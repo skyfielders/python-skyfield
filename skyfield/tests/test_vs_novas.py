@@ -30,19 +30,19 @@ else:
     c_nutation = c.nutation
     import novas.compat.nutation  # overwrites nutation() function with module!
 
+    T0 = timescales.T0
     TA = c.julian_date(1969, 7, 20, 20. + 18./60.)  # arbitrary test date
     TB = c.julian_date(2012, 12, 21)                # arbitrary test date
+
+    A0 = array([T0])
+    AA = array([TA])
+    AB = array([TB])
 
 tau = angles.tau
 degree = tau / 360.0
 arcminute = degree / 60.0
 arcsecond = arcminute / 60.0
 meter = 1.0 / earthlib.AU_KM
-T0 = timescales.T0
-
-A0 = array([T0])
-AA = array([TA])
-AB = array([TB])
 
 planet_codes = {
     'mercury': 1,
