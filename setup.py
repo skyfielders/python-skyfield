@@ -9,7 +9,7 @@ setup(
     license='MIT',
     author='Brandon Rhodes',
     author_email='brandon@rhodesmill.org',
-    url='http://github.com/brandon-rhodes/skyfield/',
+    url='http://github.com/brandon-rhodes/python-skyfield/',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
