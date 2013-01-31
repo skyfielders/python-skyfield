@@ -1,7 +1,7 @@
 """Coordinate systems."""
 
-import numpy as np
-from numpy import arcsin, arctan2, ndarray, max, min, sqrt
+from numpy import (arcsin, arctan2, array, einsum, isscalar,
+                   ndarray, max, min, sqrt)
 from math import cos, sin, pi
 from skyfield.angles import interpret_longitude, interpret_latitude
 from skyfield.framelib import ICRS_to_J2000
@@ -84,7 +84,7 @@ class Topos(object):
     def __call__(self, jd_tt):
         from skyfield.earthlib import geocentric_position_and_velocity
         if not hasattr(jd_tt, 'shape'):
-            jd_tt = np.array((jd_tt,))
+            jd_tt = array((jd_tt,))
         e = self.earth(jd_tt)
         tpos, tvel = geocentric_position_and_velocity(self, jd_tt)
         t = ToposICRS(e.position + tpos, e.velocity + tvel, jd_tt)
@@ -114,7 +114,7 @@ class GCRS(XYZ):
         from skyfield.earthlib import compute_limb_angle
 
         if observer.geocentric:
-            use_earth = np.array((False,))
+            use_earth = array((False,))
         else:
             limb_angle, nadir_angle = compute_limb_angle(
                 position, observer.position)
@@ -124,15 +124,15 @@ class GCRS(XYZ):
                        jd, use_earth)
         add_aberration(position, observer.velocity, self.lighttime)
 
-        if np.isscalar(jd):
-            jd = np.array((jd,))
+        if isscalar(jd):
+            jd = array((jd,))
             position = position.reshape((3, 1))
         else:
             position = position.copy()
 
         position = position.T.dot(ICRS_to_J2000)
-        position = np.einsum('ij,jki->ik', position, compute_precession(jd))
-        position = np.einsum('ij,jki->ik', position, compute_nutation(jd))
+        position = einsum('ij,jki->ik', position, compute_precession(jd))
+        position = einsum('ij,jki->ik', position, compute_nutation(jd))
         position = position.T
 
         eq = Apparent()

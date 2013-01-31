@@ -1,6 +1,7 @@
 """Formulae for specific earth behaviors and effects."""
 
-from numpy import arcsin, arccos, array, clip, cos, pi, sin, sqrt, tensordot, squeeze, einsum, where, zeros_like
+from numpy import (arcsin, arccos, array, clip, cos, einsum,
+                   pi, sin, sqrt, zeros_like)
 from skyfield import timescales
 from skyfield.angles import DEG2RAD
 from skyfield.framelib import J2000_to_ICRS

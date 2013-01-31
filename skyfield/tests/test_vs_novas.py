@@ -1,7 +1,7 @@
 """Compare the output of Skyfield with the same routines from NOVAS."""
 
 from itertools import product
-from numpy import array, einsum, tensordot
+from numpy import array, einsum
 from unittest import TestCase
 
 from skyfield import (angles, coordinates, earthlib, framelib, nutationlib,
