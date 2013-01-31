@@ -5,8 +5,8 @@ from numpy import arcsin, arctan2, ndarray, max, min, sqrt
 from math import cos, sin, pi
 from skyfield.angles import interpret_longitude, interpret_latitude
 from skyfield.framelib import ICRS_to_J2000
-from skyfield.nutationlib import nutation_matrix
-from skyfield.precessionlib import precession_matrix
+from skyfield.nutationlib import compute_nutation
+from skyfield.precessionlib import compute_precession
 from skyfield.relativity import add_aberration, add_deflection
 
 J2000 = 2451545.0
@@ -41,7 +41,7 @@ class XYZ(object):
     def __init__(self, position, velocity=None, jd=None):
         self.position = position
         self.velocity = velocity
-        self.jd = np.float64(jd)
+        self.jd = jd
 
 class ICRS(XYZ):
 
@@ -83,6 +83,8 @@ class Topos(object):
 
     def __call__(self, jd_tt):
         from skyfield.earthlib import geocentric_position_and_velocity
+        if not hasattr(jd_tt, 'shape'):
+            jd_tt = np.array((jd_tt,))
         e = self.earth(jd_tt)
         tpos, tvel = geocentric_position_and_velocity(self, jd_tt)
         t = ToposICRS(e.position + tpos, e.velocity + tvel, jd_tt)
@@ -109,12 +111,13 @@ class GCRS(XYZ):
 
         observer = self.observer
 
-        from skyfield.earthlib import limb
+        from skyfield.earthlib import compute_limb_angle
 
         if observer.geocentric:
-            use_earth = False
+            use_earth = np.array((False,))
         else:
-            limb_angle, nadir_angle = limb(position, observer.position)
+            limb_angle, nadir_angle = compute_limb_angle(
+                position, observer.position)
             use_earth = limb_angle >= 0.8
 
         add_deflection(position, observer.position, observer.ephemeris,
@@ -128,8 +131,8 @@ class GCRS(XYZ):
             position = position.copy()
 
         position = position.T.dot(ICRS_to_J2000)
-        position = np.einsum('ij,jki->ik', position, precession_matrix(jd))
-        position = np.einsum('ij,jki->ik', position, nutation_matrix(jd))
+        position = np.einsum('ij,jki->ik', position, compute_precession(jd))
+        position = np.einsum('ij,jki->ik', position, compute_nutation(jd))
         position = position.T
 
         eq = Apparent()

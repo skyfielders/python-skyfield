@@ -1,4 +1,4 @@
-from math import fmod, sin
+from numpy import fmod, sin
 
 # Much of the following code is adapted from the USNO's "novas.c".
 
@@ -49,8 +49,7 @@ def sidereal_time(jd_ut1, delta_t):
 
     gst = fmod((st / 3600.0 + theta), 360.0) / 15.0
 
-    if gst < 0.0:
-        gst += 24.0
+    gst += 24.0 * (gst < 0.0)
 
     return gst
 

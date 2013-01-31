@@ -1,4 +1,5 @@
 import jplephem
+from numpy import array
 
 from skyfield import earthlib, timescales
 from skyfield.coordinates import ICRS
@@ -55,9 +56,13 @@ class Ephemeris(object):
         self.pluto = Planet(self, self.jplephemeris, 'pluto')
 
     def compute(self, name, jd):
+        if not hasattr(jd, 'shape'):
+            jd = array((jd,))
         return getattr(self, name)(jd)
 
     def earth(self, jd):
+        if not hasattr(jd, 'shape'):
+            jd = array((jd,))
         compute = self.jplephemeris.compute
         pv = compute('earthmoon', jd) - compute('moon', jd) * self.moon_share
         pv *= KM_AU
@@ -66,6 +71,8 @@ class Ephemeris(object):
         return i
 
     def moon(self, jd):
+        if not hasattr(jd, 'shape'):
+            jd = array((jd,))
         compute = self.jplephemeris.compute
         pv = compute('earthmoon', jd) + compute('moon', jd) * self.earth_share
         pv *= KM_AU

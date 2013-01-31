@@ -5,11 +5,13 @@ from skyfield.timescales import T0
 PSI_COR = 0.0
 EPS_COR = 0.0
 
-def nutation_matrix(jd_tdb):
-    """Generate the nutation for `jd_tdb`.
+def compute_nutation(jd_tdb):
+    """Generate the nutation rotations for a series of epochs `jd_tdb`.
 
-    The 3x3 matrix that is returned will nutate a position from mean
-    equator and equinox of epoch to true equator and equinox of epoch.
+    `jd_tdb` - array of TDB Julian dates
+
+    The array of matrices that is returned has dimensions `(3, 3, n)`
+    where `n` is the number of dates that were provided.
 
     """
     # Call 'e_tilt' to get the obliquity and nutation angles.

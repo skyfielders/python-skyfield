@@ -79,7 +79,7 @@ def add_deflection(position, observer, ephemeris, jd, apply_earth, count=3):
 
     # If observer is not at geocenter, add in deflection due to Earth.
 
-    if apply_earth:
+    if apply_earth.any():
         bpv = ephemeris.compute('earth', jd)
         rmass = rmasses['earth']
         _add_deflection(position, observer, bpv.position, rmass)

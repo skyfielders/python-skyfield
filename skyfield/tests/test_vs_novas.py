@@ -1,7 +1,7 @@
 """Compare the output of Skyfield with the same routines from NOVAS."""
 
 from itertools import product
-from numpy import array
+from numpy import array, einsum, tensordot
 from unittest import TestCase
 
 from skyfield import (angles, coordinates, earthlib, framelib, nutationlib,
@@ -73,16 +73,21 @@ class NOVASTests(TestCase):
     def eq(self, first, second, delta=None):
         if delta is None:
             delta = self.delta
-        if abs(first - second) > delta:
+        if hasattr(first, 'shape') or hasattr(second, 'shape'):
+            failed = abs(first - second).max() > delta
+        else:
+            failed = abs(first - second) > delta
+        if failed:
             raise AssertionError(
-                '%r != %r within %r because the difference is %r times too big'
+                '%r\ndoes not equal\n%r\nwithin the error bound\n%r\n'
+                'because the difference is\n%r\ntimes too big'
                 % (first, second, delta, abs(first - second) / delta))
 
     # Tests of generating a full position or coordinate.
 
     def test_astro_planet(self):
 
-        for t, name in product((T0, TA, TB), planets_to_test):
+        for t, name in product([T0, TA, TB], planets_to_test):
             obj = c.make_object(0, planet_codes[name], b'planet', None)
             ra, dec, dis = c.astro_planet(t, obj)
 
@@ -96,7 +101,7 @@ class NOVASTests(TestCase):
 
     def test_app_planet(self):
 
-        for t, name in product((T0, TA, TB), planets_to_test):
+        for t, name in product([T0, TA, TB], planets_to_test):
             obj = c.make_object(0, planet_codes[name], b'planet', None)
             ra, dec, dis = c.app_planet(t, obj)
 
@@ -116,7 +121,7 @@ class NOVASTests(TestCase):
         ggr.ephemeris = self.e
         delta_t = 0
 
-        for t, name in product((T0, TA, TB), planets_to_test):
+        for t, name in product([T0, TA, TB], planets_to_test):
             obj = c.make_object(0, planet_codes[name], b'planet', None)
             ra, dec, dis = c.topo_planet(t, delta_t, obj, position)
 
@@ -127,158 +132,171 @@ class NOVASTests(TestCase):
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
             self.eq(dis, g.distance, 0.1 * meter)  # TODO: improve this?
 
-    # Tests of basic functions (in alphabetical order by NOVAS name).
+    # Tests of basic functions.
 
-    def test_era(self):
+    def test_earth_rotation_angle(self):
         self.delta = 1e-12
-        self.eq(c.era(T0), timescales.earth_rotation_angle(T0))
-        self.eq(c.era(TA), timescales.earth_rotation_angle(TA))
-        self.eq(c.era(TB), timescales.earth_rotation_angle(TB))
+
+        a0 = c.era(T0)
+        aA = c.era(TA)
+        aB = c.era(TB)
+
+        t = array([T0, TA, TB])
+        v = timescales.earth_rotation_angle(t)
+        self.eq(v, [a0, aA, aB])
 
     def test_earth_tilt(self):
         self.delta = 1e-14
-        for a, b in zip(c.e_tilt(T0), nutationlib.earth_tilt(A0)):
-            self.eq(a, b)
-        for a, b in zip(c.e_tilt(TA), nutationlib.earth_tilt(AA)):
-            self.eq(a, b)
-        for a, b in zip(c.e_tilt(TB), nutationlib.earth_tilt(AB)):
-            self.eq(a, b)
+
+        vars0 = c.e_tilt(T0)
+        vars1 = c.e_tilt(TA)
+        vars2 = c.e_tilt(TB)
+
+        t = array([T0, TA, TB])
+        v = nutationlib.earth_tilt(t)
+        for i in range(len(v)):
+            self.eq(v[i], [vars0[i], vars1[i], vars2[i]])
 
     def test_equation_of_the_equinoxes_complimentary_terms(self):
         self.delta = 1e-23
 
-        self.eq(nutationlib.equation_of_the_equinoxes_complimentary_terms(A0),
-                c.ee_ct(T0, 0.0, 0))
-        self.eq(nutationlib.equation_of_the_equinoxes_complimentary_terms(AA),
-                c.ee_ct(TA, 0.0, 0))
-        self.eq(nutationlib.equation_of_the_equinoxes_complimentary_terms(AB),
-                c.ee_ct(TB, 0.0, 0))
+        e0 = c.ee_ct(T0, 0.0, 0)
+        eA = c.ee_ct(TA, 0.0, 0)
+        eB = c.ee_ct(TB, 0.0, 0)
+
+        t = array([T0, TA, TB])
+        v = nutationlib.equation_of_the_equinoxes_complimentary_terms(t)
+        self.eq(v, [e0, eA, eB])
 
     def test_frame_tie(self):
         self.delta = 1e-15
-        v = array((1, 2, 3))
+        v = array([1, 2, 3])
 
-        for a, b in zip(c.frame_tie(v, 0),
-                        v.dot(framelib.ICRS_to_J2000)):
-            self.eq(a, b)
-
-        for a, b in zip(c.frame_tie(v, -1),
-                        v.dot(framelib.J2000_to_ICRS)):
-            self.eq(a, b)
+        self.eq(c.frame_tie(v, 0), v.dot(framelib.ICRS_to_J2000))
+        self.eq(c.frame_tie(v, -1), v.dot(framelib.J2000_to_ICRS))
 
     def test_fundamental_arguments(self):
         self.delta = 1e-12
 
-        a = nutationlib.fundamental_arguments(jcentury(T0))
-        b = c.fund_args(jcentury(T0))
-        for i in range(5):
-            self.eq(a[i], b[i])
+        args0 = c.fund_args(jcentury(T0))
+        argsA = c.fund_args(jcentury(TA))
+        argsB = c.fund_args(jcentury(TB))
 
-        a = nutationlib.fundamental_arguments(jcentury(TA))
-        b = c.fund_args(jcentury(TA))
-        for i in range(5):
-            self.eq(a[i], b[i])
+        t = array([T0, TA, TB])
+        v = nutationlib.fundamental_arguments(jcentury(t))
+        self.eq(v.T, [args0, argsA, argsB])
 
-        a = nutationlib.fundamental_arguments(jcentury(TB))
-        b = c.fund_args(jcentury(TB))
-        for i in range(5):
-            self.eq(a[i], b[i])
-
-    def test_geo_posvel(self):
+    def test_geocentric_position_and_velocity(self):
         self.delta = 1e-13
 
-        obs1 = c.make_observer_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-        ggr = coordinates.Topos('75 W', '45 N', 0.0,
-                                temperature=10.0, pressure=1010.0)
         delta_t = 0.0
+        observer = c.make_observer_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
 
-        for v1, v2 in zip(c.geo_posvel(T0, delta_t, obs1),
-                          earthlib.geocentric_position_and_velocity(ggr, A0)):
-            for a, b in zip(v1, v2):
-                self.eq(a, b)
+        pos0, vel0 = c.geo_posvel(T0, delta_t, observer)
+        posA, velA = c.geo_posvel(TA, delta_t, observer)
+
+        topos = coordinates.Topos('75 W', '45 N', elevation=0.0,
+                                  temperature=10.0, pressure=1010.0)
+
+        t = array([T0, TA])
+        posv, velv = earthlib.geocentric_position_and_velocity(topos, t)
+        self.eq(posv.T, [pos0, posA])
+        self.eq(velv.T, [vel0, velA])
 
     def test_iau2000a(self):
         self.delta = 1e-19
 
-        self.eq(nutationlib.iau2000a(A0)[0], c.nutation.iau2000a(T0, 0.0)[0])
-        self.eq(nutationlib.iau2000a(A0)[1], c.nutation.iau2000a(T0, 0.0)[1])
+        psi0, eps0 = c.nutation.iau2000a(T0, 0.0)
+        psiA, epsA = c.nutation.iau2000a(TA, 0.0)
+        psiB, epsB = c.nutation.iau2000a(TB, 0.0)
 
-        self.eq(nutationlib.iau2000a(AA)[0], c.nutation.iau2000a(TA, 0.0)[0])
-        self.eq(nutationlib.iau2000a(AA)[1], c.nutation.iau2000a(TA, 0.0)[1])
-
-        self.eq(nutationlib.iau2000a(AB)[0], c.nutation.iau2000a(TB, 0.0)[0])
-        self.eq(nutationlib.iau2000a(AB)[1], c.nutation.iau2000a(TB, 0.0)[1])
+        t = array([T0, TA, TB])
+        psi, eps = nutationlib.iau2000a(t)
+        self.eq(psi, [psi0, psiA, psiB])
+        self.eq(eps, [eps0, epsA, epsB])
 
     def test_mean_obliq(self):
         self.delta = 0
 
-        self.eq(c.mean_obliq(T0), nutationlib.mean_obliquity(T0))
-        self.eq(c.mean_obliq(TA), nutationlib.mean_obliquity(TA))
-        self.eq(c.mean_obliq(TB), nutationlib.mean_obliquity(TB))
+        m0 = c.mean_obliq(T0)
+        mA = c.mean_obliq(TA)
+        mB = c.mean_obliq(TB)
+
+        t = array([T0, TA, TB])
+        v = nutationlib.mean_obliquity(t)
+        self.eq(v, [m0, mA, mB])
 
     def test_nutation(self):
         self.delta = 1e-15
         v = array([1, 2, 3])
 
-        for a, b in zip(c_nutation(T0, v, direction=0),
-                        v.dot(nutationlib.nutation_matrix(A0)[:,:,0])):
-            self.eq(a, b)
+        v0 = c_nutation(T0, v, direction=0)
+        va = c_nutation(TA, v, direction=0)
+        vb = c_nutation(TB, v, direction=0)
 
-        for a, b in zip(c_nutation(TA, v, direction=0),
-                        v.dot(nutationlib.nutation_matrix(AA)[:,:,0])):
-            self.eq(a, b)
+        dates = array([T0, TA, TB])
+        v = einsum('i,ijk->jk', v, nutationlib.compute_nutation(dates))
 
-        for a, b in zip(c_nutation(TB, v, direction=1),
-                        v.dot(nutationlib.nutation_matrix(AB).T[0])):
-            self.eq(a, b)
+        self.eq(v0, v[:,0])
+        self.eq(va, v[:,1])
+        self.eq(vb, v[:,2])
 
     def test_precession(self):
         self.delta = 1e-15
         v = array([1, 2, 3])
-        c.precession(T0, v, TA)
 
-        for a, b in zip(c.precession(T0, v, TA),
-                        v.dot(precessionlib.precession_matrix(TA))):
-            self.eq(a, b)
+        va = c.precession(T0, v, TA)
+        vb = c.precession(T0, v, TB)
 
-        for a, b in zip(c.precession(TB, v, T0),
-                        v.dot(precessionlib.precession_matrix(TB).T)):
-            self.eq(a, b)
+        ab = array([TA, TB])
+        vab = einsum('i,ijk->jk', v, precessionlib.compute_precession(ab))
+
+        self.eq(va, vab[:,0])
+        self.eq(vb, vab[:,1])
 
     def test_sidereal_time(self):
         delta_t = 0.0
         self.delta = 1e-13
-        self.eq(c.sidereal_time(T0, 0.0, delta_t, False, True),
-                timescales.sidereal_time(T0, delta_t))
-        self.eq(c.sidereal_time(TA, 0.0, delta_t, False, True),
-                timescales.sidereal_time(TA, delta_t))
-        self.eq(c.sidereal_time(TB, 0.0, delta_t, False, True),
-                timescales.sidereal_time(TB, delta_t))
+
+        st0 = c.sidereal_time(T0, 0.0, delta_t, False, True)
+        stA = c.sidereal_time(TA, 0.0, delta_t, False, True)
+        stB = c.sidereal_time(TB, 0.0, delta_t, False, True)
+
+        t = array([T0, TA, TB])
+        v = timescales.sidereal_time(t, delta_t)
+        self.eq(v, [st0, stA, stB])
 
     def test_terra(self):
         self.delta = 1e-18
 
-        obs1 = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
+        observer = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
 
-        class Obs(object):
+        class Topos(object):
             latitude = 45.0 * angles.DEG2RAD
             longitude = -75.0 * angles.DEG2RAD
             elevation = 0.0
-        obs2 = Obs()
+        topos = Topos()
 
-        for v1, v2 in zip(c.terra(obs1, 11.0), earthlib.terra(obs2, 11.0)):
-            for a, b in zip(v1, v2):
-                self.eq(a, b)
+        pos0, vel0 = array(c.terra(observer, 11.0))
+        pos1, vel1 = array(c.terra(observer, 23.9))
 
-        for v1, v2 in zip(c.terra(obs1, 23.9), earthlib.terra(obs2, 23.9)):
-            for a, b in zip(v1, v2):
-                self.eq(a, b)
+        posn, veln = earthlib.terra(topos, array([11.0, 23.9]))
+
+        self.eq(pos0, posn[:,0])
+        self.eq(pos1, posn[:,1])
+        self.eq(vel0, veln[:,0])
+        self.eq(vel1, veln[:,1])
 
     def test_tdb2tt(self):
         self.delta = 1e-16
-        self.eq(c.tdb2tt(T0)[1], timescales.tdb_minus_tt(T0))
-        self.eq(c.tdb2tt(TA)[1], timescales.tdb_minus_tt(TA))
-        self.eq(c.tdb2tt(TB)[1], timescales.tdb_minus_tt(TB))
+
+        tt0 = c.tdb2tt(T0)[1]
+        ttA = c.tdb2tt(TA)[1]
+        ttB = c.tdb2tt(TB)[1]
+
+        t = array([T0, TA, TB])
+        v = timescales.tdb_minus_tt(t)
+        self.eq(v, [tt0, ttA, ttB])
 
 def jcentury(t):
     return (t - T0) / 36525.0

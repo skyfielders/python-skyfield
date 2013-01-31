@@ -1,10 +1,16 @@
-from numpy import array, cos, rollaxis, sin
+from numpy import array, cos, sin
 from skyfield.angles import ASEC2RAD
 from skyfield.timescales import T0
 
-def precession_matrix(jd_tdb):
-    """Return the rotation matrix for precessing to epoch `jd_tdb`."""
+def compute_precession(jd_tdb):
+    """Return the rotation matrices for precessing to an array of epochs.
 
+    `jd_tdb` - array of TDB Julian dates
+
+    The array returned has the shape `(3, 3, n)` where `n` is the number
+    of dates that have been provided as input.
+
+    """
     eps0 = 84381.406
 
     # 't' is time in TDB centuries.
@@ -59,8 +65,5 @@ def precession_matrix(jd_tdb):
                   (cd * sb * sa + sd * cc * cb * sa + ca * sd * sc,
                    -sd * sb * sa + cd * cc * cb * sa + ca * cd * sc,
                    -sc * cb * sa + cc * ca)))
-
-    if rot3.ndim > 2:
-        pass #rot3 = rollaxis(rot3, 2)
 
     return rot3
