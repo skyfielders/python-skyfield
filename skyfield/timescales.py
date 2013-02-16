@@ -4,6 +4,14 @@ from numpy import fmod, sin
 
 T0 = 2451545.0
 
+def julian_date(year, month=1, day=1, hour=0.0):
+    janfeb = month < 3
+    return (day - 32075
+            + 1461 * (year + 4800 - janfeb) // 4
+            + 367 * (month - 2 + janfeb * 12) // 12
+            - 3 * ((year + 4900 - janfeb) // 100) // 4
+            ) - 0.5 + hour / 24.0
+
 def tdb_minus_tt(jd_tdb):
     """Computes TT corresponding to a TDB Julian date."""
 

@@ -61,14 +61,15 @@ planets_to_test = planet_codes.keys()
 
 class NOVASTests(TestCase):
 
-    delta = 'the delta needs to be specified at the top of each test'
-
     @classmethod
     def setUpClass(cls):
         if de405 is None or novas is None:
             cls.__unittest_skip__ = True
             return
         cls.e = planets.Ephemeris(de405)
+
+    def setUp(self):
+        self.delta = 0.0
 
     def eq(self, first, second, delta=None):
         if delta is None:
@@ -78,10 +79,11 @@ class NOVASTests(TestCase):
         else:
             failed = abs(first - second) > delta
         if failed:
+            appendix = ('\nbecause the difference is\n%r\ntimes too big'
+                        % (abs(first - second) / delta)) if delta else ''
             raise AssertionError(
-                '%r\ndoes not equal\n%r\nwithin the error bound\n%r\n'
-                'because the difference is\n%r\ntimes too big'
-                % (first, second, delta, abs(first - second) / delta))
+                '%r\ndoes not equal\n%r\nwithin the error bound\n%r%s'
+                % (first, second, delta, appendix))
 
     # Tests of generating a full position or coordinate.
 
@@ -214,6 +216,18 @@ class NOVASTests(TestCase):
         psi, eps = nutationlib.iau2000a(t)
         self.eq(psi, [psi0, psiA, psiB])
         self.eq(eps, [eps0, epsA, epsB])
+
+    def test_julian_date(self):
+        for args in (
+              (-4712, 1, 1, 0.0),
+              (-4712, 3, 1, 0.0),
+              (-4712, 12, 31, 0.5),
+              (-241, 3, 25, 19.0),
+              (530, 9, 27, 23.5),
+              (1976, 3, 7, 12.5),
+              (2000, 1, 1, 0.0),
+              ):
+            self.eq(c.julian_date(*args), timescales.julian_date(*args))
 
     def test_mean_obliq(self):
         self.delta = 0
