@@ -32,3 +32,11 @@ Introduction
 
             planet = getattr(self.e, name)
             g = ggr(t).observe(planet).apparent()
+
+
+DE405  52.1 MB  1600–2200 (May 1997)
+DE406 170.0 MB -3000–3000 (May 1997)
+DE421  13.0 MB  1900–2050 (February 2008)
+DE422 519.6 MB -3000–3000 (September 2009)
+DE423  34.6 MB  1800–2200 (February 2010)
+
