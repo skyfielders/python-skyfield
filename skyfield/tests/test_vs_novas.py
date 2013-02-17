@@ -136,6 +136,10 @@ class NOVASTests(TestCase):
 
     # Tests of basic functions.
 
+    def test_cal_date(self):
+        for jd in 0.0, 2414988.5, 2415020.31352, 2442249.5, 2456335.2428472:
+            assert c.cal_date(jd) == timescales.cal_date(jd)
+
     def test_earth_rotation_angle(self):
         self.delta = 1e-12
 

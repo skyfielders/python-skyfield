@@ -12,6 +12,26 @@ def julian_date(year, month=1, day=1, hour=0.0):
             - 3 * ((year + 4900 - janfeb) // 100) // 4
             ) - 0.5 + hour / 24.0
 
+def cal_date(jd):
+    """Convert Julian Day `jd` into a Gregorian year, month, day, and hour."""
+    jd += 0.5
+
+    hour = jd % 1.0 * 24.0
+    k = int(jd) + 68569
+    n = 4 * k // 146097;
+
+    k = k - (146097 * n + 3) // 4
+    m = 4000 * (k + 1) // 1461001
+    k = k - 1461 * m // 4 + 31
+    month = 80 * k // 2447
+    day = k - 2447 * month // 80
+    k = month // 11
+
+    month = month + 2 - 12 * k
+    year = 100 * (n - 49) + m + k
+
+    return year, month, day, hour
+
 def tdb_minus_tt(jd_tdb):
     """Computes TT corresponding to a TDB Julian date."""
 
