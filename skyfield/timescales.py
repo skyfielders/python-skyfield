@@ -14,7 +14,7 @@ def julian_date(year, month=1, day=1, hour=0.0):
 
 def cal_date(jd):
     """Convert Julian Day `jd` into a Gregorian year, month, day, and hour."""
-    jd += 0.5
+    jd = jd + 0.5
 
     hour = jd % 1.0 * 24.0
     k = int(jd) + 68569
