@@ -17,5 +17,5 @@ setup(
         'Topic :: Scientific/Engineering :: Astronomy',
         ],
     packages=[ 'skyfield', 'skyfield.tests' ],
-    install_requires=['jplephem', 'numpy', 'sgp4'],
+    install_requires=['de421', 'jplephem', 'numpy', 'sgp4'],
     )
