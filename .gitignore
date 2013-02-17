@@ -2,5 +2,6 @@
 .tox/
 MANIFEST
 htmlcov/
+skyfield/documentation/_build
 *.pyc
 *.egg-info
