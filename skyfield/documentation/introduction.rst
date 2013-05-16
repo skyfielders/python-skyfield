@@ -17,6 +17,16 @@ Introduction
 >>> print earth(2414993.5).observe(mars).astrometric()
 <Astrometric position RA=[ 4.61170587] dec=[-0.42044766]>
 
+>>> e = earth(2414993.5)
+>>> print e
+<ICRS position x=[ 0.27383326] y=[ 0.8749085] z=[ 0.37944054]>
+>>> print e.x
+[ 0.27383326]
+>>> print e.y
+[ 0.8749085]
+>>> print e.z
+[ 0.37944054]
+
 >>> import numpy as np
 >>> t0 = 2414993.5
 >>> t = np.arange(t0, t0 + 5, 1.0)

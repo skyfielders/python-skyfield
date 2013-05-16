@@ -48,6 +48,15 @@ class XYZ(object):
         return '<%s position x=%s y=%s z=%s>' % (
             self.__class__.__name__, p[0], p[1], p[2])
 
+    @property
+    def x(self): return self.position[0]
+
+    @property
+    def y(self): return self.position[1]
+
+    @property
+    def z(self): return self.position[2]
+
 class ICRS(XYZ):
 
     geocentric = True
