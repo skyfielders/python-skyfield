@@ -43,6 +43,11 @@ class XYZ(object):
         self.velocity = velocity
         self.jd = jd
 
+    def __repr__(self):
+        p = self.position
+        return '<%s position x=%s y=%s z=%s>' % (
+            self.__class__.__name__, p[0], p[1], p[2])
+
 class ICRS(XYZ):
 
     geocentric = True

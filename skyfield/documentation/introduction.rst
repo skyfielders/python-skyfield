@@ -10,6 +10,10 @@ Introduction
 >>> from skyfield.planets import Ephemeris
 >>> eph = Ephemeris()
 >>> earth, mars = eph.earth, eph.mars
+>>> print earth(2414993.5)
+<ICRS position x=[ 0.27383326] y=[ 0.8749085] z=[ 0.37944054]>
+>>> print earth(2414993.5).observe(mars)
+<GCRS position x=[-0.22086377] y=[-2.1862353] z=[-0.98246221]>
 >>> print earth(2414993.5).observe(mars).astrometric()
 <Astrometric position RA=[ 4.61170587] dec=[-0.42044766]>
 
