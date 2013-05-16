@@ -16,6 +16,8 @@ Introduction
 <GCRS position x=[-0.22086377] y=[-2.1862353] z=[-0.98246221]>
 >>> print earth(2414993.5).observe(mars).astrometric()
 <Astrometric position RA=[ 4.61170587] dec=[-0.42044766]>
+>>> print earth(2414993.5).observe(mars).apparent()
+<Apparent position RA=[ 4.58500039] dec=[-0.41933084]>
 
 >>> e = earth(2414993.5)
 >>> print e
