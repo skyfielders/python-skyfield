@@ -7,18 +7,21 @@ Introduction
 >>> import sgp4
 
 
->>> from ephem.planets import Ephemeris
+>>> from skyfield.planets import Ephemeris
 >>> eph = Ephemeris()
 >>> earth, mars = eph.earth, eph.mars
 >>> print earth(2414993.5).observe(mars).astrometric()
-
+<Astrometric position RA=[ 4.61170587] dec=[-0.42044766]>
 
 >>> import numpy as np
 >>> t0 = 2414993.5
 >>> t = np.arange(t0, t0 + 5, 1.0)
 >>> print earth(t).observe(mars).astrometric()
+<Astrometric position RA=[ 4.61170587  4.62603456  4.64038665  4.65476093  4.66915621] dec=[-0.42044766 -0.42106794 -0.42161316 -0.42208295 -0.42247693]>
 
 >>> print earth(t).observe(mars).apparent()
+<Apparent position RA=[ 4.58500039  4.59931574  4.61365598  4.62801986  4.64240623] dec=[-0.41933084 -0.42008982 -0.42077423 -0.42138359 -0.42191745]>
+
 
         ggr = coordinates.Topos('75 W', '45 N', 0.0,
                                 temperature=10.0, pressure=1010.0)
