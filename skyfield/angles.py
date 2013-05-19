@@ -3,28 +3,46 @@ ASEC2RAD = 4.848136811095359935899141e-6
 DEG2RAD = 0.017453292519943296
 tau = 6.283185307179586476925287
 
-class Angle(object):
+import numpy as np
+from numpy import ndarray, array
 
-    def __init__(self, radians):
-        self.radians = radians
+
+class Angle(ndarray):
+
+    # __array_priority__ = -1.0
+
+    # def __init__(self, radians):
+    #     self.radians = radians
 
     def hours(self):
-        return 24. / tau * self.radians
+        return 24. / tau * self
 
     def hms(self):
-        h, ms = divmod(self.radians / tau * 24., 1.)
-        m, ss = divmod(ms * 60., 1.)
-        s = ss * 60.
-        return h, m, s
+        return sexa(self.hours())
+
+    def hstr(self):
+        h, m, s = self.hms()
+        return '{}h {}m {}s'.format(int(h), int(m), float(s))
 
     def degrees(self):
-        return 360. / tau * self.radians
+        return 360. / tau * self
 
     def dms(self):
-        h, ms = divmod(self.radians / tau * 360., 1.)
-        m, ss = divmod(ms * 60., 1.)
-        s = ss * 60.
-        return h, m, s
+        return sexa(self.degrees())
+
+    def dstr(self):
+        d, m, s = self.dms()
+        return '{}deg {}m {}s'.format(int(d), int(m), float(s))
+
+
+one = array([1.0])
+
+def sexa(value):
+    fraction, whole = np.modf(value, subok=False)
+    fraction, minutes = np.modf(fraction * 60.0)
+    seconds = fraction * 60.0
+    return whole, minutes, seconds
+
 
 def interpret_longitude(value):
     split = getattr(value, 'split', None)

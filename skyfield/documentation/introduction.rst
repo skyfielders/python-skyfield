@@ -5,7 +5,7 @@ Introduction
 
 
 >>> import sgp4
-
+>>> import numpy as np
 
 >>> from skyfield.planets import Ephemeris
 >>> eph = Ephemeris()
@@ -18,6 +18,27 @@ Introduction
 <Astrometric position RA=[ 4.61170587] dec=[-0.42044766]>
 >>> print earth(2414993.5).observe(mars).apparent()
 <Apparent position RA=[ 4.58500039] dec=[-0.41933084]>
+
+
+>>> a = earth(2414993.5).observe(mars).astrometric()
+>>> a
+<Astrometric position RA=[ 4.61170587] dec=[-0.42044766]>
+>>> a.ra
+Angle([ 4.61170587])
+>>> a.ra.hms()
+(array([ 17.]), array([ 36.]), array([ 55.50790452]))
+>>> a.ra.hstr()
+'17h 36m 55.5079045158s'
+>>> a.dec.dms()
+(array([-24.]), array([-5.]), array([-23.55485117]))
+>>> a.dec.dstr()
+'-24deg -5m -23.5548511656s'
+
+
+>>> a = earth(np.array([2414993.5, 2414994.5])).observe(mars).astrometric()
+>>> a
+<Astrometric position RA=[ 4.61170587  4.62603456] dec=[-0.42044766 -0.42106794]>
+
 
 >>> e = earth(2414993.5)
 >>> print e

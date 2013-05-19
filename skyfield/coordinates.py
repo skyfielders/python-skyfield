@@ -3,7 +3,7 @@
 from numpy import (arcsin, arctan2, array, einsum, isscalar,
                    ndarray, max, min, sqrt)
 from math import cos, sin, pi
-from skyfield.angles import interpret_longitude, interpret_latitude
+from skyfield.angles import interpret_longitude, interpret_latitude, Angle
 from skyfield.framelib import ICRS_to_J2000
 from skyfield.nutationlib import compute_nutation
 from skyfield.precessionlib import compute_precession
@@ -193,6 +193,9 @@ class HeliocentricLonLat(ndarray):
 
 def to_polar(position):
     r = sqrt((position * position).sum(axis=0))
-    phi = arctan2(-position[1], -position[0]) + pi
-    theta = arcsin(position[2] / r)
+    phi = Angle(r.shape)
+    theta = Angle(r.shape)
+    arctan2(-position[1], -position[0], out=phi)
+    arcsin(position[2] / r, out=theta)
+    phi += pi
     return phi, theta
