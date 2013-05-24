@@ -26,14 +26,17 @@ Introduction
 >>> a.ra
 Angle([ 4.61170587])
 >>> a.ra.hms()
-(array([ 17.]), array([ 36.]), array([ 55.50790452]))
+(array([ 1.]), array([ 17.]), array([ 36.]), array([ 55.50790452]))
 >>> a.ra.hstr()
 '17h 36m 55.5079045158s'
 >>> a.dec.dms()
-(array([-24.]), array([-5.]), array([-23.55485117]))
+(array([-1.]), array([ 24.]), array([ 5.]), array([ 23.55485117]))
 >>> a.dec.dstr()
-'-24deg -5m -23.5548511656s'
+'-24deg 5m 23.5548511656s'
 
+repr(a.dec.dpretty())
+-24
+-24°5´23´´.5548511656
 
 >>> a = earth(np.array([2414993.5, 2414994.5])).observe(mars).astrometric()
 >>> a
