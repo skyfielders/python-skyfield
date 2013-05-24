@@ -9,21 +9,25 @@ import numpy as np
 from numpy import ndarray, array
 
 
-class Angle(ndarray):
+class WrongUnitError(ValueError):
 
-    # __array_priority__ = -1.0
+    def __init__(self, name, unit):
+        usual = 'hours' if (unit == 'degrees') else 'degrees'
+        self.args = ('This angle is usually expressed in {}, not {};'
+                     ' if you want to express it in {} anyway, use'
+                     ' {}_anyway()'.format(usual, unit, unit, name),)
 
-    # def __init__(self, radians):
-    #     self.radians = radians
+
+class BaseAngle(ndarray):
 
     def hours(self):
         return 24. / tau * self
 
     def hms(self):
-        return sexa(self.hours())
+        return sexa(24. / tau * self)
 
     def hstr(self):
-        sgn, h, m, s = self.hms()
+        sgn, h, m, s = sexa(24. / tau * self)
         sign = '-' if sgn < 0.0 else ''
         return '{}{}h {}m {}s'.format(sign, int(h), int(m), float(s))
 
@@ -41,6 +45,43 @@ class Angle(ndarray):
     def dpretty(self):
         d, m, s = self.dms()
         return '{}°{}´{}´´'.format(int(d), int(m), float(s))
+
+    hours_anyway = hours
+    hms_anyway = hms
+    hstr_anyway = hstr
+
+    degrees_anyway = degrees
+    dms_anyway = dms
+    dstr_anyway = dstr
+
+
+class Angle(BaseAngle):
+
+    # Protect naive users from accidentally calling hour methods.
+
+    def hours(self):
+        raise WrongUnitError('hours', 'hours')
+
+    def hms(self):
+        raise WrongUnitError('hms', 'hours')
+
+    def hstr(self):
+        raise WrongUnitError('hstr', 'hours')
+
+
+
+class HourAngle(BaseAngle):
+
+    # Protect naive users from accidentally calling degree methods.
+
+    def degrees(self):
+        raise WrongUnitError('degrees', 'degrees')
+
+    def dms(self):
+        raise WrongUnitError('dms', 'degrees')
+
+    def dstr(self):
+        raise WrongUnitError('dstr', 'degrees')
 
 
 one = array([1.0])

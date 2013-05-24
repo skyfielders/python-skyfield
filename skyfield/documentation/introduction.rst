@@ -24,7 +24,7 @@ Introduction
 >>> a
 <Astrometric position RA=[ 4.61170587] dec=[-0.42044766]>
 >>> a.ra
-Angle([ 4.61170587])
+HourAngle([ 4.61170587])
 >>> a.ra.hms()
 (array([ 1.]), array([ 17.]), array([ 36.]), array([ 55.50790452]))
 >>> a.ra.hstr()
@@ -33,6 +33,16 @@ Angle([ 4.61170587])
 (array([-1.]), array([ 24.]), array([ 5.]), array([ 23.55485117]))
 >>> a.dec.dstr()
 '-24deg 5m 23.5548511656s'
+
+>>> a.ra.degrees()
+Traceback (most recent call last):
+  ...
+WrongUnitError: This angle is usually expressed in hours, not degrees; if you want to express it in degrees anyway, use degrees_anyway()
+
+>>> a.dec.hms()
+Traceback (most recent call last):
+  ...
+WrongUnitError: This angle is usually expressed in degrees, not hours; if you want to express it in hours anyway, use hms_anyway()
 
 repr(a.dec.dpretty())
 -24

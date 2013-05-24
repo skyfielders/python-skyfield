@@ -3,7 +3,8 @@
 from numpy import (arcsin, arctan2, array, einsum, isscalar,
                    ndarray, max, min, sqrt)
 from math import cos, sin, pi
-from skyfield.angles import interpret_longitude, interpret_latitude, Angle
+from skyfield.angles import interpret_longitude, interpret_latitude, Angle, \
+    HourAngle
 from skyfield.framelib import ICRS_to_J2000
 from skyfield.nutationlib import compute_nutation
 from skyfield.precessionlib import compute_precession
@@ -114,7 +115,7 @@ class GCRS(XYZ):
 
     def astrometric(self, epoch=None):
         eq = Astrometric()
-        eq.ra, eq.dec = to_polar(self.position)
+        eq.ra, eq.dec = to_polar(self.position, phi_class=HourAngle)
         eq.distance = self.distance
         # TODO: epoch
         return eq
@@ -150,7 +151,7 @@ class GCRS(XYZ):
         position = position.T
 
         eq = Apparent()
-        eq.ra, eq.dec = to_polar(position)
+        eq.ra, eq.dec = to_polar(position, phi_class=HourAngle)
         eq.distance = self.distance
         return eq
 
@@ -191,9 +192,9 @@ class HeliocentricLonLat(ndarray):
     @property
     def r(self): return self[2]
 
-def to_polar(position):
+def to_polar(position, phi_class=Angle):
     r = sqrt((position * position).sum(axis=0))
-    phi = Angle(r.shape)
+    phi = phi_class(r.shape)
     theta = Angle(r.shape)
     arctan2(-position[1], -position[0], out=phi)
     arcsin(position[2] / r, out=theta)
