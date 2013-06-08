@@ -10,10 +10,33 @@ Introduction
 >>> from skyfield.planets import Ephemeris
 >>> eph = Ephemeris()
 >>> earth, mars = eph.earth, eph.mars
->>> print earth(2414993.5)
-<ICRS position x=[ 0.27383326] y=[ 0.8749085] z=[ 0.37944054]>
+
+>>> e = earth(2414993.5)
+>>> print e
+<ICRS position x,y,z AU and velocity xdot,ydot,zdot AU/day at date jd>
+>>> e.x
+array([ 0.27383326])
+>>> e.y
+array([ 0.8749085])
+>>> e.z
+array([ 0.37944054])
+
+>>> e.xdot
+array([-0.01683965])
+>>> e.ydot
+array([ 0.00427786])
+>>> e.zdot
+array([ 0.00185493])
+
+>>> dates = np.array([2414993.5, 2414994.5])
+>>> e = earth(dates)
+>>> e.x
+array([ 0.27383326,  0.25695284])
+
+
 >>> print earth(2414993.5).observe(mars)
-<GCRS position x=[-0.22086377] y=[-2.1862353] z=[-0.98246221]>
+<GCRS position x,y,z AU and velocity xdot,ydot,zdot AU/day at date jd>
+
 >>> print earth(2414993.5).observe(mars).astrometric()
 <Astrometric position RA=[ 4.61170587] dec=[-0.42044766]>
 >>> print earth(2414993.5).observe(mars).apparent()
@@ -55,7 +78,7 @@ repr(a.dec.dpretty())
 
 >>> e = earth(2414993.5)
 >>> print e
-<ICRS position x=[ 0.27383326] y=[ 0.8749085] z=[ 0.37944054]>
+<ICRS position x,y,z AU and velocity xdot,ydot,zdot AU/day at date jd>
 >>> print e.x
 [ 0.27383326]
 >>> print e.y

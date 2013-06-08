@@ -45,9 +45,12 @@ class XYZ(object):
         self.jd = jd
 
     def __repr__(self):
-        p = self.position
-        return '<%s position x=%s y=%s z=%s>' % (
-            self.__class__.__name__, p[0], p[1], p[2])
+        return '<%s position x,y,z AU%s%s>' % (
+            self.__class__.__name__,
+            '' if (self.velocity is None) else
+            ' and velocity xdot,ydot,zdot AU/day',
+            '' if self.jd is None else ' at date jd',
+            )
 
     @property
     def x(self): return self.position[0]
@@ -57,6 +60,15 @@ class XYZ(object):
 
     @property
     def z(self): return self.position[2]
+
+    @property
+    def xdot(self): return self.velocity[0]
+
+    @property
+    def ydot(self): return self.velocity[1]
+
+    @property
+    def zdot(self): return self.velocity[2]
 
 class ICRS(XYZ):
 
