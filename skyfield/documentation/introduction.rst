@@ -14,19 +14,19 @@ Introduction
 >>> e = earth(2414993.5)
 >>> print e
 <ICRS position x,y,z AU and velocity xdot,ydot,zdot AU/day at date jd>
->>> e.x
-array([ 0.27383326])
->>> e.y
-array([ 0.8749085])
->>> e.z
-array([ 0.37944054])
+>>> print e.x
+0.273833256524
+>>> print e.y
+0.874908499106
+>>> print e.z
+0.37944053759
 
->>> e.xdot
-array([-0.01683965])
->>> e.ydot
-array([ 0.00427786])
->>> e.zdot
-array([ 0.00185493])
+>>> print e.xdot
+-0.0168396519412
+>>> print e.ydot
+0.00427785895254
+>>> print e.zdot
+0.00185493319076
 
 >>> dates = np.array([2414993.5, 2414994.5])
 >>> e = earth(dates)
@@ -38,22 +38,22 @@ array([ 0.27383326,  0.25695284])
 <GCRS position x,y,z AU and velocity xdot,ydot,zdot AU/day at date jd>
 
 >>> print earth(2414993.5).observe(mars).astrometric()
-<Astrometric position RA=[ 4.61170587] dec=[-0.42044766]>
+<Astrometric position RA=4.61170587399 dec=-0.420447658663>
 >>> print earth(2414993.5).observe(mars).apparent()
 <Apparent position RA=[ 4.58500039] dec=[-0.41933084]>
 
 
 >>> a = earth(2414993.5).observe(mars).astrometric()
 >>> a
-<Astrometric position RA=[ 4.61170587] dec=[-0.42044766]>
+<Astrometric position RA=4.61170587399 dec=-0.420447658663>
 >>> a.ra
-HourAngle([ 4.61170587])
+HourAngle(4.611705873992877)
 >>> a.ra.hms()
-(array([ 1.]), array([ 17.]), array([ 36.]), array([ 55.50790452]))
+(1.0, 17.0, 36.0, 55.507904515793314)
 >>> a.ra.hstr()
 '17h 36m 55.5079045158s'
 >>> a.dec.dms()
-(array([-1.]), array([ 24.]), array([ 5.]), array([ 23.55485117]))
+(-1.0, 24.0, 5.0, 23.554851165623347)
 >>> a.dec.dstr()
 '-24deg 5m 23.5548511656s'
 
@@ -75,16 +75,6 @@ repr(a.dec.dpretty())
 >>> a
 <Astrometric position RA=[ 4.61170587  4.62603456] dec=[-0.42044766 -0.42106794]>
 
-
->>> e = earth(2414993.5)
->>> print e
-<ICRS position x,y,z AU and velocity xdot,ydot,zdot AU/day at date jd>
->>> print e.x
-[ 0.27383326]
->>> print e.y
-[ 0.8749085]
->>> print e.z
-[ 0.37944054]
 
 >>> import numpy as np
 >>> t0 = 2414993.5
