@@ -8,3 +8,9 @@ The Skyfield To-Do List
   at the PyEphem GitHub issue:
 
   https://github.com/brandon-rhodes/pyephem/issues/16
+
+* When Earth Satellites are implemented, include the orbit number of a
+  satellite's current position in the public attributes that are set on
+  the resulting position object, as promised in PyEphem GitHub issue:
+
+  https://github.com/brandon-rhodes/pyephem/issues/15
