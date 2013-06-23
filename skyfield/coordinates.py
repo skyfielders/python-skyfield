@@ -74,6 +74,13 @@ class ICRS(XYZ):
 
     geocentric = True
 
+    def __sub__(self, body):
+        if self.velocity is None or body.velocity is None:
+            velocity = None
+        else:
+            velocity = body.velocity - self.velocity
+        return XYZ(self.position - body.position, velocity, self.jd)
+
     def observe(self, body):
         # TODO: should also accept another ICRS?
 

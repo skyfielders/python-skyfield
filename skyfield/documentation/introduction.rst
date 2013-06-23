@@ -33,6 +33,12 @@ Introduction
 >>> e.x
 array([ 0.27383326,  0.25695284])
 
+huh, how do we measure distance? abs does not work >>> print
+  mars(2414993.5).position - earth(2414993.5).position
+
+>>> emi = mars(2414993.5) - earth(2414993.5)
+>>> print emi.x, emi.y, emi.z
+-0.220661979709 -2.18621208383 -0.982457068395
 
 >>> print earth(2414993.5).observe(mars)
 <GCRS position x,y,z AU and velocity xdot,ydot,zdot AU/day at date jd>
