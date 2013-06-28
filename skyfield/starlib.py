@@ -1,5 +1,7 @@
 """Python classes that represent various classes of star."""
 
+from .timescales import T0
+
 class Star(object):
 
     def __init__(self, ra, dec,
@@ -12,4 +14,8 @@ class Star(object):
         self.rad_vel = rad_vel
 
     def __call__(self, jd):
-        pass
+        position, velocity = 'starvectors(self)'  # pos1
+        dt = 'd_light'(position, 'observer')
+        position = 'proper_motion'(T0, position, velocity, (jd + dt))
+        position, t_light = 'bary2obs(position, observer)'
+        return position
