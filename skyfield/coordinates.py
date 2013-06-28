@@ -15,27 +15,6 @@ C_AUDAY = 173.1446326846693
 
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
 
-class Hours(float):
-
-    def hms(self):
-        n = self if self > 0. else -self
-        d, fraction = divmod(n * 12. / pi, 1.)
-        m, s = divmod(fraction * 3600., 60.)
-        return d if self > 0. else -d, m, s
-
-    def __str__(self):
-        return '%d:%02d:%02f' % self.hms()
-
-class Degrees(float):
-
-    def dms(self):
-        n = self if self > 0. else -self
-        d, fraction = divmod(n * 180. / pi, 1.)
-        m, s = divmod(fraction * 3600., 60.)
-        return d if self > 0. else -d, m, s
-
-    def __str__(self):
-        return '%d:%02d:%02f' % self.dms()
 
 class XYZ(object):
 
@@ -202,11 +181,11 @@ class HeliocentricLonLat(ndarray):
             raise ValueError('how do I use that?')
         return self
 
-    @property
-    def lon(self): return Degrees(self[0])
+    # @property
+    # def lon(self): return Degrees(self[0])
 
-    @property
-    def lat(self): return Degrees(self[1])
+    # @property
+    # def lat(self): return Degrees(self[1])
 
     @property
     def r(self): return self[2]
