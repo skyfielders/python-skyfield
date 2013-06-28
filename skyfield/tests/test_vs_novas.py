@@ -5,7 +5,7 @@ from numpy import array, einsum
 from unittest import TestCase
 
 from skyfield import (angles, coordinates, earthlib, framelib, nutationlib,
-                      planets, precessionlib, timescales)
+                      planets, precessionlib, starlib, timescales)
 
 # Since some users might run these tests without having installed our
 # test dependencies, we detect import errors and skip these tests if the
@@ -84,6 +84,29 @@ class NOVASTests(TestCase):
             raise AssertionError(
                 '%r\ndoes not equal\n%r\nwithin the error bound\n%r%s'
                 % (first, second, delta, appendix))
+
+    # Tests of generating a stellar position.
+
+    def TODO_test_star_deflected_by_jupiter(self):
+        for jd in [T0, TA, TB]:
+            star = c.make_cat_entry(
+                star_name=b'Star', catalog=b'cat', star_num=101,
+                ra=1.59132070233, dec=8.5958876464,
+                pm_ra=0.0, pm_dec=0.0,
+                parallax=0.0, rad_vel=0.0,
+                )
+            ra, dec = c.app_star(jd, star)
+
+            earth = self.e.earth
+            star = starlib.Star(
+                ra=1.59132070233, dec=8.5958876464,
+                pm_ra=0.0, pm_dec=0.0,
+                parallax=0.0, rad_vel=0.0,
+                )
+            g = earth(jd).observe(star).apparent()
+
+            self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
+            self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
 
     # Tests of generating a full position or coordinate.
 
