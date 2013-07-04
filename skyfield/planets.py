@@ -19,7 +19,12 @@ class Planet(object):
         return '<Planet %s>' % (self.jplname,)
 
     def __call__(self, jd):
-        pv = self.jplephemeris.compute(self.jplname, jd)
+        e = self.jplephemeris
+        c = e.compute
+        if self.jplname == 'earth':
+            pv = c('earthmoon', jd) - c('moon', jd) * self.ephemeris.moon_share
+        else:
+            pv = c(self.jplname, jd)
         pv *= KM_AU
         i = ICRS(pv[:3], pv[3:], jd)
         i.ephemeris = self.ephemeris
@@ -48,6 +53,7 @@ class Ephemeris(object):
         self.sun = Planet(self, self.jplephemeris, 'sun')
         self.mercury = Planet(self, self.jplephemeris, 'mercury')
         self.venus = Planet(self, self.jplephemeris, 'venus')
+        self.earth = Planet(self, self.jplephemeris, 'earth')
         self.mars = Planet(self, self.jplephemeris, 'mars')
         self.jupiter = Planet(self, self.jplephemeris, 'jupiter')
         self.saturn = Planet(self, self.jplephemeris, 'saturn')
@@ -57,14 +63,6 @@ class Ephemeris(object):
 
     def compute(self, name, jd):
         return getattr(self, name)(jd)
-
-    def earth(self, jd):
-        compute = self.jplephemeris.compute
-        pv = compute('earthmoon', jd) - compute('moon', jd) * self.moon_share
-        pv *= KM_AU
-        i = ICRS(pv[:3], pv[3:], jd)
-        i.ephemeris = self
-        return i
 
     def moon(self, jd):
         compute = self.jplephemeris.compute
