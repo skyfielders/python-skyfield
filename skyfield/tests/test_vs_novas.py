@@ -307,6 +307,19 @@ class NOVASTests(TestCase):
         v = timescales.sidereal_time(t, delta_t)
         self.eq(v, [st0, stA, stB])
 
+    def test_starvectors(self):
+        self.delta = 1e-10
+
+        p, v = c.starvectors(c.make_cat_entry(
+                'POLARIS', 'HIP', 0, 2.530301028, 89.264109444,
+                44.22, -11.75, 7.56, -17.4))
+
+        star = starlib.Star(2.530301028, 89.264109444,
+                            44.22, -11.75, 7.56, -17.4)
+
+        self.eq(p, star._position)
+        self.eq(v, star._velocity)
+
     def test_terra(self):
         self.delta = 1e-18
 
