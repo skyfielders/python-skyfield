@@ -38,17 +38,17 @@ using one of three simple techniques::
 
     # What is the sky-catalog coordinate of Mars?
 
-    radec = earth(t).observe(mars).astrometric()
+    radec = mars.observe_from(earth(t)).astrometric()
 
     # Where is Mars in the sky, viewed from Earth's center?
 
-    radec = earth(t).observe(mars).apparent()
+    radec = mars.observe_from(earth(t)).apparent()
 
     # Where is Mars in the sky, viewed from Boston?
 
     boston = coordinates.Topos('71.0603 W', '42.3583 N',
         elevation=0.0, temperature=10.0, pressure=1010.0)
-    radec = boston(t).observe(mars).apparent()
+    radec = mars.observe_from(boston(t)).apparent()
 
 All of these routines are designed
 to operate very efficiently if,
@@ -60,7 +60,7 @@ you provide them with a NumPy array of dates instead::
     t0 = jday(2013, 1, 30, 0, 0, 0)
     t = np.arange(t0, t0 + 365.0, 1.0)
 
-    radec = boston(t).observe(mars).apparent()
+    radec = mars.observe_from(boston(t)).apparent()
 
 I will expand this README as the API continues to develop,
 but I wanted to at least get these few details typed up

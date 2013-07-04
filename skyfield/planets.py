@@ -32,6 +32,9 @@ class Planet(object):
         i.ephemeris = self.ephemeris
         return i
 
+    def observe_from(self, observer):
+        return observer.observe(self)
+
 class Ephemeris(object):
 
     def __init__(self, module=None):

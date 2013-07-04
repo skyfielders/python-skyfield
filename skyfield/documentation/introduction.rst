@@ -40,16 +40,16 @@ huh, how do we measure distance? abs does not work >>> print
 >>> print emi.x, emi.y, emi.z
 -0.220661979709 -2.18621208383 -0.982457068395
 
->>> print earth(2414993.5).observe(mars)
+>>> print mars.observe_from(earth(2414993.5))
 <GCRS position x,y,z AU and velocity xdot,ydot,zdot AU/day at date jd>
 
->>> print earth(2414993.5).observe(mars).astrometric()
+>>> print mars.observe_from(earth(2414993.5)).astrometric()
 <Astrometric position RA=4.61170587399 dec=-0.420447658663>
->>> print earth(2414993.5).observe(mars).apparent()
+>>> print mars.observe_from(earth(2414993.5)).apparent()
 <Apparent position RA=[ 4.58500039] dec=[-0.41933084]>
 
 
->>> a = earth(2414993.5).observe(mars).astrometric()
+>>> a = mars.observe_from(earth(2414993.5)).astrometric()
 >>> a
 <Astrometric position RA=4.61170587399 dec=-0.420447658663>
 >>> a.ra
@@ -77,7 +77,7 @@ repr(a.dec.dpretty())
 -24
 -24°5´23´´.5548511656
 
->>> a = earth(np.array([2414993.5, 2414994.5])).observe(mars).astrometric()
+>>> a = mars.observe_from(earth(np.array([2414993.5, 2414994.5]))).astrometric()
 >>> a
 <Astrometric position RA=[ 4.61170587  4.62603456] dec=[-0.42044766 -0.42106794]>
 
@@ -85,10 +85,10 @@ repr(a.dec.dpretty())
 >>> import numpy as np
 >>> t0 = 2414993.5
 >>> t = np.arange(t0, t0 + 5, 1.0)
->>> print earth(t).observe(mars).astrometric()
+>>> print mars.observe_from(earth(t)).astrometric()
 <Astrometric position RA=[ 4.61170587  4.62603456  4.64038665  4.65476093  4.66915621] dec=[-0.42044766 -0.42106794 -0.42161316 -0.42208295 -0.42247693]>
 
->>> print earth(t).observe(mars).apparent()
+>>> print mars.observe_from(earth(t)).apparent()
 <Apparent position RA=[ 4.58500039  4.59931574  4.61365598  4.62801986  4.64240623] dec=[-0.41933084 -0.42008982 -0.42077423 -0.42138359 -0.42191745]>
 
 
@@ -103,7 +103,7 @@ repr(a.dec.dpretty())
             ra, dec, dis = c.topo_planet(t, delta_t, obj, position)
 
             planet = getattr(self.e, name)
-            g = ggr(t).observe(planet).apparent()
+            g = planet.observe_from(ggr(t)).apparent()
 
 
 DE405  52.1 MB  1600–2200 (May 1997)

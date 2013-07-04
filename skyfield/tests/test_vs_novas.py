@@ -103,7 +103,7 @@ class NOVASTests(TestCase):
                 pm_ra=0.0, pm_dec=0.0,
                 parallax=0.0, rad_vel=0.0,
                 )
-            g = earth(jd).observe(star).apparent()
+            g = star.observe_from(earth(jd)).apparent()
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
@@ -118,7 +118,7 @@ class NOVASTests(TestCase):
 
             earth = self.e.earth
             planet = getattr(self.e, name)
-            g = earth(t).observe(planet).astrometric()
+            g = planet.observe_from(earth(t)).astrometric()
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
@@ -132,7 +132,7 @@ class NOVASTests(TestCase):
 
             earth = self.e.earth
             planet = getattr(self.e, name)
-            g = earth(t).observe(planet).apparent()
+            g = planet.observe_from(earth(t)).apparent()
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
@@ -151,7 +151,7 @@ class NOVASTests(TestCase):
             ra, dec, dis = c.topo_planet(t, delta_t, obj, position)
 
             planet = getattr(self.e, name)
-            g = ggr(t).observe(planet).apparent()
+            g = planet.observe_from(ggr(t)).apparent()
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
