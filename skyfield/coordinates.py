@@ -1,7 +1,6 @@
 """Coordinate systems."""
 
-from numpy import (arcsin, arctan2, array, einsum, isscalar,
-                   ndarray, max, min, sqrt)
+from numpy import arcsin, arctan2, array, einsum, isscalar, ndarray, sqrt
 from math import cos, sin, pi
 from skyfield.angles import interpret_longitude, interpret_latitude, Angle, \
     HourAngle
@@ -59,32 +58,6 @@ class ICRS(XYZ):
         else:
             velocity = body.velocity - self.velocity
         return XYZ(self.position - body.position, velocity, self.jd)
-
-    def observe(self, body):
-        # TODO: should also accept another ICRS?
-
-        jd = self.jd
-        lighttime0 = 0.0
-        vector = body(jd).position - self.position
-        euclidian_distance = distance = sqrt((vector * vector).sum(axis=0))
-
-        for i in range(10):
-            lighttime = distance / C_AUDAY
-            delta = lighttime - lighttime0
-            if -1e-12 < min(delta) and max(delta) < 1e-12:
-                break
-            lighttime0 = lighttime
-            target = body(jd - lighttime)
-            vector = target.position - self.position
-            distance = sqrt((vector * vector).sum(axis=0))
-        else:
-            raise ValueError('observe() light-travel time failed to converge')
-
-        g = GCRS(vector, target.velocity - self.velocity, jd)
-        g.observer = self
-        g.distance = euclidian_distance
-        g.lighttime = lighttime
-        return g
 
 class Topos(object):
 

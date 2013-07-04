@@ -1,11 +1,12 @@
 import jplephem
-from numpy import array
+from numpy import max, min, sqrt
 
 from skyfield import earthlib, timescales
-from skyfield.coordinates import ICRS
+from skyfield.coordinates import ICRS, GCRS
 
 DAY_S = 24.0 * 60.0 * 60.0
 KM_AU = 1.0 / earthlib.AU_KM
+C_AUDAY = 173.1446326846693
 
 T0 = timescales.T0
 
@@ -33,7 +34,31 @@ class Planet(object):
         return i
 
     def observe_from(self, observer):
-        return observer.observe(self)
+        # TODO: should also accept another ICRS?
+
+        jd = observer.jd
+        lighttime0 = 0.0
+        vector = self(jd).position - observer.position
+        euclidian_distance = distance = sqrt((vector * vector).sum(axis=0))
+
+        for i in range(10):
+            lighttime = distance / C_AUDAY
+            delta = lighttime - lighttime0
+            if -1e-12 < min(delta) and max(delta) < 1e-12:
+                break
+            lighttime0 = lighttime
+            target = self(jd - lighttime)
+            vector = target.position - observer.position
+            distance = sqrt((vector * vector).sum(axis=0))
+        else:
+            raise ValueError('observe_from() light-travel time'
+                             ' failed to converge')
+
+        g = GCRS(vector, target.velocity - observer.velocity, jd)
+        g.observer = observer
+        g.distance = euclidian_distance
+        g.lighttime = lighttime
+        return g
 
 class Ephemeris(object):
 
