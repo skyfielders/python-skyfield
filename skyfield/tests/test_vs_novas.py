@@ -113,7 +113,7 @@ class NOVASTests(TestCase):
     def test_astro_planet(self):
 
         for t, name in product([T0, TA, TB], planets_to_test):
-            obj = c.make_object(0, planet_codes[name], b'planet', None)
+            obj = c.make_object(0, planet_codes[name], 'planet', None)
             ra, dec, dis = c.astro_planet(t, obj)
 
             earth = self.e.earth
@@ -127,7 +127,7 @@ class NOVASTests(TestCase):
     def test_app_planet(self):
 
         for t, name in product([T0, TA, TB], planets_to_test):
-            obj = c.make_object(0, planet_codes[name], b'planet', None)
+            obj = c.make_object(0, planet_codes[name], 'planet', None)
             ra, dec, dis = c.app_planet(t, obj)
 
             earth = self.e.earth
@@ -147,7 +147,7 @@ class NOVASTests(TestCase):
         delta_t = 0
 
         for t, name in product([T0, TA, TB], planets_to_test):
-            obj = c.make_object(0, planet_codes[name], b'planet', None)
+            obj = c.make_object(0, planet_codes[name], 'planet', None)
             ra, dec, dis = c.topo_planet(t, delta_t, obj, position)
 
             planet = getattr(self.e, name)
