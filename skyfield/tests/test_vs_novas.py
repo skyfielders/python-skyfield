@@ -69,7 +69,7 @@ class NOVASTests(TestCase):
         cls.e = planets.Ephemeris(de405)
 
     def setUp(self):
-        self.delta = 0.0
+        self.delta = None  # force an error if a test forgets to specify
 
     def eq(self, first, second, delta=None):
         if delta is None:
@@ -245,6 +245,7 @@ class NOVASTests(TestCase):
         self.eq(eps, [eps0, epsA, epsB])
 
     def test_julian_date(self):
+        self.delta = 0.0
         for args in (
               (-4712, 1, 1, 0.0),
               (-4712, 3, 1, 0.0),
