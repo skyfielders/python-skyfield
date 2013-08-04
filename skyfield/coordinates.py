@@ -104,14 +104,14 @@ class GCRS(XYZ):
         from skyfield.earthlib import compute_limb_angle
 
         if observer.geocentric:
-            use_earth = array((False,))
+            include_earth_deflection = array((False,))
         else:
             limb_angle, nadir_angle = compute_limb_angle(
                 position, observer.position)
-            use_earth = limb_angle >= 0.8
+            include_earth_deflection = limb_angle >= 0.8
 
         add_deflection(position, observer.position, observer.ephemeris,
-                       jd, use_earth)
+                       jd, include_earth_deflection)
         add_aberration(position, observer.velocity, self.lighttime)
 
         if isscalar(jd):

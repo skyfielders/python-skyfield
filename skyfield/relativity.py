@@ -25,7 +25,8 @@ rmasses = {
     'moon': 27068700.387534,
     }
 
-def add_deflection(position, observer, ephemeris, jd, apply_earth, count=3):
+def add_deflection(position, observer, ephemeris, jd,
+                   include_earth_deflection, count=3):
     """Update `position` for how solar system masses will deflect its light.
 
     Given the ICRS `position` [x,y,z] of an object (AU) that is being
@@ -79,7 +80,7 @@ def add_deflection(position, observer, ephemeris, jd, apply_earth, count=3):
 
     # If observer is not at geocenter, add in deflection due to Earth.
 
-    if apply_earth.any():
+    if include_earth_deflection.any():
         bpv = ephemeris.compute('earth', jd)
         rmass = rmasses['earth']
         _add_deflection(position, observer, bpv.position, rmass)
