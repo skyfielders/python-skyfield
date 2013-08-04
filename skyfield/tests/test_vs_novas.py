@@ -87,7 +87,7 @@ class NOVASTests(TestCase):
 
     # Tests of generating a stellar position.
 
-    def TODO_test_star_deflected_by_jupiter(self):
+    def test_star_deflected_by_jupiter(self):
         for jd in [T0, TA, TB]:
             star = c.make_cat_entry(
                 star_name=b'Star', catalog=b'cat', star_num=101,
@@ -101,7 +101,7 @@ class NOVASTests(TestCase):
             star = starlib.Star(
                 ra=1.59132070233, dec=8.5958876464,
                 pm_ra=0.0, pm_dec=0.0,
-                parallax=0.0, rad_vel=0.0,
+                parallax=0.0, radial_velocity=0.0,
                 )
             g = star.observe_from(earth(jd)).apparent()
 

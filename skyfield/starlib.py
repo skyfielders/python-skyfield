@@ -1,12 +1,15 @@
 """Python classes that represent various classes of star."""
 
-from numpy import array, cos, sin
+from numpy import array, cos, sin, sqrt
+from .coordinates import GCRS
+from .relativity import light_time_difference
 from .timescales import T0
 
 AU_KM = 1.4959787069098932e+8
 ASEC2RAD = 4.848136811095359935899141e-6
 DEG2RAD = 0.017453292519943296
 C = 299792458.0
+C_AUDAY = 173.1446326846693
 
 class Star(object):
 
@@ -21,15 +24,20 @@ class Star(object):
 
         self._compute_vectors()
 
-    def __call__(self, jd):
-        position, velocity = self.position, self.velocity
-        dt = 'd_light'(position, 'observer')
-        position = 'proper_motion'(T0, position, velocity, (jd + dt))
-        position, t_light = 'bary2obs(position, observer)'
-        return position
-
     def observe_from(self, observer):
-        pass
+        position, velocity = self._position, self._velocity
+        jd = observer.jd
+        dt = light_time_difference(position, observer.position)
+        position = position + velocity * (T0 - jd - dt)
+        vector = position - observer.position
+        distance = sqrt((vector * vector).sum(axis=0))
+        lighttime = distance / C_AUDAY
+
+        g = GCRS(vector, velocity - observer.velocity, jd)
+        g.observer = observer
+        g.distance = distance
+        g.lighttime = lighttime
+        return g
 
     def _compute_vectors(self):
         """Compute the star's position as an ICRS position and velocity."""
