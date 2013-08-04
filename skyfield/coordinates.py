@@ -1,7 +1,7 @@
 """Coordinate systems."""
 
-from numpy import arcsin, arctan2, array, einsum, isscalar, ndarray, sqrt
-from math import cos, sin, pi
+from numpy import (arcsin, arctan2, array, cos, einsum, isscalar,
+                   ndarray, pi, sin, sqrt)
 from skyfield.angles import interpret_longitude, interpret_latitude, Angle, \
     HourAngle
 from skyfield.framelib import ICRS_to_J2000
@@ -18,9 +18,13 @@ ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
 class XYZ(object):
 
     def __init__(self, position, velocity=None, jd=None):
-        self.position = position
-        self.velocity = velocity
         self.jd = jd
+        if getattr(jd, 'shape', ()) == ():
+            self.position = position.reshape((3,))
+            self.velocity = velocity.reshape((3,))
+        else:
+            self.position = position
+            self.velocity = velocity
 
     def __repr__(self):
         return '<%s position x,y,z AU%s%s>' % (
@@ -128,7 +132,7 @@ class GCRS(XYZ):
 
 class RADec():
     def __repr__(self):
-        return '<%s position RA=%s dec=%s>' % (
+        return '<%s position RA=%r dec=%r>' % (
             self.__class__.__name__, self.ra, self.dec)
 
 class Astrometric(RADec):

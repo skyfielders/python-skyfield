@@ -29,7 +29,7 @@ class BaseAngle(ndarray):
     def hstr(self):
         sgn, h, m, s = sexa(24. / tau * self)
         sign = '-' if sgn < 0.0 else ''
-        return '{}{}h {}m {}s'.format(sign, int(h), int(m), float(s))
+        return '{}{}h {}m {:.3f}s'.format(sign, int(h), int(m), float(s))
 
     def degrees(self):
         return 360. / tau * self
@@ -40,7 +40,7 @@ class BaseAngle(ndarray):
     def dstr(self):
         sgn, d, m, s = sexa(self.degrees())
         sign = '-' if sgn < 0.0 else ''
-        return '{}{}deg {}m {}s'.format(sign, int(d), int(m), float(s))
+        return '{}{}deg {}m {:.3f}s'.format(sign, int(d), int(m), float(s))
 
     def dpretty(self):
         d, m, s = self.dms()

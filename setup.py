@@ -17,5 +17,6 @@ setup(
         'Topic :: Scientific/Engineering :: Astronomy',
         ],
     packages=[ 'skyfield', 'skyfield.tests' ],
+    package_data = {'skyfield': ['documentation/*.rst']},
     install_requires=['de421', 'jplephem', 'numpy', 'sgp4'],
     )

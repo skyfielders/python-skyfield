@@ -7,25 +7,26 @@ Introduction
 >>> import sgp4
 >>> import numpy as np
 
+>>> import skyfield.angles
 >>> from skyfield.planets import Ephemeris
 >>> eph = Ephemeris()
 >>> earth, mars = eph.earth, eph.mars
 
 >>> e = earth(2414993.5)
->>> print e
+>>> print(e)
 <ICRS position x,y,z AU and velocity xdot,ydot,zdot AU/day at date jd>
->>> print e.x
+>>> print(e.x)
 0.273833256524
->>> print e.y
+>>> print(e.y)
 0.874908499106
->>> print e.z
+>>> print(e.z)
 0.37944053759
 
->>> print e.xdot
+>>> print(e.xdot)
 -0.0168396519412
->>> print e.ydot
+>>> print(e.ydot)
 0.00427785895254
->>> print e.zdot
+>>> print(e.zdot)
 0.00185493319076
 
 >>> dates = np.array([2414993.5, 2414994.5])
@@ -37,41 +38,43 @@ huh, how do we measure distance? abs does not work >>> print
   mars(2414993.5).position - earth(2414993.5).position
 
 >>> emi = mars(2414993.5) - earth(2414993.5)
->>> print emi.x, emi.y, emi.z
--0.220661979709 -2.18621208383 -0.982457068395
+>>> print(emi.position)
+[-0.22066198 -2.18621208 -0.98245707]
 
->>> print mars.observe_from(earth(2414993.5))
+>>> print(mars.observe_from(earth(2414993.5)))
 <GCRS position x,y,z AU and velocity xdot,ydot,zdot AU/day at date jd>
 
->>> print mars.observe_from(earth(2414993.5)).astrometric()
-<Astrometric position RA=4.61170587399 dec=-0.420447658663>
->>> print mars.observe_from(earth(2414993.5)).apparent()
-<Apparent position RA=[ 4.58500039] dec=[-0.41933084]>
+>>> print(mars.observe_from(earth(2414993.5)).astrometric())
+<Astrometric position RA=HourAngle(4.611705873992877) dec=Angle(-0.4204476586629836)>
+>>> print(mars.observe_from(earth(2414993.5)).apparent())
+<Apparent position RA=HourAngle([ 4.58500039]) dec=Angle([-0.41933084])>
 
 
 >>> a = mars.observe_from(earth(2414993.5)).astrometric()
 >>> a
-<Astrometric position RA=4.61170587399 dec=-0.420447658663>
+<Astrometric position RA=HourAngle(4.611705873992877) dec=Angle(-0.4204476586629836)>
 >>> a.ra
 HourAngle(4.611705873992877)
 >>> a.ra.hms()
 (1.0, 17.0, 36.0, 55.507904515793314)
 >>> a.ra.hstr()
-'17h 36m 55.5079045158s'
+'17h 36m 55.508s'
 >>> a.dec.dms()
 (-1.0, 24.0, 5.0, 23.554851165623347)
 >>> a.dec.dstr()
-'-24deg 5m 23.5548511656s'
+'-24deg 5m 23.555s'
 
->>> a.ra.degrees()
-Traceback (most recent call last):
-  ...
-WrongUnitError: This angle is usually expressed in hours, not degrees; if you want to express it in degrees anyway, use degrees_anyway()
+>>> try:
+...     a.ra.degrees()
+... except skyfield.angles.WrongUnitError as e:
+...     print(e)
+This angle is usually expressed in hours, not degrees; if you want to express it in degrees anyway, use degrees_anyway()
 
->>> a.dec.hms()
-Traceback (most recent call last):
-  ...
-WrongUnitError: This angle is usually expressed in degrees, not hours; if you want to express it in hours anyway, use hms_anyway()
+>>> try:
+...     a.dec.hms()
+... except skyfield.angles.WrongUnitError as e:
+...     print(e)
+This angle is usually expressed in degrees, not hours; if you want to express it in hours anyway, use hms_anyway()
 
 repr(a.dec.dpretty())
 -24
@@ -79,17 +82,17 @@ repr(a.dec.dpretty())
 
 >>> a = mars.observe_from(earth(np.array([2414993.5, 2414994.5]))).astrometric()
 >>> a
-<Astrometric position RA=[ 4.61170587  4.62603456] dec=[-0.42044766 -0.42106794]>
+<Astrometric position RA=HourAngle([ 4.61170587,  4.62603456]) dec=Angle([-0.42044766, -0.42106794])>
 
 
 >>> import numpy as np
 >>> t0 = 2414993.5
 >>> t = np.arange(t0, t0 + 5, 1.0)
->>> print mars.observe_from(earth(t)).astrometric()
-<Astrometric position RA=[ 4.61170587  4.62603456  4.64038665  4.65476093  4.66915621] dec=[-0.42044766 -0.42106794 -0.42161316 -0.42208295 -0.42247693]>
+>>> print(mars.observe_from(earth(t)).astrometric())
+<Astrometric position RA=HourAngle([ 4.61170587,  4.62603456,  4.64038665,  4.65476093,  4.66915621]) dec=Angle([-0.42044766, -0.42106794, -0.42161316, -0.42208295, -0.42247693])>
 
->>> print mars.observe_from(earth(t)).apparent()
-<Apparent position RA=[ 4.58500039  4.59931574  4.61365598  4.62801986  4.64240623] dec=[-0.41933084 -0.42008982 -0.42077423 -0.42138359 -0.42191745]>
+>>> print(mars.observe_from(earth(t)).apparent())
+<Apparent position RA=HourAngle([ 4.58500039,  4.59931574,  4.61365598,  4.62801986,  4.64240623]) dec=Angle([-0.41933084, -0.42008982, -0.42077423, -0.42138359, -0.42191745])>
 
 
         ggr = coordinates.Topos('75 W', '45 N', 0.0,
