@@ -34,10 +34,6 @@ else:
     TA = c.julian_date(1969, 7, 20, 20. + 18./60.)  # arbitrary test date
     TB = c.julian_date(2012, 12, 21)                # arbitrary test date
 
-    A0 = array([T0])
-    AA = array([TA])
-    AB = array([TB])
-
 tau = angles.tau
 degree = tau / 360.0
 arcminute = degree / 60.0
