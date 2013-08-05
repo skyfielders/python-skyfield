@@ -72,6 +72,7 @@ class NOVASTests(TestCase):
         self.delta = None  # force an error if a test forgets to specify
 
     def eq(self, first, second, delta=None):
+        """Test whether two floats are within `delta` of one another."""
         if delta is None:
             delta = self.delta
         if hasattr(first, 'shape') or hasattr(second, 'shape'):
@@ -90,7 +91,7 @@ class NOVASTests(TestCase):
     def test_star_deflected_by_jupiter(self):
         for jd in [T0, TA, TB]:
             star = c.make_cat_entry(
-                star_name=b'Star', catalog=b'cat', star_num=101,
+                star_name='Star', catalog='cat', star_num=101,
                 ra=1.59132070233, dec=8.5958876464,
                 pm_ra=0.0, pm_dec=0.0,
                 parallax=0.0, rad_vel=0.0,
