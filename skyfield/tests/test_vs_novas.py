@@ -158,6 +158,31 @@ class NOVASTests(TestCase):
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
             self.eq(dis, g.distance, 0.1 * meter)  # TODO: improve this?
 
+    # Tests of generating a full position in horizontal coordinates.
+
+    def test_horizontal(self):
+        position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
+        ggr = coordinates.Topos('75 W', '45 N', 0.0,
+                                temperature=10.0, pressure=1010.0)
+        ggr.earth = self.e.earth
+        ggr.ephemeris = self.e
+        delta_t = 0.0
+        xp = yp = 0.0
+
+        for tt, name in product([T0, TA, TB], planets_to_test):
+            obj = c.make_object(0, planet_codes[name], 'planet', None)
+            ra, dec, dis = c.topo_planet(tt, delta_t, obj, position)
+            ut1 = tt - delta_t  # TODO: delta_t in seconds? or days?
+            (zd, az), (ra, dec) = c.equ2hor(
+                ut1, delta_t, xp, yp, position, ra, dec, ref_option=0)
+
+            planet = getattr(self.e, name)
+            h = planet.observe_from(ggr(tt)).apparent().horizontal()
+
+            self.eq(zd * tau / 360.0, h.zd, 0.001 * arcsecond)
+            self.eq(az * tau / 360.0, h.az, 0.001 * arcsecond)
+            self.eq(dis, h.distance, 0.1 * meter)  # TODO: improve this?
+
     # Tests of basic functions.
 
     def test_cal_date(self):

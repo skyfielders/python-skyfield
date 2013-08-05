@@ -3,7 +3,7 @@
 from numpy import (arcsin, arctan2, array, cos, einsum, isscalar,
                    ndarray, pi, sin, sqrt)
 from skyfield.angles import interpret_longitude, interpret_latitude, Angle, \
-    HourAngle
+    HourAngle, tau
 from skyfield.framelib import ICRS_to_J2000
 from skyfield.nutationlib import compute_nutation
 from skyfield.precessionlib import compute_precession
@@ -78,6 +78,8 @@ class Topos(object):
         e = self.earth(jd_tt)
         tpos, tvel = geocentric_position_and_velocity(self, jd_tt)
         t = ToposICRS(e.position + tpos, e.velocity + tvel, jd_tt)
+        t.latitude = self.latitude
+        t.longitude = self.longitude
         t.ephemeris = self.ephemeris
         return t
 
@@ -91,7 +93,9 @@ class GCRS(XYZ):
     def astrometric(self, epoch=None):
         eq = Astrometric()
         eq.ra, eq.dec = to_polar(self.position, phi_class=HourAngle)
+        eq.position = self.position
         eq.distance = self.distance
+        eq.observer = self.observer
         # TODO: epoch
         return eq
 
@@ -127,10 +131,13 @@ class GCRS(XYZ):
 
         eq = Apparent()
         eq.ra, eq.dec = to_polar(position, phi_class=HourAngle)
+        eq.jd = jd
+        eq.position = position
         eq.distance = self.distance
+        eq.observer = self.observer
         return eq
 
-class RADec():
+class RADec(object):
     def __repr__(self):
         return '<%s position RA=%r dec=%r>' % (
             self.__class__.__name__, self.ra, self.dec)
@@ -139,6 +146,72 @@ class Astrometric(RADec):
     pass
 
 class Apparent(RADec):
+    """Topocentric RA and declination vs true equator and equinox-of-date."""
+
+    def horizontal(self):
+        lat = self.observer.latitude
+        lon = self.observer.longitude
+        delta_t = 0.0
+
+        sinlat = sin(lat)
+        coslat = cos(lat)
+        sinlon = sin(lon)
+        coslon = cos(lon)
+
+        uze = array([coslat * coslon, coslat * sinlon, sinlat])
+        une = array([-sinlat * coslon, -sinlat * sinlon, coslat])
+        uwe = array([sinlon, -coslon, 0.0])
+
+        # TODO: allow called to ask for corrections using xp and yp
+
+        # TODO: this might be indefensible if delta_t is not zero
+        jd_ut1 = self.jd
+
+        from .timescales import sidereal_time
+
+        def spin(angle, vector):
+            cosang = cos(angle)
+            sinang = sin(angle)
+
+            r1 = array([cosang, sinang, 0.0])
+            r2 = array([-sinang, cosang, 0.0])
+            r3 = array([0.0, 0.0, 1.0])
+
+            return array([
+                r1.dot(vector),
+                r2.dot(vector),
+                r3.dot(vector),
+                ])
+
+        gast = sidereal_time(jd_ut1, delta_t, use_eqeq=True)
+        uz = spin(-gast * tau / 24.0, uze)
+        un = spin(-gast * tau / 24.0, une)
+        uw = spin(-gast * tau / 24.0, uwe)
+
+        p = self.position[:,0]  # TODO: vectorize this whole operation
+        pz = p.dot(uz)
+        pn = p.dot(un)
+        pw = p.dot(uw)
+
+        proj = sqrt(pn * pn + pw * pw)
+
+        h = Horizontal()
+
+        if proj > 0.0:
+            h.az = -arctan2(pw, pn)
+
+        if h.az < 0.0:
+            h.az += tau
+
+        if h.az >= tau:
+            h.az -= tau
+
+        h.zd = arctan2(proj, pz)
+        h.distance = self.distance
+        # TODO: which JD to save with coordinate?
+        return h
+
+class Horizontal(object):
     pass
 
 class HeliocentricLonLat(ndarray):

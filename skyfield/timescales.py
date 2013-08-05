@@ -47,7 +47,7 @@ def tdb_minus_tt(jd_tdb):
           + 0.000002 * sin (  21.3299 * t + 5.5431)
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
 
-def sidereal_time(jd_ut1, delta_t):
+def sidereal_time(jd_ut1, delta_t, use_eqeq=False):
     """Compute Greenwich sidereal time at Julian date `jd_ut1`."""
 
     # Time argument for precession and nutation components of sidereal
@@ -58,6 +58,16 @@ def sidereal_time(jd_ut1, delta_t):
 
     t = (jd_tdb - T0) / 36525.0
 
+    # Equation of equinoxes.
+
+    from .nutationlib import earth_tilt
+
+    if use_eqeq:
+        ee = earth_tilt(jd_tdb)[2]
+        eqeq = ee * 15.0
+    else:
+        eqeq = 0.0
+
     # Compute the Earth Rotation Angle.  Time argument is UT1.
 
     theta = earth_rotation_angle(jd_ut1)
@@ -66,7 +76,7 @@ def sidereal_time(jd_ut1, delta_t):
     # Precession-in-RA terms in mean sidereal time taken from third
     # reference, eq. (42), with coefficients in arcseconds.
 
-    st =    (     0.014506 +
+    st = eqeq + ( 0.014506 +
         (((( -    0.0000000368   * t
              -    0.000029956  ) * t
              -    0.00000044   ) * t
