@@ -13,7 +13,7 @@ J2000 = 2451545.0
 C_AUDAY = 173.1446326846693
 
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
-
+quarter_tau = 0.25 * tau
 
 class XYZ(object):
 
@@ -206,7 +206,9 @@ class Apparent(RADec):
         if h.az >= tau:
             h.az -= tau
 
-        h.zd = arctan2(proj, pz)
+        zd = arctan2(proj, pz)
+        h.zd = zd
+        h.alt = quarter_tau - zd
         h.distance = self.distance
         # TODO: which JD to save with coordinate?
         return h

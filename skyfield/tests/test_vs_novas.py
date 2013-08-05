@@ -177,6 +177,7 @@ class NOVASTests(TestCase):
 
             self.eq(zd * tau / 360.0, h.zd, 0.001 * arcsecond)
             self.eq(az * tau / 360.0, h.az, 0.001 * arcsecond)
+            self.eq(0.25 * tau - zd * tau / 360.0, h.alt, 0.001 * arcsecond)
             self.eq(dis, h.distance, 0.1 * meter)  # TODO: improve this?
 
     # Tests of basic functions.
