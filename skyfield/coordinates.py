@@ -74,16 +74,20 @@ class Topos(object):
         self.latitude = interpret_latitude(latitude)
         self.elevation = elevation
 
-    def __call__(self, jd_tt):
-        from skyfield.earthlib import geocentric_position_and_velocity
+    def __call__(self, jd_tt, delta_t=0.0):
+        from .earthlib import geocentric_position_and_velocity
+        from .timescales import tdb_minus_tt
+
         if not hasattr(jd_tt, 'shape'):
             jd_tt = array((jd_tt,))
-        e = self.earth(jd_tt)
-        tpos, tvel = geocentric_position_and_velocity(self, jd_tt)
+        jd_tdb = jd_tt + tdb_minus_tt(jd_tt) / 86400.0
+        e = self.earth(jd_tdb)
+        tpos, tvel = geocentric_position_and_velocity(self, jd_tt, delta_t)
         t = ToposICRS(e.position + tpos, e.velocity + tvel, jd_tt)
         t.latitude = self.latitude
         t.longitude = self.longitude
         t.ephemeris = self.ephemeris
+        t.delta_t = delta_t
         return t
 
 class ToposICRS(ICRS):
@@ -103,9 +107,15 @@ class GCRS(XYZ):
         return eq
 
     def apparent(self):
-        jd = self.jd
-        position = self.position.copy()
+        from .timescales import tdb_minus_tt
 
+        # jd_tt = self.jd
+        # jd_tdb = jd_tt + tdb_minus_tt(jd_tt) / 86400.0
+
+        jd_tdb = self.jd
+        #jd_tt = jd_tdb - tdb_minus_tt(jd_tt) / 86400.0
+
+        position = self.position.copy()
         observer = self.observer
 
         from skyfield.earthlib import compute_limb_angle
@@ -118,23 +128,23 @@ class GCRS(XYZ):
             include_earth_deflection = limb_angle >= 0.8
 
         add_deflection(position, observer.position, observer.ephemeris,
-                       jd, include_earth_deflection)
+                       jd_tdb, include_earth_deflection)
         add_aberration(position, observer.velocity, self.lighttime)
 
-        if isscalar(jd):
-            jd = array((jd,))
+        if isscalar(jd_tdb):
+            jd_tdb = array((jd_tdb,))
             position = position.reshape((3, 1))
         else:
             position = position.copy()
 
         position = position.T.dot(ICRS_to_J2000)
-        position = einsum('ij,jki->ik', position, compute_precession(jd))
-        position = einsum('ij,jki->ik', position, compute_nutation(jd))
+        position = einsum('ij,jki->ik', position, compute_precession(jd_tdb))
+        position = einsum('ij,jki->ik', position, compute_nutation(jd_tdb))
         position = position.T
 
         eq = Apparent()
         eq.ra, eq.dec = to_polar(position, phi_class=HourAngle)
-        eq.jd = jd
+        eq.jd_tdb = jd_tdb
         eq.position = position
         eq.distance = self.distance
         eq.observer = self.observer
@@ -154,7 +164,7 @@ class Apparent(RADec):
     def horizontal(self):
         lat = self.observer.latitude
         lon = self.observer.longitude
-        delta_t = 0.0
+        delta_t = self.observer.delta_t
 
         sinlat = sin(lat)
         coslat = cos(lat)
@@ -167,8 +177,8 @@ class Apparent(RADec):
 
         # TODO: allow called to ask for corrections using xp and yp
 
-        # TODO: this might be indefensible if delta_t is not zero
-        jd_ut1 = self.jd
+        jd_tt = self.jd
+        jd_ut1 = jd_tt - delta_t / 86400.0
 
         from .timescales import sidereal_time
 

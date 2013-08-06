@@ -25,7 +25,7 @@ rmasses = {
     'moon': 27068700.387534,
     }
 
-def add_deflection(position, observer, ephemeris, jd,
+def add_deflection(position, observer, ephemeris, jd_tdb,
                    include_earth_deflection, count=3):
     """Update `position` for how solar system masses will deflect its light.
 
@@ -49,7 +49,7 @@ def add_deflection(position, observer, ephemeris, jd,
 
         # Get position of gravitating body wrt ss barycenter at time 'jd_tdb'.
 
-        bpv = ephemeris.compute(name, jd)
+        bpv = ephemeris.compute(name, jd_tdb)
 
         # Get position of gravitating body wrt observer at time 'jd_tdb'.
 
@@ -63,13 +63,13 @@ def add_deflection(position, observer, ephemeris, jd,
         # Get position of gravitating body wrt ss barycenter at time when
         # incoming photons were closest to it.
 
-        tclose = jd
+        tclose = jd_tdb
 
         # if dlt > 0.0:
         #     tclose = jd - dlt
 
-        tclose = where(dlt > 0.0, jd - dlt, tclose)
-        tclose = where(tlt < dlt, jd - tlt, tclose)
+        tclose = where(dlt > 0.0, jd_tdb - dlt, tclose)
+        tclose = where(tlt < dlt, jd_tdb - tlt, tclose)
 
         # if tlt < dlt:
         #     tclose = jd - tlt
@@ -81,7 +81,7 @@ def add_deflection(position, observer, ephemeris, jd,
     # If observer is not at geocenter, add in deflection due to Earth.
 
     if include_earth_deflection.any():
-        bpv = ephemeris.compute('earth', jd)
+        bpv = ephemeris.compute('earth', jd_tdb)
         rmass = rmasses['earth']
         _add_deflection(position, observer, bpv.position, rmass)
 

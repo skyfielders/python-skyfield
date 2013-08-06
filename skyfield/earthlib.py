@@ -20,7 +20,7 @@ rade = ERAD / AU
 halfpi = pi / 2.0
 
 
-def geocentric_position_and_velocity(topos, jd_tt):
+def geocentric_position_and_velocity(topos, jd_tt, delta_t=0.0):
     """Compute the geocentric position, velocity of a terrestrial observer.
 
     `topos` - `Topos` object describing a location.
@@ -30,7 +30,6 @@ def geocentric_position_and_velocity(topos, jd_tt):
     which each measure position in AU long the axes of the ICRS.
 
     """
-    delta_t = 0
     jd_tdb = jd_tt + timescales.tdb_minus_tt(jd_tt)
     jd_ut1 = jd_tt - (delta_t / 86400.)
 
