@@ -63,6 +63,9 @@ class ICRS(XYZ):
             velocity = body.velocity - self.velocity
         return XYZ(self.position - body.position, velocity, self.jd)
 
+    def observe(self, body):
+        return body.observe_from(self)
+
 class Topos(object):
 
     def __init__(self, longitude, latitude, elevation=0.,
