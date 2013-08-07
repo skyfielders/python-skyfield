@@ -31,12 +31,12 @@ def geocentric_position_and_velocity(topos, jd):
 
     """
     gmst = timescales.sidereal_time(jd)
-    x1, x2, eqeq, x3, x4 = earth_tilt(jd.tdb)
+    x1, x2, eqeq, x3, x4 = earth_tilt(jd)
     gast = gmst + eqeq / 3600.0
 
     pos, vel = terra(topos, gast)
 
-    n = compute_nutation(jd.tdb)
+    n = compute_nutation(jd)
     p = compute_precession(jd.tdb)
     f = J2000_to_ICRS
 

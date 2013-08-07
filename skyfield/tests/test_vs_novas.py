@@ -222,14 +222,14 @@ class NOVASTests(TestCase):
         self.eq(v, [a0, aA, aB])
 
     def test_earth_tilt(self):
-        self.delta = 1e-14
+        self.delta = 1e-9  # can this be improved?
 
         vars0 = c.e_tilt(T0)
         vars1 = c.e_tilt(TA)
         vars2 = c.e_tilt(TB)
 
-        t = array([T0, TA, TB])
-        v = nutationlib.earth_tilt(t)
+        jd = JulianDate(tdb=[T0, TA, TB])
+        v = nutationlib.earth_tilt(jd)
         for i in range(len(v)):
             self.eq(v[i], [vars0[i], vars1[i], vars2[i]])
 
@@ -323,8 +323,8 @@ class NOVASTests(TestCase):
         va = c_nutation(TA, v, direction=0)
         vb = c_nutation(TB, v, direction=0)
 
-        dates = array([T0, TA, TB])
-        v = einsum('i,ijk->jk', v, nutationlib.compute_nutation(dates))
+        jd = JulianDate(tt=[T0, TA, TB])
+        v = einsum('i,ijk->jk', v, nutationlib.compute_nutation(jd))
 
         self.eq(v0, v[:,0])
         self.eq(va, v[:,1])

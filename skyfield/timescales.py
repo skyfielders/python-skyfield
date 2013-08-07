@@ -25,11 +25,7 @@ class JulianDate(object):
     `utc` - Coordinated Universal Time
 
     """
-    #indices = {name: i for name in enumerate(sequence)}
-
     def __init__(self, tdb=None, tt=None, ut1=None, utc=None, delta_t=0.0):
-
-        # self.has = has = bytearray(4)
 
         self.delta_t = _wrap(delta_t)
 
@@ -144,7 +140,7 @@ def sidereal_time(jd, use_eqeq=False):
     from .nutationlib import earth_tilt
 
     if use_eqeq:
-        ee = earth_tilt(jd.tdb)[2]
+        ee = earth_tilt(jd)[2]
         eqeq = ee * 15.0
     else:
         eqeq = 0.0

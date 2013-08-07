@@ -5,10 +5,8 @@ from skyfield.timescales import T0
 PSI_COR = 0.0
 EPS_COR = 0.0
 
-def compute_nutation(jd_tdb):
-    """Generate the nutation rotations for a series of epochs `jd_tdb`.
-
-    `jd_tdb` - array of TDB Julian dates
+def compute_nutation(jd):
+    """Generate the nutation rotations for a series of epochs `jd`.
 
     The array of matrices that is returned has dimensions `(3, 3, n)`
     where `n` is the number of dates that were provided.
@@ -16,7 +14,7 @@ def compute_nutation(jd_tdb):
     """
     # Call 'e_tilt' to get the obliquity and nutation angles.
 
-    oblm, oblt, eqeq, psi, eps = earth_tilt(jd_tdb)
+    oblm, oblt, eqeq, psi, eps = earth_tilt(jd)
 
     cobm = cos(oblm * DEG2RAD)
     sobm = sin(oblm * DEG2RAD)
@@ -33,18 +31,18 @@ def compute_nutation(jd_tdb):
                     cpsi * sobm * cobt - cobm * sobt,
                     cpsi * sobm * sobt + cobm * cobt)))
 
-def earth_tilt(jd_tdb):
+def earth_tilt(jd):
     """Return stuff about the earth's axis and position."""
 
-    dp, de = iau2000a(jd_tdb)
+    dp, de = iau2000a(jd.tt)
     dp /= ASEC2RAD
     de /= ASEC2RAD
-    c_terms = equation_of_the_equinoxes_complimentary_terms(jd_tdb) / ASEC2RAD
+    c_terms = equation_of_the_equinoxes_complimentary_terms(jd.tt) / ASEC2RAD
 
     d_psi = dp + PSI_COR
     d_eps = de + EPS_COR
 
-    mean_ob = mean_obliquity(jd_tdb)
+    mean_ob = mean_obliquity(jd.tdb)
     true_ob = mean_ob + d_eps
 
     mean_ob /= 3600.0
