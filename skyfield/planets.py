@@ -20,7 +20,12 @@ class Planet(object):
         return '<Planet %s>' % (self.jplname,)
 
     def __call__(self, jd):
-        jd_tdb = jd
+        position, velocity = self._position_and_velocity(jd.tdb)
+        i = ICRS(position, velocity, jd)
+        i.ephemeris = self.ephemeris
+        return i
+
+    def _position_and_velocity(self, jd_tdb):
         e = self.jplephemeris
         c = e.compute
         if self.jplname == 'earth':
@@ -30,16 +35,15 @@ class Planet(object):
         else:
             pv = c(self.jplname, jd_tdb)
         pv *= KM_AU
-        i = ICRS(pv[:3], pv[3:], jd_tdb)
-        i.ephemeris = self.ephemeris
-        return i
+        return pv[:3], pv[3:]
 
     def observe_from(self, observer):
         # TODO: should also accept another ICRS?
 
-        jd_tdb = observer.jd
+        jd_tdb = observer.jd.tdb
         lighttime0 = 0.0
-        vector = self(jd_tdb).position - observer.position
+        position, velocity = self._position_and_velocity(jd_tdb)
+        vector = position - observer.position
         euclidian_distance = distance = sqrt((vector * vector).sum(axis=0))
 
         for i in range(10):
@@ -48,14 +52,14 @@ class Planet(object):
             if -1e-12 < min(delta) and max(delta) < 1e-12:
                 break
             lighttime0 = lighttime
-            target = self(jd_tdb - lighttime)
-            vector = target.position - observer.position
+            position, velocity = self._position_and_velocity(jd_tdb - lighttime)
+            vector = position - observer.position
             distance = sqrt((vector * vector).sum(axis=0))
         else:
             raise ValueError('observe_from() light-travel time'
                              ' failed to converge')
 
-        g = GCRS(vector, target.velocity - observer.velocity, jd_tdb)
+        g = GCRS(vector, velocity - observer.velocity, observer.jd)
         g.observer = observer
         g.distance = euclidian_distance
         g.lighttime = lighttime
@@ -91,5 +95,5 @@ class Ephemeris(object):
         self.neptune = Planet(self, self.jplephemeris, 'neptune')
         self.pluto = Planet(self, self.jplephemeris, 'pluto')
 
-    def compute(self, name, jd):
-        return getattr(self, name)(jd)
+    def _position_and_velocity(self, name, jd):
+        return getattr(self, name)._position_and_velocity(jd)

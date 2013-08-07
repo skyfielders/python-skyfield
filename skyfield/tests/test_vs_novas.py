@@ -95,14 +95,14 @@ class NOVASTests(TestCase):
     # Tests of generating a stellar position.
 
     def test_star_deflected_by_jupiter(self):
-        for jd in [T0, TA, TB]:
+        for jd_tt in [T0, TA, TB]:
             star = c.make_cat_entry(
                 star_name='Star', catalog='cat', star_num=101,
                 ra=1.59132070233, dec=8.5958876464,
                 pm_ra=0.0, pm_dec=0.0,
                 parallax=0.0, rad_vel=0.0,
                 )
-            ra, dec = c.app_star(jd, star)
+            ra, dec = c.app_star(jd_tt, star)
 
             earth = self.e.earth
             star = starlib.Star(
@@ -110,6 +110,7 @@ class NOVASTests(TestCase):
                 pm_ra=0.0, pm_dec=0.0,
                 parallax=0.0, radial_velocity=0.0,
                 )
+            jd = JulianDate(tt=jd_tt)
             g = star.observe_from(earth(jd)).apparent()
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
@@ -119,13 +120,14 @@ class NOVASTests(TestCase):
 
     def test_astro_planet(self):
 
-        for t, name in product([T0, TA, TB], planets_to_test):
+        for jd_tt, name in product([T0, TA, TB], planets_to_test):
             obj = c.make_object(0, planet_codes[name], 'planet', None)
-            ra, dec, dis = c.astro_planet(t, obj)
+            ra, dec, dis = c.astro_planet(jd_tt, obj)
 
             earth = self.e.earth
             planet = getattr(self.e, name)
-            g = planet.observe_from(earth(t)).astrometric()
+            jd = JulianDate(tt=jd_tt)
+            g = planet.observe_from(earth(jd)).astrometric()
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
@@ -133,13 +135,14 @@ class NOVASTests(TestCase):
 
     def test_app_planet(self):
 
-        for t, name in product([T0, TA, TB], planets_to_test):
+        for jd_tt, name in product([T0, TA, TB], planets_to_test):
             obj = c.make_object(0, planet_codes[name], 'planet', None)
-            ra, dec, dis = c.app_planet(t, obj)
+            ra, dec, dis = c.app_planet(jd_tt, obj)
 
             earth = self.e.earth
             planet = getattr(self.e, name)
-            g = planet.observe_from(earth(t)).apparent()
+            jd = JulianDate(tt=jd_tt)
+            g = planet.observe_from(earth(jd)).apparent()
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
@@ -162,8 +165,6 @@ class NOVASTests(TestCase):
                 # the Moon until we can refactor how we handle time to
                 # simplify all of our code.
                 continue
-
-            # print name, jd_tt, delta_t
 
             obj = c.make_object(0, planet_codes[name], 'planet', None)
             ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
@@ -377,8 +378,8 @@ class NOVASTests(TestCase):
         star = starlib.Star(2.530301028, 89.264109444,
                             44.22, -11.75, 7.56, -17.4)
 
-        self.eq(p, star._position)
-        self.eq(v, star._velocity)
+        self.eq(p, star._position.reshape(3))
+        self.eq(v, star._velocity.reshape(3))
 
     def test_terra(self):
         self.delta = 1e-18

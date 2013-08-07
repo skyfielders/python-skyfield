@@ -28,7 +28,7 @@ class Star(object):
         position, velocity = self._position, self._velocity
         jd = observer.jd
         dt = light_time_difference(position, observer.position)
-        position = position + velocity * (T0 - jd - dt)
+        position = position + velocity * (T0 - jd.tdb - dt)
         vector = position - observer.position
         distance = sqrt((vector * vector).sum(axis=0))
         lighttime = distance / C_AUDAY
@@ -63,7 +63,7 @@ class Star(object):
             dist * cdc * cra,
             dist * cdc * sra,
             dist * sdc,
-            ))
+            )).reshape((3, 1))
 
         # Compute Doppler factor, which accounts for change in light
         # travel time to star.
@@ -83,4 +83,4 @@ class Star(object):
             - pmr * sra - pmd * sdc * cra + rvl * cdc * cra,
               pmr * cra - pmd * sdc * sra + rvl * cdc * sra,
               pmd * cdc + rvl * sdc,
-              ))
+              )).reshape((3, 1))

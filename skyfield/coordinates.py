@@ -77,13 +77,12 @@ class Topos(object):
     def __call__(self, jd):
         from .earthlib import geocentric_position_and_velocity
 
-        e = self.earth(jd.tdb)
+        e = self.earth(jd)
         tpos, tvel = geocentric_position_and_velocity(self, jd)
-        t = ToposICRS(e.position + tpos, e.velocity + tvel, jd.tt)
+        t = ToposICRS(e.position + tpos, e.velocity + tvel, jd)
         t.latitude = self.latitude
         t.longitude = self.longitude
         t.ephemeris = self.ephemeris
-        t.delta_t = jd.delta_t
         return t
 
 class ToposICRS(ICRS):
@@ -103,8 +102,7 @@ class GCRS(XYZ):
         return eq
 
     def apparent(self):
-        from .timescales import JulianDate
-        jd = JulianDate(self.jd)
+        jd = self.jd
         jd_tdb = jd.tdb
 
         position = self.position.copy()
@@ -132,13 +130,13 @@ class GCRS(XYZ):
             position = position.copy()
 
         position = position.T.dot(ICRS_to_J2000)
-        position = einsum('ij,jki->ik', position, compute_precession(jd.tdb))
+        position = einsum('ij,jki->ik', position, compute_precession(jd_tdb))
         position = einsum('ij,jki->ik', position, compute_nutation(jd))
         position = position.T
 
         eq = Apparent()
         eq.ra, eq.dec = to_polar(position, phi_class=HourAngle)
-        eq.jd_tdb = jd_tdb
+        eq.jd = jd
         eq.position = position
         eq.distance = self.distance
         eq.observer = self.observer
@@ -158,7 +156,6 @@ class Apparent(RADec):
     def horizontal(self):
         lat = self.observer.latitude
         lon = self.observer.longitude
-        delta_t = self.observer.delta_t
 
         sinlat = sin(lat)
         coslat = cos(lat)
@@ -170,14 +167,6 @@ class Apparent(RADec):
         uwe = array([sinlon, -coslon, 0.0])
 
         # TODO: allow called to ask for corrections using xp and yp
-
-        from .timescales import tdb_minus_tt
-
-        jd_tdb = self.jd_tdb
-        jd_tt = jd_tdb - tdb_minus_tt(jd_tdb) / 86400.0
-        jd_ut1 = jd_tt - delta_t / 86400.0
-
-        from .timescales import sidereal_time
 
         def spin(angle, vector):
             cosang = cos(angle)
@@ -193,9 +182,8 @@ class Apparent(RADec):
                 r3.dot(vector),
                 ])
 
-        from .timescales import JulianDate
-        jd = JulianDate(ut1=jd_ut1, delta_t=delta_t)
-        gast = sidereal_time(jd, use_eqeq=True)
+        from .timescales import sidereal_time
+        gast = sidereal_time(self.jd, use_eqeq=True)
         uz = spin(-gast * tau / 24.0, uze)
         un = spin(-gast * tau / 24.0, une)
         uw = spin(-gast * tau / 24.0, uwe)

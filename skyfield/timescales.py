@@ -30,13 +30,17 @@ class JulianDate(object):
         self.delta_t = _wrap(delta_t)
 
         if tdb is not None:
-            self.tdb = _wrap(tdb)
+            self.tdb = tdb = _wrap(tdb)
+            self.shape = tdb.shape
         if tt is not None:
-            self.tt = _wrap(tt)
+            self.tt = tt = _wrap(tt)
+            self.shape = tt.shape
         if ut1 is not None:
-            self.ut1 = _wrap(ut1)
+            self.ut1 = ut1 = _wrap(ut1)
+            self.shape = ut1.shape
         if utc is not None:
-            self.utc = _wrap(utc)
+            self.utc = utc = _wrap(utc)
+            self.shape = utc.shape
 
         if not self.__dict__:
             raise ValueError('you must supply either tdb= tt= ut1= or utc=')
