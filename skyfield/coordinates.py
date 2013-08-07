@@ -2,12 +2,15 @@
 
 from numpy import (arcsin, arctan2, array, cos, einsum, isscalar,
                    ndarray, pi, sin, sqrt)
-from skyfield.angles import interpret_longitude, interpret_latitude, Angle, \
-    HourAngle, tau
-from skyfield.framelib import ICRS_to_J2000
-from skyfield.nutationlib import compute_nutation
-from skyfield.precessionlib import compute_precession
-from skyfield.relativity import add_aberration, add_deflection
+
+from .angles import (interpret_longitude, interpret_latitude, Angle,
+                     HourAngle, tau)
+from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
+                       sidereal_time)
+from .framelib import ICRS_to_J2000
+from .nutationlib import compute_nutation
+from .precessionlib import compute_precession
+from .relativity import add_aberration, add_deflection
 
 J2000 = 2451545.0
 C_AUDAY = 173.1446326846693
@@ -75,8 +78,6 @@ class Topos(object):
         self.elevation = elevation
 
     def __call__(self, jd):
-        from .earthlib import geocentric_position_and_velocity
-
         e = self.earth(jd)
         tpos, tvel = geocentric_position_and_velocity(self, jd)
         t = ToposICRS(e.position + tpos, e.velocity + tvel, jd)
@@ -107,8 +108,6 @@ class GCRS(XYZ):
 
         position = self.position.copy()
         observer = self.observer
-
-        from skyfield.earthlib import compute_limb_angle
 
         if observer.geocentric:
             include_earth_deflection = array((False,))
@@ -182,7 +181,6 @@ class Apparent(RADec):
                 r3.dot(vector),
                 ])
 
-        from .earthlib import sidereal_time
         gast = sidereal_time(self.jd, use_eqeq=True)
         uz = spin(-gast * tau / 24.0, uze)
         un = spin(-gast * tau / 24.0, une)
