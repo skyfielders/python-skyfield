@@ -74,16 +74,17 @@ class Topos(object):
         self.latitude = interpret_latitude(latitude)
         self.elevation = elevation
 
-    def __call__(self, jd_tt, delta_t=0.0):
+    def __call__(self, jd, delta_t=0.0):
         from .earthlib import geocentric_position_and_velocity
-        from .timescales import tdb_minus_tt
+        # from .timescales import tdb_minus_tt
 
-        if not hasattr(jd_tt, 'shape'):
-            jd_tt = array((jd_tt,))
-        jd_tdb = jd_tt + tdb_minus_tt(jd_tt) / 86400.0
-        e = self.earth(jd_tdb)
-        tpos, tvel = geocentric_position_and_velocity(self, jd_tt, delta_t)
-        t = ToposICRS(e.position + tpos, e.velocity + tvel, jd_tt)
+        # if not hasattr(jd_tt, 'shape'):
+        #     jd_tt = array((jd_tt,))
+        # jd_tdb = jd_tt + tdb_minus_tt(jd_tt) / 86400.0
+
+        e = self.earth(jd.tdb)
+        tpos, tvel = geocentric_position_and_velocity(self, jd.tt, delta_t)
+        t = ToposICRS(e.position + tpos, e.velocity + tvel, jd.tt)
         t.latitude = self.latitude
         t.longitude = self.longitude
         t.ephemeris = self.ephemeris

@@ -7,6 +7,8 @@ from unittest import TestCase
 from skyfield import (angles, coordinates, earthlib, framelib, nutationlib,
                       planets, precessionlib, starlib, timescales)
 
+from ..timescales import JulianDate
+
 # Since some users might run these tests without having installed our
 # test dependencies, we detect import errors and skip these tests if the
 # resources they need are not available.
@@ -167,7 +169,8 @@ class NOVASTests(TestCase):
             ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
 
             planet = getattr(self.e, name)
-            g = ggr(jd_tt, delta_t).observe(planet).apparent()
+            jd = JulianDate(tt=jd_tt)
+            g = ggr(jd, delta_t).observe(planet).apparent()
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
@@ -191,7 +194,8 @@ class NOVASTests(TestCase):
                 ut1, delta_t, xp, yp, position, ra, dec, ref_option=0)
 
             planet = getattr(self.e, name)
-            h = ggr(tt, delta_t).observe(planet).apparent().horizontal()
+            jd = JulianDate(tt=tt)
+            h = ggr(jd, delta_t).observe(planet).apparent().horizontal()
 
             # TODO: these should be much closer; something wrong with time?
             # Try to get them back to 0.001
