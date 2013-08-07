@@ -24,7 +24,7 @@ def geocentric_position_and_velocity(topos, jd):
     """Compute the geocentric position, velocity of a terrestrial observer.
 
     `topos` - `Topos` object describing a location.
-    `jd_tt` - Array of Julian dates in Terrestrial Time.
+    `jd` - a JulianDate.
 
     The return value is a 2-element tuple `(pos, vel)` of 3-vectors
     which each measure position in AU long the axes of the ICRS.

@@ -103,7 +103,9 @@ class GCRS(XYZ):
         return eq
 
     def apparent(self):
-        jd_tdb = self.jd
+        from .timescales import JulianDate
+        jd = JulianDate(self.jd)
+        jd_tdb = jd.tdb
 
         position = self.position.copy()
         observer = self.observer
@@ -117,21 +119,20 @@ class GCRS(XYZ):
                 position, observer.position)
             include_earth_deflection = limb_angle >= 0.8
 
+        if len(position.shape) == 1:
+            jd_tdb = jd_tdb[0]
+
         add_deflection(position, observer.position, observer.ephemeris,
                        jd_tdb, include_earth_deflection)
         add_aberration(position, observer.velocity, self.lighttime)
 
-        from .timescales import JulianDate
-        jd = JulianDate(tdb=jd_tdb)
-
         if isscalar(jd_tdb):
-            jd_tdb = array((jd_tdb,))
             position = position.reshape((3, 1))
         else:
             position = position.copy()
 
         position = position.T.dot(ICRS_to_J2000)
-        position = einsum('ij,jki->ik', position, compute_precession(jd_tdb))
+        position = einsum('ij,jki->ik', position, compute_precession(jd.tdb))
         position = einsum('ij,jki->ik', position, compute_nutation(jd))
         position = position.T
 
