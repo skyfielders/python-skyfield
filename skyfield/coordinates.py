@@ -73,16 +73,24 @@ class Topos(object):
 
     def __init__(self, longitude, latitude, elevation=0.,
                  temperature=10.0, pressure=1010.0):
-        self.longitude = interpret_longitude(longitude)
-        self.latitude = interpret_latitude(latitude)
+        self.longitude = lon = interpret_longitude(longitude)
+        self.latitude = lat = interpret_latitude(latitude)
         self.elevation = elevation
+
+        sinlat = sin(lat)
+        coslat = cos(lat)
+        sinlon = sin(lon)
+        coslon = cos(lon)
+
+        self.up = array([coslat * coslon, coslat * sinlon, sinlat])
+        self.north = array([-sinlat * coslon, -sinlat * sinlon, coslat])
+        self.west = array([sinlon, -coslon, 0.0])
 
     def __call__(self, jd):
         e = self.earth(jd)
         tpos, tvel = geocentric_position_and_velocity(self, jd)
         t = ToposICRS(e.position + tpos, e.velocity + tvel, jd)
-        t.latitude = self.latitude
-        t.longitude = self.longitude
+        t.topos = self
         t.ephemeris = self.ephemeris
         return t
 
@@ -153,19 +161,18 @@ class Apparent(RADec):
     """Topocentric RA and declination vs true equator and equinox-of-date."""
 
     def horizontal(self):
-        lat = self.observer.latitude
-        lon = self.observer.longitude
 
-        sinlat = sin(lat)
-        coslat = cos(lat)
-        sinlon = sin(lon)
-        coslon = cos(lon)
+        try:
+            topos = self.observer.topos
+            uze = topos.up
+            une = topos.north
+            uwe = topos.west
+        except AttributeError:
+            raise ValueError('to compute an apparent position, you must'
+                             ' observe from a specific Earth location that'
+                             ' you specify using a Topos instance')
 
-        uze = array([coslat * coslon, coslat * sinlon, sinlat])
-        une = array([-sinlat * coslon, -sinlat * sinlon, coslat])
-        uwe = array([sinlon, -coslon, 0.0])
-
-        # TODO: allow called to ask for corrections using xp and yp
+        # TODO: allow for corrections using xp and yp
 
         def spin(angle, vector):
             cosang = cos(angle)
