@@ -33,7 +33,8 @@ def geocentric_position_and_velocity(topos, jd_tt, delta_t=0.0):
     jd_tdb = jd_tt + timescales.tdb_minus_tt(jd_tt)
     jd_ut1 = jd_tt - (delta_t / 86400.)
 
-    gmst = timescales.sidereal_time(jd_ut1, delta_t)
+    from .timescales import JulianDate
+    gmst = timescales.sidereal_time(JulianDate(ut1=jd_ut1, delta_t=delta_t))
     x1, x2, eqeq, x3, x4 = earth_tilt(jd_tdb)
     gast = gmst + eqeq / 3600.0
 

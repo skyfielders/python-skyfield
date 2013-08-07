@@ -352,8 +352,8 @@ class NOVASTests(TestCase):
         stA = c.sidereal_time(TA, 0.0, delta_t, False, True)
         stB = c.sidereal_time(TB, 0.0, delta_t, False, True)
 
-        t = array([T0, TA, TB])
-        v = timescales.sidereal_time(t, delta_t)
+        jd = JulianDate(ut1=[T0, TA, TB])
+        v = timescales.sidereal_time(jd)
         self.eq(v, [st0, stA, stB])
 
     def test_sidereal_time_with_nonzero_delta_t(self):
@@ -363,9 +363,8 @@ class NOVASTests(TestCase):
         stA = c.sidereal_time(TA, 0.0, DA, False, True)
         stB = c.sidereal_time(TB, 0.0, DB, False, True)
 
-        t = array([T0, TA, TB])
-        delta_t = array([D0, DA, DB])
-        v = timescales.sidereal_time(t, delta_t)
+        jd = JulianDate(ut1=[T0, TA, TB], delta_t=[D0, DA, DB])
+        v = timescales.sidereal_time(jd)
         self.eq(v, [st0, stA, stB])
 
     def test_starvectors(self):

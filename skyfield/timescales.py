@@ -31,7 +31,7 @@ class JulianDate(object):
 
         # self.has = has = bytearray(4)
 
-        self.delta_t = delta_t
+        self.delta_t = _wrap(delta_t)
 
         if tdb is not None:
             self.tdb = _wrap(tdb)
@@ -131,13 +131,9 @@ def tdb_minus_tt(jd_tdb):
           + 0.000002 * sin (  21.3299 * t + 5.5431)
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
 
-def sidereal_time(jd_ut1, delta_t, use_eqeq=False):
+def sidereal_time(jd, use_eqeq=False):
     """Compute Greenwich sidereal time at Julian date `jd_ut1`."""
 
-    # Time argument for precession and nutation components of sidereal
-    # time is TDB.  First approximation is TDB = TT, then refine.
-
-    jd = JulianDate(ut1=jd_ut1, delta_t=delta_t)
     t = (jd.tdb - T0) / 36525.0
 
     # Equation of equinoxes.

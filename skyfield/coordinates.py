@@ -195,7 +195,9 @@ class Apparent(RADec):
                 r3.dot(vector),
                 ])
 
-        gast = sidereal_time(jd_ut1, delta_t, use_eqeq=True)
+        from .timescales import JulianDate
+        jd = JulianDate(ut1=jd_ut1, delta_t=delta_t)
+        gast = sidereal_time(jd, use_eqeq=True)
         uz = spin(-gast * tau / 24.0, uze)
         un = spin(-gast * tau / 24.0, une)
         uw = spin(-gast * tau / 24.0, uwe)
