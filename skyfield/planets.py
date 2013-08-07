@@ -20,25 +20,26 @@ class Planet(object):
         return '<Planet %s>' % (self.jplname,)
 
     def __call__(self, jd):
+        jd_tdb = jd
         e = self.jplephemeris
         c = e.compute
         if self.jplname == 'earth':
-            pv = c('earthmoon', jd) - c('moon', jd) * e.earth_share
+            pv = c('earthmoon', jd_tdb) - c('moon', jd_tdb) * e.earth_share
         elif self.jplname == 'moon':
-            pv = c('earthmoon', jd) + c('moon', jd) * e.moon_share
+            pv = c('earthmoon', jd_tdb) + c('moon', jd_tdb) * e.moon_share
         else:
-            pv = c(self.jplname, jd)
+            pv = c(self.jplname, jd_tdb)
         pv *= KM_AU
-        i = ICRS(pv[:3], pv[3:], jd)
+        i = ICRS(pv[:3], pv[3:], jd_tdb)
         i.ephemeris = self.ephemeris
         return i
 
     def observe_from(self, observer):
         # TODO: should also accept another ICRS?
 
-        jd = observer.jd
+        jd_tdb = observer.jd
         lighttime0 = 0.0
-        vector = self(jd).position - observer.position
+        vector = self(jd_tdb).position - observer.position
         euclidian_distance = distance = sqrt((vector * vector).sum(axis=0))
 
         for i in range(10):
@@ -47,14 +48,14 @@ class Planet(object):
             if -1e-12 < min(delta) and max(delta) < 1e-12:
                 break
             lighttime0 = lighttime
-            target = self(jd - lighttime)
+            target = self(jd_tdb - lighttime)
             vector = target.position - observer.position
             distance = sqrt((vector * vector).sum(axis=0))
         else:
             raise ValueError('observe_from() light-travel time'
                              ' failed to converge')
 
-        g = GCRS(vector, target.velocity - observer.velocity, jd)
+        g = GCRS(vector, target.velocity - observer.velocity, jd_tdb)
         g.observer = observer
         g.distance = euclidian_distance
         g.lighttime = lighttime
