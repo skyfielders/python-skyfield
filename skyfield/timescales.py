@@ -57,7 +57,7 @@ class JulianDate(object):
         tdb = d.get('tdb')
         tt = d.get('tt')
         ut1 = d.get('ut1')
-        utc = d.get('utc')
+        utc = d.get('utc')  # wrong! TT -(const)-> TAI -(leap secs)-> UTC?
 
         if i >= _TT:
             if (tt is None) and (tdb is not None):
@@ -133,51 +133,3 @@ def tdb_minus_tt(jd_tdb):
           + 0.000005 * sin (  52.9691 * t + 0.4444)
           + 0.000002 * sin (  21.3299 * t + 5.5431)
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
-
-def sidereal_time(jd, use_eqeq=False):
-    """Compute Greenwich sidereal time at Julian date `jd_ut1`."""
-
-    t = (jd.tdb - T0) / 36525.0
-
-    # Equation of equinoxes.
-
-    from .nutationlib import earth_tilt
-
-    if use_eqeq:
-        ee = earth_tilt(jd)[2]
-        eqeq = ee * 15.0
-    else:
-        eqeq = 0.0
-
-    # Compute the Earth Rotation Angle.  Time argument is UT1.
-
-    theta = earth_rotation_angle(jd.ut1)
-
-    # The equinox method.  See Circular 179, Section 2.6.2.
-    # Precession-in-RA terms in mean sidereal time taken from third
-    # reference, eq. (42), with coefficients in arcseconds.
-
-    st = eqeq + ( 0.014506 +
-        (((( -    0.0000000368   * t
-             -    0.000029956  ) * t
-             -    0.00000044   ) * t
-             +    1.3915817    ) * t
-             + 4612.156534     ) * t)
-
-    # Form the Greenwich sidereal time.
-
-    gst = fmod((st / 3600.0 + theta), 360.0) / 15.0
-
-    gst += 24.0 * (gst < 0.0)
-
-    return gst
-
-def earth_rotation_angle(jd_ut1):
-    """Return the value of the Earth Rotation Angle (theta) for a UT1 date.
-
-    Uses the expression from the note to IAU Resolution B1.8 of 2000.
-
-    """
-    thet1 = 0.7790572732640 + 0.00273781191135448 * (jd_ut1 - T0)
-    thet3 = jd_ut1 % 1.0
-    return (thet1 + thet3) % 1.0 * 360.0

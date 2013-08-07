@@ -182,7 +182,7 @@ class Apparent(RADec):
                 r3.dot(vector),
                 ])
 
-        from .timescales import sidereal_time
+        from .earthlib import sidereal_time
         gast = sidereal_time(self.jd, use_eqeq=True)
         uz = spin(-gast * tau / 24.0, uze)
         un = spin(-gast * tau / 24.0, une)

@@ -1,13 +1,14 @@
 """Formulae for specific earth behaviors and effects."""
 
-from numpy import (arcsin, arccos, array, clip, cos, einsum,
+from numpy import (arcsin, arccos, array, clip, cos, einsum, fmod,
                    pi, sin, sqrt, zeros_like)
-from skyfield import timescales
-from skyfield.angles import DEG2RAD
-from skyfield.framelib import J2000_to_ICRS
-from skyfield.functions import dots
-from skyfield.nutationlib import earth_tilt, compute_nutation
-from skyfield.precessionlib import compute_precession
+
+from .angles import DEG2RAD
+from .framelib import J2000_to_ICRS
+from .functions import dots
+from .nutationlib import earth_tilt, compute_nutation
+from .precessionlib import compute_precession
+from .timescales import T0
 
 ANGVEL = 7.2921150e-5
 AU = 1.4959787069098932e+11
@@ -30,7 +31,7 @@ def geocentric_position_and_velocity(topos, jd):
     which each measure position in AU long the axes of the ICRS.
 
     """
-    gmst = timescales.sidereal_time(jd)
+    gmst = sidereal_time(jd)
     x1, x2, eqeq, x3, x4 = earth_tilt(jd)
     gast = gmst + eqeq / 3600.0
 
@@ -91,6 +92,7 @@ def terra(topos, st):
 
     return pos, vel
 
+
 def compute_limb_angle(position, observer):
     """Determine the angle of an object above or below the Earth's limb.
 
@@ -137,3 +139,51 @@ def compute_limb_angle(position, observer):
     nadir_angle = (pi - zdobj) / aprad
 
     return limb_angle, nadir_angle
+
+
+def sidereal_time(jd, use_eqeq=False):
+    """Compute Greenwich sidereal time at Julian date `jd_ut1`."""
+
+    t = (jd.tdb - T0) / 36525.0
+
+    # Equation of equinoxes.
+
+    if use_eqeq:
+        ee = earth_tilt(jd)[2]
+        eqeq = ee * 15.0
+    else:
+        eqeq = 0.0
+
+    # Compute the Earth Rotation Angle.  Time argument is UT1.
+
+    theta = earth_rotation_angle(jd.ut1)
+
+    # The equinox method.  See Circular 179, Section 2.6.2.
+    # Precession-in-RA terms in mean sidereal time taken from third
+    # reference, eq. (42), with coefficients in arcseconds.
+
+    st = eqeq + ( 0.014506 +
+        (((( -    0.0000000368   * t
+             -    0.000029956  ) * t
+             -    0.00000044   ) * t
+             +    1.3915817    ) * t
+             + 4612.156534     ) * t)
+
+    # Form the Greenwich sidereal time.
+
+    gst = fmod((st / 3600.0 + theta), 360.0) / 15.0
+
+    gst += 24.0 * (gst < 0.0)
+
+    return gst
+
+
+def earth_rotation_angle(jd_ut1):
+    """Return the value of the Earth Rotation Angle (theta) for a UT1 date.
+
+    Uses the expression from the note to IAU Resolution B1.8 of 2000.
+
+    """
+    thet1 = 0.7790572732640 + 0.00273781191135448 * (jd_ut1 - T0)
+    thet3 = jd_ut1 % 1.0
+    return (thet1 + thet3) % 1.0 * 360.0
