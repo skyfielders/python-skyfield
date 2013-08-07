@@ -74,7 +74,7 @@ class Topos(object):
         self.latitude = interpret_latitude(latitude)
         self.elevation = elevation
 
-    def __call__(self, jd, delta_t=0.0):
+    def __call__(self, jd):
         from .earthlib import geocentric_position_and_velocity
 
         e = self.earth(jd.tdb)
@@ -83,7 +83,7 @@ class Topos(object):
         t.latitude = self.latitude
         t.longitude = self.longitude
         t.ephemeris = self.ephemeris
-        t.delta_t = delta_t
+        t.delta_t = jd.delta_t
         return t
 
 class ToposICRS(ICRS):

@@ -170,7 +170,7 @@ class NOVASTests(TestCase):
 
             planet = getattr(self.e, name)
             jd = JulianDate(tt=jd_tt, delta_t=delta_t)
-            g = ggr(jd, delta_t).observe(planet).apparent()
+            g = ggr(jd).observe(planet).apparent()
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
@@ -195,7 +195,7 @@ class NOVASTests(TestCase):
 
             planet = getattr(self.e, name)
             jd = JulianDate(tt=jd_tt, delta_t=delta_t)
-            h = ggr(jd, delta_t).observe(planet).apparent().horizontal()
+            h = ggr(jd).observe(planet).apparent().horizontal()
 
             # TODO: these should be much closer; something wrong with time?
             # Try to get them back to 0.001
