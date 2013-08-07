@@ -1,6 +1,7 @@
 from numpy import array, cos, fmod, sin, tensordot, zeros
-from skyfield.angles import ASEC2RAD, ASEC360, DEG2RAD, tau
-from skyfield.timescales import T0
+
+from .angles import ASEC2RAD, ASEC360, DEG2RAD, tau
+from .timescales import T0
 
 PSI_COR = 0.0
 EPS_COR = 0.0

@@ -1,5 +1,6 @@
 from numpy import abs, sqrt, where
-from skyfield.functions import dots, length
+
+from .functions import dots, length
 
 C = 299792458.0
 AU = 1.4959787069098932e+11

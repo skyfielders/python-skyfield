@@ -1,8 +1,8 @@
 import jplephem
 from numpy import max, min, sqrt
 
-from skyfield import earthlib, timescales
-from skyfield.coordinates import ICRS, GCRS
+from . import earthlib, timescales
+from .coordinates import ICRS, GCRS
 
 DAY_S = 24.0 * 60.0 * 60.0
 KM_AU = 1.0 / earthlib.AU_KM
