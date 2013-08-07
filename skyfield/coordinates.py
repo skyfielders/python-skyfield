@@ -76,11 +76,6 @@ class Topos(object):
 
     def __call__(self, jd, delta_t=0.0):
         from .earthlib import geocentric_position_and_velocity
-        # from .timescales import tdb_minus_tt
-
-        # if not hasattr(jd_tt, 'shape'):
-        #     jd_tt = array((jd_tt,))
-        # jd_tdb = jd_tt + tdb_minus_tt(jd_tt) / 86400.0
 
         e = self.earth(jd.tdb)
         tpos, tvel = geocentric_position_and_velocity(self, jd.tt, delta_t)

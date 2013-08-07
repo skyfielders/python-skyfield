@@ -27,9 +27,11 @@ class JulianDate(object):
     """
     #indices = {name: i for name in enumerate(sequence)}
 
-    def __init__(self, tdb=None, tt=None, ut1=None, utc=None):
+    def __init__(self, tdb=None, tt=None, ut1=None, utc=None, delta_t=0.0):
 
         # self.has = has = bytearray(4)
+
+        self.delta_t = delta_t
 
         if tdb is not None:
             self.tdb = _wrap(tdb)
@@ -79,7 +81,7 @@ class JulianDate(object):
                 return ut1
 
         if (tt is None) and (ut1 is not None):
-            tt = self.tt = 4.5
+            tt = ut1 + self.delta_t / 86400.0
             if i == _TT:
                 return tt
 
@@ -135,24 +137,22 @@ def sidereal_time(jd_ut1, delta_t, use_eqeq=False):
     # Time argument for precession and nutation components of sidereal
     # time is TDB.  First approximation is TDB = TT, then refine.
 
-    jd_tt = jd_ut1 + delta_t / 86400.0
-    jd_tdb = jd_tt + tdb_minus_tt(jd_tt) / 86400.0
-
-    t = (jd_tdb - T0) / 36525.0
+    jd = JulianDate(ut1=jd_ut1, delta_t=delta_t)
+    t = (jd.tdb - T0) / 36525.0
 
     # Equation of equinoxes.
 
     from .nutationlib import earth_tilt
 
     if use_eqeq:
-        ee = earth_tilt(jd_tdb)[2]
+        ee = earth_tilt(jd.tdb)[2]
         eqeq = ee * 15.0
     else:
         eqeq = 0.0
 
     # Compute the Earth Rotation Angle.  Time argument is UT1.
 
-    theta = earth_rotation_angle(jd_ut1)
+    theta = earth_rotation_angle(jd.ut1)
 
     # The equinox method.  See Circular 179, Section 2.6.2.
     # Precession-in-RA terms in mean sidereal time taken from third
