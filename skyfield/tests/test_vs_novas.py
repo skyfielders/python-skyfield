@@ -131,7 +131,7 @@ class NOVASTests(TestCase):
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
-            self.eq(dis, g.distance, 0.1 * meter)
+            self.eq(dis, g.distance, 0.001 * meter)
 
     def test_app_planet(self):
 
@@ -146,7 +146,7 @@ class NOVASTests(TestCase):
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
-            self.eq(dis, g.distance, 0.1 * meter)
+            self.eq(dis, g.distance, 0.001 * meter)
 
     def test_topo_planet(self):
         position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
@@ -157,15 +157,6 @@ class NOVASTests(TestCase):
 
         for (jd_tt, delta_t), name in product([P0, PA, PB], planets_to_test):
 
-            if name == 'moon':
-                # Drat.  Somewhere a mistake is being made (probably the
-                # wrong time is being provided to one of our routines?)
-                # and so our position for the fastest-moving target, the
-                # Moon, is not matching NOVAS exactly.  For now, disable
-                # the Moon until we can refactor how we handle time to
-                # simplify all of our code.
-                continue
-
             obj = c.make_object(0, planet_codes[name], 'planet', None)
             ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
 
@@ -175,7 +166,7 @@ class NOVASTests(TestCase):
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
             self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
-            self.eq(dis, g.distance, 0.1 * meter)  # TODO: improve this?
+            self.eq(dis, g.distance, 0.001 * meter)
 
     # Tests of generating a full position in horizontal coordinates.
 
@@ -198,12 +189,10 @@ class NOVASTests(TestCase):
             jd = JulianDate(tt=jd_tt, delta_t=delta_t)
             h = ggr(jd).observe(planet).apparent().horizontal()
 
-            # TODO: these should be much closer; something wrong with time?
-            # Try to get them back to 0.001
-            self.eq(zd * tau / 360.0, h.zd, 0.1 * arcsecond)
-            self.eq(az * tau / 360.0, h.az, 0.1 * arcsecond)
-            self.eq(0.25 * tau - zd * tau / 360.0, h.alt, 0.1 * arcsecond)
-            self.eq(dis, h.distance, 0.1 * meter)  # TODO: improve this?
+            self.eq(zd * tau / 360.0, h.zd, 0.001 * arcsecond)
+            self.eq(az * tau / 360.0, h.az, 0.001 * arcsecond)
+            self.eq(0.25 * tau - zd * tau / 360.0, h.alt, 0.001 * arcsecond)
+            self.eq(dis, h.distance, 0.001 * meter)
 
     # Tests of basic functions.
 
@@ -223,7 +212,7 @@ class NOVASTests(TestCase):
         self.eq(v, [a0, aA, aB])
 
     def test_earth_tilt(self):
-        self.delta = 1e-9  # can this be improved?
+        self.delta = 1e-9
 
         vars0 = c.e_tilt(T0)
         vars1 = c.e_tilt(TA)
