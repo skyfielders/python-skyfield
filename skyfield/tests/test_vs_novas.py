@@ -186,15 +186,15 @@ class NOVASTests(TestCase):
         ggr.ephemeris = self.e
         xp = yp = 0.0
 
-        for (tt, delta_t), name in product([P0, PA, PB], planets_to_test):
+        for (jd_tt, delta_t), name in product([P0, PA, PB], planets_to_test):
             obj = c.make_object(0, planet_codes[name], 'planet', None)
-            ra, dec, dis = c.topo_planet(tt, delta_t, obj, position)
-            ut1 = tt - delta_t / 86400.0
+            ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
+            jd_ut1 = jd_tt - delta_t / 86400.0
             (zd, az), (ra, dec) = c.equ2hor(
-                ut1, delta_t, xp, yp, position, ra, dec, ref_option=0)
+                jd_ut1, delta_t, xp, yp, position, ra, dec, ref_option=0)
 
             planet = getattr(self.e, name)
-            jd = JulianDate(tt=tt, delta_t=delta_t)
+            jd = JulianDate(tt=jd_tt, delta_t=delta_t)
             h = ggr(jd, delta_t).observe(planet).apparent().horizontal()
 
             # TODO: these should be much closer; something wrong with time?
