@@ -4,11 +4,8 @@ from numpy import array, fmod, sin
 
 T0 = 2451545.0
 
-sequence = ['tdb', 'tt', 'ut1', 'utc']
-sequence_indexes = {name: i for i, name in enumerate(sequence)}
-
-# plans_a = {sequence[i]: sequence[0:i] for i in range(1, len(sequence))}
-# print plans_a
+_sequence = ['tdb', 'tt', 'ut1', 'utc']
+_sequence_indexes = {name: i for i, name in enumerate(_sequence)}
 
 def _wrap(a):
     if hasattr(a, 'shape'):
@@ -47,32 +44,12 @@ class JulianDate(object):
             raise ValueError('you must supply either tdb= tt= ut1= or utc=')
 
     def __getattr__(self, name):
-        # value = self.compute
         d = self.__dict__
-        # has = self.has
-        # f = 1
-        # #i = sequence_indexes(name)a
-        # i = sequence_indexes[name]
-        # j = has.rfind(b'\1', 0, i)
-        # k = has.find(b'\1', i + 1)
-        # print 'computing!'
-        #sequenceB = reversed(sequence)
-
-        # forward_utc =
-
-        # forward_tt = False
-        # forward_ut1 = False
-        # forward_utc = False
-
-        # seq = self.sequence
-        i = sequence_indexes.get(name, None)
+        i = _sequence_indexes.get(name, None)
         if i is None:
             raise AttributeError('no such attribute {!r}'.format(name))
 
         _TDB, _TT, _UT1, _UTC = (0, 1, 2, 3)
-
-        #value = None
-        #sequenceA = ['tdb', 'tt', 'ut1', 'utc']
 
         tdb = d.get('tdb')
         tt = d.get('tt')
@@ -108,88 +85,6 @@ class JulianDate(object):
 
         tdb = self.tdb = tt + tdb_minus_tt(tt) / 86400.0
         return tdb
-
-        # if _TDB < i:
-        #     if i < _UTC or 'utc' not in d:
-                
-        #         if name < 'ut1' or 'ut1' not in d:
-        #             if name < 'tt' or 'tt' not in d:
-        #                 if name != 'tdb':
-                            
-        #                 if name < 'tdb':
-        #                     value = None
-        #                 value = d.get('tdb')
-    
-        #                 if value is not None:
-        #                     value = f(value)
-        #                     self.tt = value
-    
-        #             if name >= 'ut1' and value is not None:
-        #                 value = f(value)
-        #                 self.ut1 = value
-    
-        #         if name >= 'utc' and value is not None:
-        #             value = f(value)
-        #             self.utc = value
-
-        # if name < 'utc' or 'utc' not in d:
-        #     if name < 'ut1' or 'ut1' not in d:
-        #         if name < 'tt' or 'tt' not in d:
-
-        #             value = d.get('tdb')
-
-        #             if name >= 'tt' and value is not None:
-        #                 value = f(value)
-        #                 self.tt = value
-
-        #         if name >= 'ut1' and value is not None:
-        #             value = f(value)
-        #             self.ut1 = value
-
-        #     if name >= 'utc' and value is not None:
-        #         value = f(value)
-        #         self.utc = value
-
-        
-
-        # if name == 'ut1':
-        #     if 'tt' not in d:
-        #         tt = f(tdb)
-        #     ut1 = g(tt)
-        # elif name == 'tt' and 'tdb' in d:
-        #     tt = f(tdb)
-
-        # if name == 'ut1':
-        #     if 'tt' not in d:
-        #         tt = f(tdb)
-        #     ut1 = g(tt)
-        # elif name == 'tt' and 'tdb' in d:
-        #     tt = f(tdb)
-
-        # if name == 'ut1' and 'tt' in d:
-        #     ut1 = g(tt)
-        # elif name == 'ut1' and 'tdb' in d:
-        #     tt = f(tdb)
-        #     ut1 = g(tt)
-        # elif name == 'tt' and 'tdb' in d:
-        #     tt = f(tdb)
-
-        # if name == 'ut1' or name > 'ut1':
-        #     value = d.get('ut1', None)
-            
-
-
-        # if name > 'tdb':
-        #     # need we compute utc?
-        #     if name >= 'utc':
-        #         if name > 'ut1' and ut1 is None:
-        #             if name > 'tt' and tt is None:
-        #                 compute_tt_from_tdb()
-        #             compute_ut1_from_tt()
-        #         compute_utc_from_ut1()
-                
-        # print 'GETATTR', name
-        # return 3
 
 def julian_date(year, month=1, day=1, hour=0.0):
     janfeb = month < 3
