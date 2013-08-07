@@ -169,7 +169,7 @@ class NOVASTests(TestCase):
             ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
 
             planet = getattr(self.e, name)
-            jd = JulianDate(tt=jd_tt)
+            jd = JulianDate(tt=jd_tt, delta_t=delta_t)
             g = ggr(jd, delta_t).observe(planet).apparent()
 
             self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
@@ -194,7 +194,7 @@ class NOVASTests(TestCase):
                 ut1, delta_t, xp, yp, position, ra, dec, ref_option=0)
 
             planet = getattr(self.e, name)
-            jd = JulianDate(tt=tt)
+            jd = JulianDate(tt=tt, delta_t=delta_t)
             h = ggr(jd, delta_t).observe(planet).apparent().horizontal()
 
             # TODO: these should be much closer; something wrong with time?
@@ -274,8 +274,8 @@ class NOVASTests(TestCase):
         topos = coordinates.Topos('75 W', '45 N', elevation=0.0,
                                   temperature=10.0, pressure=1010.0)
 
-        t = array([T0, TA])
-        posv, velv = earthlib.geocentric_position_and_velocity(topos, t)
+        jd = JulianDate(tt=[T0, TA], delta_t=delta_t)
+        posv, velv = earthlib.geocentric_position_and_velocity(topos, jd)
         self.eq(posv.T, [pos0, posA])
         self.eq(velv.T, [vel0, velA])
 
@@ -352,7 +352,7 @@ class NOVASTests(TestCase):
         stA = c.sidereal_time(TA, 0.0, delta_t, False, True)
         stB = c.sidereal_time(TB, 0.0, delta_t, False, True)
 
-        jd = JulianDate(ut1=[T0, TA, TB])
+        jd = JulianDate(ut1=[T0, TA, TB], delta_t=delta_t)
         v = timescales.sidereal_time(jd)
         self.eq(v, [st0, stA, stB])
 

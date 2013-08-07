@@ -46,6 +46,7 @@ class JulianDate(object):
             raise ValueError('you must supply either tdb= tt= ut1= or utc=')
 
     def __getattr__(self, name):
+        delta_t = self.delta_t
         d = self.__dict__
         i = _sequence_indexes.get(name, None)
         if i is None:
@@ -60,32 +61,34 @@ class JulianDate(object):
 
         if i >= _TT:
             if (tt is None) and (tdb is not None):
-                tt = self.tt = 3.4
+                self.tt = tt = tdb - tdb_minus_tt(tdb) / 86400.0
                 if i == _TT:
                     return tt
 
             if i >= _UT1:
                 if (ut1 is None) and (tt is not None):
-                    ut1 = self.ut1 = 4.5
+                    self.ut1 = ut1 = tt - delta_t / 86400.
                     if i == _UT1:
                         return ut1
 
                 if i == _UTC:
                     if (ut1 is not None):
+                        die
                         utc = self.utc = 6.7
                         return utc
 
         if (ut1 is None) and (utc is not None):
+            die
             ut1 = self.ut1 = 3.4
             if i == _UT1:
                 return ut1
 
         if (tt is None) and (ut1 is not None):
-            tt = ut1 + self.delta_t / 86400.0
+            self.tt = tt = ut1 + self.delta_t / 86400.0
             if i == _TT:
                 return tt
 
-        tdb = self.tdb = tt + tdb_minus_tt(tt) / 86400.0
+        self.tdb = tdb = tt + tdb_minus_tt(tt) / 86400.0
         return tdb
 
 def julian_date(year, month=1, day=1, hour=0.0):

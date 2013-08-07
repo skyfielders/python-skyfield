@@ -78,7 +78,7 @@ class Topos(object):
         from .earthlib import geocentric_position_and_velocity
 
         e = self.earth(jd.tdb)
-        tpos, tvel = geocentric_position_and_velocity(self, jd.tt, delta_t)
+        tpos, tvel = geocentric_position_and_velocity(self, jd)
         t = ToposICRS(e.position + tpos, e.velocity + tvel, jd.tt)
         t.latitude = self.latitude
         t.longitude = self.longitude

@@ -20,7 +20,7 @@ rade = ERAD / AU
 halfpi = pi / 2.0
 
 
-def geocentric_position_and_velocity(topos, jd_tt, delta_t=0.0):
+def geocentric_position_and_velocity(topos, jd):
     """Compute the geocentric position, velocity of a terrestrial observer.
 
     `topos` - `Topos` object describing a location.
@@ -30,18 +30,14 @@ def geocentric_position_and_velocity(topos, jd_tt, delta_t=0.0):
     which each measure position in AU long the axes of the ICRS.
 
     """
-    jd_tdb = jd_tt + timescales.tdb_minus_tt(jd_tt)
-    jd_ut1 = jd_tt - (delta_t / 86400.)
-
-    from .timescales import JulianDate
-    gmst = timescales.sidereal_time(JulianDate(ut1=jd_ut1, delta_t=delta_t))
-    x1, x2, eqeq, x3, x4 = earth_tilt(jd_tdb)
+    gmst = timescales.sidereal_time(jd)
+    x1, x2, eqeq, x3, x4 = earth_tilt(jd.tdb)
     gast = gmst + eqeq / 3600.0
 
     pos, vel = terra(topos, gast)
 
-    n = compute_nutation(jd_tdb)
-    p = compute_precession(jd_tdb)
+    n = compute_nutation(jd.tdb)
+    p = compute_precession(jd.tdb)
     f = J2000_to_ICRS
 
     t = einsum('jin,kjn->ikn', n, p)
