@@ -177,7 +177,10 @@ class Apparent(RADec):
 
         # TODO: allow called to ask for corrections using xp and yp
 
-        jd_tt = self.jd
+        from .timescales import tdb_minus_tt
+
+        jd_tdb = self.jd_tdb
+        jd_tt = jd_tdb - tdb_minus_tt(jd_tdb) / 86400.0
         jd_ut1 = jd_tt - delta_t / 86400.0
 
         from .timescales import sidereal_time
