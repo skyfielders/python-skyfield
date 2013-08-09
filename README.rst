@@ -9,15 +9,9 @@ that are written in pure Python,
 with NumPy as their only binary dependency;
 this library itself requires no compilation.
 
-You can install Skyfield
-and a basic ephemeris for predicting planetary positions
-using a pair of commands like this
-(you will note that version 0.1 is not yet released,
-so early experimenters use the GitHub repository directly)::
+You can install the current development version of Skyfield with::
 
-    git clone https://github.com/brandon-rhodes/python-skyfield.git
-    pip install ./python-skyfield
-    pip install de421
+    pip install https://github.com/brandon-rhodes/python-skyfield.git
 
 The interface is still evolving,
 but you can already ask the position of a planet in the sky
