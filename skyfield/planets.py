@@ -1,14 +1,9 @@
 import jplephem
 from numpy import max, min, sqrt
 
-from . import earthlib, timescales
+from .constants import KM_AU, C_AUDAY
 from .coordinates import ICRS, GCRS
 
-DAY_S = 24.0 * 60.0 * 60.0
-KM_AU = 1.0 / earthlib.AU_KM
-C_AUDAY = 173.1446326846693
-
-T0 = timescales.T0
 
 class Planet(object):
     def __init__(self, ephemeris, jplephemeris, jplname):

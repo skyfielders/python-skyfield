@@ -3,8 +3,8 @@
 from numpy import (arcsin, arctan2, array, cos, einsum, isscalar,
                    ndarray, pi, sin, sqrt)
 
-from .angles import (interpret_longitude, interpret_latitude, Angle,
-                     HourAngle, tau)
+from .angles import (interpret_longitude, interpret_latitude, Angle, HourAngle)
+from .constants import TAU
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
 from .framelib import ICRS_to_J2000
@@ -12,11 +12,8 @@ from .nutationlib import compute_nutation
 from .precessionlib import compute_precession
 from .relativity import add_aberration, add_deflection
 
-J2000 = 2451545.0
-C_AUDAY = 173.1446326846693
-
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
-quarter_tau = 0.25 * tau
+quarter_tau = 0.25 * TAU
 
 class XYZ(object):
 
@@ -189,9 +186,9 @@ class Apparent(RADec):
                 ])
 
         gast = sidereal_time(self.jd, use_eqeq=True)
-        uz = spin(-gast * tau / 24.0, uze)
-        un = spin(-gast * tau / 24.0, une)
-        uw = spin(-gast * tau / 24.0, uwe)
+        uz = spin(-gast * TAU / 24.0, uze)
+        un = spin(-gast * TAU / 24.0, une)
+        uw = spin(-gast * TAU / 24.0, uwe)
 
         p = self.position[:,0]  # TODO: vectorize this whole operation
         pz = p.dot(uz)
@@ -206,10 +203,10 @@ class Apparent(RADec):
             h.az = -arctan2(pw, pn)
 
         if h.az < 0.0:
-            h.az += tau
+            h.az += TAU
 
-        if h.az >= tau:
-            h.az -= tau
+        if h.az >= TAU:
+            h.az -= TAU
 
         zd = arctan2(proj, pz)
         h.zd = zd

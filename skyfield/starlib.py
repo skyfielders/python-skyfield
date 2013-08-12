@@ -1,15 +1,11 @@
 """Python classes that represent various classes of star."""
 
 from numpy import array, cos, sin, sqrt
+from .constants import AU_KM, ASEC2RAD, DEG2RAD, C, C_AUDAY
 from .coordinates import GCRS
 from .relativity import light_time_difference
 from .timescales import T0
 
-AU_KM = 1.4959787069098932e+8
-ASEC2RAD = 4.848136811095359935899141e-6
-DEG2RAD = 0.017453292519943296
-C = 299792458.0
-C_AUDAY = 173.1446326846693
 
 class Star(object):
 
