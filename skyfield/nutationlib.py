@@ -1,7 +1,6 @@
 from numpy import array, cos, fmod, sin, tensordot, zeros
 
-from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, PSI_COR, EPS_COR
-from .timescales import T0
+from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, PSI_COR, EPS_COR, T0
 
 
 def compute_nutation(jd):
