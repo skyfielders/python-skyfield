@@ -57,11 +57,11 @@ huh, how do we measure distance? abs does not work >>> print
 HourAngle(4.611705873992877)
 >>> a.ra.hms()
 (1.0, 17.0, 36.0, 55.507904515793314)
->>> a.ra.hstr()
+>>> a.ra.hours_str()
 '17h 36m 55.508s'
 >>> a.dec.dms()
 (-1.0, 24.0, 5.0, 23.554851165623347)
->>> a.dec.dstr()
+>>> a.dec.degrees_str()
 '-24deg 5m 23.555s'
 
 >>> try:

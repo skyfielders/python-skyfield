@@ -21,10 +21,10 @@ class BaseAngle(ndarray):
     def hms(self):
         return sexa(24. / TAU * self)
 
-    def hstr(self):
-        sgn, h, m, s = sexa(24. / TAU * self)
-        sign = '-' if sgn < 0.0 else ''
-        return '{}{}h {}m {:.3f}s'.format(sign, int(h), int(m), float(s))
+    def hours_str(self):
+        sgn, w, m, s = self.hms()
+        list_of_strings = self.list_repr(sgn, w, m, s, 'h')
+        return list_of_strings
 
     def degrees(self):
         return 360. / TAU * self
@@ -32,10 +32,18 @@ class BaseAngle(ndarray):
     def dms(self):
         return sexa(self.degrees())
 
-    def dstr(self):
-        sgn, d, m, s = sexa(self.degrees())
-        sign = '-' if sgn < 0.0 else ''
-        return '{}{}deg {}m {:.3f}s'.format(sign, int(d), int(m), float(s))
+    def degrees_str(self):
+        sgn, w, m, s = self.dms()
+        list_of_strings = self.list_repr(sgn, w, m, s, 'deg')
+        return list_of_strings
+
+    def list_repr(self, sgn, w, m, s, type):
+        sgn = np.where(sgn < 0, '-', '')
+        zipped = zip(sgn, w, m, s)
+        list_of_strings = []
+        for angle in zipped:
+            list_of_strings.append('{}{}{} {}m {:.3f}s'.format(angle[0], int(angle[1]), type, int(angle[2]), float(angle[3])))
+        return list_of_strings
 
     def dpretty(self):
         d, m, s = self.dms()
@@ -43,11 +51,11 @@ class BaseAngle(ndarray):
 
     hours_anyway = hours
     hms_anyway = hms
-    hstr_anyway = hstr
+    hstr_anyway = hours_str
 
     degrees_anyway = degrees
     dms_anyway = dms
-    dstr_anyway = dstr
+    dstr_anyway = degrees_str
 
 
 class Angle(BaseAngle):
@@ -60,8 +68,8 @@ class Angle(BaseAngle):
     def hms(self):
         raise WrongUnitError('hms', 'hours')
 
-    def hstr(self):
-        raise WrongUnitError('hstr', 'hours')
+    def hours_str(self):
+        raise WrongUnitError('degrees_str', 'hours')
 
 
 
@@ -75,8 +83,8 @@ class HourAngle(BaseAngle):
     def dms(self):
         raise WrongUnitError('dms', 'degrees')
 
-    def dstr(self):
-        raise WrongUnitError('dstr', 'degrees')
+    def degrees_str(self):
+        raise WrongUnitError('degrees_str', 'degrees')
 
 
 one = array([1.0])

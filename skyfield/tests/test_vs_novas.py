@@ -4,9 +4,9 @@ from itertools import product
 from numpy import array, einsum
 from unittest import TestCase
 
-from skyfield import (coordinates, earthlib, framelib, nutationlib,
+from skyfield import (angles, coordinates, earthlib, framelib, nutationlib,
                       planets, precessionlib, starlib, timescales)
-
+from skyfield.angles import BaseAngle
 from ..constants import T0, DEG2RAD, AU_KM, TAU
 from ..timescales import JulianDate
 
@@ -403,3 +403,20 @@ class NOVASTests(TestCase):
 
 def jcentury(t):
     return (t - T0) / 36525.0
+
+
+class AnglesTest(TestCase):
+
+    def setUp(self):
+        self.angles = BaseAngle(3)
+        self.angles[0] = 34.74
+        self.angles[1] = 6.29
+        self.angles[2] = 95.45
+
+    def test_hours_str_for_a_vector(self):
+        result = self.angles.hours_str()
+        self.assertEquals(result, ['132h 41m 49.291s', '24h 1m 33.709s', '364h 35m 31.717s'])
+
+    def test_degrees_str_for_a_vector(self):
+        result = self.angles.degrees_str()
+        self.assertEquals(result, ['1990deg 27m 19.369s', '360deg 23m 25.631s', '5468deg 52m 55.756s'])
