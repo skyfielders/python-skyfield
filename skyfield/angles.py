@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
-
-ASEC360 = 1296000.0
-ASEC2RAD = 4.848136811095359935899141e-6
-DEG2RAD = 0.017453292519943296
-tau = 6.283185307179586476925287
-
 import numpy as np
 from numpy import ndarray, array
 
+from .constants import TAU
 
 class WrongUnitError(ValueError):
 
@@ -21,18 +16,18 @@ class WrongUnitError(ValueError):
 class BaseAngle(ndarray):
 
     def hours(self):
-        return 24. / tau * self
+        return 24. / TAU * self
 
     def hms(self):
-        return sexa(24. / tau * self)
+        return sexa(24. / TAU * self)
 
     def hstr(self):
-        sgn, h, m, s = sexa(24. / tau * self)
+        sgn, h, m, s = sexa(24. / TAU * self)
         sign = '-' if sgn < 0.0 else ''
         return '{}{}h {}m {:.3f}s'.format(sign, int(h), int(m), float(s))
 
     def degrees(self):
-        return 360. / tau * self
+        return 360. / TAU * self
 
     def dms(self):
         return sexa(self.degrees())
@@ -102,7 +97,7 @@ def interpret_longitude(value):
         degrees = float(pieces[0])
         if len(pieces) > 1 and pieces[1].lower() == 'w':
             degrees = - degrees
-        return degrees / 360. * tau
+        return degrees / 360. * TAU
     else:
         return value
 
@@ -113,6 +108,6 @@ def interpret_latitude(value):
         degrees = float(pieces[0])
         if len(pieces) > 1 and pieces[1].lower() == 's':
             degrees = - degrees
-        return degrees / 360. * tau
+        return degrees / 360. * TAU
     else:
         return value

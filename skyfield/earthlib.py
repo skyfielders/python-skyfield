@@ -3,20 +3,12 @@
 from numpy import (arcsin, arccos, array, clip, cos, einsum, fmod,
                    pi, sin, sqrt, zeros_like)
 
-from .angles import DEG2RAD
+from .constants import DEG2RAD, ERAD, AU, T0, ANGVEL, AU_KM, ERAD_KM, F, RAD2DEG
 from .framelib import J2000_to_ICRS
 from .functions import dots
 from .nutationlib import earth_tilt, compute_nutation
 from .precessionlib import compute_precession
-from .timescales import T0
 
-ANGVEL = 7.2921150e-5
-AU = 1.4959787069098932e+11
-AU_KM = 1.4959787069098932e+8
-ERAD = 6378136.6
-ERAD_KM = ERAD / 1000.0
-F = 0.003352819697896
-RAD2DEG = 57.295779513082321
 rade = ERAD / AU
 halfpi = pi / 2.0
 

@@ -1,6 +1,6 @@
 from numpy import array, cos, sin
 
-from .angles import ASEC2RAD
+from .constants import ASEC2RAD
 from .timescales import T0
 
 def compute_precession(jd_tdb):
