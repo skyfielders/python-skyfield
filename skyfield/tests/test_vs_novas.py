@@ -403,23 +403,6 @@ class NOVASTests(TestCase):
         v = timescales.tdb_minus_tt(t)
         self.eq(v, [tt0, ttA, ttB])
 
-import pytest
-
-SAMPLE_DATES = [T0, TA, TB]
-
-@pytest.fixture(params=SAMPLE_DATES)
-def sample_date(request):
-    return request.param
-
-def test_SOMETHING(sample_date, sample_planet):
-    assert small_integer == 0
-
-
-
-
-
-
-
 
 def jcentury(t):
     return (t - T0) / 36525.0
