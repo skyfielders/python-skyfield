@@ -268,7 +268,7 @@ class NOVASTests(TestCase):
         self.eq(velv.T, [vel0, velA])
 
     def test_iau2000a(self):
-        self.delta = 1e-19
+        self.delta = 1e-18
 
         psi0, eps0 = c.nutation.iau2000a(T0, 0.0)
         psiA, epsA = c.nutation.iau2000a(TA, 0.0)
@@ -399,6 +399,7 @@ class NOVASTests(TestCase):
         t = array([T0, TA, TB])
         v = timescales.tdb_minus_tt(t)
         self.eq(v, [tt0, ttA, ttB])
+
 
 def jcentury(t):
     return (t - T0) / 36525.0
