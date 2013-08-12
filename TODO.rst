@@ -11,7 +11,7 @@ Sprint Possibilities
 ====================
 
 * All constants should probably be moved into their own module.  Name it
-  ``constants.py`` and do a ``from skyfield.constants import ...`` at the top of
+  ``constants.py`` and do a ``from .constants import ...`` at the top of
   each of the other modules that need it.
 
 * Use py.test fixtures to turn loops into parameterized tests.
