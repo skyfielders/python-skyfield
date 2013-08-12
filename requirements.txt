@@ -4,7 +4,3 @@ numpy==1.7.1
 py==1.4.15
 pytest==2.3.5
 sgp4==1.1
--e git+git@github.com:aarose/python-skyfield.git@0dd5207f6b096c30b861c825351d00bcfbd98fe6#egg=skyfield-dev
-tox==1.5.0
-virtualenv==1.10.1
-wsgiref==0.1.2
