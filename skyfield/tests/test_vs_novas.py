@@ -110,8 +110,8 @@ def test_new_star_deflected_by_jupiter(timepairs):
     jd = JulianDate(tt=jd_tt)
     g = star.observe_from(earth(jd)).apparent()
     
-    eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
-    eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
+    eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
+    eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
 
 
 def test_astro_planet(timepairs, planets_list):
@@ -128,8 +128,8 @@ def test_astro_planet(timepairs, planets_list):
     jd = JulianDate(tt=jd_tt)
     g = planet.observe_from(earth(jd)).astrometric()
     
-    eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
-    eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
+    eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
+    eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
     eq(dis, g.distance, 0.001 * meter)
 
 
@@ -146,8 +146,8 @@ def test_app_planet(timepairs, planets_list):
     jd = JulianDate(tt=jd_tt)
     g = planet.observe_from(earth(jd)).apparent()
 
-    eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
-    eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
+    eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
+    eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
     eq(dis, g.distance, 0.001 * meter)
 
 
@@ -177,9 +177,9 @@ def test_new_horizontal(timepairs, planets_list):
     jd = JulianDate(tt=jd_tt, delta_t=delta_t)
     h = ggr(jd).observe(planet).apparent().horizontal()
     
-    eq(zd * tau / 360.0, h.zd, 0.001 * arcsecond)
-    eq(az * tau / 360.0, h.az, 0.001 * arcsecond)
-    eq(0.25 * tau - zd * tau / 360.0, h.alt, 0.001 * arcsecond)
+    eq(zd * TAU / 360.0, h.zd, 0.001 * arcsecond)
+    eq(az * TAU / 360.0, h.az, 0.001 * arcsecond)
+    eq(0.25 * TAU - zd * TAU / 360.0, h.alt, 0.001 * arcsecond)
     eq(dis, h.distance, 0.001 * meter)
 
 
