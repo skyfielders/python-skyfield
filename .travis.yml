@@ -1,0 +1,16 @@
+# Config file for automatic testing at travis-ci.org
+
+language: python
+
+python:
+  - "2.7"
+  # Python 3
+  - "3.2"
+
+# command to install dependencies
+install:
+  - pip install -q tox --use-mirrors
+
+# command to run tests
+script:
+  - tox
