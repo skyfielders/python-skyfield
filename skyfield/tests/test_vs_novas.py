@@ -113,9 +113,9 @@ def test_new_star_deflected_by_jupiter(timepairs):
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
 
+# Tests of generating a full position or coordinate.
 
 def test_astro_planet(timepairs, planets_list):
-    """ Tests of generating a full position or coordinate. """
     jd_tt = timepairs[0]
     planet_name = planets_list[0]
     planet_code = planets_list[1]
@@ -145,6 +145,29 @@ def test_app_planet(timepairs, planets_list):
     planet = getattr(emp, planet_name)
     jd = JulianDate(tt=jd_tt)
     g = planet.observe_from(earth(jd)).apparent()
+
+    eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
+    eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
+    eq(dis, g.distance, 0.001 * meter)
+
+def test_topo_planet(timepairs, planets_list):
+    position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
+    ggr = coordinates.Topos('75 W', '45 N', 0.0,
+                            temperature=10.0, pressure=1010.0)
+    ggr.earth = emp.earth
+    ggr.ephemeris = emp
+
+    jd_tt = timepairs[0]
+    delta_t = timepairs[1]
+    planet_name = planets_list[0]
+    planet_code = planets_list[1]
+
+    obj = c.make_object(0, planet_code, 'planet', None)
+    ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
+
+    planet = getattr(emp, planet_name)
+    jd = JulianDate(tt=jd_tt, delta_t=delta_t)
+    g = ggr(jd).observe(planet).apparent()
 
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
@@ -210,108 +233,6 @@ class NOVASTests(TestCase):
             raise AssertionError(
                 '%r\ndoes not equal\n%r\nwithin the error bound\n%r%s'
                 % (first, second, delta, appendix))
-
-    # Tests of generating a stellar position.
-
-    def test_star_deflected_by_jupiter(self):
-        for jd_tt in [T0, TA, TB]:
-            star = c.make_cat_entry(
-                star_name='Star', catalog='cat', star_num=101,
-                ra=1.59132070233, dec=8.5958876464,
-                pm_ra=0.0, pm_dec=0.0,
-                parallax=0.0, rad_vel=0.0,
-                )
-            ra, dec = c.app_star(jd_tt, star)
-
-            earth = self.e.earth
-            star = starlib.Star(
-                ra=1.59132070233, dec=8.5958876464,
-                pm_ra=0.0, pm_dec=0.0,
-                parallax=0.0, radial_velocity=0.0,
-                )
-            jd = JulianDate(tt=jd_tt)
-            g = star.observe_from(earth(jd)).apparent()
-
-            self.eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
-            self.eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
-
-    # Tests of generating a full position or coordinate.
-
-    def test_astro_planet(self):
-
-        for jd_tt, name in product([T0, TA, TB], planets_to_test):
-            obj = c.make_object(0, planet_codes[name], 'planet', None)
-            ra, dec, dis = c.astro_planet(jd_tt, obj)
-
-            earth = self.e.earth
-            planet = getattr(self.e, name)
-            jd = JulianDate(tt=jd_tt)
-            g = planet.observe_from(earth(jd)).astrometric()
-
-            self.eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
-            self.eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
-            self.eq(dis, g.distance, 0.001 * meter)
-
-    def test_app_planet(self):
-
-        for jd_tt, name in product([T0, TA, TB], planets_to_test):
-            obj = c.make_object(0, planet_codes[name], 'planet', None)
-            ra, dec, dis = c.app_planet(jd_tt, obj)
-
-            earth = self.e.earth
-            planet = getattr(self.e, name)
-            jd = JulianDate(tt=jd_tt)
-            g = planet.observe_from(earth(jd)).apparent()
-
-            self.eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
-            self.eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
-            self.eq(dis, g.distance, 0.001 * meter)
-
-    def test_topo_planet(self):
-        position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-        ggr = coordinates.Topos('75 W', '45 N', 0.0,
-                                temperature=10.0, pressure=1010.0)
-        ggr.earth = self.e.earth
-        ggr.ephemeris = self.e
-
-        for (jd_tt, delta_t), name in product([P0, PA, PB], planets_to_test):
-
-            obj = c.make_object(0, planet_codes[name], 'planet', None)
-            ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
-
-            planet = getattr(self.e, name)
-            jd = JulianDate(tt=jd_tt, delta_t=delta_t)
-            g = ggr(jd).observe(planet).apparent()
-
-            self.eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
-            self.eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
-            self.eq(dis, g.distance, 0.001 * meter)
-
-    # Tests of generating a full position in horizontal coordinates.
-
-    def test_horizontal(self):
-        position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-        ggr = coordinates.Topos('75 W', '45 N', 0.0,
-                                temperature=10.0, pressure=1010.0)
-        ggr.earth = self.e.earth
-        ggr.ephemeris = self.e
-        xp = yp = 0.0
-
-        for (jd_tt, delta_t), name in product([P0, PA, PB], planets_to_test):
-            obj = c.make_object(0, planet_codes[name], 'planet', None)
-            ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
-            jd_ut1 = jd_tt - delta_t / 86400.0
-            (zd, az), (ra, dec) = c.equ2hor(
-                jd_ut1, delta_t, xp, yp, position, ra, dec, ref_option=0)
-
-            planet = getattr(self.e, name)
-            jd = JulianDate(tt=jd_tt, delta_t=delta_t)
-            h = ggr(jd).observe(planet).apparent().horizontal()
-
-            self.eq(zd * TAU / 360.0, h.zd, 0.001 * arcsecond)
-            self.eq(az * TAU / 360.0, h.az, 0.001 * arcsecond)
-            self.eq(0.25 * TAU - zd * TAU / 360.0, h.alt, 0.001 * arcsecond)
-            self.eq(dis, h.distance, 0.001 * meter)
      
     # Tests of basic functions.
 
