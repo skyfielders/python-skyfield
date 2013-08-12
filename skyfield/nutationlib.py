@@ -1,10 +1,8 @@
 from numpy import array, cos, fmod, sin, tensordot, zeros
 
-from .angles import ASEC2RAD, ASEC360, DEG2RAD, tau
+from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, PSI_COR, EPS_COR
 from .timescales import T0
 
-PSI_COR = 0.0
-EPS_COR = 0.0
 
 def compute_nutation(jd):
     """Generate the nutation rotations for a series of epochs `jd`.
@@ -98,7 +96,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (     0.051635 +
               (    -0.00024470)
               * t) * t) * t) * t) * ASEC2RAD
-              + fmod(1325.0*t, 1.0) * tau) % tau;
+              + fmod(1325.0*t, 1.0) * TAU) % TAU;
 
     # Mean Anomaly of the Sun.
 
@@ -108,7 +106,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (     +0.000136 +
               (     -0.00001149)
               * t) * t) * t) * t) * ASEC2RAD
-              + fmod (99.0*t, 1.0) * tau) % tau;
+              + fmod (99.0*t, 1.0) * TAU) % TAU;
 
     # Mean Longitude of the Moon minus Mean Longitude of the Ascending
     # Node of the Moon.
@@ -119,7 +117,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (     -0.001037 +
               (      0.00000417)
               * t) * t) * t) * t) * ASEC2RAD
-              + fmod (1342.0*t, 1.0) * tau) % tau;
+              + fmod (1342.0*t, 1.0) * TAU) % TAU;
 
     # Mean Elongation of the Moon from the Sun.
 
@@ -129,7 +127,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (      0.006593 +
               (     -0.00003169)
               * t) * t) * t) * t) * ASEC2RAD
-              + fmod (1236.0*t, 1.0) * tau) % tau;
+              + fmod (1236.0*t, 1.0) * TAU) % TAU;
 
     # Mean Longitude of the Ascending Node of the Moon.
 
@@ -139,16 +137,16 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (      0.007702 +
               (     -0.00005939)
               * t) * t) * t) * t) * ASEC2RAD
-              + fmod (-5.0*t, 1.0) * tau) % tau;
+              + fmod (-5.0*t, 1.0) * TAU) % TAU;
 
-    fa[ 5] = (4.402608842 + 2608.7903141574 * t) % tau
-    fa[ 6] = (3.176146697 + 1021.3285546211 * t) % tau
-    fa[ 7] = (1.753470314 +  628.3075849991 * t) % tau
-    fa[ 8] = (6.203480913 +  334.0612426700 * t) % tau
-    fa[ 9] = (0.599546497 +   52.9690962641 * t) % tau
-    fa[10] = (0.874016757 +   21.3299104960 * t) % tau
-    fa[11] = (5.481293872 +    7.4781598567 * t) % tau
-    fa[12] = (5.311886287 +    3.8133035638 * t) % tau
+    fa[ 5] = (4.402608842 + 2608.7903141574 * t) % TAU
+    fa[ 6] = (3.176146697 + 1021.3285546211 * t) % TAU
+    fa[ 7] = (1.753470314 +  628.3075849991 * t) % TAU
+    fa[ 8] = (6.203480913 +  334.0612426700 * t) % TAU
+    fa[ 9] = (0.599546497 +   52.9690962641 * t) % TAU
+    fa[10] = (0.874016757 +   21.3299104960 * t) % TAU
+    fa[11] = (5.481293872 +    7.4781598567 * t) % TAU
+    fa[12] = (5.311886287 +    3.8133035638 * t) % TAU
     fa[13] = (0.024381750 +    0.00000538691 * t) * t
 
     # Evaluate the complementary terms.
@@ -188,7 +186,7 @@ def iau2000a(jd_tt):
     # ** Luni-solar nutation **
     # Summation of luni-solar nutation series (in reverse order).
 
-    arg = fmod(nals_t.dot(a), tau)
+    arg = fmod(nals_t.dot(a), TAU)
 
     sarg = sin(arg)
     carg = cos(arg)
@@ -209,23 +207,23 @@ def iau2000a(jd_tt):
 
     # Mean anomaly of the Moon.
 
-    al = fmod(2.35555598 + 8328.6914269554 * t, tau)
+    al = fmod(2.35555598 + 8328.6914269554 * t, TAU)
 
     # Mean anomaly of the Sun.
 
-    alsu = fmod(6.24006013 + 628.301955 * t, tau)
+    alsu = fmod(6.24006013 + 628.301955 * t, TAU)
 
     # Mean argument of the latitude of the Moon.
 
-    af = fmod(1.627905234 + 8433.466158131 * t, tau)
+    af = fmod(1.627905234 + 8433.466158131 * t, TAU)
 
     # Mean elongation of the Moon from the Sun.
 
-    ad = fmod(5.198466741 + 7771.3771468121 * t, tau)
+    ad = fmod(5.198466741 + 7771.3771468121 * t, TAU)
 
     # Mean longitude of the ascending node of the Moon.
 
-    aom = fmod(2.18243920 - 33.757045 * t, tau)
+    aom = fmod(2.18243920 - 33.757045 * t, TAU)
 
     # General accumulated precession in longitude.
 
@@ -233,21 +231,21 @@ def iau2000a(jd_tt):
 
     # Planetary longitudes, Mercury through Neptune (Souchay et al. 1999).
 
-    alme = fmod(4.402608842 + 2608.7903141574 * t, tau)
-    alve = fmod(3.176146697 + 1021.3285546211 * t, tau)
-    alea = fmod(1.753470314 +  628.3075849991 * t, tau)
-    alma = fmod(6.203480913 +  334.0612426700 * t, tau)
-    alju = fmod(0.599546497 +   52.9690962641 * t, tau)
-    alsa = fmod(0.874016757 +   21.3299104960 * t, tau)
-    alur = fmod(5.481293871 +    7.4781598567 * t, tau)
-    alne = fmod(5.321159000 +    3.8127774000 * t, tau)
+    alme = fmod(4.402608842 + 2608.7903141574 * t, TAU)
+    alve = fmod(3.176146697 + 1021.3285546211 * t, TAU)
+    alea = fmod(1.753470314 +  628.3075849991 * t, TAU)
+    alma = fmod(6.203480913 +  334.0612426700 * t, TAU)
+    alju = fmod(0.599546497 +   52.9690962641 * t, TAU)
+    alsa = fmod(0.874016757 +   21.3299104960 * t, TAU)
+    alur = fmod(5.481293871 +    7.4781598567 * t, TAU)
+    alne = fmod(5.321159000 +    3.8127774000 * t, TAU)
 
     # Summation of planetary nutation series (in reverse order).
 
     a = array((al, alsu, af, ad, aom,
                alme, alve, alea, alma, alju, alsa, alur, alne, apa))
 
-    arg = fmod(napl_t.dot(a), tau)
+    arg = fmod(napl_t.dot(a), TAU)
     sc = array((sin(arg), cos(arg))).T
 
     dpsipl = tensordot(sc, nutation_coefficients_longitude) * factor

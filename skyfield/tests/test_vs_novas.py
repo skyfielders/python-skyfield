@@ -4,9 +4,10 @@ from itertools import product
 from numpy import array, einsum
 from unittest import TestCase
 
-from skyfield import (angles, coordinates, earthlib, framelib, nutationlib,
+from skyfield import (coordinates, earthlib, framelib, nutationlib,
                       planets, precessionlib, starlib, timescales)
 
+from ..constants import TAU, DEG2RAD
 from ..timescales import JulianDate
 
 # Since some users might run these tests without having installed our
@@ -44,8 +45,8 @@ else:
     PA = (TA, DA)
     PB = (TB, DB)
 
-tau = angles.tau
-degree = tau / 360.0
+tau = TAU
+degree = TAU / 360.0
 arcminute = degree / 60.0
 arcsecond = arcminute / 60.0
 meter = 1.0 / earthlib.AU_KM
@@ -270,7 +271,7 @@ class NOVASTests(TestCase):
         self.eq(velv.T, [vel0, velA])
 
     def test_iau2000a(self):
-        self.delta = 1e-19
+        self.delta = 1e-18
 
         psi0, eps0 = c.nutation.iau2000a(T0, 0.0)
         psiA, epsA = c.nutation.iau2000a(TA, 0.0)
@@ -376,8 +377,8 @@ class NOVASTests(TestCase):
         observer = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
 
         class Topos(object):
-            latitude = 45.0 * angles.DEG2RAD
-            longitude = -75.0 * angles.DEG2RAD
+            latitude = 45.0 * DEG2RAD
+            longitude = -75.0 * DEG2RAD
             elevation = 0.0
         topos = Topos()
 
@@ -401,6 +402,24 @@ class NOVASTests(TestCase):
         t = array([T0, TA, TB])
         v = timescales.tdb_minus_tt(t)
         self.eq(v, [tt0, ttA, ttB])
+
+import pytest
+
+SAMPLE_DATES = [T0, TA, TB]
+
+@pytest.fixture(params=SAMPLE_DATES)
+def sample_date(request):
+    return request.param
+
+def test_SOMETHING(sample_date, sample_planet):
+    assert small_integer == 0
+
+
+
+
+
+
+
 
 def jcentury(t):
     return (t - T0) / 36525.0

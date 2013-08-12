@@ -1,8 +1,9 @@
 from numpy import array, fmod, sin
 
+from .constants import T0
+
 # Much of the following code is adapted from the USNO's "novas.c".
 
-T0 = 2451545.0
 
 _sequence = ['tdb', 'tt', 'ut1', 'utc']
 _sequence_indexes = {name: i for i, name in enumerate(_sequence)}
