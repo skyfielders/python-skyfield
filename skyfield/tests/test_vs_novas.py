@@ -65,6 +65,127 @@ planet_codes = {
 
 planets_to_test = planet_codes.keys()
 
+# Defining fixtures
+import pytest
+
+@pytest.fixture(params=[P0, PA, PB])
+def timepairs(request):
+    return request.param
+
+@pytest.fixture(params=planet_codes.items())
+def planets_list(request):
+    return request.param
+
+emp = planets.Ephemeris(de405)
+
+def eq(first, second, delta=None):
+    """Test whether two floats are within `delta` of one another."""
+    if hasattr(first, 'shape') or hasattr(second, 'shape'):
+        failed = abs(first - second).max() > delta
+    else:
+        failed = abs(first - second) > delta
+    if failed:
+        appendix = ('\nbecause the difference is\n%r\ntimes too big'
+                    % (abs(first - second) / delta)) if delta else ''
+        raise AssertionError(
+            '%r\ndoes not equal\n%r\nwithin the error bound\n%r%s'
+            % (first, second, delta, appendix))
+
+
+def test_new_star_deflected_by_jupiter(timepairs):
+    """ Tests of generating a stellar position. """
+    jd_tt = timepairs[0]
+    star = c.make_cat_entry(
+        star_name='Star', catalog='cat', star_num=101,
+        ra=1.59132070233, dec=8.5958876464,
+        pm_ra=0.0, pm_dec=0.0,
+        parallax=0.0, rad_vel=0.0,
+        )
+    ra, dec = c.app_star(jd_tt, star)
+        
+    earth = emp.earth
+    star = starlib.Star(
+        ra=1.59132070233, dec=8.5958876464,
+        pm_ra=0.0, pm_dec=0.0,
+        parallax=0.0, radial_velocity=0.0,
+        )
+    jd = JulianDate(tt=jd_tt)
+    g = star.observe_from(earth(jd)).apparent()
+    
+    eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
+    eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
+
+
+def test_astro_planet(timepairs, planets_list):
+    """ Tests of generating a full position or coordinate. """
+    jd_tt = timepairs[0]
+    planet_name = planets_list[0]
+    planet_code = planets_list[1]
+    
+    obj = c.make_object(0, planet_code, 'planet', None)
+    ra, dec, dis = c.astro_planet(jd_tt, obj)
+    
+    earth = emp.earth
+    planet = getattr(emp, planet_name)
+    jd = JulianDate(tt=jd_tt)
+    g = planet.observe_from(earth(jd)).astrometric()
+    
+    eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
+    eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
+    eq(dis, g.distance, 0.001 * meter)
+
+
+def test_app_planet(timepairs, planets_list):
+    jd_tt = timepairs[0]
+    planet_name = planets_list[0]
+    planet_code = planets_list[1]
+    
+    obj = c.make_object(0, planet_code, 'planet', None)
+    ra, dec, dis = c.app_planet(jd_tt, obj)
+
+    earth = emp.earth
+    planet = getattr(emp, planet_name)
+    jd = JulianDate(tt=jd_tt)
+    g = planet.observe_from(earth(jd)).apparent()
+
+    eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
+    eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
+    eq(dis, g.distance, 0.001 * meter)
+
+
+def test_new_horizontal(timepairs, planets_list):
+    """ Tests of generating a full position in horizontal coordinates. Uses
+        fixtures to iterate through date pairs and planets to generate
+        individual tests.
+    """
+    jd_tt = timepairs[0]
+    delta_t = timepairs[1]
+    planet_name = planets_list[0]
+    planet_code = planets_list[1]
+    position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
+    ggr = coordinates.Topos('75 W', '45 N', 0.0,
+                            temperature=10.0, pressure=1010.0)
+    ggr.earth = emp.earth
+    ggr.ephemeris = emp
+    xp = yp = 0.0
+
+    # replaces the for loop
+    obj = c.make_object(0, planet_code, 'planet', None)
+    ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
+    jd_ut1 = jd_tt - delta_t / 86400.0
+    (zd, az), (ra, dec) = c.equ2hor(
+        jd_ut1, delta_t, xp, yp, position, ra, dec, ref_option=0)
+    planet = getattr(emp, planet_name)
+    jd = JulianDate(tt=jd_tt, delta_t=delta_t)
+    h = ggr(jd).observe(planet).apparent().horizontal()
+    
+    eq(zd * tau / 360.0, h.zd, 0.001 * arcsecond)
+    eq(az * tau / 360.0, h.az, 0.001 * arcsecond)
+    eq(0.25 * tau - zd * tau / 360.0, h.alt, 0.001 * arcsecond)
+    eq(dis, h.distance, 0.001 * meter)
+
+
+
 class NOVASTests(TestCase):
 
     @classmethod
@@ -193,7 +314,7 @@ class NOVASTests(TestCase):
             self.eq(az * tau / 360.0, h.az, 0.001 * arcsecond)
             self.eq(0.25 * tau - zd * tau / 360.0, h.alt, 0.001 * arcsecond)
             self.eq(dis, h.distance, 0.001 * meter)
-
+     
     # Tests of basic functions.
 
     def test_cal_date(self):
@@ -404,3 +525,5 @@ class NOVASTests(TestCase):
 
 def jcentury(t):
     return (t - T0) / 36525.0
+
+
