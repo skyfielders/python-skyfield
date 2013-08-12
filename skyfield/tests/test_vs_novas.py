@@ -4,9 +4,10 @@ from itertools import product
 from numpy import array, einsum
 from unittest import TestCase
 
-from skyfield import (angles, coordinates, earthlib, framelib, nutationlib,
+from skyfield import (coordinates, earthlib, framelib, nutationlib,
                       planets, precessionlib, starlib, timescales)
 
+from ..constants import T0, DEG2RAD, AU_KM, TAU
 from ..timescales import JulianDate
 
 # Since some users might run these tests without having installed our
@@ -32,8 +33,7 @@ else:
     c_nutation = c.nutation
     import novas.compat.nutation  # overwrites nutation() function with module!
 
-    T0 = timescales.T0
-    TA = c.julian_date(1969, 7, 20, 20. + 18./60.)
+    TA = c.julian_date(1969, 7, 20, 20. + 18. / 60.)
     TB = c.julian_date(2012, 12, 21)
 
     D0 = 63.8285
@@ -44,11 +44,9 @@ else:
     PA = (TA, DA)
     PB = (TB, DB)
 
-tau = angles.tau
-degree = tau / 360.0
-arcminute = degree / 60.0
+arcminute = DEG2RAD / 60.0
 arcsecond = arcminute / 60.0
-meter = 1.0 / earthlib.AU_KM
+meter = 1.0 / AU_KM
 
 planet_codes = {
     'mercury': 1,
@@ -234,8 +232,8 @@ class NOVASTests(TestCase):
             jd = JulianDate(tt=jd_tt)
             g = star.observe_from(earth(jd)).apparent()
 
-            self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
-            self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
+            self.eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
+            self.eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
 
     # Tests of generating a full position or coordinate.
 
@@ -250,8 +248,8 @@ class NOVASTests(TestCase):
             jd = JulianDate(tt=jd_tt)
             g = planet.observe_from(earth(jd)).astrometric()
 
-            self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
-            self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
+            self.eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
+            self.eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
             self.eq(dis, g.distance, 0.001 * meter)
 
     def test_app_planet(self):
@@ -265,8 +263,8 @@ class NOVASTests(TestCase):
             jd = JulianDate(tt=jd_tt)
             g = planet.observe_from(earth(jd)).apparent()
 
-            self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
-            self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
+            self.eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
+            self.eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
             self.eq(dis, g.distance, 0.001 * meter)
 
     def test_topo_planet(self):
@@ -285,8 +283,8 @@ class NOVASTests(TestCase):
             jd = JulianDate(tt=jd_tt, delta_t=delta_t)
             g = ggr(jd).observe(planet).apparent()
 
-            self.eq(ra * tau / 24.0, g.ra, 0.001 * arcsecond)
-            self.eq(dec * tau / 360.0, g.dec, 0.001 * arcsecond)
+            self.eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
+            self.eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
             self.eq(dis, g.distance, 0.001 * meter)
 
     # Tests of generating a full position in horizontal coordinates.
@@ -310,9 +308,9 @@ class NOVASTests(TestCase):
             jd = JulianDate(tt=jd_tt, delta_t=delta_t)
             h = ggr(jd).observe(planet).apparent().horizontal()
 
-            self.eq(zd * tau / 360.0, h.zd, 0.001 * arcsecond)
-            self.eq(az * tau / 360.0, h.az, 0.001 * arcsecond)
-            self.eq(0.25 * tau - zd * tau / 360.0, h.alt, 0.001 * arcsecond)
+            self.eq(zd * TAU / 360.0, h.zd, 0.001 * arcsecond)
+            self.eq(az * TAU / 360.0, h.az, 0.001 * arcsecond)
+            self.eq(0.25 * TAU - zd * TAU / 360.0, h.alt, 0.001 * arcsecond)
             self.eq(dis, h.distance, 0.001 * meter)
      
     # Tests of basic functions.
@@ -391,7 +389,7 @@ class NOVASTests(TestCase):
         self.eq(velv.T, [vel0, velA])
 
     def test_iau2000a(self):
-        self.delta = 1e-19
+        self.delta = 1e-18
 
         psi0, eps0 = c.nutation.iau2000a(T0, 0.0)
         psiA, epsA = c.nutation.iau2000a(TA, 0.0)
@@ -497,8 +495,8 @@ class NOVASTests(TestCase):
         observer = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
 
         class Topos(object):
-            latitude = 45.0 * angles.DEG2RAD
-            longitude = -75.0 * angles.DEG2RAD
+            latitude = 45.0 * DEG2RAD
+            longitude = -75.0 * DEG2RAD
             elevation = 0.0
         topos = Topos()
 
@@ -522,6 +520,7 @@ class NOVASTests(TestCase):
         t = array([T0, TA, TB])
         v = timescales.tdb_minus_tt(t)
         self.eq(v, [tt0, ttA, ttB])
+
 
 def jcentury(t):
     return (t - T0) / 36525.0

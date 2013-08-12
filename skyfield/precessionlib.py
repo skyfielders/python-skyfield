@@ -1,7 +1,6 @@
 from numpy import array, cos, sin
 
-from .angles import ASEC2RAD
-from .timescales import T0
+from .constants import ASEC2RAD, T0
 
 def compute_precession(jd_tdb):
     """Return the rotation matrices for precessing to an array of epochs.

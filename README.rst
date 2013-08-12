@@ -11,7 +11,7 @@ this library itself requires no compilation.
 
 You can install the current development version of Skyfield with::
 
-    pip install https://github.com/brandon-rhodes/python-skyfield.git
+    pip install https://github.com/brandon-rhodes/python-skyfield/archive/master.zip
 
 The interface is still evolving,
 but you can already ask the position of a planet in the sky

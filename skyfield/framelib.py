@@ -2,7 +2,8 @@
 
 from numpy import array
 
-ASEC2RAD = 4.848136811095359935899141e-6
+from .constants import ASEC2RAD
+
 
 def build_matrix():
     # 'xi0', 'eta0', and 'da0' are ICRS frame biases in arcseconds taken

@@ -1,14 +1,8 @@
 from numpy import abs, sqrt, where
 
+from .constants import C, AU, C_AUDAY, GS
 from .functions import dots, length
 
-C = 299792458.0
-AU = 1.4959787069098932e+11
-C_AUDAY = 173.1446326846693
-
-# Heliocentric gravitational constant in meters^3 / second^2, from DE-405.
-
-GS = 1.32712440017987e+20
 
 deflectors = ['sun', 'jupiter', 'saturn', 'moon', 'venus', 'uranus', 'neptune']
 rmasses = {
