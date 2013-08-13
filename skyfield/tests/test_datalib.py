@@ -10,7 +10,7 @@ def test_simple_download():
 
     download_file(url='http://foo.com/data.txt', filename='data.txt')
     assert os.path.exists('data.txt')
-    assert str(open('data.txt', 'r').read()) == 'FOOBAR'
+    assert open('data.txt', 'rb').read() == b'FOOBAR'
     os.remove('data.txt')
 
 @httpretty.activate
@@ -20,7 +20,7 @@ def test_simple_download_days_old_0():
     write_file('data.txt', 'BAZ')
 
     download_file(url='http://foo.com/data.txt', filename='data.txt', days_old=0)
-    assert open('data.txt', 'r').read() == 'FOOBAR'
+    assert open('data.txt', 'rb').read() == b'FOOBAR'
     os.remove('data.txt')
 
 @httpretty.activate
@@ -31,7 +31,7 @@ def test_simple_download_days_old_1():
     write_file('data.txt', 'BAZ')
 
     download_file(url='http://foo.com/data.txt', filename='data.txt', days_old=1)
-    assert str(open('data.txt', 'r').read()) == 'BAZ'
+    assert open('data.txt', 'rb').read() == b'BAZ'
     os.remove('data.txt')
 
 def test_is_days_old_true():
