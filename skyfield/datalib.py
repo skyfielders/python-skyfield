@@ -9,9 +9,11 @@ def download_file(url, filename, days_old=0):
             return
 
     response = requests.get(url, stream=True)
-    f = open(filename, 'w')
+    f = open(filename, 'wb')
     for chunk in response.iter_content(1024):
-        f.write(str(chunk))
+        f.write(chunk)
+
+    f.close()
 
 def is_days_old(filename, days_old):
     min_old = datetime.now()-timedelta(days=days_old)
