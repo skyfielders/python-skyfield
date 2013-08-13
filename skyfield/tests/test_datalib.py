@@ -55,4 +55,5 @@ def test_is_days_old_false():
 def write_file(filename, data):
     f = open(filename, 'w')
     f.write(data)
+    f.close()
 
