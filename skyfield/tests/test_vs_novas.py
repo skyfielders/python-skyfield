@@ -152,7 +152,6 @@ def test_topo_planet(timepairs, planets_list):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = coordinates.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
-    ggr.earth = emp.earth
     ggr.ephemeris = emp
 
     jd_tt = timepairs[0]
@@ -184,7 +183,6 @@ def test_new_horizontal(timepairs, planets_list):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = coordinates.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
-    ggr.earth = emp.earth
     ggr.ephemeris = emp
     xp = yp = 0.0
 
@@ -384,6 +382,8 @@ def test_terra():
 
     observer = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
 
+    # Note that class stands in for a NOVAS Topos, not for our native
+    # Topos class!
     class Topos(object):
         latitude = 45.0 * DEG2RAD
         longitude = -75.0 * DEG2RAD

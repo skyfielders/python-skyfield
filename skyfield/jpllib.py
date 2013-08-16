@@ -1,8 +1,9 @@
 import jplephem
+from functools import wraps
 from numpy import max, min, sqrt
 
 from .constants import KM_AU, C_AUDAY
-from .coordinates import ICRS, GCRS
+from .coordinates import ICRS, GCRS, Topos
 
 
 class Planet(object):
@@ -60,6 +61,12 @@ class Planet(object):
         g.lighttime = lighttime
         return g
 
+class Earth(Planet):
+
+    def topos(self, *args, **kw):  # TODO: args and docs like of Topos object?
+        return Topos(*args, **kw)
+
+
 class Ephemeris(object):
 
     def __init__(self, module):
@@ -69,7 +76,7 @@ class Ephemeris(object):
         self.sun = Planet(self, self.jplephemeris, 'sun')
         self.mercury = Planet(self, self.jplephemeris, 'mercury')
         self.venus = Planet(self, self.jplephemeris, 'venus')
-        self.earth = Planet(self, self.jplephemeris, 'earth')
+        self.earth = Earth(self, self.jplephemeris, 'earth')
         self.moon = Planet(self, self.jplephemeris, 'moon')
         self.mars = Planet(self, self.jplephemeris, 'mars')
         self.jupiter = Planet(self, self.jplephemeris, 'jupiter')

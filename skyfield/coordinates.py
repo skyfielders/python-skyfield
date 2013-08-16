@@ -84,7 +84,7 @@ class Topos(object):
         self.west = array([sinlon, -coslon, 0.0])
 
     def __call__(self, jd):
-        e = self.earth(jd)
+        e = self.ephemeris.earth(jd)
         tpos, tvel = geocentric_position_and_velocity(self, jd)
         t = ToposICRS(e.position + tpos, e.velocity + tvel, jd)
         t.topos = self

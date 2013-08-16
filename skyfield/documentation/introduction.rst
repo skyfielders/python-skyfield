@@ -5,6 +5,7 @@
 
 
 >>> from skyfield.planets import earth, mars
+>>> boston = earth.topos('71.0636 W', '42.3583 N')
 
 fix >>> import sgp4
 fix >>> import numpy as np
