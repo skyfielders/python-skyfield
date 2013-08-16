@@ -4,8 +4,15 @@
 ==============
 
 
+>>> from skyfield.timescales import JulianDate
+>>> jd = JulianDate(ut1=2456755.75)
+
 >>> from skyfield.planets import earth, mars
 >>> boston = earth.topos('71.0636 W', '42.3583 N')
+>>> h = boston(jd).observe(mars).apparent().horizontal()
+>>> print h.alt.dstr(); print h.az.dstr()
+40deg 3m 49.433s
+201deg 58m 7.067s
 
 fix >>> import sgp4
 fix >>> import numpy as np

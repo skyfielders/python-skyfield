@@ -1,5 +1,4 @@
 import jplephem
-from functools import wraps
 from numpy import max, min, sqrt
 
 from .constants import KM_AU, C_AUDAY
@@ -64,7 +63,9 @@ class Planet(object):
 class Earth(Planet):
 
     def topos(self, *args, **kw):  # TODO: args and docs like of Topos object?
-        return Topos(*args, **kw)
+        t = Topos(*args, **kw)
+        t.ephemeris = self.ephemeris
+        return t
 
 
 class Ephemeris(object):

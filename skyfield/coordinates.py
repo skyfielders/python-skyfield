@@ -195,24 +195,13 @@ class Apparent(RADec):
         pn = p.dot(un)
         pw = p.dot(uw)
 
-        proj = sqrt(pn * pn + pw * pw)
+        position = array([pn, -pw, pz])
 
         h = Horizontal()
-
-        if proj > 0.0:
-            h.az = -arctan2(pw, pn)
-
-        if h.az < 0.0:
-            h.az += TAU
-
-        if h.az >= TAU:
-            h.az -= TAU
-
-        zd = arctan2(proj, pz)
-        h.zd = zd
-        h.alt = quarter_tau - zd
+        h.az, h.alt = to_polar(position)
+        h.zd = quarter_tau - h.alt
+        h.jd = self.jd
         h.distance = self.distance
-        # TODO: which JD to save with coordinate?
         return h
 
 class Horizontal(object):
