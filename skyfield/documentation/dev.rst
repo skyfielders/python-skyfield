@@ -34,8 +34,8 @@ that the user might submit.
    special attributes that NumPy arrays enjoy.
 
    >>> n = 3.4
-   >>> type(n)
-   <type 'float'>
+   >>> type(n).__name__
+   'float'
    >>> hasattr(n, 'shape')
    False
 
