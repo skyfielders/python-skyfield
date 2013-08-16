@@ -4,13 +4,12 @@
 ==============
 
 
+>>> from skyfield.planets import earth, mars
+
 fix >>> import sgp4
 fix >>> import numpy as np
 
 fix >>> import skyfield.angles
-fix >>> from skyfield.planets import Ephemeris
-fix >>> eph = Ephemeris()
-fix >>> earth, mars = eph.earth, eph.mars
 
 fix >>> e = earth(2414993.5)
 fix >>> print(e)

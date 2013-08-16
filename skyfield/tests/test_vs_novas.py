@@ -1,11 +1,9 @@
 """Compare the output of Skyfield with the same routines from NOVAS."""
 
-from itertools import product
 from numpy import array, einsum
-from unittest import TestCase
 
 from skyfield import (coordinates, earthlib, framelib, nutationlib,
-                      planets, precessionlib, starlib, timescales)
+                      jpllib, precessionlib, starlib, timescales)
 
 from ..constants import T0, DEG2RAD, AU_KM, TAU
 from ..timescales import JulianDate
@@ -74,7 +72,7 @@ def timepairs(request):
 def planets_list(request):
     return request.param
 
-emp = planets.Ephemeris(de405)
+emp = jpllib.Ephemeris(de405)
 
 def eq(first, second, epsilon=None):
     """Test whether two floats are within `epsilon` of one another."""
@@ -100,7 +98,7 @@ def test_new_star_deflected_by_jupiter(timepairs):
         parallax=0.0, rad_vel=0.0,
         )
     ra, dec = c.app_star(jd_tt, star)
-        
+
     earth = emp.earth
     star = starlib.Star(
         ra=1.59132070233, dec=8.5958876464,
@@ -109,7 +107,7 @@ def test_new_star_deflected_by_jupiter(timepairs):
         )
     jd = JulianDate(tt=jd_tt)
     g = star.observe_from(earth(jd)).apparent()
-    
+
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
 
@@ -119,15 +117,15 @@ def test_astro_planet(timepairs, planets_list):
     jd_tt = timepairs[0]
     planet_name = planets_list[0]
     planet_code = planets_list[1]
-    
+
     obj = c.make_object(0, planet_code, 'planet', None)
     ra, dec, dis = c.astro_planet(jd_tt, obj)
-    
+
     earth = emp.earth
     planet = getattr(emp, planet_name)
     jd = JulianDate(tt=jd_tt)
     g = planet.observe_from(earth(jd)).astrometric()
-    
+
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
     eq(dis, g.distance, 0.001 * meter)
@@ -137,7 +135,7 @@ def test_app_planet(timepairs, planets_list):
     jd_tt = timepairs[0]
     planet_name = planets_list[0]
     planet_code = planets_list[1]
-    
+
     obj = c.make_object(0, planet_code, 'planet', None)
     ra, dec, dis = c.app_planet(jd_tt, obj)
 
@@ -199,7 +197,7 @@ def test_new_horizontal(timepairs, planets_list):
     planet = getattr(emp, planet_name)
     jd = JulianDate(tt=jd_tt, delta_t=delta_t)
     h = ggr(jd).observe(planet).apparent().horizontal()
-    
+
     eq(zd * TAU / 360.0, h.zd, 0.001 * arcsecond)
     eq(az * TAU / 360.0, h.az, 0.001 * arcsecond)
     eq(0.25 * TAU - zd * TAU / 360.0, h.alt, 0.001 * arcsecond)
@@ -415,5 +413,3 @@ def test_tdb2tt():
 
 def jcentury(t):
     return (t - T0) / 36525.0
-
-
