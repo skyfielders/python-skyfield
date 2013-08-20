@@ -11,6 +11,10 @@ from reportlab.pdfbase.ttfonts import TTFont
 tau = pi * 2.0
 quarter_tau = pi / 2.0
 
+bright_star_color = 'black'
+dim_star_color = '#777770'
+text_color = 'black'
+
 def main():
     pdfmetrics.registerFont(TTFont('Dosis', 'Dosis.ttf'))
 
@@ -34,10 +38,7 @@ def main():
     c.setFillColor('white')
     c.rect(0, 0, w, h, stroke=0, fill=1)
 
-    c.setFillColor('black')
-    c.setFont('Dosis', 24)
-    sw = c.stringWidth('Skyfield')
-    c.drawString(w // 2 - sw // 2, 20, 'Skyfield')
+    c.setFillColor(bright_star_color)
 
     rotation = 10.0 * tau / 360.0
     # magscale = 0.1
@@ -50,6 +51,8 @@ def main():
     # for 45 degrees:
     # x_offset = 96 -13.5
     # y_offset = 96 -10
+
+    small_glyphs = []
 
     for ra, dec, mag in stars:
         # if mag > 4.0:
@@ -64,10 +67,26 @@ def main():
         if x < -43.0 or x > 19.0:
             continue
 
+        x += x_offset
+        y += y_offset
+
         r = ((13.0 - mag) / 10.0) ** 4.0 #* magscale
         r = min(r, 1.0)
         #print r
-        c.circle(x_offset + x, y_offset + y, r, stroke=0, fill=1)
+        if r < 0.5:
+            small_glyphs.append((x, y, r))
+        else:
+            c.circle(x, y, r, stroke=0, fill=1)
+
+    c.setFillColor(dim_star_color)
+    for x, y, r in small_glyphs:
+        c.circle(x, y, r, stroke=0, fill=1)
+
+    c.setFillColor(text_color)
+    c.setFont('Dosis', 24)
+    sw = c.stringWidth('Skyfield')
+    c.drawString(w // 2 - sw // 2, 20, 'Skyfield')
+
     c.showPage()
     with open('logo.pdf', 'wb') as f:
         f.write(c.getpdfdata())
