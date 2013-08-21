@@ -1,6 +1,17 @@
+# -*- coding: utf-8 -*-
+
 """Build the Skyfield logo."""
 
-# To make a PNG:
+# To build the logo and make a PNG:
+#
+# wget http://tdc-www.harvard.edu/catalogs/bsc5.dat.gz
+# gunzip bsc5.dat.gz
+#
+# wget http://www.impallari.com/media/releases/dosis-v1.7.zip
+# [extract Dosis-Medium.ttf]
+#
+# python logo.py
+#
 # convert -density 480 logo.pdf logo.png
 
 from math import cos, pi, sin
@@ -11,26 +22,40 @@ from reportlab.pdfbase.ttfonts import TTFont
 tau = pi * 2.0
 quarter_tau = pi / 2.0
 
-bright_star_color = 'black'
-dim_star_color = '#777770'
-text_color = 'black'
+alpha_star_color = '#6C1900'
+bright_star_color = '#013C53'
+dim_star_color = '#aaaaaa'
+text_color = '#013C53'
+greek_color = 'black'
+
+greeks = {
+    'Alp': (u'α', 1.0),
+    'Bet': (u'β', 1.0),
+    'Gam': (u'γ', 1.3),
+    'Del': (u'δ', 0.9),
+    'Eps': (u'ε', 1.0),
+    'Zet': (u'ζ', 1.0),
+    'Eta': (u'η', 1.0),
+    }
 
 def main():
-    pdfmetrics.registerFont(TTFont('Dosis', 'Dosis.ttf'))
+    pdfmetrics.registerFont(TTFont('Dosis', 'Dosis-Medium.ttf'))
 
     stars = []
     with open('bsc5.dat', 'rb') as f:
         for line in f:
             line = '.' + line  # switch to 1-based indexing
-            # print line
             if not line[62].strip():
                 continue  # skip coordinate-less novas
+            letter = intern(line[8:11])
+            if letter == '   ':
+                letter = None
             h, m, s = float(line[61:63]), float(line[63:65]), float(line[65:69])
             ra = (h + (m + s / 60.0) / 60.0) * tau / 24.0
             d, m, s = float(line[69:72]), float(line[72:74]), float(line[76:78])
             dec = (d + (m + s / 60.0) / 60.0) * tau / 360.0
             mag = float(line[103:108])
-            stars.append((ra, dec, mag))
+            stars.append((letter, ra, dec, mag))
 
     h, w = 72, 96
     c = Canvas('logo.pdf', pagesize=(w, h))
@@ -53,8 +78,9 @@ def main():
     # y_offset = 96 -10
 
     small_glyphs = []
+    c.setFont('Helvetica', 2)
 
-    for ra, dec, mag in stars:
+    for letter, ra, dec, mag in stars:
         # if mag > 4.0:
         #     continue
         d = - (dec - quarter_tau) * 100
@@ -72,11 +98,24 @@ def main():
 
         r = ((13.0 - mag) / 10.0) ** 4.0 #* magscale
         r = min(r, 1.0)
-        #print r
+
         if r < 0.5:
             small_glyphs.append((x, y, r))
         else:
-            c.circle(x, y, r, stroke=0, fill=1)
+            if letter is not None:
+                c.saveState()
+                greek_letter, offset = greeks[letter]
+                c.setFillColor(greek_color)
+                c.drawString(x+offset, y+0.5, greek_letter)
+                if letter == 'Alp':
+                    c.setFillColor(alpha_star_color)
+                    c.circle(x, y, r, stroke=0, fill=1)
+                c.restoreState()
+                if letter != 'Alp':
+                    c.circle(x, y, r, stroke=0, fill=1)
+            else:
+                c.circle(x, y, r, stroke=0, fill=1)
+
 
     c.setFillColor(dim_star_color)
     for x, y, r in small_glyphs:
