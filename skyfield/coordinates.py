@@ -1,7 +1,7 @@
 """Coordinate systems."""
 
 from numpy import (arcsin, arctan2, array, cos, einsum, isscalar,
-                   ndarray, pi, sin, sqrt)
+                   ndarray, pi, sin, sqrt, zeros)
 
 from .angles import (interpret_longitude, interpret_latitude, Angle, HourAngle)
 from .constants import TAU
@@ -175,15 +175,14 @@ class Apparent(RADec):
             cosang = cos(angle)
             sinang = sin(angle)
 
-            r1 = array([cosang, sinang, 0.0])
-            r2 = array([-sinang, cosang, 0.0])
-            r3 = array([0.0, 0.0, 1.0])
+            rotation = zeros((3, 3)) * angle
+            rotation[0, 0] = cosang
+            rotation[0, 1] = -sinang
+            rotation[1, 0] = sinang
+            rotation[1, 1] = cosang
+            rotation[2, 2] = 1.0
 
-            return array([
-                r1.dot(vector),
-                r2.dot(vector),
-                r3.dot(vector),
-                ])
+            return vector.dot(rotation)
 
         gast = sidereal_time(self.jd, use_eqeq=True)
         uz = spin(-gast * TAU / 24.0, uze)
