@@ -22,10 +22,10 @@ from reportlab.pdfbase.ttfonts import TTFont
 tau = pi * 2.0
 quarter_tau = pi / 2.0
 
-alpha_star_color = '#6C1900'
-bright_star_color = '#013C53'
+alpha_star_color = '#BC243C'
+bright_star_color = '#002664'
 dim_star_color = '#aaaaaa'
-text_color = '#013C53'
+text_color = '#002664'
 greek_color = 'black'
 
 greeks = {
@@ -57,7 +57,7 @@ def main():
             mag = float(line[103:108])
             stars.append((letter, ra, dec, mag))
 
-    h, w = 72, 96
+    h, w = 48, 96
     c = Canvas('logo.pdf', pagesize=(w, h))
 
     c.setFillColor('white')
@@ -69,7 +69,7 @@ def main():
     # magscale = 0.1
     # For 10 degrees:
     x_offset = 96 -33.5
-    y_offset = 96 +1.5
+    y_offset = h  +37.5
     # For 15 degrees:
     # x_offset = 96 -28.5
     # y_offset = 96 +0.5
@@ -124,7 +124,7 @@ def main():
     c.setFillColor(text_color) #, alpha=0.5)
     c.setFont('Dosis', 24)
     sw = c.stringWidth('Skyfield')
-    c.drawString(w // 2 - sw // 2, 20, 'Skyfield')
+    c.drawString(w // 2 - sw // 2, h - 40, 'Skyfield')
 
     c.showPage()
     with open('logo.pdf', 'wb') as f:
