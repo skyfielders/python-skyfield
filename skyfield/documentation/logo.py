@@ -68,8 +68,8 @@ def main():
     rotation = 10.0 * tau / 360.0
     # magscale = 0.1
     # For 10 degrees:
-    x_offset = 96 -33.76
-    y_offset = 96 +1.63
+    x_offset = 96 -33.5
+    y_offset = 96 +1.5
     # For 15 degrees:
     # x_offset = 96 -28.5
     # y_offset = 96 +0.5
@@ -121,7 +121,7 @@ def main():
     for x, y, r in small_glyphs:
         c.circle(x, y, r, stroke=0, fill=1)
 
-    c.setFillColor(text_color)
+    c.setFillColor(text_color) #, alpha=0.5)
     c.setFont('Dosis', 24)
     sw = c.stringWidth('Skyfield')
     c.drawString(w // 2 - sw // 2, 20, 'Skyfield')
