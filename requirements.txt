@@ -4,3 +4,4 @@ novas==3.1.1.2
 novas_de405==1997
 pytest
 httpretty==0.6.3
+sphinx
