@@ -1,13 +1,9 @@
 """Run a series of timing tests on core Skyfield atoms."""
 
-from itertools import product
-from numpy import array, einsum, mean, std, float64, zeros
-from unittest import TestCase
+from numpy import array, mean, std, zeros
+from skyfield import coordinates, earthlib, nutationlib, planets, starlib
 
-from skyfield import (coordinates, earthlib, framelib, nutationlib,
-                      planets, precessionlib, starlib, timescales)
-
-from .constants import T0, DEG2RAD, AU_KM, TAU
+from .constants import T0
 from .timescales import julian_date, JulianDate
 from timeit import default_timer
 
@@ -18,9 +14,8 @@ D0 = 63.8285
 DA = 39.707
 DB = 66.8779
 
-import de421
-emp = planets.Ephemeris(de421)
-earth = emp.earth
+earth = planets.earth
+jupiter = planets.jupiter
 star = starlib.Star(
     ra=1.59132070233, dec=8.5958876464,
     pm_ra=0.0, pm_dec=0.0,
@@ -62,15 +57,12 @@ def bm_star_observe_from(times, t):
 
 
 def bm_planet_observe_from(times, t):
-    run_benchmark(times, emp.jupiter.observe_from, earth(t))
+    run_benchmark(times, jupiter.observe_from, earth(t))
 
 
 def bm_topo_planet_observe(times, t):
-    ggr = coordinates.Topos('75 W', '45 N', 0.0,
-                            temperature=10.0, pressure=1010.0)
-    ggr.earth = emp.earth
-    ggr.ephemeris = emp
-    run_benchmark(times, ggr(t).observe, emp.jupiter)
+    ggr = earth.topos('75 W', '45 N', 0.0, temperature=10.0, pressure=1010.0)
+    run_benchmark(times, ggr(t).observe, jupiter)
 
 
 def bm_earth_tilt(times, t):
@@ -79,7 +71,7 @@ def bm_earth_tilt(times, t):
 
 def bm_equation_of_the_equinoxes(times, t):
     run_benchmark(times, nutationlib.equation_of_the_equinoxes_complimentary_terms, t)
-    
+
 
 def bm_coordinate_to_astrometric(times, t):
     coordinate = star.observe_from(earth(t))
@@ -92,11 +84,8 @@ def bm_coordinate_to_apparent(times, t):
 
 
 def bm_coordinate_horizontal(times, t):
-    ggr = coordinates.Topos('75 W', '45 N', 0.0,
-                            temperature=10.0, pressure=1010.0)
-    ggr.earth = emp.earth
-    ggr.ephemeris = emp
-    run_benchmark(times, ggr(t).observe(emp.jupiter).apparent().horizontal)
+    ggr = earth.topos('75 W', '45 N', 0.0, temperature=10.0, pressure=1010.0)
+    run_benchmark(times, ggr(t).observe(jupiter).apparent().horizontal)
 
 
 BENCHMARKS = (
