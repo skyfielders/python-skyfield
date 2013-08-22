@@ -1,5 +1,6 @@
 """Run a series of timing tests on core Skyfield atoms."""
 
+import sys
 from numpy import array, mean, std, zeros
 from skyfield import earthlib, nutationlib, planets, starlib
 
@@ -25,6 +26,7 @@ star = starlib.Star(
 
 class BM(object):
     def __init__(self, times, bm_fn, t):
+        self.name = bm_fn.__name__
         self.times = times
         self.bm_fn = bm_fn
         self.t = t
@@ -122,5 +124,8 @@ BENCHMARKS = (
 )
 
 if __name__ == "__main__":
+    patterns = sys.argv[1:]
     for bm in BENCHMARKS:
+        if any(pattern not in bm.name for pattern in patterns):
+            continue
         bm()
