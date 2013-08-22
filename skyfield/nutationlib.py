@@ -75,17 +75,17 @@ def mean_obliquity(jd_tdb):
 def equation_of_the_equinoxes_complimentary_terms(jd_tt):
     """Compute the complementary terms of the equation of the equinoxes.
 
-    `jd_tt` - numpy.array of dates for which to compute the terms
+    `jd_tt` - float or numpy.array of Terrestrial Time Julian dates
 
     """
-
     # Interval between fundamental epoch J2000.0 and current date.
 
     t = (jd_tt - T0) / 36525.0
 
-    # Fundamental Arguments.
+    # Build array for intermediate results.
 
-    fa = zeros((14, jd_tt.shape[0]))
+    shape = getattr(jd_tt, 'shape', None)
+    fa = zeros((14,) if shape is None else (14, shape[0]))
 
     # Mean Anomaly of the Moon.
 

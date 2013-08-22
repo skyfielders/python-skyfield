@@ -1,6 +1,7 @@
 """Compare the output of Skyfield with the same routines from NOVAS."""
 
-from numpy import array, einsum
+import pytest
+from numpy import array, einsum, ndarray
 
 from skyfield import (coordinates, earthlib, framelib, nutationlib,
                       jpllib, precessionlib, starlib, timescales)
@@ -33,6 +34,7 @@ else:
 
     TA = c.julian_date(1969, 7, 20, 20. + 18. / 60.)
     TB = c.julian_date(2012, 12, 21)
+    TC = c.julian_date(2027, 8, 2, 10. + 7. / 60. + 50. / 3600.)
 
     D0 = 63.8285
     DA = 39.707
@@ -61,8 +63,19 @@ planet_codes = {
 
 planets_to_test = planet_codes.keys()
 
-# Defining fixtures
-import pytest
+# Fixtures.
+
+class Box(object):
+    """Hides values, like NumPy arrays, from py.test fixture bugs."""
+    def __init__(self, value):
+        self.boxed_value = value
+
+jd_vector = array([T0, TA, TB, TC])
+jd_vector.flags.writeable = False
+
+@pytest.fixture(params=[Box(T0), Box(TA), Box(TB), Box(jd_vector)])
+def jd_float_or_vector(request):
+    return request.param
 
 @pytest.fixture(params=[P0, PA, PB])
 def timepairs(request):
@@ -71,6 +84,8 @@ def timepairs(request):
 @pytest.fixture(params=planet_codes.items())
 def planets_list(request):
     return request.param
+
+# Tests.
 
 emp = jpllib.Ephemeris(de405)
 
@@ -230,16 +245,17 @@ def test_earth_tilt():
     for i in range(len(v)):
         eq(v[i], [vars0[i], vars1[i], vars2[i]], epsilon)
 
-def test_equation_of_the_equinoxes_complimentary_terms():
-    epsilon = 1e-23
+def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
+    epsilon = 1e-22
+    jd_tt = jd_float_or_vector.boxed_value
 
-    e0 = c.ee_ct(T0, 0.0, 0)
-    eA = c.ee_ct(TA, 0.0, 0)
-    eB = c.ee_ct(TB, 0.0, 0)
+    if hasattr(jd_tt, 'shape'):
+        u = [c.ee_ct(j, 0.0, 0) for j in jd_tt]
+    else:
+        u = c.ee_ct(jd_tt, 0.0, 0)
 
-    t = array([T0, TA, TB])
-    v = nutationlib.equation_of_the_equinoxes_complimentary_terms(t)
-    eq(v, [e0, eA, eB], epsilon)
+    v = nutationlib.equation_of_the_equinoxes_complimentary_terms(jd_tt)
+    eq(v, u, epsilon)
 
 def test_frame_tie():
     epsilon = 1e-15
