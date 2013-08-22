@@ -95,7 +95,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (     0.051635 +
               (    -0.00024470)
               * t) * t) * t) * t) * ASEC2RAD
-              + fmod(1325.0*t, 1.0) * TAU) % TAU;
+              + (1325.0*t % 1.0) * TAU)
 
     # Mean Anomaly of the Sun.
 
@@ -105,7 +105,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (     +0.000136 +
               (     -0.00001149)
               * t) * t) * t) * t) * ASEC2RAD
-              + fmod (99.0*t, 1.0) * TAU) % TAU;
+              + (99.0*t % 1.0) * TAU)
 
     # Mean Longitude of the Moon minus Mean Longitude of the Ascending
     # Node of the Moon.
@@ -116,7 +116,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (     -0.001037 +
               (      0.00000417)
               * t) * t) * t) * t) * ASEC2RAD
-              + fmod (1342.0*t, 1.0) * TAU) % TAU;
+              + (1342.0*t % 1.0) * TAU)
 
     # Mean Elongation of the Moon from the Sun.
 
@@ -126,7 +126,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (      0.006593 +
               (     -0.00003169)
               * t) * t) * t) * t) * ASEC2RAD
-              + fmod (1236.0*t, 1.0) * TAU) % TAU;
+              + (1236.0*t % 1.0) * TAU)
 
     # Mean Longitude of the Ascending Node of the Moon.
 
@@ -136,38 +136,28 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (      0.007702 +
               (     -0.00005939)
               * t) * t) * t) * t) * ASEC2RAD
-              + fmod (-5.0*t, 1.0) * TAU) % TAU;
+              + (-5.0*t % 1.0) * TAU)
 
-    fa[ 5] = (4.402608842 + 2608.7903141574 * t) % TAU
-    fa[ 6] = (3.176146697 + 1021.3285546211 * t) % TAU
-    fa[ 7] = (1.753470314 +  628.3075849991 * t) % TAU
-    fa[ 8] = (6.203480913 +  334.0612426700 * t) % TAU
-    fa[ 9] = (0.599546497 +   52.9690962641 * t) % TAU
-    fa[10] = (0.874016757 +   21.3299104960 * t) % TAU
-    fa[11] = (5.481293872 +    7.4781598567 * t) % TAU
-    fa[12] = (5.311886287 +    3.8133035638 * t) % TAU
+    fa[ 5] = (4.402608842 + 2608.7903141574 * t)
+    fa[ 6] = (3.176146697 + 1021.3285546211 * t)
+    fa[ 7] = (1.753470314 +  628.3075849991 * t)
+    fa[ 8] = (6.203480913 +  334.0612426700 * t)
+    fa[ 9] = (0.599546497 +   52.9690962641 * t)
+    fa[10] = (0.874016757 +   21.3299104960 * t)
+    fa[11] = (5.481293872 +    7.4781598567 * t)
+    fa[12] = (5.311886287 +    3.8133035638 * t)
     fa[13] = (0.024381750 +    0.00000538691 * t) * t
+
+    fa %= TAU
 
     # Evaluate the complementary terms.
 
-    s0 = 0.0
-    s1 = 0.0
+    a = ke0_t.dot(fa)
+    s0 = se0_t_0.dot(sin(a)) + se0_t_1.dot(cos(a))
 
-    for i in reversed(range(33)):
+    a = ke1.dot(fa)
+    s1 = se1_0 * sin(a) + se1_1 * cos(a)
 
-        a = 0.0
-
-        for j in range(14):
-            a += ke0_t[i][j] * fa[j]
-
-        s0 += se0_t[i][0] * sin(a) + se0_t[i][1] * cos(a)
-
-    a = 0.0
-
-    for j in range(14):
-        a += ke1[j] * fa[j]
-
-    s1 += se1[0] * sin(a) + se1[1] * cos(a)
     c_terms = s0 + s1 * t
     c_terms *= ASEC2RAD
     return c_terms
@@ -308,7 +298,7 @@ def fundamental_arguments(t):
 
 # Argument coefficients for t^0.
 
-ke0_t = (
+ke0_t = array([
       (0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0),
       (0,  0,  0,  0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0),
       (0,  0,  2, -2,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0),
@@ -341,15 +331,16 @@ ke0_t = (
       (0,  0,  4, -2,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0),
       (0,  0,  2, -2,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0),
       (1,  0, -2,  0, -3,  0,  0,  0,  0,  0,  0,  0,  0,  0),
-      (1,  0, -2,  0, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0))
+      (1,  0, -2,  0, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0),
+      ])
 
 # Argument coefficients for t^1.
 
-ke1 = (0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0)
+ke1 = array([0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0])
 
 # Sine and cosine coefficients for t^0.
 
-se0_t = (
+se0_t = array([
       (+2640.96e-6,          -0.39e-6),
       (  +63.52e-6,          -0.02e-6),
       (  +11.75e-6,          +0.01e-6),
@@ -382,11 +373,16 @@ se0_t = (
       (   +0.13e-6,          +0.00e-6),
       (   -0.11e-6,          +0.00e-6),
       (   +0.11e-6,          +0.00e-6),
-      (   +0.11e-6,          +0.00e-6))
+      (   +0.11e-6,          +0.00e-6),
+      ])
+
+se0_t_0, se0_t_1 = se0_t.T
 
 # Sine and cosine coefficients for t^1.
 
 se1 = (   -0.87e-6,          +0.00e-6)
+se1_0 = se1[0]
+se1_1 = se1[1]
 
 # Luni-Solar argument multipliers:
 #      L     L'    F     D     Om
