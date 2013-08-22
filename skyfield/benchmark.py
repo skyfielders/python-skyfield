@@ -1,5 +1,6 @@
 """Run a series of timing tests on core Skyfield atoms."""
 
+import gc
 import sys
 from numpy import array, mean, std, zeros
 from skyfield import earthlib, nutationlib, planets, starlib
@@ -38,9 +39,11 @@ class BM(object):
 def run_benchmark(times, fn, *args, **kwargs):
     data = zeros(times)
     for i in xrange(times):
+        gc.disable()
         start = default_timer()
         fn(*args, **kwargs)
         end = default_timer()
+        gc.enable()
 
         data[i] = end - start
 
