@@ -273,7 +273,7 @@ def test_fundamental_arguments():
 
     t = array([T0, TA, TB])
     v = nutationlib.fundamental_arguments(jcentury(t))
-    eq(v.T, [args0, argsA, argsB], epsilon)
+    eq(v, array([args0, argsA, argsB]).T, epsilon)
 
 def test_geocentric_position_and_velocity():
     epsilon = 1e-13

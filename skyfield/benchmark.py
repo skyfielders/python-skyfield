@@ -79,6 +79,10 @@ def bm_equation_of_the_equinoxes(times, t):
     run_benchmark(times, nutationlib.equation_of_the_equinoxes_complimentary_terms, t)
 
 
+def bm_fundamental_arguments(times, t):
+    run_benchmark(times, nutationlib.fundamental_arguments, t)
+
+
 def bm_coordinate_to_astrometric(times, t):
     coordinate = star.observe_from(earth(t))
     run_benchmark(times, coordinate.astrometric)
@@ -114,6 +118,8 @@ BENCHMARKS = (
     BM(times=100, bm_fn=bm_earth_tilt, t=JulianDate(tt=TB)),
 
     BM(times=100, bm_fn=bm_equation_of_the_equinoxes, t=array([T0, TA, TB])),
+
+    BM(times=100, bm_fn=bm_fundamental_arguments, t=array([T0, TA, TB])),
 
     BM(times=100, bm_fn=bm_coordinate_to_astrometric, t=JulianDate(tt=T0)),
     BM(times=100, bm_fn=bm_coordinate_to_astrometric, t=JulianDate(tt=TA)),

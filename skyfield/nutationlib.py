@@ -249,6 +249,26 @@ def iau2000a(jd_tt):
 
 #
 
+fa0, fa1, fa2, fa3, fa4 = array([
+
+    # Mean Anomaly of the Moon.
+    (485868.249036, 1717915923.2178, 31.8792, 0.051635, - .00024470),
+
+    # Mean Anomaly of the Sun.
+    (1287104.79305,  129596581.0481, - 0.5532, 0.000136, - 0.00001149),
+
+    # Mean Longitude of the Moon minus Mean Longitude of the Ascending
+    # Node of the Moon.
+    (335779.526232, 1739527262.8478, - 12.7512, -  0.001037, 0.00000417),
+
+    # Mean Elongation of the Moon from the Sun.
+    (1072260.70369, 1602961601.2090, - 6.3706, 0.006593, - 0.00003169),
+
+    # Mean Longitude of the Ascending Node of the Moon.
+    (450160.398036, - 6962890.5431, 7.4722, 0.007702, - 0.00005939),
+
+    ]).T[:,:,None]
+
 def fundamental_arguments(t):
     """Compute the fundamental arguments (mean elements) of Sun and Moon.
 
@@ -264,37 +284,17 @@ def fundamental_arguments(t):
                  precession = 5028.8200 arcsec/cy)
 
     """
-    a0 = fmod(485868.249036 +
-             t * (1717915923.2178 +
-             t * (        31.8792 +
-             t * (         0.051635 +
-             t * (       - 0.00024470)))), ASEC360) * ASEC2RAD
-
-    a1 = fmod(1287104.79305 +
-             t * ( 129596581.0481 +
-             t * (       - 0.5532 +
-             t * (         0.000136 +
-             t * (       - 0.00001149)))), ASEC360) * ASEC2RAD
-
-    a2 = fmod(335779.526232 +
-             t * (1739527262.8478 +
-             t * (      - 12.7512 +
-             t * (      -  0.001037 +
-             t * (         0.00000417)))), ASEC360) * ASEC2RAD
-
-    a3 = fmod(1072260.70369 +
-             t * (1602961601.2090 +
-             t * (       - 6.3706 +
-             t * (         0.006593 +
-             t * (       - 0.00003169)))), ASEC360) * ASEC2RAD
-
-    a4 = fmod(450160.398036 +
-             t * ( - 6962890.5431 +
-             t * (         7.4722 +
-             t * (         0.007702 +
-             t * (       - 0.00005939)))), ASEC360) * ASEC2RAD
-
-    return array((a0, a1, a2, a3, a4))
+    a = fa4 * t
+    a += fa3
+    a *= t
+    a += fa2
+    a *= t
+    a += fa1
+    a *= t
+    a += fa0
+    fmod(a, ASEC360, out=a)
+    a *= ASEC2RAD
+    return a
 
 # Argument coefficients for t^0.
 
