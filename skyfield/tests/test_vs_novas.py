@@ -250,7 +250,7 @@ def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
     jd_tt = jd_float_or_vector.boxed_value
 
     if hasattr(jd_tt, 'shape'):
-        u = [c.ee_ct(j, 0.0, 0) for j in jd_tt]
+        u = array([c.ee_ct(j, 0.0, 0) for j in jd_tt]).T
     else:
         u = c.ee_ct(jd_tt, 0.0, 0)
 
@@ -264,16 +264,19 @@ def test_frame_tie():
     eq(c.frame_tie(v, 0), v.dot(framelib.ICRS_to_J2000), epsilon)
     eq(c.frame_tie(v, -1), v.dot(framelib.J2000_to_ICRS), epsilon)
 
-def test_fundamental_arguments():
+def test_fundamental_arguments(jd_float_or_vector):
     epsilon = 1e-12
+    jd_tdb = jd_float_or_vector.boxed_value
 
-    args0 = c.fund_args(jcentury(T0))
-    argsA = c.fund_args(jcentury(TA))
-    argsB = c.fund_args(jcentury(TB))
+    t = jcentury(jd_tdb)
 
-    t = array([T0, TA, TB])
-    v = nutationlib.fundamental_arguments(jcentury(t))
-    eq(v, array([args0, argsA, argsB]).T, epsilon)
+    if hasattr(t, 'shape'):
+        u = array([c.fund_args(ti) for ti in t]).T
+    else:
+        u = c.fund_args(t)
+
+    v = nutationlib.fundamental_arguments(t)
+    eq(v, u, epsilon)
 
 def test_geocentric_position_and_velocity():
     epsilon = 1e-13

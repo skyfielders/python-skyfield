@@ -294,7 +294,9 @@ def fundamental_arguments(t):
     a += fa0
     fmod(a, ASEC360, out=a)
     a *= ASEC2RAD
-    return a
+    if getattr(t, 'shape', ()):
+        return a
+    return a[:,0]
 
 # Argument coefficients for t^0.
 

@@ -7,6 +7,19 @@ These short topics introduce new developers to some of the core concepts
 of the Skyfield library, to help them be productive and to make good use
 of the conventions laid down in the existing code base.
 
+(Wondering how to do fundamental_arguments() without reshape:)
+
+>>> from numpy import array, matrix, float64
+>>> m = array([4.0,5.0,6.0])
+>>> arg1 = float64(2.0)
+>>> argn = array([2.0, 3.0])
+>>> arg1 * m.reshape(3,)
+array([  8.,  10.,  12.])
+>>> argn * m.reshape(3, 1)
+array([[  8.,  12.],
+       [ 10.,  15.],
+       [ 12.,  18.]])
+
 Scalar Theory
 -------------
 
