@@ -1,10 +1,10 @@
 """Run a series of timing tests on core Skyfield atoms."""
 
 from numpy import array, mean, std, zeros
-from skyfield import coordinates, earthlib, nutationlib, planets, starlib
+from skyfield import earthlib, nutationlib, planets, starlib
 
-from .constants import T0
-from .timescales import julian_date, JulianDate
+from skyfield.constants import T0
+from skyfield.timescales import julian_date, JulianDate
 from timeit import default_timer
 
 TA = julian_date(1969, 7, 20, 20. + 18. / 60.)
@@ -42,10 +42,11 @@ def run_benchmark(times, fn, *args, **kwargs):
 
         data[i] = end - start
 
-    avg, stdev = mean(data), std(data)
+    avg, stdev, least = mean(data), std(data), min(data)
     suite_name = "{}.{}".format(fn.__module__, fn.__name__)
-    print('{} : times = {}, avg = {}, std = {}'.format(
-        suite_name, times, avg, stdev))
+    factor = 1e6
+    print('{} times  {:10.2f} avg  {:10.2f} least  {}'.format(
+        times, avg * factor, least * factor, suite_name))
 
 
 def bm_earth_rotation_angle(times, t):
