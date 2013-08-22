@@ -85,6 +85,22 @@ def timepairs(request):
 def planets_list(request):
     return request.param
 
+# Helpers.
+
+def vcall(function, value, *args):
+    """Call a function once or many times, on whether `value` is a vector.
+
+    If `value` is scalar, then `function` is called once with the value
+    and any other `args` and its return value is returned.  Otherwise,
+    `function` is called as many times as there are elements in `value`,
+    and an array of return values is returned.
+
+    """
+    if hasattr(value, 'shape'):
+        return array([function(v, *args) for v in value]).T
+    else:
+        return function(value, *args)
+
 # Tests.
 
 emp = jpllib.Ephemeris(de405)
@@ -248,12 +264,7 @@ def test_earth_tilt():
 def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
     epsilon = 1e-22
     jd_tt = jd_float_or_vector.boxed_value
-
-    if hasattr(jd_tt, 'shape'):
-        u = array([c.ee_ct(j, 0.0, 0) for j in jd_tt]).T
-    else:
-        u = c.ee_ct(jd_tt, 0.0, 0)
-
+    u = vcall(c.ee_ct, jd_tt, 0.0, 0)
     v = nutationlib.equation_of_the_equinoxes_complimentary_terms(jd_tt)
     eq(v, u, epsilon)
 
@@ -267,14 +278,8 @@ def test_frame_tie():
 def test_fundamental_arguments(jd_float_or_vector):
     epsilon = 1e-12
     jd_tdb = jd_float_or_vector.boxed_value
-
     t = jcentury(jd_tdb)
-
-    if hasattr(t, 'shape'):
-        u = array([c.fund_args(ti) for ti in t]).T
-    else:
-        u = c.fund_args(t)
-
+    u = vcall(c.fund_args, t)
     v = nutationlib.fundamental_arguments(t)
     eq(v, u, epsilon)
 
