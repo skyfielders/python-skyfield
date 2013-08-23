@@ -321,16 +321,12 @@ def test_julian_date():
           ):
         eq(c.julian_date(*args), timescales.julian_date(*args), epsilon)
 
-def test_mean_obliq():
+def test_mean_obliq(jd_float_or_vector):
     epsilon = 0
-
-    m0 = c.mean_obliq(T0)
-    mA = c.mean_obliq(TA)
-    mB = c.mean_obliq(TB)
-
-    t = array([T0, TA, TB])
-    v = nutationlib.mean_obliquity(t)
-    eq(v, [m0, mA, mB], epsilon)
+    jd_tdb = jd_float_or_vector.boxed_value
+    u = vcall(c.mean_obliq, jd_tdb)
+    v = nutationlib.mean_obliquity(jd_tdb)
+    eq(u, v, epsilon)
 
 def test_nutation():
     epsilon = 1e-15

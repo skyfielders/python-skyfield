@@ -54,8 +54,11 @@ def earth_tilt(jd):
 #
 
 def mean_obliquity(jd_tdb):
-    """Compute the mean obliquity of the ecliptic."""
+    """Compute the mean obliquity of the ecliptic.
 
+    `jd_tt` - TDB time as a Julian date float, or NumPy array of floats
+
+    """
     # Compute time in Julian centuries from epoch J2000.0.
 
     t = (jd_tdb - T0) / 36525.0;
