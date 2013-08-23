@@ -75,7 +75,7 @@ def mean_obliquity(jd_tdb):
 def equation_of_the_equinoxes_complimentary_terms(jd_tt):
     """Compute the complementary terms of the equation of the equinoxes.
 
-    `jd_tt` - float or numpy.array of Terrestrial Time Julian dates
+    `jd_tt` - Terrestrial Time: Julian date float, or NumPy array of floats
 
     """
     # Interval between fundamental epoch J2000.0 and current date.
@@ -163,7 +163,15 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
     return c_terms
 
 def iau2000a(jd_tt):
+    """Compute Earth nutation based on the IAU 2000A nutation model.
 
+    `jd_tt` - Terrestrial Time: Julian date float, or NumPy array of floats
+
+    Returns a tuple ``(delta_psi, delta_epsilon)`` where each value is
+    either a float or a NumPy array with the same dimensions as the
+    input argument.
+
+    """
     # Interval between fundamental epoch J2000.0 and given date.
 
     t = (jd_tt - T0) / 36525.0
@@ -196,23 +204,23 @@ def iau2000a(jd_tt):
 
     # Mean anomaly of the Moon.
 
-    al = fmod(2.35555598 + 8328.6914269554 * t, TAU)
+    al = 2.35555598 + 8328.6914269554 * t
 
     # Mean anomaly of the Sun.
 
-    alsu = fmod(6.24006013 + 628.301955 * t, TAU)
+    alsu = 6.24006013 + 628.301955 * t
 
     # Mean argument of the latitude of the Moon.
 
-    af = fmod(1.627905234 + 8433.466158131 * t, TAU)
+    af = 1.627905234 + 8433.466158131 * t
 
     # Mean elongation of the Moon from the Sun.
 
-    ad = fmod(5.198466741 + 7771.3771468121 * t, TAU)
+    ad = 5.198466741 + 7771.3771468121 * t
 
     # Mean longitude of the ascending node of the Moon.
 
-    aom = fmod(2.18243920 - 33.757045 * t, TAU)
+    aom = 2.18243920 - 33.757045 * t
 
     # General accumulated precession in longitude.
 
@@ -220,19 +228,21 @@ def iau2000a(jd_tt):
 
     # Planetary longitudes, Mercury through Neptune (Souchay et al. 1999).
 
-    alme = fmod(4.402608842 + 2608.7903141574 * t, TAU)
-    alve = fmod(3.176146697 + 1021.3285546211 * t, TAU)
-    alea = fmod(1.753470314 +  628.3075849991 * t, TAU)
-    alma = fmod(6.203480913 +  334.0612426700 * t, TAU)
-    alju = fmod(0.599546497 +   52.9690962641 * t, TAU)
-    alsa = fmod(0.874016757 +   21.3299104960 * t, TAU)
-    alur = fmod(5.481293871 +    7.4781598567 * t, TAU)
-    alne = fmod(5.321159000 +    3.8127774000 * t, TAU)
+    alme = 4.402608842 + 2608.7903141574 * t
+    alve = 3.176146697 + 1021.3285546211 * t
+    alea = 1.753470314 +  628.3075849991 * t
+    alma = 6.203480913 +  334.0612426700 * t
+    alju = 0.599546497 +   52.9690962641 * t
+    alsa = 0.874016757 +   21.3299104960 * t
+    alur = 5.481293871 +    7.4781598567 * t
+    alne = 5.321159000 +    3.8127774000 * t
 
     # Summation of planetary nutation series (in reverse order).
 
     a = array((al, alsu, af, ad, aom,
                alme, alve, alea, alma, alju, alsa, alur, alne, apa))
+
+    fmod(a, TAU, out=a)
 
     arg = fmod(napl_t.dot(a), TAU)
     sc = array((sin(arg), cos(arg))).T
@@ -272,7 +282,7 @@ fa0, fa1, fa2, fa3, fa4 = array([
 def fundamental_arguments(t):
     """Compute the fundamental arguments (mean elements) of Sun and Moon.
 
-    t - TDB time in Julian centuries since J2000.0
+    `t` - TDB time in Julian centuries since J2000.0, as float or NumPy array
 
     Outputs fundamental arguments, in radians:
           a[0] = l (mean anomaly of the Moon)

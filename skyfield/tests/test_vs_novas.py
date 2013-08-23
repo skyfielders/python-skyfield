@@ -73,7 +73,7 @@ class Box(object):
 jd_vector = array([T0, TA, TB, TC])
 jd_vector.flags.writeable = False
 
-@pytest.fixture(params=[Box(T0), Box(TA), Box(TB), Box(jd_vector)])
+@pytest.fixture(params=[Box(T0), Box(TA), Box(TB), Box(TC), Box(jd_vector)])
 def jd_float_or_vector(request):
     return request.param
 
@@ -266,7 +266,7 @@ def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
     jd_tt = jd_float_or_vector.boxed_value
     u = vcall(c.ee_ct, jd_tt, 0.0, 0)
     v = nutationlib.equation_of_the_equinoxes_complimentary_terms(jd_tt)
-    eq(v, u, epsilon)
+    eq(u, v, epsilon)
 
 def test_frame_tie():
     epsilon = 1e-15
@@ -281,7 +281,7 @@ def test_fundamental_arguments(jd_float_or_vector):
     t = jcentury(jd_tdb)
     u = vcall(c.fund_args, t)
     v = nutationlib.fundamental_arguments(t)
-    eq(v, u, epsilon)
+    eq(u, v, epsilon)
 
 def test_geocentric_position_and_velocity():
     epsilon = 1e-13
@@ -300,17 +300,13 @@ def test_geocentric_position_and_velocity():
     eq(posv.T, [pos0, posA], epsilon)
     eq(velv.T, [vel0, velA], epsilon)
 
-def test_iau2000a():
-    epsilon = 1e-18
-
-    psi0, eps0 = c.nutation.iau2000a(T0, 0.0)
-    psiA, epsA = c.nutation.iau2000a(TA, 0.0)
-    psiB, epsB = c.nutation.iau2000a(TB, 0.0)
-
-    t = array([T0, TA, TB])
-    psi, eps = nutationlib.iau2000a(t)
-    eq(psi, [psi0, psiA, psiB], epsilon)
-    eq(eps, [eps0, epsA, epsB], epsilon)
+def test_iau2000a(jd_float_or_vector):
+    epsilon = 2e-18
+    jd_tt = jd_float_or_vector.boxed_value
+    psi0, eps0 = vcall(c.nutation.iau2000a, jd_tt, 0.0)
+    psi1, eps1 = nutationlib.iau2000a(jd_tt)
+    eq(psi0, psi1, epsilon)
+    eq(eps0, eps1, epsilon)
 
 def test_julian_date():
     epsilon = 0.0
