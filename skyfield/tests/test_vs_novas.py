@@ -393,8 +393,8 @@ def test_terra():
 
     observer = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
 
-    # Note that class stands in for a NOVAS Topos, not for our native
-    # Topos class!
+    # Note that this class stands in for a NOVAS Topos structure, but
+    # not for our own Topos class!
     class Topos(object):
         latitude = 45.0 * DEG2RAD
         longitude = -75.0 * DEG2RAD

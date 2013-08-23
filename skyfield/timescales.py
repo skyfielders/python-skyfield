@@ -1,9 +1,7 @@
-from numpy import array, fmod, sin
-
+from numpy import array, sin
 from .constants import T0
 
 # Much of the following code is adapted from the USNO's "novas.c".
-
 
 _sequence = ['tdb', 'tt', 'ut1', 'utc']
 _sequence_indexes = {name: i for i, name in enumerate(_sequence)}
@@ -14,6 +12,11 @@ def _wrap(a):
     if hasattr(a, '__len__'):
         return array(a)
     return array((a,))
+
+def _convert(a):
+    if not hasattr(a, 'shape') and hasattr(a, '__len__'):
+        a = array(a)
+    return a, getattr(a, 'shape', ())
 
 class JulianDate(object):
     """Julian date.
@@ -28,20 +31,16 @@ class JulianDate(object):
     """
     def __init__(self, tdb=None, tt=None, ut1=None, utc=None, delta_t=0.0):
 
-        self.delta_t = delta_t
+        self.delta_t, ignored_shape = _convert(delta_t)
 
         if tdb is not None:
-            self.tdb = tdb
-            self.shape = getattr(tdb, 'shape', ())
+            self.tdb, self.shape = _convert(tdb)
         if tt is not None:
-            self.tt = tt
-            self.shape = getattr(tt, 'shape', ())
+            self.tt, self.shape = _convert(tt)
         if ut1 is not None:
-            self.ut1 = ut1
-            self.shape = getattr(ut1, 'shape', ())
+            self.ut1, self.shape = _convert(ut1)
         if utc is not None:
-            self.utc = utc
-            self.shape = getattr(utc, 'shape', ())
+            self.utc, self.shape = _convert(utc)
 
         if not self.__dict__:
             raise ValueError('you must supply either tdb= tt= ut1= or utc=')
