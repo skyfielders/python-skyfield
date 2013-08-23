@@ -75,14 +75,16 @@ jd_vector = array([T0, TA, TB, TC])
 jd_vector.flags.writeable = False
 
 @pytest.fixture(params=[
-    JulianDate(ut1=T0, delta_t=D0),
-    JulianDate(ut1=TA, delta_t=DA),
-    JulianDate(ut1=TB, delta_t=DB),
-    JulianDate(ut1=TC, delta_t=DC),
-    JulianDate(ut1=[T0, TA, TB, TC], delta_t=[D0, DA, DB, DC]),
+    Box({'ut1': T0, 'delta_t': D0}),
+    Box({'ut1': TA, 'delta_t': DA}),
+    Box({'ut1': TB, 'delta_t': DB}),
+    Box({'ut1': TC, 'delta_t': DC}),
+    Box({'ut1': [T0, TA, TB, TC], 'delta_t': [D0, DA, DB, DC]}),
     ])
 def jd(request):
-    return request.param
+    # Build a new JulianDate each time, because some test cases need to
+    # adjust the value of the date they are passed.
+    return JulianDate(**request.param.boxed_value)
 
 @pytest.fixture(params=[Box(T0), Box(TA), Box(TB), Box(TC), Box(jd_vector)])
 def jd_float_or_vector(request):
@@ -107,7 +109,7 @@ def vcall(function, *args):
     arrays, and an array of return values is returned.
 
     """
-    lengths = [arg.shape[0] for arg in args if hasattr(arg, 'shape')]
+    lengths = [arg.shape[0] for arg in args if getattr(arg, 'shape', ())]
     if not lengths:
         return function(*args)
     length = min(lengths)
@@ -343,20 +345,13 @@ def test_mean_obliq(jd_float_or_vector):
     v = nutationlib.mean_obliquity(jd_tdb)
     eq(u, v, epsilon)
 
-def test_nutation():
+def test_nutation(jd):
     epsilon = 1e-15
-    v = array([1, 2, 3])
-
-    v0 = c_nutation(T0, v, direction=0)
-    va = c_nutation(TA, v, direction=0)
-    vb = c_nutation(TB, v, direction=0)
-
-    jd = JulianDate(tt=[T0, TA, TB])
-    v = einsum('i,ijk->jk', v, nutationlib.compute_nutation(jd))
-
-    eq(v0, v[:,0], epsilon)
-    eq(va, v[:,1], epsilon)
-    eq(vb, v[:,2], epsilon)
+    xyz = [1.0, 2.0, 3.0]
+    u = vcall(c_nutation, jd.tt, xyz)  # TODO: shouldn't this be jd.tdb?
+    xyz = array(xyz)
+    v = einsum('i...,ij...->j...', xyz, nutationlib.compute_nutation(jd))
+    eq(u, v, epsilon)
 
 def test_precession(jd_float_or_vector):
     epsilon = 1e-15

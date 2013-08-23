@@ -1,17 +1,14 @@
 from numpy import array, cos, fmod, sin, tensordot, zeros
-
 from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, PSI_COR, EPS_COR, T0
 
-
 def compute_nutation(jd):
-    """Generate the nutation rotations for a series of epochs `jd`.
+    """Generate the nutation rotations for JulianDate `jd`.
 
-    The array of matrices that is returned has dimensions `(3, 3, n)`
-    where `n` is the number of dates that were provided.
+    If the Julian date is scalar, a simple ``(3, 3)`` matrix is
+    returned; if the date is an array of length ``n``, then an array of
+    matrices is returned with dimensions ``(3, 3, n)``.
 
     """
-    # Call 'e_tilt' to get the obliquity and nutation angles.
-
     oblm, oblt, eqeq, psi, eps = earth_tilt(jd)
 
     cobm = cos(oblm * DEG2RAD)
