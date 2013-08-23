@@ -39,6 +39,7 @@ else:
     D0 = 63.8285
     DA = 39.707
     DB = 66.8779
+    DC = 72.  # http://maia.usno.navy.mil/ser7/deltat.preds
 
     P0 = (T0, D0)  # "pair 0"
     PA = (TA, DA)
@@ -73,6 +74,16 @@ class Box(object):
 jd_vector = array([T0, TA, TB, TC])
 jd_vector.flags.writeable = False
 
+@pytest.fixture(params=[
+    JulianDate(ut1=T0, delta_t=D0),
+    JulianDate(ut1=TA, delta_t=DA),
+    JulianDate(ut1=TB, delta_t=DB),
+    JulianDate(ut1=TC, delta_t=DC),
+    JulianDate(ut1=[T0, TA, TB, TC], delta_t=[D0, DA, DB, DC]),
+    ])
+def jd(request):
+    return request.param
+
 @pytest.fixture(params=[Box(T0), Box(TA), Box(TB), Box(TC), Box(jd_vector)])
 def jd_float_or_vector(request):
     return request.param
@@ -87,19 +98,28 @@ def planets_list(request):
 
 # Helpers.
 
-def vcall(function, value, *args):
-    """Call a function once or many times, on whether `value` is a vector.
+def vcall(function, *args):
+    """Call a function once or many times, on whether any args are arrays.
 
-    If `value` is scalar, then `function` is called once with the value
-    and any other `args` and its return value is returned.  Otherwise,
-    `function` is called as many times as there are elements in `value`,
-    and an array of return values is returned.
+    If no arguments are NumPy arrays, then `function` is called once
+    with the arguments and its return value is returned.  Otherwise,
+    `function` is called as many times as there are values in the
+    arrays, and an array of return values is returned.
 
     """
-    if hasattr(value, 'shape'):
-        return array([function(v, *args) for v in value]).T
-    else:
-        return function(value, *args)
+    lengths = [arg.shape[0] for arg in args if hasattr(arg, 'shape')]
+    if not lengths:
+        return function(*args)
+    length = min(lengths)
+    arglists = [list() for i in range(length)]
+    for arg in args:
+        if hasattr(arg, 'shape'):
+            for i, arglist in enumerate(arglists):
+                arglist.append(arg[i])
+        else:
+            for arglist in arglists:
+                arglist.append(arg)
+    return array([function(*arglist) for arglist in arglists]).T
 
 # Tests.
 
@@ -351,29 +371,18 @@ def test_precession():
     eq(va, vab[:,0], epsilon)
     eq(vb, vab[:,1], epsilon)
 
-def test_sidereal_time_with_zero_delta_t():
+def test_sidereal_time_with_zero_delta_t(jd):
     epsilon = 1e-13
-
-    delta_t = 0.0
-
-    st0 = c.sidereal_time(T0, 0.0, delta_t, False, True)
-    stA = c.sidereal_time(TA, 0.0, delta_t, False, True)
-    stB = c.sidereal_time(TB, 0.0, delta_t, False, True)
-
-    jd = JulianDate(ut1=[T0, TA, TB], delta_t=delta_t)
+    jd.delta_t = 0.0
+    u = vcall(c.sidereal_time, jd.ut1, 0.0, 0.0, False, True)
     v = earthlib.sidereal_time(jd)
-    eq(v, [st0, stA, stB], epsilon)
+    eq(u, v, epsilon)
 
-def test_sidereal_time_with_nonzero_delta_t():
+def test_sidereal_time_with_nonzero_delta_t(jd):
     epsilon = 1e-13
-
-    st0 = c.sidereal_time(T0, 0.0, D0, False, True)
-    stA = c.sidereal_time(TA, 0.0, DA, False, True)
-    stB = c.sidereal_time(TB, 0.0, DB, False, True)
-
-    jd = JulianDate(ut1=[T0, TA, TB], delta_t=[D0, DA, DB])
+    u = vcall(c.sidereal_time, jd.ut1, 0.0, jd.delta_t, False, True)
     v = earthlib.sidereal_time(jd)
-    eq(v, [st0, stA, stB], epsilon)
+    eq(u, v, epsilon)
 
 def test_starvectors():
     epsilon = 1e-10
