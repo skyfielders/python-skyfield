@@ -143,16 +143,16 @@ def eq(first, second, epsilon=None):
             % (first, second, epsilon, appendix))
 
 
-def test_star_deflected_by_jupiter(timepairs):
+def test_star_deflected_by_jupiter(jd):
     """ Tests of generating a stellar position. """
-    jd_tt = timepairs[0]
+
     star = c.make_cat_entry(
         star_name='Star', catalog='cat', star_num=101,
         ra=1.59132070233, dec=8.5958876464,
         pm_ra=0.0, pm_dec=0.0,
         parallax=0.0, rad_vel=0.0,
         )
-    ra, dec = c.app_star(jd_tt, star)
+    ra, dec = vcall(c.app_star, jd.tt, star)
 
     earth = emp.earth
     star = starlib.Star(
@@ -160,8 +160,11 @@ def test_star_deflected_by_jupiter(timepairs):
         pm_ra=0.0, pm_dec=0.0,
         parallax=0.0, radial_velocity=0.0,
         )
-    jd = JulianDate(tt=jd_tt)
-    g = star.observe_from(earth(jd)).apparent()
+    g = earth(jd).observe(star).apparent()
+
+    assert shape_of(jd.tt) == shape_of(g.ra)
+    assert shape_of(jd.tt) == shape_of(g.dec)
+    assert shape_of(jd.tt) == shape_of(g.distance)
 
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)

@@ -1,4 +1,4 @@
-from numpy import abs, sqrt, where
+from numpy import abs, einsum, sqrt, where
 
 from .constants import C, AU, C_AUDAY, GS
 from .functions import dots, length
@@ -97,7 +97,7 @@ def light_time_difference(position, observer_position):
     # Light-time returned is the projection of vector 'pos_obs' onto the
     # unit vector 'u1' (formed from 'pos1'), divided by the speed of light.
 
-    diflt = (observer_position * u1).sum(axis=0) / C_AUDAY
+    diflt = einsum('a...,a...', u1, observer_position) / C_AUDAY
     return diflt
 
 #
