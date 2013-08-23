@@ -28,20 +28,20 @@ class JulianDate(object):
     """
     def __init__(self, tdb=None, tt=None, ut1=None, utc=None, delta_t=0.0):
 
-        self.delta_t = _wrap(delta_t)
+        self.delta_t = delta_t
 
         if tdb is not None:
-            self.tdb = tdb = _wrap(tdb)
-            self.shape = tdb.shape
+            self.tdb = tdb
+            self.shape = getattr(tdb, 'shape', ())
         if tt is not None:
-            self.tt = tt = _wrap(tt)
-            self.shape = tt.shape
+            self.tt = tt
+            self.shape = getattr(tt, 'shape', ())
         if ut1 is not None:
-            self.ut1 = ut1 = _wrap(ut1)
-            self.shape = ut1.shape
+            self.ut1 = ut1
+            self.shape = getattr(ut1, 'shape', ())
         if utc is not None:
-            self.utc = utc = _wrap(utc)
-            self.shape = utc.shape
+            self.utc = utc
+            self.shape = getattr(utc, 'shape', ())
 
         if not self.__dict__:
             raise ValueError('you must supply either tdb= tt= ut1= or utc=')

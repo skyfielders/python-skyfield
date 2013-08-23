@@ -249,17 +249,12 @@ def test_earth_rotation_angle():
     v = earthlib.earth_rotation_angle(t)
     eq(v, [a0, aA, aB], epsilon)
 
-def test_earth_tilt():
+def test_earth_tilt(jd_float_or_vector):
     epsilon = 1e-9
-
-    vars0 = c.e_tilt(T0)
-    vars1 = c.e_tilt(TA)
-    vars2 = c.e_tilt(TB)
-
-    jd = JulianDate(tdb=[T0, TA, TB])
+    jd = JulianDate(tdb=jd_float_or_vector.boxed_value)
+    u = vcall(c.e_tilt, jd.tdb)
     v = nutationlib.earth_tilt(jd)
-    for i in range(len(v)):
-        eq(v[i], [vars0[i], vars1[i], vars2[i]], epsilon)
+    eq(u, array(v), epsilon)
 
 def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
     epsilon = 1e-22

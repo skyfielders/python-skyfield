@@ -30,8 +30,11 @@ def compute_nutation(jd):
                     cpsi * sobm * sobt + cobm * cobt)))
 
 def earth_tilt(jd):
-    """Return stuff about the earth's axis and position."""
+    """Return a tuple of information about the earth's axis and position.
 
+    `jd` - A JulianDate object.
+
+    """
     dp, de = iau2000a(jd.tt)
     dp /= ASEC2RAD
     de /= ASEC2RAD
@@ -87,8 +90,8 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
 
     # Build array for intermediate results.
 
-    shape = getattr(jd_tt, 'shape', None)
-    fa = zeros((14,) if shape is None else (14, shape[0]))
+    shape = getattr(jd_tt, 'shape', ())
+    fa = zeros((14,) if shape == () else (14, shape[0]))
 
     # Mean Anomaly of the Moon.
 
