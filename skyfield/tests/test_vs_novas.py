@@ -1,7 +1,7 @@
 """Compare the output of Skyfield with the same routines from NOVAS."""
 
 import pytest
-from numpy import array, einsum, ndarray
+from numpy import array, einsum, rollaxis
 
 from skyfield import (coordinates, earthlib, framelib, nutationlib,
                       jpllib, precessionlib, starlib, timescales)
@@ -121,7 +121,8 @@ def vcall(function, *args):
         else:
             for arglist in arglists:
                 arglist.append(arg)
-    return array([function(*arglist) for arglist in arglists]).T
+    result = array([function(*arglist) for arglist in arglists])
+    return rollaxis(result, 0, len(result.shape))
 
 # Tests.
 
@@ -300,22 +301,19 @@ def test_fundamental_arguments(jd_float_or_vector):
     v = nutationlib.fundamental_arguments(t)
     eq(u, v, epsilon)
 
-def test_geocentric_position_and_velocity():
+def test_geocentric_position_and_velocity(jd):
     epsilon = 1e-13
+    jd.delta_t = delta_t = 0.0  # TODO: relax this limitation?
 
-    delta_t = 0.0
     observer = c.make_observer_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-
-    pos0, vel0 = c.geo_posvel(T0, delta_t, observer)
-    posA, velA = c.geo_posvel(TA, delta_t, observer)
+    posu, velu = vcall(c.geo_posvel, jd.tt, delta_t, observer)
 
     topos = coordinates.Topos('75 W', '45 N', elevation=0.0,
                               temperature=10.0, pressure=1010.0)
-
-    jd = JulianDate(tt=[T0, TA], delta_t=delta_t)
     posv, velv = earthlib.geocentric_position_and_velocity(topos, jd)
-    eq(posv.T, [pos0, posA], epsilon)
-    eq(velv.T, [vel0, velA], epsilon)
+
+    eq(posu, posv, epsilon)
+    eq(velu, velv, epsilon)
 
 def test_iau2000a(jd_float_or_vector):
     epsilon = 2e-18

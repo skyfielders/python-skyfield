@@ -33,11 +33,11 @@ def geocentric_position_and_velocity(topos, jd):
     p = compute_precession(jd.tdb)
     f = J2000_to_ICRS
 
-    t = einsum('jin,kjn->ikn', n, p)
-    t = einsum('ijn,jk->ikn', t, f)
+    t = einsum('ji...,kj...->ik...', n, p)
+    t = einsum('ij...,jk...->ik...', t, f)
 
-    pos = einsum('in,ijn->jn', pos, t)
-    vel = einsum('in,ijn->jn', vel, t)
+    pos = einsum('i...,ij...->j...', pos, t)
+    vel = einsum('i...,ij...->j...', vel, t)
 
     return pos, vel
 
