@@ -411,16 +411,12 @@ def test_terra():
     eq(vel0, veln[:,0], epsilon)
     eq(vel1, veln[:,1], epsilon)
 
-def test_tdb2tt():
+def test_tdb2tt(jd_float_or_vector):
     epsilon = 1e-16
-
-    tt0 = c.tdb2tt(T0)[1]
-    ttA = c.tdb2tt(TA)[1]
-    ttB = c.tdb2tt(TB)[1]
-
-    t = array([T0, TA, TB])
-    v = timescales.tdb_minus_tt(t)
-    eq(v, [tt0, ttA, ttB], epsilon)
+    jd_tdb = jd_float_or_vector.boxed_value
+    u = vcall(c.tdb2tt, jd_tdb)[1]
+    v = timescales.tdb_minus_tt(jd_tdb)
+    eq(u, v, epsilon)
 
 def jcentury(t):
     return (t - T0) / 36525.0
