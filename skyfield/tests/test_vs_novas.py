@@ -62,8 +62,6 @@ planet_codes = {
     'moon': 11,
     }
 
-planets_to_test = planet_codes.keys()
-
 # Fixtures.
 
 class Box(object):
@@ -145,7 +143,7 @@ def eq(first, second, epsilon=None):
             % (first, second, epsilon, appendix))
 
 
-def test_new_star_deflected_by_jupiter(timepairs):
+def test_star_deflected_by_jupiter(timepairs):
     """ Tests of generating a stellar position. """
     jd_tt = timepairs[0]
     star = c.make_cat_entry(
@@ -228,29 +226,24 @@ def test_topo_planet(jd, planets_list):
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
     eq(dis, g.distance, 0.001 * meter)
 
-def test_new_horizontal(timepairs, planets_list):
+def test_horizontal(jd, planets_list):
     """ Tests of generating a full position in horizontal coordinates. Uses
         fixtures to iterate through date pairs and planets to generate
         individual tests.
     """
-    jd_tt = timepairs[0]
-    delta_t = timepairs[1]
-    planet_name = planets_list[0]
-    planet_code = planets_list[1]
+    planet_name, planet_code = planets_list
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = coordinates.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
     ggr.ephemeris = emp
     xp = yp = 0.0
 
-    # replaces the for loop
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
-    jd_ut1 = jd_tt - delta_t / 86400.0
-    (zd, az), (ra, dec) = c.equ2hor(
-        jd_ut1, delta_t, xp, yp, position, ra, dec, ref_option=0)
+    ra, dec, dis = vcall(c.topo_planet, jd.tt, jd.delta_t, obj, position)
+    (zd, az), (ra, dec) = vcall(
+        c.equ2hor, jd.ut1, jd.delta_t, xp, yp, position, ra, dec)
+
     planet = getattr(emp, planet_name)
-    jd = JulianDate(tt=jd_tt, delta_t=delta_t)
     h = ggr(jd).observe(planet).apparent().horizontal()
 
     eq(zd * TAU / 360.0, h.zd, 0.001 * arcsecond)

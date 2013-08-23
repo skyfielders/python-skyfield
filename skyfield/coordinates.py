@@ -1,13 +1,14 @@
 """Coordinate systems."""
 
-from numpy import (arcsin, arctan2, array, cos, einsum, isscalar,
-                   ndarray, pi, sin, sqrt, zeros)
+from numpy import (arcsin, arctan2, array, cos, einsum,
+                   ndarray, ones_like, pi, sin, sqrt, zeros_like)
 
 from .angles import (interpret_longitude, interpret_latitude, Angle, HourAngle)
 from .constants import TAU
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
 from .framelib import ICRS_to_J2000
+from .functions import dots
 from .nutationlib import compute_nutation
 from .precessionlib import compute_precession
 from .relativity import add_aberration, add_deflection
@@ -163,27 +164,28 @@ class Apparent(RADec):
         # TODO: allow for corrections using xp and yp
 
         def spin(angle, vector):
+            z = zeros_like(angle)
+            u = ones_like(angle)
             cosang = cos(angle)
             sinang = sin(angle)
 
-            rotation = zeros((3, 3)) * angle
-            rotation[0, 0] = cosang
-            rotation[0, 1] = -sinang
-            rotation[1, 0] = sinang
-            rotation[1, 1] = cosang
-            rotation[2, 2] = 1.0
+            rotation = array([
+                [cosang, -sinang, z],
+                [sinang, cosang, z],
+                [z, z, u],
+                ])
 
-            return vector.dot(rotation)
+            return einsum('i...,ij...->j...', vector, rotation)
 
         gast = sidereal_time(self.jd, use_eqeq=True)
         uz = spin(-gast * TAU / 24.0, uze)
         un = spin(-gast * TAU / 24.0, une)
         uw = spin(-gast * TAU / 24.0, uwe)
 
-        p = self.position[:,0]  # TODO: vectorize this whole operation
-        pz = p.dot(uz)
-        pn = p.dot(un)
-        pw = p.dot(uw)
+        p = self.position
+        pz = dots(p, uz)
+        pn = dots(p, un)
+        pw = dots(p, uw)
 
         position = array([pn, -pw, pz])
 
