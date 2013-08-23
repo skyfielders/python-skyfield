@@ -1,7 +1,7 @@
 """Compare the output of Skyfield with the same routines from NOVAS."""
 
 import pytest
-from numpy import array, einsum, ndarray
+from numpy import array, einsum, rollaxis
 
 from skyfield import (coordinates, earthlib, framelib, nutationlib,
                       jpllib, precessionlib, starlib, timescales)
@@ -39,6 +39,7 @@ else:
     D0 = 63.8285
     DA = 39.707
     DB = 66.8779
+    DC = 72.  # http://maia.usno.navy.mil/ser7/deltat.preds
 
     P0 = (T0, D0)  # "pair 0"
     PA = (TA, DA)
@@ -61,8 +62,6 @@ planet_codes = {
     'moon': 11,
     }
 
-planets_to_test = planet_codes.keys()
-
 # Fixtures.
 
 class Box(object):
@@ -72,6 +71,18 @@ class Box(object):
 
 jd_vector = array([T0, TA, TB, TC])
 jd_vector.flags.writeable = False
+
+@pytest.fixture(params=[
+    Box({'ut1': T0, 'delta_t': D0}),
+    Box({'ut1': TA, 'delta_t': DA}),
+    Box({'ut1': TB, 'delta_t': DB}),
+    Box({'ut1': TC, 'delta_t': DC}),
+    Box({'ut1': [T0, TA, TB, TC], 'delta_t': [D0, DA, DB, DC]}),
+    ])
+def jd(request):
+    # Build a new JulianDate each time, because some test cases need to
+    # adjust the value of the date they are passed.
+    return JulianDate(**request.param.boxed_value)
 
 @pytest.fixture(params=[Box(T0), Box(TA), Box(TB), Box(TC), Box(jd_vector)])
 def jd_float_or_vector(request):
@@ -87,19 +98,32 @@ def planets_list(request):
 
 # Helpers.
 
-def vcall(function, value, *args):
-    """Call a function once or many times, on whether `value` is a vector.
+def shape_of(value):
+    return getattr(value, 'shape', ())
 
-    If `value` is scalar, then `function` is called once with the value
-    and any other `args` and its return value is returned.  Otherwise,
-    `function` is called as many times as there are elements in `value`,
-    and an array of return values is returned.
+def vcall(function, *args):
+    """Call a function once or many times, on whether any args are arrays.
+
+    If no arguments are NumPy arrays, then `function` is called once
+    with the arguments and its return value is returned.  Otherwise,
+    `function` is called as many times as there are values in the
+    arrays, and an array of return values is returned.
 
     """
-    if hasattr(value, 'shape'):
-        return array([function(v, *args) for v in value]).T
-    else:
-        return function(value, *args)
+    lengths = [arg.shape[0] for arg in args if getattr(arg, 'shape', ())]
+    if not lengths:
+        return function(*args)
+    length = min(lengths)
+    arglists = [list() for i in range(length)]
+    for arg in args:
+        if hasattr(arg, 'shape'):
+            for i, arglist in enumerate(arglists):
+                arglist.append(arg[i])
+        else:
+            for arglist in arglists:
+                arglist.append(arg)
+    result = array([function(*arglist) for arglist in arglists])
+    return rollaxis(result, 0, len(result.shape))
 
 # Tests.
 
@@ -119,16 +143,16 @@ def eq(first, second, epsilon=None):
             % (first, second, epsilon, appendix))
 
 
-def test_new_star_deflected_by_jupiter(timepairs):
+def test_star_deflected_by_jupiter(jd):
     """ Tests of generating a stellar position. """
-    jd_tt = timepairs[0]
+
     star = c.make_cat_entry(
         star_name='Star', catalog='cat', star_num=101,
         ra=1.59132070233, dec=8.5958876464,
         pm_ra=0.0, pm_dec=0.0,
         parallax=0.0, rad_vel=0.0,
         )
-    ra, dec = c.app_star(jd_tt, star)
+    ra, dec = vcall(c.app_star, jd.tt, star)
 
     earth = emp.earth
     star = starlib.Star(
@@ -136,95 +160,93 @@ def test_new_star_deflected_by_jupiter(timepairs):
         pm_ra=0.0, pm_dec=0.0,
         parallax=0.0, radial_velocity=0.0,
         )
-    jd = JulianDate(tt=jd_tt)
-    g = star.observe_from(earth(jd)).apparent()
+    g = earth(jd).observe(star).apparent()
+
+    assert shape_of(jd.tt) == shape_of(g.ra)
+    assert shape_of(jd.tt) == shape_of(g.dec)
+    assert shape_of(jd.tt) == shape_of(g.distance)
 
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
 
 # Tests of generating a full position or coordinate.
 
-def test_astro_planet(timepairs, planets_list):
-    jd_tt = timepairs[0]
-    planet_name = planets_list[0]
-    planet_code = planets_list[1]
+def test_astro_planet(jd, planets_list):
+    planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = c.astro_planet(jd_tt, obj)
+    ra, dec, dis = vcall(c.astro_planet, jd.tt, obj)
 
     earth = emp.earth
     planet = getattr(emp, planet_name)
-    jd = JulianDate(tt=jd_tt)
-    g = planet.observe_from(earth(jd)).astrometric()
+    g = earth(jd).observe(planet).astrometric()
+
+    assert shape_of(jd.tt) == shape_of(g.ra)
+    assert shape_of(jd.tt) == shape_of(g.dec)
+    assert shape_of(jd.tt) == shape_of(g.distance)
 
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
     eq(dis, g.distance, 0.001 * meter)
 
-
-def test_app_planet(timepairs, planets_list):
-    jd_tt = timepairs[0]
-    planet_name = planets_list[0]
-    planet_code = planets_list[1]
+def test_app_planet(jd, planets_list):
+    planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = c.app_planet(jd_tt, obj)
+    ra, dec, dis = vcall(c.app_planet, jd.tt, obj)
 
     earth = emp.earth
     planet = getattr(emp, planet_name)
-    jd = JulianDate(tt=jd_tt)
-    g = planet.observe_from(earth(jd)).apparent()
+    g = earth(jd).observe(planet).apparent()
+
+    assert shape_of(jd.tt) == shape_of(g.ra)
+    assert shape_of(jd.tt) == shape_of(g.dec)
+    assert shape_of(jd.tt) == shape_of(g.distance)
 
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
     eq(dis, g.distance, 0.001 * meter)
 
-def test_topo_planet(timepairs, planets_list):
+def test_topo_planet(jd, planets_list):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = coordinates.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
     ggr.ephemeris = emp
 
-    jd_tt = timepairs[0]
-    delta_t = timepairs[1]
-    planet_name = planets_list[0]
-    planet_code = planets_list[1]
+    planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
+    ra, dec, dis = vcall(c.topo_planet, jd.tt, jd.delta_t, obj, position)
 
     planet = getattr(emp, planet_name)
-    jd = JulianDate(tt=jd_tt, delta_t=delta_t)
     g = ggr(jd).observe(planet).apparent()
+
+    assert shape_of(jd.tt) == shape_of(g.ra)
+    assert shape_of(jd.tt) == shape_of(g.dec)
+    assert shape_of(jd.tt) == shape_of(g.distance)
 
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
     eq(dis, g.distance, 0.001 * meter)
 
-
-def test_new_horizontal(timepairs, planets_list):
+def test_horizontal(jd, planets_list):
     """ Tests of generating a full position in horizontal coordinates. Uses
         fixtures to iterate through date pairs and planets to generate
         individual tests.
     """
-    jd_tt = timepairs[0]
-    delta_t = timepairs[1]
-    planet_name = planets_list[0]
-    planet_code = planets_list[1]
+    planet_name, planet_code = planets_list
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = coordinates.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
     ggr.ephemeris = emp
     xp = yp = 0.0
 
-    # replaces the for loop
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
-    jd_ut1 = jd_tt - delta_t / 86400.0
-    (zd, az), (ra, dec) = c.equ2hor(
-        jd_ut1, delta_t, xp, yp, position, ra, dec, ref_option=0)
+    ra, dec, dis = vcall(c.topo_planet, jd.tt, jd.delta_t, obj, position)
+    (zd, az), (ra, dec) = vcall(
+        c.equ2hor, jd.ut1, jd.delta_t, xp, yp, position, ra, dec)
+
     planet = getattr(emp, planet_name)
-    jd = JulianDate(tt=jd_tt, delta_t=delta_t)
     h = ggr(jd).observe(planet).apparent().horizontal()
 
     eq(zd * TAU / 360.0, h.zd, 0.001 * arcsecond)
@@ -238,28 +260,18 @@ def test_cal_date():
     for jd in 0.0, 2414988.5, 2415020.31352, 2442249.5, 2456335.2428472:
         assert c.cal_date(jd) == timescales.cal_date(jd)
 
-def test_earth_rotation_angle():
+def test_earth_rotation_angle(jd_float_or_vector):
     epsilon = 1e-12
+    jd_ut1 = jd_float_or_vector.boxed_value
+    u = vcall(c.era, jd_ut1)
+    v = earthlib.earth_rotation_angle(jd_ut1)
+    eq(u, v, epsilon)
 
-    a0 = c.era(T0)
-    aA = c.era(TA)
-    aB = c.era(TB)
-
-    t = array([T0, TA, TB])
-    v = earthlib.earth_rotation_angle(t)
-    eq(v, [a0, aA, aB], epsilon)
-
-def test_earth_tilt():
+def test_earth_tilt(jd):
     epsilon = 1e-9
-
-    vars0 = c.e_tilt(T0)
-    vars1 = c.e_tilt(TA)
-    vars2 = c.e_tilt(TB)
-
-    jd = JulianDate(tdb=[T0, TA, TB])
+    u = vcall(c.e_tilt, jd.tdb)
     v = nutationlib.earth_tilt(jd)
-    for i in range(len(v)):
-        eq(v[i], [vars0[i], vars1[i], vars2[i]], epsilon)
+    eq(u, array(v), epsilon)
 
 def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
     epsilon = 1e-22
@@ -270,10 +282,10 @@ def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
 
 def test_frame_tie():
     epsilon = 1e-15
-    v = array([1, 2, 3])
+    xyz = array([1.0, 2.0, 3.0])
 
-    eq(c.frame_tie(v, 0), v.dot(framelib.ICRS_to_J2000), epsilon)
-    eq(c.frame_tie(v, -1), v.dot(framelib.J2000_to_ICRS), epsilon)
+    eq(c.frame_tie(xyz, 0), xyz.dot(framelib.ICRS_to_J2000), epsilon)
+    eq(c.frame_tie(xyz, -1), xyz.dot(framelib.J2000_to_ICRS), epsilon)
 
 def test_fundamental_arguments(jd_float_or_vector):
     epsilon = 1e-12
@@ -283,22 +295,19 @@ def test_fundamental_arguments(jd_float_or_vector):
     v = nutationlib.fundamental_arguments(t)
     eq(u, v, epsilon)
 
-def test_geocentric_position_and_velocity():
+def test_geocentric_position_and_velocity(jd):
     epsilon = 1e-13
+    jd.delta_t = delta_t = 0.0  # TODO: relax this limitation?
 
-    delta_t = 0.0
     observer = c.make_observer_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-
-    pos0, vel0 = c.geo_posvel(T0, delta_t, observer)
-    posA, velA = c.geo_posvel(TA, delta_t, observer)
+    posu, velu = vcall(c.geo_posvel, jd.tt, delta_t, observer)
 
     topos = coordinates.Topos('75 W', '45 N', elevation=0.0,
                               temperature=10.0, pressure=1010.0)
-
-    jd = JulianDate(tt=[T0, TA], delta_t=delta_t)
     posv, velv = earthlib.geocentric_position_and_velocity(topos, jd)
-    eq(posv.T, [pos0, posA], epsilon)
-    eq(velv.T, [vel0, velA], epsilon)
+
+    eq(posu, posv, epsilon)
+    eq(velu, velv, epsilon)
 
 def test_iau2000a(jd_float_or_vector):
     epsilon = 2e-18
@@ -328,57 +337,36 @@ def test_mean_obliq(jd_float_or_vector):
     v = nutationlib.mean_obliquity(jd_tdb)
     eq(u, v, epsilon)
 
-def test_nutation():
+def test_nutation(jd):
     epsilon = 1e-15
-    v = array([1, 2, 3])
+    xyz = [1.0, 2.0, 3.0]
+    u = vcall(c_nutation, jd.tt, xyz)  # TODO: shouldn't this be jd.tdb?
+    xyz = array(xyz)
+    v = einsum('i...,ij...->j...', xyz, nutationlib.compute_nutation(jd))
+    eq(u, v, epsilon)
 
-    v0 = c_nutation(T0, v, direction=0)
-    va = c_nutation(TA, v, direction=0)
-    vb = c_nutation(TB, v, direction=0)
-
-    jd = JulianDate(tt=[T0, TA, TB])
-    v = einsum('i,ijk->jk', v, nutationlib.compute_nutation(jd))
-
-    eq(v0, v[:,0], epsilon)
-    eq(va, v[:,1], epsilon)
-    eq(vb, v[:,2], epsilon)
-
-def test_precession():
+def test_precession(jd_float_or_vector):
     epsilon = 1e-15
-    v = array([1, 2, 3])
+    jd_tdb = jd_float_or_vector.boxed_value
+    xyz = [1.0, 2.0, 3.0]
+    u = vcall(c.precession, T0, xyz, jd_tdb)
+    xyz = array(xyz)
+    matrix_or_matrices = precessionlib.compute_precession(jd_tdb)
+    v = einsum('i...,ij...->j...', array(xyz), matrix_or_matrices)
+    eq(u, v, epsilon)
 
-    va = c.precession(T0, v, TA)
-    vb = c.precession(T0, v, TB)
-
-    ab = array([TA, TB])
-    vab = einsum('i,ijk->jk', v, precessionlib.compute_precession(ab))
-
-    eq(va, vab[:,0], epsilon)
-    eq(vb, vab[:,1], epsilon)
-
-def test_sidereal_time_with_zero_delta_t():
+def test_sidereal_time_with_zero_delta_t(jd):
     epsilon = 1e-13
-
-    delta_t = 0.0
-
-    st0 = c.sidereal_time(T0, 0.0, delta_t, False, True)
-    stA = c.sidereal_time(TA, 0.0, delta_t, False, True)
-    stB = c.sidereal_time(TB, 0.0, delta_t, False, True)
-
-    jd = JulianDate(ut1=[T0, TA, TB], delta_t=delta_t)
+    jd.delta_t = 0.0
+    u = vcall(c.sidereal_time, jd.ut1, 0.0, 0.0, False, True)
     v = earthlib.sidereal_time(jd)
-    eq(v, [st0, stA, stB], epsilon)
+    eq(u, v, epsilon)
 
-def test_sidereal_time_with_nonzero_delta_t():
+def test_sidereal_time_with_nonzero_delta_t(jd):
     epsilon = 1e-13
-
-    st0 = c.sidereal_time(T0, 0.0, D0, False, True)
-    stA = c.sidereal_time(TA, 0.0, DA, False, True)
-    stB = c.sidereal_time(TB, 0.0, DB, False, True)
-
-    jd = JulianDate(ut1=[T0, TA, TB], delta_t=[D0, DA, DB])
+    u = vcall(c.sidereal_time, jd.ut1, 0.0, jd.delta_t, False, True)
     v = earthlib.sidereal_time(jd)
-    eq(v, [st0, stA, stB], epsilon)
+    eq(u, v, epsilon)
 
 def test_starvectors():
     epsilon = 1e-10
@@ -398,8 +386,8 @@ def test_terra():
 
     observer = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
 
-    # Note that class stands in for a NOVAS Topos, not for our native
-    # Topos class!
+    # Note that this class stands in for a NOVAS Topos structure, but
+    # not for our own Topos class!
     class Topos(object):
         latitude = 45.0 * DEG2RAD
         longitude = -75.0 * DEG2RAD
@@ -416,16 +404,12 @@ def test_terra():
     eq(vel0, veln[:,0], epsilon)
     eq(vel1, veln[:,1], epsilon)
 
-def test_tdb2tt():
+def test_tdb2tt(jd_float_or_vector):
     epsilon = 1e-16
-
-    tt0 = c.tdb2tt(T0)[1]
-    ttA = c.tdb2tt(TA)[1]
-    ttB = c.tdb2tt(TB)[1]
-
-    t = array([T0, TA, TB])
-    v = timescales.tdb_minus_tt(t)
-    eq(v, [tt0, ttA, ttB], epsilon)
+    jd_tdb = jd_float_or_vector.boxed_value
+    u = vcall(c.tdb2tt, jd_tdb)[1]
+    v = timescales.tdb_minus_tt(jd_tdb)
+    eq(u, v, epsilon)
 
 def jcentury(t):
     return (t - T0) / 36525.0

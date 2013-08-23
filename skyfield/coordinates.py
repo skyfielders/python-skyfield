@@ -1,13 +1,14 @@
 """Coordinate systems."""
 
-from numpy import (arcsin, arctan2, array, cos, einsum, isscalar,
-                   ndarray, pi, sin, sqrt, zeros)
+from numpy import (arcsin, arctan2, array, cos, einsum,
+                   ndarray, ones_like, pi, sin, sqrt, zeros_like)
 
 from .angles import (interpret_longitude, interpret_latitude, Angle, HourAngle)
 from .constants import TAU
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
 from .framelib import ICRS_to_J2000
+from .functions import dots
 from .nutationlib import compute_nutation
 from .precessionlib import compute_precession
 from .relativity import add_aberration, add_deflection
@@ -19,12 +20,8 @@ class XYZ(object):
 
     def __init__(self, position, velocity=None, jd=None):
         self.jd = jd
-        if getattr(jd, 'shape', ()) == ():
-            self.position = position.reshape((3,))
-            self.velocity = velocity.reshape((3,))
-        else:
-            self.position = position
-            self.velocity = velocity
+        self.position = position
+        self.velocity = velocity
 
     def __repr__(self):
         return '<%s position x,y,z AU%s%s>' % (
@@ -121,21 +118,16 @@ class GCRS(XYZ):
                 position, observer.position)
             include_earth_deflection = limb_angle >= 0.8
 
-        if len(position.shape) == 1:
-            jd_tdb = jd_tdb[0]
-
         add_deflection(position, observer.position, observer.ephemeris,
                        jd_tdb, include_earth_deflection)
         add_aberration(position, observer.velocity, self.lighttime)
 
-        if isscalar(jd_tdb):
-            position = position.reshape((3, 1))
-        else:
-            position = position.copy()
+        p = compute_precession(jd_tdb)
+        n = compute_nutation(jd)
 
         position = position.T.dot(ICRS_to_J2000)
-        position = einsum('ij,jki->ik', position, compute_precession(jd_tdb))
-        position = einsum('ij,jki->ik', position, compute_nutation(jd))
+        position = einsum('...j,jk...->...k', position, p)
+        position = einsum('...j,jk...->...k', position, n)
         position = position.T
 
         eq = Apparent()
@@ -172,27 +164,28 @@ class Apparent(RADec):
         # TODO: allow for corrections using xp and yp
 
         def spin(angle, vector):
+            z = zeros_like(angle)
+            u = ones_like(angle)
             cosang = cos(angle)
             sinang = sin(angle)
 
-            rotation = zeros((3, 3)) * angle
-            rotation[0, 0] = cosang
-            rotation[0, 1] = -sinang
-            rotation[1, 0] = sinang
-            rotation[1, 1] = cosang
-            rotation[2, 2] = 1.0
+            rotation = array([
+                [cosang, -sinang, z],
+                [sinang, cosang, z],
+                [z, z, u],
+                ])
 
-            return vector.dot(rotation)
+            return einsum('i...,ij...->j...', vector, rotation)
 
         gast = sidereal_time(self.jd, use_eqeq=True)
         uz = spin(-gast * TAU / 24.0, uze)
         un = spin(-gast * TAU / 24.0, une)
         uw = spin(-gast * TAU / 24.0, uwe)
 
-        p = self.position[:,0]  # TODO: vectorize this whole operation
-        pz = p.dot(uz)
-        pn = p.dot(un)
-        pw = p.dot(uw)
+        p = self.position
+        pz = dots(p, uz)
+        pn = dots(p, un)
+        pw = dots(p, uw)
 
         position = array([pn, -pw, pz])
 

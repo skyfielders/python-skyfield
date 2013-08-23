@@ -1,6 +1,6 @@
 """Python classes that represent various classes of star."""
 
-from numpy import array, cos, sin, sqrt
+from numpy import array, cos, outer, sin, sqrt
 from .constants import AU_KM, ASEC2RAD, DEG2RAD, C, C_AUDAY, T0
 from .coordinates import GCRS
 from .relativity import light_time_difference
@@ -23,12 +23,15 @@ class Star(object):
         position, velocity = self._position, self._velocity
         jd = observer.jd
         dt = light_time_difference(position, observer.position)
-        position = position + velocity * (T0 - jd.tdb - dt)
+        if jd.shape:
+            position = (outer(velocity, T0 - jd.tdb - dt).T + position).T
+        else:
+            position = position + velocity * (T0 - jd.tdb - dt)
         vector = position - observer.position
         distance = sqrt((vector * vector).sum(axis=0))
         lighttime = distance / C_AUDAY
 
-        g = GCRS(vector, velocity - observer.velocity, jd)
+        g = GCRS(vector, (observer.velocity.T - velocity).T, jd)
         g.observer = observer
         g.distance = distance
         g.lighttime = lighttime
@@ -58,7 +61,7 @@ class Star(object):
             dist * cdc * cra,
             dist * cdc * sra,
             dist * sdc,
-            )).reshape((3, 1))
+            ))
 
         # Compute Doppler factor, which accounts for change in light
         # travel time to star.
@@ -78,4 +81,4 @@ class Star(object):
             - pmr * sra - pmd * sdc * cra + rvl * cdc * cra,
               pmr * cra - pmd * sdc * sra + rvl * cdc * sra,
               pmd * cdc + rvl * sdc,
-              )).reshape((3, 1))
+              ))

@@ -1,7 +1,7 @@
 """Formulae for specific earth behaviors and effects."""
 
 from numpy import (arcsin, arccos, array, clip, cos, einsum, fmod,
-                   pi, sin, sqrt, zeros_like)
+                   minimum, pi, sin, sqrt, zeros_like)
 
 from .constants import DEG2RAD, ERAD, AU, T0, ANGVEL, AU_KM, ERAD_KM, F, RAD2DEG
 from .framelib import J2000_to_ICRS
@@ -10,8 +10,6 @@ from .nutationlib import earth_tilt, compute_nutation
 from .precessionlib import compute_precession
 
 rade = ERAD / AU
-halfpi = pi / 2.0
-
 
 def geocentric_position_and_velocity(topos, jd):
     """Compute the geocentric position, velocity of a terrestrial observer.
@@ -33,11 +31,11 @@ def geocentric_position_and_velocity(topos, jd):
     p = compute_precession(jd.tdb)
     f = J2000_to_ICRS
 
-    t = einsum('jin,kjn->ikn', n, p)
-    t = einsum('ijn,jk->ikn', t, f)
+    t = einsum('ji...,kj...->ik...', n, p)
+    t = einsum('ij...,jk...->ik...', t, f)
 
-    pos = einsum('in,ijn->jn', pos, t)
-    vel = einsum('in,ijn->jn', vel, t)
+    pos = einsum('i...,ij...->j...', pos, t)
+    vel = einsum('i...,ij...->j...', vel, t)
 
     return pos, vel
 
@@ -107,10 +105,7 @@ def compute_limb_angle(position, observer):
 
     # Compute apparent angular radius of Earth's limb.
 
-    if disobs >= rade:
-        aprad = arcsin(rade / disobs)
-    else:
-        aprad = halfpi
+    aprad = arcsin(minimum(rade / disobs, 1.0))
 
     # Compute zenith distance of Earth's limb.
 

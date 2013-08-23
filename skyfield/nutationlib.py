@@ -1,17 +1,14 @@
 from numpy import array, cos, fmod, sin, tensordot, zeros
-
 from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, PSI_COR, EPS_COR, T0
 
-
 def compute_nutation(jd):
-    """Generate the nutation rotations for a series of epochs `jd`.
+    """Generate the nutation rotations for JulianDate `jd`.
 
-    The array of matrices that is returned has dimensions `(3, 3, n)`
-    where `n` is the number of dates that were provided.
+    If the Julian date is scalar, a simple ``(3, 3)`` matrix is
+    returned; if the date is an array of length ``n``, then an array of
+    matrices is returned with dimensions ``(3, 3, n)``.
 
     """
-    # Call 'e_tilt' to get the obliquity and nutation angles.
-
     oblm, oblt, eqeq, psi, eps = earth_tilt(jd)
 
     cobm = cos(oblm * DEG2RAD)
@@ -30,8 +27,11 @@ def compute_nutation(jd):
                     cpsi * sobm * sobt + cobm * cobt)))
 
 def earth_tilt(jd):
-    """Return stuff about the earth's axis and position."""
+    """Return a tuple of information about the earth's axis and position.
 
+    `jd` - A JulianDate object.
+
+    """
     dp, de = iau2000a(jd.tt)
     dp /= ASEC2RAD
     de /= ASEC2RAD
@@ -87,8 +87,8 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
 
     # Build array for intermediate results.
 
-    shape = getattr(jd_tt, 'shape', None)
-    fa = zeros((14,) if shape is None else (14, shape[0]))
+    shape = getattr(jd_tt, 'shape', ())
+    fa = zeros((14,) if shape == () else (14, shape[0]))
 
     # Mean Anomaly of the Moon.
 
