@@ -358,18 +358,15 @@ def test_nutation():
     eq(va, v[:,1], epsilon)
     eq(vb, v[:,2], epsilon)
 
-def test_precession():
+def test_precession(jd_float_or_vector):
     epsilon = 1e-15
-    v = array([1, 2, 3])
-
-    va = c.precession(T0, v, TA)
-    vb = c.precession(T0, v, TB)
-
-    ab = array([TA, TB])
-    vab = einsum('i,ijk->jk', v, precessionlib.compute_precession(ab))
-
-    eq(va, vab[:,0], epsilon)
-    eq(vb, vab[:,1], epsilon)
+    jd_tdb = jd_float_or_vector.boxed_value
+    xyz = [1.0, 2.0, 3.0]
+    u = vcall(c.precession, T0, xyz, jd_tdb)
+    xyz = array(xyz)
+    matrix_or_matrices = precessionlib.compute_precession(jd_tdb)
+    v = einsum('i...,ij...->j...', array(xyz), matrix_or_matrices)
+    eq(u, v, epsilon)
 
 def test_sidereal_time_with_zero_delta_t(jd):
     epsilon = 1e-13
