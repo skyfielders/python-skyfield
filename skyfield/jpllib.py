@@ -20,6 +20,22 @@ class Planet(object):
         i.ephemeris = self.ephemeris
         return i
 
+    def _position(self, jd_tdb):
+        e = self.jplephemeris
+        c = e.position
+        if self.jplname == 'earth':
+            p = c('earthmoon', jd_tdb) - c('moon', jd_tdb) * e.earth_share
+        elif self.jplname == 'moon':
+            p = c('earthmoon', jd_tdb) + c('moon', jd_tdb) * e.moon_share
+        else:
+            p = c(self.jplname, jd_tdb)
+        p *= KM_AU
+        if getattr(jd_tdb, 'shape', ()) == ():
+            # Skyfield, unlike jplephem, is willing to accept and return
+            # plain scalars instead of only trafficking in NumPy arrays.
+            p = p[:,0]
+        return p
+
     def _position_and_velocity(self, jd_tdb):
         e = self.jplephemeris
         c = e.compute
@@ -89,6 +105,9 @@ class Ephemeris(object):
         self.uranus = Planet(self, self.jplephemeris, 'uranus')
         self.neptune = Planet(self, self.jplephemeris, 'neptune')
         self.pluto = Planet(self, self.jplephemeris, 'pluto')
+
+    def _position(self, name, jd):
+        return getattr(self, name)._position(jd)
 
     def _position_and_velocity(self, name, jd):
         return getattr(self, name)._position_and_velocity(jd)

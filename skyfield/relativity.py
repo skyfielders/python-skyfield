@@ -44,7 +44,7 @@ def add_deflection(position, observer, ephemeris, jd_tdb,
 
         # Get position of gravitating body wrt ss barycenter at time 'jd_tdb'.
 
-        bposition, bvelocity = ephemeris._position_and_velocity(name, jd_tdb)
+        bposition = ephemeris._position(name, jd_tdb)
 
         # Get position of gravitating body wrt observer at time 'jd_tdb'.
 
@@ -69,14 +69,14 @@ def add_deflection(position, observer, ephemeris, jd_tdb,
         # if tlt < dlt:
         #     tclose = jd - tlt
 
-        bposition, bvelocity = ephemeris._position_and_velocity(name, tclose)
+        bposition = ephemeris._position(name, tclose)
         rmass = rmasses[name]
         _add_deflection(position, observer, bposition, rmass)
 
     # If observer is not at geocenter, add in deflection due to Earth.
 
     if include_earth_deflection.any():
-        bposition, bvelocity = ephemeris._position_and_velocity('earth', tclose)
+        bposition = ephemeris._position('earth', tclose)
         rmass = rmasses['earth']
         _add_deflection(position, observer, bposition, rmass)
 
