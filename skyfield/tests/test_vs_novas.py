@@ -206,28 +206,27 @@ def test_app_planet(jd, planets_list):
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
     eq(dis, g.distance, 0.001 * meter)
 
-def test_topo_planet(timepairs, planets_list):
+def test_topo_planet(jd, planets_list):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = coordinates.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
     ggr.ephemeris = emp
 
-    jd_tt = timepairs[0]
-    delta_t = timepairs[1]
-    planet_name = planets_list[0]
-    planet_code = planets_list[1]
+    planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = c.topo_planet(jd_tt, delta_t, obj, position)
+    ra, dec, dis = vcall(c.topo_planet, jd.tt, jd.delta_t, obj, position)
 
     planet = getattr(emp, planet_name)
-    jd = JulianDate(tt=jd_tt, delta_t=delta_t)
     g = ggr(jd).observe(planet).apparent()
+
+    assert shape_of(jd.tt) == shape_of(g.ra)
+    assert shape_of(jd.tt) == shape_of(g.dec)
+    assert shape_of(jd.tt) == shape_of(g.distance)
 
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
     eq(dis, g.distance, 0.001 * meter)
-
 
 def test_new_horizontal(timepairs, planets_list):
     """ Tests of generating a full position in horizontal coordinates. Uses
