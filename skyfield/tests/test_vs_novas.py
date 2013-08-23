@@ -261,20 +261,15 @@ def test_cal_date():
     for jd in 0.0, 2414988.5, 2415020.31352, 2442249.5, 2456335.2428472:
         assert c.cal_date(jd) == timescales.cal_date(jd)
 
-def test_earth_rotation_angle():
+def test_earth_rotation_angle(jd_float_or_vector):
     epsilon = 1e-12
+    jd_ut1 = jd_float_or_vector.boxed_value
+    u = vcall(c.era, jd_ut1)
+    v = earthlib.earth_rotation_angle(jd_ut1)
+    eq(u, v, epsilon)
 
-    a0 = c.era(T0)
-    aA = c.era(TA)
-    aB = c.era(TB)
-
-    t = array([T0, TA, TB])
-    v = earthlib.earth_rotation_angle(t)
-    eq(v, [a0, aA, aB], epsilon)
-
-def test_earth_tilt(jd_float_or_vector):
+def test_earth_tilt(jd):
     epsilon = 1e-9
-    jd = JulianDate(tdb=jd_float_or_vector.boxed_value)
     u = vcall(c.e_tilt, jd.tdb)
     v = nutationlib.earth_tilt(jd)
     eq(u, array(v), epsilon)
@@ -288,10 +283,10 @@ def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
 
 def test_frame_tie():
     epsilon = 1e-15
-    v = array([1, 2, 3])
+    xyz = array([1.0, 2.0, 3.0])
 
-    eq(c.frame_tie(v, 0), v.dot(framelib.ICRS_to_J2000), epsilon)
-    eq(c.frame_tie(v, -1), v.dot(framelib.J2000_to_ICRS), epsilon)
+    eq(c.frame_tie(xyz, 0), xyz.dot(framelib.ICRS_to_J2000), epsilon)
+    eq(c.frame_tie(xyz, -1), xyz.dot(framelib.J2000_to_ICRS), epsilon)
 
 def test_fundamental_arguments(jd_float_or_vector):
     epsilon = 1e-12
