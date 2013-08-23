@@ -121,14 +121,12 @@ class GCRS(XYZ):
                        jd_tdb, include_earth_deflection)
         add_aberration(position, observer.velocity, self.lighttime)
 
-        if isscalar(jd_tdb):
-            position = position.reshape((3, 1))
-        else:
-            position = position.copy()
+        p = compute_precession(jd_tdb)
+        n = compute_nutation(jd)
 
         position = position.T.dot(ICRS_to_J2000)
-        position = einsum('ij,jki->ik', position, compute_precession(jd_tdb))
-        position = einsum('ij,jki->ik', position, compute_nutation(jd))
+        position = einsum('...j,jk...->...k', position, p)
+        position = einsum('...j,jk...->...k', position, n)
         position = position.T
 
         eq = Apparent()

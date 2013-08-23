@@ -100,6 +100,9 @@ def planets_list(request):
 
 # Helpers.
 
+def shape_of(value):
+    return getattr(value, 'shape', ())
+
 def vcall(function, *args):
     """Call a function once or many times, on whether any args are arrays.
 
@@ -177,22 +180,27 @@ def test_astro_planet(jd, planets_list):
     planet = getattr(emp, planet_name)
     g = earth(jd).observe(planet).astrometric()
 
+    assert shape_of(jd.tt) == shape_of(g.ra)
+    assert shape_of(jd.tt) == shape_of(g.dec)
+    assert shape_of(jd.tt) == shape_of(g.distance)
+
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
     eq(dis, g.distance, 0.001 * meter)
 
-def test_app_planet(timepairs, planets_list):
-    jd_tt = timepairs[0]
-    planet_name = planets_list[0]
-    planet_code = planets_list[1]
+def test_app_planet(jd, planets_list):
+    planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = c.app_planet(jd_tt, obj)
+    ra, dec, dis = vcall(c.app_planet, jd.tt, obj)
 
     earth = emp.earth
     planet = getattr(emp, planet_name)
-    jd = JulianDate(tt=jd_tt)
     g = earth(jd).observe(planet).apparent()
+
+    assert shape_of(jd.tt) == shape_of(g.ra)
+    assert shape_of(jd.tt) == shape_of(g.dec)
+    assert shape_of(jd.tt) == shape_of(g.distance)
 
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
