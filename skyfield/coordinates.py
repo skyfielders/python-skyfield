@@ -19,12 +19,8 @@ class XYZ(object):
 
     def __init__(self, position, velocity=None, jd=None):
         self.jd = jd
-        if getattr(jd, 'shape', ()) == ():
-            self.position = position.reshape((3,))
-            self.velocity = velocity.reshape((3,))
-        else:
-            self.position = position
-            self.velocity = velocity
+        self.position = position
+        self.velocity = velocity
 
     def __repr__(self):
         return '<%s position x,y,z AU%s%s>' % (
@@ -120,9 +116,6 @@ class GCRS(XYZ):
             limb_angle, nadir_angle = compute_limb_angle(
                 position, observer.position)
             include_earth_deflection = limb_angle >= 0.8
-
-        if len(position.shape) == 1:
-            jd_tdb = jd_tdb[0]
 
         add_deflection(position, observer.position, observer.ephemeris,
                        jd_tdb, include_earth_deflection)

@@ -167,23 +167,19 @@ def test_new_star_deflected_by_jupiter(timepairs):
 
 # Tests of generating a full position or coordinate.
 
-def test_astro_planet(timepairs, planets_list):
-    jd_tt = timepairs[0]
-    planet_name = planets_list[0]
-    planet_code = planets_list[1]
+def test_astro_planet(jd, planets_list):
+    planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = c.astro_planet(jd_tt, obj)
+    ra, dec, dis = vcall(c.astro_planet, jd.tt, obj)
 
     earth = emp.earth
     planet = getattr(emp, planet_name)
-    jd = JulianDate(tt=jd_tt)
-    g = planet.observe_from(earth(jd)).astrometric()
+    g = earth(jd).observe(planet).astrometric()
 
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
     eq(dis, g.distance, 0.001 * meter)
-
 
 def test_app_planet(timepairs, planets_list):
     jd_tt = timepairs[0]
@@ -196,7 +192,7 @@ def test_app_planet(timepairs, planets_list):
     earth = emp.earth
     planet = getattr(emp, planet_name)
     jd = JulianDate(tt=jd_tt)
-    g = planet.observe_from(earth(jd)).apparent()
+    g = earth(jd).observe(planet).apparent()
 
     eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
     eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)

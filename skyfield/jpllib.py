@@ -30,6 +30,10 @@ class Planet(object):
         else:
             pv = c(self.jplname, jd_tdb)
         pv *= KM_AU
+        if getattr(jd_tdb, 'shape', ()) == ():
+            # Skyfield, unlike jplephem, is willing to accept and return
+            # plain scalars instead of only trafficking in NumPy arrays.
+            pv = pv[:,0]
         return pv[:3], pv[3:]
 
     def observe_from(self, observer):
