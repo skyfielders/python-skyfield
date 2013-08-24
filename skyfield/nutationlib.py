@@ -1,4 +1,4 @@
-from numpy import array, cos, fmod, sin, tensordot, zeros
+from numpy import array, cos, fmod, sin, einsum, outer, tensordot, zeros
 from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, PSI_COR, EPS_COR, T0
 
 def compute_nutation(jd):
@@ -165,6 +165,37 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
     c_terms *= ASEC2RAD
     return c_terms
 
+anomaly_constant, anomaly_coefficient = array([
+
+    # Mean anomaly of the Moon.
+    (2.35555598, 8328.6914269554),
+
+    # Mean anomaly of the Sun.
+    (6.24006013, 628.301955),
+
+    # Mean argument of the latitude of the Moon.
+    (1.627905234, 8433.466158131),
+
+    # Mean elongation of the Moon from the Sun.
+    (5.198466741, 7771.3771468121),
+
+    # Mean longitude of the ascending node of the Moon.
+    (2.18243920, - 33.757045),
+
+    # Planetary longitudes, Mercury through Neptune (Souchay et al. 1999).
+    (4.402608842, 2608.7903141574),
+    (3.176146697, 1021.3285546211),
+    (1.753470314,  628.3075849991),
+    (6.203480913,  334.0612426700),
+    (0.599546497,   52.9690962641),
+    (0.874016757,   21.3299104960),
+    (5.481293871,    7.4781598567),
+    (5.321159000,    3.8127774000),
+
+    # General accumulated precession in longitude (gets multiplied by t).
+    (0.02438175, 0.00000538691),
+    ]).T
+
 def iau2000a(jd_tt):
     """Compute Earth nutation based on the IAU 2000A nutation model.
 
@@ -203,49 +234,17 @@ def iau2000a(jd_tt):
     dpsils = dp * factor
     depsls = de * factor
 
-    # ** Planetary nutation. **
-
-    # Mean anomaly of the Moon.
-
-    al = 2.35555598 + 8328.6914269554 * t
-
-    # Mean anomaly of the Sun.
-
-    alsu = 6.24006013 + 628.301955 * t
-
-    # Mean argument of the latitude of the Moon.
-
-    af = 1.627905234 + 8433.466158131 * t
-
-    # Mean elongation of the Moon from the Sun.
-
-    ad = 5.198466741 + 7771.3771468121 * t
-
-    # Mean longitude of the ascending node of the Moon.
-
-    aom = 2.18243920 - 33.757045 * t
-
-    # General accumulated precession in longitude.
-
-    apa = (0.02438175 + 0.00000538691 * t) * t
-
-    # Planetary longitudes, Mercury through Neptune (Souchay et al. 1999).
-
-    alme = 4.402608842 + 2608.7903141574 * t
-    alve = 3.176146697 + 1021.3285546211 * t
-    alea = 1.753470314 +  628.3075849991 * t
-    alma = 6.203480913 +  334.0612426700 * t
-    alju = 0.599546497 +   52.9690962641 * t
-    alsa = 0.874016757 +   21.3299104960 * t
-    alur = 5.481293871 +    7.4781598567 * t
-    alne = 5.321159000 +    3.8127774000 * t
-
-    # Summation of planetary nutation series (in reverse order).
-
-    a = array((al, alsu, af, ad, aom,
-               alme, alve, alea, alma, alju, alsa, alur, alne, apa))
+    if getattr(t, 'shape', ()) == ():
+        a = t * anomaly_coefficient + anomaly_constant
+    else:
+        a = (outer(anomaly_coefficient, t).T + anomaly_constant).T
+    a[-1] *= t
 
     fmod(a, TAU, out=a)
+
+    # TODO: the NOVAS library is careful to sum napl_t in reverse order,
+    # perhaps because the least significant terms come last; could we
+    # increase the precision of our tests if we followed suit?
 
     arg = fmod(napl_t.dot(a), TAU)
     sc = array((sin(arg), cos(arg))).T
