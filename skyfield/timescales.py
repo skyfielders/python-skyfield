@@ -1,5 +1,5 @@
 from numpy import array, sin
-from .constants import T0
+from .constants import T0, S_DAY
 
 # Much of the following code is adapted from the USNO's "novas.c".
 
@@ -61,13 +61,13 @@ class JulianDate(object):
 
         if i >= _TT:
             if (tt is None) and (tdb is not None):
-                self.tt = tt = tdb - tdb_minus_tt(tdb) / 86400.0
+                self.tt = tt = tdb - tdb_minus_tt(tdb) * S_DAY
                 if i == _TT:
                     return tt
 
             if i >= _UT1:
                 if (ut1 is None) and (tt is not None):
-                    self.ut1 = ut1 = tt - delta_t / 86400.
+                    self.ut1 = ut1 = tt - delta_t / S_DAY
                     if i == _UT1:
                         return ut1
 
@@ -84,11 +84,11 @@ class JulianDate(object):
                 return ut1
 
         if (tt is None) and (ut1 is not None):
-            self.tt = tt = ut1 + self.delta_t / 86400.0
+            self.tt = tt = ut1 + self.delta_t * S_DAY
             if i == _TT:
                 return tt
 
-        self.tdb = tdb = tt + tdb_minus_tt(tt) / 86400.0
+        self.tdb = tdb = tt + tdb_minus_tt(tt) * S_DAY
         return tdb
 
 def julian_date(year, month=1, day=1, hour=0.0):

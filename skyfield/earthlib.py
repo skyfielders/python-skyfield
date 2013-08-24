@@ -3,7 +3,8 @@
 from numpy import (arcsin, arccos, array, clip, cos, einsum, fmod,
                    minimum, pi, sin, sqrt, zeros_like)
 
-from .constants import DEG2RAD, ERAD, AU, T0, ANGVEL, AU_KM, ERAD_KM, F, RAD2DEG
+from .constants import (AU, ANGVEL, AU_KM, DAY_S, DEG2RAD, ERAD,
+                        ERAD_KM, F, RAD2DEG, T0)
 from .framelib import J2000_to_ICRS
 from .functions import dots
 from .nutationlib import earth_tilt, compute_nutation
@@ -78,7 +79,7 @@ def terra(topos, st):
     # Compute velocity vector components in kilometers/sec.
 
     aac = ANGVEL * ach * cosphi
-    vel = array((-aac * sinst, aac * cosst, zero)) / AU_KM * 86400.0
+    vel = array((-aac * sinst, aac * cosst, zero)) / AU_KM * DAY_S
 
     return pos, vel
 

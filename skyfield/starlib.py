@@ -1,7 +1,7 @@
 """Python classes that represent various classes of star."""
 
 from numpy import array, cos, outer, sin, sqrt
-from .constants import AU_KM, ASEC2RAD, DEG2RAD, C, C_AUDAY, T0
+from .constants import AU_KM, ASEC2RAD, DEG2RAD, C, C_AUDAY, DAY_S, T0
 from .coordinates import GCRS
 from .relativity import light_time_difference
 
@@ -73,7 +73,7 @@ class Star(object):
 
         pmr = self.pm_ra / (parallax * 365.25) * k
         pmd = self.pm_dec / (parallax * 365.25) * k
-        rvl = self.radial_velocity * 86400.0 / AU_KM * k
+        rvl = self.radial_velocity * DAY_S / AU_KM * k
 
         # Transform motion vector to equatorial system.
 

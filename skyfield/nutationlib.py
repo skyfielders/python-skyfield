@@ -1,4 +1,5 @@
-from numpy import array, cos, fmod, sin, einsum, outer, tensordot, zeros
+"""Routines that compute Earth nutation."""
+from numpy import array, cos, fmod, sin, outer, tensordot, zeros
 from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, PSI_COR, EPS_COR, T0
 
 def compute_nutation(jd):
@@ -54,7 +55,7 @@ def earth_tilt(jd):
 #
 
 def mean_obliquity(jd_tdb):
-    """Compute the mean obliquity of the ecliptic.
+    """Return the mean obliquity of the ecliptic in arcseconds.
 
     `jd_tt` - TDB time as a Julian date float, or NumPy array of floats
 
