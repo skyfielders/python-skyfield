@@ -34,12 +34,10 @@ def earth_tilt(jd):
 
     """
     dp, de = iau2000a(jd.tt)
-    dp /= ASEC2RAD
-    de /= ASEC2RAD
     c_terms = equation_of_the_equinoxes_complimentary_terms(jd.tt) / ASEC2RAD
 
-    d_psi = dp + PSI_COR
-    d_eps = de + EPS_COR
+    d_psi = dp * 1e-7 + PSI_COR
+    d_eps = de * 1e-7 + EPS_COR
 
     mean_ob = mean_obliquity(jd.tdb)
     true_ob = mean_ob + d_eps
@@ -202,9 +200,9 @@ def iau2000a(jd_tt):
 
     `jd_tt` - Terrestrial Time: Julian date float, or NumPy array of floats
 
-    Returns a tuple ``(delta_psi, delta_epsilon)`` where each value is
-    either a float or a NumPy array with the same dimensions as the
-    input argument.
+    Returns a tuple ``(delta_psi, delta_epsilon)`` measured in tenths of
+    a micro-arcsecond.  Each value is either a float, or a NumPy array
+    with the same dimensions as the input argument.
 
     """
     # Interval between fundamental epoch J2000.0 and given date.
@@ -218,7 +216,8 @@ def iau2000a(jd_tt):
     # ** Luni-solar nutation **
     # Summation of luni-solar nutation series (in reverse order).
 
-    arg = fmod(nals_t.dot(a), TAU)
+    arg = nals_t.dot(a)
+    arg = fmod(arg, TAU, out=arg)
 
     sarg = sin(arg)
     carg = cos(arg)
@@ -226,14 +225,10 @@ def iau2000a(jd_tt):
     stsc = array((sarg, t * sarg, carg)).T
     ctcs = array((carg, t * carg, sarg)).T
 
-    dp = tensordot(stsc, lunisolar_longitude_coefficients)
-    de = tensordot(ctcs, lunisolar_obliquity_coefficients)
+    dpsi = tensordot(stsc, lunisolar_longitude_coefficients)
+    deps = tensordot(ctcs, lunisolar_obliquity_coefficients)
 
-    # Convert from 0.1 microarcsec units to radians.
-
-    factor = 1.0e-7 * ASEC2RAD
-    dpsils = dp * factor
-    depsls = de * factor
+    # Compute and add in planetary components.
 
     if getattr(t, 'shape', ()) == ():
         a = t * anomaly_coefficient + anomaly_constant
@@ -241,22 +236,17 @@ def iau2000a(jd_tt):
         a = (outer(anomaly_coefficient, t).T + anomaly_constant).T
     a[-1] *= t
 
-    fmod(a, TAU, out=a)
-
     # TODO: the NOVAS library is careful to sum napl_t in reverse order,
     # perhaps because the least significant terms come last; could we
     # increase the precision of our tests if we followed suit?
 
-    arg = fmod(napl_t.dot(a), TAU)
+    fmod(a, TAU, out=a)
+    arg = napl_t.dot(a)
+    fmod(arg, TAU, out=arg)
     sc = array((sin(arg), cos(arg))).T
 
-    dpsipl = tensordot(sc, nutation_coefficients_longitude) * factor
-    depspl = tensordot(sc, nutation_coefficients_obliquity) * factor
-
-    # Total: Add planetary and luni-solar components.
-
-    dpsi = dpsipl + dpsils
-    deps = depspl + depsls
+    dpsi += tensordot(sc, nutation_coefficients_longitude)
+    deps += tensordot(sc, nutation_coefficients_obliquity)
 
     return dpsi, deps
 

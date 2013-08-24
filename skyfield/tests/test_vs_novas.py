@@ -6,7 +6,7 @@ from numpy import array, einsum, rollaxis
 from skyfield import (coordinates, earthlib, framelib, nutationlib,
                       jpllib, precessionlib, starlib, timescales)
 
-from ..constants import T0, DEG2RAD, AU_KM, TAU
+from ..constants import ASEC2RAD, AU_KM, DEG2RAD, TAU, T0
 from ..timescales import JulianDate
 
 # Since some users might run these tests without having installed our
@@ -310,12 +310,13 @@ def test_geocentric_position_and_velocity(jd):
     eq(velu, velv, epsilon)
 
 def test_iau2000a(jd_float_or_vector):
-    epsilon = 2e-18
+    epsilon = 3e-6  # tenths of micro arcseconds
     jd_tt = jd_float_or_vector.boxed_value
     psi0, eps0 = vcall(c.nutation.iau2000a, jd_tt, 0.0)
     psi1, eps1 = nutationlib.iau2000a(jd_tt)
-    eq(psi0, psi1, epsilon)
-    eq(eps0, eps1, epsilon)
+    to_tenths_of_microarcseconds = 1e7 / ASEC2RAD
+    eq(psi0 * to_tenths_of_microarcseconds, psi1, epsilon)
+    eq(eps0 * to_tenths_of_microarcseconds, eps1, epsilon)
 
 def test_julian_date():
     epsilon = 0.0
