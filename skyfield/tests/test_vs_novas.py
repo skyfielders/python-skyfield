@@ -310,7 +310,7 @@ def test_geocentric_position_and_velocity(jd):
     eq(velu, velv, epsilon)
 
 def test_iau2000a(jd_float_or_vector):
-    epsilon = 3e-6  # tenths of micro arcseconds
+    epsilon = 4e-6  # tenths of micro arcseconds
     jd_tt = jd_float_or_vector.boxed_value
     psi0, eps0 = vcall(c.nutation.iau2000a, jd_tt, 0.0)
     psi1, eps1 = nutationlib.iau2000a(jd_tt)
