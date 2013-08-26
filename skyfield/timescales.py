@@ -6,6 +6,41 @@ from .constants import T0, S_DAY
 _sequence = ['tdb', 'tt', 'ut1', 'utc']
 _sequence_indexes = {name: i for i, name in enumerate(_sequence)}
 
+extra_documentation = """
+
+        This function takes a Julian date as argument. Either provide a
+        `jd=` keyword argument supplying a `JulianDate` if you already
+        have one, or supply a float or array of floats with one of the
+        following keyword arguments:
+
+        `tdb=` - Barycentric Dynamical Time
+        `tt=`  - Terrestrial Time
+        `ut1=` - Universal Time
+        `utc=` - Coordinated Universal Time
+
+"""
+
+def takes_julian_date(function):
+    """Wrap `function` so it accepts the standard Julian date arguments.
+
+    A function that takes two arguments, `self` and `jd`, may be wrapped
+    with this decorator if it wants to support optional auto-creation of
+    its `jd` argument by accepting all of the same keyword arguments
+    that the JulianDate constructor itself supports.
+
+    """
+    def wrapper(self, jd=None, tdb=None, tt=None, ut1=None, utc=None,
+                delta_t=0.0):
+        if jd is None:
+            jd = JulianDate(tdb=tdb, tt=tt, ut1=ut1, utc=utc, delta_t=delta_t)
+        else:
+            pass  # TODO: verify that they provided a JulianDate instance
+        return function(self, jd)
+    wrapper.__name__ = function.__name__
+    synopsis, blank_line, description = function.__doc__.partition('\n\n')
+    wrapper.__doc__ = ''.join(synopsis + extra_documentation + description)
+    return wrapper
+
 def _wrap(a):
     if hasattr(a, 'shape'):
         return a

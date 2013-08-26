@@ -12,6 +12,7 @@ from .functions import dots
 from .nutationlib import compute_nutation
 from .precessionlib import compute_precession
 from .relativity import add_aberration, add_deflection
+from .timescales import takes_julian_date
 
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
 quarter_tau = 0.25 * TAU
@@ -80,7 +81,9 @@ class Topos(object):
         self.north = array([-sinlat * coslon, -sinlat * sinlon, coslat])
         self.west = array([sinlon, -coslon, 0.0])
 
+    @takes_julian_date
     def __call__(self, jd):
+        """Compute where this Earth location was in space on a given date."""
         e = self.ephemeris.earth(jd)
         tpos, tvel = geocentric_position_and_velocity(self, jd)
         t = ToposICRS(e.position + tpos, e.velocity + tvel, jd)
