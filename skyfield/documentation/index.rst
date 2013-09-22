@@ -9,13 +9,23 @@
 
    *Elegant Astronomy for Python*
 
+.. testsetup::
+
+   import datetime as dtmodule
+   class datetime(dtmodule.datetime):
+       """Secret replacement for datetime."""
+       @classmethod
+       def now(cls):
+           """Return a constant "now"."""
+           return dtmodule.datetime(2013, 9, 22, 14)
+   dtmodule.datetime = datetime
+
 .. testcode::
 
+   from datetime import datetime
    from skyfield.planets import earth, mars
-   from skyfield.timescales import julian_date
-   j = julian_date(2013, 9, 22, 14.0)
-   h = earth(tt=j).observe(mars).apparent()
-   print('RA=%s Dec=%s' % (h.ra.hstr(), h.dec.dstr()))
+   a = earth(datetime.now()).observe(mars).apparent()
+   print('RA=%s Dec=%s' % (a.ra.hstr(), a.dec.dstr()))
 
 .. testoutput::
 

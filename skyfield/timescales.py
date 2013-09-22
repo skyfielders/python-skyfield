@@ -31,8 +31,9 @@ def takes_julian_date(function):
     """
     def wrapper(self, jd=None, tdb=None, tt=None, ut1=None, utc=None,
                 delta_t=0.0):
-        if jd is None:
-            jd = JulianDate(tdb=tdb, tt=tt, ut1=ut1, utc=utc, delta_t=delta_t)
+        if not isinstance(jd, JulianDate):
+            jd = JulianDate(jd=jd, tdb=tdb, tt=tt, ut1=ut1, utc=utc,
+                            delta_t=delta_t)
         else:
             pass  # TODO: verify that they provided a JulianDate instance
         return function(self, jd)
@@ -64,10 +65,17 @@ class JulianDate(object):
     `utc` - Coordinated Universal Time
 
     """
-    def __init__(self, tdb=None, tt=None, ut1=None, utc=None, delta_t=0.0):
+    def __init__(self, jd=None, tdb=None, tt=None, ut1=None,
+                 utc=None, delta_t=0.0):
 
         self.delta_t, ignored_shape = _convert(delta_t)
 
+        if jd is not None:
+            # TODO: we should actually presume that datetime's are utc
+            #assert isinstance(jd, datetime)
+            dt = jd
+            f = ((dt.second + dt.microsecond * 1e-6) / 60.0 + dt.minute) / 60.0
+            tdb = julian_date(dt.year, dt.month, dt.day, dt.hour + f)
         if tdb is not None:
             self.tdb, self.shape = _convert(tdb)
         if tt is not None:
