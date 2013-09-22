@@ -3,7 +3,7 @@ from numpy import max, min, sqrt
 
 from .constants import KM_AU, C_AUDAY
 from .coordinates import ICRS, GCRS, Topos
-
+from .timescales import takes_julian_date
 
 class Planet(object):
     def __init__(self, ephemeris, jplephemeris, jplname):
@@ -14,7 +14,9 @@ class Planet(object):
     def __repr__(self):
         return '<Planet %s>' % (self.jplname,)
 
+    @takes_julian_date
     def __call__(self, jd):
+        """Return the ICRS x,y,z position of this planet at the given time."""
         position, velocity = self._position_and_velocity(jd.tdb)
         i = ICRS(position, velocity, jd)
         i.ephemeris = self.ephemeris

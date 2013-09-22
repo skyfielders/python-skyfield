@@ -9,18 +9,30 @@
 
    *Elegant Astronomy for Python*
 
-::
+.. testcode::
 
    from skyfield.planets import earth, mars
+   from skyfield.timescales import julian_date
+   j = julian_date(2013, 9, 22, 14.0)
+   h = earth(tt=j).observe(mars).apparent()
+   print('RA=%s Dec=%s' % (h.ra.hstr(), h.dec.dstr()))
+
+.. testoutput::
+
+   RA=9h 15m 35.818s Dec=17deg 9m 32.622s
+
+.. testcode::
+
+   from skyfield.planets import earth, mars
+   from skyfield.timescales import julian_date
    boston = earth.topos('71.0636 W', '42.3583 N')
-   h = boston(jd).observe(mars).apparent().horizontal()
-   print h.alt.dstr()
-   print h.az.dstr()
+   j = julian_date(2013, 9, 22, 14.0)
+   h = boston(tt=j).observe(mars).apparent().horizontal()
+   print('Alt=%s Az=%s' % (h.alt.dstr(), h.az.dstr()))
 
-::
+.. testoutput::
 
-   40deg 3m 49.433s
-   201deg 58m 7.067s
+   Alt=64deg 45m 42.248s Az=183deg 39m 40.219s
 
 .. toctree::
    :maxdepth: 2
