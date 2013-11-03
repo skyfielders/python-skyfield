@@ -10,12 +10,6 @@ forget.
 Sprint Possibilities
 ====================
 
-* All constants should probably be moved into their own module.  Name it
-  ``constants.py`` and do a ``from .constants import ...`` at the top of
-  each of the other modules that need it.
-
-* Use py.test fixtures to turn loops into parameterized tests.
-
 * What happens if an angle that's a vector of values has .dstr() or
   .hstr() called on it?  (And, those might not be those good method
   names.)  Make it return a list of strings.
