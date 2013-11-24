@@ -2,7 +2,7 @@
 
 from numpy import array, cos, outer, sin, sqrt
 from .constants import AU_KM, ASEC2RAD, DEG2RAD, C, C_AUDAY, DAY_S, T0
-from .coordinates import GCRS
+from .coordinates import Astrometric
 from .relativity import light_time_difference
 
 
@@ -31,7 +31,7 @@ class Star(object):
         distance = sqrt((vector * vector).sum(axis=0))
         lighttime = distance / C_AUDAY
 
-        g = GCRS(vector, (observer.velocity.T - velocity).T, jd)
+        g = Astrometric(vector, (observer.velocity.T - velocity).T, jd)
         g.observer = observer
         g.distance = distance
         g.lighttime = lighttime

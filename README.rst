@@ -32,7 +32,7 @@ using one of three simple techniques::
 
     # What is the sky-catalog coordinate of Mars?
 
-    radec = mars.observe_from(earth(t)).astrometric()
+    ra, dec, d = mars.observe_from(earth(t)).radec()
 
     # Where is Mars in the sky, viewed from Earth's center?
 

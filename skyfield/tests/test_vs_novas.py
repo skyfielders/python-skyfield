@@ -175,19 +175,21 @@ def test_astro_planet(jd, planets_list):
     planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = vcall(c.astro_planet, jd.tt, obj)
+    ra0, dec0, dis0 = vcall(c.astro_planet, jd.tt, obj)
 
     earth = emp.earth
     planet = getattr(emp, planet_name)
-    g = earth(jd).observe(planet).astrometric()
+    p = earth(jd).observe(planet)
+    ra, dec, d = p.radec()
+    dis = p.distance
 
-    assert shape_of(jd.tt) == shape_of(g.ra)
-    assert shape_of(jd.tt) == shape_of(g.dec)
-    assert shape_of(jd.tt) == shape_of(g.distance)
+    assert shape_of(jd.tt) == shape_of(ra)
+    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(dis)
 
-    eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
-    eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
-    eq(dis, g.distance, 0.001 * meter)
+    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
+    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
+    eq(dis0, dis, 0.001 * meter)
 
 def test_app_planet(jd, planets_list):
     planet_name, planet_code = planets_list

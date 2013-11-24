@@ -96,16 +96,17 @@ class ToposICRS(ICRS):
 
     geocentric = False
 
-class GCRS(XYZ):
+class Astrometric(XYZ):
+    """An astrometric position as GCRS x,y,z coordinates.
 
-    def astrometric(self, epoch=None):
-        eq = Astrometric()
-        eq.ra, eq.dec = to_polar(self.position, phi_class=HourAngle)
-        eq.position = self.position
-        eq.distance = self.distance
-        eq.observer = self.observer
-        # TODO: epoch
-        return eq
+    The *astrometric position* of a body is its position adjusted for
+    the light-time delay between the body and an observer; it is the
+    position of the body back when it emitted (or reflected) the light
+    that is just now reaching the observer's eyes or telescope.
+
+    """
+    def radec(self):
+        return to_polar(self.position, phi_class=HourAngle)
 
     def apparent(self):
         jd = self.jd
@@ -134,7 +135,7 @@ class GCRS(XYZ):
         position = position.T
 
         eq = Apparent()
-        eq.ra, eq.dec = to_polar(position, phi_class=HourAngle)
+        eq.ra, eq.dec, d = to_polar(position, phi_class=HourAngle)
         eq.jd = jd
         eq.position = position
         eq.distance = self.distance
@@ -145,9 +146,6 @@ class RADec(object):
     def __repr__(self):
         return '<%s position RA=%r dec=%r>' % (
             self.__class__.__name__, self.ra, self.dec)
-
-class Astrometric(RADec):
-    pass
 
 class Apparent(RADec):
     """Topocentric RA and declination vs true equator and equinox-of-date."""
@@ -193,7 +191,7 @@ class Apparent(RADec):
         position = array([pn, -pw, pz])
 
         h = Horizontal()
-        h.az, h.alt = to_polar(position)
+        h.az, h.alt, d = to_polar(position)
         h.zd = quarter_tau - h.alt
         h.jd = self.jd
         h.distance = self.distance
@@ -235,4 +233,4 @@ def to_polar(position, phi_class=Angle):
     arctan2(-position[1], -position[0], out=phi)
     arcsin(position[2] / r, out=theta)
     phi += pi
-    return phi, theta
+    return phi, theta, r

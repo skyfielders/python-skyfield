@@ -2,7 +2,7 @@ import jplephem
 from numpy import max, min, sqrt
 
 from .constants import KM_AU, C_AUDAY
-from .coordinates import ICRS, GCRS, Topos
+from .coordinates import ICRS, Astrometric, Topos
 from .timescales import takes_julian_date
 
 class Planet(object):
@@ -76,7 +76,7 @@ class Planet(object):
             raise ValueError('observe_from() light-travel time'
                              ' failed to converge')
 
-        g = GCRS(vector, velocity - observer.velocity, observer.jd)
+        g = Astrometric(vector, velocity - observer.velocity, observer.jd)
         g.observer = observer
         g.distance = euclidian_distance
         g.lighttime = lighttime

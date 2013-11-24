@@ -85,7 +85,7 @@ def bm_fundamental_arguments(times, t):
 
 def bm_coordinate_to_astrometric(times, t):
     coordinate = star.observe_from(earth(t))
-    run_benchmark(times, coordinate.astrometric)
+    run_benchmark(times, coordinate.radec)
 
 
 def bm_coordinate_to_apparent(times, t):

@@ -46,18 +46,10 @@ fix >>> emi = mars(2414993.5) - earth(2414993.5)
 fix >>> print(emi.position)
 [-0.22066198 -2.18621208 -0.98245707]
 
-fix >>> print(mars.observe_from(earth(2414993.5)))
-<GCRS position x,y,z AU and velocity xdot,ydot,zdot AU/day at date jd>
-
-fix >>> print(mars.observe_from(earth(2414993.5)).astrometric())
-<Astrometric position RA=HourAngle(4.611705873992877) dec=Angle(-0.4204476586629836)>
 fix >>> print(mars.observe_from(earth(2414993.5)).apparent())
 <Apparent position RA=HourAngle([ 4.58500039]) dec=Angle([-0.41933084])>
 
 
-fix >>> a = mars.observe_from(earth(2414993.5)).astrometric()
-fix >>> a
-<Astrometric position RA=HourAngle(4.611705873992877) dec=Angle(-0.4204476586629836)>
 fix >>> a.ra
 HourAngle(4.611705873992877)
 fix >>> a.ra.hms()
@@ -85,16 +77,10 @@ repr(a.dec.dpretty())
 -24
 -24°5´23´´.5548511656
 
-fix >>> a = mars.observe_from(earth(np.array([2414993.5, 2414994.5]))).astrometric()
-fix >>> a
-<Astrometric position RA=HourAngle([ 4.61170587,  4.62603456]) dec=Angle([-0.42044766, -0.42106794])>
-
 
 fix >>> import numpy as np
 fix >>> t0 = 2414993.5
 fix >>> t = np.arange(t0, t0 + 5, 1.0)
-fix >>> print(mars.observe_from(earth(t)).astrometric())
-<Astrometric position RA=HourAngle([ 4.61170587,  4.62603456,  4.64038665,  4.65476093,  4.66915621]) dec=Angle([-0.42044766, -0.42106794, -0.42161316, -0.42208295, -0.42247693])>
 
 fix >>> print(mars.observe_from(earth(t)).apparent())
 <Apparent position RA=HourAngle([ 4.58500039,  4.59931574,  4.61365598,  4.62801986,  4.64240623]) dec=Angle([-0.41933084, -0.42008982, -0.42077423, -0.42138359, -0.42191745])>
