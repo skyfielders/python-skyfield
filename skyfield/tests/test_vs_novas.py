@@ -139,7 +139,7 @@ def eq(first, second, epsilon=None):
         appendix = ('\nbecause the difference is\n%r\ntimes too big'
                     % (abs(first - second) / epsilon)) if epsilon else ''
         raise AssertionError(
-            '%r\ndoes not equal\n%r\nwithin the error bound\n%r%s'
+            '\n%r does not equal\n%r\nwithin the error bound\n%r%s'
             % (first, second, epsilon, appendix))
 
 
