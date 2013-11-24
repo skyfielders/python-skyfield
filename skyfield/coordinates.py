@@ -110,8 +110,6 @@ class Astrometric(XYZ):
 
     def apparent(self):
         jd = self.jd
-        jd_tdb = jd.tdb
-
         position = self.position.copy()
         observer = self.observer
 
@@ -123,32 +121,38 @@ class Astrometric(XYZ):
             include_earth_deflection = limb_angle >= 0.8
 
         add_deflection(position, observer.position, observer.ephemeris,
-                       jd_tdb, include_earth_deflection)
+                       jd.tdb, include_earth_deflection)
         add_aberration(position, observer.velocity, self.lighttime)
 
-        p = compute_precession(jd_tdb)
-        n = compute_nutation(jd)
+        # p = compute_precession(jd_tdb)
+        # n = compute_nutation(jd)
 
-        position = position.T.dot(ICRS_to_J2000)
-        position = einsum('...j,jk...->...k', position, p)
-        position = einsum('...j,jk...->...k', position, n)
-        position = position.T
+        # position = position.T.dot(ICRS_to_J2000)
+        # position = einsum('...j,jk...->...k', position, p)
+        # position = einsum('...j,jk...->...k', position, n)
+        # position = position.T
 
-        eq = Apparent()
-        eq.ra, eq.dec, d = to_polar(position, phi_class=HourAngle)
-        eq.jd = jd
-        eq.position = position
-        eq.distance = self.distance
-        eq.observer = self.observer
-        return eq
+        a = Apparent(position, jd=jd)
+        a.distance = self.distance
+        a.observer = self.observer
+        return a
 
-class RADec(object):
-    def __repr__(self):
-        return '<%s position RA=%r dec=%r>' % (
-            self.__class__.__name__, self.ra, self.dec)
+class Apparent(XYZ):
+    """An apparent position as GCRS x,y,z coordinates.
 
-class Apparent(RADec):
-    """Topocentric RA and declination vs true equator and equinox-of-date."""
+    The *apparent position* of a body is its position adjusted not only
+    for the light-time delay between the body and an observer, which is
+    already accounted for in the object's astrometric position, but
+    further adjusted for aberration (Earth's motion through slants the
+    light rays that we see from its the surface) and deflection (light
+    bends as it passes large masses like the Sun or Jupiter).
+
+    """
+    def radec(self, epoch=None):
+        position = self.position
+        if epoch is not None:
+            position = to_epoch(position, self.jd)
+        return to_polar(position, phi_class=HourAngle)
 
     def horizontal(self):
 
@@ -184,6 +188,8 @@ class Apparent(RADec):
         uw = spin(-gast * TAU / 24.0, uwe)
 
         p = self.position
+        p = to_epoch(p, self.jd)
+
         pz = dots(p, uz)
         pn = dots(p, un)
         pw = dots(p, uw)
@@ -234,3 +240,15 @@ def to_polar(position, phi_class=Angle):
     arcsin(position[2] / r, out=theta)
     phi += pi
     return phi, theta, r
+
+def to_epoch(position, epoch):
+    jd = epoch
+    p = compute_precession(jd.tdb)
+    n = compute_nutation(jd)
+
+    position = position.T.dot(ICRS_to_J2000)
+    position = einsum('...j,jk...->...k', position, p)
+    position = einsum('...j,jk...->...k', position, n)
+    position = position.T
+
+    return position

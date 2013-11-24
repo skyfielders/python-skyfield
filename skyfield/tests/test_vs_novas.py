@@ -152,7 +152,7 @@ def test_star_deflected_by_jupiter(jd):
         pm_ra=0.0, pm_dec=0.0,
         parallax=0.0, rad_vel=0.0,
         )
-    ra, dec = vcall(c.app_star, jd.tt, star)
+    ra0, dec0 = vcall(c.app_star, jd.tt, star)
 
     earth = emp.earth
     star = starlib.Star(
@@ -160,14 +160,14 @@ def test_star_deflected_by_jupiter(jd):
         pm_ra=0.0, pm_dec=0.0,
         parallax=0.0, radial_velocity=0.0,
         )
-    g = earth(jd).observe(star).apparent()
+    ra, dec, distance = earth(jd).observe(star).apparent().radec(epoch=jd)
 
-    assert shape_of(jd.tt) == shape_of(g.ra)
-    assert shape_of(jd.tt) == shape_of(g.dec)
-    assert shape_of(jd.tt) == shape_of(g.distance)
+    assert shape_of(jd.tt) == shape_of(ra)
+    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(distance)
 
-    eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
-    eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
+    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
+    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
 
 # Tests of generating a full position or coordinate.
 
@@ -175,39 +175,40 @@ def test_astro_planet(jd, planets_list):
     planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra0, dec0, dis0 = vcall(c.astro_planet, jd.tt, obj)
+    ra0, dec0, distance0 = vcall(c.astro_planet, jd.tt, obj)
 
     earth = emp.earth
     planet = getattr(emp, planet_name)
     p = earth(jd).observe(planet)
     ra, dec, d = p.radec()
-    dis = p.distance
+    distance = p.distance
 
     assert shape_of(jd.tt) == shape_of(ra)
     assert shape_of(jd.tt) == shape_of(dec)
-    assert shape_of(jd.tt) == shape_of(dis)
+    assert shape_of(jd.tt) == shape_of(distance)
 
     eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
     eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
-    eq(dis0, dis, 0.001 * meter)
+    eq(distance0, distance, 0.001 * meter)
 
 def test_app_planet(jd, planets_list):
     planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = vcall(c.app_planet, jd.tt, obj)
+    ra0, dec0, distance0 = vcall(c.app_planet, jd.tt, obj)
 
     earth = emp.earth
     planet = getattr(emp, planet_name)
-    g = earth(jd).observe(planet).apparent()
+    p = earth(jd).observe(planet).apparent()
+    ra, dec, distance = p.radec(epoch=jd)
 
-    assert shape_of(jd.tt) == shape_of(g.ra)
-    assert shape_of(jd.tt) == shape_of(g.dec)
-    assert shape_of(jd.tt) == shape_of(g.distance)
+    assert shape_of(jd.tt) == shape_of(ra)
+    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(distance)
 
-    eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
-    eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
-    eq(dis, g.distance, 0.001 * meter)
+    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
+    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
+    eq(distance0, p.distance, 0.001 * meter)
 
 def test_topo_planet(jd, planets_list):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
@@ -218,18 +219,20 @@ def test_topo_planet(jd, planets_list):
     planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = vcall(c.topo_planet, jd.tt, jd.delta_t, obj, position)
+    ra0, dec0, distance0 = vcall(c.topo_planet, jd.tt, jd.delta_t,
+                                 obj, position)
 
     planet = getattr(emp, planet_name)
-    g = ggr(jd).observe(planet).apparent()
+    p = ggr(jd).observe(planet).apparent()
+    ra, dec, distance = p.radec(epoch=jd)
 
-    assert shape_of(jd.tt) == shape_of(g.ra)
-    assert shape_of(jd.tt) == shape_of(g.dec)
-    assert shape_of(jd.tt) == shape_of(g.distance)
+    assert shape_of(jd.tt) == shape_of(ra)
+    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(distance)
 
-    eq(ra * TAU / 24.0, g.ra, 0.001 * arcsecond)
-    eq(dec * TAU / 360.0, g.dec, 0.001 * arcsecond)
-    eq(dis, g.distance, 0.001 * meter)
+    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
+    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
+    eq(distance0, p.distance, 0.001 * meter)
 
 def test_horizontal(jd, planets_list):
     """ Tests of generating a full position in horizontal coordinates. Uses
