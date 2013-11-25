@@ -13,10 +13,10 @@ def dots(v, u):
 
 
 def length(xyz):
-    """Given a vector `xyz` as a 3-value array, return its length.
+    """Given a 3-element array `[x y z]`, return its length.
 
-    The three elements of the array can either be scalars, or can
-    themselves be arrays recording whose series of x, y, and z.
+    The three elements can be simple scalars, or the array can be two
+    dimensions and offer three whole series of x, y, and z coordinates.
 
     """
     return sqrt((xyz * xyz).sum(axis=0))

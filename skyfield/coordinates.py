@@ -5,6 +5,7 @@ from numpy import (arcsin, arctan2, array, cos, einsum,
 
 from .angles import (interpret_longitude, interpret_latitude, Angle, HourAngle)
 from .constants import TAU
+from .functions import length
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
 from .framelib import ICRS_to_J2000
@@ -51,7 +52,7 @@ class XYZ(object):
     def zdot(self): return self.velocity[2]
 
 class ICRS(XYZ):
-    """An x,y,z position whose axes are oriented to the ICRS standard.
+    """An x,y,z position whose axes are oriented to the ICRS system.
 
     The ICRS is a permanent coordinate system that has superseded the
     old series of equinox-based systems like B1900, B1950, and J2000.
@@ -236,7 +237,7 @@ class HeliocentricLonLat(ndarray):
     def r(self): return self[2]
 
 def to_polar(position, phi_class=Angle):
-    r = sqrt((position * position).sum(axis=0))
+    r = length(position)
     phi = phi_class(r.shape)
     theta = Angle(r.shape)
     arctan2(-position[1], -position[0], out=phi)

@@ -3,6 +3,7 @@ from numpy import max, min, sqrt
 
 from .constants import KM_AU, C_AUDAY
 from .coordinates import ICRS, Astrometric, Topos
+from .functions import length
 from .timescales import takes_julian_date
 
 class Planet(object):
@@ -61,7 +62,7 @@ class Planet(object):
         lighttime0 = 0.0
         position, velocity = self._position_and_velocity(jd_tdb)
         vector = position - observer.position
-        euclidian_distance = distance = sqrt((vector * vector).sum(axis=0))
+        euclidian_distance = distance = length(vector)
 
         for i in range(10):
             lighttime = distance / C_AUDAY
@@ -71,7 +72,7 @@ class Planet(object):
             lighttime0 = lighttime
             position, velocity = self._position_and_velocity(jd_tdb - lighttime)
             vector = position - observer.position
-            distance = sqrt((vector * vector).sum(axis=0))
+            distance = length(vector)
         else:
             raise ValueError('observe_from() light-travel time'
                              ' failed to converge')
