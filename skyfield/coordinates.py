@@ -51,18 +51,30 @@ class XYZ(object):
     def zdot(self): return self.velocity[2]
 
 class ICRS(XYZ):
+    """An x,y,z position whose axes are oriented to the ICRS standard.
 
-    geocentric = True
+    The ICRS is a permanent coordinate system that has superseded the
+    old series of equinox-based systems like B1900, B1950, and J2000.
+
+    """
+    geocentric = True  # TODO: figure out what this meant and get rid of it
 
     def __sub__(self, body):
+        """Subtract two ICRS vectors to produce a third."""
         if self.velocity is None or body.velocity is None:
             velocity = None
         else:
             velocity = body.velocity - self.velocity
-        return XYZ(self.position - body.position, velocity, self.jd)
+        return ICRS(self.position - body.position, velocity, self.jd)
 
     def observe(self, body):
         return body.observe_from(self)
+
+    def radec(self, epoch=None):
+        position = self.position
+        if epoch is not None:
+            position = to_epoch(position, self.jd)
+        return to_polar(position, phi_class=HourAngle)
 
 class Topos(object):
 
@@ -96,7 +108,7 @@ class ToposICRS(ICRS):
 
     geocentric = False
 
-class Astrometric(XYZ):
+class Astrometric(ICRS):
     """An astrometric position as GCRS x,y,z coordinates.
 
     The *astrometric position* of a body is its position adjusted for
@@ -105,9 +117,6 @@ class Astrometric(XYZ):
     that is just now reaching the observer's eyes or telescope.
 
     """
-    def radec(self):
-        return to_polar(self.position, phi_class=HourAngle)
-
     def apparent(self):
         jd = self.jd
         position = self.position.copy()
@@ -137,7 +146,7 @@ class Astrometric(XYZ):
         a.observer = self.observer
         return a
 
-class Apparent(XYZ):
+class Apparent(ICRS):
     """An apparent position as GCRS x,y,z coordinates.
 
     The *apparent position* of a body is its position adjusted not only
@@ -148,12 +157,6 @@ class Apparent(XYZ):
     bends as it passes large masses like the Sun or Jupiter).
 
     """
-    def radec(self, epoch=None):
-        position = self.position
-        if epoch is not None:
-            position = to_epoch(position, self.jd)
-        return to_polar(position, phi_class=HourAngle)
-
     def horizontal(self):
 
         try:
