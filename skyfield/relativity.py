@@ -1,7 +1,7 @@
 from numpy import abs, einsum, sqrt, where
 
 from .constants import C, AU, C_AUDAY, GS
-from .functions import dots, length
+from .functions import dots, length_of
 
 
 deflectors = ['sun', 'jupiter', 'saturn', 'moon', 'venus', 'uranus', 'neptune']
@@ -36,7 +36,7 @@ def add_deflection(position, observer, ephemeris, jd_tdb,
     """
     # Compute light-time to observed object.
 
-    tlt = length(position) / C_AUDAY
+    tlt = length_of(position) / C_AUDAY
 
     # Cycle through gravitating bodies.
 
@@ -91,7 +91,7 @@ def light_time_difference(position, observer_position):
     # From 'pos1', form unit vector 'u1' in direction of star or light
     # source.
 
-    dis = length(position)
+    dis = length_of(position)
     u1 = position / dis
 
     # Light-time returned is the projection of vector 'pos_obs' onto the
@@ -119,9 +119,9 @@ def _add_deflection(position, observer, deflector, rmass):
 
     # Compute vector magnitudes and unit vectors.
 
-    pmag = length(position)
-    qmag = length(pq)
-    emag = length(pe)
+    pmag = length_of(position)
+    qmag = length_of(pq)
+    emag = length_of(pe)
 
     phat = position / pmag
     qhat = pq / qmag
@@ -162,7 +162,7 @@ def add_aberration(position, velocity, lighttime):
 
     """
     p1mag = lighttime * C_AUDAY
-    vemag = length(velocity)
+    vemag = length_of(velocity)
     beta = vemag / C_AUDAY
     dot = dots(position, velocity)
 

@@ -12,7 +12,7 @@ def dots(v, u):
     return (v * u).sum(axis=0)
 
 
-def length(xyz):
+def length_of(xyz):
     """Given a 3-element array `[x y z]`, return its length.
 
     The three elements can be simple scalars, or the array can be two

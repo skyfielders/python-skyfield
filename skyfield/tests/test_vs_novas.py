@@ -7,6 +7,7 @@ from skyfield import (coordinates, earthlib, framelib, nutationlib,
                       jpllib, precessionlib, starlib, timescales)
 
 from ..constants import ASEC2RAD, AU_KM, DEG2RAD, TAU, T0
+from ..functions import length_of
 from ..timescales import JulianDate
 
 # Since some users might run these tests without having installed our
@@ -179,9 +180,10 @@ def test_astro_planet(jd, planets_list):
 
     earth = emp.earth
     planet = getattr(emp, planet_name)
+    e = earth(jd)
     p = earth(jd).observe(planet)
     ra, dec, d = p.radec()
-    distance = p.distance
+    distance = length_of((e - planet(jd)).position)
 
     assert shape_of(jd.tt) == shape_of(ra)
     assert shape_of(jd.tt) == shape_of(dec)
@@ -199,8 +201,10 @@ def test_app_planet(jd, planets_list):
 
     earth = emp.earth
     planet = getattr(emp, planet_name)
-    p = earth(jd).observe(planet).apparent()
-    ra, dec, distance = p.radec(epoch=jd)
+    e = earth(jd)
+    p = e.observe(planet).apparent()
+    ra, dec, d = p.radec(epoch=jd)
+    distance = length_of((e - planet(jd)).position)
 
     assert shape_of(jd.tt) == shape_of(ra)
     assert shape_of(jd.tt) == shape_of(dec)
@@ -208,7 +212,7 @@ def test_app_planet(jd, planets_list):
 
     eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
     eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
-    eq(distance0, p.distance, 0.001 * meter)
+    eq(distance0, distance, 0.001 * meter)
 
 def test_topo_planet(jd, planets_list):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
@@ -223,8 +227,10 @@ def test_topo_planet(jd, planets_list):
                                  obj, position)
 
     planet = getattr(emp, planet_name)
-    p = ggr(jd).observe(planet).apparent()
-    ra, dec, distance = p.radec(epoch=jd)
+    g = ggr(jd)
+    p = g.observe(planet).apparent()
+    ra, dec, d = p.radec(epoch=jd)
+    distance = length_of((g - planet(jd)).position)
 
     assert shape_of(jd.tt) == shape_of(ra)
     assert shape_of(jd.tt) == shape_of(dec)
@@ -232,7 +238,7 @@ def test_topo_planet(jd, planets_list):
 
     eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
     eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
-    eq(distance0, p.distance, 0.001 * meter)
+    eq(distance0, distance, 0.001 * meter)
 
 def test_horizontal(jd, planets_list):
     """ Tests of generating a full position in horizontal coordinates. Uses
@@ -252,12 +258,14 @@ def test_horizontal(jd, planets_list):
         c.equ2hor, jd.ut1, jd.delta_t, xp, yp, position, ra, dec)
 
     planet = getattr(emp, planet_name)
-    h = ggr(jd).observe(planet).apparent().horizontal()
+    g = ggr(jd)
+    h = g.observe(planet).apparent().horizontal()
+    distance = length_of((g - planet(jd)).position)
 
     eq(zd * TAU / 360.0, h.zd, 0.001 * arcsecond)
     eq(az * TAU / 360.0, h.az, 0.001 * arcsecond)
     eq(0.25 * TAU - zd * TAU / 360.0, h.alt, 0.001 * arcsecond)
-    eq(dis, h.distance, 0.001 * meter)
+    eq(dis, distance, 0.001 * meter)
 
 # Tests for Basic Functions
 
