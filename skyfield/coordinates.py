@@ -19,7 +19,11 @@ ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
 quarter_tau = 0.25 * TAU
 
 class XYZ(object):
+    """A vector stored as a 3-element array ``[x y z]``.
 
+    Can optionally carry a velocity as well.
+
+    """
     def __init__(self, position, velocity=None, jd=None):
         self.jd = jd
         self.position = position
@@ -119,6 +123,7 @@ class Astrometric(ICRS):
 
     """
     def apparent(self):
+        """Return the corresponding apparent position."""
         jd = self.jd
         position = self.position.copy()
         observer = self.observer
@@ -139,18 +144,24 @@ class Astrometric(ICRS):
         return a
 
 class Apparent(ICRS):
-    """An apparent position as GCRS x,y,z coordinates.
+    """An apparent position as a GCRS x,y,z vector.
 
     The *apparent position* of a body is its position adjusted not only
-    for the light-time delay between the body and an observer, which is
-    already accounted for in the object's astrometric position, but
-    further adjusted for aberration (Earth's motion through slants the
-    light rays that we see from its the surface) and deflection (light
-    bends as it passes large masses like the Sun or Jupiter).
+    for the light-time delay between the body and an observer (which is
+    already accounted for in the object's astrometric position), but
+    also adjusted for deflection (light rays bending as they pass large
+    masses like the Sun or Jupiter) and aberration (light appearing to
+    slant because of Earth's motion through space).
 
     """
     def altaz(self):
+        """Return the position as a tuple ``(alt, az, d)``.
 
+        `alt` - Altitude in degrees above the horizon.
+        `az` - Azimuth angle east around the horizon from due-north.
+        `d` - Distance to the object.
+
+        """
         try:
             topos = self.observer.topos
             uze = topos.up
