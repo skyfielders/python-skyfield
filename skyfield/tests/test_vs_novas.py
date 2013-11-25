@@ -240,8 +240,8 @@ def test_topo_planet(jd, planets_list):
     eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
     eq(distance0, distance, 0.001 * meter)
 
-def test_horizontal(jd, planets_list):
-    """ Tests of generating a full position in horizontal coordinates. Uses
+def test_altaz(jd, planets_list):
+    """ Tests of generating a full position in altaz coordinates. Uses
         fixtures to iterate through date pairs and planets to generate
         individual tests.
     """
@@ -254,17 +254,17 @@ def test_horizontal(jd, planets_list):
 
     obj = c.make_object(0, planet_code, 'planet', None)
     ra, dec, dis = vcall(c.topo_planet, jd.tt, jd.delta_t, obj, position)
-    (zd, az), (ra, dec) = vcall(
+    (zd0, az0), (ra, dec) = vcall(
         c.equ2hor, jd.ut1, jd.delta_t, xp, yp, position, ra, dec)
+    alt0 = 90.0 - zd0
 
     planet = getattr(emp, planet_name)
     g = ggr(jd)
-    h = g.observe(planet).apparent().horizontal()
+    alt, az, d = g.observe(planet).apparent().altaz()
     distance = length_of((g - planet(jd)).position)
 
-    eq(zd * TAU / 360.0, h.zd, 0.001 * arcsecond)
-    eq(az * TAU / 360.0, h.az, 0.001 * arcsecond)
-    eq(0.25 * TAU - zd * TAU / 360.0, h.alt, 0.001 * arcsecond)
+    eq(az0 * TAU / 360.0, az, 0.001 * arcsecond)
+    eq(alt0 * TAU / 360.0, alt, 0.001 * arcsecond)
     eq(dis, distance, 0.001 * meter)
 
 # Tests for Basic Functions

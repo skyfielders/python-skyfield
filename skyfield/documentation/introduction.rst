@@ -6,10 +6,10 @@
 
 >>> from skyfield.planets import earth, mars
 >>> boston = earth.topos('71.0636 W', '42.3583 N')
->>> h = boston(ut1=2456755.75).observe(mars).apparent().horizontal()
->>> print(h.alt.dstr())
+>>> alt, az, d = boston(ut1=2456755.75).observe(mars).apparent().altaz()
+>>> print(alt.dstr())
 40deg 3m 49.433s
->>> print(h.az.dstr())
+>>> print(az.dstr())
 201deg 58m 7.067s
 
 fix >>> import sgp4

@@ -1,4 +1,4 @@
-"""Coordinate systems."""
+"""Classes representing different kinds of astronomical position."""
 
 from numpy import (arcsin, arctan2, array, cos, einsum,
                    ndarray, ones_like, pi, sin, sqrt, zeros_like)
@@ -134,14 +134,6 @@ class Astrometric(ICRS):
                        jd.tdb, include_earth_deflection)
         add_aberration(position, observer.velocity, self.lighttime)
 
-        # p = compute_precession(jd_tdb)
-        # n = compute_nutation(jd)
-
-        # position = position.T.dot(ICRS_to_J2000)
-        # position = einsum('...j,jk...->...k', position, p)
-        # position = einsum('...j,jk...->...k', position, n)
-        # position = position.T
-
         a = Apparent(position, jd=jd)
         a.observer = self.observer
         return a
@@ -157,7 +149,7 @@ class Apparent(ICRS):
     bends as it passes large masses like the Sun or Jupiter).
 
     """
-    def horizontal(self):
+    def altaz(self):
 
         try:
             topos = self.observer.topos
@@ -199,14 +191,8 @@ class Apparent(ICRS):
 
         position = array([pn, -pw, pz])
 
-        h = Horizontal()
-        h.az, h.alt, d = to_polar(position)
-        h.zd = quarter_tau - h.alt
-        h.jd = self.jd
-        return h
-
-class Horizontal(object):
-    pass
+        az, alt, d = to_polar(position)
+        return alt, az, d
 
 class HeliocentricLonLat(ndarray):
 
