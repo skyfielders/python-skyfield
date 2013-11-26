@@ -9,7 +9,7 @@ from skyfield.constants import T0
 from skyfield.timescales import julian_date, JulianDate
 from timeit import default_timer
 
-TA = julian_date(1969, 7, 20, 20. + 18. / 60.)
+TA = julian_date(1969, 7, 20, 20., 18.)
 TB = julian_date(2012, 12, 21)
 
 D0 = 63.8285

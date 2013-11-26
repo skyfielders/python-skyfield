@@ -26,7 +26,7 @@ def test_iss_altitude():
         2013, 11, 24, 6 - cst, 33., 43.)
     iss_position = array(iss_position) * KM_AU
     jd = JulianDate(ut1=julian_date(
-        2013, 11, 24, (6 - cst) + 33/60. + 43/3600.))
+        2013, 11, 24, (6 - cst), 33., 43.))
     lake_zurich = earth.topos('88.1 W', '42.2 N')
     earthpos = earth(jd)
     lake = (lake_zurich(jd).position - earthpos.position)

@@ -74,8 +74,8 @@ class JulianDate(object):
             # TODO: we should actually presume that datetime's are utc
             #assert isinstance(jd, datetime)
             dt = jd
-            f = ((dt.second + dt.microsecond * 1e-6) / 60.0 + dt.minute) / 60.0
-            tdb = julian_date(dt.year, dt.month, dt.day, dt.hour + f)
+            tdb = julian_date(dt.year, dt.month, dt.day, dt.hour,
+                              dt.minute, dt.second + dt.microsecond * 1e-6)
         if tdb is not None:
             self.tdb, self.shape = _convert(tdb)
         if tt is not None:
@@ -134,13 +134,14 @@ class JulianDate(object):
         self.tdb = tdb = tt + tdb_minus_tt(tt) * S_DAY
         return tdb
 
-def julian_date(year, month=1, day=1, hour=0.0):
+def julian_date(year, month=1, day=1, hour=0.0, minute=0.0, second=0.0):
     janfeb = month < 3
-    return (day - 32075
+    return ((second / 60.0 + minute) / 60.0 + hour) / 24.0 - 0.5 + (
+            day - 32075
             + 1461 * (year + 4800 - janfeb) // 4
             + 367 * (month - 2 + janfeb * 12) // 12
             - 3 * ((year + 4900 - janfeb) // 100) // 4
-            ) - 0.5 + hour / 24.0
+            )
 
 def cal_date(jd):
     """Convert Julian Day `jd` into a Gregorian year, month, day, and hour."""
