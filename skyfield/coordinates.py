@@ -79,7 +79,8 @@ class ICRS(XYZ):
         position = self.position
         if epoch is not None:
             position = to_epoch(position, self.jd)
-        return to_polar(position, phi_class=HourAngle)
+        d, dec, ra = to_polar(position, phi_class=HourAngle)
+        return ra, dec, d
 
 class Topos(object):
 
@@ -202,7 +203,7 @@ class Apparent(ICRS):
 
         position = array([pn, -pw, pz])
 
-        az, alt, d = to_polar(position)
+        d, alt, az = to_polar(position)
         return alt, az, d
 
 class HeliocentricLonLat(ndarray):
@@ -232,15 +233,26 @@ class HeliocentricLonLat(ndarray):
     def r(self): return self[2]
 
 def to_polar(position, phi_class=Angle):
+    """Convert ``[x y z]`` into spherical coordinates ``(r, theta, phi)``.
+
+    ``r`` - vector length
+    ``theta`` - angle above (+) or below (-) the xy-plane
+    ``phi`` - angle around the z-axis
+
+    The order of values in the tuple is intended to match ISO 31-11.
+
+    """
     r = length_of(position)
-    phi = phi_class(r.shape)
     theta = Angle(r.shape)
-    arctan2(-position[1], -position[0], out=phi)
+    phi = phi_class(r.shape)
     arcsin(position[2] / r, out=theta)
+    arctan2(-position[1], -position[0], out=phi)
     phi += pi
-    return phi, theta, r
+    return r, theta, phi
 
 def to_epoch(position, epoch):
+    """Convert an ICRS position into an Earth equatorial position."""
+
     jd = epoch
     p = compute_precession(jd.tdb)
     n = compute_nutation(jd)
