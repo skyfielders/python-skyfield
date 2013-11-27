@@ -2,8 +2,8 @@ import jplephem
 from numpy import max, min
 
 from .constants import KM_AU, C_AUDAY
-from .coordinates import ICRS, Astrometric, Topos
 from .functions import length_of
+from .positionlib import ICRS, Astrometric, Topos
 from .timescales import takes_julian_date
 
 class Planet(object):

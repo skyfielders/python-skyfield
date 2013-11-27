@@ -17,7 +17,7 @@ The interface is still evolving,
 but you can already ask the position of a planet in the sky
 using one of three simple techniques::
 
-    import skyfield.coordinates
+    import skyfield.positionlib
     import skyfield.planets
     import de421
 
@@ -40,7 +40,7 @@ using one of three simple techniques::
 
     # Where is Mars in the sky, viewed from Boston?
 
-    boston = coordinates.Topos('71.0603 W', '42.3583 N',
+    boston = positionlib.Topos('71.0603 W', '42.3583 N',
         elevation=0.0, temperature=10.0, pressure=1010.0)
     radec = mars.observe_from(boston(t)).apparent()
 

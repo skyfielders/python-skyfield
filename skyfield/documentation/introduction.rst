@@ -86,7 +86,7 @@ fix >>> print(mars.observe_from(earth(t)).apparent())
 <Apparent position RA=HourAngle([ 4.58500039,  4.59931574,  4.61365598,  4.62801986,  4.64240623]) dec=Angle([-0.41933084, -0.42008982, -0.42077423, -0.42138359, -0.42191745])>
 
 
-        ggr = coordinates.Topos('75 W', '45 N', 0.0,
+        ggr = positionlib.Topos('75 W', '45 N', 0.0,
                                 temperature=10.0, pressure=1010.0)
         ggr.earth = self.e.earth
         ggr.ephemeris = self.e

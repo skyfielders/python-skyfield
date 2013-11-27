@@ -3,7 +3,7 @@
 import pytest
 from numpy import array, einsum, rollaxis
 
-from skyfield import (coordinates, earthlib, framelib, nutationlib,
+from skyfield import (positionlib, earthlib, framelib, nutationlib,
                       jpllib, precessionlib, starlib, timescales)
 
 from ..constants import ASEC2RAD, AU_KM, DEG2RAD, TAU, T0
@@ -216,7 +216,7 @@ def test_app_planet(jd, planets_list):
 
 def test_topo_planet(jd, planets_list):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-    ggr = coordinates.Topos('75 W', '45 N', 0.0,
+    ggr = positionlib.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
     ggr.ephemeris = emp
 
@@ -247,7 +247,7 @@ def test_altaz(jd, planets_list):
     """
     planet_name, planet_code = planets_list
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-    ggr = coordinates.Topos('75 W', '45 N', 0.0,
+    ggr = positionlib.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
     ggr.ephemeris = emp
     xp = yp = 0.0
@@ -315,7 +315,7 @@ def test_geocentric_position_and_velocity(jd):
     observer = c.make_observer_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     posu, velu = vcall(c.geo_posvel, jd.tt, delta_t, observer)
 
-    topos = coordinates.Topos('75 W', '45 N', elevation=0.0,
+    topos = positionlib.Topos('75 W', '45 N', elevation=0.0,
                               temperature=10.0, pressure=1010.0)
     posv, velv = earthlib.geocentric_position_and_velocity(topos, jd)
 
