@@ -3,11 +3,11 @@
 import pytest
 from datetime import datetime, timedelta
 from numpy import array
-from sgp4.earth_gravity import wgs72
-from sgp4.io import twoline2rv
 from skyfield.constants import KM_AU
 from skyfield.planets import earth, mars
+from skyfield.sgp4lib import EarthSatellite
 from skyfield.timescales import JulianDate
+
 
 iss_tle = ("""\
 ISS (ZARYA)             \n\
@@ -38,21 +38,14 @@ def iss_transit(request):
 
 def test_iss_altitude(iss_transit):
     dt, altitude = iss_transit
+
     cst = timedelta(hours=-6) #, minutes=1)
     dt = dt - cst
-    line0, line1, line2 = iss_tle.splitlines()
-    satellite = twoline2rv(line1, line2, wgs72)
-    iss_position, iss_velocity = satellite.propagate(
-        dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
-    iss_position = array(iss_position) * KM_AU
     jd = JulianDate(dt)
+
+    lines = iss_tle.splitlines()
+    s = EarthSatellite(lines, earth)
     lake_zurich = earth.topos('88.1 W', '42.2 N')
-    earthpos = earth(jd)
-    lake = (lake_zurich(jd).position - earthpos.position)
-    diff = lake_zurich(jd).observe(mars)
-    diff.position = (iss_position) - lake
-    diff.lighttime = 0.0000000000000001
-    diff.observer.velocity = array([0.000000000000001,0.,0.])
-    alt, az, d = diff.apparent().altaz()
+    alt, az, d = lake_zurich(jd).observe(s).apparent().altaz()
     print dt, altitude, alt.degrees()
     assert abs(alt.degrees() - altitude) < 2.0  # TODO: tighten this up?
