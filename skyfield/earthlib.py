@@ -4,13 +4,16 @@ from numpy import (arcsin, arccos, array, clip, cos, einsum, fmod,
                    minimum, pi, sin, sqrt, zeros_like)
 
 from .constants import (AU, ANGVEL, AU_KM, DAY_S, DEG2RAD, ERAD,
-                        ERAD_KM, F, RAD2DEG, T0)
+                        ERAD_KM, IERS_2010_INVERSE_EARTH_FLATTENING,
+                        RAD2DEG, T0)
 from .framelib import J2000_to_ICRS
 from .functions import dots
 from .nutationlib import earth_tilt, compute_nutation
 from .precessionlib import compute_precession
 
 rade = ERAD / AU
+one_minus_flattening = 1.0 - 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
+one_minus_flattening_squared = one_minus_flattening * one_minus_flattening
 
 def geocentric_position_and_velocity(topos, jd):
     """Compute the geocentric position, velocity of a terrestrial observer.
@@ -53,14 +56,12 @@ def terra(topos, st):
 
     """
     zero = zeros_like(st)
-    df = 1.0 - F
-    df2 = df * df
-
     phi = topos.latitude
     sinphi = sin(phi)
     cosphi = cos(phi)
-    c = 1.0 / sqrt(cosphi * cosphi + df2 * sinphi * sinphi)
-    s = df2 * c
+    c = 1.0 / sqrt(cosphi * cosphi +
+                   sinphi * sinphi * one_minus_flattening_squared)
+    s = one_minus_flattening_squared * c
     ht_km = topos.elevation / 1000.0
     ach = ERAD_KM * c + ht_km
     ash = ERAD_KM * s + ht_km
