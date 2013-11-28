@@ -13,20 +13,31 @@ from .timescales import takes_julian_date
 _minutes_per_day = 1440.
 
 class EarthSatellite(object):
-    """A satellite in orbit around the Earth, initialized by a TLE entry."""
+    """An Earth satellite loaded from a TLE file and propagated with SGP4."""
 
     def __init__(self, lines, earth):
         self.earth = earth
-        self.sgp4_satellite = twoline2rv(*lines[1:3], whichconst=wgs72)
+        self.sgp4_satellite = twoline2rv(*lines[-2:], whichconst=wgs72)
+
+    def _position_and_velocity_TEME_km(self, jd):
+        """Return the raw true equator mean equinox (TEME) vectors from SGP4.
+
+        Returns a tuple of NumPy arrays ``([x y z], [xdot ydot zdot])``
+        expressed in kilometers and kilometers per second.
+
+        """
+        minutes_past_epoch = (jd.ut1 - self.sgp4_satellite.jdsatepoch) * 1440.
+        position, velocity = sgp4(self.sgp4_satellite, minutes_past_epoch)
+        return (array(position), array(velocity))
 
     @takes_julian_date
     def __call__(self, jd):
         """Compute where satellite is in space on a given date."""
 
-        m = (jd.ut1 - self.sgp4_satellite.jdsatepoch) * _minutes_per_day
-        position, velocity = sgp4(self.sgp4_satellite, m)
-        position = array(position) * KM_AU
-        velocity = array(velocity) * KM_AU * DAY_S
+        position_teme, velocity_teme = self._position_and_velocity_TEME_km(jd)
+        # TODO: real conversion from TEME to GCRS
+        position = array(position_teme) * KM_AU
+        velocity = array(velocity_teme) * KM_AU * DAY_S
         e = self.earth(jd)
         p = ICRS(position + e.position, velocity + e.velocity, jd=jd)
         # a.ephemeris = self.ephemeris

@@ -2,12 +2,9 @@
 
 import pytest
 from datetime import datetime, timedelta
-from numpy import array
-from skyfield.constants import KM_AU
-from skyfield.planets import earth, mars
+from skyfield.planets import earth
 from skyfield.sgp4lib import EarthSatellite
 from skyfield.timescales import JulianDate
-
 
 iss_tle = ("""\
 ISS (ZARYA)             \n\
@@ -47,5 +44,36 @@ def test_iss_altitude(iss_transit):
     s = EarthSatellite(lines, earth)
     lake_zurich = earth.topos('88.1 W', '42.2 N')
     alt, az, d = lake_zurich(jd).observe(s).apparent().altaz()
-    print dt, altitude, alt.degrees()
+    print dt, altitude, alt.degrees(), altitude - alt.degrees()
     assert abs(alt.degrees() - altitude) < 2.0  # TODO: tighten this up?
+
+# The following tests are based on the text of
+# http://www.celestrak.com/publications/AIAA/2006-6753/AIAA-2006-6753-Rev2.pdf
+
+appendix_c_example = """\
+TEME EXAMPLE
+1 00005U 58002B   00179.78495062  .00000023  00000-0  28098-4 0  4753
+2 00005  34.2682 348.7242 1859667 331.7664  19.3264 10.82419157413667
+"""
+
+def test_appendix_c():
+    lines = appendix_c_example.splitlines()
+    sat = EarthSatellite(lines, earth)
+
+    jd_epoch = sat.sgp4_satellite.jdsatepoch
+    three_days_later = jd_epoch + 3.0
+    jd = JulianDate(ut1=three_days_later)
+
+    # First, a crucial sanity check (which is, technically, a test of
+    # the `sgp4` package and not of Skyfield): are the right coordinates
+    # being produced by our Python SGP4 propagator for this satellite?
+
+    rTEME, vTEME = sat._position_and_velocity_TEME_km(jd)
+
+    assert abs(-9060.47373569 - rTEME[0]) < 1e-8
+    assert abs(4658.70952502 - rTEME[1]) < 1e-8
+    assert abs(813.68673153 - rTEME[2]) < 1e-8
+
+    assert abs(-2.232832783 - vTEME[0]) < 1e-9
+    assert abs(-4.110453490 - vTEME[1]) < 1e-9
+    assert abs(-3.157345433 - vTEME[2]) < 1e-9
