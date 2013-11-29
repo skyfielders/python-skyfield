@@ -15,6 +15,10 @@ class WrongUnitError(ValueError):
 
 class BaseAngle(ndarray):
 
+    @classmethod
+    def from_degrees(cls, degrees):
+        return np.float_(degrees * TAU / 360.0).astype(cls)
+
     def hours(self):
         return 24. / TAU * self
 
