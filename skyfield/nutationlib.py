@@ -32,6 +32,14 @@ def earth_tilt(jd):
 
     `jd` - A JulianDate object.
 
+    The returned tuple contains five items:
+
+    ``mean_ob`` - Mean obliquity of the ecliptic in degrees.
+    ``true_ob`` - True obliquity of the ecliptic in degrees.
+    ``eq_eq`` - Equation of the equinoxes in seconds of time.
+    ``d_psi`` - Nutation in longitude in arcseconds.
+    ``d_eps`` - Nutation in obliquity in arcseconds.
+
     """
     dp, de = iau2000a(jd.tt)
     c_terms = equation_of_the_equinoxes_complimentary_terms(jd.tt) / ASEC2RAD
