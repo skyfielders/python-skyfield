@@ -3,9 +3,12 @@
 import pytest
 import sys
 from datetime import datetime, timedelta
+from numpy import array, cos, pi, sin
 from skyfield.planets import earth
 from skyfield.sgp4lib import EarthSatellite
-from skyfield.timescales import JulianDate
+from skyfield.timescales import JulianDate, julian_date
+
+tau = pi * 2.0
 
 iss_tle = ("""\
 ISS (ZARYA)             \n\
@@ -59,7 +62,81 @@ TEME EXAMPLE
 2 00005  34.2682 348.7242 1859667 331.7664  19.3264 10.82419157413667
 """
 
-def test_appendix_c():
+from ..constants import DEG2RAD
+
+arcminute = DEG2RAD / 60.0
+arcsecond = arcminute / 60.0
+
+def ROT1(theta):
+    return array([[1.0, 0.0, 0.0],
+                  [0.0, cos(theta), -sin(theta)],
+                  [0.0, sin(theta), cos(theta)]])
+
+def ROT2(theta):
+    return array([[cos(theta), 0.0, sin(theta)],
+                  [0.0, 1.0, 0.0],
+                  [-sin(theta), 0.0, cos(theta)]])
+
+def ROT3(theta):
+    return array([[cos(theta), -sin(theta), 0.0],
+                  [sin(theta), cos(theta), 0.0],
+                  [0.0, 0.0, 1.0]])
+
+def test_appendix_c_conversion_to_teme():
+
+    # This is a rough beginning for getting this routine implemented
+    # correctly; for now, run with: py.test -s -k conversion_to_teme
+
+    # Julian centuries?
+    h = 7
+    m = 51
+    s = 28.386 - 0.439961
+    raw_jd = julian_date(2004, 4, 6, h, m, s)
+
+    rTEME = array([5094.18016210, 6127.64465950, 6380.34453270])
+    # vTEME = array([-4.746131487, 0.785818041, 5.531931288])
+
+    xp = -0.140682 * arcsecond
+    yp = 0.333309 * arcsecond
+    xp = yp = 0.0
+
+    # theta = (67310.54841
+    #          + (876600.0 * 3600.0 + 8640184.812866) * t_ut1
+    #          + (0.093104) * (t_ut1 ** 2.0)
+    #          - (6.2e-6) * (t_ut1 ** 3.0))
+
+    TU = (raw_jd - 2451545.0) / 36525.0
+    # GMST = 24110.54841 + TU*(8640184.812866 + TU*(0.093104 + TU*(-6.2E-6)))
+    G1 = TU*(184.812866+TU*(0.093104+TU*(-6.2E-6)))/86400.0
+    G2 = TU*100.0
+    G3 = 0.2790572733                              # 24110.54841/86400
+    GMST = G1 + G2 + G3
+    GMST = GMST % 1.0
+    theta = GMST * tau
+    print
+    print 'GMST (revolutions) =', GMST
+    print 'GMST (h/m) =', divmod(GMST * 1440.0, 60.0)
+    # no factor of 1.002737908 in the following increment?
+    theta += ((s / 60.0 + m) / 60.0 + h) * tau / 24.0
+    print 'theta (radians) =', theta
+    print 'theta (DESIRED) = 5.45956'
+
+    W_ITRF_minus_PEF = (ROT1(yp)).dot(ROT2(xp))
+    print W_ITRF_minus_PEF
+
+    #theta = 0.82362  # this was very close to what we need
+    #theta = 5.45956  # this is very close to what we need
+
+    print
+    print (W_ITRF_minus_PEF.T).dot(ROT3(theta).T)
+    print (W_ITRF_minus_PEF.T).dot((ROT3(theta).T).dot(rTEME))
+    print ((W_ITRF_minus_PEF.T).dot(ROT3(theta).T)).dot(rTEME)
+    print (ROT3(theta).T).dot(rTEME)
+    print 'Want:'
+    print '−1033.47938300 7901.29527540 6380.35659580 km'
+    print
+
+def test_appendix_c_satellite():
     lines = appendix_c_example.splitlines()
     sat = EarthSatellite(lines, earth)
 
