@@ -69,13 +69,13 @@ arcsecond = arcminute / 60.0
 
 def ROT1(theta):
     return array([[1.0, 0.0, 0.0],
-                  [0.0, cos(theta), -sin(theta)],
-                  [0.0, sin(theta), cos(theta)]])
+                  [0.0, cos(theta), sin(theta)],
+                  [0.0, -sin(theta), cos(theta)]])
 
 def ROT2(theta):
-    return array([[cos(theta), 0.0, sin(theta)],
+    return array([[cos(theta), 0.0, -sin(theta)],
                   [0.0, 1.0, 0.0],
-                  [-sin(theta), 0.0, cos(theta)]])
+                  [sin(theta), 0.0, cos(theta)]])
 
 def ROT3(theta):
     return array([[cos(theta), -sin(theta), 0.0],
@@ -98,12 +98,23 @@ def test_appendix_c_conversion_to_teme():
 
     xp = -0.140682 * arcsecond
     yp = 0.333309 * arcsecond
-    xp = yp = 0.0
+    #xp = yp = 0.0
 
-    # theta = (67310.54841
-    #          + (876600.0 * 3600.0 + 8640184.812866) * t_ut1
-    #          + (0.093104) * (t_ut1 ** 2.0)
-    #          - (6.2e-6) * (t_ut1 ** 3.0))
+    print
+
+    t_ut1 = raw_jd / 36525.0
+    print 't_ut1 =', t_ut1
+    SSS = (24.0 * 60.0 * 60.0)
+    theta2 = (67310.54841 / SSS
+             + (876600.0 * 3600.0 + 8640184.812866) * t_ut1 / SSS
+             + (0.093104) * (t_ut1 ** 2.0)
+             - (6.2e-6) * (t_ut1 ** 3.0))
+    print 'theta2? ', (theta2 % 1.0)
+    print 'theta2? ', (theta2 % 1.0) * tau
+    print 'theta2? ', (theta2 % 1.0) * tau / 24.0
+    print 'theta2? ', (theta2 % tau)
+    print 'theta2? ', (theta2 % tau) * tau
+    print 'theta2? ', (theta2 % tau) * tau / 24.0
 
     TU = (raw_jd - 2451545.0) / 36525.0
     # GMST = 24110.54841 + TU*(8640184.812866 + TU*(0.093104 + TU*(-6.2E-6)))
@@ -113,7 +124,6 @@ def test_appendix_c_conversion_to_teme():
     GMST = G1 + G2 + G3
     GMST = GMST % 1.0
     theta = GMST * tau
-    print
     print 'GMST (revolutions) =', GMST
     print 'GMST (h/m) =', divmod(GMST * 1440.0, 60.0)
     # no factor of 1.002737908 in the following increment?
@@ -128,10 +138,10 @@ def test_appendix_c_conversion_to_teme():
     #theta = 5.45956  # this is very close to what we need
 
     print
-    print (W_ITRF_minus_PEF.T).dot(ROT3(theta).T)
-    print (W_ITRF_minus_PEF.T).dot((ROT3(theta).T).dot(rTEME))
-    print ((W_ITRF_minus_PEF.T).dot(ROT3(theta).T)).dot(rTEME)
+    # print (W_ITRF_minus_PEF.T).dot((ROT3(theta).T).dot(rTEME))
+    # print ((W_ITRF_minus_PEF.T).dot(ROT3(theta).T)).dot(rTEME)
     print (ROT3(theta).T).dot(rTEME)
+    print (W_ITRF_minus_PEF.T).dot(ROT3(theta).T).dot(rTEME)
     print 'Want:'
     print '−1033.47938300 7901.29527540 6380.35659580 km'
     print
