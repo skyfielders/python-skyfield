@@ -62,7 +62,7 @@ TEME EXAMPLE
 2 00005  34.2682 348.7242 1859667 331.7664  19.3264 10.82419157413667
 """
 
-from ..constants import DEG2RAD
+from ..constants import DEG2RAD, T0
 
 arcminute = DEG2RAD / 60.0
 arcsecond = arcminute / 60.0
@@ -102,19 +102,19 @@ def test_appendix_c_conversion_to_teme():
 
     print
 
-    t_ut1 = raw_jd / 36525.0
-    print 't_ut1 =', t_ut1
+    t_ut1 = (raw_jd - T0) / 36525.0  # instead of raw_jd / 36525.0
     SSS = (24.0 * 60.0 * 60.0)
-    theta2 = (67310.54841 / SSS
-             + (876600.0 * 3600.0 + 8640184.812866) * t_ut1 / SSS
+    theta2 = (
+             67310.54841
+             + (876600.0 * 3600.0 + 8640184.812866) * t_ut1
              + (0.093104) * (t_ut1 ** 2.0)
-             - (6.2e-6) * (t_ut1 ** 3.0))
-    print 'theta2? ', (theta2 % 1.0)
-    print 'theta2? ', (theta2 % 1.0) * tau
-    print 'theta2? ', (theta2 % 1.0) * tau / 24.0
-    print 'theta2? ', (theta2 % tau)
-    print 'theta2? ', (theta2 % tau) * tau
-    print 'theta2? ', (theta2 % tau) * tau / 24.0
+             - (6.2e-6) * (t_ut1 ** 3.0)
+             ) / SSS - 0.5 - (raw_jd - T0)
+
+    theta2 += ((s / 60.0 + m) / 60.0 + h) / 24.0
+    theta2 %= 1.0
+    theta2 *= tau
+    print 'theta2? ', theta2
 
     TU = (raw_jd - 2451545.0) / 36525.0
     # GMST = 24110.54841 + TU*(8640184.812866 + TU*(0.093104 + TU*(-6.2E-6)))
@@ -123,28 +123,16 @@ def test_appendix_c_conversion_to_teme():
     G3 = 0.2790572733                              # 24110.54841/86400
     GMST = G1 + G2 + G3
     GMST = GMST % 1.0
-    theta = GMST * tau
-    print 'GMST (revolutions) =', GMST
-    print 'GMST (h/m) =', divmod(GMST * 1440.0, 60.0)
-    # no factor of 1.002737908 in the following increment?
-    theta += ((s / 60.0 + m) / 60.0 + h) * tau / 24.0
-    print 'theta (radians) =', theta
-    print 'theta (DESIRED) = 5.45956'
+    LST = GMST + ((s / 60.0 + m) / 60.0 + h) / 24.0
+    theta = LST * tau
+    print 'theta:  ', theta
 
     W_ITRF_minus_PEF = (ROT1(yp)).dot(ROT2(xp))
-    print W_ITRF_minus_PEF
-
-    #theta = 0.82362  # this was very close to what we need
-    #theta = 5.45956  # this is very close to what we need
 
     print
-    # print (W_ITRF_minus_PEF.T).dot((ROT3(theta).T).dot(rTEME))
-    # print ((W_ITRF_minus_PEF.T).dot(ROT3(theta).T)).dot(rTEME)
-    print (ROT3(theta).T).dot(rTEME)
     print (W_ITRF_minus_PEF.T).dot(ROT3(theta).T).dot(rTEME)
-    print 'Want:'
-    print '−1033.47938300 7901.29527540 6380.35659580 km'
-    print
+    print (W_ITRF_minus_PEF.T).dot(ROT3(theta2).T).dot(rTEME)
+    print array([-1033.47938300, 7901.29527540, 6380.35659580])
 
 def test_appendix_c_satellite():
     lines = appendix_c_example.splitlines()
