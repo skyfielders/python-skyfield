@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+import sys
 from datetime import datetime, timedelta
 from skyfield.planets import earth
 from skyfield.sgp4lib import EarthSatellite
@@ -22,7 +23,9 @@ heavens_above_transits = """\
 30 Nov	-1.9	04:54:52	33°	SSE	04:54:52	33°	SSE	04:56:55	10°	SE	visible
 01 Dec	-0.9	05:41:13	12°	SW	05:41:13	12°	SW	05:42:15	10°	SSW	visible
 02 Dec	-0.4	04:54:46	10°	S	04:54:46	10°	S	04:54:49	10°	S	visible
-""".decode('utf-8')
+"""
+if sys.version_info < (3,):
+    heavens_above_transits = heavens_above_transits.decode('utf-8')
 
 @pytest.fixture(params=heavens_above_transits.splitlines())
 def iss_transit(request):
@@ -44,7 +47,7 @@ def test_iss_altitude(iss_transit):
     s = EarthSatellite(lines, earth)
     lake_zurich = earth.topos('88.1 W', '42.2 N')
     alt, az, d = lake_zurich(jd).observe(s).apparent().altaz()
-    print dt, altitude, alt.degrees(), altitude - alt.degrees()
+    print(dt, altitude, alt.degrees(), altitude - alt.degrees())
     assert abs(alt.degrees() - altitude) < 2.0  # TODO: tighten this up?
 
 # The following tests are based on the text of
