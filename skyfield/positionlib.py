@@ -10,7 +10,6 @@ from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
 from .framelib import ICRS_to_J2000
 from .functions import dots
-from .nutationlib import compute_nutation
 from .relativity import add_aberration, add_deflection
 from .timescales import takes_julian_date
 
@@ -253,11 +252,10 @@ def to_epoch(position, epoch):
     """Convert an ICRS position into an Earth equatorial position."""
 
     jd = epoch
-    n = compute_nutation(jd)
 
     position = position.T.dot(ICRS_to_J2000)
     position = einsum('...j,jk...->...k', position, jd.P)
-    position = einsum('...j,jk...->...k', position, n)
+    position = einsum('...j,jk...->...k', position, jd.N)
     position = position.T
 
     return position

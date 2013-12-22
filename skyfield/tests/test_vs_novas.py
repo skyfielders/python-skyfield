@@ -424,14 +424,11 @@ def test_ter2cel(jd):
     position = spin(-gast * TAU / 24.0, array(position))
 
     from ..framelib import J2000_to_ICRS
-    from ..nutationlib import compute_nutation
-
-    n = compute_nutation(jd)
 
     position = array(position)
     position = position.T
-    import numpy as np
-    position = einsum('...j,jk...->...k', position, np.rollaxis(n, 1))
+
+    position = einsum('...j,jk...->...k', position, jd.NT)
     position = einsum('...j,jk...->...k', position, jd.PT)
     position = position.dot(J2000_to_ICRS)
     position = position.T

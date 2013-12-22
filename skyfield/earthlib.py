@@ -8,7 +8,7 @@ from .constants import (AU, ANGVEL, AU_KM, DAY_S, DEG2RAD, ERAD,
                         RAD2DEG, T0)
 from .framelib import J2000_to_ICRS
 from .functions import dots
-from .nutationlib import earth_tilt, compute_nutation
+from .nutationlib import earth_tilt
 
 rade = ERAD / AU
 one_minus_flattening = 1.0 - 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
@@ -30,11 +30,8 @@ def geocentric_position_and_velocity(topos, jd):
 
     pos, vel = terra(topos, gast)
 
-    n = compute_nutation(jd)
-    f = J2000_to_ICRS
-
-    t = einsum('ji...,kj...->ik...', n, jd.P)
-    t = einsum('ij...,jk...->ik...', t, f)
+    t = einsum('ji...,kj...->ik...', jd.N, jd.P)
+    t = einsum('ij...,jk...->ik...', t, J2000_to_ICRS)
 
     pos = einsum('i...,ij...->j...', pos, t)
     vel = einsum('i...,ij...->j...', vel, t)
