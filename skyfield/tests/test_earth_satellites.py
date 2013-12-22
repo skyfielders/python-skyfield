@@ -3,9 +3,10 @@
 import pytest
 import sys
 from datetime import datetime, timedelta
-from numpy import array
+from numpy import array, cross
+from skyfield.functions import rot_z
 from skyfield.planets import earth
-from skyfield.sgp4lib import EarthSatellite, TEME_to_ITRF
+from skyfield.sgp4lib import EarthSatellite, PEF_to_ITRF, theta_GMST1982
 from skyfield.timescales import JulianDate, julian_date
 
 iss_tle = ("""\
@@ -66,15 +67,25 @@ arcminute = DEG2RAD / 60.0
 arcsecond = arcminute / 60.0
 second = 1.0 / (24.0 * 60.0 * 60.0)
 
+_second = 1.0 / (24.0 * 60.0 * 60.0)
+
 def test_appendix_c_conversion_from_TEME_to_ITRF():
     rTEME = array([5094.18016210, 6127.64465950, 6380.34453270])
-    # vTEME = array([-4.746131487, 0.785818041, 5.531931288])
+    vTEME = array([-4.746131487, 0.785818041, 5.531931288])
+    vTEME = vTEME * 24.0 * 60.0 * 60.0  # km/s to km/day
 
     raw_jd = julian_date(2004, 4, 6, 7, 51, 28.386 - 0.439961)
     xp = -0.140682 * arcsecond
     yp = 0.333309 * arcsecond
 
-    rITRF = TEME_to_ITRF(raw_jd, xp, yp).dot(rTEME)
+    theta, dtheta = theta_GMST1982(raw_jd)
+    R = rot_z(-theta)
+    W = PEF_to_ITRF(xp, yp)
+    angular_velocity = array([0, 0, -dtheta])
+
+    rPEF = (R).dot(rTEME)
+    rITRF = (W).dot(rPEF)
+    vITRF = (W).dot((R).dot(vTEME) + cross(angular_velocity, rPEF))
 
     meter = 1e-3
 
@@ -82,7 +93,11 @@ def test_appendix_c_conversion_from_TEME_to_ITRF():
     assert abs(+7901.29527540 - rITRF[1]) < 0.1 * meter
     assert abs(+6380.35659580 - rITRF[2]) < 0.1 * meter
 
-    # TODO: velocity
+    vITRF_per_second = vITRF * second
+
+    assert abs(-3.225636520 - vITRF_per_second[0]) < 1e-4 * meter
+    assert abs(-2.872451450 - vITRF_per_second[1]) < 1e-4 * meter
+    assert abs(+5.531924446 - vITRF_per_second[2]) < 1e-4 * meter
 
 def test_appendix_c_satellite():
     lines = appendix_c_example.splitlines()

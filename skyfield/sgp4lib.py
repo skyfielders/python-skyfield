@@ -60,9 +60,20 @@ class EarthSatellite(object):
 
 _second = 1.0 / (24.0 * 60.0 * 60.0)
 
-def TEME_to_ITRF(raw_jd, xp, yp):
-    j = raw_jd - T0
-    t = j / 36525.0
+def theta_GMST1982(raw_jd):
+    """Return the angle of Greenwich Mean Standard Time 1982 given the JD.
+
+    This angle defines the difference between the idiosyncratic True
+    Equator Mean Equinox (TEME) frame of reference used by SGP4 and the
+    more standard Pseudo Earth Fixed (PEF) frame of reference.
+
+    """
+    t = (raw_jd - T0) / 36525.0
     g = 67310.54841 + (8640184.812866 + (0.093104 + (-6.2e-6) * t) * t) * t
+    dg = 8640184.812866 + (0.093104 * 2.0 + (-6.2e-6 * 3.0) * t) * t
     theta = (raw_jd % 1.0 + g * _second % 1.0) * tau
-    return (rot_x(-yp)).dot(rot_y(-xp)).dot(rot_z(-theta))
+    dtheta = (1.0 + dg * _second / 36525.0) * tau
+    return theta, dtheta
+
+def PEF_to_ITRF(xp, yp):
+    return (rot_x(-yp)).dot(rot_y(-xp))
