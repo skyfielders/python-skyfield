@@ -3,10 +3,9 @@
 import pytest
 import sys
 from datetime import datetime, timedelta
-from numpy import array, cross
-from skyfield.functions import rot_z
+from numpy import array
 from skyfield.planets import earth
-from skyfield.sgp4lib import EarthSatellite, PEF_to_ITRF, theta_GMST1982
+from skyfield.sgp4lib import EarthSatellite, TEME_to_ITRF
 from skyfield.timescales import JulianDate, julian_date
 
 iss_tle = ("""\
@@ -76,14 +75,7 @@ def test_appendix_c_conversion_from_TEME_to_ITRF():
     xp = -0.140682 * arcsecond
     yp = 0.333309 * arcsecond
 
-    theta, dtheta = theta_GMST1982(raw_jd)
-    R = rot_z(-theta)
-    W = PEF_to_ITRF(xp, yp)
-    angular_velocity = array([0, 0, -dtheta])
-
-    rPEF = (R).dot(rTEME)
-    rITRF = (W).dot(rPEF)
-    vITRF = (W).dot((R).dot(vTEME) + cross(angular_velocity, rPEF))
+    rITRF, vITRF = TEME_to_ITRF(rTEME, vTEME, raw_jd, xp, yp)
 
     meter = 1e-3
 

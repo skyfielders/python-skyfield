@@ -1,6 +1,6 @@
 """An object representing an Earth-orbiting satellite."""
 
-from numpy import array
+from numpy import array, cross
 from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
@@ -75,5 +75,26 @@ def theta_GMST1982(raw_jd):
     dtheta = (1.0 + dg * _second / 36525.0) * tau
     return theta, dtheta
 
-def PEF_to_ITRF(xp, yp):
-    return (rot_x(-yp)).dot(rot_y(-xp))
+def TEME_to_ITRF(rTEME, vTEME, raw_jd, xp=0.0, yp=0.0):
+    """Convert TEME position and velocity into standard ITRS coordinates.
+
+    This converts a position and velocity vector in the idiosyncratic
+    True Equator Mean Equinox (TEME) frame of reference used by the SGP4
+    theory into vectors into the more standard ITRS frame of reference.
+
+    The velocity should be in units per day.
+
+    """
+    theta, dtheta = theta_GMST1982(raw_jd)
+    angular_velocity = array([0, 0, -dtheta])
+    R = rot_z(-theta)
+    rPEF = (R).dot(rTEME)
+    vPEF = (R).dot(vTEME) + cross(angular_velocity, rPEF)
+    if xp == 0.0 and yp == 0.0:
+        rITRF = rPEF
+        vITRF = vPEF
+    else:
+        W = (rot_x(-yp)).dot(rot_y(-xp))
+        rITRF = (W).dot(rPEF)
+        vITRF = (W).dot(vPEF)
+    return rITRF, vITRF
