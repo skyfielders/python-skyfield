@@ -1,5 +1,4 @@
-from numpy import sqrt
-
+from numpy import array, cos, sin, sqrt
 
 def dots(v, u):
     """Given one or more vectors in `v` and `u`, return their dot products.
@@ -11,7 +10,6 @@ def dots(v, u):
     """
     return (v * u).sum(axis=0)
 
-
 def length_of(xyz):
     """Given a 3-element array `[x y z]`, return its length.
 
@@ -20,3 +18,18 @@ def length_of(xyz):
 
     """
     return sqrt((xyz * xyz).sum(axis=0))
+
+def rot_x(theta):
+    c = cos(theta)
+    s = sin(theta)
+    return array([(1.0, 0.0, 0.0), (0.0, c, s), (0.0, -s, c)])
+
+def rot_y(theta):
+    c = cos(theta)
+    s = sin(theta)
+    return array([(c, 0.0, -s), (0.0, 1.0, 0.0), (s, 0.0, c)])
+
+def rot_z(theta):
+    c = cos(theta)
+    s = sin(theta)
+    return array([(c, -s, 0.0), (s, c, 0.0), (0.0, 0.0, 1.0)])

@@ -5,8 +5,8 @@ from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
 
-from .constants import C_AUDAY, DAY_S, KM_AU
-from .functions import length_of
+from .constants import C_AUDAY, DAY_S, KM_AU, T0, tau
+from .functions import length_of, rot_x, rot_y, rot_z
 from .positionlib import ICRS, Astrometric
 from .timescales import takes_julian_date
 
@@ -56,3 +56,13 @@ class EarthSatellite(object):
         # g.distance = euclidian_distance
         g.lighttime = length_of(g.position) / C_AUDAY
         return g
+
+
+_second = 1.0 / (24.0 * 60.0 * 60.0)
+
+def TEME_to_ITRF(raw_jd, xp, yp):
+    j = raw_jd - T0
+    t = j / 36525.0
+    g = 67310.54841 + (8640184.812866 + (0.093104 + (-6.2e-6) * t) * t) * t
+    theta = (raw_jd % 1.0 + g * _second % 1.0) * tau
+    return (rot_x(-yp)).dot(rot_y(-xp)).dot(rot_z(-theta))
