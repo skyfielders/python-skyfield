@@ -66,6 +66,7 @@ from ..constants import DEG2RAD, T0
 
 arcminute = DEG2RAD / 60.0
 arcsecond = arcminute / 60.0
+second = 1.0 / (24.0 * 60.0 * 60.0)
 
 def ROT1(theta):
     return array([[1.0, 0.0, 0.0],
@@ -82,57 +83,31 @@ def ROT3(theta):
                   [sin(theta), cos(theta), 0.0],
                   [0.0, 0.0, 1.0]])
 
-def test_appendix_c_conversion_to_teme():
+def test_appendix_c_conversion_from_teme():
 
-    # This is a rough beginning for getting this routine implemented
-    # correctly; for now, run with: py.test -s -k conversion_to_teme
-
-    # Julian centuries?
-    h = 7
-    m = 51
-    s = 28.386 - 0.439961
-    raw_jd = julian_date(2004, 4, 6, h, m, s)
+    raw_jd = julian_date(2004, 4, 6, 7, 51, 28.386 - 0.439961)
 
     rTEME = array([5094.18016210, 6127.64465950, 6380.34453270])
     # vTEME = array([-4.746131487, 0.785818041, 5.531931288])
 
     xp = -0.140682 * arcsecond
     yp = 0.333309 * arcsecond
-    #xp = yp = 0.0
 
-    print
-
-    t_ut1 = (raw_jd - T0) / 36525.0  # instead of raw_jd / 36525.0
-    SSS = (24.0 * 60.0 * 60.0)
-    theta2 = (
-             67310.54841
-             + (876600.0 * 3600.0 + 8640184.812866) * t_ut1
-             + (0.093104) * (t_ut1 ** 2.0)
-             - (6.2e-6) * (t_ut1 ** 3.0)
-             ) / SSS - 0.5 - (raw_jd - T0)
-
-    theta2 += ((s / 60.0 + m) / 60.0 + h) / 24.0
-    theta2 %= 1.0
-    theta2 *= tau
-    print 'theta2? ', theta2
-
-    TU = (raw_jd - 2451545.0) / 36525.0
-    # GMST = 24110.54841 + TU*(8640184.812866 + TU*(0.093104 + TU*(-6.2E-6)))
-    G1 = TU*(184.812866+TU*(0.093104+TU*(-6.2E-6)))/86400.0
-    G2 = TU*100.0
-    G3 = 0.2790572733                              # 24110.54841/86400
-    GMST = G1 + G2 + G3
-    GMST = GMST % 1.0
-    LST = GMST + ((s / 60.0 + m) / 60.0 + h) / 24.0
-    theta = LST * tau
-    print 'theta:  ', theta
+    j = (raw_jd - T0)
+    t = j / 36525.0
+    g = 67310.54841 + (8640184.812866 + (0.093104 + (-6.2e-6) * t) * t) * t
+    theta = (raw_jd % 1.0 + g * second % 1.0) * tau
 
     W_ITRF_minus_PEF = (ROT1(yp)).dot(ROT2(xp))
+    rITRF = (W_ITRF_minus_PEF.T).dot(ROT3(theta).T).dot(rTEME)
 
-    print
-    print (W_ITRF_minus_PEF.T).dot(ROT3(theta).T).dot(rTEME)
-    print (W_ITRF_minus_PEF.T).dot(ROT3(theta2).T).dot(rTEME)
-    print array([-1033.47938300, 7901.29527540, 6380.35659580])
+    m = 1e-3
+
+    assert abs(-1033.47938300 - rITRF[0]) < 0.1 * m
+    assert abs(+7901.29527540 - rITRF[1]) < 0.1 * m
+    assert abs(+6380.35659580 - rITRF[2]) < 0.1 * m
+
+    # TODO: velocity
 
 def test_appendix_c_satellite():
     lines = appendix_c_example.splitlines()
