@@ -67,8 +67,6 @@ arcminute = DEG2RAD / 60.0
 arcsecond = arcminute / 60.0
 second = 1.0 / (24.0 * 60.0 * 60.0)
 
-_second = 1.0 / (24.0 * 60.0 * 60.0)
-
 def test_appendix_c_conversion_from_TEME_to_ITRF():
     rTEME = array([5094.18016210, 6127.64465950, 6380.34453270])
     vTEME = array([-4.746131487, 0.785818041, 5.531931288])
