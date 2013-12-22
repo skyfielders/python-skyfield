@@ -1,5 +1,6 @@
-from numpy import array, sin
+from numpy import array, rollaxis, sin
 from .constants import T0, S_DAY
+from .precessionlib import compute_precession
 
 # Much of the following code is adapted from the USNO's "novas.c".
 
@@ -89,6 +90,19 @@ class JulianDate(object):
             raise ValueError('you must supply either tdb= tt= ut1= or utc=')
 
     def __getattr__(self, name):
+
+        # Cache of several expensive functions of time.
+
+        if name == 'P':
+            self.P = P = compute_precession(self.tdb)
+            return P
+
+        if name == 'PT':
+            self.PT = PT = rollaxis(self.P, 1)
+            return PT
+
+        # Conversion between timescales.
+
         delta_t = self.delta_t
         d = self.__dict__
         i = _sequence_indexes.get(name, None)

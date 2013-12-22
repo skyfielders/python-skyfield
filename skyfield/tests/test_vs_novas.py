@@ -395,6 +395,51 @@ def test_starvectors():
     eq(p, star._position.reshape(3), epsilon)
     eq(v, star._velocity.reshape(3), epsilon)
 
+def test_ter2cel(jd):
+    jd_low = 0.0
+    xp = yp = 0.0
+    position = [1033.47938300, 7901.29527540, 6380.35659580]
+    u = vcall(c.ter2cel, jd.ut1, jd_low, jd.delta_t, xp, yp, position)
+
+    from numpy import zeros_like, ones_like, cos, sin
+
+    def spin(angle, vector):
+        z = zeros_like(angle)
+        u = ones_like(angle)
+        cosang = cos(angle)
+        sinang = sin(angle)
+
+        rotation = array([
+            [cosang, -sinang, z],
+            [sinang, cosang, z],
+            [z, z, u],
+            ])
+
+        return einsum('i...,ij...->j...', vector, rotation)
+
+    # Todo: wobble
+
+    from ..earthlib import sidereal_time
+    gast = sidereal_time(jd, use_eqeq=True)
+    position = spin(-gast * TAU / 24.0, array(position))
+
+    from ..framelib import J2000_to_ICRS
+    from ..nutationlib import compute_nutation
+
+    n = compute_nutation(jd)
+
+    position = array(position)
+    position = position.T
+    import numpy as np
+    position = einsum('...j,jk...->...k', position, np.rollaxis(n, 1))
+    position = einsum('...j,jk...->...k', position, jd.PT)
+    position = position.dot(J2000_to_ICRS)
+    position = position.T
+    v = position
+
+    epsilon = 1e-9
+    eq(u, v, epsilon)
+
 def test_terra():
     epsilon = 1e-18
 

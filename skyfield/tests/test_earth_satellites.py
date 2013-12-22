@@ -3,9 +3,12 @@
 import pytest
 import sys
 from datetime import datetime, timedelta
+from numpy import array, cos, pi, sin
 from skyfield.planets import earth
 from skyfield.sgp4lib import EarthSatellite
-from skyfield.timescales import JulianDate
+from skyfield.timescales import JulianDate, julian_date
+
+tau = pi * 2.0
 
 iss_tle = ("""\
 ISS (ZARYA)             \n\
@@ -59,7 +62,54 @@ TEME EXAMPLE
 2 00005  34.2682 348.7242 1859667 331.7664  19.3264 10.82419157413667
 """
 
-def test_appendix_c():
+from ..constants import DEG2RAD, T0
+
+arcminute = DEG2RAD / 60.0
+arcsecond = arcminute / 60.0
+second = 1.0 / (24.0 * 60.0 * 60.0)
+
+def ROT1(theta):
+    return array([[1.0, 0.0, 0.0],
+                  [0.0, cos(theta), sin(theta)],
+                  [0.0, -sin(theta), cos(theta)]])
+
+def ROT2(theta):
+    return array([[cos(theta), 0.0, -sin(theta)],
+                  [0.0, 1.0, 0.0],
+                  [sin(theta), 0.0, cos(theta)]])
+
+def ROT3(theta):
+    return array([[cos(theta), -sin(theta), 0.0],
+                  [sin(theta), cos(theta), 0.0],
+                  [0.0, 0.0, 1.0]])
+
+def test_appendix_c_conversion_from_teme():
+
+    raw_jd = julian_date(2004, 4, 6, 7, 51, 28.386 - 0.439961)
+
+    rTEME = array([5094.18016210, 6127.64465950, 6380.34453270])
+    # vTEME = array([-4.746131487, 0.785818041, 5.531931288])
+
+    xp = -0.140682 * arcsecond
+    yp = 0.333309 * arcsecond
+
+    j = (raw_jd - T0)
+    t = j / 36525.0
+    g = 67310.54841 + (8640184.812866 + (0.093104 + (-6.2e-6) * t) * t) * t
+    theta = (raw_jd % 1.0 + g * second % 1.0) * tau
+
+    W_ITRF_minus_PEF = (ROT1(yp)).dot(ROT2(xp))
+    rITRF = (W_ITRF_minus_PEF.T).dot(ROT3(theta).T).dot(rTEME)
+
+    m = 1e-3
+
+    assert abs(-1033.47938300 - rITRF[0]) < 0.1 * m
+    assert abs(+7901.29527540 - rITRF[1]) < 0.1 * m
+    assert abs(+6380.35659580 - rITRF[2]) < 0.1 * m
+
+    # TODO: velocity
+
+def test_appendix_c_satellite():
     lines = appendix_c_example.splitlines()
     sat = EarthSatellite(lines, earth)
 
