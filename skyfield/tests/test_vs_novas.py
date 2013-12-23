@@ -192,6 +192,26 @@ def test_astro_planet(jd, planets_list):
     eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
     eq(distance0, distance, 0.001 * meter)
 
+def test_virtual_planet(jd, planets_list):
+    planet_name, planet_code = planets_list
+
+    obj = c.make_object(0, planet_code, 'planet', None)
+    ra0, dec0, distance0 = vcall(c.virtual_planet, jd.tt, obj)
+
+    earth = emp.earth
+    planet = getattr(emp, planet_name)
+    e = earth(jd)
+    distance = length_of((e - planet(jd)).position)
+    ra, dec, d = e.observe(planet).apparent().radec()
+
+    assert shape_of(jd.tt) == shape_of(ra)
+    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(distance)
+
+    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
+    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
+    eq(distance0, distance, 0.001 * meter)
+
 def test_app_planet(jd, planets_list):
     planet_name, planet_code = planets_list
 
@@ -203,6 +223,31 @@ def test_app_planet(jd, planets_list):
     e = earth(jd)
     distance = length_of((e - planet(jd)).position)
     ra, dec, d = e.observe(planet).apparent().radec(epoch=jd)
+
+    assert shape_of(jd.tt) == shape_of(ra)
+    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(distance)
+
+    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
+    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
+    eq(distance0, distance, 0.001 * meter)
+
+def test_local_planet(jd, planets_list):
+    position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
+    ggr = positionlib.Topos('75 W', '45 N', 0.0,
+                            temperature=10.0, pressure=1010.0)
+    ggr.ephemeris = emp
+
+    planet_name, planet_code = planets_list
+
+    obj = c.make_object(0, planet_code, 'planet', None)
+    ra0, dec0, distance0 = vcall(c.local_planet, jd.tt, jd.delta_t,
+                                 obj, position)
+
+    planet = getattr(emp, planet_name)
+    g = ggr(jd)
+    distance = length_of((g - planet(jd)).position)
+    ra, dec, d = g.observe(planet).apparent().radec()
 
     assert shape_of(jd.tt) == shape_of(ra)
     assert shape_of(jd.tt) == shape_of(dec)
