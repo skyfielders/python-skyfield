@@ -7,7 +7,7 @@ from sgp4.propagation import sgp4
 
 from .constants import C_AUDAY, DAY_S, KM_AU, T0, tau
 from .functions import length_of, rot_x, rot_y, rot_z
-from .positionlib import ICRS, Astrometric
+from .positionlib import Astrometric, ICRS, ITRF_to_GCRS
 from .timescales import takes_julian_date
 
 _minutes_per_day = 1440.
@@ -34,12 +34,16 @@ class EarthSatellite(object):
     def __call__(self, jd):
         """Compute where satellite is in space on a given date."""
 
-        position_teme, velocity_teme = self._position_and_velocity_TEME_km(jd)
-        # TODO: real conversion from TEME to GCRS
-        position = array(position_teme) * KM_AU
-        velocity = array(velocity_teme) * KM_AU * DAY_S
+        rTEME, vTEME = self._position_and_velocity_TEME_km(jd)
+        rTEME *= KM_AU
+        vTEME *= KM_AU * DAY_S
+
+        rITRF, vITRF = TEME_to_ITRF(jd.ut1, rTEME, vTEME)
+        rGCRS = ITRF_to_GCRS(jd, rITRF)  # todo: someday also compute vGCRS?
+        vGCRS = array((0.0, 0.0, 0.0))
+
         e = self.earth(jd)
-        p = ICRS(position + e.position, velocity + e.velocity, jd=jd)
+        p = ICRS(rGCRS + e.position, vGCRS + e.velocity, jd=jd)
         # a.ephemeris = self.ephemeris
         return p
 
@@ -60,32 +64,35 @@ class EarthSatellite(object):
 
 _second = 1.0 / (24.0 * 60.0 * 60.0)
 
-def theta_GMST1982(raw_jd):
+def theta_GMST1982(jd_ut1):
     """Return the angle of Greenwich Mean Standard Time 1982 given the JD.
 
     This angle defines the difference between the idiosyncratic True
     Equator Mean Equinox (TEME) frame of reference used by SGP4 and the
     more standard Pseudo Earth Fixed (PEF) frame of reference.
 
+    From AIAA 2006-6753 Appendix C.
+
     """
-    t = (raw_jd - T0) / 36525.0
+    t = (jd_ut1 - T0) / 36525.0
     g = 67310.54841 + (8640184.812866 + (0.093104 + (-6.2e-6) * t) * t) * t
     dg = 8640184.812866 + (0.093104 * 2.0 + (-6.2e-6 * 3.0) * t) * t
-    theta = (raw_jd % 1.0 + g * _second % 1.0) * tau
+    theta = (jd_ut1 % 1.0 + g * _second % 1.0) * tau
     dtheta = (1.0 + dg * _second / 36525.0) * tau
     return theta, dtheta
 
-def TEME_to_ITRF(rTEME, vTEME, raw_jd, xp=0.0, yp=0.0):
+def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
     """Convert TEME position and velocity into standard ITRS coordinates.
 
     This converts a position and velocity vector in the idiosyncratic
     True Equator Mean Equinox (TEME) frame of reference used by the SGP4
     theory into vectors into the more standard ITRS frame of reference.
+    The velocity should be provided in units per day, not per second.
 
-    The velocity should be in units per day.
+    From AIAA 2006-6753 Appendix C.
 
     """
-    theta, dtheta = theta_GMST1982(raw_jd)
+    theta, dtheta = theta_GMST1982(jd_ut1)
     angular_velocity = array([0, 0, -dtheta])
     R = rot_z(-theta)
     rPEF = (R).dot(rTEME)

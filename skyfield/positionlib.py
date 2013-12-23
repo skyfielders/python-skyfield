@@ -8,7 +8,7 @@ from .constants import TAU
 from .functions import length_of
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
-from .framelib import ICRS_to_J2000
+from .framelib import ICRS_to_J2000, J2000_to_ICRS
 from .functions import dots
 from .relativity import add_aberration, add_deflection
 from .timescales import takes_julian_date
@@ -259,3 +259,33 @@ def to_epoch(position, epoch):
     position = position.T
 
     return position
+
+def ITRF_to_GCRS(jd, rITRF):  # todo: velocity
+
+    def spin(angle, vector):
+        z = zeros_like(angle)
+        u = ones_like(angle)
+        cosang = cos(angle)
+        sinang = sin(angle)
+
+        rotation = array([
+            [cosang, -sinang, z],
+            [sinang, cosang, z],
+            [z, z, u],
+            ])
+
+        return einsum('i...,ij...->j...', vector, rotation)
+
+    # Todo: wobble
+
+    gast = sidereal_time(jd, use_eqeq=True)
+    position = spin(-gast * TAU / 24.0, array(rITRF))
+
+    position = array(position)
+    position = position.T
+
+    position = einsum('...j,jk...->...k', position, jd.NT)
+    position = einsum('...j,jk...->...k', position, jd.PT)
+    position = position.dot(J2000_to_ICRS)
+    rGCRS = position.T
+    return rGCRS
