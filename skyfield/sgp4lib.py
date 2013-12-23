@@ -7,7 +7,7 @@ from sgp4.propagation import sgp4
 
 from .constants import C_AUDAY, DAY_S, KM_AU, T0, tau
 from .functions import length_of, rot_x, rot_y, rot_z
-from .positionlib import Astrometric, ICRS, ITRF_to_GCRS
+from .positionlib import Apparent, ICRS, ITRF_to_GCRS
 from .timescales import takes_julian_date
 
 _minutes_per_day = 1440.
@@ -30,8 +30,7 @@ class EarthSatellite(object):
         position, velocity = sgp4(self.sgp4_satellite, minutes_past_epoch)
         return (array(position), array(velocity))
 
-    @takes_julian_date
-    def __call__(self, jd):
+    def _compute_GCRS(self, jd):
         """Compute where satellite is in space on a given date."""
 
         rTEME, vTEME = self._position_and_velocity_TEME_km(jd)
@@ -39,26 +38,20 @@ class EarthSatellite(object):
         vTEME *= KM_AU * DAY_S
 
         rITRF, vITRF = TEME_to_ITRF(jd.ut1, rTEME, vTEME)
-        rGCRS = ITRF_to_GCRS(jd, rITRF)  # todo: someday also compute vGCRS?
-        vGCRS = array((0.0, 0.0, 0.0))
+        rGCRS = ITRF_to_GCRS(jd, rITRF)
+        vGCRS = array((0.0, 0.0, 0.0))  # todo: someday also compute vGCRS?
 
-        e = self.earth(jd)
-        p = ICRS(rGCRS + e.position, vGCRS + e.velocity, jd=jd)
-        # a.ephemeris = self.ephemeris
-        return p
+        return rGCRS, vGCRS
 
     def observe_from(self, observer):
-        # TODO: should we add the kind of light-time back-dating that
-        # planets use, in case, say, someone on Mars tries to look at
-        # the ISS?
+        # TODO: what if someone on Mars tries to look at the ISS?
 
-        my = self(observer.jd)
-        g = Astrometric(my.position - observer.position,
-                        my.velocity - observer.velocity,
-                        observer.jd)
+        rGCRS, vGCRS = self._compute_GCRS(observer.jd)
+        g = Apparent(rGCRS - observer.rGCRS,
+                     vGCRS - observer.vGCRS,
+                     observer.jd)
         g.observer = observer
         # g.distance = euclidian_distance
-        g.lighttime = length_of(g.position) / C_AUDAY
         return g
 
 
@@ -78,8 +71,8 @@ def theta_GMST1982(jd_ut1):
     g = 67310.54841 + (8640184.812866 + (0.093104 + (-6.2e-6) * t) * t) * t
     dg = 8640184.812866 + (0.093104 * 2.0 + (-6.2e-6 * 3.0) * t) * t
     theta = (jd_ut1 % 1.0 + g * _second % 1.0) * tau
-    dtheta = (1.0 + dg * _second / 36525.0) * tau
-    return theta, dtheta
+    theta_dot = (1.0 + dg * _second / 36525.0) * tau
+    return theta, theta_dot
 
 def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
     """Convert TEME position and velocity into standard ITRS coordinates.
@@ -92,8 +85,8 @@ def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
     From AIAA 2006-6753 Appendix C.
 
     """
-    theta, dtheta = theta_GMST1982(jd_ut1)
-    angular_velocity = array([0, 0, -dtheta])
+    theta, theta_dot = theta_GMST1982(jd_ut1)
+    angular_velocity = array([0, 0, -theta_dot])
     R = rot_z(-theta)
     rPEF = (R).dot(rTEME)
     vPEF = (R).dot(vTEME) + cross(angular_velocity, rPEF)

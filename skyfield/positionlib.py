@@ -103,6 +103,8 @@ class Topos(object):
         e = self.ephemeris.earth(jd)
         tpos, tvel = geocentric_position_and_velocity(self, jd)
         t = ToposICRS(e.position + tpos, e.velocity + tvel, jd)
+        t.rGCRS = tpos
+        t.vGCRS = tvel
         t.topos = self
         t.ephemeris = self.ephemeris
         return t
@@ -113,12 +115,13 @@ class ToposICRS(ICRS):
     geocentric = False
 
 class Astrometric(ICRS):
-    """An astrometric position as GCRS x,y,z coordinates.
+    """An astrometric position as an x,y,z vector in the ICRS.
 
-    The *astrometric position* of a body is its position adjusted for
-    the light-time delay between the body and an observer; it is the
-    position of the body back when it emitted (or reflected) the light
-    that is just now reaching the observer's eyes or telescope.
+    The *astrometric position* of a body is its position relative to an
+    observer, adjusted for light-time delay: the position of the body
+    back when it emitted (or reflected) the light or other radiation
+    that is just now reaching the observer's eyes or telescope.  This is
+    always a difference between two BCRS vectors.
 
     """
     def apparent(self):
@@ -143,14 +146,22 @@ class Astrometric(ICRS):
         return a
 
 class Apparent(ICRS):
-    """An apparent position as a GCRS x,y,z vector.
+    """An apparent position as an x,y,z vector in the GCRS.
 
-    The *apparent position* of a body is its position adjusted not only
-    for the light-time delay between the body and an observer (which is
-    already accounted for in the object's astrometric position), but
-    also adjusted for deflection (light rays bending as they pass large
-    masses like the Sun or Jupiter) and aberration (light appearing to
-    slant because of Earth's motion through space).
+    The *apparent position* of a body is its position relative to an
+    observer, adjusted not only for the light-time delay between the
+    body and an observer (which was already accounted for in the
+    object's astrometric position), but also adjusted for deflection
+    (its light rays bending as they pass large masses like the Sun or
+    Jupiter) and aberration (light slanting because of the observer's
+    motion through space).
+
+    Included in aberration is the relativistic transformation that takes
+    the position out of the BCRS system and into the GCRS Earth-centered
+    reference frame.  Or, if the observer was a planet or satellite with
+    its own orbit around the Sun, then this apparent position will not
+    really be a GCRS position but instead belong to a GCRS-like system
+    centered instead on that observer.
 
     """
     def altaz(self):

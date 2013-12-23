@@ -47,7 +47,7 @@ def test_iss_altitude(iss_transit):
     lines = iss_tle.splitlines()
     s = EarthSatellite(lines, earth)
     lake_zurich = earth.topos('88.1 W', '42.2 N')
-    alt, az, d = lake_zurich(jd).observe(s).apparent().altaz()
+    alt, az, d = lake_zurich(jd).observe(s).altaz()
     print(dt, their_altitude, alt.degrees(), their_altitude - alt.degrees())
     assert abs(alt.degrees() - their_altitude) < 2.5  # TODO: tighten this up?
 
