@@ -16,12 +16,15 @@ from .timescales import takes_julian_date
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
 quarter_tau = 0.25 * TAU
 
-class XYZ(object):
-    """A vector stored as a 3-element array ``[x y z]``.
+class ICRS(object):
+    """An x,y,z position whose axes are oriented to the ICRS system.
 
-    Can optionally carry a velocity as well.
+    The ICRS is a permanent coordinate system that has superseded the
+    old series of equinox-based systems like B1900, B1950, and J2000.
 
     """
+    geocentric = True  # TODO: figure out what this meant and get rid of it
+
     def __init__(self, position, velocity=None, jd=None):
         self.jd = jd
         self.position = position
@@ -34,33 +37,6 @@ class XYZ(object):
             ' and velocity xdot,ydot,zdot AU/day',
             '' if self.jd is None else ' at date jd',
             )
-
-    @property
-    def x(self): return self.position[0]
-
-    @property
-    def y(self): return self.position[1]
-
-    @property
-    def z(self): return self.position[2]
-
-    @property
-    def xdot(self): return self.velocity[0]
-
-    @property
-    def ydot(self): return self.velocity[1]
-
-    @property
-    def zdot(self): return self.velocity[2]
-
-class ICRS(XYZ):
-    """An x,y,z position whose axes are oriented to the ICRS system.
-
-    The ICRS is a permanent coordinate system that has superseded the
-    old series of equinox-based systems like B1900, B1950, and J2000.
-
-    """
-    geocentric = True  # TODO: figure out what this meant and get rid of it
 
     def __sub__(self, body):
         """Subtract two ICRS vectors to produce a third."""
