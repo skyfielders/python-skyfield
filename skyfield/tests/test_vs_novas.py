@@ -181,9 +181,8 @@ def test_astro_planet(jd, planets_list):
     earth = emp.earth
     planet = getattr(emp, planet_name)
     e = earth(jd)
-    p = earth(jd).observe(planet)
-    ra, dec, d = p.radec()
     distance = length_of((e - planet(jd)).position)
+    ra, dec, d = e.observe(planet).radec()
 
     assert shape_of(jd.tt) == shape_of(ra)
     assert shape_of(jd.tt) == shape_of(dec)
@@ -202,9 +201,8 @@ def test_app_planet(jd, planets_list):
     earth = emp.earth
     planet = getattr(emp, planet_name)
     e = earth(jd)
-    p = e.observe(planet).apparent()
-    ra, dec, d = p.radec(epoch=jd)
     distance = length_of((e - planet(jd)).position)
+    ra, dec, d = e.observe(planet).apparent().radec(epoch=jd)
 
     assert shape_of(jd.tt) == shape_of(ra)
     assert shape_of(jd.tt) == shape_of(dec)
@@ -228,9 +226,8 @@ def test_topo_planet(jd, planets_list):
 
     planet = getattr(emp, planet_name)
     g = ggr(jd)
-    p = g.observe(planet).apparent()
-    ra, dec, d = p.radec(epoch=jd)
     distance = length_of((g - planet(jd)).position)
+    ra, dec, d = g.observe(planet).apparent().radec(epoch=jd)
 
     assert shape_of(jd.tt) == shape_of(ra)
     assert shape_of(jd.tt) == shape_of(dec)
@@ -260,8 +257,8 @@ def test_altaz(jd, planets_list):
 
     planet = getattr(emp, planet_name)
     g = ggr(jd)
-    alt, az, d = g.observe(planet).apparent().altaz()
     distance = length_of((g - planet(jd)).position)
+    alt, az, d = g.observe(planet).apparent().altaz()
 
     eq(az0 * TAU / 360.0, az, 0.001 * arcsecond)
     eq(alt0 * TAU / 360.0, alt, 0.001 * arcsecond)
