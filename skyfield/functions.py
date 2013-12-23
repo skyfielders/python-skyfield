@@ -1,4 +1,4 @@
-from numpy import array, cos, sin, sqrt
+from numpy import array, cos, ones_like, sin, sqrt, zeros_like
 
 def dots(v, u):
     """Given one or more vectors in `v` and `u`, return their dot products.
@@ -18,6 +18,13 @@ def length_of(xyz):
 
     """
     return sqrt((xyz * xyz).sum(axis=0))
+
+def spin_x(theta):
+    z = zeros_like(theta)
+    u = ones_like(theta)
+    c = cos(theta)
+    s = sin(theta)
+    return array(((c, -s, z), (s, c, z), (z, z, u)))
 
 def rot_x(theta):
     c = cos(theta)

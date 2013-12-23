@@ -1,11 +1,10 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import (arcsin, arctan2, array, cos, einsum,
-                   ndarray, ones_like, pi, sin, sqrt, zeros_like)
+from numpy import arcsin, arctan2, array, cos, einsum, ndarray, pi, sin, sqrt
 
-from .angles import (interpret_longitude, interpret_latitude, Angle, HourAngle)
+from .angles import interpret_longitude, interpret_latitude, Angle, HourAngle
 from .constants import TAU
-from .functions import length_of
+from .functions import length_of, spin_x
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
 from .framelib import ICRS_to_J2000, J2000_to_ICRS
@@ -158,26 +157,13 @@ class Apparent(ICRS):
                              ' observe from a specific Earth location that'
                              ' you specify using a Topos instance')
 
-        # TODO: allow for corrections using xp and yp
-
-        def spin(angle, vector):
-            z = zeros_like(angle)
-            u = ones_like(angle)
-            cosang = cos(angle)
-            sinang = sin(angle)
-
-            rotation = array([
-                [cosang, -sinang, z],
-                [sinang, cosang, z],
-                [z, z, u],
-                ])
-
-            return einsum('i...,ij...->j...', vector, rotation)
+        # TODO: wobble
 
         gast = sidereal_time(self.jd, use_eqeq=True)
-        uz = spin(-gast * TAU / 24.0, uze)
-        un = spin(-gast * TAU / 24.0, une)
-        uw = spin(-gast * TAU / 24.0, uwe)
+        spin = spin_x(-gast * TAU / 24.0)
+        uz = einsum('i...,ij...->j...', uze, spin)
+        un = einsum('i...,ij...->j...', une, spin)
+        uw = einsum('i...,ij...->j...', uwe, spin)
 
         p = self.position
         p = to_epoch(p, self.jd)
@@ -249,24 +235,11 @@ def to_epoch(position, epoch):
 
 def ITRF_to_GCRS(jd, rITRF):  # todo: velocity
 
-    def spin(angle, vector):
-        z = zeros_like(angle)
-        u = ones_like(angle)
-        cosang = cos(angle)
-        sinang = sin(angle)
-
-        rotation = array([
-            [cosang, -sinang, z],
-            [sinang, cosang, z],
-            [z, z, u],
-            ])
-
-        return einsum('i...,ij...->j...', vector, rotation)
-
     # Todo: wobble
 
     gast = sidereal_time(jd, use_eqeq=True)
-    position = spin(-gast * TAU / 24.0, array(rITRF))
+    spin = spin_x(-gast * TAU / 24.0)
+    position = einsum('i...,ij...->j...', array(rITRF), spin)
 
     position = array(position)
     position = position.T
