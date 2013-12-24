@@ -214,11 +214,8 @@ def to_polar(position, phi_class=Angle):
 
     """
     r = length_of(position)
-    theta = Angle(r.shape)
-    phi = phi_class(r.shape)
-    arcsin(position[2] / r, out=theta)
-    arctan2(-position[1], -position[0], out=phi)
-    phi += pi
+    theta = Angle(radians=arcsin(position[2] / r))
+    phi = phi_class(radians=arctan2(-position[1], -position[0]) + pi)
     return r, theta, phi
 
 def to_epoch(position, epoch):

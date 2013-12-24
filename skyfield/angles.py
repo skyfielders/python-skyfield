@@ -1,37 +1,53 @@
 # -*- coding: utf-8 -*-
+
 import numpy as np
-from numpy import ndarray, array
+from .constants import tau
 
-from .constants import TAU
+_to_degrees = 360.0 / tau
+_from_degrees = tau / 360.0
 
-class WrongUnitError(ValueError):
+_to_hours = 24.0 / tau
+_from_hours = tau / 24.0
 
-    def __init__(self, name, unit):
-        usual = 'hours' if (unit == 'degrees') else 'degrees'
-        self.args = ('This angle is usually expressed in {}, not {};'
-                     ' if you want to express it in {} anyway, use'
-                     ' {}_anyway()'.format(usual, unit, unit, name),)
+_instantiation_instructions = """to instantiate an Angle, try one of:
 
+Angle(angle=another_angle)
+Angle(radians=value)
+Angle(degrees=value)
+Angle(hours=value)
 
-class BaseAngle(ndarray):
+where `value` can be either a Python float or a NumPy array of floats"""
 
-    @classmethod
-    def from_degrees(cls, degrees):
-        return np.float_(degrees * TAU / 360.0).astype(cls)
+class BaseAngle(object):
+
+    def __init__(self, angle=None, radians=None, degrees=None, hours=None):
+        if angle is not None:
+            if not isinstance(angle, BaseAngle):
+                raise ValueError(_instantiation_instructions)
+            self._radians = angle._radians
+        elif radians is not None:
+            self._radians = radians
+        elif degrees is not None:
+            self._radians = degrees * _from_degrees
+        elif hours is not None:
+            self._radians = hours * _from_hours
+
+    def radians(self):
+        return self._radians
 
     def hours(self):
-        return 24. / TAU * self
+        return self._radians * _to_hours
 
     def hms(self):
-        return sexa(24. / TAU * self)
+        return sexa(self.hours())
 
     def hstr(self):
-        sgn, h, m, s = sexa(24. / TAU * self)
+        sgn, h, m, s = sexa(self.hours())
         sign = '-' if sgn < 0.0 else ''
         return '{}{}h {}m {:.3f}s'.format(sign, int(h), int(m), float(s))
 
     def degrees(self):
-        return 360. / TAU * self
+        return self._radians * _to_degrees
 
     def dms(self):
         return sexa(self.degrees())
@@ -53,6 +69,13 @@ class BaseAngle(ndarray):
     dms_anyway = dms
     dstr_anyway = dstr
 
+class WrongUnitError(ValueError):
+
+    def __init__(self, name, unit):
+        usual = 'hours' if (unit == 'degrees') else 'degrees'
+        self.args = ('This angle is usually expressed in {}, not {};'
+                     ' if you want to express it in {} anyway, use'
+                     ' {}_anyway()'.format(usual, unit, unit, name),)
 
 class Angle(BaseAngle):
 
@@ -67,8 +90,6 @@ class Angle(BaseAngle):
     def hstr(self):
         raise WrongUnitError('hstr', 'hours')
 
-
-
 class HourAngle(BaseAngle):
 
     # Protect naive users from accidentally calling degree methods.
@@ -82,9 +103,6 @@ class HourAngle(BaseAngle):
     def dstr(self):
         raise WrongUnitError('dstr', 'degrees')
 
-
-one = array([1.0])
-
 def sexa(value):
     sign = np.sign(value, subok=False)
     absolute = np.absolute(value, subok=False)
@@ -93,7 +111,6 @@ def sexa(value):
     seconds = fraction * 60.0
     return sign, whole, minutes, seconds
 
-
 def interpret_longitude(value):
     split = getattr(value, 'split', None)
     if split is not None:
@@ -101,7 +118,7 @@ def interpret_longitude(value):
         degrees = float(pieces[0])
         if len(pieces) > 1 and pieces[1].lower() == 'w':
             degrees = - degrees
-        return degrees / 360. * TAU
+        return degrees / 360. * tau
     else:
         return value
 
@@ -112,6 +129,6 @@ def interpret_latitude(value):
         degrees = float(pieces[0])
         if len(pieces) > 1 and pieces[1].lower() == 's':
             degrees = - degrees
-        return degrees / 360. * TAU
+        return degrees / 360. * tau
     else:
         return value

@@ -48,6 +48,8 @@ else:
 
 arcminute = DEG2RAD / 60.0
 arcsecond = arcminute / 60.0
+arcsecond_in_hours = 24.0 / 360.0 / 60.0 / 60.0
+arcsecond_in_degrees = 1.0 / 60.0 / 60.0
 meter = 1.0 / AU_KM
 
 planet_codes = {
@@ -163,12 +165,12 @@ def test_star_deflected_by_jupiter(jd):
         )
     ra, dec, distance = earth(jd).observe(star).apparent().radec(epoch=jd)
 
-    assert shape_of(jd.tt) == shape_of(ra)
-    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(ra.hours())
+    assert shape_of(jd.tt) == shape_of(dec.degrees())
     assert shape_of(jd.tt) == shape_of(distance)
 
-    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
-    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
+    eq(ra0, ra.hours(), 1e-9 * arcsecond_in_hours)
+    eq(dec0, dec.degrees(), 1e-9 * arcsecond_in_degrees)
 
 # Tests of generating a full position or coordinate.
 
@@ -184,12 +186,12 @@ def test_astro_planet(jd, planets_list):
     distance = length_of((e - planet(jd)).position)
     ra, dec, d = e.observe(planet).radec()
 
-    assert shape_of(jd.tt) == shape_of(ra)
-    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(ra.hours())
+    assert shape_of(jd.tt) == shape_of(dec.degrees())
     assert shape_of(jd.tt) == shape_of(distance)
 
-    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
-    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
+    eq(ra0, ra.hours(), 1e-3 * arcsecond_in_hours)
+    eq(dec0, dec.degrees(), 1e-3 * arcsecond_in_degrees)
     eq(distance0, distance, 0.001 * meter)
 
 def test_virtual_planet(jd, planets_list):
@@ -204,12 +206,12 @@ def test_virtual_planet(jd, planets_list):
     distance = length_of((e - planet(jd)).position)
     ra, dec, d = e.observe(planet).apparent().radec()
 
-    assert shape_of(jd.tt) == shape_of(ra)
-    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(ra.hours())
+    assert shape_of(jd.tt) == shape_of(dec.degrees())
     assert shape_of(jd.tt) == shape_of(distance)
 
-    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
-    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
+    eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
+    eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.001 * meter)
 
 def test_app_planet(jd, planets_list):
@@ -224,12 +226,12 @@ def test_app_planet(jd, planets_list):
     distance = length_of((e - planet(jd)).position)
     ra, dec, d = e.observe(planet).apparent().radec(epoch=jd)
 
-    assert shape_of(jd.tt) == shape_of(ra)
-    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(ra.hours())
+    assert shape_of(jd.tt) == shape_of(dec.degrees())
     assert shape_of(jd.tt) == shape_of(distance)
 
-    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
-    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
+    eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
+    eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.001 * meter)
 
 def test_local_planet(jd, planets_list):
@@ -249,12 +251,12 @@ def test_local_planet(jd, planets_list):
     distance = length_of((g - planet(jd)).position)
     ra, dec, d = g.observe(planet).apparent().radec()
 
-    assert shape_of(jd.tt) == shape_of(ra)
-    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(ra.hours())
+    assert shape_of(jd.tt) == shape_of(dec.degrees())
     assert shape_of(jd.tt) == shape_of(distance)
 
-    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
-    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
+    eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
+    eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.001 * meter)
 
 def test_topo_planet(jd, planets_list):
@@ -274,12 +276,12 @@ def test_topo_planet(jd, planets_list):
     distance = length_of((g - planet(jd)).position)
     ra, dec, d = g.observe(planet).apparent().radec(epoch=jd)
 
-    assert shape_of(jd.tt) == shape_of(ra)
-    assert shape_of(jd.tt) == shape_of(dec)
+    assert shape_of(jd.tt) == shape_of(ra.hours())
+    assert shape_of(jd.tt) == shape_of(dec.degrees())
     assert shape_of(jd.tt) == shape_of(distance)
 
-    eq(ra0 * TAU / 24.0, ra, 0.001 * arcsecond)
-    eq(dec0 * TAU / 360.0, dec, 0.001 * arcsecond)
+    eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
+    eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.001 * meter)
 
 def test_altaz(jd, planets_list):
@@ -305,8 +307,8 @@ def test_altaz(jd, planets_list):
     distance = length_of((g - planet(jd)).position)
     alt, az, d = g.observe(planet).apparent().altaz()
 
-    eq(az0 * TAU / 360.0, az, 0.001 * arcsecond)
-    eq(alt0 * TAU / 360.0, alt, 0.001 * arcsecond)
+    eq(az0, az.degrees(), 0.001 * arcsecond_in_degrees)
+    eq(alt0, alt.degrees(), 0.001 * arcsecond_in_degrees)
     eq(dis, distance, 0.001 * meter)
 
 # Tests for Basic Functions
