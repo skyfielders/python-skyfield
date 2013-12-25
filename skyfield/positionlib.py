@@ -177,31 +177,6 @@ class Apparent(ICRS):
         d, alt, az = to_polar(position)
         return alt, az, d
 
-class HeliocentricLonLat(ndarray):
-
-    def __new__(cls, other):
-        self = ndarray.__new__(cls, (3,))
-        if isinstance(other, ICRS):
-            x, y, z = other
-            y, z = (
-                y * cos(ecliptic_obliquity) + z * sin(ecliptic_obliquity),
-                z * cos(ecliptic_obliquity) - y * sin(ecliptic_obliquity),
-                )
-            self[2] = r = sqrt(x*x + y*y + z*z)
-            self[0] = arctan2(-y, -x) + pi
-            self[1] = arcsin(z / r)
-        else:
-            raise ValueError('how do I use that?')
-        return self
-
-    # @property
-    # def lon(self): return Degrees(self[0])
-
-    # @property
-    # def lat(self): return Degrees(self[1])
-
-    @property
-    def r(self): return self[2]
 
 def to_polar(position, phi_class=Angle):
     """Convert ``[x y z]`` into spherical coordinates ``(r, theta, phi)``.
