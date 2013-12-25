@@ -132,11 +132,12 @@ class Apparent(ICRS):
     motion through space).
 
     Included in aberration is the relativistic transformation that takes
-    the position out of the BCRS system and into the GCRS Earth-centered
-    reference frame.  Or, if the observer was a planet or satellite with
-    its own orbit around the Sun, then this apparent position will not
-    really be a GCRS position but instead belong to a GCRS-like system
-    centered instead on that observer.
+    the position out of the BCRS centered on the solar system barycenter
+    and into the GCRS centered on the Earth.
+
+    If the observer was a planet or satellite with its own orbit around
+    the Sun, then this apparent position is not really a GCRS position,
+    but belongs to a GCRS-like system centered on that observer instead.
 
     """
     def altaz(self):
