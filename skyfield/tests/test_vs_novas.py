@@ -6,7 +6,7 @@ from numpy import array, einsum
 from skyfield import (positionlib, earthlib, framelib, nutationlib,
                       jpllib, precessionlib, starlib, timescales)
 
-from ..constants import ASEC2RAD, AU_KM, DEG2RAD, T0
+from ..constants import ASEC2RAD, AU, DEG2RAD, T0
 from ..functions import length_of
 from ..timescales import JulianDate
 
@@ -51,7 +51,7 @@ arcminute = DEG2RAD / 60.0
 arcsecond = arcminute / 60.0
 arcsecond_in_hours = 24.0 / 360.0 / 60.0 / 60.0
 arcsecond_in_degrees = 1.0 / 60.0 / 60.0
-meter = 1.0 / AU_KM
+meter = 1.0 / AU
 
 planet_codes = {
     'mercury': 1,
@@ -139,7 +139,7 @@ def test_astro_planet(jd, planet_name_and_code):
 
     eq(ra0, ra.hours(), 1e-3 * arcsecond_in_hours)
     eq(dec0, dec.degrees(), 1e-3 * arcsecond_in_degrees)
-    eq(distance0, distance, 0.001 * meter)
+    eq(distance0, distance, 0.5 * meter)
 
 def test_virtual_planet(jd, planet_name_and_code):
     planet_name, planet_code = planet_name_and_code
@@ -155,7 +155,7 @@ def test_virtual_planet(jd, planet_name_and_code):
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
-    eq(distance0, distance, 0.001 * meter)
+    eq(distance0, distance, 0.5 * meter)
 
 def test_app_planet(jd, planet_name_and_code):
     planet_name, planet_code = planet_name_and_code
@@ -171,7 +171,7 @@ def test_app_planet(jd, planet_name_and_code):
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
-    eq(distance0, distance, 0.001 * meter)
+    eq(distance0, distance, 0.5 * meter)
 
 def test_local_planet(jd, planet_name_and_code):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
@@ -191,7 +191,7 @@ def test_local_planet(jd, planet_name_and_code):
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
-    eq(distance0, distance, 0.001 * meter)
+    eq(distance0, distance, 0.5 * meter)
 
 def test_topo_planet(jd, planet_name_and_code):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
@@ -211,7 +211,7 @@ def test_topo_planet(jd, planet_name_and_code):
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
-    eq(distance0, distance, 0.001 * meter)
+    eq(distance0, distance, 0.5 * meter)
 
 def test_altaz(jd, planet_name_and_code):
     """ Tests of generating a full position in altaz coordinates. Uses
@@ -238,7 +238,7 @@ def test_altaz(jd, planet_name_and_code):
 
     eq(az0, az.degrees(), 0.001 * arcsecond_in_degrees)
     eq(alt0, alt.degrees(), 0.001 * arcsecond_in_degrees)
-    eq(dis, distance, 0.001 * meter)
+    eq(dis, distance, 0.5 * meter)
 
 # Tests for Basic Functions
 
