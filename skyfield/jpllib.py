@@ -1,7 +1,7 @@
 import jplephem
 from numpy import max, min
 
-from .constants import KM_AU, C_AUDAY
+from .constants import AU_KM, C_AUDAY
 from .functions import length_of
 from .positionlib import ICRS, Astrometric, Topos
 from .timescales import takes_julian_date
@@ -32,7 +32,7 @@ class Planet(object):
             p = c('earthmoon', jd_tdb) + c('moon', jd_tdb) * e.moon_share
         else:
             p = c(self.jplname, jd_tdb)
-        p *= KM_AU
+        p /= AU_KM
         if getattr(jd_tdb, 'shape', ()) == ():
             # Skyfield, unlike jplephem, is willing to accept and return
             # plain scalars instead of only trafficking in NumPy arrays.
@@ -48,7 +48,7 @@ class Planet(object):
             pv = c('earthmoon', jd_tdb) + c('moon', jd_tdb) * e.moon_share
         else:
             pv = c(self.jplname, jd_tdb)
-        pv *= KM_AU
+        pv /= AU_KM
         if getattr(jd_tdb, 'shape', ()) == ():
             # Skyfield, unlike jplephem, is willing to accept and return
             # plain scalars instead of only trafficking in NumPy arrays.

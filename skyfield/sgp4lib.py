@@ -5,10 +5,9 @@ from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
 
-from .constants import C_AUDAY, DAY_S, KM_AU, T0, tau
-from .functions import length_of, rot_x, rot_y, rot_z
-from .positionlib import Apparent, ICRS, ITRF_to_GCRS
-from .timescales import takes_julian_date
+from .constants import AU_KM, DAY_S, T0, tau
+from .functions import rot_x, rot_y, rot_z
+from .positionlib import Apparent, ITRF_to_GCRS
 
 _minutes_per_day = 1440.
 
@@ -34,8 +33,9 @@ class EarthSatellite(object):
         """Compute where satellite is in space on a given date."""
 
         rTEME, vTEME = self._position_and_velocity_TEME_km(jd)
-        rTEME *= KM_AU
-        vTEME *= KM_AU * DAY_S
+        rTEME /= AU_KM
+        vTEME /= AU_KM
+        vTEME *= DAY_S
 
         rITRF, vITRF = TEME_to_ITRF(jd.ut1, rTEME, vTEME)
         rGCRS = ITRF_to_GCRS(jd, rITRF)
