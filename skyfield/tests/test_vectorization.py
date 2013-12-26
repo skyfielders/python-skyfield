@@ -1,5 +1,6 @@
 """Determine whether arrays work as well as individual inputs."""
 
+import pytest
 from numpy import array
 from ..constants import T0
 from ..planets import earth, mars
@@ -14,20 +15,7 @@ dates = array([
 
 deltas = array([39.707, 63.8285, 66.8779, 72.])
 
-class Manifold(object):
-    def __init__(self, vec, seq):
-        self.vec = vec
-        self.seq = seq
-
-    def step(self, f):
-        self.vec = f(self.vec)
-        self.seq = [f(value) for value in self.seq]
-
-    def check(self, name):
-        for vslice, value in zip(self.vec, self.seq):
-            assert vslice == value
-
-def planetary_position(ut1, delta_t):
+def generate_planetary_position(ut1, delta_t):
     jd = JulianDate(ut1=ut1, delta_t=delta_t)
 
     yield jd.ut1
@@ -53,14 +41,18 @@ def planetary_position(ut1, delta_t):
     yield dec.degrees()
     yield distance
 
-def test_planetary_position():
-    vector_results = list(planetary_position(dates, deltas))
+@pytest.fixture(params=[generate_planetary_position])
+def gradual_computation(request):
+    return request.param
 
-    length = len(dates)
+def test_gradual_computations(gradual_computation):
+    vector_results = list(gradual_computation(dates, deltas))
+
+    correct_length = len(dates)
     for vector_value in vector_results:
-        assert vector_value.shape[-1] == length
+        assert vector_value.shape[-1] == correct_length
 
     for i, (date, delta) in enumerate(zip(dates, deltas)):
-        scalar_results = list(planetary_position(date, delta))
+        scalar_results = list(gradual_computation(date, delta))
         for vector_value, scalar_value in zip(vector_results, scalar_results):
             assert (vector_value.T[i] == scalar_value).all()
