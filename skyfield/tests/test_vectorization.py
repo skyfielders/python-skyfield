@@ -1,11 +1,16 @@
 """Determine whether arrays work as well as individual inputs."""
 
-from itertools import izip
+import sys
 from numpy import array
 from .. import starlib
 from ..constants import T0, B1950
 from ..planets import earth, mars
 from ..timescales import JulianDate, julian_date
+
+if sys.version_info < (3,):
+    from itertools import izip
+else:
+    izip = zip
 
 dates = array([
     julian_date(1969, 7, 20, 20. + 18. / 60.),
