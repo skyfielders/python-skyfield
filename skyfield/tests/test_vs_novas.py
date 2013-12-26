@@ -6,7 +6,7 @@ from numpy import array, einsum
 from skyfield import (positionlib, earthlib, framelib, nutationlib,
                       jpllib, precessionlib, starlib, timescales)
 
-from ..constants import ASEC2RAD, AU, DEG2RAD, T0
+from ..constants import ASEC2RAD, AU, AU_KM, DEG2RAD, T0
 from ..functions import length_of
 from ..timescales import JulianDate
 
@@ -91,10 +91,13 @@ def planet_name_and_code(request):
 
 def eq(first, second, epsilon=None):
     """Test whether two floats are within `epsilon` of one another."""
+    #print 'Significance of epsilon:', epsilon / second
+    difference = abs(first - second)
+    #print 'Difference relative to epsilon:', difference / epsilon
     if hasattr(first, 'shape') or hasattr(second, 'shape'):
-        failed = abs(first - second).max() > epsilon
+        failed = difference.max() > epsilon
     else:
-        failed = abs(first - second) > epsilon
+        failed = difference > epsilon
     if failed:
         appendix = ('\nbecause the difference is\n%r\ntimes too big'
                     % (abs(first - second) / epsilon)) if epsilon else ''
@@ -247,65 +250,67 @@ def test_cal_date():
         assert c.cal_date(jd) == timescales.cal_date(jd)
 
 def test_earth_rotation_angle(jd_float_or_vector):
-    epsilon = 1e-12
     jd_ut1 = jd_float_or_vector
     u = c.era(jd_ut1)
     v = earthlib.earth_rotation_angle(jd_ut1)
+    epsilon = 1e-12  # degrees; 14 to 15 digits of agreement
     eq(u, v, epsilon)
 
 def test_earth_tilt(jd):
-    epsilon = 1e-9
     u = c.e_tilt(jd.tdb)
     v = nutationlib.earth_tilt(jd)
+    epsilon = 1e-9  # 9 to 11 digits of agreement; why not more?
     eq(array(u), array(v), epsilon)
 
 def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
-    epsilon = 1e-22
     jd_tt = jd_float_or_vector
     u = c.ee_ct(jd_tt, 0.0, 0)
     v = nutationlib.equation_of_the_equinoxes_complimentary_terms(jd_tt)
+
+    epsilon = 1e-22  # radians; 14 digits of agreement
     eq(u, v, epsilon)
 
 def test_frame_tie():
-    epsilon = 1e-15
-    xyz = array([1.0, 2.0, 3.0])
-
+    xyz = array([1.1, 1.2, 1.3])
+    epsilon = 0.0  # perfect
     eq(c.frame_tie(xyz, 0), xyz.dot(framelib.ICRS_to_J2000), epsilon)
     eq(c.frame_tie(xyz, -1), xyz.dot(framelib.J2000_to_ICRS), epsilon)
 
 def test_fundamental_arguments(jd_float_or_vector):
-    epsilon = 1e-12
     jd_tdb = jd_float_or_vector
     t = jcentury(jd_tdb)
     u = c.fund_args(t)
     v = nutationlib.fundamental_arguments(t)
+
+    epsilon = 1e-12  # radians; 13 digits of agreement
     eq(u, v, epsilon)
 
 def test_geocentric_position_and_velocity(jd):
-    epsilon = 1e-13
-    jd.delta_t = delta_t = 0.0  # TODO: relax this limitation?
-
     observer = c.make_observer_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-    posu, velu = c.geo_posvel(jd.tt, delta_t, observer)
+    posu, velu = c.geo_posvel(jd.tt, jd.delta_t, observer)
 
     topos = positionlib.Topos('75 W', '45 N', elevation=0.0,
                               temperature=10.0, pressure=1010.0)
     posv, velv = earthlib.geocentric_position_and_velocity(topos, jd)
 
+    epsilon = 1e-6 * meter  # 13 to 14 digits of agreement
+
     eq(posu, posv, epsilon)
     eq(velu, velv, epsilon)
 
 def test_iau2000a(jd_float_or_vector):
-    epsilon = 4e-6  # tenths of micro arcseconds
     jd_tt = jd_float_or_vector
     psi0, eps0 = c.nutation.iau2000a(jd_tt, 0.0)
     psi1, eps1 = nutationlib.iau2000a(jd_tt)
     to_tenths_of_microarcseconds = 1e7 / ASEC2RAD
+
+    epsilon = 4e-6  # tenths of micro arcseconds; 13 digits of precision
+
     eq(psi0 * to_tenths_of_microarcseconds, psi1, epsilon)
     eq(eps0 * to_tenths_of_microarcseconds, eps1, epsilon)
 
 def test_julian_date():
-    epsilon = 0.0
+    epsilon = 0.0  # perfect
     for args in (
           (-4712, 1, 1, 0.0),
           (-4712, 3, 1, 0.0),
@@ -318,46 +323,43 @@ def test_julian_date():
         eq(c.julian_date(*args), timescales.julian_date(*args), epsilon)
 
 def test_mean_obliq(jd_float_or_vector):
-    epsilon = 0
     jd_tdb = jd_float_or_vector
     u = c.mean_obliq(jd_tdb)
     v = nutationlib.mean_obliquity(jd_tdb)
+    epsilon = 0.0  # perfect
     eq(u, v, epsilon)
 
 def test_nutation(jd):
-    epsilon = 1e-15
-    xyz = [1.0, 2.0, 3.0]
-    u = c_nutation(jd.tt, xyz)  # TODO: shouldn't this be jd.tdb?
+    xyz = [1.1, 1.2, 1.3]
+    u = c_nutation(jd.tdb, xyz)
     xyz = array(xyz)
     v = einsum('i...,ij...->j...', xyz, nutationlib.compute_nutation(jd))
+    epsilon = 1e-14  # 14 digits of agreement
     eq(u, v, epsilon)
 
 def test_precession(jd_float_or_vector):
-    epsilon = 1e-15
     jd_tdb = jd_float_or_vector
-    xyz = [1.0, 2.0, 3.0]
+    xyz = [1.1, 1.2, 1.3]
     u = c.precession(T0, xyz, jd_tdb)
-    xyz = array(xyz)
     matrix_or_matrices = precessionlib.compute_precession(jd_tdb)
-    v = einsum('i...,ij...->j...', array(xyz), matrix_or_matrices)
+    v = einsum('ij...,i...->j...', matrix_or_matrices, array(xyz))
+    epsilon = 1e-15  # 15 digits of agreement
     eq(u, v, epsilon)
 
 def test_sidereal_time_with_zero_delta_t(jd):
-    epsilon = 1e-13
     jd.delta_t = 0.0
     u = c.sidereal_time(jd.ut1, 0.0, 0.0, False, True)
     v = earthlib.sidereal_time(jd)
+    epsilon = 1e-13  # days; 14 digits of agreement
     eq(u, v, epsilon)
 
 def test_sidereal_time_with_nonzero_delta_t(jd):
-    epsilon = 1e-13
     u = c.sidereal_time(jd.ut1, 0.0, jd.delta_t, False, True)
     v = earthlib.sidereal_time(jd)
+    epsilon = 1e-13  # days; 14 digits of agreement
     eq(u, v, epsilon)
 
 def test_starvectors():
-    epsilon = 1e-10
-
     p, v = c.starvectors(c.make_cat_entry(
             'POLARIS', 'HIP', 0, 2.530301028, 89.264109444,
             44.22, -11.75, 7.56, -17.4))
@@ -365,23 +367,25 @@ def test_starvectors():
     star = starlib.Star(2.530301028, 89.264109444,
                         44.22, -11.75, 7.56, -17.4)
 
-    eq(p, star._position.reshape(3), epsilon)
-    eq(v, star._velocity.reshape(3), epsilon)
+    p_epsilon = 1e-10  # AU; 16 digits of agreement
+    v_epsilon = 1e-17  # AU/day; 15 digits of agreement
+
+    eq(p, star._position, p_epsilon)
+    eq(v, star._velocity, v_epsilon)
 
 def test_ter2cel(jd):
     jd_low = 0.0
     xp = yp = 0.0
-    position = [1033.47938300, 7901.29527540, 6380.35659580]
+
+    position = array([1.1, 1.2, 1.3])
 
     theirs = c.ter2cel(jd.ut1, jd_low, jd.delta_t, xp, yp, position)
     ours = positionlib.ITRF_to_GCRS(jd, position)
 
-    epsilon = 1e-9
+    epsilon = 1e-13  # 13 digits of agreement
     eq(theirs, ours, epsilon)
 
 def test_terra():
-    epsilon = 1e-18
-
     observer = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
 
     # Note that this class stands in for a NOVAS Topos structure, but
@@ -397,17 +401,19 @@ def test_terra():
 
     posn, veln = earthlib.terra(topos, array([11.0, 23.9]))
 
+    epsilon = 1e-8 * meter  # 14 digits of agreement
+
     eq(pos0, posn[:,0], epsilon)
     eq(pos1, posn[:,1], epsilon)
     eq(vel0, veln[:,0], epsilon)
     eq(vel1, veln[:,1], epsilon)
 
 def test_tdb2tt(jd_float_or_vector):
-    epsilon = 1e-16
     jd_tdb = jd_float_or_vector
     u = c.tdb2tt(jd_tdb)[1]
     v = timescales.tdb_minus_tt(jd_tdb)
-    eq(u, v, epsilon)
+    epsilon_seconds = 1e-16  # 11 or 12 digits of agreement; why not more?
+    eq(u, v, epsilon_seconds)
 
 def jcentury(t):
     return (t - T0) / 36525.0

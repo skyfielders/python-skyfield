@@ -225,7 +225,7 @@ def iau2000a(jd_tt):
     # Summation of luni-solar nutation series (in reverse order).
 
     arg = nals_t.dot(a)
-    arg = fmod(arg, TAU, out=arg)
+    fmod(arg, TAU, out=arg)
 
     sarg = sin(arg)
     carg = cos(arg)
@@ -243,10 +243,6 @@ def iau2000a(jd_tt):
     else:
         a = (outer(anomaly_coefficient, t).T + anomaly_constant).T
     a[-1] *= t
-
-    # TODO: the NOVAS library is careful to sum napl_t in reverse order,
-    # perhaps because the least significant terms come last; could we
-    # increase the precision of our tests if we followed suit?
 
     fmod(a, TAU, out=a)
     arg = napl_t.dot(a)
