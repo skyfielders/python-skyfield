@@ -2,7 +2,8 @@
 
 from itertools import izip
 from numpy import array
-from ..constants import T0
+from .. import starlib
+from ..constants import T0, B1950
 from ..planets import earth, mars
 from ..timescales import JulianDate, julian_date
 
@@ -41,6 +42,43 @@ def compute_planetary_position(ut1, delta_t):
     yield dec.degrees()
     yield distance
 
+    ra, dec, distance = astrometric.radec(epoch=B1950)
+
+    yield ra.hours()
+    #yield dec.degrees()
+    #yield distance
+
+    apparent = astrometric.apparent()
+
+    yield apparent.position
+    #yield apparent.velocity  # = None?
+
+    ra, dec, distance = apparent.radec()
+
+    yield ra.hours()
+    #yield dec.degrees()
+    #yield distance
+
+    ra, dec, distance = apparent.radec(epoch=B1950)
+
+    yield ra.hours()
+    #yield dec.degrees()
+    #yield distance
+
+def compute_stellar_position(ut1, delta_t):
+    star = starlib.Star(ra=1.59132070233, dec=8.5958876464)
+    observer = earth(ut1=ut1, delta_t=delta_t)
+    astrometric = observer.observe(star)
+
+    yield astrometric.position
+    yield astrometric.velocity
+
+    ra, dec, distance = astrometric.radec()
+
+    yield ra.hours()
+    yield dec.degrees()
+    yield distance
+
 def generate_comparisons(computation):
     """Set up comparisons between vector and scalar outputs of `computation`.
 
@@ -59,11 +97,15 @@ def generate_comparisons(computation):
 
 def pytest_generate_tests(metafunc):
     if 'vector_vs_scalar' in metafunc.fixturenames:
-        metafunc.parametrize('vector_vs_scalar',
-            list(generate_comparisons(compute_planetary_position))
-            )
+        metafunc.parametrize(
+            'vector_vs_scalar',
+            list(generate_comparisons(compute_planetary_position)) +
+            list(generate_comparisons(compute_stellar_position)))
 
 def test_vector_vs_scalar(vector_vs_scalar):
     location, vector, i, scalar = vector_vs_scalar
+    assert vector is not None, (
+        '{}:\n  vector is None'.format(location))
     assert (vector.T[i] == scalar).all(), (
-        '{}:\n  {}[{}] != {}'.format(location, vector.T, i, scalar))
+        '{}:\n  {}[{}] != {}\n  difference: {}'.format(
+            location, vector.T, i, scalar, vector.T[i] - scalar))

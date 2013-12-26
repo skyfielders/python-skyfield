@@ -1,12 +1,12 @@
 """Compare the output of Skyfield with the same routines from NOVAS."""
 
 import pytest
-from numpy import array, einsum, rollaxis
+from numpy import array, einsum
 
 from skyfield import (positionlib, earthlib, framelib, nutationlib,
                       jpllib, precessionlib, starlib, timescales)
 
-from ..constants import ASEC2RAD, AU_KM, DEG2RAD, TAU, T0
+from ..constants import ASEC2RAD, AU_KM, DEG2RAD, T0
 from ..functions import length_of
 from ..timescales import JulianDate
 
@@ -16,6 +16,7 @@ from ..timescales import JulianDate
 
 try:
     import de405
+    de405 = jpllib.Ephemeris(de405)
 except ImportError:
     de405 = None
 
@@ -72,22 +73,18 @@ class Box(object):
     def __init__(self, value):
         self.boxed_value = value
 
-jd_vector = array([T0, TA, TB, TC])
-jd_vector.flags.writeable = False
-
 @pytest.fixture(params=[
     Box({'ut1': T0, 'delta_t': D0}),
     Box({'ut1': TA, 'delta_t': DA}),
     Box({'ut1': TB, 'delta_t': DB}),
     Box({'ut1': TC, 'delta_t': DC}),
-    Box({'ut1': [T0, TA, TB, TC], 'delta_t': [D0, DA, DB, DC]}),
     ])
 def jd(request):
     # Build a new JulianDate each time, because some test cases need to
     # adjust the value of the date they are passed.
     return JulianDate(**request.param.boxed_value)
 
-@pytest.fixture(params=[Box(T0), Box(TA), Box(TB), Box(TC), Box(jd_vector)])
+@pytest.fixture(params=[Box(T0), Box(TA), Box(TB), Box(TC)])
 def jd_float_or_vector(request):
     return request.param
 
@@ -99,38 +96,7 @@ def timepairs(request):
 def planets_list(request):
     return request.param
 
-# Helpers.
-
-def shape_of(value):
-    return getattr(value, 'shape', ())
-
-def vcall(function, *args):
-    """Call a function once or many times, on whether any args are arrays.
-
-    If no arguments are NumPy arrays, then `function` is called once
-    with the arguments and its return value is returned.  Otherwise,
-    `function` is called as many times as there are values in the
-    arrays, and an array of return values is returned.
-
-    """
-    lengths = [arg.shape[0] for arg in args if getattr(arg, 'shape', ())]
-    if not lengths:
-        return function(*args)
-    length = min(lengths)
-    arglists = [list() for i in range(length)]
-    for arg in args:
-        if hasattr(arg, 'shape'):
-            for i, arglist in enumerate(arglists):
-                arglist.append(arg[i])
-        else:
-            for arglist in arglists:
-                arglist.append(arg)
-    result = array([function(*arglist) for arglist in arglists])
-    return rollaxis(result, 0, len(result.shape))
-
 # Tests.
-
-emp = jpllib.Ephemeris(de405)
 
 def eq(first, second, epsilon=None):
     """Test whether two floats are within `epsilon` of one another."""
@@ -147,27 +113,21 @@ def eq(first, second, epsilon=None):
 
 
 def test_star_deflected_by_jupiter(jd):
-    """ Tests of generating a stellar position. """
-
     star = c.make_cat_entry(
         star_name='Star', catalog='cat', star_num=101,
         ra=1.59132070233, dec=8.5958876464,
         pm_ra=0.0, pm_dec=0.0,
         parallax=0.0, rad_vel=0.0,
         )
-    ra0, dec0 = vcall(c.app_star, jd.tt, star)
+    ra0, dec0 = c.app_star(jd.tt, star)
 
-    earth = emp.earth
+    earth = de405.earth
     star = starlib.Star(
         ra=1.59132070233, dec=8.5958876464,
         pm_ra=0.0, pm_dec=0.0,
         parallax=0.0, radial_velocity=0.0,
         )
     ra, dec, distance = earth(jd).observe(star).apparent().radec(epoch=jd)
-
-    assert shape_of(jd.tt) == shape_of(ra.hours())
-    assert shape_of(jd.tt) == shape_of(dec.degrees())
-    assert shape_of(jd.tt) == shape_of(distance)
 
     eq(ra0, ra.hours(), 1e-9 * arcsecond_in_hours)
     eq(dec0, dec.degrees(), 1e-9 * arcsecond_in_degrees)
@@ -178,17 +138,13 @@ def test_astro_planet(jd, planets_list):
     planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra0, dec0, distance0 = vcall(c.astro_planet, jd.tt, obj)
+    ra0, dec0, distance0 = c.astro_planet(jd.tt, obj)
 
-    earth = emp.earth
-    planet = getattr(emp, planet_name)
+    earth = de405.earth
+    planet = getattr(de405, planet_name)
     e = earth(jd)
     distance = length_of((e - planet(jd)).position)
     ra, dec, d = e.observe(planet).radec()
-
-    assert shape_of(jd.tt) == shape_of(ra.hours())
-    assert shape_of(jd.tt) == shape_of(dec.degrees())
-    assert shape_of(jd.tt) == shape_of(distance)
 
     eq(ra0, ra.hours(), 1e-3 * arcsecond_in_hours)
     eq(dec0, dec.degrees(), 1e-3 * arcsecond_in_degrees)
@@ -198,17 +154,13 @@ def test_virtual_planet(jd, planets_list):
     planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra0, dec0, distance0 = vcall(c.virtual_planet, jd.tt, obj)
+    ra0, dec0, distance0 = c.virtual_planet(jd.tt, obj)
 
-    earth = emp.earth
-    planet = getattr(emp, planet_name)
+    earth = de405.earth
+    planet = getattr(de405, planet_name)
     e = earth(jd)
     distance = length_of((e - planet(jd)).position)
     ra, dec, d = e.observe(planet).apparent().radec()
-
-    assert shape_of(jd.tt) == shape_of(ra.hours())
-    assert shape_of(jd.tt) == shape_of(dec.degrees())
-    assert shape_of(jd.tt) == shape_of(distance)
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
@@ -218,17 +170,13 @@ def test_app_planet(jd, planets_list):
     planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra0, dec0, distance0 = vcall(c.app_planet, jd.tt, obj)
+    ra0, dec0, distance0 = c.app_planet(jd.tt, obj)
 
-    earth = emp.earth
-    planet = getattr(emp, planet_name)
+    earth = de405.earth
+    planet = getattr(de405, planet_name)
     e = earth(jd)
     distance = length_of((e - planet(jd)).position)
     ra, dec, d = e.observe(planet).apparent().radec(epoch=jd)
-
-    assert shape_of(jd.tt) == shape_of(ra.hours())
-    assert shape_of(jd.tt) == shape_of(dec.degrees())
-    assert shape_of(jd.tt) == shape_of(distance)
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
@@ -238,22 +186,17 @@ def test_local_planet(jd, planets_list):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = positionlib.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
-    ggr.ephemeris = emp
+    ggr.ephemeris = de405
 
     planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra0, dec0, distance0 = vcall(c.local_planet, jd.tt, jd.delta_t,
-                                 obj, position)
+    ra0, dec0, distance0 = c.local_planet(jd.tt, jd.delta_t, obj, position)
 
-    planet = getattr(emp, planet_name)
+    planet = getattr(de405, planet_name)
     g = ggr(jd)
     distance = length_of((g - planet(jd)).position)
     ra, dec, d = g.observe(planet).apparent().radec()
-
-    assert shape_of(jd.tt) == shape_of(ra.hours())
-    assert shape_of(jd.tt) == shape_of(dec.degrees())
-    assert shape_of(jd.tt) == shape_of(distance)
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
@@ -263,22 +206,17 @@ def test_topo_planet(jd, planets_list):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = positionlib.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
-    ggr.ephemeris = emp
+    ggr.ephemeris = de405
 
     planet_name, planet_code = planets_list
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra0, dec0, distance0 = vcall(c.topo_planet, jd.tt, jd.delta_t,
-                                 obj, position)
+    ra0, dec0, distance0 = c.topo_planet(jd.tt, jd.delta_t, obj, position)
 
-    planet = getattr(emp, planet_name)
+    planet = getattr(de405, planet_name)
     g = ggr(jd)
     distance = length_of((g - planet(jd)).position)
     ra, dec, d = g.observe(planet).apparent().radec(epoch=jd)
-
-    assert shape_of(jd.tt) == shape_of(ra.hours())
-    assert shape_of(jd.tt) == shape_of(dec.degrees())
-    assert shape_of(jd.tt) == shape_of(distance)
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
@@ -293,16 +231,16 @@ def test_altaz(jd, planets_list):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = positionlib.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
-    ggr.ephemeris = emp
+    ggr.ephemeris = de405
     xp = yp = 0.0
 
     obj = c.make_object(0, planet_code, 'planet', None)
-    ra, dec, dis = vcall(c.topo_planet, jd.tt, jd.delta_t, obj, position)
-    (zd0, az0), (ra, dec) = vcall(
-        c.equ2hor, jd.ut1, jd.delta_t, xp, yp, position, ra, dec)
+    ra, dec, dis = c.topo_planet(jd.tt, jd.delta_t, obj, position)
+    (zd0, az0), (ra, dec) = c.equ2hor(jd.ut1, jd.delta_t, xp, yp,
+                                      position, ra, dec)
     alt0 = 90.0 - zd0
 
-    planet = getattr(emp, planet_name)
+    planet = getattr(de405, planet_name)
     g = ggr(jd)
     distance = length_of((g - planet(jd)).position)
     alt, az, d = g.observe(planet).apparent().altaz()
@@ -320,20 +258,20 @@ def test_cal_date():
 def test_earth_rotation_angle(jd_float_or_vector):
     epsilon = 1e-12
     jd_ut1 = jd_float_or_vector.boxed_value
-    u = vcall(c.era, jd_ut1)
+    u = c.era(jd_ut1)
     v = earthlib.earth_rotation_angle(jd_ut1)
     eq(u, v, epsilon)
 
 def test_earth_tilt(jd):
     epsilon = 1e-9
-    u = vcall(c.e_tilt, jd.tdb)
+    u = c.e_tilt(jd.tdb)
     v = nutationlib.earth_tilt(jd)
-    eq(u, array(v), epsilon)
+    eq(array(u), array(v), epsilon)
 
 def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
     epsilon = 1e-22
     jd_tt = jd_float_or_vector.boxed_value
-    u = vcall(c.ee_ct, jd_tt, 0.0, 0)
+    u = c.ee_ct(jd_tt, 0.0, 0)
     v = nutationlib.equation_of_the_equinoxes_complimentary_terms(jd_tt)
     eq(u, v, epsilon)
 
@@ -348,7 +286,7 @@ def test_fundamental_arguments(jd_float_or_vector):
     epsilon = 1e-12
     jd_tdb = jd_float_or_vector.boxed_value
     t = jcentury(jd_tdb)
-    u = vcall(c.fund_args, t)
+    u = c.fund_args(t)
     v = nutationlib.fundamental_arguments(t)
     eq(u, v, epsilon)
 
@@ -357,7 +295,7 @@ def test_geocentric_position_and_velocity(jd):
     jd.delta_t = delta_t = 0.0  # TODO: relax this limitation?
 
     observer = c.make_observer_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-    posu, velu = vcall(c.geo_posvel, jd.tt, delta_t, observer)
+    posu, velu = c.geo_posvel(jd.tt, delta_t, observer)
 
     topos = positionlib.Topos('75 W', '45 N', elevation=0.0,
                               temperature=10.0, pressure=1010.0)
@@ -369,7 +307,7 @@ def test_geocentric_position_and_velocity(jd):
 def test_iau2000a(jd_float_or_vector):
     epsilon = 4e-6  # tenths of micro arcseconds
     jd_tt = jd_float_or_vector.boxed_value
-    psi0, eps0 = vcall(c.nutation.iau2000a, jd_tt, 0.0)
+    psi0, eps0 = c.nutation.iau2000a(jd_tt, 0.0)
     psi1, eps1 = nutationlib.iau2000a(jd_tt)
     to_tenths_of_microarcseconds = 1e7 / ASEC2RAD
     eq(psi0 * to_tenths_of_microarcseconds, psi1, epsilon)
@@ -391,14 +329,14 @@ def test_julian_date():
 def test_mean_obliq(jd_float_or_vector):
     epsilon = 0
     jd_tdb = jd_float_or_vector.boxed_value
-    u = vcall(c.mean_obliq, jd_tdb)
+    u = c.mean_obliq(jd_tdb)
     v = nutationlib.mean_obliquity(jd_tdb)
     eq(u, v, epsilon)
 
 def test_nutation(jd):
     epsilon = 1e-15
     xyz = [1.0, 2.0, 3.0]
-    u = vcall(c_nutation, jd.tt, xyz)  # TODO: shouldn't this be jd.tdb?
+    u = c_nutation(jd.tt, xyz)  # TODO: shouldn't this be jd.tdb?
     xyz = array(xyz)
     v = einsum('i...,ij...->j...', xyz, nutationlib.compute_nutation(jd))
     eq(u, v, epsilon)
@@ -407,7 +345,7 @@ def test_precession(jd_float_or_vector):
     epsilon = 1e-15
     jd_tdb = jd_float_or_vector.boxed_value
     xyz = [1.0, 2.0, 3.0]
-    u = vcall(c.precession, T0, xyz, jd_tdb)
+    u = c.precession(T0, xyz, jd_tdb)
     xyz = array(xyz)
     matrix_or_matrices = precessionlib.compute_precession(jd_tdb)
     v = einsum('i...,ij...->j...', array(xyz), matrix_or_matrices)
@@ -416,13 +354,13 @@ def test_precession(jd_float_or_vector):
 def test_sidereal_time_with_zero_delta_t(jd):
     epsilon = 1e-13
     jd.delta_t = 0.0
-    u = vcall(c.sidereal_time, jd.ut1, 0.0, 0.0, False, True)
+    u = c.sidereal_time(jd.ut1, 0.0, 0.0, False, True)
     v = earthlib.sidereal_time(jd)
     eq(u, v, epsilon)
 
 def test_sidereal_time_with_nonzero_delta_t(jd):
     epsilon = 1e-13
-    u = vcall(c.sidereal_time, jd.ut1, 0.0, jd.delta_t, False, True)
+    u = c.sidereal_time(jd.ut1, 0.0, jd.delta_t, False, True)
     v = earthlib.sidereal_time(jd)
     eq(u, v, epsilon)
 
@@ -444,7 +382,7 @@ def test_ter2cel(jd):
     xp = yp = 0.0
     position = [1033.47938300, 7901.29527540, 6380.35659580]
 
-    theirs = vcall(c.ter2cel, jd.ut1, jd_low, jd.delta_t, xp, yp, position)
+    theirs = c.ter2cel(jd.ut1, jd_low, jd.delta_t, xp, yp, position)
     ours = positionlib.ITRF_to_GCRS(jd, position)
 
     epsilon = 1e-9
@@ -476,7 +414,7 @@ def test_terra():
 def test_tdb2tt(jd_float_or_vector):
     epsilon = 1e-16
     jd_tdb = jd_float_or_vector.boxed_value
-    u = vcall(c.tdb2tt, jd_tdb)[1]
+    u = c.tdb2tt(jd_tdb)[1]
     v = timescales.tdb_minus_tt(jd_tdb)
     eq(u, v, epsilon)
 
