@@ -68,32 +68,23 @@ planet_codes = {
 
 # Fixtures.
 
-class Box(object):
-    """Hides values, like NumPy arrays, from py.test fixture bugs."""
-    def __init__(self, value):
-        self.boxed_value = value
-
 @pytest.fixture(params=[
-    Box({'ut1': T0, 'delta_t': D0}),
-    Box({'ut1': TA, 'delta_t': DA}),
-    Box({'ut1': TB, 'delta_t': DB}),
-    Box({'ut1': TC, 'delta_t': DC}),
+    {'ut1': T0, 'delta_t': D0},
+    {'ut1': TA, 'delta_t': DA},
+    {'ut1': TB, 'delta_t': DB},
+    {'ut1': TC, 'delta_t': DC},
     ])
 def jd(request):
     # Build a new JulianDate each time, because some test cases need to
     # adjust the value of the date they are passed.
-    return JulianDate(**request.param.boxed_value)
+    return JulianDate(**request.param)
 
-@pytest.fixture(params=[Box(T0), Box(TA), Box(TB), Box(TC)])
+@pytest.fixture(params=[T0, TA, TB, TC])
 def jd_float_or_vector(request):
     return request.param
 
-@pytest.fixture(params=[P0, PA, PB])
-def timepairs(request):
-    return request.param
-
 @pytest.fixture(params=planet_codes.items())
-def planets_list(request):
+def planet_name_and_code(request):
     return request.param
 
 # Tests.
@@ -134,8 +125,8 @@ def test_star_deflected_by_jupiter(jd):
 
 # Tests of generating a full position or coordinate.
 
-def test_astro_planet(jd, planets_list):
-    planet_name, planet_code = planets_list
+def test_astro_planet(jd, planet_name_and_code):
+    planet_name, planet_code = planet_name_and_code
 
     obj = c.make_object(0, planet_code, 'planet', None)
     ra0, dec0, distance0 = c.astro_planet(jd.tt, obj)
@@ -150,8 +141,8 @@ def test_astro_planet(jd, planets_list):
     eq(dec0, dec.degrees(), 1e-3 * arcsecond_in_degrees)
     eq(distance0, distance, 0.001 * meter)
 
-def test_virtual_planet(jd, planets_list):
-    planet_name, planet_code = planets_list
+def test_virtual_planet(jd, planet_name_and_code):
+    planet_name, planet_code = planet_name_and_code
 
     obj = c.make_object(0, planet_code, 'planet', None)
     ra0, dec0, distance0 = c.virtual_planet(jd.tt, obj)
@@ -166,8 +157,8 @@ def test_virtual_planet(jd, planets_list):
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.001 * meter)
 
-def test_app_planet(jd, planets_list):
-    planet_name, planet_code = planets_list
+def test_app_planet(jd, planet_name_and_code):
+    planet_name, planet_code = planet_name_and_code
 
     obj = c.make_object(0, planet_code, 'planet', None)
     ra0, dec0, distance0 = c.app_planet(jd.tt, obj)
@@ -182,13 +173,13 @@ def test_app_planet(jd, planets_list):
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.001 * meter)
 
-def test_local_planet(jd, planets_list):
+def test_local_planet(jd, planet_name_and_code):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = positionlib.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
     ggr.ephemeris = de405
 
-    planet_name, planet_code = planets_list
+    planet_name, planet_code = planet_name_and_code
 
     obj = c.make_object(0, planet_code, 'planet', None)
     ra0, dec0, distance0 = c.local_planet(jd.tt, jd.delta_t, obj, position)
@@ -202,13 +193,13 @@ def test_local_planet(jd, planets_list):
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.001 * meter)
 
-def test_topo_planet(jd, planets_list):
+def test_topo_planet(jd, planet_name_and_code):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = positionlib.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
     ggr.ephemeris = de405
 
-    planet_name, planet_code = planets_list
+    planet_name, planet_code = planet_name_and_code
 
     obj = c.make_object(0, planet_code, 'planet', None)
     ra0, dec0, distance0 = c.topo_planet(jd.tt, jd.delta_t, obj, position)
@@ -222,12 +213,12 @@ def test_topo_planet(jd, planets_list):
     eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.001 * meter)
 
-def test_altaz(jd, planets_list):
+def test_altaz(jd, planet_name_and_code):
     """ Tests of generating a full position in altaz coordinates. Uses
         fixtures to iterate through date pairs and planets to generate
         individual tests.
     """
-    planet_name, planet_code = planets_list
+    planet_name, planet_code = planet_name_and_code
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = positionlib.Topos('75 W', '45 N', 0.0,
                             temperature=10.0, pressure=1010.0)
@@ -257,7 +248,7 @@ def test_cal_date():
 
 def test_earth_rotation_angle(jd_float_or_vector):
     epsilon = 1e-12
-    jd_ut1 = jd_float_or_vector.boxed_value
+    jd_ut1 = jd_float_or_vector
     u = c.era(jd_ut1)
     v = earthlib.earth_rotation_angle(jd_ut1)
     eq(u, v, epsilon)
@@ -270,7 +261,7 @@ def test_earth_tilt(jd):
 
 def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
     epsilon = 1e-22
-    jd_tt = jd_float_or_vector.boxed_value
+    jd_tt = jd_float_or_vector
     u = c.ee_ct(jd_tt, 0.0, 0)
     v = nutationlib.equation_of_the_equinoxes_complimentary_terms(jd_tt)
     eq(u, v, epsilon)
@@ -284,7 +275,7 @@ def test_frame_tie():
 
 def test_fundamental_arguments(jd_float_or_vector):
     epsilon = 1e-12
-    jd_tdb = jd_float_or_vector.boxed_value
+    jd_tdb = jd_float_or_vector
     t = jcentury(jd_tdb)
     u = c.fund_args(t)
     v = nutationlib.fundamental_arguments(t)
@@ -306,7 +297,7 @@ def test_geocentric_position_and_velocity(jd):
 
 def test_iau2000a(jd_float_or_vector):
     epsilon = 4e-6  # tenths of micro arcseconds
-    jd_tt = jd_float_or_vector.boxed_value
+    jd_tt = jd_float_or_vector
     psi0, eps0 = c.nutation.iau2000a(jd_tt, 0.0)
     psi1, eps1 = nutationlib.iau2000a(jd_tt)
     to_tenths_of_microarcseconds = 1e7 / ASEC2RAD
@@ -328,7 +319,7 @@ def test_julian_date():
 
 def test_mean_obliq(jd_float_or_vector):
     epsilon = 0
-    jd_tdb = jd_float_or_vector.boxed_value
+    jd_tdb = jd_float_or_vector
     u = c.mean_obliq(jd_tdb)
     v = nutationlib.mean_obliquity(jd_tdb)
     eq(u, v, epsilon)
@@ -343,7 +334,7 @@ def test_nutation(jd):
 
 def test_precession(jd_float_or_vector):
     epsilon = 1e-15
-    jd_tdb = jd_float_or_vector.boxed_value
+    jd_tdb = jd_float_or_vector
     xyz = [1.0, 2.0, 3.0]
     u = c.precession(T0, xyz, jd_tdb)
     xyz = array(xyz)
@@ -413,7 +404,7 @@ def test_terra():
 
 def test_tdb2tt(jd_float_or_vector):
     epsilon = 1e-16
-    jd_tdb = jd_float_or_vector.boxed_value
+    jd_tdb = jd_float_or_vector
     u = c.tdb2tt(jd_tdb)[1]
     v = timescales.tdb_minus_tt(jd_tdb)
     eq(u, v, epsilon)
