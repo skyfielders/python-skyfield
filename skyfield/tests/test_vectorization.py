@@ -1,6 +1,6 @@
 """Determine whether arrays work as well as individual inputs."""
 
-import pytest
+from itertools import izip
 from numpy import array
 from ..constants import T0
 from ..planets import earth, mars
@@ -15,7 +15,7 @@ dates = array([
 
 deltas = array([39.707, 63.8285, 66.8779, 72.])
 
-def generate_planetary_position(ut1, delta_t):
+def compute_planetary_position(ut1, delta_t):
     jd = JulianDate(ut1=ut1, delta_t=delta_t)
 
     yield jd.ut1
@@ -41,18 +41,29 @@ def generate_planetary_position(ut1, delta_t):
     yield dec.degrees()
     yield distance
 
-@pytest.fixture(params=[generate_planetary_position])
-def gradual_computation(request):
-    return request.param
+def generate_comparisons(computation):
+    """Set up comparisons between vector and scalar outputs of `computation`.
 
-def test_gradual_computations(gradual_computation):
-    vector_results = list(gradual_computation(dates, deltas))
+    The `computation` should be a generator that accepts both vector and
+    scalar input, and that yields a series of values whose shape
+    corresponds to its input's shape.
 
-    correct_length = len(dates)
-    for vector_value in vector_results:
-        assert vector_value.shape[-1] == correct_length
+    """
+    vector_results = list(computation(dates, deltas))
+    for i, (date, delta_t) in enumerate(zip(dates, deltas)):
+        g = computation(date, delta_t)
+        for vector, scalar in izip(vector_results, g):
+            f = g.gi_frame
+            location = '{}:{}'.format(f.f_code.co_filename, f.f_lineno)
+            yield location, vector, i, scalar
 
-    for i, (date, delta) in enumerate(zip(dates, deltas)):
-        scalar_results = list(gradual_computation(date, delta))
-        for vector_value, scalar_value in zip(vector_results, scalar_results):
-            assert (vector_value.T[i] == scalar_value).all()
+def pytest_generate_tests(metafunc):
+    if 'vector_vs_scalar' in metafunc.fixturenames:
+        metafunc.parametrize('vector_vs_scalar',
+            list(generate_comparisons(compute_planetary_position))
+            )
+
+def test_vector_vs_scalar(vector_vs_scalar):
+    location, vector, i, scalar = vector_vs_scalar
+    assert (vector.T[i] == scalar).all(), (
+        '{}:\n  {}[{}] != {}'.format(location, vector.T, i, scalar))
