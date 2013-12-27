@@ -5,6 +5,7 @@ from numpy import array
 from .. import starlib
 from ..constants import T0, B1950
 from ..planets import earth, mars
+from ..positionlib import Topos
 from ..timescales import JulianDate, julian_date
 
 if sys.version_info < (3,):
@@ -21,7 +22,7 @@ dates = array([
 
 deltas = array([39.707, 63.8285, 66.8779, 72.])
 
-def compute_planetary_position(ut1, delta_t):
+def observe_planet_from_geocenter(ut1, delta_t):
     jd = JulianDate(ut1=ut1, delta_t=delta_t)
 
     yield jd.ut1
@@ -29,6 +30,57 @@ def compute_planetary_position(ut1, delta_t):
     yield jd.tdb
 
     observer = earth(jd)
+
+    yield observer.position
+    yield observer.velocity
+    yield observer.jd.ut1
+    yield observer.jd.tt
+    yield observer.jd.tdb
+
+    astrometric = observer.observe(mars)
+
+    yield astrometric.position
+    yield astrometric.velocity
+
+    ra, dec, distance = astrometric.radec()
+
+    yield ra.hours()
+    yield dec.degrees()
+    yield distance
+
+    ra, dec, distance = astrometric.radec(epoch=B1950)
+
+    yield ra.hours()
+    #yield dec.degrees()
+    #yield distance
+
+    apparent = astrometric.apparent()
+
+    yield apparent.position
+    #yield apparent.velocity  # = None?
+
+    ra, dec, distance = apparent.radec()
+
+    yield ra.hours()
+    #yield dec.degrees()
+    #yield distance
+
+    ra, dec, distance = apparent.radec(epoch=B1950)
+
+    yield ra.hours()
+    #yield dec.degrees()
+    #yield distance
+
+def observe_planet_from_topos(ut1, delta_t):
+    jd = JulianDate(ut1=ut1, delta_t=delta_t)
+
+    yield jd.ut1
+    yield jd.tt
+    yield jd.tdb
+
+    topos = Topos('71.1375 W', '42.6583 N', 0.0)
+    topos.ephemeris = earth.ephemeris
+    observer = topos(jd)
 
     yield observer.position
     yield observer.velocity
@@ -84,6 +136,14 @@ def compute_stellar_position(ut1, delta_t):
     yield dec.degrees()
     yield distance
 
+def pytest_generate_tests(metafunc):
+    if 'vector_vs_scalar' in metafunc.fixturenames:
+        metafunc.parametrize(
+            'vector_vs_scalar',
+            list(generate_comparisons(observe_planet_from_geocenter)) +
+            list(generate_comparisons(observe_planet_from_topos)) +
+            list(generate_comparisons(compute_stellar_position)))
+
 def generate_comparisons(computation):
     """Set up comparisons between vector and scalar outputs of `computation`.
 
@@ -99,13 +159,6 @@ def generate_comparisons(computation):
             f = g.gi_frame
             location = '{}:{}'.format(f.f_code.co_filename, f.f_lineno)
             yield location, vector, i, scalar
-
-def pytest_generate_tests(metafunc):
-    if 'vector_vs_scalar' in metafunc.fixturenames:
-        metafunc.parametrize(
-            'vector_vs_scalar',
-            list(generate_comparisons(compute_planetary_position)) +
-            list(generate_comparisons(compute_stellar_position)))
 
 def test_vector_vs_scalar(vector_vs_scalar):
     location, vector, i, scalar = vector_vs_scalar
