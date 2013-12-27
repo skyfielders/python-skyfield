@@ -1,13 +1,12 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import arcsin, arctan2, array, cos, einsum, ndarray, pi, sin, sqrt
+from numpy import arcsin, arctan2, array, cos, einsum, pi, sin
 
 from .angles import interpret_longitude, interpret_latitude, Angle, HourAngle
 from .constants import TAU
 from .functions import length_of, spin_x
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
-from .framelib import ICRS_to_J2000, J2000_to_ICRS
 from .functions import dots
 from .relativity import add_aberration, add_deflection
 from .timescales import takes_julian_date

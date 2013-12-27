@@ -1,9 +1,7 @@
 """Raw transforms between coordinate frames, as NumPy matrices."""
 
 from numpy import array
-
 from .constants import ASEC2RAD
-
 
 def build_matrix():
     # 'xi0', 'eta0', and 'da0' are ICRS frame biases in arcseconds taken
@@ -30,6 +28,5 @@ def build_matrix():
 
     return array(((xx, xy, xz), (yx, yy, yz), (zx, zy, zz)))
 
-
-J2000_to_ICRS = build_matrix()
-ICRS_to_J2000 = J2000_to_ICRS.T
+ICRS_to_J2000 = build_matrix()
+del build_matrix

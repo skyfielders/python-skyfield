@@ -112,7 +112,7 @@ class JulianDate(object):
             return NT
 
         if name == 'M':
-            self.M = M = einsum('ij...,jk...,kl...->il...', self.N, self.P, B.T)
+            self.M = M = einsum('ij...,jk...,kl...->il...', self.N, self.P, B)
             return M
 
         if name == 'MT':

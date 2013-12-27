@@ -274,8 +274,8 @@ def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
 def test_frame_tie():
     xyz = array([1.1, 1.2, 1.3])
     epsilon = 1e-15  # but can be 0.0 when running outside of tox!
-    eq(c.frame_tie(xyz, 0), xyz.dot(framelib.ICRS_to_J2000), epsilon)
-    eq(c.frame_tie(xyz, -1), xyz.dot(framelib.J2000_to_ICRS), epsilon)
+    eq(c.frame_tie(xyz, 0), framelib.ICRS_to_J2000.dot(xyz), epsilon)
+    eq(c.frame_tie(xyz, -1), framelib.ICRS_to_J2000.T.dot(xyz), epsilon)
 
 def test_fundamental_arguments(jd_float_or_vector):
     jd_tdb = jd_float_or_vector

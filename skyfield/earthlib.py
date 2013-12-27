@@ -5,13 +5,13 @@ from numpy import (arcsin, arccos, array, clip, cos, einsum, fmod,
 
 from .constants import (AU, ANGVEL, DAY_S, DEG2RAD, ERAD,
                         IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0)
-from .framelib import J2000_to_ICRS
 from .functions import dots
 from .nutationlib import earth_tilt
 
 rade = ERAD / AU
 one_minus_flattening = 1.0 - 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
 one_minus_flattening_squared = one_minus_flattening * one_minus_flattening
+
 
 def geocentric_position_and_velocity(topos, jd):
     """Compute the GCRS position and velocity of a terrestrial observer.
