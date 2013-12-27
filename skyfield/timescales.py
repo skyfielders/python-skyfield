@@ -96,7 +96,7 @@ class JulianDate(object):
         # Cache of several expensive functions of time.
 
         if name == 'P':
-            self.P = P = rollaxis(compute_precession(self.tdb), 1)
+            self.P = P = compute_precession(self.tdb)
             return P
 
         if name == 'PT':
@@ -104,7 +104,7 @@ class JulianDate(object):
             return PT
 
         if name == 'N':
-            self.N = N = rollaxis(compute_nutation(self), 1)
+            self.N = N = compute_nutation(self)
             return N
 
         if name == 'NT':
@@ -112,7 +112,7 @@ class JulianDate(object):
             return NT
 
         if name == 'M':
-            self.M = M = einsum('ij...,jk...,kl...->il...', self.NT, self.PT, B.T)
+            self.M = M = einsum('ij...,jk...,kl...->il...', self.N, self.P, B.T)
             return M
 
         if name == 'MT':

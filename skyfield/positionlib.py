@@ -200,8 +200,8 @@ def to_epoch(position, epoch):
     jd = epoch
 
     position = position.T.dot(ICRS_to_J2000)
-    position = einsum('...j,jk...->...k', position, jd.P)
-    position = einsum('...j,jk...->...k', position, jd.N)
+    position = einsum('...j,jk...->...k', position, jd.PT)
+    position = einsum('...j,jk...->...k', position, jd.NT)
     position = position.T
 
     return position
@@ -217,8 +217,8 @@ def ITRF_to_GCRS(jd, rITRF):  # todo: velocity
     position = array(position)
     position = position.T
 
-    position = einsum('...j,jk...->...k', position, jd.NT)
-    position = einsum('...j,jk...->...k', position, jd.PT)
+    position = einsum('...j,jk...->...k', position, jd.N)
+    position = einsum('...j,jk...->...k', position, jd.P)
     position = position.dot(J2000_to_ICRS)
     rGCRS = position.T
     return rGCRS
