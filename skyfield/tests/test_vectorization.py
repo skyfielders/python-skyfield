@@ -1,7 +1,7 @@
 """Determine whether arrays work as well as individual inputs."""
 
 import sys
-from numpy import array
+from numpy import array, rollaxis
 from .. import starlib
 from ..constants import T0, B1950
 from ..planets import earth, mars
@@ -22,13 +22,19 @@ dates = array([
 
 deltas = array([39.707, 63.8285, 66.8779, 72.])
 
-def observe_planet_from_geocenter(ut1, delta_t):
+def compute_times_and_equinox_matrices(ut1, delta_t):
     jd = JulianDate(ut1=ut1, delta_t=delta_t)
 
     yield jd.ut1
     yield jd.tt
     yield jd.tdb
 
+    yield jd.P
+    yield jd.N
+    yield jd.M
+
+def observe_planet_from_geocenter(ut1, delta_t):
+    jd = JulianDate(ut1=ut1, delta_t=delta_t)
     observer = earth(jd)
 
     yield observer.position
@@ -140,6 +146,7 @@ def pytest_generate_tests(metafunc):
     if 'vector_vs_scalar' in metafunc.fixturenames:
         metafunc.parametrize(
             'vector_vs_scalar',
+            list(generate_comparisons(compute_times_and_equinox_matrices)) +
             list(generate_comparisons(observe_planet_from_geocenter)) +
             list(generate_comparisons(observe_planet_from_topos)) +
             list(generate_comparisons(compute_stellar_position)))
@@ -162,8 +169,12 @@ def generate_comparisons(computation):
 
 def test_vector_vs_scalar(vector_vs_scalar):
     location, vector, i, scalar = vector_vs_scalar
+    vectorT = rollaxis(vector, -1)
     assert vector is not None, (
         '{}:\n  vector is None'.format(location))
-    assert (vector.T[i] == scalar).all(), (
+    assert vectorT[i].shape == scalar.shape, (
+        '{}:\n  {}[{}].shape != {}.shape\n  shapes: {} {}'.format(
+            location, vector.T, i, scalar, vector.T[i].shape, scalar.shape))
+    assert (vectorT[i] == scalar).all(), (
         '{}:\n  {}[{}] != {}\n  difference: {}'.format(
             location, vector.T, i, scalar, vector.T[i] - scalar))
