@@ -93,7 +93,8 @@ def eq(first, second, epsilon=None):
     """Test whether two floats are within `epsilon` of one another."""
     #print 'Significance of epsilon:', epsilon / second
     difference = abs(first - second)
-    #print 'Difference relative to epsilon:', difference / epsilon
+    # if epsilon:
+    #     print 'Difference relative to epsilon:', difference / epsilon
     if hasattr(first, 'shape') or hasattr(second, 'shape'):
         failed = difference.max() > epsilon
     else:
