@@ -1,5 +1,6 @@
-from numpy import array, rollaxis, sin
+from numpy import array, einsum, rollaxis, sin
 from .constants import T0, S_DAY
+from .framelib import ICRS_to_J2000 as B
 from .nutationlib import compute_nutation
 from .precessionlib import compute_precession
 
@@ -109,6 +110,14 @@ class JulianDate(object):
         if name == 'NT':
             self.NT = NT = rollaxis(self.N, 1)
             return NT
+
+        if name == 'M':
+            self.M = M = einsum('ij...,jk...,kl...->il...', self.NT, self.PT, B.T)
+            return M
+
+        if name == 'MT':
+            self.MT = MT = rollaxis(self.M, 1)
+            return MT
 
         # Conversion between timescales.
 

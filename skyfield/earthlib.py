@@ -29,9 +29,8 @@ def geocentric_position_and_velocity(topos, jd):
 
     pos, vel = terra(topos, gast)
 
-    R = einsum('ij...,jk...,kl...->li...', J2000_to_ICRS.T, jd.P, jd.N,)
-    pos = einsum('ij...,i...->j...', R, pos)
-    vel = einsum('ij...,i...->j...', R, vel)
+    pos = einsum('ij...,j...->i...', jd.MT, pos)
+    vel = einsum('ij...,j...->i...', jd.MT, vel)
 
     return pos, vel
 
