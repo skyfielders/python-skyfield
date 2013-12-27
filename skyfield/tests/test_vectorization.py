@@ -1,7 +1,7 @@
 """Determine whether arrays work as well as individual inputs."""
 
 import sys
-from numpy import array, rollaxis
+from numpy import array, array_str, array_repr, rollaxis
 from .. import starlib
 from ..constants import T0, B1950
 from ..planets import earth, mars
@@ -68,14 +68,14 @@ def observe_planet_from_geocenter(ut1, delta_t):
     ra, dec, distance = apparent.radec()
 
     yield ra.hours()
-    #yield dec.degrees()
-    #yield distance
+    yield dec.degrees()
+    yield distance
 
     ra, dec, distance = apparent.radec(epoch=B1950)
 
     yield ra.hours()
-    #yield dec.degrees()
-    #yield distance
+    yield dec.degrees()
+    yield distance
 
 def observe_planet_from_topos(ut1, delta_t):
     jd = JulianDate(ut1=ut1, delta_t=delta_t)
@@ -108,8 +108,8 @@ def observe_planet_from_topos(ut1, delta_t):
     ra, dec, distance = astrometric.radec(epoch=B1950)
 
     yield ra.hours()
-    #yield dec.degrees()
-    #yield distance
+    yield dec.degrees()
+    yield distance
 
     apparent = astrometric.apparent()
 
@@ -119,14 +119,14 @@ def observe_planet_from_topos(ut1, delta_t):
     ra, dec, distance = apparent.radec()
 
     yield ra.hours()
-    #yield dec.degrees()
-    #yield distance
+    yield dec.degrees()
+    yield distance
 
     ra, dec, distance = apparent.radec(epoch=B1950)
 
-    #yield ra.hours()
-    #yield dec.degrees()
-    #yield distance
+    yield ra.hours()
+    yield dec.degrees()
+    yield distance
 
 def compute_stellar_position(ut1, delta_t):
     star = starlib.Star(ra=1.59132070233, dec=8.5958876464)
@@ -175,6 +175,16 @@ def test_vector_vs_scalar(vector_vs_scalar):
     assert vectorT[i].shape == scalar.shape, (
         '{}:\n  {}[{}].shape != {}.shape\n  shapes: {} {}'.format(
             location, vector.T, i, scalar, vector.T[i].shape, scalar.shape))
-    assert (vectorT[i] == scalar).all(), (
-        '{}:\n  {}[{}] != {}\n  difference: {}'.format(
-            location, vector.T, i, scalar, vector.T[i] - scalar))
+
+    # Ignore rounding errors in the final floating-point bits:
+
+    if scalar.shape:
+        vrepr = array_repr(vectorT[i], precision=18)
+        srepr = array_repr(scalar, precision=18)
+    else:
+        vrepr = array_str(array([vectorT[i]]), precision=13).strip('[] ')
+        srepr = array_str(array([scalar]), precision=13).strip('[] ')
+
+    assert vrepr == srepr, (
+        '{}:\n  vector[{}] = {}\n  scalar    = {}\n  difference: {}'.format(
+            location, i, vrepr, srepr, vector.T[i] - scalar))
