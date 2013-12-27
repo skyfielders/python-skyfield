@@ -334,7 +334,7 @@ def test_nutation(jd):
     xyz = [1.1, 1.2, 1.3]
     u = c_nutation(jd.tdb, xyz)
     xyz = array(xyz)
-    v = einsum('i...,ij...->j...', xyz, nutationlib.compute_nutation(jd))
+    v = einsum('ij...,j...->i...', nutationlib.compute_nutation(jd), xyz)
     epsilon = 1e-14  # 14 digits of agreement
     eq(u, v, epsilon)
 

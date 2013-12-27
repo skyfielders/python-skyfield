@@ -19,13 +19,15 @@ def compute_nutation(jd):
     cpsi = cos(psi * ASEC2RAD)
     spsi = sin(psi * ASEC2RAD)
 
-    return array(((cpsi, spsi * cobt, spsi * sobt),
-                  (-spsi * cobm,
-                    cpsi * cobm * cobt + sobm * sobt,
-                    cpsi * cobm * sobt - sobm * cobt),
-                  (-spsi * sobm,
-                    cpsi * sobm * cobt - cobm * sobt,
-                    cpsi * sobm * sobt + cobm * cobt)))
+    return array(((cpsi,
+                  -spsi * cobm,
+                  -spsi * sobm),
+                  (spsi * cobt,
+                   cpsi * cobm * cobt + sobm * sobt,
+                   cpsi * sobm * cobt - cobm * sobt),
+                  (spsi * sobt,
+                   cpsi * cobm * sobt - sobm * cobt,
+                   cpsi * sobm * sobt + cobm * cobt)))
 
 def earth_tilt(jd):
     """Return a tuple of information about the earth's axis and position.

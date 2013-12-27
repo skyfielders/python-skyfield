@@ -104,7 +104,7 @@ class JulianDate(object):
             return PT
 
         if name == 'N':
-            self.N = N = compute_nutation(self)
+            self.N = N = rollaxis(compute_nutation(self), 1)
             return N
 
         if name == 'NT':
