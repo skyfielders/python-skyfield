@@ -51,8 +51,8 @@ def observe_planet_from_geocenter(ut1, delta_t):
     ra, dec, distance = astrometric.radec(epoch=B1950)
 
     yield ra.hours()
-    #yield dec.degrees()
-    #yield distance
+    yield dec.degrees()
+    yield distance
 
     apparent = astrometric.apparent()
 
