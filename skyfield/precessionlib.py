@@ -57,13 +57,13 @@ def compute_precession(jd_tdb):
     # R3(chi_a) R1(-omega_a) R3(-psi_a) R1(epsilon_0).
 
     rot3 = array(((cd * cb - sb * sd * cc,
-                   -sd * cb - sb * cd * cc,
-                   sb * sc),
-                  (cd * sb * ca + sd * cc * cb * ca - sa * sd * sc,
+                   cd * sb * ca + sd * cc * cb * ca - sa * sd * sc,
+                   cd * sb * sa + sd * cc * cb * sa + ca * sd * sc),
+                  (-sd * cb - sb * cd * cc,
                    -sd * sb * ca + cd * cc * cb * ca - sa * cd * sc,
-                   -sc * cb * ca - sa * cc),
-                  (cd * sb * sa + sd * cc * cb * sa + ca * sd * sc,
-                   -sd * sb * sa + cd * cc * cb * sa + ca * cd * sc,
+                   -sd * sb * sa + cd * cc * cb * sa + ca * cd * sc),
+                  (sb * sc,
+                   -sc * cb * ca - sa * cc,
                    -sc * cb * sa + cc * ca)))
 
     return rot3

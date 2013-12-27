@@ -341,7 +341,7 @@ def test_nutation(jd):
 def test_precession(jd_float_or_vector):
     jd_tdb = jd_float_or_vector
     xyz = [1.1, 1.2, 1.3]
-    u = c.precession(jd_tdb, xyz, T0)
+    u = c.precession(T0, xyz, jd_tdb)
     matrix_or_matrices = precessionlib.compute_precession(jd_tdb)
     v = einsum('ij...,j...->i...', matrix_or_matrices, array(xyz))
     epsilon = 1e-15  # 15 digits of agreement
