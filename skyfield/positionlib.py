@@ -201,12 +201,4 @@ def ITRF_to_GCRS(jd, rITRF):  # todo: velocity
     gast = sidereal_time(jd, use_eqeq=True)
     spin = spin_x(-gast * TAU / 24.0)
     position = einsum('i...,ij...->j...', array(rITRF), spin)
-
-    position = array(position)
-    position = position.T
-
-    position = einsum('...j,jk...->...k', position, jd.N)
-    position = einsum('...j,jk...->...k', position, jd.P)
-    position = position.dot(J2000_to_ICRS)
-    rGCRS = position.T
-    return rGCRS
+    return einsum('ij...,j...->i...', jd.MT, position)
