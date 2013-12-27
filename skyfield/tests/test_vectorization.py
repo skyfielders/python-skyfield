@@ -118,7 +118,7 @@ def observe_planet_from_topos(ut1, delta_t):
 
     ra, dec, distance = apparent.radec(epoch=B1950)
 
-    yield ra.hours()
+    #yield ra.hours()
     #yield dec.degrees()
     #yield distance
 

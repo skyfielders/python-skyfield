@@ -51,7 +51,8 @@ class ICRS(object):
     def radec(self, epoch=None):
         position = self.position
         if epoch is not None:
-            position = to_epoch(position, self.jd)
+            # TODO: oughtn't we actually use `epoch`, instead of ignoring it?
+            position = einsum('ij...,j...->i...', self.jd.M, position)
         d, dec, ra = to_polar(position, phi_class=HourAngle)
         return ra, dec, d
 
@@ -166,8 +167,7 @@ class Apparent(ICRS):
         un = einsum('i...,ij...->j...', une, spin)
         uw = einsum('i...,ij...->j...', uwe, spin)
 
-        p = self.position
-        p = to_epoch(p, self.jd)
+        p = einsum('ij...,j...->i...', self.jd.M, self.position)
 
         pz = dots(p, uz)
         pn = dots(p, un)
@@ -193,18 +193,6 @@ def to_polar(position, phi_class=Angle):
     theta = Angle(radians=arcsin(position[2] / r))
     phi = phi_class(radians=arctan2(-position[1], -position[0]) + pi)
     return r, theta, phi
-
-def to_epoch(position, epoch):
-    """Convert an ICRS position into an Earth equatorial position."""
-
-    jd = epoch
-
-    position = position.T.dot(ICRS_to_J2000)
-    position = einsum('...j,jk...->...k', position, jd.PT)
-    position = einsum('...j,jk...->...k', position, jd.NT)
-    position = position.T
-
-    return position
 
 def ITRF_to_GCRS(jd, rITRF):  # todo: velocity
 
