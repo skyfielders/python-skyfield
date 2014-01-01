@@ -32,6 +32,9 @@ class BaseAngle(object):
         elif hours is not None:
             self._radians = hours * _from_hours
 
+    def __format__(self, format_spec):
+        return self.dstr()
+
     def radians(self):
         return self._radians
 
@@ -91,6 +94,9 @@ class Angle(BaseAngle):
         raise WrongUnitError('hstr', 'hours')
 
 class HourAngle(BaseAngle):
+
+    def __format__(self, format_spec):
+        return self.hstr()
 
     # Protect naive users from accidentally calling degree methods.
 
