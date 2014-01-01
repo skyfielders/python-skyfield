@@ -52,8 +52,8 @@ class ICRS(object):
         if epoch is not None:
             # TODO: oughtn't we actually use `epoch`, instead of ignoring it?
             position = einsum('ij...,j...->i...', self.jd.M, position)
-        d, dec, ra = to_polar(position, phi_class=HourAngle)
-        return ra, dec, d
+        d, dec, ra = to_polar(position)
+        return HourAngle(radians=ra), Angle(radians=dec), d
 
 class Topos(object):
 
@@ -175,10 +175,10 @@ class Apparent(ICRS):
         position = array([pn, -pw, pz])
 
         d, alt, az = to_polar(position)
-        return alt, az, d
+        return Angle(radians=alt), Angle(radians=az), d
 
 
-def to_polar(position, phi_class=Angle):
+def to_polar(position):
     """Convert ``[x y z]`` into spherical coordinates ``(r, theta, phi)``.
 
     ``r`` - vector length
@@ -189,8 +189,8 @@ def to_polar(position, phi_class=Angle):
 
     """
     r = length_of(position)
-    theta = Angle(radians=arcsin(position[2] / r))
-    phi = phi_class(radians=arctan2(-position[1], -position[0]) + pi)
+    theta = arcsin(position[2] / r)
+    phi = arctan2(-position[1], -position[0]) + pi
     return r, theta, phi
 
 def ITRF_to_GCRS(jd, rITRF):  # todo: velocity
