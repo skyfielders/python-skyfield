@@ -52,13 +52,13 @@ def observe_planet_from_geocenter(ut1, delta_t):
 
     yield ra.hours()
     yield dec.degrees()
-    yield distance
+    yield distance.AU
 
     ra, dec, distance = astrometric.radec(epoch=B1950)
 
     yield ra.hours()
     yield dec.degrees()
-    yield distance
+    yield distance.AU
 
     apparent = astrometric.apparent()
 
@@ -69,13 +69,13 @@ def observe_planet_from_geocenter(ut1, delta_t):
 
     yield ra.hours()
     yield dec.degrees()
-    yield distance
+    yield distance.AU
 
     ra, dec, distance = apparent.radec(epoch=B1950)
 
     yield ra.hours()
     yield dec.degrees()
-    yield distance
+    yield distance.AU
 
 def observe_planet_from_topos(ut1, delta_t):
     jd = JulianDate(ut1=ut1, delta_t=delta_t)
@@ -103,13 +103,13 @@ def observe_planet_from_topos(ut1, delta_t):
 
     yield ra.hours()
     yield dec.degrees()
-    yield distance
+    yield distance.AU
 
     ra, dec, distance = astrometric.radec(epoch=B1950)
 
     yield ra.hours()
     yield dec.degrees()
-    yield distance
+    yield distance.AU
 
     apparent = astrometric.apparent()
 
@@ -120,13 +120,13 @@ def observe_planet_from_topos(ut1, delta_t):
 
     yield ra.hours()
     yield dec.degrees()
-    yield distance
+    yield distance.AU
 
     ra, dec, distance = apparent.radec(epoch=B1950)
 
     yield ra.hours()
     yield dec.degrees()
-    yield distance
+    yield distance.AU
 
 def compute_stellar_position(ut1, delta_t):
     star = starlib.Star(ra=1.59132070233, dec=8.5958876464)
@@ -140,7 +140,7 @@ def compute_stellar_position(ut1, delta_t):
 
     yield ra.hours()
     yield dec.degrees()
-    yield distance
+    yield distance.AU
 
 def pytest_generate_tests(metafunc):
     if 'vector_vs_scalar' in metafunc.fixturenames:

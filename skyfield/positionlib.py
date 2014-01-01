@@ -10,6 +10,7 @@ from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
 from .functions import dots
 from .relativity import add_aberration, add_deflection
 from .timescales import takes_julian_date
+from .units import Distance
 
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
 quarter_tau = 0.25 * TAU
@@ -53,7 +54,7 @@ class ICRS(object):
             # TODO: oughtn't we actually use `epoch`, instead of ignoring it?
             position = einsum('ij...,j...->i...', self.jd.M, position)
         d, dec, ra = to_polar(position)
-        return HourAngle(radians=ra), Angle(radians=dec), d
+        return HourAngle(radians=ra), Angle(radians=dec), Distance(d)
 
 class Topos(object):
 
@@ -175,7 +176,7 @@ class Apparent(ICRS):
         position = array([pn, -pw, pz])
 
         d, alt, az = to_polar(position)
-        return Angle(radians=alt), Angle(radians=az), d
+        return Angle(radians=alt), Angle(radians=az), Distance(d)
 
 
 def to_polar(position):
