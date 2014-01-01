@@ -93,7 +93,7 @@ def test_appendix_c_satellite():
     lines = appendix_c_example.splitlines()
     sat = EarthSatellite(lines, earth)
 
-    jd_epoch = sat.sgp4_satellite.jdsatepoch
+    jd_epoch = sat._sgp4_satellite.jdsatepoch
     three_days_later = jd_epoch + 3.0
     jd = JulianDate(ut1=three_days_later)
 

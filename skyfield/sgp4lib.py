@@ -15,8 +15,8 @@ class EarthSatellite(object):
     """An Earth satellite loaded from a TLE file and propagated with SGP4."""
 
     def __init__(self, lines, earth):
-        self.earth = earth
-        self.sgp4_satellite = twoline2rv(*lines[-2:], whichconst=wgs72)
+        self._earth = earth
+        self._sgp4_satellite = twoline2rv(*lines[-2:], whichconst=wgs72)
 
     def _position_and_velocity_TEME_km(self, jd):
         """Return the raw true equator mean equinox (TEME) vectors from SGP4.
@@ -25,8 +25,8 @@ class EarthSatellite(object):
         expressed in kilometers and kilometers per second.
 
         """
-        minutes_past_epoch = (jd.ut1 - self.sgp4_satellite.jdsatepoch) * 1440.
-        position, velocity = sgp4(self.sgp4_satellite, minutes_past_epoch)
+        minutes_past_epoch = (jd.ut1 - self._sgp4_satellite.jdsatepoch) * 1440.
+        position, velocity = sgp4(self._sgp4_satellite, minutes_past_epoch)
         return (array(position), array(velocity))
 
     def _compute_GCRS(self, jd):
