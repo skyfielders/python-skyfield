@@ -1,4 +1,4 @@
-from numpy import array, einsum, rollaxis, sin
+from numpy import arange, array, einsum, rollaxis, sin
 from .constants import T0, S_DAY
 from .framelib import ICRS_to_J2000 as B
 from .nutationlib import compute_nutation
@@ -90,6 +90,11 @@ class JulianDate(object):
 
         if not self.__dict__:
             raise ValueError('you must supply either tdb= tt= ut1= or utc=')
+
+    def dayrange(self, days, step=1.0):
+        """Return a JulianDate extending `days` into the future."""
+        cls = type(self)
+        return cls(ut1=arange(self.ut1, self.ut1 + days + step * 0.5, step))
 
     def __getattr__(self, name):
 
