@@ -1,3 +1,10 @@
+"""Top-level objects and functions offered by the Skyfield library.
+
+Importing this ``skyfield.api`` module causes Skyfield to load up the
+default JPL planetary ephemeris ``de421`` and create planet objects like
+``earth`` and ``mars`` that are ready for your use.
+
+"""
 import de421
 from .jpllib import Ephemeris
 

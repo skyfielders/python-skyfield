@@ -4,7 +4,7 @@ import pytest
 import sys
 from datetime import datetime, timedelta
 from numpy import array
-from skyfield.planets import earth
+from skyfield.api import earth
 from skyfield.sgp4lib import EarthSatellite, TEME_to_ITRF
 from skyfield.timescales import JulianDate, julian_date
 

@@ -4,7 +4,7 @@
 ==============
 
 
->>> from skyfield.planets import earth, mars
+>>> from skyfield.api import earth, mars
 >>> boston = earth.topos('71.0636 W', '42.3583 N')
 >>> alt, az, d = boston(ut1=2456755.75).observe(mars).apparent().altaz()
 >>> print(alt.dstr())

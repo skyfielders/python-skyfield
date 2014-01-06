@@ -4,7 +4,7 @@ import sys
 from numpy import array, array_str, array_repr, rollaxis
 from .. import starlib
 from ..constants import T0, B1950
-from ..planets import earth, mars
+from ..api import earth, mars
 from ..positionlib import Topos
 from ..timescales import JulianDate, julian_date
 
