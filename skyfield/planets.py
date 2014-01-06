@@ -16,5 +16,5 @@ uranus = ephemeris.uranus
 neptune = ephemeris.neptune
 pluto = ephemeris.pluto
 
-nine_planets = [mercury, venus, earth, mars,
-                jupiter, saturn, uranus, neptune, pluto]
+eight_planets = [mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
+nine_planets = eight_planets + [pluto]
