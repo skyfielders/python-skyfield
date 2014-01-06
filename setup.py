@@ -18,5 +18,10 @@ setup(
         ],
     packages=[ 'skyfield', 'skyfield.tests' ],
     package_data = {'skyfield': ['documentation/*.rst']},
-    install_requires=['de421==2008', 'jplephem', 'numpy', 'sgp4', 'requests==1.2.3'],
-    )
+    install_requires=[
+        'de421==2008.1',
+        'jplephem>=1.2',
+        'numpy',
+        'requests>=1.2.3',
+        'sgp4>=1.1',
+        ])
