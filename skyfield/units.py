@@ -9,4 +9,4 @@ class Distance(object):
         if name == 'km':
             self.km = self.AU * AU_KM
             return self.km
-        return super(Distance, self).__getattr__(name)
+        raise AttributeError('no attribute named %r' % (name,))

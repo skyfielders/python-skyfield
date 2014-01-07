@@ -24,9 +24,9 @@ class ICRS(object):
     """
     geocentric = True  # TODO: figure out what this meant and get rid of it
 
-    def __init__(self, position, velocity=None, jd=None):
+    def __init__(self, position_AU, velocity=None, jd=None):
         self.jd = jd
-        self.position = position
+        self.position = Distance(position_AU)
         self.velocity = velocity
 
     def __repr__(self):
@@ -43,18 +43,18 @@ class ICRS(object):
             velocity = None
         else:
             velocity = body.velocity - self.velocity
-        return ICRS(self.position - body.position, velocity, self.jd)
+        return ICRS(self.position.AU - body.position.AU, velocity, self.jd)
 
     def observe(self, body):
         return body.observe_from(self)
 
     def radec(self, epoch=None):
-        position = self.position
+        position_AU = self.position.AU
         if epoch is not None:
             # TODO: oughtn't we actually use `epoch`, instead of ignoring it?
-            position = einsum('ij...,j...->i...', self.jd.M, position)
-        d, dec, ra = to_polar(position)
-        return HourAngle(radians=ra), Angle(radians=dec), Distance(d)
+            position_AU = einsum('ij...,j...->i...', self.jd.M, position_AU)
+        r_AU, dec, ra = to_polar(position_AU)
+        return HourAngle(radians=ra), Angle(radians=dec), Distance(r_AU)
 
 class Topos(object):
 
@@ -77,9 +77,9 @@ class Topos(object):
     def __call__(self, jd):
         """Compute where this Earth location was in space on a given date."""
         e = self.ephemeris.earth(jd)
-        tpos, tvel = geocentric_position_and_velocity(self, jd)
-        t = ToposICRS(e.position + tpos, e.velocity + tvel, jd)
-        t.rGCRS = tpos
+        tpos_AU, tvel = geocentric_position_and_velocity(self, jd)
+        t = ToposICRS(e.position.AU + tpos_AU, e.velocity + tvel, jd)
+        t.rGCRS = tpos_AU
         t.vGCRS = tvel
         t.topos = self
         t.ephemeris = self.ephemeris
@@ -103,21 +103,21 @@ class Astrometric(ICRS):
     def apparent(self):
         """Return the corresponding apparent position."""
         jd = self.jd
-        position = self.position.copy()
+        position_AU = self.position.AU.copy()
         observer = self.observer
 
         if observer.geocentric:
             include_earth_deflection = array((False,))
         else:
             limb_angle, nadir_angle = compute_limb_angle(
-                position, observer.position)
+                position_AU, observer.position.AU)
             include_earth_deflection = limb_angle >= 0.8
 
-        add_deflection(position, observer.position, observer.ephemeris,
+        add_deflection(position_AU, observer.position.AU, observer.ephemeris,
                        jd.tdb, include_earth_deflection)
-        add_aberration(position, observer.velocity, self.lighttime)
+        add_aberration(position_AU, observer.velocity, self.lighttime)
 
-        a = Apparent(position, jd=jd)
+        a = Apparent(position_AU, jd=jd)
         a.observer = self.observer
         return a
 
@@ -167,31 +167,31 @@ class Apparent(ICRS):
         un = einsum('i...,ij...->j...', une, spin)
         uw = einsum('i...,ij...->j...', uwe, spin)
 
-        p = einsum('ij...,j...->i...', self.jd.M, self.position)
+        p = einsum('ij...,j...->i...', self.jd.M, self.position.AU)
 
         pz = dots(p, uz)
         pn = dots(p, un)
         pw = dots(p, uw)
 
-        position = array([pn, -pw, pz])
+        position_AU = array([pn, -pw, pz])
 
-        d, alt, az = to_polar(position)
-        return Angle(radians=alt), Angle(radians=az), Distance(d)
+        r_AU, alt, az = to_polar(position_AU)
+        return Angle(radians=alt), Angle(radians=az), Distance(r_AU)
 
 
-def to_polar(position):
+def to_polar(xyz):
     """Convert ``[x y z]`` into spherical coordinates ``(r, theta, phi)``.
 
     ``r`` - vector length
     ``theta`` - angle above (+) or below (-) the xy-plane
     ``phi`` - angle around the z-axis
 
-    The order of values in the tuple is intended to match ISO 31-11.
+    The order of the three return values is intended to match ISO 31-11.
 
     """
-    r = length_of(position)
-    theta = arcsin(position[2] / r)
-    phi = arctan2(-position[1], -position[0]) + pi
+    r = length_of(xyz)
+    theta = arcsin(xyz[2] / r)
+    phi = arctan2(-xyz[1], -xyz[0]) + pi
     return r, theta, phi
 
 def ITRF_to_GCRS(jd, rITRF):  # todo: velocity

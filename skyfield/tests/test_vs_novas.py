@@ -6,7 +6,7 @@ from numpy import array, einsum
 from skyfield import (positionlib, earthlib, framelib, nutationlib,
                       jpllib, precessionlib, starlib, timescales)
 
-from ..constants import ASEC2RAD, AU, AU_KM, DEG2RAD, T0
+from ..constants import ASEC2RAD, AU, DEG2RAD, T0
 from ..functions import length_of
 from ..timescales import JulianDate
 
@@ -138,7 +138,7 @@ def test_astro_planet(jd, planet_name_and_code):
     earth = de405.earth
     planet = getattr(de405, planet_name)
     e = earth(jd)
-    distance = length_of((e - planet(jd)).position)
+    distance = length_of((e - planet(jd)).position.AU)
     ra, dec, d = e.observe(planet).radec()
 
     eq(ra0, ra.hours(), 1e-3 * arcsecond_in_hours)
@@ -154,7 +154,7 @@ def test_virtual_planet(jd, planet_name_and_code):
     earth = de405.earth
     planet = getattr(de405, planet_name)
     e = earth(jd)
-    distance = length_of((e - planet(jd)).position)
+    distance = length_of((e - planet(jd)).position.AU)
     ra, dec, d = e.observe(planet).apparent().radec()
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
@@ -170,7 +170,7 @@ def test_app_planet(jd, planet_name_and_code):
     earth = de405.earth
     planet = getattr(de405, planet_name)
     e = earth(jd)
-    distance = length_of((e - planet(jd)).position)
+    distance = length_of((e - planet(jd)).position.AU)
     ra, dec, d = e.observe(planet).apparent().radec(epoch=jd)
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
@@ -190,7 +190,7 @@ def test_local_planet(jd, planet_name_and_code):
 
     planet = getattr(de405, planet_name)
     g = ggr(jd)
-    distance = length_of((g - planet(jd)).position)
+    distance = length_of((g - planet(jd)).position.AU)
     ra, dec, d = g.observe(planet).apparent().radec()
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
@@ -210,7 +210,7 @@ def test_topo_planet(jd, planet_name_and_code):
 
     planet = getattr(de405, planet_name)
     g = ggr(jd)
-    distance = length_of((g - planet(jd)).position)
+    distance = length_of((g - planet(jd)).position.AU)
     ra, dec, d = g.observe(planet).apparent().radec(epoch=jd)
 
     eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
@@ -237,7 +237,7 @@ def test_altaz(jd, planet_name_and_code):
 
     planet = getattr(de405, planet_name)
     g = ggr(jd)
-    distance = length_of((g - planet(jd)).position)
+    distance = length_of((g - planet(jd)).position.AU)
     alt, az, d = g.observe(planet).apparent().altaz()
 
     eq(az0, az.degrees(), 0.001 * arcsecond_in_degrees)

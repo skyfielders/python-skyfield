@@ -23,12 +23,12 @@ class Star(object):
     def observe_from(self, observer):
         position, velocity = self._position, self._velocity
         jd = observer.jd
-        dt = light_time_difference(position, observer.position)
+        dt = light_time_difference(position, observer.position.AU)
         if jd.shape:
             position = (outer(velocity, T0 - jd.tdb - dt).T + position).T
         else:
             position = position + velocity * (T0 - jd.tdb - dt)
-        vector = position - observer.position
+        vector = position - observer.position.AU
         distance = length_of(vector)
         lighttime = distance / C_AUDAY
 
