@@ -77,7 +77,8 @@ class Planet(object):
             raise ValueError('observe_from() light-travel time'
                              ' failed to converge')
 
-        g = Astrometric(vector, velocity - observer.velocity, observer.jd)
+        g = Astrometric(vector, velocity - observer.velocity.AU_per_d,
+                        observer.jd)
         g.observer = observer
         g.distance = euclidian_distance
         g.lighttime = lighttime

@@ -39,7 +39,8 @@ def observe_planet_from_geocenter(ut1, delta_t):
 
     yield observer.position.AU
     yield observer.position.km
-    yield observer.velocity
+    yield observer.velocity.AU_per_d
+    yield observer.velocity.km_per_s
     yield observer.jd.ut1
     yield observer.jd.tt
     yield observer.jd.tdb
@@ -47,7 +48,7 @@ def observe_planet_from_geocenter(ut1, delta_t):
     astrometric = observer.observe(mars)
 
     yield astrometric.position.AU
-    yield astrometric.velocity
+    yield astrometric.velocity.AU_per_d
 
     ra, dec, distance = astrometric.radec()
 
@@ -90,7 +91,7 @@ def observe_planet_from_topos(ut1, delta_t):
     observer = topos(jd)
 
     yield observer.position.AU
-    yield observer.velocity
+    yield observer.velocity.AU_per_d
     yield observer.jd.ut1
     yield observer.jd.tt
     yield observer.jd.tdb
@@ -98,7 +99,7 @@ def observe_planet_from_topos(ut1, delta_t):
     astrometric = observer.observe(mars)
 
     yield astrometric.position.AU
-    yield astrometric.velocity
+    yield astrometric.velocity.AU_per_d
 
     ra, dec, distance = astrometric.radec()
 
@@ -135,7 +136,7 @@ def compute_stellar_position(ut1, delta_t):
     astrometric = observer.observe(star)
 
     yield astrometric.position.AU
-    yield astrometric.velocity
+    yield astrometric.velocity.AU_per_d
 
     ra, dec, distance = astrometric.radec()
 

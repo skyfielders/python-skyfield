@@ -10,7 +10,7 @@ from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
 from .functions import dots
 from .relativity import add_aberration, add_deflection
 from .timescales import takes_julian_date
-from .units import Distance
+from .units import Distance, Velocity
 
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
 quarter_tau = 0.25 * TAU
@@ -24,10 +24,13 @@ class ICRS(object):
     """
     geocentric = True  # TODO: figure out what this meant and get rid of it
 
-    def __init__(self, position_AU, velocity=None, jd=None):
+    def __init__(self, position_AU, velocity_AU_per_d=None, jd=None):
         self.jd = jd
         self.position = Distance(position_AU)
-        self.velocity = velocity
+        if velocity_AU_per_d is None:
+            self.velocity = None
+        else:
+            self.velocity = Velocity(velocity_AU_per_d)
 
     def __repr__(self):
         return '<%s position x,y,z AU%s%s>' % (
@@ -39,11 +42,12 @@ class ICRS(object):
 
     def __sub__(self, body):
         """Subtract two ICRS vectors to produce a third."""
+        p = self.position.AU - body.position.AU
         if self.velocity is None or body.velocity is None:
-            velocity = None
+            v = None
         else:
-            velocity = body.velocity - self.velocity
-        return ICRS(self.position.AU - body.position.AU, velocity, self.jd)
+            v = body.velocity.AU_per_d - self.velocity.AU_per_d
+        return ICRS(p, v, self.jd)
 
     def observe(self, body):
         return body.observe_from(self)
@@ -77,10 +81,12 @@ class Topos(object):
     def __call__(self, jd):
         """Compute where this Earth location was in space on a given date."""
         e = self.ephemeris.earth(jd)
-        tpos_AU, tvel = geocentric_position_and_velocity(self, jd)
-        t = ToposICRS(e.position.AU + tpos_AU, e.velocity + tvel, jd)
+        tpos_AU, tvel_AU_per_d = geocentric_position_and_velocity(self, jd)
+        t = ToposICRS(e.position.AU + tpos_AU,
+                      e.velocity.AU_per_d + tvel_AU_per_d,
+                      jd)
         t.rGCRS = tpos_AU
-        t.vGCRS = tvel
+        t.vGCRS = tvel_AU_per_d
         t.topos = self
         t.ephemeris = self.ephemeris
         return t
@@ -115,7 +121,7 @@ class Astrometric(ICRS):
 
         add_deflection(position_AU, observer.position.AU, observer.ephemeris,
                        jd.tdb, include_earth_deflection)
-        add_aberration(position_AU, observer.velocity, self.lighttime)
+        add_aberration(position_AU, observer.velocity.AU_per_d, self.lighttime)
 
         a = Apparent(position_AU, jd=jd)
         a.observer = self.observer
