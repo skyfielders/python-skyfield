@@ -131,7 +131,10 @@ class JulianDate(object):
             self.tdb = tdb = tt + tdb_minus_tt(tt) * S_DAY
             return tdb
 
-        delta_t = self.delta_t
+        if name == 'ut1':
+            self.ut1 = ut1 = self.tt - self.delta_t / S_DAY
+            return ut1
+
         d = self.__dict__
         i = _sequence_indexes.get(name, None)
         if i is None:
@@ -142,31 +145,12 @@ class JulianDate(object):
         tdb = d.get('tdb')
         tt = d.get('tt')
         ut1 = d.get('ut1')
-        utc = d.get('utc')  # wrong! TT -(const)-> TAI -(leap secs)-> UTC?
 
         if i >= _TT:
             if (tt is None) and (tdb is not None):
                 self.tt = tt = tdb - tdb_minus_tt(tdb) * S_DAY
                 if i == _TT:
                     return tt
-
-            if i >= _UT1:
-                if (ut1 is None) and (tt is not None):
-                    self.ut1 = ut1 = tt - delta_t / S_DAY
-                    if i == _UT1:
-                        return ut1
-
-                if i == _UTC:
-                    if (ut1 is not None):
-                        die
-                        utc = self.utc = 6.7
-                        return utc
-
-        if (ut1 is None) and (utc is not None):
-            die
-            ut1 = self.ut1 = 3.4
-            if i == _UT1:
-                return ut1
 
         if (tt is None) and (ut1 is not None):
             self.tt = tt = ut1 + self.delta_t * S_DAY
