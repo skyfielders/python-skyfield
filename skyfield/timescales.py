@@ -126,6 +126,11 @@ class JulianDate(object):
 
         # Conversion between timescales.
 
+        if name == 'tdb':
+            tt = self.tt
+            self.tdb = tdb = tt + tdb_minus_tt(tt) * S_DAY
+            return tdb
+
         delta_t = self.delta_t
         d = self.__dict__
         i = _sequence_indexes.get(name, None)
@@ -168,8 +173,6 @@ class JulianDate(object):
             if i == _TT:
                 return tt
 
-        self.tdb = tdb = tt + tdb_minus_tt(tt) * S_DAY
-        return tdb
 
 def julian_date(year, month=1, day=1, hour=0.0, minute=0.0, second=0.0):
     janfeb = month < 3
