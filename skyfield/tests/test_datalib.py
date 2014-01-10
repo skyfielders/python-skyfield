@@ -1,4 +1,4 @@
-from skyfield.datalib import download_file, is_days_old
+from skyfield.io import download_file, is_days_old
 from datetime import datetime, timedelta
 import httpretty
 import os
