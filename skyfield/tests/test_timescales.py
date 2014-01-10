@@ -1,10 +1,10 @@
 from numpy import searchsorted
 from skyfield.constants import DAY_S
-from skyfield.io import Downloader
+from skyfield.io import Cache
 from skyfield.timescales import download_leapseconds, julian_date
 
 def test_leap_second():
-    downloader = Downloader('.', days_old=9999)
+    downloader = Cache('.', days_old=9999)
     leap_dates, leap_offsets = download_leapseconds(downloader)
 
     def from_utc_to_tai(year, month, day, hour, minute, second):

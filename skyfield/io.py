@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 
 
-class Downloader(object):
+class Cache(object):
     def __init__(self, cache_path, days_old=0):
         self.cache_path = cache_path
         self.days_old = days_old
