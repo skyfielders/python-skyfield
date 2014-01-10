@@ -201,3 +201,19 @@ def tdb_minus_tt(jd_tdb):
           + 0.000005 * sin (  52.9691 * t + 0.4444)
           + 0.000002 * sin (  21.3299 * t + 5.5431)
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
+
+def download_leapseconds(downloader):
+    """Download the current USNO table of leap seconds; return a NumPy array.
+
+    The returned array has shape ``(2, N)`` given ``N`` leap seconds in
+    the UNSO table, where array row zero holds Julian dates, and array
+    row one holds the TAI-UTC offset that went into effect at each date.
+
+    """
+    with downloader.get('http://maia.usno.navy.mil/ser7/leapsec.dat') as f:
+        lines = f.readlines()
+
+    fieldslist = [line.split() for line in lines]
+    utc_cutoffs = array([float(fields[4]) for fields in fieldslist])
+    utc_offsets = array([float(fields[6]) for fields in fieldslist])
+    return utc_cutoffs, utc_offsets
