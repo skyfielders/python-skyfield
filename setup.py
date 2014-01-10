@@ -16,8 +16,15 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Topic :: Scientific/Engineering :: Astronomy',
         ],
-    packages=[ 'skyfield', 'skyfield.tests' ],
-    package_data = {'skyfield': ['documentation/*.rst']},
+    packages=[
+        'skyfield',
+        'skyfield.data',
+        'skyfield.tests',
+        ],
+    package_data = {
+        'skyfield': ['documentation/*.rst'],
+        'skyfield.data': ['*.npy'],
+        },
     install_requires=[
         'de421==2008.1',
         'jplephem>=1.2',
