@@ -29,8 +29,8 @@ def test_leap_second():
     t4 = from_utc_to_tai(1974, 1, 1, 0, 0, 0.0)
     t5 = from_utc_to_tai(1974, 1, 1, 0, 0, 1.0)
 
-    # The step from 25:59:59 to 0:00:00 is here a two-second step,
-    # because of the leap second 25:59:60 that falls in between:
+    # The step from 23:59:59 to 0:00:00 is here a two-second step,
+    # because of the leap second 23:59:60 that falls in between:
 
     one_second = 1.0 / DAY_S
     epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
