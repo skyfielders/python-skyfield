@@ -4,8 +4,8 @@ from skyfield.io import Cache
 from skyfield.timescales import download_leapseconds, julian_date
 
 def test_leap_second():
-    downloader = Cache('.', days_old=9999)
-    leap_dates, leap_offsets = download_leapseconds(downloader)
+    cache = Cache('.', days_old=9999)
+    leap_dates, leap_offsets = cache.run(download_leapseconds)
 
     def from_utc_to_tai(year, month, day, hour, minute, second):
         j = julian_date(year, month, day, hour, minute, 0.0)

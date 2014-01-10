@@ -202,7 +202,7 @@ def tdb_minus_tt(jd_tdb):
           + 0.000002 * sin (  21.3299 * t + 5.5431)
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
 
-def download_leapseconds(downloader):
+def download_leapseconds(cache):
     """Download the USNO table of leap seconds; return two NumPy arrays.
 
     The two arrays returned are ``leap_dates`` and ``leap_offsets`` with
@@ -222,11 +222,11 @@ def download_leapseconds(downloader):
     to build the corresponding TAI time.
 
     """
-    with downloader.get('http://maia.usno.navy.mil/ser7/leapsec.dat') as f:
+    with cache.open_url('http://maia.usno.navy.mil/ser7/leapsec.dat') as f:
         lines = f.readlines()
 
     linefields = [line.split() for line in lines]
+    offsets = [float(fields[6]) for fields in linefields]
     leap_dates = array([float(fields[4]) for fields in linefields])
-    leap_offsets = [float(fields[6]) for fields in linefields]
-    leap_offsets = leap_offsets[0:1] + leap_offsets
+    leap_offsets = offsets[0:1] + offsets
     return leap_dates, leap_offsets
