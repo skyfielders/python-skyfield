@@ -114,11 +114,6 @@ class JulianDate(object):
         self.shape = self.tt.shape
         self.delta_t = delta_t
 
-    def dayrange(self, days, step=1.0):
-        """Return a JulianDate extending `days` into the future."""
-        cls = type(self)
-        return cls(ut1=arange(self.ut1, self.ut1 + days + step * 0.5, step))
-
     def utc_iso(self, places=0):
         if places:
             power_of_ten = 10 ** places
