@@ -132,11 +132,12 @@ class JulianDate(object):
         """Return UTC as (year, month, day, hour, minute, second.fraction).
 
         The `offset` is added to the UTC time before it is split into
-        its components for help with rounding.  If the result is going
-        to be displayed as seconds, for example, set `offset` to half a
-        second and then throw away the fraction; if the result is going
-        to be displayed as minutes, set `offset` to thirty seconds and
-        throw away the seconds altogether; and so forth.
+        its components.  This is useful if the user is going to round
+        the result before displaying it.  If the result is going to be
+        displayed as seconds, for example, set `offset` to half a second
+        and then throw away the fraction; if the result is going to be
+        displayed as minutes, set `offset` to thirty seconds and then
+        throw away the seconds; and so forth.
 
         """
         tai = self.tai + offset
@@ -144,9 +145,15 @@ class JulianDate(object):
         leap_reverse_dates = leap_dates + leap_offsets / DAY_S
         i = searchsorted(leap_reverse_dates, tai, 'right')
         j = tai - leap_offsets[i] / DAY_S
-        y, mon, d, h = cal_date(j)
-        h, hfrac = divmod(h, 1.0)
-        m, s = divmod(hfrac * 3600.0, 60.0)
+        whole, fraction = divmod(j + 0.5, 1.0)
+        whole = int(whole)
+        if j < leap_dates[i-1]:
+            y, mon, d = calendar_date(whole)
+            h, m, s = 23, 59, 60.0
+        else:
+            y, mon, d = calendar_date(whole)
+            h, hfrac = divmod(fraction * 24.0, 1.0)
+            m, s = divmod(hfrac * 3600.0, 60.0)
         self.utc = utc = (y, mon, d, h, m, s)
         return utc
 
@@ -236,6 +243,24 @@ def cal_date(jd):
     year = 100 * (n - 49) + m + k
 
     return year, month, day, hour
+
+def calendar_date(jd_integer):
+    """Convert Julian Day `jd_integer` into a Gregorian (year, month, day)."""
+
+    k = jd_integer + 68569
+    n = 4 * k // 146097
+
+    k = k - (146097 * n + 3) // 4
+    m = 4000 * (k + 1) // 1461001
+    k = k - 1461 * m // 4 + 31
+    month = 80 * k // 2447
+    day = k - 2447 * month // 80
+    k = month // 11
+
+    month = month + 2 - 12 * k
+    year = 100 * (n - 49) + m + k
+
+    return year, month, day
 
 def tdb_minus_tt(jd_tdb):
     """Computes TT corresponding to a TDB Julian date."""
