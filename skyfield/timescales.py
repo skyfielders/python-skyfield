@@ -158,7 +158,7 @@ class JulianDate(object):
         whole = int(whole)
         if i and j < leap_dates[i-1]:
             y, mon, d = calendar_date(whole)
-            h, m, s = 23, 59, 60.0
+            h, m, s = 23, 59, 60.0 + (fraction * DAY_S) % 1.0
         else:
             y, mon, d = calendar_date(whole)
             h, hfrac = divmod(fraction * 24.0, 1.0)
