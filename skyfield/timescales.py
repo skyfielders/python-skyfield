@@ -9,20 +9,22 @@ from .precessionlib import compute_precession
 # Much of the following code is adapted from the USNO's "novas.c".
 
 _half_second = 0.5 / DAY_S
-_sequence = ['tdb', 'tt', 'ut1', 'utc']
-_sequence_indexes = {name: i for i, name in enumerate(_sequence)}
 
 extra_documentation = """
 
-        This function takes a Julian date as argument. Either provide a
-        `jd=` keyword argument supplying a `JulianDate` if you already
-        have one, or supply a float or array of floats with one of the
-        following keyword arguments:
+        This routine takes a date as its argument.  You can either
+        provide a `jd=` keyword argument with a `JulianDate` you have
+        built yourself, or use one of these keyword arguments::
 
-        `tdb=` - Barycentric Dynamical Time
-        `tt=`  - Terrestrial Time
-        `ut1=` - Universal Time
-        `utc=` - Coordinated Universal Time
+            # Coordinated Universal Time
+            utc=(1973, 12, 29, 23, 59, 48.0)
+            utc=datetime(1973, 12, 29, 23, 59, 48.0)
+
+            # International Atomic Time
+            tai=2442046.5
+
+            # Terrestrial Time
+            tt=2442046.5
 
 """
 
