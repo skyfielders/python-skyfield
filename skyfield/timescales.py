@@ -147,7 +147,7 @@ class JulianDate(object):
         j = tai - leap_offsets[i] / DAY_S
         whole, fraction = divmod(j + 0.5, 1.0)
         whole = int(whole)
-        if j < leap_dates[i-1]:
+        if i and j < leap_dates[i-1]:
             y, mon, d = calendar_date(whole)
             h, m, s = 23, 59, 60.0
         else:

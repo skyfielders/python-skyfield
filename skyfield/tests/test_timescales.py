@@ -1,6 +1,14 @@
 from skyfield.constants import DAY_S
 from skyfield.timescales import JulianDate
 
+one_second = 1.0 / DAY_S
+epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
+
+def test_early_utc():
+    jd = JulianDate(utc=(1915, 12, 2, 3, 4, 5.6786786))
+    assert abs(jd.tt - 2420833.6283317441) < epsilon
+    assert jd.utc_iso() == '1915-12-02T03:04:06Z'
+
 def test_leap_second():
 
     # During 1973 the offset between UTC and TAI was 12.0 seconds, so
@@ -23,9 +31,6 @@ def test_leap_second():
     # The step from 23:59:59 to 0:00:00 is here a two-second step,
     # because of the leap second 23:59:60 that falls in between:
 
-    one_second = 1.0 / DAY_S
-    epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
-
     assert abs(t4 - t2 - 2.0 * one_second) < epsilon
 
     # Thus, the five dates given above are all one second apart:
@@ -35,8 +40,9 @@ def test_leap_second():
     assert abs(t4 - t3 - one_second) < epsilon
     assert abs(t5 - t4 - one_second) < epsilon
 
-    # And all five Julian dates can be converted back to UTC.
+    # And all these dates can be converted back to UTC.
 
+    assert JulianDate(tai=t0).utc_iso() == '1973-12-31T23:59:48Z'
     assert JulianDate(tai=t1).utc_iso() == '1973-12-31T23:59:58Z'
     assert JulianDate(tai=t2).utc_iso() == '1973-12-31T23:59:59Z'
     assert JulianDate(tai=t3).utc_iso() == '1973-12-31T23:59:60Z'
