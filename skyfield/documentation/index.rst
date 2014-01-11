@@ -13,32 +13,34 @@
        @classmethod
        def now(cls):
            """Return a constant "now"."""
-           return dtmodule.datetime(2013, 9, 22, 14)
-   dtmodule.datetime = datetime
+           return api.datetime(2013, 9, 22, 14)
+   from skyfield import api
+   api.datetime = datetime
 
 .. testcode::
 
-   from datetime import datetime
-   from skyfield.planets import earth, mars
-   a = earth(datetime.now()).observe(mars).apparent()
-   print('RA=%s Dec=%s' % (a.ra.hstr(), a.dec.dstr()))
+    from skyfield.api import datetime, earth, mars
+    now = datetime.now()
+    ra, dec, d = earth(utc=now).observe(mars).radec()
+    print(ra)
+    print(dec)
 
 .. testoutput::
 
-   RA=9h 15m 35.818s Dec=17deg 9m 32.622s
+    9h 14m 50.346s
+    17deg 13' 2.583"
 
 .. testcode::
 
-   from skyfield.planets import earth, mars
-   from skyfield.timescales import julian_date
-   boston = earth.topos('71.0636 W', '42.3583 N')
-   j = julian_date(2013, 9, 22, 14.0)
-   h = boston(tt=j).observe(mars).apparent().horizontal()
-   print('Alt=%s Az=%s' % (h.alt.dstr(), h.az.dstr()))
+    boston = earth.topos('71.0636 W', '42.3583 N')
+    alt, az, d = boston(utc=now).observe(mars).apparent().altaz()
+    print(alt)
+    print(az)
 
 .. testoutput::
 
-   Alt=64deg 45m 42.248s Az=183deg 39m 40.219s
+    64deg 44' 50.083"
+    184deg 17' 16.943"
 
 .. toctree::
    :maxdepth: 2

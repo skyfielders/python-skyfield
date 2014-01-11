@@ -58,11 +58,7 @@ class BaseAngle(object):
     def dstr(self):
         sgn, d, m, s = sexa(self.degrees())
         sign = '-' if sgn < 0.0 else ''
-        return '{}{}deg {}m {:.3f}s'.format(sign, int(d), int(m), float(s))
-
-    def dpretty(self):
-        d, m, s = self.dms()
-        return '{}°{}´{}´´'.format(int(d), int(m), float(s))
+        return '{}{}deg {}\' {:.3f}"'.format(sign, int(d), int(m), float(s))
 
     hours_anyway = hours
     hms_anyway = hms
@@ -82,6 +78,8 @@ class WrongUnitError(ValueError):
 
 class Angle(BaseAngle):
 
+    __str__ = BaseAngle.dstr
+
     # Protect naive users from accidentally calling hour methods.
 
     def hours(self):
@@ -95,8 +93,7 @@ class Angle(BaseAngle):
 
 class HourAngle(BaseAngle):
 
-    def __format__(self, format_spec):
-        return self.hstr()
+    __str__ = BaseAngle.hstr
 
     # Protect naive users from accidentally calling degree methods.
 

@@ -6,6 +6,7 @@ default JPL planetary ephemeris ``de421`` and create planet objects like
 
 """
 import de421
+from datetime import datetime
 from .jpllib import Ephemeris
 
 ephemeris = Ephemeris(de421)
