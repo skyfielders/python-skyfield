@@ -9,6 +9,22 @@ def test_early_utc():
     assert abs(jd.tt - 2420833.6283317441) < epsilon
     assert jd.utc_iso() == '1915-12-02T03:04:06Z'
 
+def test_iso_decimal_that_rounds_up():
+    jd = JulianDate(utc=(1915, 12, 2, 3, 4, 5.6786786))
+    assert jd.utc_iso(digits=0) == '1915-12-02T03:04:06Z'
+    assert jd.utc_iso(digits=1) == '1915-12-02T03:04:05.7Z'
+    assert jd.utc_iso(digits=2) == '1915-12-02T03:04:05.68Z'
+    assert jd.utc_iso(digits=3) == '1915-12-02T03:04:05.679Z'
+    assert jd.utc_iso(digits=4) == '1915-12-02T03:04:05.6787Z'
+
+def test_iso_decimal_that_rounds_down():
+    jd = JulianDate(utc=(2014, 12, 21, 6, 3, 1.234234))
+    assert jd.utc_iso(digits=0) == '2014-12-21T06:03:01Z'
+    assert jd.utc_iso(digits=1) == '2014-12-21T06:03:01.2Z'
+    assert jd.utc_iso(digits=2) == '2014-12-21T06:03:01.23Z'
+    assert jd.utc_iso(digits=3) == '2014-12-21T06:03:01.234Z'
+    assert jd.utc_iso(digits=4) == '2014-12-21T06:03:01.2342Z'
+
 def test_leap_second():
 
     # During 1973 the offset between UTC and TAI was 12.0 seconds, so

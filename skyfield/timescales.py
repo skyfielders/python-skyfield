@@ -119,8 +119,17 @@ class JulianDate(object):
         cls = type(self)
         return cls(ut1=arange(self.ut1, self.ut1 + days + step * 0.5, step))
 
-    def utc_iso(self):
-        return self.utc_strftime('%Y-%m-%dT%H:%M:%SZ')
+    def utc_iso(self, digits=0):
+        if digits:
+            power_of_ten = 10 ** digits
+            offset = _half_second / power_of_ten
+            y, m, d, H, M, S = self._utc(offset)
+            S, F = divmod(S, 1.0)
+            return '%04d-%02d-%02dT%02d:%02d:%02d.%0*dZ' % (
+                y, m, d, H, M, S, digits, F * power_of_ten)
+        else:
+            tup = self._utc(_half_second)
+            return '%04d-%02d-%02dT%02d:%02d:%02dZ' % tup
 
     def utc_strftime(self, format):
         tup = self._utc(_half_second)
