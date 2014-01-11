@@ -1,5 +1,6 @@
 from datetime import datetime
 from numpy import arange, array, einsum, rollaxis, searchsorted, sin
+from time import strftime
 from .constants import T0, DAY_S
 from .framelib import ICRS_to_J2000 as B
 from .nutationlib import compute_nutation
@@ -7,6 +8,7 @@ from .precessionlib import compute_precession
 
 # Much of the following code is adapted from the USNO's "novas.c".
 
+_half_second = 0.5 / DAY_S
 _sequence = ['tdb', 'tt', 'ut1', 'utc']
 _sequence_indexes = {name: i for i, name in enumerate(_sequence)}
 
@@ -75,42 +77,78 @@ class JulianDate(object):
     def __init__(self, utc=None, tai=None, tt=None, delta_t=0.0, cache=None):
 
         self.delta_t = _to_array(delta_t)
+
         if cache is None:
             from skyfield.data import cache
+        self.cache = cache
 
-        if (tai is None) and (utc is not None):
-            leap_dates, leap_offsets = cache.run(usno_leapseconds)
+        if utc is not None:
+            self.utc = utc
+            if tai is None:
+                leap_dates, leap_offsets = cache.run(usno_leapseconds)
 
-            if isinstance(utc, datetime):
-                year = utc.year
-                month = utc.month
-                day = utc.day
-                hour = utc.hour
-                minute = utc.minute
-                second = utc.second + utc.microsecond * 1e-6
-            else:
-                year, month, day, hour, minute, second = utc
+                if isinstance(utc, datetime):
+                    year = utc.year
+                    month = utc.month
+                    day = utc.day
+                    hour = utc.hour
+                    minute = utc.minute
+                    second = utc.second + utc.microsecond * 1e-6
+                else:
+                    year, month, day, hour, minute, second = utc
 
-            j = julian_date(year, month, day, hour, minute, 0.0)
-            i = searchsorted(leap_dates, j, 'right')
-            tai = j + (second + leap_offsets[i]) / DAY_S
+                j = julian_date(year, month, day, hour, minute, 0.0)
+                i = searchsorted(leap_dates, j, 'right')
+                tai = j + (second + leap_offsets[i]) / DAY_S
 
-        if (tt is None) and (tai is not None):
-            tt = tai + tt_minus_tai
+        if tai is not None:
+            self.tai = _to_array(tai)
+            if tt is None:
+                tt = tai + tt_minus_tai
 
-        self.utc = utc
-        self.tai = _to_array(tai)
+        if tt is None:
+            raise ValueError('you must supply either utc, tai, or tt when'
+                             ' building a JulianDate')
+
         self.tt = _to_array(tt)
         self.shape = self.tt.shape
         self.delta_t = delta_t
-
-        if not self.__dict__:
-            raise ValueError('you must supply either tdb= tt= ut1= or utc=')
 
     def dayrange(self, days, step=1.0):
         """Return a JulianDate extending `days` into the future."""
         cls = type(self)
         return cls(ut1=arange(self.ut1, self.ut1 + days + step * 0.5, step))
+
+    def utc_iso(self):
+        return self.utc_strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    def utc_strftime(self, format):
+        tup = self._utc(_half_second)
+        y, mon, d, h, m, s = tup
+        tup = (int(y), int(mon), int(d), int(h), int(m), int(s), 0, 0, 0)
+        return strftime(format, tup)
+
+    def _utc(self, offset=0.0):
+        """Return UTC as (year, month, day, hour, minute, second.fraction).
+
+        The `offset` is added to the UTC time before it is split into
+        its components for help with rounding.  If the result is going
+        to be displayed as seconds, for example, set `offset` to half a
+        second and then throw away the fraction; if the result is going
+        to be displayed as minutes, set `offset` to thirty seconds and
+        throw away the seconds altogether; and so forth.
+
+        """
+        tai = self.tai + offset
+        leap_dates, leap_offsets = self.cache.run(usno_leapseconds)
+        leap_reverse_dates = leap_dates + leap_offsets / DAY_S
+        i = searchsorted(leap_reverse_dates, tai, 'right')
+        j = tai - leap_offsets[i] / DAY_S
+        y, mon, d, h = cal_date(j)
+        h, hfrac = divmod(h, 1.0)
+        m, s = divmod(hfrac * 3600.0, 60.0)
+        self.utc = utc = (y, mon, d, h, m, s)
+        return utc
 
     def __getattr__(self, name):
 
@@ -141,6 +179,22 @@ class JulianDate(object):
             return MT
 
         # Conversion between timescales.
+
+        if name == 'tai':
+            self.tai = tai = self.tt - tt_minus_tai
+            return tai
+
+        if name == 'utc':
+            tai = self.tai
+            leap_dates, leap_offsets = self.cache.run(usno_leapseconds)
+            leap_reverse_dates = leap_dates + leap_offsets / DAY_S
+            i = searchsorted(leap_reverse_dates, tai, 'right')
+            j = tai - leap_offsets[i] / DAY_S
+            y, mon, d, h = cal_date(j)
+            h, hfrac = divmod(h, 1.0)
+            m, s = divmod(hfrac * 3600.0, 60.0)
+            self.utc = utc = (y, mon, d, h, m, s)
+            return utc
 
         if name == 'tdb':
             tt = self.tt

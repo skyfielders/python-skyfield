@@ -34,3 +34,11 @@ def test_leap_second():
     assert abs(t3 - t2 - one_second) < epsilon
     assert abs(t4 - t3 - one_second) < epsilon
     assert abs(t5 - t4 - one_second) < epsilon
+
+    # And all five Julian dates can be converted back to UTC.
+
+    assert JulianDate(tai=t1).utc_iso() == '1973-12-31T23:59:58Z'
+    assert JulianDate(tai=t2).utc_iso() == '1973-12-31T23:59:59Z'
+    #assert JulianDate(tai=t3).utc_iso() == '1973-12-31T23:59:60Z'
+    assert JulianDate(tai=t4).utc_iso() == '1974-01-01T00:00:00Z'
+    assert JulianDate(tai=t5).utc_iso() == '1974-01-01T00:00:01Z'
