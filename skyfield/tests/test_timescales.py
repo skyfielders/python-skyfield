@@ -59,6 +59,34 @@ def test_iso_of_leap_second_with_fraction():
     assert jd.utc_iso(places=3) == '1973-12-31T23:59:60.123Z'
     assert jd.utc_iso(places=4) == '1973-12-31T23:59:60.1235Z'
 
+def test_iso_of_array_showing_whole_seconds():
+    jd = JulianDate(utc=(1973, 12, 31, 23, 59, np.arange(58.75, 63.1, 0.5)))
+    assert jd.utc_iso(places=0) == [
+        '1973-12-31T23:59:59Z',
+        '1973-12-31T23:59:59Z',
+        '1973-12-31T23:59:60Z',
+        '1973-12-31T23:59:60Z',
+        '1974-01-01T00:00:00Z',
+        '1974-01-01T00:00:00Z',
+        '1974-01-01T00:00:01Z',
+        '1974-01-01T00:00:01Z',
+        '1974-01-01T00:00:02Z',
+        ]
+
+def test_iso_of_array_showing_fractions():
+    jd = JulianDate(utc=(1973, 12, 31, 23, 59, np.arange(58.75, 63.1, 0.5)))
+    assert jd.utc_iso(places=2) == [
+        '1973-12-31T23:59:58.75Z',
+        '1973-12-31T23:59:59.25Z',
+        '1973-12-31T23:59:59.75Z',
+        '1973-12-31T23:59:60.25Z',
+        '1973-12-31T23:59:60.75Z',
+        '1974-01-01T00:00:00.25Z',
+        '1974-01-01T00:00:00.75Z',
+        '1974-01-01T00:00:01.25Z',
+        '1974-01-01T00:00:01.75Z',
+        ]
+
 def test_leap_second():
 
     # During 1973 the offset between UTC and TAI was 12.0 seconds, so

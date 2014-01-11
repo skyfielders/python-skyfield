@@ -1,5 +1,5 @@
 from datetime import datetime
-from numpy import array, einsum, rollaxis, searchsorted, sin
+from numpy import array, einsum, rollaxis, searchsorted, sin, where
 from time import strftime
 from .constants import T0, DAY_S
 from .framelib import ICRS_to_J2000 as B
@@ -117,11 +117,16 @@ class JulianDate(object):
             offset = _half_second / power_of_ten
             y, m, d, H, M, S = self._utc(offset)
             S, F = divmod(S, 1.0)
-            return '%04d-%02d-%02dT%02d:%02d:%02d.%0*dZ' % (
-                y, m, d, H, M, S, places, F * power_of_ten)
+            format = '%%04d-%%02d-%%02dT%%02d:%%02d:%%02d.%%0%ddZ' % places
+            args = (y, m, d, H, M, S, F * power_of_ten)
         else:
-            tup = self._utc(_half_second)
-            return '%04d-%02d-%02dT%02d:%02d:%02dZ' % tup
+            format = '%04d-%02d-%02dT%02d:%02d:%02dZ'
+            args = self._utc(_half_second)
+
+        if self.shape:
+            return [format % tup for tup in zip(*args)]
+        else:
+            return format % args
 
     def utc_strftime(self, format):
         tup = self._utc(_half_second)
@@ -147,14 +152,12 @@ class JulianDate(object):
         i = searchsorted(leap_reverse_dates, tai, 'right')
         j = tai - leap_offsets[i] / DAY_S
         whole, fraction = divmod(j + 0.5, 1.0)
-        whole = int(whole)
-        if i and j < leap_dates[i-1]:
-            y, mon, d = calendar_date(whole)
-            h, m, s = 23, 59, 60.0 + (fraction * DAY_S) % 1.0
-        else:
-            y, mon, d = calendar_date(whole)
-            h, hfrac = divmod(fraction * 24.0, 1.0)
-            m, s = divmod(hfrac * 3600.0, 60.0)
+        whole = whole.astype(int)
+        y, mon, d = calendar_date(whole)
+        h, hfrac = divmod(fraction * 24.0, 1.0)
+        m, s = divmod(hfrac * 3600.0, 60.0)
+        is_leap_second = j < leap_dates[i-1]
+        s += is_leap_second
         self.utc = utc = (y, mon, d, h, m, s)
         return utc
 
@@ -302,8 +305,11 @@ def usno_leapseconds(cache):
     dates = [float(fields[4]) for fields in linefields]
     offsets = [float(fields[6]) for fields in linefields]
 
+    dates.insert(0, float('-inf'))
     dates.append(float('inf'))
+
     offsets.insert(0, offsets[0])
+    offsets.insert(1, offsets[0])
 
     return array([dates, offsets])
 
