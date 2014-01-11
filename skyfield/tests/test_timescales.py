@@ -1,15 +1,7 @@
-from numpy import searchsorted
 from skyfield.constants import DAY_S
-from skyfield.data import cache
-from skyfield.timescales import usno_leapseconds, julian_date
+from skyfield.timescales import JulianDate
 
 def test_leap_second():
-    leap_dates, leap_offsets = cache.run(usno_leapseconds)
-
-    def from_utc_to_tai(year, month, day, hour, minute, second):
-        j = julian_date(year, month, day, hour, minute, 0.0)
-        i = searchsorted(leap_dates, j, 'right')
-        return j + (second + leap_offsets[i]) / DAY_S
 
     # During 1973 the offset between UTC and TAI was 12.0 seconds, so
     # TAI should reach the first moment of 1974 while the UTC clock is
@@ -17,16 +9,16 @@ def test_leap_second():
     # fraction 0.5 can be precisely represented in floating point, so we
     # can use a bare `==` in this assert:
 
-    t0 = from_utc_to_tai(1973, 12, 31, 23, 59, 48.0)
+    t0 = JulianDate(utc=(1973, 12, 31, 23, 59, 48.0)).tai
     assert t0 == 2442048.5
 
     # Here are some more interesting values:
 
-    t1 = from_utc_to_tai(1973, 12, 31, 23, 59, 58.0)
-    t2 = from_utc_to_tai(1973, 12, 31, 23, 59, 59.0)
-    t3 = from_utc_to_tai(1973, 12, 31, 23, 59, 60.0)
-    t4 = from_utc_to_tai(1974, 1, 1, 0, 0, 0.0)
-    t5 = from_utc_to_tai(1974, 1, 1, 0, 0, 1.0)
+    t1 = JulianDate(utc=(1973, 12, 31, 23, 59, 58.0)).tai
+    t2 = JulianDate(utc=(1973, 12, 31, 23, 59, 59.0)).tai
+    t3 = JulianDate(utc=(1973, 12, 31, 23, 59, 60.0)).tai
+    t4 = JulianDate(utc=(1974, 1, 1, 0, 0, 0.0)).tai
+    t5 = JulianDate(utc=(1974, 1, 1, 0, 0, 1.0)).tai
 
     # The step from 23:59:59 to 0:00:00 is here a two-second step,
     # because of the leap second 23:59:60 that falls in between:

@@ -1,5 +1,5 @@
-from numpy import arange, array, einsum, rollaxis, sin
-from .constants import T0, S_DAY
+from numpy import arange, array, einsum, rollaxis, searchsorted, sin
+from .constants import T0, S_DAY, DAY_S
 from .framelib import ICRS_to_J2000 as B
 from .nutationlib import compute_nutation
 from .precessionlib import compute_precession
@@ -32,11 +32,11 @@ def takes_julian_date(function):
     that the JulianDate constructor itself supports.
 
     """
-    def wrapper(self, jd=None, tdb=None, tt=None, ut1=None, utc=None,
-                delta_t=0.0):
-        if not isinstance(jd, JulianDate):
-            jd = JulianDate(jd=jd, tdb=tdb, tt=tt, ut1=ut1, utc=utc,
-                            delta_t=delta_t)
+    def wrapper(self, jd=None, utc=None, tai=None, tt=None,
+                delta_t=0.0, cache=None):
+        if jd is None:
+            jd = JulianDate(utc=utc, tai=tai, tt=tt,
+                            delta_t=delta_t, cache=cache)
         else:
             pass  # TODO: verify that they provided a JulianDate instance
         return function(self, jd)
@@ -68,25 +68,27 @@ class JulianDate(object):
     `utc` - Coordinated Universal Time
 
     """
-    def __init__(self, jd=None, tdb=None, tt=None, ut1=None,
-                 utc=None, delta_t=0.0):
+    def __init__(self, utc=None, tai=None, tt=None, delta_t=0.0, cache=None):
 
         self.delta_t, ignored_shape = _convert(delta_t)
+        if cache is None:
+            from skyfield.data import cache
 
-        if jd is not None:
-            # TODO: we should actually presume that datetime's are utc
-            #assert isinstance(jd, datetime)
-            dt = jd
-            tdb = julian_date(dt.year, dt.month, dt.day, dt.hour,
-                              dt.minute, dt.second + dt.microsecond * 1e-6)
-        if tdb is not None:
-            self.tdb, self.shape = _convert(tdb)
-        if tt is not None:
-            self.tt, self.shape = _convert(tt)
-        if ut1 is not None:
-            self.ut1, self.shape = _convert(ut1)
-        if utc is not None:
-            self.utc, self.shape = _convert(utc)
+        if (tai is None) and (utc is not None):
+            leap_dates, leap_offsets = cache.run(usno_leapseconds)
+            year, month, day, hour, minute, second = utc
+            j = julian_date(year, month, day, hour, minute, 0.0)
+            i = searchsorted(leap_dates, j, 'right')
+            tai = j + (second + leap_offsets[i]) / DAY_S
+
+        if (tt is None) and (tai is not None):
+            tt = tai + 32.184 / DAY_S
+
+        self.utc = utc
+        self.tai = tai
+        self.tt = tt
+        self.shape = tt.shape
+        self.delta_t = delta_t
 
         if not self.__dict__:
             raise ValueError('you must supply either tdb= tt= ut1= or utc=')
@@ -135,27 +137,7 @@ class JulianDate(object):
             self.ut1 = ut1 = self.tt - self.delta_t / S_DAY
             return ut1
 
-        d = self.__dict__
-        i = _sequence_indexes.get(name, None)
-        if i is None:
-            raise AttributeError('no such attribute {!r}'.format(name))
-
-        _TDB, _TT, _UT1, _UTC = (0, 1, 2, 3)
-
-        tdb = d.get('tdb')
-        tt = d.get('tt')
-        ut1 = d.get('ut1')
-
-        if i >= _TT:
-            if (tt is None) and (tdb is not None):
-                self.tt = tt = tdb - tdb_minus_tt(tdb) * S_DAY
-                if i == _TT:
-                    return tt
-
-        if (tt is None) and (ut1 is not None):
-            self.tt = tt = ut1 + self.delta_t * S_DAY
-            if i == _TT:
-                return tt
+        raise AttributeError('no such attribute %r' % name)
 
 
 def julian_date(year, month=1, day=1, hour=0.0, minute=0.0, second=0.0):

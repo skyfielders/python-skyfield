@@ -22,8 +22,8 @@ dates = array([
 
 deltas = array([39.707, 63.8285, 66.8779, 72.])
 
-def compute_times_and_equinox_matrices(ut1, delta_t):
-    jd = JulianDate(ut1=ut1, delta_t=delta_t)
+def compute_times_and_equinox_matrices(tt, delta_t):
+    jd = JulianDate(tt=tt, delta_t=delta_t)
 
     yield jd.ut1
     yield jd.tt
@@ -33,8 +33,8 @@ def compute_times_and_equinox_matrices(ut1, delta_t):
     yield jd.N
     yield jd.M
 
-def observe_planet_from_geocenter(ut1, delta_t):
-    jd = JulianDate(ut1=ut1, delta_t=delta_t)
+def observe_planet_from_geocenter(tt, delta_t):
+    jd = JulianDate(tt=tt, delta_t=delta_t)
     observer = earth(jd)
 
     yield observer.position.AU
@@ -79,8 +79,8 @@ def observe_planet_from_geocenter(ut1, delta_t):
     yield dec.degrees()
     yield distance.AU
 
-def observe_planet_from_topos(ut1, delta_t):
-    jd = JulianDate(ut1=ut1, delta_t=delta_t)
+def observe_planet_from_topos(tt, delta_t):
+    jd = JulianDate(tt=tt, delta_t=delta_t)
 
     yield jd.ut1
     yield jd.tt
@@ -130,9 +130,9 @@ def observe_planet_from_topos(ut1, delta_t):
     yield dec.degrees()
     yield distance.AU
 
-def compute_stellar_position(ut1, delta_t):
+def compute_stellar_position(tt, delta_t):
     star = starlib.Star(ra=1.59132070233, dec=8.5958876464)
-    observer = earth(ut1=ut1, delta_t=delta_t)
+    observer = earth(tt=tt, delta_t=delta_t)
     astrometric = observer.observe(star)
 
     yield astrometric.position.AU
