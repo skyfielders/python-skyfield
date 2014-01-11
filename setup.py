@@ -23,7 +23,7 @@ setup(
         ],
     package_data = {
         'skyfield': ['documentation/*.rst'],
-        'skyfield.data': ['*.npy'],
+        'skyfield.data': ['*.npy', '*.txt'],
         },
     install_requires=[
         'de421==2008.1',
