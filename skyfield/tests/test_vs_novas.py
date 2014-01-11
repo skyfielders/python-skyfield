@@ -69,10 +69,10 @@ planet_codes = {
 # Fixtures.
 
 @pytest.fixture(params=[
-    {'ut1': T0, 'delta_t': D0},
-    {'ut1': TA, 'delta_t': DA},
-    {'ut1': TB, 'delta_t': DB},
-    {'ut1': TC, 'delta_t': DC},
+    {'tt': T0, 'delta_t': D0},
+    {'tt': TA, 'delta_t': DA},
+    {'tt': TB, 'delta_t': DB},
+    {'tt': TC, 'delta_t': DC},
     ])
 def jd(request):
     # Build a new JulianDate each time, because some test cases need to
