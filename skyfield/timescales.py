@@ -88,18 +88,13 @@ class JulianDate(object):
                 leap_dates, leap_offsets = cache.run(usno_leapseconds)
 
                 if isinstance(utc, datetime):
-                    year = utc.year
-                    month = utc.month
-                    day = utc.day
-                    hour = utc.hour
-                    minute = utc.minute
-                    second = utc.second + utc.microsecond * 1e-6
+                    tai = _utc_datetime_to_tai(leap_dates, leap_offsets, utc)
+                elif isinstance(utc, tuple):
+                    tai = _utc_to_tai(leap_dates, leap_offsets, *utc)
                 else:
-                    year, month, day, hour, minute, second = utc
-
-                j = julian_date(year, month, day, hour, minute, 0.0)
-                i = searchsorted(leap_dates, j, 'right')
-                tai = j + (second + leap_offsets[i]) / DAY_S
+                    tai = array([
+                        _utc_datetime_to_tai(leap_dates, leap_offsets, dt)
+                        for dt in utc])
 
         if tai is not None:
             self.tai = _to_array(tai)
@@ -309,3 +304,13 @@ def usno_leapseconds(cache):
     offsets.insert(0, offsets[0])
 
     return array([dates, offsets])
+
+def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
+    return _utc_to_tai(leap_dates, leap_offsets, dt.year, dt.month, dt.day,
+                       dt.hour, dt.minute, dt.second + dt.microsecond * 1e-6)
+
+def _utc_to_tai(leap_dates, leap_offsets, year, month=1, day=1,
+                hour=0, minute=0, second=0.0):
+    j = julian_date(year, month, day, hour, minute, 0.0)
+    i = searchsorted(leap_dates, j, 'right')
+    return j + (second + leap_offsets[i]) / DAY_S
