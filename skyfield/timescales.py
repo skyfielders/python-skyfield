@@ -1,5 +1,5 @@
 from datetime import datetime
-from numpy import array, einsum, rollaxis, searchsorted, sin, where, zeros_like
+from numpy import array, einsum, rollaxis, searchsorted, sin, zeros_like
 from time import strftime
 from .constants import T0, DAY_S
 from .framelib import ICRS_to_J2000 as B
