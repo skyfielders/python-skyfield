@@ -1,5 +1,5 @@
 from datetime import datetime
-from numpy import array, einsum, rollaxis, searchsorted, sin, where
+from numpy import array, einsum, rollaxis, searchsorted, sin, where, zeros_like
 from time import strftime
 from .constants import T0, DAY_S
 from .framelib import ICRS_to_J2000 as B
@@ -131,8 +131,14 @@ class JulianDate(object):
     def utc_strftime(self, format):
         tup = self._utc(_half_second)
         y, mon, d, h, m, s = tup
-        tup = (int(y), int(mon), int(d), int(h), int(m), int(s), 0, 0, 0)
-        return strftime(format, tup)
+        zero = zeros_like(y)
+        tup = (y.astype(int), mon.astype(int), d.astype(int),
+               h.astype(int), m.astype(int), s.astype(int),
+               zero, zero, zero)
+        if self.shape:
+            return [strftime(format, item) for item in zip(*tup)]
+        else:
+            return strftime(format, tup)
 
     def _utc(self, offset=0.0):
         """Return UTC as (year, month, day, hour, minute, second.fraction).

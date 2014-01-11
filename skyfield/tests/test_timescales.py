@@ -87,6 +87,18 @@ def test_iso_of_array_showing_fractions():
         '1974-01-01T00:00:01.75Z',
         ]
 
+def test_stftime_of_single_date():
+    jd = JulianDate(utc=(1973, 12, 31, 23, 59, 60))
+    assert jd.utc_strftime('%Y %m %d %H %M %S') == '1973 12 31 23 59 60'
+
+def test_stftime_of_date_array():
+    jd = JulianDate(utc=(1973, 12, 31, 23, 59, np.arange(59.0, 61.1, 1.0)))
+    assert jd.utc_strftime('%Y %m %d %H %M %S') == [
+        '1973 12 31 23 59 59',
+        '1973 12 31 23 59 60',
+        '1974 01 01 00 00 00',
+        ]
+
 def test_leap_second():
 
     # During 1973 the offset between UTC and TAI was 12.0 seconds, so
