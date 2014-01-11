@@ -1,7 +1,7 @@
 import requests
 import os
 from datetime import datetime, timedelta
-from numpy import load, save
+from numpy import load
 
 _missing = object()
 
@@ -9,8 +9,8 @@ class Cache(object):
     def __init__(self, cache_path, days_old=0):
         self.cache_path = cache_path
         self.days_old = days_old
-        self.results = {}
-        self.npy_files = {}
+        self.ram_cache = {}
+        self.npy_dirname = None
 
     def open_url(self, url, days_old=None):
         filename = url[url.rindex('/') + 1:]
@@ -27,25 +27,22 @@ class Cache(object):
         return value of its first run is returned without re-running it.
 
         """
-        result = self.results.get(function, _missing)
-        if result is _missing:
-            tup = self.npy_files.get(function)
-            if tup is None or False:
-                result = function(self)
-            else:
-                filenames = tup[1]
-                result = tuple(load(os.path.join(self.npy_directory, filename))
-                               for filename in filenames)
-            self.results[function] = result
+        result = self.ram_cache.get(function, _missing)
+        if result is not _missing:
+            return result
+
+        if self.npy_dirname:
+            path = os.path.join(self.npy_dirname, function.__name__ + '.npy')
+            if os.path.exists(path):
+                # TODO: check whether data is recent enough
+                result = load(path)
+                self.ram_cache[function] = result
+                return result
+
+        result = function(self)
+        self.ram_cache[function] = result
         return result
 
-    def rebuild_npy_files(self):
-        """Rebuild all of our ``.npy`` files."""
-        for function, (date, npy_filenames) in self.npy_files.items():
-            arrays = function(self)
-            for filename, array in zip(npy_filenames, arrays):
-                path = os.path.join(self.npy_directory, filename)
-                save(path, array)
 
 def download_file(url, filename, days_old=0):
     if os.path.exists(filename):

@@ -202,23 +202,20 @@ def tdb_minus_tt(jd_tdb):
           + 0.000002 * sin (  21.3299 * t + 5.5431)
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
 
-def download_leapseconds(cache):
-    """Download the USNO table of leap seconds; return two NumPy arrays.
+def usno_leapseconds(cache):
+    """Download the USNO table of leap seconds as a ``(2, N+1)`` NumPy array.
 
-    The two arrays returned are ``leap_dates`` and ``leap_offsets`` with
-    shapes ``(N,)`` and ``(N+1,)`` given ``N`` entries in the current
-    USNO table.  The first ``leap_dates`` array is intended to be used
-    with NumPy to find where a given date ``jd`` falls in the table::
+    The array has two rows ``[leap_dates leap_offsets]``.  The first row
+    is used to find where a given date ``jd`` falls in the table::
 
         index = np.searchsorted(leap_dates, jd, 'right')
 
-    This can return a value from ``0`` to ``N``, which is why the
-    corresponding ``leap_offsets`` table has ``N+1`` entries, so that
-    the UTC offset corresponding to the date can be fetched with::
+    This can return a value from ``0`` to ``N``, allowing the
+    corresponding UTC offset to be fetched with::
 
         offset = leap_offsets[index]
 
-    The result is the number of seconds that must be added to a UTC time
+    The offset is the number of seconds that must be added to a UTC time
     to build the corresponding TAI time.
 
     """
@@ -226,7 +223,10 @@ def download_leapseconds(cache):
         lines = f.readlines()
 
     linefields = [line.split() for line in lines]
+    dates = [float(fields[4]) for fields in linefields]
     offsets = [float(fields[6]) for fields in linefields]
-    leap_dates = array([float(fields[4]) for fields in linefields])
-    leap_offsets = offsets[0:1] + offsets
-    return leap_dates, leap_offsets
+
+    dates.append(float('inf'))
+    offsets.insert(0, offsets[0])
+
+    return array([dates, offsets])
