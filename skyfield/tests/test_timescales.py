@@ -1,9 +1,17 @@
+import numpy as np
 from skyfield.constants import DAY_S
 from skyfield.timescales import JulianDate
 from datetime import datetime
 
 one_second = 1.0 / DAY_S
 epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
+
+def test_building_JulianDate_from_tuple_with_array_inside():
+    seconds = np.arange(48.0, 58.0, 1.0)
+    jd = JulianDate(utc=(1973, 12, 29, 23, 59, seconds))
+    assert seconds.shape == jd.shape
+    for i, second in enumerate(seconds):
+        assert jd.tai[i] == JulianDate(utc=(1973, 12, 29, 23, 59, second)).tai
 
 def test_building_JulianDate_from_single_datetime():
     jd = JulianDate(utc=datetime(1973, 12, 29, 23, 59, 48))
