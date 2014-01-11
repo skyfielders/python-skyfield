@@ -42,7 +42,7 @@ def test_iss_altitude(iss_transit):
 
     cst = timedelta(hours=-6) #, minutes=1)
     dt = dt - cst
-    jd = JulianDate(dt)
+    jd = JulianDate(utc=dt, delta_t=67.2091)
 
     lines = iss_tle.splitlines()
     s = EarthSatellite(lines, earth)
@@ -95,7 +95,8 @@ def test_appendix_c_satellite():
 
     jd_epoch = sat._sgp4_satellite.jdsatepoch
     three_days_later = jd_epoch + 3.0
-    jd = JulianDate(ut1=three_days_later)
+    jd = JulianDate(tt=three_days_later)
+    jd.ut1 = array(three_days_later)
 
     # First, a crucial sanity check (which is, technically, a test of
     # the `sgp4` package and not of Skyfield): are the right coordinates

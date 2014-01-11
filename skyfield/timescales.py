@@ -1,5 +1,6 @@
+from datetime import datetime
 from numpy import arange, array, einsum, rollaxis, searchsorted, sin
-from .constants import T0, S_DAY, DAY_S
+from .constants import T0, DAY_S
 from .framelib import ICRS_to_J2000 as B
 from .nutationlib import compute_nutation
 from .precessionlib import compute_precession
@@ -52,10 +53,12 @@ def _wrap(a):
         return array(a)
     return array((a,))
 
-def _convert(a):
-    if not hasattr(a, 'shape') and hasattr(a, '__len__'):
+def _to_array(a):
+    if not hasattr(a, 'shape'):
         a = array(a)
-    return a, getattr(a, 'shape', ())
+    return a
+
+tt_minus_tai = array(32.184 / DAY_S)
 
 class JulianDate(object):
     """Julian date.
@@ -70,24 +73,34 @@ class JulianDate(object):
     """
     def __init__(self, utc=None, tai=None, tt=None, delta_t=0.0, cache=None):
 
-        self.delta_t, ignored_shape = _convert(delta_t)
+        self.delta_t = _to_array(delta_t)
         if cache is None:
             from skyfield.data import cache
 
         if (tai is None) and (utc is not None):
             leap_dates, leap_offsets = cache.run(usno_leapseconds)
-            year, month, day, hour, minute, second = utc
+
+            if isinstance(utc, datetime):
+                year = utc.year
+                month = utc.month
+                day = utc.day
+                hour = utc.hour
+                minute = utc.minute
+                second = utc.second + utc.microsecond * 1e-6
+            else:
+                year, month, day, hour, minute, second = utc
+
             j = julian_date(year, month, day, hour, minute, 0.0)
             i = searchsorted(leap_dates, j, 'right')
             tai = j + (second + leap_offsets[i]) / DAY_S
 
         if (tt is None) and (tai is not None):
-            tt = tai + 32.184 / DAY_S
+            tt = tai + tt_minus_tai
 
         self.utc = utc
-        self.tai = tai
-        self.tt = tt
-        self.shape = tt.shape
+        self.tai = _to_array(tai)
+        self.tt = _to_array(tt)
+        self.shape = self.tt.shape
         self.delta_t = delta_t
 
         if not self.__dict__:
@@ -130,11 +143,11 @@ class JulianDate(object):
 
         if name == 'tdb':
             tt = self.tt
-            self.tdb = tdb = tt + tdb_minus_tt(tt) * S_DAY
+            self.tdb = tdb = tt + tdb_minus_tt(tt) / DAY_S
             return tdb
 
         if name == 'ut1':
-            self.ut1 = ut1 = self.tt - self.delta_t / S_DAY
+            self.ut1 = ut1 = self.tt - self.delta_t / DAY_S
             return ut1
 
         raise AttributeError('no such attribute %r' % name)

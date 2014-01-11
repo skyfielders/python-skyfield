@@ -6,11 +6,12 @@
 
 >>> from skyfield.api import earth, mars
 >>> boston = earth.topos('71.0636 W', '42.3583 N')
->>> alt, az, d = boston(ut1=2456755.75).observe(mars).apparent().altaz()
+>>> utc = (2014, 4, 8, 6, 0, 0.0)
+>>> alt, az, d = boston(utc=utc).observe(mars).apparent().altaz()
 >>> print(alt.dstr())
-40deg 3m 49.433s
+39deg 59m 7.982s
 >>> print(az.dstr())
-201deg 58m 7.067s
+202deg 19m 10.244s
 
 fix >>> import sgp4
 fix >>> import numpy as np
