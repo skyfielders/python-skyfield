@@ -65,10 +65,11 @@ class JulianDate(object):
 
     Attributes:
 
-    `tdb` - Barycentric Dynamical Time
-    `tt`  - Terrestrial Time
-    `ut1` - Universal Time
-    `utc` - Coordinated Universal Time
+    `utc`     - Coordinated Universal Time
+    `tai`     - International Atomic Time
+    `tt`      - Terrestrial Time
+    `delta_t` - Difference between Terrestrial Time and UT1
+    `cache`   - SkyField `Cache` for automatically fetching `delta_t` table
 
     """
     def __init__(self, utc=None, tai=None, tt=None, delta_t=0.0, cache=None):
