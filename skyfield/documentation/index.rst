@@ -19,11 +19,13 @@
     ra, dec, d = earth(now()).observe(mars).radec()
     print(ra)
     print(dec)
+    print(d)
 
 .. testoutput::
 
     9h 14m 50.35s
     17deg 13' 2.6"
+    2.18572863461 AU
 
 .. testcode::
 

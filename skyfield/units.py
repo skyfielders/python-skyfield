@@ -10,6 +10,9 @@ class Distance(object):
             return self.km
         raise AttributeError('no attribute named %r' % (name,))
 
+    def __str__(self):
+        return '%s AU' % self.AU
+
 class Velocity(object):
     def __init__(self, value_AU_per_d):
         self.AU_per_d = value_AU_per_d
