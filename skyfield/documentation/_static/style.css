@@ -45,7 +45,7 @@ table{border-collapse:collapse;border-spacing:0}
 
 @font-face {
     font-family: "Dosis";
-    src: url(_static/Dosis-Medium.ttf);
+    src: url(Dosis-Medium.ttf);
 }
 body, body > img {
     display: block;
