@@ -10,7 +10,7 @@ from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
 from .functions import dots
 from .relativity import add_aberration, add_deflection
-from .timescales import takes_julian_date
+from .timescales import JulianDate, takes_julian_date
 from .units import Distance, Velocity
 
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
@@ -56,8 +56,11 @@ class ICRS(object):
     def radec(self, epoch=None):
         position_AU = self.position.AU
         if epoch is not None:
-            # TODO: oughtn't we actually use `epoch`, instead of ignoring it?
-            position_AU = einsum('ij...,j...->i...', self.jd.M, position_AU)
+            if epoch == 'date':
+                epoch = self.jd
+            elif isinstance(epoch, float):
+                epoch = JulianDate(tt=epoch)
+            position_AU = einsum('ij...,j...->i...', epoch.M, position_AU)
         r_AU, dec, ra = to_polar(position_AU)
         return HourAngle(radians=ra), SignedAngle(radians=dec), Distance(r_AU)
 
