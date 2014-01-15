@@ -81,6 +81,9 @@ pre {
     border: 1px dashed #93A1A1;
     padding: 0.5em 0.8em;
 }
+.highlight-none pre {
+    border: none;
+}
 pre a {
     text-decoration: none;
 }
