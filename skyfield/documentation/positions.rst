@@ -109,7 +109,7 @@ Correcting for the light-travel time
 does not simply fix a minor inconvenience,
 but reflects a very deep physical reality.
 Not only the light from Jupiter,
-but *all* of its physical effects
+but *all* of its physical effects,
 arrive no faster than the speed of light!
 As Jupiter tugs us with its gravity,
 we do not get pulled in the direction of the “real” Jupiter —
@@ -147,7 +147,7 @@ and :meth:`~Angle.dstr()` methods:
 .. testoutput::
 
     10h 49m 38.71s
-    8deg 41' 0.6"
+    +08deg 41' 00.6"
     4.82598384993
 
 As we will explore in the next section,

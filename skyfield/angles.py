@@ -20,6 +20,8 @@ where `value` can be either a Python float or a NumPy array of floats"""
 
 class BaseAngle(object):
 
+    _unary_plus = False
+
     def __init__(self, angle=None, radians=None, degrees=None, hours=None):
         if angle is not None:
             if not isinstance(angle, BaseAngle):
@@ -44,10 +46,10 @@ class BaseAngle(object):
     def hms(self):
         return sexagesimalize(self.hours())
 
-    def hstr(self, places=2):
+    def hstr(self, places=2, plus=False):
         sgn, h, m, s, etc = sexagesimalize(self.hours(), places)
-        sign = '-' if sgn < 0.0 else ''
-        return '%s%dh %dm %d.%0*ds' % (sign, h, m, s, places, etc)
+        sign = '-' if sgn < 0.0 else '+' if (plus or self._unary_plus) else ''
+        return '%s%02dh %02dm %02d.%0*ds' % (sign, h, m, s, places, etc)
 
     def degrees(self):
         return self._radians * _to_degrees
@@ -55,10 +57,10 @@ class BaseAngle(object):
     def dms(self):
         return sexagesimalize(self.degrees())
 
-    def dstr(self, places=1):
+    def dstr(self, places=1, plus=False):
         sgn, d, m, s, etc = sexagesimalize(self.degrees(), places)
-        sign = '-' if sgn < 0.0 else ''
-        return '%s%ddeg %d\' %d.%0*d"' % (sign, d, m, s, places, etc)
+        sign = '-' if sgn < 0.0 else '+' if (plus or self._unary_plus) else ''
+        return '%s%02ddeg %02d\' %02d.%0*d"' % (sign, d, m, s, places, etc)
 
     hours_anyway = hours
     hms_anyway = hms
@@ -90,6 +92,11 @@ class Angle(BaseAngle):
 
     def hstr(self):
         raise WrongUnitError('hstr', 'hours')
+
+class SignedAngle(Angle):
+    """An Angle that prints a unary ``'+'`` when positive."""
+
+    _unary_plus = True
 
 class HourAngle(BaseAngle):
 

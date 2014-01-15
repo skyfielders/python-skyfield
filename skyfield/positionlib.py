@@ -2,7 +2,8 @@
 
 from numpy import arcsin, arctan2, array, cos, einsum, pi, sin
 
-from .angles import interpret_longitude, interpret_latitude, Angle, HourAngle
+from .angles import (interpret_longitude, interpret_latitude,
+                     Angle, HourAngle, SignedAngle)
 from .constants import TAU
 from .functions import length_of, spin_x
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
@@ -58,7 +59,7 @@ class ICRS(object):
             # TODO: oughtn't we actually use `epoch`, instead of ignoring it?
             position_AU = einsum('ij...,j...->i...', self.jd.M, position_AU)
         r_AU, dec, ra = to_polar(position_AU)
-        return HourAngle(radians=ra), Angle(radians=dec), Distance(r_AU)
+        return HourAngle(radians=ra), SignedAngle(radians=dec), Distance(r_AU)
 
 class Topos(object):
 
