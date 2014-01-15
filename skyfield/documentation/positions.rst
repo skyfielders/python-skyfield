@@ -225,7 +225,11 @@ in an almanac or by using other astronomy software.
 
 Instead, apparent positions are usually expressed
 relative to the Earth’s real orientation
-as its rolls and tumbles through space.
+as its rolls and tumbles through space —
+which, after all,
+is how right ascension and declination were defined
+through most of human history,
+before the invention of the ICRS axes.
 The Earth’s poles and equator move at least slightly every day,
 and move by very large amounts as years add up to centuries.
 
@@ -258,4 +262,60 @@ and the data in the
 and are sometimes said to be expressed
 in the “dynamical reference system” defined by the Earth itself.
 
+Azimuth and altitude
+====================
 
+The final result that many users seek
+is the *altitude* and *azimuth* of an object
+relative to their own location on the Earth’s surface.
+
+The altitude measures the angle above or below the horizon,
+with a positive number of degrees meaning “above”
+and a negative number indicating that the object
+is below the horizon (and impossible to view).
+Azimuth measures the angle around the sky from the north pole,
+so 0° means that the object is straight north,
+90° indicates that the object lies to the east,
+180° means south, and 270° means that the object is straight west.
+
+Altitude and azimuth are computed
+by calling the :meth:`~Apparent.altaz()` method on an apparent position.
+But because the method needs to know whose local horizon to use,
+it does not work
+on the plain geocentric (“Earth centered”) positions
+that have been generating so far:
+
+.. testcode::
+
+    alt, az, distance = apparent.altaz()
+
+.. testoutput::
+
+    Traceback (most recent call last):
+      ...
+    ValueError: to compute an apparent position, you must observe from a specific Earth location that you specify using a Topos instance
+
+Instead, you have to give Skyfield your geographic location.
+Astronomers use the term *topocentric*
+for a position measured relative to a specific location on Earth,
+so Skyfield represents Earth locations using a :class:`Topos` class
+that you can generate by using the :meth:`Earth.topos` method
+of an Earth object:
+
+.. testcode::
+
+    boston = earth.topos('71.0603 W', '42.3583 N')
+    astro = boston(utc=(1980, 1, 1)).observe(jupiter)
+    alt, az, distance = astro.apparent().altaz()
+    print alt.dstr()
+    print az.dstr()
+    print distance.AU
+
+.. testoutput::
+
+    -23deg 22' 47.8"
+    51deg 43' 29.6"
+    4.82600082194
+
+So Jupiter was more than 23° below the horizon for Bostonians
+on 1980 January 1 at midnight UTC.
