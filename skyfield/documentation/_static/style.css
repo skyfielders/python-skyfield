@@ -71,15 +71,18 @@ h1, h2 {
     text-style: italic;
 }
 code, pre, tt {
-    font-size: 0.875em;
     background-color: #FDF6E3;
 }
 code, tt {
     padding: 0 0.25em;
 }
+dd {
+    margin-bottom: 1em;
+}
 pre {
     border: 1px dashed #93A1A1;
     padding: 0.5em 0.8em;
+    font-size: 0.875em;
 }
 .highlight-none pre {
     border: none;
