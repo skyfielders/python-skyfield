@@ -91,8 +91,8 @@ pre tt {
     padding: 0;
     font-size: 1.25em;
 }
-@media screen and (min-width: 480px) {body {font-size: 1.25em;}}
-@media screen and (min-width: 640px) {body {font-size: 1.375em;}}
+@media screen and (min-width: 480px) {body {font-size: 1.125em;}}
+@media screen and (min-width: 640px) {body {font-size: 1.25em;}}
 
 /* To regenerate the following Pygments palette, run:
    pip install pygments-style-solarized
