@@ -46,3 +46,6 @@
 
    introduction
    positions
+   time
+   planets
+   earth-satellites

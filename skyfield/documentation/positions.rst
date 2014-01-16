@@ -4,8 +4,8 @@
 ===========================
 
 Skyfield is careful to distinguish the *position* of an object
-from any particular choice of *coordinates*
-by which the user might want to designate that position.
+from the several choices of *coordinate*
+that can be used to designate that position with numbers.
 There are only three basic kinds of position that Skyfield recognizes,
 but several different ways in which a position
 can be turned into coordinates.
@@ -58,6 +58,38 @@ All hyperlinked attributes and method names,
 both in the text above and in the explanations below,
 lead to the low-level :doc:`api`
 which explains each option in even greater detail.
+
+Generating positions
+====================
+
+Skyfield already supports two kinds of object
+that can compute their position,
+and will soon be supporting more.
+Each object is a simple Python callable
+that can take a date as its argument
+and return its position as of that moment:
+
+* :doc:`planets` — the eight planets and Pluto are all supported,
+  thanks to the excellent work of the Jet Propulsion Laboratory (JPL)
+  and to Skyfield’s support for their major solar system ephemerides. ::
+
+    from skyfield.api import earth, now
+    position = earth(now())
+
+* :doc:`earth-satellites` — Earth satellite positions can be generated
+  from public TLE elements describing their current orbit,
+  which you can download from Celestrak. ::
+
+    from skyfield.api import earth, now
+    sat = earth.satellite()
+    position = sat(now())
+
+Read :doc:`time` for more information
+about how to build dates and pass them to planets and satellites
+when generating positions.
+
+What can you do with a position once it has been generated?
+The rest of this document is a complete tour of the possibilities.
 
 Barycentric position
 ====================
