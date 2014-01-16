@@ -1,5 +1,7 @@
 
-.. image:: _static/logo.png
+==========
+ Skyfield
+==========
 
 .. rst-class:: motto
 

@@ -18,7 +18,7 @@ together with all of the attributes and methods that they support:
     Three positions
 
     obj(time)           →  Barycentric position (BCRS)
-     └─ observe(obj2)   →  Astrometric position (ICRS)
+     └─ observe(obj2)   →  Astrometric position (ΔBCRS)
          └─ apparent()  →  Apparent position (GCRS)
 
     Barycentric, Astrometric, or Apparent position
@@ -44,13 +44,13 @@ together with all of the attributes and methods that they support:
      │
      ├── `hours() <api.html#Angle.hours>`_             →   23.934469599999996
      ├── `hms() <api.html#Angle.hms>`_               →   (1, 23, 56, 4, 0)
-     ├── `hstr() <api.html#Angle.hstr>`_              →   '23h 56m 4.09s'
-     ├── `hstr(places=4) <api.html#Angle.hstr>`_      →   '23h 56m 4.0906s'
+     ├── `hstr() <api.html#Angle.hstr>`_              →   '23h 56m 04.09s'
+     ├── `hstr(places=4) <api.html#Angle.hstr>`_      →   '23h 56m 04.0906s'
      │
      ├── `degrees() <api.html#Angle.degrees>`_           →   359.017044
      ├── `dms() <api.html#Angle.dms>`_               →   (1, 359, 1, 1, 0)
-     ├── `dstr() <api.html#Angle.dstr>`_              →   '359deg 1\' 1.4"'
-     └── `dstr(places=3) <api.html#Angle.dstr>`_      →   '359deg 1\' 1.358"'
+     ├── `dstr() <api.html#Angle.dstr>`_              →   '359deg 01\' 01.4"'
+     └── `dstr(places=3) <api.html#Angle.dstr>`_      →   '359deg 01\' 01.358"'
 
 The rest of this page is simply designed to explain
 all of the features outlined in the quick reference above.
@@ -59,8 +59,8 @@ both in the text above and in the explanations below,
 lead to the low-level :doc:`api`
 which explains each option in even greater detail.
 
-From barycentric position to astrometric position
-=================================================
+Barycentric position
+====================
 
 When you ask Skyfield for the position of a planet or star,
 it produces a three-dimensional position
@@ -100,6 +100,9 @@ in kilometers with the :attr:`~Position.km` attribute.
 And if you have the third-party AstroPy package installed,
 then you can convert these coordinates
 into any length unit with the :meth:`~Position.to()` method.
+
+Astrometric position
+====================
 
 You might think that you could determine
 the position of Jupiter in the night sky
@@ -166,8 +169,8 @@ against the background of stars in a
 `printed star atlas <http://www.amazon.com/s/?_encoding=UTF8&camp=1789&creative=390957&linkCode=ur2&pageMinusResults=1&suo=1389754954253&tag=letsdisthemat-20&url=search-alias%3Daps#/ref=nb_sb_noss_1?url=search-alias%3Daps&field-keywords=star%20atlas&sprefix=star+%2Caps&rh=i%3Aaps%2Ck%3Astar%20atlas&sepatfbtf=true&tc=1389754955568>`_,
 because star atlases also use astrometric positions.
 
-The apparent position
-=====================
+Apparent position
+=================
 
 To determine the position of an object in the night sky
 with even greater accuracy,

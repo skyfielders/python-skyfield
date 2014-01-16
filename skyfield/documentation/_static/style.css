@@ -62,6 +62,13 @@ h1, h2 {
     font-family: "Dosis";
     color: #002664;
 }
+#skyfield h1 {
+    margin: 0 auto;
+    width: 480px;
+    height: 240px;
+    background: #ffffff url('logo.png') no-repeat left top;
+    text-indent:-9999px;  /* so screen reader will still read the title */
+}
 .headerlink {
     color: #f8f8ff;
     text-decoration: none;
