@@ -1,4 +1,6 @@
 
+.. currentmodule:: skyfield.api
+
 ===========================
  Positions and Coordinates
 ===========================
@@ -113,6 +115,8 @@ by asking Skyfield for their :attr:`~Position.position` attribute:
 
 .. testcode::
 
+    # BCRS positions of Earth and Jupiter
+
     from skyfield.api import earth, jupiter
     print earth(utc=(1980, 1, 1)).position.AU
     print jupiter(utc=(1980, 1, 1)).position.AU
@@ -166,6 +170,8 @@ that we see in our sky:
 
 .. testcode::
 
+    # Observing Jupiter from the Earth's position
+
     astro = earth(utc=(1980, 1, 1)).observe(jupiter)
     print astro.position.AU
 
@@ -181,6 +187,8 @@ and display using their :meth:`~Angle.hstr()`
 and :meth:`~Angle.dstr()` methods:
 
 .. testcode::
+
+    # Astrometric RA and declination
 
     ra, dec, distance = astro.radec()
     print ra.hstr()
@@ -237,17 +245,17 @@ is typically expressed as the angles
 
 .. testcode::
 
+    # Apparent GCRS ("J2000.0") coordinates
+
     apparent = astro.apparent()
     ra, dec, distance = apparent.radec()
 
-    print 'Apparent ICRS ("J2000.0") coordinates:'
     print ra.hstr()
     print dec.dstr()
     print distance.AU
 
 .. testoutput::
 
-    Apparent ICRS ("J2000.0") coordinates:
     10h 49m 39.34s
     +08deg 40' 56.4"
     4.82598384993
@@ -276,16 +284,16 @@ when you ask the apparent position for coordinates:
 
 .. testcode::
 
+    # Coordinates relative to true equator and equinox
+
     ra, dec, distance = apparent.radec(epoch='date')
 
-    print 'Measured against the true equator and equinox:'
     print ra.hstr()
     print dec.dstr()
     print distance.AU
 
 .. testoutput::
 
-    Measured against the true equator and equinox:
     10h 48m 36.02s
     +08deg 47' 18.6"
     4.82598384993
@@ -338,6 +346,9 @@ that you can generate by using the :meth:`Earth.topos` method
 of an Earth object:
 
 .. testcode::
+
+    # Altitude and azimuth in the sky of a
+    # specific geographic location
 
     boston = earth.topos('71.0603 W', '42.3583 N')
     astro = boston(utc=(1980, 1, 1)).observe(jupiter)

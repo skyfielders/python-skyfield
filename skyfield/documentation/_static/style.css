@@ -86,6 +86,14 @@ code, tt {
 dd {
     margin-bottom: 1em;
 }
+dl.class em {
+    color: #bc2400;
+    font-family: monospace;
+    font-style: normal;
+}
+dl.class big {
+    font-size: 1em;
+}
 pre {
     border: 1px dashed #93A1A1;
     padding: 0.5em 0.8em;

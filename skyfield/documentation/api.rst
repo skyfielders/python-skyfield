@@ -1,9 +1,6 @@
 
-===================
- API Documentation
-===================
+===============
+ API Reference
+===============
 
-.. method:: Position.radec(abc)
-
-
-            Test
+.. autoclass:: skyfield.api.JulianDate

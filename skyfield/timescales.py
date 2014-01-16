@@ -92,7 +92,8 @@ class JulianDate(object):
                 if isinstance(utc, datetime):
                     tai = _utc_datetime_to_tai(leap_dates, leap_offsets, utc)
                 elif isinstance(utc, tuple):
-                    tai = _utc_to_tai(leap_dates, leap_offsets, *utc)
+                    values = [_to_array(value) for value in utc]
+                    tai = _utc_to_tai(leap_dates, leap_offsets, *values)
                 else:
                     tai = array([
                         _utc_datetime_to_tai(leap_dates, leap_offsets, dt)
