@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, tzinfo
 from numpy import array, einsum, rollaxis, searchsorted, sin, zeros_like
 from time import strftime
 from .constants import T0, DAY_S
@@ -6,9 +6,25 @@ from .framelib import ICRS_to_J2000 as B
 from .nutationlib import compute_nutation
 from .precessionlib import compute_precession
 
+try:
+    from pytz import utc
+except ImportError:
+    _timedelta_zero = timedelta(0)
+    class UTC(tzinfo):
+        'UTC'
+        def utcoffset(self, dt):
+            return UTC.zero
+        def tzname(self, dt):
+            return 'UTC'
+        def dst(self, dt):
+            return UTC.zero
+    utc = UTC()
+
 # Much of the following code is adapted from the USNO's "novas.c".
 
 _half_second = 0.5 / DAY_S
+_half_millisecond = 0.5e-3 / DAY_S
+_half_microsecond = 0.5e-6 / DAY_S
 
 extra_documentation = """
 
@@ -112,6 +128,26 @@ class JulianDate(object):
         self.shape = self.tt.shape
         self.delta_t = delta_t
 
+    def astimezone(self, tz):
+        dt = self.utc_datetime()
+        normalize = getattr(tz, 'normalize', lambda d: d)
+        if self.shape:
+            return [normalize(d.astimezone(tz)) for d in dt]
+        else:
+            return normalize(dt.astimezone(tz))
+
+    def utc_datetime(self):
+        year, month, day, hour, minute, second = self._utc(_half_millisecond)
+        second, fraction = divmod(second, 1.0)
+        second = second.astype(int)
+        milli = (fraction * 1000).astype(int) * 1000
+        if self.shape:
+            utcs = [utc] * self.shape[0]
+            argsets = zip(year, month, day, hour, minute, second, milli, utcs)
+            return [datetime(*args) for args in argsets]
+        else:
+            return datetime(year, month, day, hour, minute, second, milli, utc)
+
     def utc_iso(self, places=0):
         if places:
             power_of_ten = 10 ** places
@@ -165,7 +201,7 @@ class JulianDate(object):
         m, s = divmod(hfrac * 3600.0, 60.0)
         is_leap_second = j < leap_dates[i-1]
         s += is_leap_second
-        self.utc = utc = (y, mon, d, h, m, s)
+        self.utc = utc = (y, mon, d, h.astype(int), m.astype(int), s)
         return utc
 
     def __getattr__(self, name):
@@ -321,8 +357,9 @@ def usno_leapseconds(cache):
     return array([dates, offsets])
 
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
-    return _utc_to_tai(leap_dates, leap_offsets, dt.year, dt.month, dt.day,
-                       dt.hour, dt.minute, dt.second + dt.microsecond * 1e-6)
+    year, month, day, hour, minute, second, wday, yday, dst = dt.utctimetuple()
+    return _utc_to_tai(leap_dates, leap_offsets, year, month, day,
+                       hour, minute, second + dt.microsecond * 1e-6)
 
 def _utc_to_tai(leap_dates, leap_offsets, year, month=1, day=1,
                 hour=0, minute=0, second=0.0):
