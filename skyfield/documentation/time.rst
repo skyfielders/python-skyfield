@@ -5,55 +5,71 @@
  Dates and Time
 ================
 
-The foundation of Skyfield
-is its specially crafted :class:`JulianDate` class,
-which performs efficient conversions
-among the various astronomical time scales.
-It also acts as an internal cache for various date-dependent values,
-so that Skyfield only has to compute each of them once.
+Astronomers use several different numerical scales for measuring time.
+Since Skyfield often has to reference several such scales
+over the course of a single calculation,
+the :class:`JulianDate` class
+is designed to cache each new time scale
+when a calculation first demands it.
+Further demands for the same time scale
+can then be satisfied without recomputing the value again.
 
-Skyfield objects that accept date arguments give you two choices.
-Once choice is to build your own :class:`JulianDate`:
+Each time scale supported by :class:`JulianDate`
+is described in detail in one of the sections below.
+The supported time scales are:
+
+* ``jd.utc`` — Coordinated Universal Time (“Greenwich Time”)
+* ``jd.tai`` — International Atomic Time
+* ``jd.tt`` — Terrestrial Time
+* ``jd.tdb`` — Barycentric Dynamical Time (the JPL’s “T\ :sub:`eph`”)
+* ``jd.ut1`` — Universal Time
+
+To build a Julian date object,
+simply use one of these time scales
+as a keyword argument to the constructor
+to specify the moment you want to represent:
 
 .. testcode::
 
-    from skyfield.api import JulianDate, earth
-
-    # Building the JulianDate yourself
+    from skyfield.api import JulianDate
 
     jd = JulianDate(utc=(2014, 1, 1))
-    print earth(jd).position.AU
 
-.. testoutput::
+For all of the techniques that you can use to build a Julian date,
+read the next two sections on :ref:`your-timezone`
+and on :ref:`building-dates`.
 
-    [-0.17461758  0.88567056  0.38384886]
-
-This is always the better approach
-if you are going to be using a particular date more than once,
-because all of the information that the date object
-caches during its first computation
-will be available, for free, in all subsequent computations.
-
-But if you are only going to use a date once,
-you can skip the step of creating an object.
-Instead, simply supply the arguments
-that you would have used to build the date,
-and Skyfield will build a :class:`JulianDate` behind the scenes
-on your behalf:
+There are two ways to provide a date argument
+to a Skyfield routine that needs one:
+you can supply a :class:`JulianDate`
+that you have gone ahead and built yourself;
+or you can simply call the routine with the same keyword argument
+that you would have used to build the Julian date,
+and Skyfield will construct the date internally.
+So these two calculations come out exactly the same:
 
 .. testcode::
 
-    # Letting Skyfield build the JulianDate
+    from skyfield.api import earth
 
+    print earth(jd).position.AU
     print earth(utc=(2014, 1, 1)).position.AU
 
 .. testoutput::
 
     [-0.17461758  0.88567056  0.38384886]
+    [-0.17461758  0.88567056  0.38384886]
 
-This results in more concise code.
-The only disadvantage is that you lack a date object
-to re-use in any subsequent computation.
+Be sure to build the Julian date yourself
+if you have the opportunity to use it over and over again
+in several different calculations.
+Not only will you avoid recomputing the time scales
+again for each calculation,
+but there are some even more expensive functions of time
+that Julian dates take responsibility for caching
+that you can read about below in the section on :ref:`date-cache`.
+
+.. _building-dates:
 
 Date arrays
 ===========
@@ -127,6 +143,8 @@ If you want to check,
 you can scroll up and verify that this is the same coordinate
 that we generated for January 1st at the top of this document
 when we were using a single date instead of an array.
+
+.. _your-timezone:
 
 Your timezone
 =============
@@ -203,7 +221,7 @@ with whole lists of ``datetime`` objects as inputs and outputs:
 
 .. testcode::
 
-    hours = range(6)
+    hours = range(4)
     dates = [eastern.localize(datetime(2014, 1, 16, h))
              for h in hours]
 
@@ -217,9 +235,7 @@ with whole lists of ``datetime`` objects as inputs and outputs:
     [datetime.datetime(2014, 1, 16, 5, 0, tzinfo=<UTC>),
      datetime.datetime(2014, 1, 16, 6, 0, tzinfo=<UTC>),
      datetime.datetime(2014, 1, 16, 7, 0, tzinfo=<UTC>),
-     datetime.datetime(2014, 1, 16, 8, 0, tzinfo=<UTC>),
-     datetime.datetime(2014, 1, 16, 9, 0, tzinfo=<UTC>),
-     datetime.datetime(2014, 1, 16, 10, 0, tzinfo=<UTC>)]
+     datetime.datetime(2014, 1, 16, 8, 0, tzinfo=<UTC>)]
 
 .. testcode::
 
@@ -230,13 +246,11 @@ with whole lists of ``datetime`` objects as inputs and outputs:
     [datetime.datetime(2014, 1, 16, 0, 0, tzinfo=...EST...),
      datetime.datetime(2014, 1, 16, 1, 0, tzinfo=...EST...),
      datetime.datetime(2014, 1, 16, 2, 0, tzinfo=...EST...),
-     datetime.datetime(2014, 1, 16, 3, 0, tzinfo=...EST...),
-     datetime.datetime(2014, 1, 16, 4, 0, tzinfo=...EST...),
-     datetime.datetime(2014, 1, 16, 5, 0, tzinfo=...EST...)]
+     datetime.datetime(2014, 1, 16, 3, 0, tzinfo=...EST...)]
 
 Building Python lists of ``datetime`` objects
 is neither as elegant nor as efficient
-as working directly in UTC,
+as working directly in UTC with NumPy arrays,
 which we will explore in more detail the next section.
 But if you need to operate primarily in your own timezone,
 then it is the only option.
@@ -253,19 +267,25 @@ Other timescales: TAI, TT, and TDB
 
     jd = JulianDate(utc=(2014, 1, 1))
     print 'TAI = %r' % jd.tai
-    print 'TT =  %r' % jd.tt
+    print 'TT  = %r' % jd.tt
     print 'TDB = %r' % jd.tdb
     print 'UT1 = %r' % jd.ut1
 
 .. testoutput::
 
     TAI = 2456658.5004050927
-    TT =  2456658.5007775929
+    TT  = 2456658.5007775929
     TDB = 2456658.500777592
     UT1 = 2456658.5007775929
 
 UT1 and ΔT
 ==========
+
+.. _date-cache:
+
+The Julian date object as cache
+===============================
+
 
 .. _matplotlib: http://matplotlib.org/
 .. _requirements.txt: http://www.pip-installer.org/en/latest/cookbook.html
