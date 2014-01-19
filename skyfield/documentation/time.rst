@@ -556,6 +556,77 @@ at the Jet Propulsion Laboratory.
 UT1 and ΔT
 ==========
 
+The time scale UT1 is the least uniform time scale of all
+because its clock cannot be housed in a laboratory,
+nor is its rate established by any human convention.
+It is, rather, the clock
+whose “hand” is the rotation of the Earth itself!
+
+The UT1 time is derived from the direction
+that the Earth happens to be pointing at any given moment.
+And the Earth is a young world,
+with a still-molten iron core and viscous mantle and continents
+that fall and rise as each passing ice age weighs down upon them.
+We think that we can predict, with high accuracy,
+where the planets will be in their orbits
+thousands of years from now.
+But the fluid dynamics of an elastic rotating ellipsoid
+is at the moment beyond us.
+To declare leap seconds and keep UTC close to UT1,
+we cannot simply run a formula.
+Instead, we watch with sensitive instruments
+to see what the Earth will do next.
+
+If you are interested in the Earth as a dynamic body,
+visit the `Long-term Delta T
+<http://www.usno.navy.mil/USNO/earth-orientation/eo-products/long-term>`_
+page provided by the United States Naval Observatory.
+You will find graphs and tables
+showing how the length of Earth’s day
+expands and contracts by milliseconds over the decades.
+The accumulated error at any given moment
+is provided as ΔT,
+the evolving difference between TT and UT1
+that dropped below zero in 1871 but then rose past it in 1902
+and now stands at more than +67.2 seconds.
+
+The task of governing leap seconds can be stated, then,
+as the task of keeping the difference between TT and UTC
+close to the wild natural value ΔT.
+The standards bodies promise, in fact,
+that these differences will always be within 0.9 seconds of each other.
+
+In calculations that do not involve Earth’s rotation,
+ΔT never arises.
+The positions of planets,
+the distance to the Moon,
+and the movement of a comet or asteroid
+all ignore ΔT completely.
+
+* ΔT is used when you specify your geographic location
+  as a :class`Topos` and Skyfield needs to determine
+  where in space that location is facing at a given date and time.
+
+* ΔT is needed to determine directions
+  like “up,” “north,” and “east” when you want Skyfield
+  to compute the altitude and azimuth of an object
+  in your local sky.
+
+* ΔT determines the Earth orientation for Skyfield
+  with an Earth satellite position generated from TLE elements
+  gets translated into a full Solar System position.
+
+Soon, Skyfield will include a full table of historical ΔT values
+along with guidelines about using them in calculations.
+For the moment,
+if you need the above calculations to run at very high precision,
+you can look up ΔT in a table
+and provide it to your Julian date manually:
+
+.. testcode::
+
+    JulianDate(utc=(2014, 1, 1), delta_t=67.2810)
+
 .. _date-cache:
 
 The Julian date object as cache
