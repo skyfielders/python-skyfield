@@ -130,6 +130,9 @@ and is configured with the correct time zone):
 
 .. testsetup::
 
+    import numpy as np
+    np.set_printoptions(suppress=True)
+
     from skyfield import api
     def now():
         """Return a constant "now"."""
@@ -275,7 +278,7 @@ and insists on keeping time internally
 using the uniform time scales discussed below in :ref:`tai-tt-tdb`.
 
 Second, leap seconds disqualify the Python ``datetime``
-from use as a general way to represent time,
+from use as a general way to represent time
 because it refuses to accept seconds greater than 59:
 
 .. testcode::
@@ -296,21 +299,21 @@ as a duplicate 23:59:59, as is the case here:
 
 .. testcode::
 
-    dt_list, leap_seconds = jd.astimezone(eastern)
+    dt, leap_second = jd.astimezone(eastern)
 
-    for dt, leap_second in zip(dt_list, leap_seconds):
-        print str(dt) + (' +1s' if leap_second else '')
+    for dt_i, leap_second_i in zip(dt, leap_second):
+        print str(dt_i), 'leap_second =', leap_second_i
 
 .. testoutput::
 
-    2012-06-30 19:59:58-04:00
-    2012-06-30 19:59:59-04:00
-    2012-06-30 19:59:59-04:00 +1s
-    2012-06-30 20:00:00-04:00
-    2012-06-30 20:00:01-04:00
+    2012-06-30 19:59:58-04:00 leap_second = 0
+    2012-06-30 19:59:59-04:00 leap_second = 0
+    2012-06-30 19:59:59-04:00 leap_second = 1
+    2012-06-30 20:00:00-04:00 leap_second = 0
+    2012-06-30 20:00:01-04:00 leap_second = 0
 
 Using calendar tuples to represent UTC times is more elegant
-that trying to use Python ``datetime`` objects
+than using Python ``datetime`` objects
 because leap seconds can be represented accurately.
 If your application cannot avoid using ``datetime`` objects,
 then you will have to decide
@@ -324,11 +327,11 @@ your decision to ignore it in a particular case:
 
 .. testcode::
 
-    # Bad: your code fails to document what it is ignoring.
+    # Bad - your code fails to document what it is ignoring.
 
     dt = jd.astimezone(eastern)[0]
 
-    # Good: the meaning of the second value is explicit,
+    # Good - the meaning of the second value is explicit,
     # even if you make no further use of the `leap_second`.
 
     dt, leap_second = jd.astimezone(eastern)
@@ -338,35 +341,55 @@ your decision to ignore it in a particular case:
 Date arrays
 ===========
 
-To compute a position or coordinate
-over a whole range of dates,
-take advantage of Skyfield’s support for NumPy arrays.
-Building separate date objects is a slow process:
+Skyfield works most efficiently
+when you build a single :class:`JulianDate` object
+that holds an entire array of dates,
+instead of building many separate :class:`JulianDate` objects.
+There are three techniques for building arrays.
+
+* Make ``utc=`` a list of ``datetime`` objects.
+
+* Specify ``tai=`` or ``tt=`` or ``tdb=`` or ``ut1=``
+  using an entire NumPy array or Python list of floating point values.
+
+* With any parameter,
+  use a calendar tuple with one element
+  set to a whole list or array of values
+  instead of just being a single value.
+
+The last possibility is generally the one that is the most fun,
+because its lets you vary whichever time unit you want
+while holding the others steady.
+And you are free to provide out-of-range values
+and leave it to Skyfield to work out the correct result.
+Here are some examples::
+
+    utc=(range(1900, 1950),)    # Fifty years
+    utc=(1980, range(1, 25))    # Twenty-four months
+    utc=(2005, 5, [1, 10, 20])  # 1st, 10th, 20th of May
+
+    # The ten seconds crossing the 1974 leap second
+    utc=(1975, 1, 1, 0, 0, range(-5, 5))
+
+When you provide an array :class:`JulianDate` to a Skyfield calculation,
+the resulting array will have an extra dimension
+expanding what would normally be a single result
+into as many results as you provided dates.
+We can compute position of the Earth as an example:
 
 .. testcode::
 
-    # Building separate dates is slow and awkward
+    # Single Earth position
 
-    for day in 1, 2, 3, 4:
-        jd = JulianDate(utc=(2014, 1, day))
-        print earth(jd).position.AU
+    print earth(utc=(2014, 1, 1)).position.AU
 
 .. testoutput::
 
     [-0.17461758  0.88567056  0.38384886]
-    [-0.19179872  0.88265548  0.38254134]
-    [-0.20891924  0.87936337  0.38111391]
-    [-0.22597338  0.87579547  0.37956709]
-
-If you instead construct a single :class:`JulianDate`
-that holds a whole array of dates,
-then explicit loops disappear from your code
-and Skyfield can perform efficient vector computations
-over the whole range of dates at once:
 
 .. testcode::
 
-    # Date arrays are concise and efficient
+    # Whole array of Earth positions
 
     days = [1, 2, 3, 4]
     jd = JulianDate(utc=(2014, 1, days))
@@ -380,20 +403,19 @@ over the whole range of dates at once:
      [ 0.38384886  0.38254134  0.38111391  0.37956709]]
 
 Note the shape of the resulting NumPy array.
-If you unpack this array using three names,
+If you unpack this array into three names,
 then you get three four-element arrays
-whose four values correspond
-to the four dates in the :class:`JulianDate`.
-These arrays are ready to be submitted to `matplotlib`_
+corresponding to the four dates.
+These four-element arrays are ready to be submitted to `matplotlib`_
 and other scientific Python tools::
 
-    x, y, z = pos
+    x, y, z = pos    # four values each
     plot(x, y)
 
 If you instead slice along the second axis,
 then you can retrieve an individual position for a particular date —
-for example, the position corresponding to the first date
-lives at index zero:
+note that the first position is what we got a moment ago
+when we computed the January 1st position by itself:
 
 .. testcode::
 
@@ -403,17 +425,36 @@ lives at index zero:
 
     [-0.17461758  0.88567056  0.38384886]
 
-If you want to check,
-you can scroll up and verify that this is the same coordinate
-that we generated for January 1st at the top of this document
-when we were using a single date instead of an array.
+Finally, converting an array Julian date back into a calendar tuple
+results in the year, month, and all of the other values
+being as deep as the array itself:
 
-.. _utc-and-timezone:
+.. testcode::
 
-Building UTC arrays
-===================
+    from pprint import pprint
+    pprint(jd.utc)
 
+.. testoutput::
 
+    array([[ 2014.,  2014.,  2014.,  2014.],
+           [    1.,     1.,     1.,     1.],
+           [    1.,     2.,     3.,     4.],
+           [    0.,     0.,     0.,     0.],
+           [    0.,     0.,     0.,     0.],
+           [    0.,     0.,     0.,     0.]])
+
+Again, simply slice across the second dimension of the array
+to pull a particular calendar tuple out of the larger result:
+
+.. testcode::
+
+    print jd.utc[:,2]
+
+.. testoutput::
+
+    [ 2014.     1.     3.     0.     0.     0.]
+
+.. _tai-tt-tdb:
 
 Other timescales: TAI, TT, and TDB
 ==================================

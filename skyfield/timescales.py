@@ -273,8 +273,8 @@ class JulianDate(object):
             y, mon, d, h = cal_date(j)
             h, hfrac = divmod(h, 1.0)
             m, s = divmod(hfrac * 3600.0, 60.0)
-            self.utc = utc = (y, mon, d, h, m, s)
-            return utc
+            tup = (y, mon, d, h, m, s)
+            return array(tup) if self.shape else tup
 
         if name == 'tdb':
             tt = self.tt
@@ -318,10 +318,10 @@ def julian_date(year, month=1, day=1, hour=0, minute=0, second=0.0):
 
 def cal_date(jd):
     """Given a Julian Date, return a Gregorian year, month, day, and hour."""
-    jd = jd + 0.5
+    jd = _to_array(jd) + 0.5
 
     hour = jd % 1.0 * 24.0
-    k = int(jd) + 68569
+    k = jd.astype(int) + 68569
     n = 4 * k // 146097;
 
     k = k - (146097 * n + 3) // 4
