@@ -604,7 +604,7 @@ and the movement of a comet or asteroid
 all ignore ΔT completely.
 
 * ΔT is used when you specify your geographic location
-  as a :class`Topos` and Skyfield needs to determine
+  as a :class:`Topos` and Skyfield needs to determine
   where in space that location is facing at a given date and time.
 
 * ΔT is needed to determine directions
@@ -632,6 +632,51 @@ and provide it to your Julian date manually:
 The Julian date object as cache
 ===============================
 
+When you create a :class:`JulianDate`
+it goes ahead and computes its ``tt`` Terrestrial Time attribute
+starting from whatever time argument you provide.
+If you provide the ``utc`` parameter, for example,
+then the date first computes and sets ``tai`` followed by ``tt``.
+Each of the other time attributes only gets computed once,
+the first time you access it.
+
+The general rule is that attributes are only computed once,
+and can be accessed again and again for free,
+while methods never cache their results —
+think of the ``()`` parentheses after a method name
+as your reminder that “this will do a fresh computation every time.”
+
+In addition to time scales,
+there are several more functions of time
+that live on Julian date objects
+since they are often needed repeatedly during a calculation.
+
+``P``
+    The precession matrix **P** for rotating an *x,y,z* vector
+    to the true equator and equinox — the “epoch” — of this Julian date.
+
+``N``
+    The even more expensive nutation matrix **N**
+    for rotating an *x,y,z* vector to this epoch of this Julian date.
+
+``M``
+    The product **NPB** that performs the complete rotation
+    between a vector in the ICRS
+    and a vector in the dynamical reference system of this Julian date,
+    where **B** is the frame tie between the two systems.
+
+``MT``, ``NT``, ``PT``
+    The three matrices **M**\ :sup:`T`, **N**\ :sup:`T`,
+    and **P**\ :sup:`T`
+    that are the transposes of the three previous matrices,
+    and that rotate back the other direction
+    from the dynamical reference system back to the ICRS frame.
+
+You will typically never have to access these matrices yourself,
+as they are used automatically by the :meth:`Position.radec()`
+method when you use its  ``epoch=`` parameter
+to ask for a right ascension and declination
+in the dynamical reference system.
 
 .. _matplotlib: http://matplotlib.org/
 .. _pytz: http://pytz.sourceforge.net/
