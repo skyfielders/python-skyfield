@@ -56,10 +56,16 @@ class ICRS(object):
     def radec(self, epoch=None):
         position_AU = self.position.AU
         if epoch is not None:
-            if epoch == 'date':
-                epoch = self.jd
+            if isinstance(epoch, JulianDate):
+                pass
             elif isinstance(epoch, float):
                 epoch = JulianDate(tt=epoch)
+            elif epoch == 'date':
+                epoch = self.jd
+            else:
+                raise ValueError('the epoch= must be a Julian date,'
+                                 ' a floating point Terrestrial Time (TT),'
+                                 ' or the string "date" for epoch-of-date')
             position_AU = einsum('ij...,j...->i...', epoch.M, position_AU)
         r_AU, dec, ra = to_polar(position_AU)
         return HourAngle(radians=ra), SignedAngle(radians=dec), Distance(r_AU)

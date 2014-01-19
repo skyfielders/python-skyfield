@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from numpy import array
 from skyfield.api import earth
 from skyfield.sgp4lib import EarthSatellite, TEME_to_ITRF
-from skyfield.timescales import JulianDate, julian_date
+from skyfield.timescales import JulianDate, julian_date, utc
 
 iss_tle = ("""\
 ISS (ZARYA)             \n\
@@ -33,7 +33,7 @@ def iss_transit(request):
     line = request.param
     fields = line.split()
     dt = datetime.strptime('2013 {0} {1} {6}'.format(*fields),
-                           '%Y %d %b %H:%M:%S')
+                           '%Y %d %b %H:%M:%S').replace(tzinfo=utc)
     altitude = float(fields[7][:-1])
     return dt, altitude
 
@@ -71,7 +71,8 @@ def test_appendix_c_conversion_from_TEME_to_ITRF():
     vTEME = array([-4.746131487, 0.785818041, 5.531931288])
     vTEME = vTEME * 24.0 * 60.0 * 60.0  # km/s to km/day
 
-    jd_ut1 = julian_date(2004, 4, 6, 7, 51, 28.386 - 0.439961)
+    jd_ut1 = JulianDate(tt=(2004, 4, 6, 7, 51, 28.386 - 0.439961)).tt
+
     xp = -0.140682 * arcsecond
     yp = 0.333309 * arcsecond
 

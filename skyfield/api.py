@@ -8,7 +8,7 @@ default JPL planetary ephemeris ``de421`` and create planet objects like
 import de421
 from datetime import datetime
 from .jpllib import Ephemeris
-from .timescales import JulianDate
+from .timescales import JulianDate, now, utc
 
 ephemeris = Ephemeris(de421)
 del Ephemeris
@@ -27,6 +27,3 @@ pluto = ephemeris.pluto
 
 eight_planets = [mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
 nine_planets = eight_planets + [pluto]
-
-def now():
-    return JulianDate(utc=datetime.now())

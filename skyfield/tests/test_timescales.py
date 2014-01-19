@@ -1,6 +1,6 @@
 import numpy as np
 from skyfield.constants import DAY_S
-from skyfield.timescales import JulianDate
+from skyfield.timescales import JulianDate, utc
 from datetime import datetime
 
 one_second = 1.0 / DAY_S
@@ -14,17 +14,17 @@ def test_building_JulianDate_from_tuple_with_array_inside():
         assert jd.tai[i] == JulianDate(utc=(1973, 12, 29, 23, 59, second)).tai
 
 def test_building_JulianDate_from_single_datetime():
-    jd = JulianDate(utc=datetime(1973, 12, 29, 23, 59, 48))
+    jd = JulianDate(utc=datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc))
     assert jd.tai == 2442046.5
 
 def test_building_JulianDate_from_list_of_datetimes():
     jd = JulianDate(utc=[
-        datetime(1973, 12, 29, 23, 59, 48),
-        datetime(1973, 12, 30, 23, 59, 48),
-        datetime(1973, 12, 31, 23, 59, 48),
-        datetime(1974, 1, 1, 23, 59, 47),
-        datetime(1974, 1, 2, 23, 59, 47),
-        datetime(1974, 1, 3, 23, 59, 47),
+        datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc),
+        datetime(1973, 12, 30, 23, 59, 48, tzinfo=utc),
+        datetime(1973, 12, 31, 23, 59, 48, tzinfo=utc),
+        datetime(1974, 1, 1, 23, 59, 47, tzinfo=utc),
+        datetime(1974, 1, 2, 23, 59, 47, tzinfo=utc),
+        datetime(1974, 1, 3, 23, 59, 47, tzinfo=utc),
         ])
     assert (jd.tai == [
         2442046.5, 2442047.5, 2442048.5, 2442049.5, 2442050.5, 2442051.5,

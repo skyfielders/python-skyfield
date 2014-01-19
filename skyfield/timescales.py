@@ -9,15 +9,17 @@ from .precessionlib import compute_precession
 try:
     from pytz import utc
 except ImportError:
-    _timedelta_zero = timedelta(0)
+
     class UTC(tzinfo):
         'UTC'
+        zero = timedelta(0)
         def utcoffset(self, dt):
-            return UTC.zero
+            return self.zero
         def tzname(self, dt):
             return 'UTC'
         def dst(self, dt):
-            return UTC.zero
+            return self.zero
+
     utc = UTC()
 
 # Much of the following code is adapted from the USNO's "novas.c".
@@ -25,6 +27,8 @@ except ImportError:
 _half_second = 0.5 / DAY_S
 _half_millisecond = 0.5e-3 / DAY_S
 _half_microsecond = 0.5e-6 / DAY_S
+_months = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
 
 extra_documentation = """
 
@@ -100,20 +104,17 @@ class JulianDate(object):
             from skyfield.data import cache
         self.cache = cache
 
-        if utc is not None:
-            self.utc = utc
-            if tai is None:
-                leap_dates, leap_offsets = cache.run(usno_leapseconds)
-
-                if isinstance(utc, datetime):
-                    tai = _utc_datetime_to_tai(leap_dates, leap_offsets, utc)
-                elif isinstance(utc, tuple):
-                    values = [_to_array(value) for value in utc]
-                    tai = _utc_to_tai(leap_dates, leap_offsets, *values)
-                else:
-                    tai = array([
-                        _utc_datetime_to_tai(leap_dates, leap_offsets, dt)
-                        for dt in utc])
+        if tai is None and utc is not None:
+            leap_dates, leap_offsets = cache.run(usno_leapseconds)
+            if isinstance(utc, datetime):
+                tai = _utc_datetime_to_tai(leap_dates, leap_offsets, utc)
+            elif isinstance(utc, tuple):
+                values = [_to_array(value) for value in utc]
+                tai = _utc_to_tai(leap_dates, leap_offsets, *values)
+            else:
+                tai = array([
+                    _utc_datetime_to_tai(leap_dates, leap_offsets, dt)
+                    for dt in utc])
 
         if tai is not None:
             self.tai = _to_array(tai)
@@ -123,6 +124,8 @@ class JulianDate(object):
         if tt is None:
             raise ValueError('you must supply either utc, tai, or tt when'
                              ' building a JulianDate')
+        elif isinstance(tt, tuple):
+            tt = julian_date(*tt)
 
         self.tt = _to_array(tt)
         self.shape = self.tt.shape
@@ -149,6 +152,8 @@ class JulianDate(object):
             return datetime(year, month, day, hour, minute, second, milli, utc)
 
     def utc_iso(self, places=0):
+        """Return UTC as an ISO 8601 string, or an entire array of strings."""
+
         if places:
             power_of_ten = 10 ** places
             offset = _half_second / power_of_ten
@@ -159,6 +164,21 @@ class JulianDate(object):
         else:
             format = '%04d-%02d-%02dT%02d:%02d:%02dZ'
             args = self._utc(_half_second)
+
+        if self.shape:
+            return [format % tup for tup in zip(*args)]
+        else:
+            return format % args
+
+    def utc_jpl(self):
+        """Return UTC in the format used by the JPL HORIZONS system."""
+
+        offset = _half_second / 1e4
+        y, m, d, H, M, S = self._utc(offset)
+        S, F = divmod(S, 1.0)
+        # TODO: B.C.?
+        format = 'A.D. %04d-%s-%02d %02d:%02d:%02d.%04d UT'
+        args = (y, _months[m], d, H, M, S, F * 1e4)
 
         if self.shape:
             return [format % tup for tup in zip(*args)]
@@ -261,18 +281,37 @@ class JulianDate(object):
 
         raise AttributeError('no such attribute %r' % name)
 
+    def __eq__(self, other_jd):
+        return self.tt == other_jd.tt
 
-def julian_date(year, month=1, day=1, hour=0.0, minute=0.0, second=0.0):
+
+def now():
+    """Return the current date and time as a `JulianDate` object.
+
+    For the return value to be correct, your operating system time and
+    timezone settings must be set so that the Python Standard Library
+    constructor ``datetime.datetime.utcnow()`` returns a correct UTC
+    date and time.
+
+    """
+    return JulianDate(utc=datetime.utcnow().replace(tzinfo=utc))
+
+def julian_day(year, month=1, day=1):
+    """Given a proleptic Gregorian calendar date, return a Julian day integer."""
     janfeb = month < 3
-    return ((second / 60.0 + minute) / 60.0 + hour) / 24.0 - 0.5 + (
-            day - 32075
+    return (day
             + 1461 * (year + 4800 - janfeb) // 4
             + 367 * (month - 2 + janfeb * 12) // 12
             - 3 * ((year + 4900 - janfeb) // 100) // 4
-            )
+            - 32075)
+
+def julian_date(year, month=1, day=1, hour=0, minute=0, second=0.0):
+    """Given a proleptic Gregorian calendar date, return a Julian date float."""
+    return julian_day(year, month, day) - 0.5 + (
+        second + minute * 60.0 + hour * 3600.0) / DAY_S
 
 def cal_date(jd):
-    """Convert Julian Day `jd` into a Gregorian year, month, day, and hour."""
+    """Given a Julian Date, return a Gregorian year, month, day, and hour."""
     jd = jd + 0.5
 
     hour = jd % 1.0 * 24.0
@@ -357,12 +396,15 @@ def usno_leapseconds(cache):
     return array([dates, offsets])
 
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
-    year, month, day, hour, minute, second, wday, yday, dst = dt.utctimetuple()
+    tup = dt.astimezone(utc).utctimetuple()
+    year, month, day, hour, minute, second, wday, yday, dst = tup
     return _utc_to_tai(leap_dates, leap_offsets, year, month, day,
-                       hour, minute, second + dt.microsecond * 1e-6)
+                       hour, minute, second + dt.microsecond / 1000000.00)
 
 def _utc_to_tai(leap_dates, leap_offsets, year, month=1, day=1,
                 hour=0, minute=0, second=0.0):
-    j = julian_date(year, month, day, hour, minute, 0.0)
+    j = julian_day(year, month, day) - 0.5
     i = searchsorted(leap_dates, j, 'right')
-    return j + (second + leap_offsets[i]) / DAY_S
+    return j + (second + leap_offsets[i]
+                + minute * 60.0
+                + hour * 3600.0) / DAY_S
