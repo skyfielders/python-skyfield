@@ -18,7 +18,7 @@ Each time scale supported by :class:`JulianDate`
 is described in detail in one of the sections below.
 The supported time scales are:
 
-* ``jd.utc_…`` — Coordinated Universal Time (“Greenwich Time”)
+* ``jd.utc`` — Coordinated Universal Time (“Greenwich Time”)
 * ``jd.tai`` — International Atomic Time
 * ``jd.tt`` — Terrestrial Time
 * ``jd.tdb`` — Barycentric Dynamical Time (the JPL’s “T\ :sub:`eph`”)
@@ -26,17 +26,30 @@ The supported time scales are:
 
 To build a Julian date object,
 simply use one of these time scales
-as a keyword argument to specify the moment you want to represent:
+as a keyword argument to specify the moment you want to represent.
 
 .. testcode::
 
     from skyfield.api import JulianDate
+    JulianDate(utc=(2014, 1, 18))
 
-    jd = JulianDate(utc=(2014, 1, 18))
+The possibilities that will be explored in the course of this page
+are::
 
-For all of the techniques that you can use to build a Julian date,
-read the next two sections on :ref:`utc-and-timezone`
-and on :ref:`building-dates`.
+    Parameter to the JulianDate constructor
+    │
+    ├── utc = Calendar tuple or Python `datetime` or `date`
+    ├── tai = Calendar tuple or Julian date float
+    ├── tt  = Calendar tuple or Julian date float
+    ├── tdb = Calendar tuple or Julian date float
+    └── ut1 = Calendar tuple or Julian date float
+
+    Calendar tuple
+    │
+    ├── (year, month, day)
+    ├── (year, month, day, hour)
+    ├── (year, month, day, hour, minute)
+    └── (year, month, day, hour, minute, second)
 
 There are two ways to provide a date argument
 to a Skyfield routine that needs one.
@@ -79,16 +92,12 @@ specifies Coordinated Universal Time (UTC),
 the world clock known affectionately as “Greenwich Mean Time”
 which is the basis for all of the world’s timezones.
 
-If you are comfortable dealing with UTC,
+If you are comfortable dealing directly with UTC,
 you can simply set and retrieve it manually.
 A Python tuple is the most convenient way
-to represent the year, month, and day of a calendar date,
-and you have the option of providing hours, minutes, and seconds
-as well:
+to represent the year, month, and day of a calendar date:
 
 .. testcode::
-
-    from skyfield.api import utc
 
     # Four ways to specify 2014 January 18 01:35:37.5
 
@@ -110,7 +119,7 @@ as well:
 
     (2014, 1, 18, 1.0, 35.0, 37.5)
     2014-01-18T01:35:38Z
-    A.D. 2014-Feb-18 01:35:37.5000 UT
+    A.D. 2014-Jan-18 01:35:37.5000 UT
     Date 2014-01-18 and time 01:35:38
 
 And by scraping together the minimal support for UTC
@@ -136,7 +145,7 @@ and is configured with the correct time zone):
 
 .. testoutput::
 
-    A.D. 2014-Feb-18 23:10:09.0000 UT
+    A.D. 2014-Jan-18 23:10:09.0000 UT
 
 But to move beyond UTC to working with actual timezones,
 you will need to install
@@ -156,7 +165,7 @@ and pass the result to Skyfield:
 .. testcode::
 
     from datetime import datetime
-    from pytz import timezone, utc
+    from pytz import timezone
 
     eastern = timezone('US/Eastern')
 
@@ -166,7 +175,13 @@ and pass the result to Skyfield:
     e = eastern.localize(d)
     jd = JulianDate(utc=e)
 
-    # Building a datetime in UTC
+And if Skyfield returns a Julian date at the end of a calculation,
+you can ask the Julian date object to build a ``datetime`` object
+for either the UTC date or your own timezone:
+
+.. testcode::
+
+    # UTC datetime
 
     dt, leap_second = jd.utc_datetime()
     print 'UTC:', dt
@@ -185,10 +200,10 @@ As we would expect,
 1:32 AM in the Eastern time zone in January
 is 6:32 AM local time in Greenwich, England,
 five hours to the east across the Atlantic.
-(The extra return value ``leap_second``
-is explained in the next section, :ref:`leap-seconds`.)
+The extra return value ``leap_second``
+is explained in the next section, :ref:`leap-seconds`.
 
-Note that the :meth:`~JulianDate.astimezone()` method
+Note that Skyfield’s :meth:`~JulianDate.astimezone()` method
 will detect that you are using a ``pytz`` timezone
 and automatically call its ``normalize()`` method for you —
 which makes sure that daylight savings time is handled correctly —
@@ -207,15 +222,15 @@ UTC and leap seconds
 
 The rate of Earth’s rotation is gradually slowing down.
 Since the UTC standard specifies a fixed length for the second,
-a day of 24 hours, and an hour of 60 minutes,
+promises a day of 24 hours, and limits an hour to 60 minutes,
 the only way to stay within the rules
 while keeping UTC synchronized with the Earth
 is to occasionally add an extra leap second
 to one of the year’s minutes.
 
 The `International Earth Rotation Service <http://hpiers.obspm.fr/>`_
-currently restricts itself to adding a leap second
-into the last minute of June or the last minute of December.
+currently restricts itself to appending a leap second
+to the last minute of June or the last minute of December.
 When a leap second is inserted,
 its minute counts 61 seconds numbered 00–60
 instead of staying within the usual range 00–59.
@@ -232,11 +247,17 @@ The most recent leap second was in June 2012:
 
 .. testoutput::
 
-    A.D. 2012-Jul-30 23:59:58.0000 UT
-    A.D. 2012-Jul-30 23:59:59.0000 UT
-    A.D. 2012-Jul-30 23:59:60.0000 UT
-    A.D. 2012-Aug-01 00:00:00.0000 UT
-    A.D. 2012-Aug-01 00:00:01.0000 UT
+    A.D. 2012-Jun-30 23:59:58.0000 UT
+    A.D. 2012-Jun-30 23:59:59.0000 UT
+    A.D. 2012-Jun-30 23:59:60.0000 UT
+    A.D. 2012-Jul-01 00:00:00.0000 UT
+    A.D. 2012-Jul-01 00:00:01.0000 UT
+
+Note that Skyfield has no problem with a calendar tuple
+that has hours, minutes, or — as in this case —
+seconds that are out of range.
+It simply added as many seconds as we specified
+and let the value overflow cleanly into the beginning of July.
 
 Keep two consequences in mind when using UTC in your calculations.
 
@@ -288,28 +309,29 @@ as a duplicate 23:59:59, as is the case here:
     2012-06-30 20:00:00-04:00
     2012-06-30 20:00:01-04:00
 
-Using tuples to represent UTC times is more elegant,
+Using calendar tuples to represent UTC times is more elegant
+that trying to use Python ``datetime`` objects
 because leap seconds can be represented accurately.
 If your application cannot avoid using ``datetime`` objects,
 then you will have to decide
 whether to simply ignore the ``leap_second`` value
 or to somehow output the leap second information.
 
-Note that it is always preferred to use the ``leap_second`` name
-in your code even when you do nothing with the value,
-to document that you have made a conscious choice
-to ignore this particular complication:
+You should always to use the ``leap_second`` name in your code,
+even when you do nothing with the value,
+to document its meaning and make explicit
+your decision to ignore it in a particular case:
 
 .. testcode::
 
     # Bad: your code fails to document what it is ignoring.
 
-    dt_list = jd.astimezone(eastern)[0]
+    dt = jd.astimezone(eastern)[0]
 
     # Good: the meaning of the second value is explicit,
-    # even if you make no use of it.
+    # even if you make no further use of the `leap_second`.
 
-    dt_list, leap_seconds = jd.astimezone(eastern)
+    dt, leap_second = jd.astimezone(eastern)
 
 .. _date-arrays:
 

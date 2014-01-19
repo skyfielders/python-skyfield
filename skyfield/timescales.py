@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, tzinfo
+from datetime import date, datetime, timedelta, tzinfo
 from numpy import array, einsum, rollaxis, searchsorted, sin, zeros_like
 from time import strftime
 from .constants import T0, DAY_S
@@ -27,7 +27,7 @@ except ImportError:
 _half_second = 0.5 / DAY_S
 _half_millisecond = 0.5e-3 / DAY_S
 _half_microsecond = 0.5e-6 / DAY_S
-_months = array(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+_months = array(['Month zero', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
 
 extra_documentation = """
@@ -108,6 +108,8 @@ class JulianDate(object):
             leap_dates, leap_offsets = cache.run(usno_leapseconds)
             if isinstance(utc, datetime):
                 tai = _utc_datetime_to_tai(leap_dates, leap_offsets, utc)
+            elif isinstance(utc, date):
+                tai = _utc_date_to_tai(leap_dates, leap_offsets, utc)
             elif isinstance(utc, tuple):
                 values = [_to_array(value) for value in utc]
                 tai = _utc_to_tai(leap_dates, leap_offsets, *values)
@@ -404,6 +406,9 @@ def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
     year, month, day, hour, minute, second, wday, yday, dst = tup
     return _utc_to_tai(leap_dates, leap_offsets, year, month, day,
                        hour, minute, second + dt.microsecond / 1000000.00)
+
+def _utc_date_to_tai(leap_dates, leap_offsets, d):
+    return _utc_to_tai(leap_dates, leap_offsets, d.year, d.month, d.day)
 
 def _utc_to_tai(leap_dates, leap_offsets, year, month=1, day=1,
                 hour=0, minute=0, second=0.0):
