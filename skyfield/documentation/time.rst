@@ -456,8 +456,57 @@ to pull a particular calendar tuple out of the larger result:
 
 .. _tai-tt-tdb:
 
-Other timescales: TAI, TT, and TDB
-==================================
+Uniform time scales: TAI, TT, and TDB
+=====================================
+
+Date arithmetic becomes very simple
+as we leave UTC behind and consider completely uniform time scales.
+Days are always twelve hours, hours always 60 minutes,
+and minutes always 60 seconds without any variation or dissent.
+Such time scales are not appropriate for your morning alarm clock
+because they will never be delayed or adjusted
+to stay in sync with the slowing rotation of the earth.
+But that is what makes them useful for astronomical calculation —
+because physics keeps up its dance,
+and the stars and planets move in their courses,
+whether humanity pauses to observe a UTC leap second or not.
+
+Because they make every day the same length,
+uniform time scales can express dates
+as a simple floating-point count of days elapsed.
+To make all historical dates come out as positive numbers,
+astronomers traditionally use Julian days
+that start counting at B.C. 4713 January 1 in the old Julian calendar —
+the same date as B.C. 4714 November 24 in our Gregorian calendar.
+The count starts at noon
+following tradition going back to the Greeks and Ptolemy,
+since the sun’s transit is an observable event
+but the moment of midnight is not.
+
+So twelve noon was the moment of Julian date zero:
+
+.. testcode::
+
+    bc_4714 = -4713
+    print JulianDate(tt=(bc_4714, 11, 24, 12)).tt
+
+.. testoutput::
+
+    0.0
+
+Did you notice how negative years work?
+People still counted by starting at one, not zero,
+when the scholar Dionysius Exiguus created the eras BC and AD
+in around the year AD 500.
+So his scheme has 1 BC followed immediately by 1 AD without a break.
+To avoid an off-by-one error,
+astronomers usually ignore BC and count backwards through a year zero
+and on into negative years.
+So negative year *-n* is what might otherwise be called
+either “*n+1* BC” or perhaps “*n+1* BCE” in a history textbook.
+
+More than two million days have passed since 4714 BC
+so modern dates tend to be rather large numbers:
 
 .. testcode::
 
@@ -465,14 +514,44 @@ Other timescales: TAI, TT, and TDB
     print 'TAI = %r' % jd.tai
     print 'TT  = %r' % jd.tt
     print 'TDB = %r' % jd.tdb
-    print 'UT1 = %r' % jd.ut1
 
 .. testoutput::
 
     TAI = 2456658.5004050927
     TT  = 2456658.5007775929
     TDB = 2456658.500777592
-    UT1 = 2456658.5007775929
+
+Why does Skyfield support three different uniform time scales?
+
+International Atomic Time (TAI) is maintained
+by the worldwide network of atomic clocks
+referenced by researchers with a need for very accurate time.
+The official leap second table
+is actually a table of offsets between TAI and UTC.
+At the end of June 2012, for example,
+the TAI−UTC offset was changed from 34.0 to 35.0
+which is what made necessary the leap second in UTC.
+
+Terrestrial Time (TT) is different
+because astronomers have been maintaining a uniform time scale
+since before TAI was established,
+using a slightly different starting point for the day.
+For practical purposes, TT is simply TAI
+plus exactly 32.184 seconds.
+So it is now more than a minute ahead of UTC.
+
+Barycentric Dynamical Time (TDB) runs at approximately the rate
+that we think an atomic clock would run at the Solar System barycenter,
+where it would be unaffected by the Earth’s motion.
+The acceleration that Earth experiences in its orbit —
+sometimes speeding up, sometimes slowing down —
+varies the rate at which our atomic clocks
+seem to run to an outside observer,
+as predicted by Einstein’s theory of General Relativity.
+So physical simulations of the Solar System tend to use TDB,
+which is continuous with the T\ :sub:`eph` time scale
+traditionally used for Solar System and spacecraft simulations
+at the Jet Propulsion Laboratory.
 
 UT1 and ΔT
 ==========
