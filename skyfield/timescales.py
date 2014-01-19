@@ -27,8 +27,8 @@ except ImportError:
 _half_second = 0.5 / DAY_S
 _half_millisecond = 0.5e-3 / DAY_S
 _half_microsecond = 0.5e-6 / DAY_S
-_months = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+_months = array(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
 
 extra_documentation = """
 
@@ -132,24 +132,28 @@ class JulianDate(object):
         self.delta_t = delta_t
 
     def astimezone(self, tz):
-        dt = self.utc_datetime()
+        dt, leap_second = self.utc_datetime()
         normalize = getattr(tz, 'normalize', lambda d: d)
         if self.shape:
-            return [normalize(d.astimezone(tz)) for d in dt]
+            dt = [normalize(d.astimezone(tz)) for d in dt]
         else:
-            return normalize(dt.astimezone(tz))
+            dt = normalize(dt.astimezone(tz))
+        return dt, leap_second
 
     def utc_datetime(self):
         year, month, day, hour, minute, second = self._utc(_half_millisecond)
         second, fraction = divmod(second, 1.0)
         second = second.astype(int)
+        leap_second = second // 60
+        second -= leap_second
         milli = (fraction * 1000).astype(int) * 1000
         if self.shape:
             utcs = [utc] * self.shape[0]
             argsets = zip(year, month, day, hour, minute, second, milli, utcs)
-            return [datetime(*args) for args in argsets]
+            dt = [datetime(*args) for args in argsets]
         else:
-            return datetime(year, month, day, hour, minute, second, milli, utc)
+            dt = datetime(year, month, day, hour, minute, second, milli, utc)
+        return dt, leap_second
 
     def utc_iso(self, places=0):
         """Return UTC as an ISO 8601 string, or an entire array of strings."""
