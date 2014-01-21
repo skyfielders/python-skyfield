@@ -10,7 +10,7 @@ from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
 from .functions import dots
 from .relativity import add_aberration, add_deflection
-from .timescales import JulianDate, takes_julian_date
+from .timelib import JulianDate, takes_julian_date
 from .units import Distance, Velocity
 
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.

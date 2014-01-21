@@ -8,7 +8,7 @@ default JPL planetary ephemeris ``de421`` and create planet objects like
 import de421
 from datetime import datetime
 from .jpllib import Ephemeris
-from .timescales import JulianDate, now, utc
+from .timelib import JulianDate, now, utc
 
 ephemeris = Ephemeris(de421)
 del Ephemeris

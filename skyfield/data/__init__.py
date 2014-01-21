@@ -5,14 +5,14 @@ import os
 from datetime import date
 from numpy import save
 from skyfield import io
-from skyfield import timescales
+from skyfield import timelib
 
 _dirname = os.path.dirname(__file__)
 
 cache = io.Cache('.')
 cache.npy_dirname = _dirname
 functions = set([
-    timescales.usno_leapseconds,
+    timelib.usno_leapseconds,
     ])
 
 def rebuild(remove_old_files=True):

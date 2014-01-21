@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from numpy import array
 from skyfield.api import earth
 from skyfield.sgp4lib import EarthSatellite, TEME_to_ITRF
-from skyfield.timescales import JulianDate, utc
+from skyfield.timelib import JulianDate, utc
 
 iss_tle = ("""\
 ISS (ZARYA)             \n\

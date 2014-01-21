@@ -1,6 +1,6 @@
 import numpy as np
 from skyfield.constants import DAY_S
-from skyfield.timescales import JulianDate, utc
+from skyfield.timelib import JulianDate, utc
 from datetime import datetime
 
 one_second = 1.0 / DAY_S

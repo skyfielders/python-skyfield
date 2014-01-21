@@ -87,13 +87,11 @@ tt_minus_tai = array(32.184 / DAY_S)
 class JulianDate(object):
     """Julian date.
 
-    Attributes:
-
-    `utc`     - Coordinated Universal Time
-    `tai`     - International Atomic Time
-    `tt`      - Terrestrial Time
-    `delta_t` - Difference between Terrestrial Time and UT1
-    `cache`   - SkyField `Cache` for automatically fetching `delta_t` table
+    :param utc: Coordinated Universal Time
+    :param tai: International Atomic Time
+    :param tt: Terrestrial Time
+    :param delta_t: Difference between Terrestrial Time and UT1
+    :param cache: Cache for automatically fetching `delta_t` table
 
     """
     def __init__(self, utc=None, tai=None, tt=None, delta_t=0.0, cache=None):
@@ -134,6 +132,13 @@ class JulianDate(object):
         self.delta_t = delta_t
 
     def astimezone(self, tz):
+        """Return a ``datetime`` for this value in a ``pytz`` timezone.
+
+        The third-party ``pytz`` package must be installed separately.
+        If this value is a date array, then a sequence of datetimes is
+        returned.
+
+        """
         dt, leap_second = self.utc_datetime()
         normalize = getattr(tz, 'normalize', lambda d: d)
         if self.shape:
@@ -143,6 +148,15 @@ class JulianDate(object):
         return dt, leap_second
 
     def utc_datetime(self):
+        """Return a UTC ``datetime`` for this value.
+
+        If the third-party ``pytz`` package is available, then its
+        ``utc`` timezone is used.  Otherwise, a Skyfield built-in
+        alternative is used; the result should be the same either way.
+        If this value is a date array, then a sequence of datetimes is
+        returned.
+
+        """
         year, month, day, hour, minute, second = self._utc(_half_millisecond)
         second, fraction = divmod(second, 1.0)
         second = second.astype(int)
@@ -158,8 +172,11 @@ class JulianDate(object):
         return dt, leap_second
 
     def utc_iso(self, places=0):
-        """Return UTC as an ISO 8601 string, or an entire array of strings."""
+        """Return this UTC value as an ISO 8601 string or array of strings.
 
+        For example: ``2014-01-18T01:35:38Z``
+
+        """
         if places:
             power_of_ten = 10 ** places
             offset = _half_second / power_of_ten
@@ -177,8 +194,11 @@ class JulianDate(object):
             return format % args
 
     def utc_jpl(self):
-        """Return UTC in the format used by the JPL HORIZONS system."""
+        """Return UTC in the format used by the JPL HORIZONS system.
 
+        For example: ``A.D. 2014-Jan-18 01:35:37.5000 UT``
+
+        """
         offset = _half_second / 1e4
         y, m, d, H, M, S = self._utc(offset)
         S, F = divmod(S, 1.0)
@@ -192,6 +212,13 @@ class JulianDate(object):
             return format % args
 
     def utc_strftime(self, format):
+        """Format this UTC time according to a standard format string.
+
+        This internally calls the Python ``strftime()`` routine from the
+        Standard Library ``time()`` module, for which you can find a
+        quick reference at http://strftime.org/.
+
+        """
         tup = self._utc(_half_second)
         y, mon, d, h, m, s = tup
         zero = zeros_like(y)

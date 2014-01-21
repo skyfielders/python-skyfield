@@ -4,7 +4,7 @@ from numpy import max, min
 from .constants import AU_KM, C_AUDAY
 from .functions import length_of
 from .positionlib import ICRS, Astrometric, Topos
-from .timescales import takes_julian_date
+from .timelib import takes_julian_date
 
 class Planet(object):
     def __init__(self, ephemeris, jplephemeris, jplname):

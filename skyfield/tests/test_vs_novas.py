@@ -4,11 +4,11 @@ import pytest
 from numpy import array, einsum
 
 from skyfield import (positionlib, earthlib, framelib, nutationlib,
-                      jpllib, precessionlib, starlib, timescales)
+                      jpllib, precessionlib, starlib, timelib)
 
 from ..constants import ASEC2RAD, AU, DEG2RAD, T0
 from ..functions import length_of
-from ..timescales import JulianDate
+from ..timelib import JulianDate
 
 # Since some users might run these tests without having installed our
 # test dependencies, we detect import errors and skip these tests if the
@@ -248,7 +248,7 @@ def test_altaz(jd, planet_name_and_code):
 
 def test_cal_date():
     for jd in 0.0, 2414988.5, 2415020.31352, 2442249.5, 2456335.2428472:
-        assert c.cal_date(jd) == timescales.cal_date(jd)
+        assert c.cal_date(jd) == timelib.cal_date(jd)
 
 def test_earth_rotation_angle(jd_float_or_vector):
     jd_ut1 = jd_float_or_vector
@@ -321,7 +321,7 @@ def test_julian_date():
           (1976, 3, 7, 12.5),
           (2000, 1, 1, 0.0),
           ):
-        eq(c.julian_date(*args), timescales.julian_date(*args), epsilon)
+        eq(c.julian_date(*args), timelib.julian_date(*args), epsilon)
 
 def test_mean_obliq(jd_float_or_vector):
     jd_tdb = jd_float_or_vector
@@ -412,7 +412,7 @@ def test_terra():
 def test_tdb2tt(jd_float_or_vector):
     jd_tdb = jd_float_or_vector
     u = c.tdb2tt(jd_tdb)[1]
-    v = timescales.tdb_minus_tt(jd_tdb)
+    v = timelib.tdb_minus_tt(jd_tdb)
     epsilon_seconds = 1e-16  # 11 or 12 digits of agreement; why not more?
     eq(u, v, epsilon_seconds)
 

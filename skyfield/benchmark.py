@@ -6,7 +6,7 @@ from numpy import array, mean, std, zeros
 from skyfield import earthlib, nutationlib, planets, starlib
 
 from skyfield.constants import T0
-from skyfield.timescales import julian_date, JulianDate
+from skyfield.timelib import julian_date, JulianDate
 from timeit import default_timer
 
 TA = julian_date(1969, 7, 20, 20., 18.)

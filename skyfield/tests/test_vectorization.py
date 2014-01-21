@@ -6,7 +6,7 @@ from .. import starlib
 from ..constants import T0, B1950
 from ..api import earth, mars
 from ..positionlib import Topos
-from ..timescales import JulianDate, julian_date
+from ..timelib import JulianDate, julian_date
 
 if sys.version_info < (3,):
     from itertools import izip
