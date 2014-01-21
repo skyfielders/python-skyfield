@@ -350,7 +350,7 @@ of an Earth object:
     # Altitude and azimuth in the sky of a
     # specific geographic location
 
-    boston = earth.topos('71.0603 W', '42.3583 N')
+    boston = earth.topos('42.3583 N', '71.0603 W')
     astro = boston(utc=(1980, 1, 1)).observe(jupiter)
     alt, az, distance = astro.apparent().altaz()
     print alt.dstr()

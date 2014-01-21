@@ -91,6 +91,10 @@ class Earth(Planet):
         t.ephemeris = self.ephemeris
         return t
 
+    def satellite(self, text):
+        from .sgp4lib import EarthSatellite
+        lines = text.splitlines()
+        return EarthSatellite(lines, self)
 
 class Ephemeris(object):
 

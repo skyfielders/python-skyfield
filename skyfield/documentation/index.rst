@@ -31,7 +31,7 @@
 
 .. testcode::
 
-    boston = earth.topos('71.0636 W', '42.3583 N')
+    boston = earth.topos('42.3583 N', '71.0636 W')
     alt, az, d = boston(now()).observe(mars).apparent().altaz()
     print(alt)
     print(az)

@@ -72,10 +72,10 @@ class ICRS(object):
 
 class Topos(object):
 
-    def __init__(self, longitude, latitude, elevation=0.,
+    def __init__(self, latitude, longitude, elevation=0.,
                  temperature=10.0, pressure=1010.0):
-        self.longitude = lon = interpret_longitude(longitude)
         self.latitude = lat = interpret_latitude(latitude)
+        self.longitude = lon = interpret_longitude(longitude)
         self.elevation = elevation
 
         sinlat = sin(lat)

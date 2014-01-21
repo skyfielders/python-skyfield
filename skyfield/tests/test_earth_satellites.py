@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from numpy import array
 from skyfield.api import earth
 from skyfield.sgp4lib import EarthSatellite, TEME_to_ITRF
-from skyfield.timescales import JulianDate, julian_date, utc
+from skyfield.timescales import JulianDate, utc
 
 iss_tle = ("""\
 ISS (ZARYA)             \n\
@@ -46,7 +46,7 @@ def test_iss_altitude(iss_transit):
 
     lines = iss_tle.splitlines()
     s = EarthSatellite(lines, earth)
-    lake_zurich = earth.topos('88.1 W', '42.2 N')
+    lake_zurich = earth.topos('42.2 N', '88.1 W')
     alt, az, d = lake_zurich(jd).observe(s).altaz()
     print(dt, their_altitude, alt.degrees(), their_altitude - alt.degrees())
     assert abs(alt.degrees() - their_altitude) < 2.5  # TODO: tighten this up?
