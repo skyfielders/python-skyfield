@@ -1,9 +1,9 @@
 
-.. currentmodule:: skyfield.api
-
 ================
  Dates and Time
 ================
+
+.. currentmodule:: skyfield.api
 
 Astronomers use several different numerical scales for measuring time.
 Since Skyfield often has to reference several such scales

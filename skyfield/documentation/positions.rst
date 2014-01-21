@@ -1,9 +1,9 @@
 
-.. currentmodule:: skyfield.api
-
 ===========================
  Positions and Coordinates
 ===========================
+
+.. currentmodule:: skyfield.api
 
 Skyfield is careful to distinguish the *position* of an object
 from the several choices of *coordinate*
