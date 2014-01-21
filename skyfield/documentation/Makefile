@@ -151,3 +151,12 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
+
+diff:
+	colordiff -ur ~/Dropbox/rhodesmill.org/skyfield _build/html/ | grep -v 'Only in' | less
+
+dry-run:
+	rsync --dry-run -crlv _build/html/ ~/Dropbox/rhodesmill.org/skyfield
+
+sync:
+	rsync -crlv _build/html/ ~/Dropbox/rhodesmill.org/skyfield
