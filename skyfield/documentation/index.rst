@@ -62,4 +62,3 @@ on GitHub.
    time
    planets
    earth-satellites
-   api
