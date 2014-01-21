@@ -11,7 +11,7 @@ setup(
     author_email='brandon@rhodesmill.org',
     url='http://github.com/brandon-rhodes/python-skyfield/',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
         'Topic :: Scientific/Engineering :: Astronomy',
