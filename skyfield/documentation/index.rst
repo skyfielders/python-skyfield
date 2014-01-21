@@ -30,8 +30,9 @@
     +17deg 13' 02.6"
     2.18572863461 AU
 
-Skyfield is a pure-Python high-precision astronomy package
-that can generate positions for planets and Earth satellites.
+Skyfield is a pure-Python astronomy package
+that makes it easy to generate high precision research-grade
+positions for planets and Earth satellites.
 You can compute either geocentric coordinates
 as shown in the example above,
 or topocentric coordinates specific to your location
@@ -50,6 +51,9 @@ on the Earth’s surface:
     64deg 44' 50.1"
     184deg 17' 16.9"
 
+You can also visit the
+`Skyfield entry <https://pypi.python.org/pypi/skyfield>`_
+on the Python Package Index.
 If anything you need seems to be missing from the following pages,
 feel free to supplement the
 `list of project issues

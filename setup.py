@@ -4,7 +4,7 @@ import skyfield  # to learn the version
 setup(
     name='skyfield',
     version=skyfield.__version__,
-    description=skyfield.__doc__,
+    description=skyfield.__doc__.split('\n', 1)[0],
     long_description=open('README.rst').read(),
     license='MIT',
     author='Brandon Rhodes',
