@@ -3,68 +3,87 @@
  The Planets
 =============
 
+.. currentmodule:: skyfield.api
+
 As you install Skyfield,
 ``pip`` will also download and install
-the `de421 <https://pypi.python.org/pypi/de421>`_ Python package.
+the `de421 <https://pypi.python.org/pypi/de421>`_ package for Python.
 It provides the DE421 Jet Propulsion Laboratory ephemeris
 that lists high-precision planetary positions
 for the years 1900 through 2050.
-Its moderate 27 MB size and use of very recent data
-seemed to make it the best choice for Skyfield’s default ephemeris.
+Its moderate 27 MB size, high accuracy, and use of very recent data
+makes it the best choice for Skyfield’s default ephemeris.
 
-It is DE421 predictions that you will receive
-when you simply import the planets from the API module:
+The DE421 ephemeris is used automatically
+when you import the planets from the API module:
 
 .. testcode::
 
-    # These use the JPL DE421 ephemeris
-
-    from skyfield.api import sun, earth, moon  # etc
+    from skyfield.api import sun, earth, moon #...
 
 There are four other ephemerides (the plural of “ephemeris”)
 available from the Python Package Index
 that you might consider installing.
+Here is the full list:
 
 `DE405 <https://pypi.python.org/pypi/de405>`_
   A standard ephemeris from 1997 that has seen wide use
-  and covers the years 1600 though 2200.
+  and requires 54 MB to cover the years 1600–2200.
 
 `DE406 <https://pypi.python.org/pypi/de406>`_
   A longer-term source of planetary positions, also published in 1997,
   that has enjoyed very widespread use
   and that stands behind several recent editions
   of the United States Naval Observatory’s Astronomical Almanac.
-  Covers the years -3000 through 3000 at the cost of 190 MB of storage.
+  Covers the years -3000–3000 at the cost of 190 MB of storage.
 
 `DE421 <https://pypi.python.org/pypi/de421>`_
   The Skyfield default, discussed above,
-  covering years 1900 through 2050.
+  issued in 2008 which covers years 1900–2050.
 
 `DE422 <https://pypi.python.org/pypi/de422>`_
   The most recent general-purpose long-period ephemeris from the JPL,
-  covering the six thousand years
-  from -3000 to 3000 but weighing in at 531 MB of storage.
+  issued in 2009 and covering the six thousand years
+  from -3000–3000 but weighing in at 531 MB of storage.
 
 `DE423 <https://pypi.python.org/pypi/de406>`_
   The most recent JPL ephemeris that has been packaged for Python,
-  whose particular goal was high accuracy for Mercury and Venus
+  issued in 2010 and whose particular goal
+  was high accuracy for Mercury and Venus
   since it was used for the MESSENGER mission to those planets.
+  It covers the years 1800–2200.
 
-To use one of these alternative ephemerides
+To use one of these alternative ephemerides,
 simply install it with the ``pip`` ``install`` command,
 import it, and wrap it in a Skyfield :class:`~jpllib.Ephemeris`.
 You can then use its planet attributes to turn dates into positions,
 just like the planets that you can import
-from the :mod:`~skyfield.api` module:
+from the :mod:`~api` module:
+
+.. testsetup::
+
+    import numpy as np
+    np.set_printoptions(suppress=True, formatter={'float': str})
 
 .. testcode::
 
     import de423
+    from skyfield import api
     from skyfield.jpllib import Ephemeris
 
     eph = Ephemeris(de423)
-    print eph.earth(utc=(1993, 5, 15)).position.AU
+    print 'DE421:', api.mercury(utc=(1993, 5, 15)).position.km
+    print 'DE423:', eph.mercury(utc=(1993, 5, 15)).position.km
 
 .. testoutput::
 
-    
+    DE421: [31387022.7906 33032548.9719 14337050.8211]
+    DE423: [31387022.7693 33032548.7756 14337050.9898]
+
+These positions might look identical,
+making you wonder why the JPL even bothered to issue a new ephemeris,
+but read all the way down to the very last digits —
+these predicted positions do differ by one or two hundred meters!
+While the difference might be impossible to see with your telescope,
+it can be of moment and consequence to professionals
+who have to intercept the planet with a spacecraft.
