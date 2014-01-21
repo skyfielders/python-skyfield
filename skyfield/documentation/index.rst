@@ -19,6 +19,7 @@
 
     from skyfield.api import earth, mars, now
     ra, dec, distance = earth(now()).observe(mars).radec()
+
     print ra
     print dec
     print distance
@@ -40,6 +41,7 @@ on the Earth’s surface:
 
     boston = earth.topos('42.3583 N', '71.0636 W')
     alt, az, d = boston(now()).observe(mars).apparent().altaz()
+
     print alt
     print az
 
