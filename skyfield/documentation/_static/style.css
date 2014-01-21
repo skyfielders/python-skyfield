@@ -112,7 +112,7 @@ pre tt {
     padding: 0;
     font-size: 1.25em;
 }
-table {
+table[border="1"] {
     margin: 1em auto;
 }
 @media screen and (min-width: 480px) {body {font-size: 1.125em;}}
