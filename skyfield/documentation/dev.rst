@@ -20,8 +20,27 @@ array([[  8.,  12.],
        [ 10.,  15.],
        [ 12.,  18.]])
 
+Importing NumPy
+===============
+
+Code examples in the Skyfield documentation that need NumPy
+will always import it as ``np``
+as that is the standard practice in the wider SciPy community.
+Examples will then use NumPy features
+through fully qualified names like ``np.array``
+since that is how users —
+especially users new to the scientific Python ecosystem —
+should be advised to structure their own code.
+
+However, because Skyfield code itself
+is presumed to always use NumPy
+in preference to built-in Python numerics,
+the hundreds of ``np.`` prefixes would add only noise.
+As a consequence, Skyfield’s modules themselves simply do a
+``from`` ``numpy`` ``import`` of any names that they need.
+
 Scalar Theory
--------------
+=============
 
 The Skyfield library is designed both for the use of naive users who
 understand only the concept of a single date and resulting position, as
