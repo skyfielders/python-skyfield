@@ -1,4 +1,3 @@
-
 =============
  The Planets
 =============
@@ -25,6 +24,16 @@ There are four other ephemerides (the plural of “ephemeris”)
 available from the Python Package Index
 that you might consider installing.
 Here is the full list:
+
+=========  ======== ========== ==============
+Ephemeris    Size      Years       Issued
+=========  ======== ========== ==============
+DE405       52.1 MB  1600–2200 May 1997
+DE406      170.0 MB -3000–3000 May 1997
+DE421       13.0 MB  1900–2050 February 2008
+DE422      519.6 MB -3000–3000 September 2009
+DE423       34.6 MB  1800–2200 February 2010
+=========  ======== ========== ==============
 
 `DE405 <https://pypi.python.org/pypi/de405>`_
   A standard ephemeris from 1997 that has seen wide use
