@@ -429,7 +429,11 @@ def usno_leapseconds(cache):
     return array([dates, offsets])
 
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
-    tup = dt.astimezone(utc).utctimetuple()
+    try:
+        utc_datetime = dt.astimezone(utc)
+    except ValueError:
+        raise ValueError(_naive_complaint)
+    tup = utc_datetime.utctimetuple()
     year, month, day, hour, minute, second, wday, yday, dst = tup
     return _utc_to_tai(leap_dates, leap_offsets, year, month, day,
                        hour, minute, second + dt.microsecond / 1000000.00)
@@ -444,3 +448,19 @@ def _utc_to_tai(leap_dates, leap_offsets, year, month=1, day=1,
     return j + (second + leap_offsets[i]
                 + minute * 60.0
                 + hour * 3600.0) / DAY_S
+
+
+_naive_complaint = """cannot interpret a datetime that lacks a timezone
+
+You must either specify that your datetime is in UTC:
+
+    from skyfield.api import utc
+    datetime(..., tzinfo=utc)  # to build a new datetime
+    d.replace(tzinfo=utc)      # to fix an existing datetime
+
+Or install the third-party `pytz` library and use any of its timezones:
+
+    from pytz import timezone
+    eastern = timezone('US/Eastern')
+    d = eastern.localize(datetime(2014, 1, 16, 1, 32, 9))
+"""
