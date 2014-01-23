@@ -46,6 +46,17 @@ def test_indexing_julian_date():
     assert jd.ut1[0] == jd0.ut1
     assert jd.delta_t == jd0.delta_t
 
+def test_slicing_julian_date():
+    jd = JulianDate(utc=(1974, 10, range(1, 6)))
+    assert jd.shape == (5,)
+    jd24 = jd[2:4]
+    assert jd24.shape == (2,)
+    assert (jd.tai[2:4] == jd24.tai).all()
+    assert (jd.tt[2:4] == jd24.tt).all()
+    assert (jd.tdb[2:4] == jd24.tdb).all()
+    assert (jd.ut1[2:4] == jd24.ut1).all()
+    assert jd.delta_t == jd24.delta_t
+
 def test_early_utc():
     jd = JulianDate(utc=(1915, 12, 2, 3, 4, 5.6786786))
     assert abs(jd.tt - 2420833.6283317441) < epsilon
