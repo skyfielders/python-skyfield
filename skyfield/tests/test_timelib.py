@@ -36,6 +36,16 @@ def test_building_JulianDate_from_list_of_datetimes():
         2442046.5, 2442047.5, 2442048.5, 2442049.5, 2442050.5, 2442051.5,
         ]).all()
 
+def test_indexing_julian_date():
+    jd = JulianDate(utc=(1974, 10, range(1, 6)))
+    assert jd.shape == (5,)
+    jd0 = jd[0]
+    assert jd.tai[0] == jd0.tai
+    assert jd.tt[0] == jd0.tt
+    assert jd.tdb[0] == jd0.tdb
+    assert jd.ut1[0] == jd0.ut1
+    assert jd.delta_t == jd0.delta_t
+
 def test_early_utc():
     jd = JulianDate(utc=(1915, 12, 2, 3, 4, 5.6786786))
     assert abs(jd.tt - 2420833.6283317441) < epsilon

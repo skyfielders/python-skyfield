@@ -131,6 +131,17 @@ class JulianDate(object):
         self.shape = self.tt.shape
         self.delta_t = delta_t
 
+    def __getitem__(self, index):
+        # TODO: also copy cached matrices?
+        jd = JulianDate(tt=self.tt[index])
+        for name in 'utc', 'tai', 'tdb', 'ut1', 'delta_t':
+            value = getattr(self, name, None)
+            if value is not None:
+                if getattr(value, 'shape', None):
+                    value = value[index]
+                setattr(jd, name, value)
+        return jd
+
     def astimezone(self, tz):
         """Return a ``datetime`` for this value in a ``pytz`` timezone.
 
