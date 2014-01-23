@@ -7,11 +7,17 @@ default JPL planetary ephemeris ``de421`` and create planet objects like
 """
 import de421
 from datetime import datetime
-from .jpllib import Ephemeris
 from .timelib import JulianDate, now, utc
 
-ephemeris = Ephemeris(de421)
-del Ephemeris
+def build_ephemeris():
+    from .data.horizons import festoon_ephemeris
+    from .jpllib import Ephemeris
+    ephemeris = Ephemeris(de421)
+    festoon_ephemeris(ephemeris)
+    return ephemeris
+
+ephemeris = build_ephemeris()
+del build_ephemeris
 
 sun = ephemeris.sun
 mercury = ephemeris.mercury

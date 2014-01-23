@@ -1,8 +1,12 @@
 from .constants import AU_KM, DAY_S
 
 class Distance(object):
-    def __init__(self, value_AU):
-        self.AU = value_AU
+    def __init__(self, AU=None, km=None):
+        if AU is not None:
+            self.AU = AU
+        elif km is not None:
+            self.km = km
+            self.AU = km / AU_KM
 
     def __getattr__(self, name):
         if name == 'km':
