@@ -17,12 +17,20 @@ class Distance(object):
     def __str__(self):
         return '%s AU' % self.AU
 
+    def to(self, unit):
+        from astropy.units import AU
+        return (self.AU * AU).to(unit)
+
 class Velocity(object):
-    def __init__(self, value_AU_per_d):
-        self.AU_per_d = value_AU_per_d
+    def __init__(self, AU_per_d):
+        self.AU_per_d = AU_per_d
 
     def __getattr__(self, name):
         if name == 'km_per_s':
             self.km_per_s = self.AU_per_d * AU_KM / DAY_S
             return self.km_per_s
         raise AttributeError('no attribute named %r' % (name,))
+
+    def to(self, unit):
+        from astropy.units import AU, d
+        return (self.AU_per_d * AU / d).to(unit)
