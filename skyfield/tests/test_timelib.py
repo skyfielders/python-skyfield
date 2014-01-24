@@ -17,7 +17,7 @@ def test_building_JulianDate_from_tuple_with_array_inside():
 def test_building_JulianDate_from_naive_datetime():
     with pytest.raises(ValueError) as excinfo:
         JulianDate(utc=datetime(1973, 12, 29, 23, 59, 48))
-    assert 'import timezone' in excinfo.value.message
+    assert 'import timezone' in str(excinfo.value)
 
 def test_building_JulianDate_from_single_datetime():
     jd = JulianDate(utc=datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc))
