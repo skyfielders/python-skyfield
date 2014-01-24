@@ -178,15 +178,19 @@ def test_vector_vs_scalar(vector_vs_scalar):
         '{}:\n  {}[{}].shape != {}.shape\n  shapes: {} {}'.format(
             location, vector.T, i, scalar, vector.T[i].shape, scalar.shape))
 
-    # Ignore rounding errors in the final floating-point bits:
+    vectorTi = vectorT[i]
 
-    if scalar.shape:
-        vrepr = array_repr(vectorT[i], precision=18)
-        srepr = array_repr(scalar, precision=18)
-    else:
-        vrepr = array_str(array([vectorT[i]]), precision=13).strip('[] ')
-        srepr = array_str(array([scalar]), precision=13).strip('[] ')
+    # Yes, an auto-generated epsilon with no physical significance!
+    # Why?  Because we are comparing the rounding differences in two
+    # (hopefully!) identical floating-point computations, not thinking
+    # of the results as two physical calculations.
 
-    assert vrepr == srepr, (
-        '{}:\n  vector[{}] = {}\n  scalar    = {}\n  difference: {}'.format(
-            location, i, vrepr, srepr, vector.T[i] - scalar))
+    epsilon = abs(1e-15 * max(vectorTi.max(), scalar.max()))
+    difference = abs(vectorTi - scalar)
+
+    assert (difference <= epsilon).all(), (
+        '{}:\n vector[{}] = {}\n'
+        ' scalar    = {}\n'
+        ' difference= {}\n'
+        ' epsilon   = {}'
+        .format(location, i, vectorTi, scalar, difference, epsilon))
