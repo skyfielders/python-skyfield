@@ -193,10 +193,11 @@ class JulianDate(object):
         if places:
             power_of_ten = 10 ** places
             offset = _half_second / power_of_ten
-            y, m, d, H, M, S = self._utc(offset)
-            S, F = divmod(S, 1.0)
+            year, month, day, hour, minute, second = self._utc(offset)
+            second, fraction = divmod(second, 1.0)
+            fraction *= power_of_ten
             format = '%%04d-%%02d-%%02dT%%02d:%%02d:%%02d.%%0%ddZ' % places
-            args = (y, m, d, H, M, S, F * power_of_ten)
+            args = (year, month, day, hour, minute, second, fraction)
         else:
             format = '%04d-%02d-%02dT%02d:%02d:%02dZ'
             args = self._utc(_half_second)
@@ -213,14 +214,15 @@ class JulianDate(object):
 
         """
         offset = _half_second / 1e4
-        y, m, d, H, M, S = self._utc(offset)
-        S, F = divmod(S, 1.0)
-        bc = y < 1
-        y = abs(y - bc)
+        year, month, day, hour, minute, second = self._utc(offset)
+        second, fraction = divmod(second, 1.0)
+        fraction *= 1e4
+        bc = year < 1
+        year = abs(year - bc)
         era = where(bc, 'B.C.', 'A.D.')
         # TODO: does the JPL really zero-fill years < 4 digits?
         format = '%s %04d-%s-%02d %02d:%02d:%02d.%04d UT'
-        args = (era, y, _months[m], d, H, M, S, F * 1e4)
+        args = (era, year, _months[month], day, hour, minute, second, fraction)
 
         if self.shape:
             return [format % tup for tup in zip(*args)]
