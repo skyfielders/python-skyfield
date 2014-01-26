@@ -117,7 +117,7 @@ to represent the year, month, and day of a calendar date:
 
 .. testoutput::
 
-    (2014, 1, 18, 1.0, 35.0, 37.5)
+    (2014, 1, 18, 1, 35, 37.5)
     2014-01-18T01:35:38Z
     A.D. 2014-Jan-18 01:35:37.5000 UT
     Date 2014-01-18 and time 01:35:38

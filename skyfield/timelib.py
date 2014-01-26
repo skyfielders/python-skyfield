@@ -267,8 +267,7 @@ class JulianDate(object):
         m, s = divmod(hfrac * 3600.0, 60.0)
         is_leap_second = j < leap_dates[i-1]
         s += is_leap_second
-        self.utc = utc = (y, mon, d, h.astype(int), m.astype(int), s)
-        return utc
+        return y, mon, d, h.astype(int), m.astype(int), s
 
     def __getattr__(self, name):
 
@@ -305,16 +304,10 @@ class JulianDate(object):
             return tai
 
         if name == 'utc':
-            tai = self.tai
-            leap_dates, leap_offsets = self.cache.run(usno_leapseconds)
-            leap_reverse_dates = leap_dates + leap_offsets / DAY_S
-            i = searchsorted(leap_reverse_dates, tai, 'right')
-            j = tai - leap_offsets[i] / DAY_S
-            y, mon, d, h = cal_date(j)
-            h, hfrac = divmod(h, 1.0)
-            m, s = divmod(hfrac * 3600.0, 60.0)
-            tup = (y, mon, d, h, m, s)
-            return array(tup) if self.shape else tup
+            utc = self._utc()
+            utc = array(utc) if self.shape else utc
+            self.utc = utc = utc
+            return utc
 
         if name == 'tdb':
             tt = self.tt

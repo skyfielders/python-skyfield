@@ -20,7 +20,6 @@ def time_value(request):
 def test_JulianDate_init(time_parameter, time_value):
     kw = {time_parameter: time_value}
     jd = JulianDate(**kw)
-    print getattr(jd, time_parameter)
     assert getattr(jd, time_parameter) == 2441700.56640625
 
 def test_building_JulianDate_from_utc_tuple_with_array_inside():
