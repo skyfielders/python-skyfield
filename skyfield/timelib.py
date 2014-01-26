@@ -117,6 +117,8 @@ class JulianDate(object):
                     for dt in utc])
 
         if tai is not None:
+            if isinstance(tai, tuple):
+                tai = julian_date(*tai)
             self.tai = _to_array(tai)
             if tt is None:
                 tt = tai + tt_minus_tai

@@ -7,23 +7,39 @@ from datetime import datetime
 one_second = 1.0 / DAY_S
 epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
 
-def test_building_JulianDate_from_tuple_with_array_inside():
+
+@pytest.fixture(params=['tai', 'tt'])
+def time_parameter(request):
+    return request.param
+
+@pytest.fixture(params=[(1973, 1, 18, 1, 35, 37.5), 2441700.56640625])
+def time_value(request):
+    return request.param
+
+
+def test_JulianDate_init(time_parameter, time_value):
+    kw = {time_parameter: time_value}
+    jd = JulianDate(**kw)
+    print getattr(jd, time_parameter)
+    assert getattr(jd, time_parameter) == 2441700.56640625
+
+def test_building_JulianDate_from_utc_tuple_with_array_inside():
     seconds = np.arange(48.0, 58.0, 1.0)
     jd = JulianDate(utc=(1973, 12, 29, 23, 59, seconds))
     assert seconds.shape == jd.shape
     for i, second in enumerate(seconds):
         assert jd.tai[i] == JulianDate(utc=(1973, 12, 29, 23, 59, second)).tai
 
-def test_building_JulianDate_from_naive_datetime():
+def test_building_JulianDate_from_naive_datetime_raises_exception():
     with pytest.raises(ValueError) as excinfo:
         JulianDate(utc=datetime(1973, 12, 29, 23, 59, 48))
     assert 'import timezone' in str(excinfo.value)
 
-def test_building_JulianDate_from_single_datetime():
+def test_building_JulianDate_from_single_utc_datetime():
     jd = JulianDate(utc=datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc))
     assert jd.tai == 2442046.5
 
-def test_building_JulianDate_from_list_of_datetimes():
+def test_building_JulianDate_from_list_of_utc_datetimes():
     jd = JulianDate(utc=[
         datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc),
         datetime(1973, 12, 30, 23, 59, 48, tzinfo=utc),
