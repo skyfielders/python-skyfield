@@ -1,5 +1,5 @@
 from datetime import date, datetime, timedelta, tzinfo
-from numpy import array, einsum, rollaxis, searchsorted, sin, zeros_like
+from numpy import array, einsum, rollaxis, searchsorted, sin, where, zeros_like
 from time import strftime
 from .constants import T0, DAY_S
 from .framelib import ICRS_to_J2000 as B
@@ -215,9 +215,12 @@ class JulianDate(object):
         offset = _half_second / 1e4
         y, m, d, H, M, S = self._utc(offset)
         S, F = divmod(S, 1.0)
-        # TODO: B.C.?
-        format = 'A.D. %04d-%s-%02d %02d:%02d:%02d.%04d UT'
-        args = (y, _months[m], d, H, M, S, F * 1e4)
+        bc = y < 1
+        y = abs(y - bc)
+        era = where(bc, 'B.C.', 'A.D.')
+        # TODO: does the JPL really zero-fill years < 4 digits?
+        format = '%s %04d-%s-%02d %02d:%02d:%02d.%04d UT'
+        args = (era, y, _months[m], d, H, M, S, F * 1e4)
 
         if self.shape:
             return [format % tup for tup in zip(*args)]

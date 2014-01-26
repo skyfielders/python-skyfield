@@ -129,6 +129,18 @@ def test_iso_of_array_showing_fractions():
         '1974-01-01T00:00:01.75Z',
         ]
 
+def test_jpl_format():
+    jd = JulianDate(utc=(range(-300, 301, 100), 7, 1))
+    assert jd.utc_jpl() == [
+        'B.C. 0301-Jul-01 00:00:00.0000 UT',
+        'B.C. 0201-Jul-01 00:00:00.0000 UT',
+        'B.C. 0101-Jul-01 00:00:00.0000 UT',
+        'B.C. 0001-Jul-01 00:00:00.0000 UT',
+        'A.D. 0100-Jul-01 00:00:00.0000 UT',
+        'A.D. 0200-Jul-01 00:00:00.0000 UT',
+        'A.D. 0300-Jul-01 00:00:00.0000 UT',
+        ]
+
 def test_stftime_of_single_date():
     jd = JulianDate(utc=(1973, 12, 31, 23, 59, 60))
     assert jd.utc_strftime('%Y %m %d %H %M %S') == '1973 12 31 23 59 60'
