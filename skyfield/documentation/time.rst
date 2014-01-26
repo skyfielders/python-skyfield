@@ -375,7 +375,7 @@ When you provide an array :class:`JulianDate` to a Skyfield calculation,
 the resulting array will have an extra dimension
 expanding what would normally be a single result
 into as many results as you provided dates.
-We can compute position of the Earth as an example:
+We can compute the position of the Earth as an example:
 
 .. testcode::
 
@@ -532,9 +532,9 @@ At the end of June 2012, for example,
 the TAI−UTC offset was changed from 34.0 to 35.0
 which is what made necessary the leap second in UTC.
 
-Terrestrial Time (TT) is different
-because astronomers have been maintaining a uniform time scale
-since before TAI was established,
+Terrestrial Time (TT) differs from TAI
+only because astronomers were already maintaining a uniform time scale
+before TAI was established,
 using a slightly different starting point for the day.
 For practical purposes, TT is simply TAI
 plus exactly 32.184 seconds.
