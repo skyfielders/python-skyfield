@@ -236,11 +236,10 @@ class JulianDate(object):
 
         """
         tup = self._utc(_half_second)
-        y, mon, d, h, m, s = tup
-        zero = zeros_like(y)
-        tup = (y.astype(int), mon.astype(int), d.astype(int),
-               h.astype(int), m.astype(int), s.astype(int),
-               zero, zero, zero)
+        year, month, day, hour, minute, second = tup
+        second = second.astype(int)
+        zero = zeros_like(year)
+        tup = (year, month, day, hour, minute, second, zero, zero, zero)
         if self.shape:
             return [strftime(format, item) for item in zip(*tup)]
         else:
