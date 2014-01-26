@@ -248,7 +248,9 @@ def test_altaz(jd, planet_name_and_code):
 
 def test_cal_date():
     for jd in 0.0, 2414988.5, 2415020.31352, 2442249.5, 2456335.2428472:
-        assert c.cal_date(jd) == timelib.cal_date(jd)
+        whole, fraction = divmod((jd + 0.5), 1.0)
+        y, m, d = timelib.calendar_date(int(whole))
+        assert c.cal_date(jd) == (y, m, d, 24.0 * fraction)
 
 def test_earth_rotation_angle(jd_float_or_vector):
     jd_ut1 = jd_float_or_vector

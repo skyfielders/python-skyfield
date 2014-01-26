@@ -352,26 +352,6 @@ def julian_date(year, month=1, day=1, hour=0, minute=0, second=0.0):
     return julian_day(year, month, day) - 0.5 + (
         second + minute * 60.0 + hour * 3600.0) / DAY_S
 
-def cal_date(jd):
-    """Given a Julian Date, return a Gregorian year, month, day, and hour."""
-    jd = _to_array(jd) + 0.5
-
-    hour = jd % 1.0 * 24.0
-    k = jd.astype(int) + 68569
-    n = 4 * k // 146097;
-
-    k = k - (146097 * n + 3) // 4
-    m = 4000 * (k + 1) // 1461001
-    k = k - 1461 * m // 4 + 31
-    month = 80 * k // 2447
-    day = k - 2447 * month // 80
-    k = month // 11
-
-    month = month + 2 - 12 * k
-    year = 100 * (n - 49) + m + k
-
-    return year, month, day, hour
-
 def calendar_date(jd_integer):
     """Convert Julian Day `jd_integer` into a Gregorian (year, month, day)."""
 
