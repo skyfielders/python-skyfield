@@ -266,12 +266,12 @@ class JulianDate(object):
         j = tai - leap_offsets[i] / DAY_S
         whole, fraction = divmod(j + 0.5, 1.0)
         whole = whole.astype(int)
-        y, mon, d = calendar_date(whole)
-        h, hfrac = divmod(fraction * 24.0, 1.0)
-        m, s = divmod(hfrac * 3600.0, 60.0)
+        year, month, day = calendar_date(whole)
+        hour, hfrac = divmod(fraction * 24.0, 1.0)
+        minute, second = divmod(hfrac * 3600.0, 60.0)
         is_leap_second = j < leap_dates[i-1]
-        s += is_leap_second
-        return y, mon, d, h.astype(int), m.astype(int), s
+        second += is_leap_second
+        return year, month, day, hour.astype(int), minute.astype(int), second
 
     def __getattr__(self, name):
 
