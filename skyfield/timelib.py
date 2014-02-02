@@ -342,7 +342,7 @@ def now():
     return JulianDate(utc=datetime.utcnow().replace(tzinfo=utc))
 
 def julian_day(year, month=1, day=1):
-    """Given a proleptic Gregorian calendar date, return a Julian day integer."""
+    """Given a proleptic Gregorian calendar date, return a Julian day int."""
     janfeb = month < 3
     return (day
             + 1461 * (year + 4800 - janfeb) // 4
@@ -451,8 +451,8 @@ _naive_complaint = """cannot interpret a datetime that lacks a timezone
 You must either specify that your datetime is in UTC:
 
     from skyfield.api import utc
-    datetime(..., tzinfo=utc)  # to build a new datetime
-    d.replace(tzinfo=utc)      # to fix an existing datetime
+    d = datetime(..., tzinfo=utc)  # to build a new datetime
+    d = d.replace(tzinfo=utc)      # to fix an existing datetime
 
 Or install the third-party `pytz` library and use any of its timezones:
 
