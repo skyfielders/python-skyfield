@@ -1,14 +1,12 @@
 """Compare the output of Skyfield with the routines from NOVAS for keplerian orbiting bodies"""
 
-from skyfield import coordinates
 import skyfield.keplerianlib
 from skyfield.keplerianlib import KeplerianOrbit
 from skyfield.positionlib import ICRCoordinates
-import de421
 
 from ..timelib import JulianDate, julian_date
 
-DISTANCE_EPSILON = 0.03
+DISTANCE_EPSILON = 0.027
 
 def test_semimajorAxisToOrbitalPeriod():
     assert skyfield.keplerianlib.semimajorAxisToOrbitalPeriod(1) == 1
@@ -94,7 +92,8 @@ def test_get_8077_hoyle_ecliptic_on_dev_sprint_day_2():
                             hoyle_8077['mean_anomaly'],
                             hoyle_8077['epoch'])
 
-    date = JulianDate(tt=julian_date(2013, 8, 13, 0))
+    date = JulianDate(tt=(2013, 8, 13, 0))
+    print date.tt
 
     expected = ICRCoordinates(2.421251271197979, -1.918893007049262, -0.09813403009731327)
 

@@ -3,7 +3,6 @@ import math
 import constants
 from positionlib import ICRCoordinates
 
-from timelib import JulianDate, julian_date
 def semimajorAxisToOrbitalPeriod(axis):
     return (axis ** 3) ** 0.5
 
@@ -72,7 +71,8 @@ class KeplerianOrbit:
         e = self.eccentricity
         I = self.inclination
         Om = self.longitude_ascending
-        n = 0.230605479
+        #n = 0.230605479
+        n = 0.230652907
 
         w = self.argument_perihelion
 
