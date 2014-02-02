@@ -380,10 +380,10 @@ def calendar_date(jd_integer):
     return year, month, day
 
 def tdb_minus_tt(jd_tdb):
-    """Computes how far TDB is in advance of TT, given TT.
+    """Computes how far TDB is in advance of TT, given TDB.
 
-    Given that the two time scales never diverge by more than 2ms, TDB
-    can simply be given as the argument to perform the conversion in the
+    Given that the two time scales never diverge by more than 2ms, TT
+    can also be given as the argument to perform the conversion in the
     other direction.
 
     """

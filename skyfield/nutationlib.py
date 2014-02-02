@@ -70,7 +70,7 @@ def mean_obliquity(jd_tdb):
     """
     # Compute time in Julian centuries from epoch J2000.0.
 
-    t = (jd_tdb - T0) / 36525.0;
+    t = (jd_tdb - T0) / 36525.0
 
     # Compute the mean obliquity in arcseconds.  Use expression from the
     # reference's eq. (39) with obliquity at J2000.0 taken from eq. (37)
@@ -80,7 +80,7 @@ def mean_obliquity(jd_tdb):
                    -  0.000000576  ) * t
                    +  0.00200340   ) * t
                    -  0.0001831    ) * t
-                   - 46.836769     ) * t + 84381.406;
+                   - 46.836769     ) * t + 84381.406
 
     return epsilon
 
