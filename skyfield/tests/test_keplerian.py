@@ -76,9 +76,9 @@ EPOCH=  2453995.5 ! 2006-Sep-17.00 (CT)          Residual RMS= .43359
 hoyle_8077 = {
     'semimajor_axis' : 2.633278254269645,
     'eccentricity' : .2109947010748546,
-    'inclination' : 17.25814783060462,
-    'longitude_ascending' : 135.855972529608,
-    'argument_perihelion' : 34.4378477722205,
+    'inclination' : 17.25945395594321,
+    'longitude_ascending' : 135.8512354853258,
+    'argument_perihelion' : 34.46503170092878,
     'mean_anomaly' : 330.9918926661418,
     'eccentric_anomaly' : 4.0942988262501965,
     'epoch' : JulianDate(tt=julian_date(2007, 5, 14, 0)),
@@ -96,7 +96,7 @@ def test_get_8077_hoyle_ecliptic_on_dev_sprint_day_2():
 
     date = JulianDate(tt=julian_date(2013, 8, 13, 0))
 
-    expected = ICRCoordinates(2.421251132790093, -1.918893156489506, -0.09813409585464707)
+    expected = ICRCoordinates(2.421251271197979, -1.918893007049262, -0.09813403009731327)
 
     test = hoyle.getECLCoordinatesOnJulianDate(date)
 
