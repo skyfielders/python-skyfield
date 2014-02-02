@@ -1,6 +1,7 @@
 from math import sin, cos
 import math
 import constants
+from positionlib import ICRCoordinates
 
 from timelib import JulianDate, julian_date
 def semimajorAxisToOrbitalPeriod(axis):
@@ -42,19 +43,6 @@ def convergeEccentricAnomaly(mean_anomaly, eccentricity, precision):
 
     # convert to degrees
     return eccentric_anomaly
-
-class ICRCoordinates:
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
-
-    def equalTo(self, other):
-        # TODO: override ==, and add epsilons here
-        return (self.x == other.x) and (self.y == other.y) and (self.z == other.z)
-
-    def __repr__(self):
-        return '(%s, %s, %s)' % (self.x, self.y, self.z)
 
 def calculateMeanAnomaly(L, wb):
     return L - wb
@@ -100,7 +88,7 @@ class KeplerianOrbit:
         M += d * n
 
         # calculate the mean anomaly in rads
-        E = convergeEccentricAnomaly(M, e, 15)
+        E = convergeEccentricAnomaly(M, e, 30)
 
         # calculate the initial primes
         x_prime = a * (cos(E) - e)

@@ -2,10 +2,13 @@
 
 from skyfield import coordinates
 import skyfield.keplerianlib
-from skyfield.keplerianlib import KeplerianOrbit, ICRCoordinates
+from skyfield.keplerianlib import KeplerianOrbit
+from skyfield.positionlib import ICRCoordinates
 import de421
 
 from ..timelib import JulianDate, julian_date
+
+DISTANCE_EPSILON = 0.03
 
 def test_semimajorAxisToOrbitalPeriod():
     assert skyfield.keplerianlib.semimajorAxisToOrbitalPeriod(1) == 1
@@ -71,14 +74,14 @@ EPOCH=  2453995.5 ! 2006-Sep-17.00 (CT)          Residual RMS= .43359
 """
 
 hoyle_8077 = {
-    'semimajor_axis' :  2.633639292806857,
-    'eccentricity' : .2110946491840378,
+    'semimajor_axis' : 2.633278254269645,
+    'eccentricity' : .2109947010748546,
     'inclination' : 17.25814783060462,
     'longitude_ascending' : 135.855972529608,
     'argument_perihelion' : 34.4378477722205,
-    'mean_anomaly' : 275.9015153135912,
-    'eccentric_anomaly' : 4.60549996242,
-    'epoch' : JulianDate(tt=julian_date(2007, 9, 16, 0)),
+    'mean_anomaly' : 330.9918926661418,
+    'eccentric_anomaly' : 4.0942988262501965,
+    'epoch' : JulianDate(tt=julian_date(2007, 5, 14, 0)),
 }
 
 
@@ -98,4 +101,4 @@ def test_get_8077_hoyle_ecliptic_on_dev_sprint_day_2():
     test = hoyle.getECLCoordinatesOnJulianDate(date)
 
     #print test
-    assert test.equalTo(expected)
+    assert test.distanceFrom(expected) < DISTANCE_EPSILON
