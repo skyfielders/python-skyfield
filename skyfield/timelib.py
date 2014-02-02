@@ -70,17 +70,12 @@ def takes_julian_date(function):
     wrapper.__doc__ = ''.join(synopsis + extra_documentation + description)
     return wrapper
 
-def _wrap(a):
-    if hasattr(a, 'shape'):
-        return a
-    if hasattr(a, '__len__'):
-        return array(a)
-    return array((a,))
-
-def _to_array(a):
-    if not hasattr(a, 'shape'):
-        a = array(a)
-    return a
+def _to_array(value):
+    """When `value` is a plain Python sequence, return it as a NumPy array."""
+    if not hasattr(value, 'shape') and hasattr(value, '__len__'):
+        return array(value)
+    else:
+        return value
 
 tt_minus_tai = array(32.184 / DAY_S)
 
@@ -138,7 +133,7 @@ class JulianDate(object):
             tt = julian_date(*tt)
 
         self.tt = _to_array(tt)
-        self.shape = self.tt.shape
+        self.shape = getattr(self.tt, 'shape', ())
         self.delta_t = delta_t
 
     def __getitem__(self, index):
