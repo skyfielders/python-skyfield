@@ -13,6 +13,8 @@ from .relativity import add_aberration, add_deflection
 from .timelib import JulianDate, takes_julian_date
 from .units import Distance, Velocity
 
+from math import sqrt, fabs
+
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
 quarter_tau = 0.25 * TAU
 
@@ -69,6 +71,27 @@ class ICRS(object):
             position_AU = einsum('ij...,j...->i...', epoch.M, position_AU)
         r_AU, dec, ra = to_polar(position_AU)
         return HourAngle(radians=ra), SignedAngle(radians=dec), Distance(r_AU)
+
+# class to represent a point in the IC reference frame
+class ICRCoordinates:
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def equalTo(self, other):
+        # TODO: override ==, and add epsilons here
+        return (self.x == other.x) and (self.y == other.y) and (self.z == other.z)
+
+    def distanceFrom(self, other):
+        dx = other.x - self.x;
+        dy = other.y - self.y;
+        dz = other.z - self.z;
+
+        return sqrt(dx ** 2 + dy ** 2 + dz ** 2);
+
+    def __repr__(self):
+        return '(%s, %s, %s)' % (self.x, self.y, self.z)
 
 class Topos(object):
 
