@@ -94,7 +94,8 @@ class JulianDate(object):
     :param cache: Cache for automatically fetching `delta_t` table
 
     """
-    def __init__(self, utc=None, tai=None, tt=None, delta_t=0.0, cache=None):
+    def __init__(self, utc=None, tai=None, tt=None, tdb=None,
+                 delta_t=0.0, cache=None):
 
         self.delta_t = _to_array(delta_t)
 
@@ -123,9 +124,16 @@ class JulianDate(object):
             if tt is None:
                 tt = tai + tt_minus_tai
 
+        if tdb is not None:
+            if isinstance(tdb, tuple):
+                tdb = julian_date(*tdb)
+            self.tdb = _to_array(tdb)
+            if tt is None:
+                tt = tdb - tdb_minus_tt(tdb) / DAY_S
+
         if tt is None:
-            raise ValueError('you must supply either utc, tai, or tt when'
-                             ' building a JulianDate')
+            raise ValueError('You must supply either utc, tai, tt, or tdb'
+                             ' when building a JulianDate')
         elif isinstance(tt, tuple):
             tt = julian_date(*tt)
 
@@ -372,12 +380,16 @@ def calendar_date(jd_integer):
     return year, month, day
 
 def tdb_minus_tt(jd_tdb):
-    """Computes TT corresponding to a TDB Julian date."""
+    """Computes how far TDB is in advance of TT, given TT.
 
+    Given that the two time scales never diverge by more than 2ms, TDB
+    can simply be given as the argument to perform the conversion in the
+    other direction.
+
+    """
     t = (jd_tdb - T0) / 36525.0
 
-    # Expression given in USNO Circular 179, eq. 2.6.
-
+    # USNO Circular 179, eq. 2.6.
     return (0.001657 * sin ( 628.3076 * t + 6.2401)
           + 0.000022 * sin ( 575.3385 * t + 4.2970)
           + 0.000014 * sin (1256.6152 * t + 6.1969)

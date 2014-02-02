@@ -8,7 +8,7 @@ one_second = 1.0 / DAY_S
 epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
 
 
-@pytest.fixture(params=['tai', 'tt'])
+@pytest.fixture(params=['tai', 'tt', 'tdb'])
 def time_parameter(request):
     return request.param
 
