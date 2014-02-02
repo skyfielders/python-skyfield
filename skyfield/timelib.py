@@ -223,7 +223,6 @@ class JulianDate(object):
         bc = year < 1
         year = abs(year - bc)
         era = where(bc, 'B.C.', 'A.D.')
-        # TODO: does the JPL really zero-fill years < 4 digits?
         format = '%s %04d-%s-%02d %02d:%02d:%02d.%04d UT'
         args = (era, year, _months[month], day, hour, minute, second, fraction)
 
