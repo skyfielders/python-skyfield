@@ -6,7 +6,7 @@ from skyfield.positionlib import ICRCoordinates
 
 from ..timelib import JulianDate, julian_date
 
-DISTANCE_EPSILON = 0.027
+DISTANCE_EPSILON = 0.026
 
 def test_semimajorAxisToOrbitalPeriod():
     assert skyfield.keplerianlib.semimajorAxisToOrbitalPeriod(1) == 1
@@ -79,7 +79,7 @@ hoyle_8077 = {
     'argument_perihelion' : 34.46503170092878,
     'mean_anomaly' : 330.9918926661418,
     'eccentric_anomaly' : 4.0942988262501965,
-    'epoch' : JulianDate(tt=julian_date(2007, 5, 14, 0)),
+    'epoch' : JulianDate(tt=(2007, 5, 14)),
 }
 
 
@@ -92,12 +92,13 @@ def test_get_8077_hoyle_ecliptic_on_dev_sprint_day_2():
                             hoyle_8077['mean_anomaly'],
                             hoyle_8077['epoch'])
 
-    date = JulianDate(tt=(2013, 8, 13, 0))
+    date = JulianDate(tt=(2013, 8, 13))
     print date.tt
-
-    expected = ICRCoordinates(2.421251271197979, -1.918893007049262, -0.09813403009731327)
 
     test = hoyle.getECLCoordinatesOnJulianDate(date)
 
     #print test
-    assert test.distanceFrom(expected) < DISTANCE_EPSILON
+    epsilon = 2e-2
+    assert abs(test.x - 2.421251271197979) < epsilon
+    assert abs(test.y - -1.918893007049262) < epsilon
+    assert abs(test.z - -0.09813403009731327) < epsilon
