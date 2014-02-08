@@ -93,7 +93,7 @@ def test_get_8077_hoyle_ecliptic_on_dev_sprint_day_2():
                             hoyle_8077['epoch'])
 
     date = JulianDate(tt=(2013, 8, 13))
-    print date.tt
+    # print date.tt
 
     test = hoyle.getECLCoordinatesOnJulianDate(date)
 

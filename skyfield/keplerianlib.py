@@ -1,7 +1,7 @@
 from math import sin, cos
 import math
-import constants
-from positionlib import ICRCoordinates
+from . import constants
+from .positionlib import ICRCoordinates
 
 def semimajorAxisToOrbitalPeriod(axis):
     return (axis ** 3) ** 0.5
