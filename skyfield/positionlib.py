@@ -13,8 +13,6 @@ from .relativity import add_aberration, add_deflection
 from .timelib import JulianDate, takes_julian_date
 from .units import Distance, Velocity
 
-from math import sqrt, fabs
-
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
 quarter_tau = 0.25 * TAU
 
@@ -82,13 +80,6 @@ class ICRCoordinates:
     def equalTo(self, other):
         # TODO: override ==, and add epsilons here
         return (self.x == other.x) and (self.y == other.y) and (self.z == other.z)
-
-    def distanceFrom(self, other):
-        dx = other.x - self.x;
-        dy = other.y - self.y;
-        dz = other.z - self.z;
-
-        return sqrt(dx ** 2 + dy ** 2 + dz ** 2);
 
     def __repr__(self):
         return '(%s, %s, %s)' % (self.x, self.y, self.z)
