@@ -120,6 +120,9 @@ class ToposICRS(ICRS):
 
     geocentric = False
 
+class Barycentric(ICRS):
+    """An ICRS x,y,z position referenced to the Solar System barycenter."""
+
 class Astrometric(ICRS):
     """An astrometric position as an x,y,z vector in the ICRS.
 

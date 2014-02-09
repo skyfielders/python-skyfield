@@ -3,7 +3,7 @@ from numpy import max, min
 
 from .constants import AU_KM, C_AUDAY
 from .functions import length_of
-from .positionlib import ICRS, Astrometric, Topos
+from .positionlib import Barycentric, Astrometric, Topos
 from .timelib import takes_julian_date
 
 class Planet(object):
@@ -17,9 +17,9 @@ class Planet(object):
 
     @takes_julian_date
     def __call__(self, jd):
-        """Return the ICRS x,y,z position of this planet at the given time."""
+        """Return the x,y,z position of this planet at the given time."""
         position, velocity = self._position_and_velocity(jd.tdb)
-        i = ICRS(position, velocity, jd)
+        i = Barycentric(position, velocity, jd)
         i.ephemeris = self.ephemeris
         return i
 
