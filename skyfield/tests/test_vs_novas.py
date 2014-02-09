@@ -119,8 +119,8 @@ def test_star_deflected_by_jupiter(jd):
     earth = de405.earth
     star = starlib.Star(
         ra=1.59132070233, dec=8.5958876464,
-        pm_ra=0.0, pm_dec=0.0,
-        parallax=0.0, radial_velocity=0.0,
+        ra_mas_per_year=0.0, dec_mas_per_year=0.0,
+        parallax=0.0, radial_km_per_s=0.0,
         )
     ra, dec, distance = earth(jd).observe(star).apparent().radec(epoch=jd)
 

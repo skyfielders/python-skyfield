@@ -10,13 +10,14 @@ from .relativity import light_time_difference
 class Star(object):
 
     def __init__(self, ra, dec,
-                 pm_ra=0.0, pm_dec=0.0, parallax=0.0, radial_velocity=0.0):
+                 ra_mas_per_year=0.0, dec_mas_per_year=0.0,
+                 parallax=0.0, radial_km_per_s=0.0):
         self.ra = ra
         self.dec = dec
-        self.pm_ra = pm_ra
-        self.pm_dec = pm_dec
+        self.ra_mas_per_year = ra_mas_per_year
+        self.dec_mas_per_year = dec_mas_per_year
         self.parallax = parallax
-        self.radial_velocity = radial_velocity
+        self.radial_km_per_s = radial_km_per_s
 
         self._compute_vectors()
 
@@ -67,14 +68,14 @@ class Star(object):
         # Compute Doppler factor, which accounts for change in light
         # travel time to star.
 
-        k = 1.0 / (1.0 - self.radial_velocity / C * 1000.0)
+        k = 1.0 / (1.0 - self.radial_km_per_s / C * 1000.0)
 
         # Convert proper motion and radial velocity to orthogonal
         # components of motion with units of AU/Day.
 
-        pmr = self.pm_ra / (parallax * 365.25) * k
-        pmd = self.pm_dec / (parallax * 365.25) * k
-        rvl = self.radial_velocity * DAY_S / AU_KM * k
+        pmr = self.ra_mas_per_year / (parallax * 365.25) * k
+        pmd = self.dec_mas_per_year / (parallax * 365.25) * k
+        rvl = self.radial_km_per_s * DAY_S / AU_KM * k
 
         # Transform motion vector to equatorial system.
 
