@@ -21,6 +21,6 @@ def test_planet_position_class():
     assert isinstance(p, positionlib.Barycentric)
 
 def test_star_position_class():
-    star = api.Star(ra=0, dec=0)
+    star = api.Star(ra_hours=0, dec_degrees=0)
     p = api.earth(utc=(2014, 2, 9, 15, 01)).observe(star)
     assert isinstance(p, positionlib.Astrometric)

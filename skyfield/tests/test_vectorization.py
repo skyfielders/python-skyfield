@@ -131,7 +131,7 @@ def observe_planet_from_topos(tt, delta_t):
     yield distance.AU
 
 def compute_stellar_position(tt, delta_t):
-    star = starlib.Star(ra=1.59132070233, dec=8.5958876464)
+    star = starlib.Star(ra_hours=1.59132070233, dec_degrees=8.5958876464)
     observer = earth(tt=tt, delta_t=delta_t)
     astrometric = observer.observe(star)
 

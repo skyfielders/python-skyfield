@@ -1,6 +1,7 @@
 """Python classes that represent various classes of star."""
 
 from numpy import array, cos, outer, sin
+from .angles import Angle
 from .constants import AU_KM, ASEC2RAD, DEG2RAD, C, C_AUDAY, DAY_S, T0
 from .functions import length_of
 from .positionlib import Astrometric
@@ -9,11 +10,24 @@ from .relativity import light_time_difference
 
 class Star(object):
 
-    def __init__(self, ra, dec,
+    def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,
                  ra_mas_per_year=0.0, dec_mas_per_year=0.0,
                  parallax=0.0, radial_km_per_s=0.0):
-        self.ra = ra
-        self.dec = dec
+
+        if ra_hours is not None:
+            self.ra = Angle(hours=ra_hours)
+        elif isinstance(ra, Angle):
+            self.ra = ra
+        else:
+            raise TypeError('please provide ra_hours=h or ra=angle_object')
+
+        if dec_degrees is not None:
+            self.dec = Angle(degrees=dec_degrees)
+        elif isinstance(dec, Angle):
+            self.dec = dec
+        else:
+            raise TypeError('please provide dec_degrees=d or dec=angle_object')
+
         self.ra_mas_per_year = ra_mas_per_year
         self.dec_mas_per_year = dec_mas_per_year
         self.parallax = parallax
@@ -52,8 +66,8 @@ class Star(object):
         # vector in equatorial system with units of AU.
 
         dist = 1.0 / sin(parallax * 1.0e-3 * ASEC2RAD)
-        r = self.ra * 15.0 * DEG2RAD
-        d = self.dec * DEG2RAD
+        r = self.ra.radians()
+        d = self.dec.radians()
         cra = cos(r)
         sra = sin(r)
         cdc = cos(d)

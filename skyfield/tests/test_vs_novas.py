@@ -118,7 +118,7 @@ def test_star_deflected_by_jupiter(jd):
 
     earth = de405.earth
     star = starlib.Star(
-        ra=1.59132070233, dec=8.5958876464,
+        ra_hours=1.59132070233, dec_degrees=8.5958876464,
         ra_mas_per_year=0.0, dec_mas_per_year=0.0,
         parallax=0.0, radial_km_per_s=0.0,
         )
@@ -367,8 +367,9 @@ def test_starvectors():
             'POLARIS', 'HIP', 0, 2.530301028, 89.264109444,
             44.22, -11.75, 7.56, -17.4))
 
-    star = starlib.Star(2.530301028, 89.264109444,
-                        44.22, -11.75, 7.56, -17.4)
+    star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
+                        ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
+                        parallax=7.56, radial_km_per_s=-17.4)
 
     p_epsilon = 1e-10  # AU; 16 digits of agreement
     v_epsilon = 1e-17  # AU/day; 15 digits of agreement
