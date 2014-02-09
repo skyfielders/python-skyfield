@@ -1,7 +1,7 @@
 """Determine whether arrays work as well as individual inputs."""
 
 import sys
-from numpy import array, array_str, array_repr, rollaxis
+from numpy import array, rollaxis
 from .. import starlib
 from ..constants import T0, B1950
 from ..api import earth, mars
