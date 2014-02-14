@@ -1,11 +1,11 @@
 """Python classes that represent various classes of star."""
 
 from numpy import array, cos, outer, sin
-from .angles import Angle
-from .constants import AU_KM, ASEC2RAD, DEG2RAD, C, C_AUDAY, DAY_S, T0
+from .constants import AU_KM, ASEC2RAD, C, C_AUDAY, DAY_S, T0
 from .functions import length_of
 from .positionlib import Astrometric
 from .relativity import light_time_difference
+from .units import Angle
 
 
 class Star(object):

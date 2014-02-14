@@ -22,5 +22,5 @@ def test_planet_position_class():
 
 def test_star_position_class():
     star = api.Star(ra_hours=0, dec_degrees=0)
-    p = api.earth(utc=(2014, 2, 9, 15, 01)).observe(star)
+    p = api.earth(utc=(2014, 2, 9, 15, 1)).observe(star)
     assert isinstance(p, positionlib.Astrometric)

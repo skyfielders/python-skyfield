@@ -2,8 +2,6 @@
 
 from numpy import arcsin, arctan2, array, cos, einsum, pi, sin
 
-from .angles import (interpret_longitude, interpret_latitude,
-                     Angle, HourAngle, SignedAngle)
 from .constants import TAU
 from .functions import length_of, spin_x
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
@@ -11,7 +9,8 @@ from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
 from .functions import dots
 from .relativity import add_aberration, add_deflection
 from .timelib import JulianDate, takes_julian_date
-from .units import Distance, Velocity
+from .units import (Distance, Velocity, Angle, HourAngle, SignedAngle,
+                    interpret_longitude, interpret_latitude)
 
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
 quarter_tau = 0.25 * TAU

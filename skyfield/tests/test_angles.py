@@ -1,4 +1,4 @@
-from skyfield.angles import Angle, HourAngle
+from skyfield.units import Angle, HourAngle
 
 def test_degree_rounding():
     tenth = 0.1 / 60.0 / 60.0  # of an arcsecond
