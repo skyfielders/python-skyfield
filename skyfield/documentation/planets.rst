@@ -81,8 +81,8 @@ from the :mod:`~api` module:
     from skyfield.jpllib import Ephemeris
 
     eph = Ephemeris(de423)
-    print 'DE421:', api.mercury(utc=(1993, 5, 15)).position.km
-    print 'DE423:', eph.mercury(utc=(1993, 5, 15)).position.km
+    print('DE421: ' + str(api.mercury(utc=(1993, 5, 15)).position.km))
+    print('DE423: ' + str(eph.mercury(utc=(1993, 5, 15)).position.km))
 
 .. testoutput::
 
