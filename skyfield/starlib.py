@@ -7,7 +7,6 @@ from .positionlib import Astrometric
 from .relativity import light_time_difference
 from .units import Angle
 
-
 class Star(object):
 
     def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,
@@ -19,14 +18,16 @@ class Star(object):
         elif isinstance(ra, Angle):
             self.ra = ra
         else:
-            raise TypeError('please provide ra_hours=h or ra=angle_object')
+            raise TypeError('please provide either ra_hours=<float> or else'
+                            ' ra=<skyfield.units.Angle object>')
 
         if dec_degrees is not None:
             self.dec = Angle(degrees=dec_degrees)
         elif isinstance(dec, Angle):
             self.dec = dec
         else:
-            raise TypeError('please provide dec_degrees=d or dec=angle_object')
+            raise TypeError('please provide either dec_degrees=<float> or else'
+                            ' dec=<skyfield.units.Angle object>')
 
         self.ra_mas_per_year = ra_mas_per_year
         self.dec_mas_per_year = dec_mas_per_year
