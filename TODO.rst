@@ -52,10 +52,6 @@ Sprint Possibilities
   * Earth-satellite orbital elements
   * (What others can we think of?)
 
-* How can we efficiently compute table-driven values like delta T and
-  leap seconds?  We should implement them, and then use them to add TAI
-  and UTC conversions to the ``JulianDate`` class.
-
 * If anyone is a NumPy expert, I would love comments on whether my code
   is at all idiomatic, or whether I'm doing things inefficiently and in
   such a quirky way that no one else will ever understand it.
@@ -65,21 +61,9 @@ Sprint Possibilities
   automated method of determining which particular constants in the code
   base our tests are not sensitive to.
 
-* Soon I will want to start experimenting to see how Skyfield can be
-  made faster.  It would be handy to have a benchmark suite, that ran
-  some common computations using ``timeit`` or else a manual timer so
-  that I could see whether small changes or adjustments to the code make
-  it slower or faster.
-
-
 
 Longer-term goals
 =================
-
-* Should angles be kept in radians, or what?  Or be like ``JulianDates``?
-
-* There should be a way to import planet functions without instantiating
-  an Ephemeris manually, since DE421 is the library default.
 
 * Make all objects that are `.observe()`’d from Earth include a
   sublatitude and sublongitude coordinate stating the position on Earth
