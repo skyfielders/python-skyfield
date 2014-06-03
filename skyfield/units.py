@@ -59,6 +59,9 @@ class Velocity(object):
             return self.km_per_s
         raise AttributeError('no attribute named %r' % (name,))
 
+    def __str__(self):
+        return '%s AU/day' % self.AU_per_d
+
     def __iter__(self):
         raise UnpackingError(_iter_message % {
             'class': self.__class__.__name__, 'values': 'xdot, ydot, zdot',
