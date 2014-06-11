@@ -421,7 +421,7 @@ when we computed the January 1st position by itself:
 
 .. testcode::
 
-    print pos[:,0]
+    print(pos[:,0])
 
 .. testoutput::
 
@@ -450,7 +450,7 @@ to pull a particular calendar tuple out of the larger result:
 
 .. testcode::
 
-    print jd.utc[:,2]
+    print(jd.utc[:,2])
 
 .. testoutput::
 
@@ -490,7 +490,7 @@ So twelve noon was the moment of Julian date zero:
 .. testcode::
 
     bc_4714 = -4713
-    print JulianDate(tt=(bc_4714, 11, 24, 12)).tt
+    print(JulianDate(tt=(bc_4714, 11, 24, 12)).tt)
 
 .. testoutput::
 
@@ -513,9 +513,9 @@ so modern dates tend to be rather large numbers:
 .. testcode::
 
     jd = JulianDate(utc=(2014, 1, 1))
-    print 'TAI = %r' % jd.tai
-    print 'TT  = %r' % jd.tt
-    print 'TDB = %r' % jd.tdb
+    print('TAI = %r' % jd.tai)
+    print('TT  = %r' % jd.tt)
+    print('TDB = %r' % jd.tdb)
 
 .. testoutput::
 
