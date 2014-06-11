@@ -11,7 +11,7 @@ It provides the DE421 Jet Propulsion Laboratory ephemeris
 that lists high-precision planetary positions
 for the years 1900 through 2050.
 Its moderate 27 MB size, high accuracy, and use of very recent data
-makes it the best choice for Skyfield’s default ephemeris.
+made it the best choice for Skyfield’s default ephemeris.
 
 The DE421 ephemeris is used automatically
 when you import the planets from the API module:
@@ -81,18 +81,22 @@ from the :mod:`~api` module:
     from skyfield.jpllib import Ephemeris
 
     eph = Ephemeris(de423)
-    print('DE421: ' + str(api.mercury(utc=(1993, 5, 15)).position.km))
-    print('DE423: ' + str(eph.mercury(utc=(1993, 5, 15)).position.km))
+    jd = api.JulianDate(utc=(1993, 5, 15))
+
+    print('DE421: {}'.format(api.mercury(jd).position.km))
+    print('DE423: {}'.format(eph.mercury(jd).position.km))
 
 .. testoutput::
 
     DE421: [31387022.7906 33032548.9719 14337050.8211]
     DE423: [31387022.7693 33032548.7756 14337050.9898]
 
-These positions might look identical,
-making you wonder why the JPL even bothered to issue a new ephemeris,
-but read all the way down to the very last digits —
-these predicted positions do differ by one or two hundred meters!
-While the difference might be impossible to see with your telescope,
-it can be of moment and consequence to professionals
-who have to intercept the planet with a spacecraft.
+These positions might look identical
+and make you wonder why the JPL even bothered to issue a new ephemeris.
+But remember that these positions are in kilometers.
+Read all the way down to the very last digits —
+these predicted positions do differ by one or two hundred meters.
+While a few-hundred-meter difference
+might be impossible to see with your telescope,
+it is quite relevant for JPL professionals
+who need to know exactly where to aim delicate spacecraft for landings.

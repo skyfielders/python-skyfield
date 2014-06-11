@@ -172,8 +172,8 @@ that we see in our sky:
 
     # Observing Jupiter from the Earth's position
 
-    astro = earth(utc=(1980, 1, 1)).observe(jupiter)
-    print(astro.position.AU)
+    astrometric = earth(utc=(1980, 1, 1)).observe(jupiter)
+    print(astrometric.position.AU)
 
 .. testoutput::
 
@@ -190,7 +190,7 @@ and :meth:`~Angle.dstr()` methods:
 
     # Astrometric RA and declination
 
-    ra, dec, distance = astro.radec()
+    ra, dec, distance = astrometric.radec()
     print(ra.hstr())
     print(dec.dstr())
     print(distance.AU)
@@ -235,12 +235,14 @@ two further effects must be taken into account:
   seen through the windshield while driving
   appears to be slanting towards you
   because of your own motion.
-  The effect is small — at most about 20 arcseconds —
-  and so was not discovered until 1729.
-  The discovery finally proved that the Earth goes around the Sun.
+  The effect is small enough — at most about 20 arcseconds —
+  that it was not both observed and explained until 1728,
+  when James Bradley realized that it provided the long-awaited proof
+  that the Earth is indeed in motion in an orbit around the Sun.
 
 Skyfield lets you apply both of these effects
-by invoking the :meth:`~Astrometric.apparent()` method.
+by invoking the :meth:`~Astrometric.apparent()` method
+on an astrometric position.
 Like an astrometric position, an apparent position
 is typically expressed as the angles
 *right ascension* and *declination*:
@@ -249,7 +251,7 @@ is typically expressed as the angles
 
     # Apparent GCRS ("J2000.0") coordinates
 
-    apparent = astro.apparent()
+    apparent = astrometric.apparent()
     ra, dec, distance = apparent.radec()
 
     print(ra.hstr())
