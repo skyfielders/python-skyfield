@@ -680,4 +680,4 @@ in the dynamical reference system.
 
 .. _matplotlib: http://matplotlib.org/
 .. _pytz: http://pytz.sourceforge.net/
-.. _requirements.txt: http://www.pip-installer.org/en/latest/cookbook.html
+.. _requirements.txt: https://pip.pypa.io/en/latest/user_guide.html#requirements-files
