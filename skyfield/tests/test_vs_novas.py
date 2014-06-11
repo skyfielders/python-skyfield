@@ -371,8 +371,8 @@ def test_starvectors():
                         ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
                         parallax=7.56, radial_km_per_s=-17.4)
 
-    p_epsilon = 1e-10  # AU; 16 digits of agreement
-    v_epsilon = 1e-17  # AU/day; 15 digits of agreement
+    p_epsilon = 1e3 * meter   # not bad for something 27 million AU distant
+    v_epsilon = 1e-6 * meter  # per day
 
     eq(p, star._position, p_epsilon)
     eq(v, star._velocity, v_epsilon)
