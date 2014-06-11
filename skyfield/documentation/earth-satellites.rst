@@ -33,9 +33,9 @@ to find out whether a satellite is above your local horizon:
     sat = earth.satellite(text)
     alt, az, distance = bluffton(utc=tup).observe(sat).altaz()
 
-    print alt
-    print az
-    print distance.km
+    print(alt)
+    print(az)
+    print(distance.km)
 
 .. testoutput::
 

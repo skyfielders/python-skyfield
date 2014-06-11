@@ -13,9 +13,9 @@ positions for planets and Earth satellites.
     from skyfield.api import earth, mars, now
     ra, dec, distance = earth(now()).observe(mars).radec()
 
-    print ra
-    print dec
-    print distance
+    print(ra)
+    print(dec)
+    print(distance)
 
 ::
 

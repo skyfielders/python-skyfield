@@ -118,8 +118,8 @@ by asking Skyfield for their :attr:`~Position.position` attribute:
     # BCRS positions of Earth and Jupiter
 
     from skyfield.api import earth, jupiter
-    print earth(utc=(1980, 1, 1)).position.AU
-    print jupiter(utc=(1980, 1, 1)).position.AU
+    print(earth(utc=(1980, 1, 1)).position.AU)
+    print(jupiter(utc=(1980, 1, 1)).position.AU)
 
 .. testoutput::
 
@@ -173,7 +173,7 @@ that we see in our sky:
     # Observing Jupiter from the Earth's position
 
     astro = earth(utc=(1980, 1, 1)).observe(jupiter)
-    print astro.position.AU
+    print(astro.position.AU)
 
 .. testoutput::
 
@@ -191,9 +191,9 @@ and :meth:`~Angle.dstr()` methods:
     # Astrometric RA and declination
 
     ra, dec, distance = astro.radec()
-    print ra.hstr()
-    print dec.dstr()
-    print distance.AU
+    print(ra.hstr())
+    print(dec.dstr())
+    print(distance.AU)
 
 .. testoutput::
 
@@ -252,9 +252,9 @@ is typically expressed as the angles
     apparent = astro.apparent()
     ra, dec, distance = apparent.radec()
 
-    print ra.hstr()
-    print dec.dstr()
-    print distance.AU
+    print(ra.hstr())
+    print(dec.dstr())
+    print(distance.AU)
 
 .. testoutput::
 
@@ -290,9 +290,9 @@ when you ask the apparent position for coordinates:
 
     ra, dec, distance = apparent.radec(epoch='date')
 
-    print ra.hstr()
-    print dec.dstr()
-    print distance.AU
+    print(ra.hstr())
+    print(dec.dstr())
+    print(distance.AU)
 
 .. testoutput::
 
@@ -355,9 +355,9 @@ of an Earth object:
     boston = earth.topos('42.3583 N', '71.0603 W')
     astro = boston(utc=(1980, 1, 1)).observe(jupiter)
     alt, az, distance = astro.apparent().altaz()
-    print alt.dstr()
-    print az.dstr()
-    print distance.AU
+    print(alt.dstr())
+    print(az.dstr())
+    print(distance.AU)
 
 .. testoutput::
 

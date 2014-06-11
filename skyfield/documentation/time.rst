@@ -66,9 +66,9 @@ come out exactly the same:
     from skyfield.api import earth
 
     jd = JulianDate(utc=(2014, 1, 1))
-    print earth(jd).position.AU
+    print(earth(jd).position.AU)
 
-    print earth(utc=(2014, 1, 1)).position.AU
+    print(earth(utc=(2014, 1, 1)).position.AU)
 
 .. testoutput::
 
@@ -110,10 +110,10 @@ to represent the year, month, and day of a calendar date:
 
     # Retrieving UTC as either a tuple or string
 
-    print jd.utc
-    print jd.utc_iso()
-    print jd.utc_jpl()
-    print jd.utc_strftime('Date %Y-%m-%d and time %H:%M:%S')
+    print(jd.utc)
+    print(jd.utc_iso())
+    print(jd.utc_jpl())
+    print(jd.utc_strftime('Date %Y-%m-%d and time %H:%M:%S'))
 
 .. testoutput::
 
@@ -144,7 +144,7 @@ and is configured with the correct time zone):
     from skyfield.api import now
 
     jd = now()
-    print jd.utc_jpl()
+    print(jd.utc_jpl())
 
 .. testoutput::
 
@@ -187,12 +187,12 @@ for either the UTC date or your own timezone:
     # UTC datetime
 
     dt, leap_second = jd.utc_datetime()
-    print 'UTC:', dt
+    print('UTC: ' + str(dt))
 
     # Converting back to an Eastern Time datetime.
 
     dt, leap_second = jd.astimezone(eastern)
-    print 'EST:', dt
+    print('EST: ' + str(dt))
 
 .. testoutput::
 
@@ -246,7 +246,7 @@ The most recent leap second was in June 2012:
     jd = JulianDate(utc=tup)
 
     for string in jd.utc_jpl():
-        print string
+        print(string)
 
 .. testoutput::
 
@@ -302,7 +302,7 @@ as a duplicate 23:59:59, as is the case here:
     dt, leap_second = jd.astimezone(eastern)
 
     for dt_i, leap_second_i in zip(dt, leap_second):
-        print str(dt_i), 'leap_second =', leap_second_i
+        print(str(dt_i) + ' leap_second = ' + str(leap_second_i))
 
 .. testoutput::
 
@@ -381,7 +381,7 @@ We can compute the position of the Earth as an example:
 
     # Single Earth position
 
-    print earth(utc=(2014, 1, 1)).position.AU
+    print(earth(utc=(2014, 1, 1)).position.AU)
 
 .. testoutput::
 
@@ -394,7 +394,7 @@ We can compute the position of the Earth as an example:
     days = [1, 2, 3, 4]
     jd = JulianDate(utc=(2014, 1, days))
     pos = earth(jd).position.AU
-    print pos
+    print(pos)
 
 .. testoutput::
 
