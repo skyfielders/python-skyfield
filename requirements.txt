@@ -6,3 +6,4 @@ novas_de405==1997.1
 pytest>=2.5
 httpretty==0.6.3
 sphinx
+pytz
