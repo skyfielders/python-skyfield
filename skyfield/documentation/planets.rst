@@ -83,8 +83,8 @@ from the :mod:`~api` module:
     eph = Ephemeris(de423)
     jd = api.JulianDate(utc=(1993, 5, 15))
 
-    print('DE421: {}'.format(api.mercury(jd).position.km))
-    print('DE423: {}'.format(eph.mercury(jd).position.km))
+    print('DE421: {0}'.format(api.mercury(jd).position.km))
+    print('DE423: {0}'.format(eph.mercury(jd).position.km))
 
 .. testoutput::
 
