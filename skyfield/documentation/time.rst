@@ -381,7 +381,9 @@ We can compute the position of the Earth as an example:
 
     # Single Earth position
 
-    print(earth(utc=(2014, 1, 1)).position.AU)
+    jd = JulianDate(utc=(2014, 1, 1))
+    pos = earth(jd).position.AU
+    print(pos)
 
 .. testoutput::
 
@@ -414,7 +416,7 @@ and other scientific Python tools::
 
 If you instead slice along the second axis,
 then you can retrieve an individual position for a particular date —
-note that the first position is what we got a moment ago
+and the first position is exactly what was returned above
 when we computed the January 1st position by itself:
 
 .. testcode::
@@ -479,7 +481,7 @@ astronomers traditionally use Julian days
 that start counting at B.C. 4713 January 1 in the old Julian calendar —
 the same date as B.C. 4714 November 24 in our Gregorian calendar.
 The count starts at noon
-following tradition going back to the Greeks and Ptolemy,
+following a tradition going back to the Greeks and Ptolemy,
 since the sun’s transit is an observable event
 but the moment of midnight is not.
 
@@ -521,7 +523,7 @@ so modern dates tend to be rather large numbers:
     TT  = 2456658.5007775929
     TDB = 2456658.500777592
 
-Why does Skyfield support three different uniform time scales?
+What are these three different uniform time scales?
 
 International Atomic Time (TAI) is maintained
 by the worldwide network of atomic clocks
@@ -530,10 +532,11 @@ The official leap second table
 is actually a table of offsets between TAI and UTC.
 At the end of June 2012, for example,
 the TAI−UTC offset was changed from 34.0 to 35.0
-which is what made necessary the leap second in UTC.
+which is what generated the leap second in UTC.
 
 Terrestrial Time (TT) differs from TAI
-only because astronomers were already maintaining a uniform time scale
+only because astronomers
+were already maintaining a uniform time scale of their own
 before TAI was established,
 using a slightly different starting point for the day.
 For practical purposes, TT is simply TAI
@@ -556,7 +559,7 @@ at the Jet Propulsion Laboratory.
 UT1 and ΔT
 ==========
 
-The time scale UT1 is the least uniform time scale of all
+Finally, UT1 is the least uniform time scale of all
 because its clock cannot be housed in a laboratory,
 nor is its rate established by any human convention.
 It is, rather, the clock
@@ -564,17 +567,18 @@ whose “hand” is the rotation of the Earth itself!
 
 The UT1 time is derived from the direction
 that the Earth happens to be pointing at any given moment.
-And the Earth is a young world,
-with a still-molten iron core and viscous mantle and continents
-that fall and rise as each passing ice age weighs down upon them.
+And the Earth is a young world
+with a still-molten iron core, and viscous mantle,
+and continents that rise and fall
+as each passing ice age weighs down upon them and then melts away.
 We think that we can predict, with high accuracy,
 where the planets will be in their orbits
 thousands of years from now.
-But the fluid dynamics of an elastic rotating ellipsoid
-is at the moment beyond us.
-To declare leap seconds and keep UTC close to UT1,
-we cannot simply run a formula.
-Instead, we watch with sensitive instruments
+But to predict the fluid dynamics of an elastic rotating ellipsoid
+is, at the moment, beyond us.
+We cannot run a simulation or formula
+to declare leap seconds and keep UTC close to UT1.
+Instead, we simply have to watch with sensitive instruments
 to see what the Earth will do next.
 
 If you are interested in the Earth as a dynamic body,
@@ -588,13 +592,14 @@ The accumulated error at any given moment
 is provided as ΔT,
 the evolving difference between TT and UT1
 that dropped below zero in 1871 but then rose past it in 1902
-and now stands at more than +67.2 seconds.
+and now stands at more than +67.2 seconds.
 
 The task of governing leap seconds can be stated, then,
 as the task of keeping the difference between TT and UTC
 close to the wild natural value ΔT.
 The standards bodies promise, in fact,
-that these differences will always be within 0.9 seconds of each other.
+that the difference between these two artificial time scales
+will always be within 0.9 seconds of the observed ΔT value.
 
 In calculations that do not involve Earth’s rotation,
 ΔT never arises.
@@ -602,6 +607,7 @@ The positions of planets,
 the distance to the Moon,
 and the movement of a comet or asteroid
 all ignore ΔT completely.
+When, then, does ΔT come into play?
 
 * ΔT is used when you specify your geographic location
   as a :class:`Topos` and Skyfield needs to determine
@@ -613,7 +619,7 @@ all ignore ΔT completely.
   in your local sky.
 
 * ΔT determines the Earth orientation for Skyfield
-  with an Earth satellite position generated from TLE elements
+  when an Earth satellite position generated from TLE elements
   gets translated into a full Solar System position.
 
 Soon, Skyfield will include a full table of historical ΔT values
