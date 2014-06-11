@@ -3,14 +3,15 @@
 language: python
 
 python:
+  - "2.6"
   - "2.7"
-  # Python 3
   - "3.2"
+  - "3.3"
+  - "3.4"
 
-# command to install dependencies
 install:
-  - pip install -q tox --use-mirrors
+  - "pip install -e ."
+  - "pip install -r requirements.txt"
 
-# command to run tests
 script:
-  - tox
+  - "py.test"
