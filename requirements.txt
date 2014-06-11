@@ -1,8 +1,8 @@
 astropy
-de405==1997
+de405==1997.1
 de423==2010.1
 novas==3.1.1.2
-novas_de405==1997
+novas_de405==1997.1
 pytest>=2.5
 httpretty==0.6.3
 sphinx
