@@ -405,7 +405,7 @@ def test_terra():
 
     posn, veln = earthlib.terra(topos, array([11.0, 23.9]))
 
-    epsilon = 1e-8 * meter  # 14 digits of agreement
+    epsilon = 1e-7 * meter  # 13 digits of agreement
 
     eq(pos0, posn[:,0], epsilon)
     eq(pos1, posn[:,1], epsilon)
