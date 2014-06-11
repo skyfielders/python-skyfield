@@ -156,9 +156,9 @@ class WrongUnitError(ValueError):
 
     def __init__(self, name, unit):
         usual = 'hours' if (unit == 'degrees') else 'degrees'
-        self.args = ('This angle is usually expressed in {}, not {};'
-                     ' if you want to express it in {} anyway, use'
-                     ' {}_anyway()'.format(usual, unit, unit, name),)
+        self.args = ('This angle is usually expressed in {0}, not {1};'
+                     ' if you want to express it in {1} anyway, use'
+                     ' {2}_anyway()'.format(usual, unit, name),)
 
 class Angle(BaseAngle):
 

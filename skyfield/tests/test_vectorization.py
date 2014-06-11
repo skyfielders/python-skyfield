@@ -166,16 +166,16 @@ def generate_comparisons(computation):
         g = computation(date, delta_t)
         for vector, scalar in izip(vector_results, g):
             f = g.gi_frame
-            location = '{}:{}'.format(f.f_code.co_filename, f.f_lineno)
+            location = '{0}:{1}'.format(f.f_code.co_filename, f.f_lineno)
             yield location, vector, i, scalar
 
 def test_vector_vs_scalar(vector_vs_scalar):
     location, vector, i, scalar = vector_vs_scalar
     vectorT = rollaxis(vector, -1)
     assert vector is not None, (
-        '{}:\n  vector is None'.format(location))
+        '{0}:\n  vector is None'.format(location))
     assert vectorT[i].shape == scalar.shape, (
-        '{}:\n  {}[{}].shape != {}.shape\n  shapes: {} {}'.format(
+        '{0}:\n  {1}[{2}].shape != {3}.shape\n  shapes: {4} {5}'.format(
             location, vector.T, i, scalar, vector.T[i].shape, scalar.shape))
 
     vectorTi = vectorT[i]
@@ -189,8 +189,8 @@ def test_vector_vs_scalar(vector_vs_scalar):
     difference = abs(vectorTi - scalar)
 
     assert (difference <= epsilon).all(), (
-        '{}:\n vector[{}] = {}\n'
-        ' scalar    = {}\n'
-        ' difference= {}\n'
-        ' epsilon   = {}'
+        '{0}:\n vector[{1}] = {2}\n'
+        ' scalar    = {3}\n'
+        ' difference= {4}\n'
+        ' epsilon   = {5}'
         .format(location, i, vectorTi, scalar, difference, epsilon))
