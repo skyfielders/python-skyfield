@@ -19,10 +19,10 @@ DB = 66.8779
 earth = api.earth
 jupiter = api.jupiter
 star = starlib.Star(
-    ra=1.59132070233, dec=8.5958876464,
-    pm_ra=0.0, pm_dec=0.0,
-    parallax=0.0, radial_velocity=0.0,
-)
+    ra_hours=1.59132070233, dec_degrees=8.5958876464,
+    ra_mas_per_year=0.0, dec_mas_per_year=0.0,
+    parallax=0.0, radial_km_per_s=0.0,
+    )
 
 
 class BM(object):
