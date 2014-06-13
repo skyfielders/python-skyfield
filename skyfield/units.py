@@ -2,6 +2,7 @@
 
 """
 import numpy as np
+from numpy import copysign
 from .constants import AU_KM, DAY_S, tau
 
 # Distance and velocity.
@@ -112,9 +113,9 @@ class BaseAngle(object):
         elif radians is not None:
             self._radians = radians
         elif degrees is not None:
-            self._radians = degrees * _from_degrees
+            self._radians = _unsexagesimalize(degrees) * _from_degrees
         elif hours is not None:
-            self._radians = hours * _from_hours
+            self._radians = _unsexagesimalize(hours) * _from_hours
 
     def __format__(self, format_spec):
         return self.dstr()
@@ -204,6 +205,34 @@ def _sexagesimalize(value, places=0):
     n, seconds = divmod(n, 60)
     n, minutes = divmod(n, 60)
     return sign, n, minutes, seconds, fraction
+
+def _unsexagesimalize(value):
+    """Return `value` after interpreting a (units, minutes, seconds) tuple.
+
+    When `value` is not a tuple, it is simply returned.
+
+    >>> _unsexagesimalize(3.14)
+    3.14
+
+    But tuples are interpreted as units, minutes, and seconds.  Note
+    that only the sign of `units` is significant!  All of the following
+    tuples convert into exactly the same value:
+
+    >>> '%f' % _unsexagesimalize((-1, 2, 3))
+    '-1.034167'
+    >>> '%f' % _unsexagesimalize((-1, -2, 3))
+    '-1.034167'
+    >>> '%f' % _unsexagesimalize((-1, -2, -3))
+    '-1.034167'
+
+    """
+    if isinstance(value, tuple):
+        for i, component in enumerate(value):
+            if i:
+                value = value + copysign(component, value) * 60.0 ** -i
+            else:
+                value = component
+    return value
 
 def interpret_longitude(value):
     split = getattr(value, 'split', None)

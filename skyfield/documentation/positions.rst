@@ -73,17 +73,30 @@ and return its position as of that moment:
 
 * :doc:`planets` — the eight planets and Pluto are all supported,
   thanks to the excellent work of the Jet Propulsion Laboratory (JPL)
-  and to Skyfield’s support for their major solar system ephemerides. ::
+  and to Skyfield’s support for their major solar system ephemerides.
+
+  .. testcode::
 
     from skyfield.api import earth, now
     position = earth(now())
+
+* :doc:`stars` — stars and other fixed objects with catalog coordinates
+  generate their current astrometric position
+  when observed from a planet.
+
+  .. testcode::
+
+    from skyfield.api import Star, earth, now
+    barnard = Star(ra_hours=(17, 57, 48.49803),
+                   dec_degrees=(4, 41, 36.2072))
+    position = earth(now()).observe(barnard)
 
 * :doc:`earth-satellites` — Earth satellite positions can be generated
   from public TLE elements describing their current orbit,
   which you can download from Celestrak. ::
 
     from skyfield.api import earth, now
-    sat = earth.satellite()
+    sat = earth.satellite(tle_text)
     position = sat(now())
 
 Read :doc:`time` for more information
