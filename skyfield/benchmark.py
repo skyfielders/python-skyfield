@@ -3,7 +3,7 @@
 import gc
 import sys
 from numpy import array, mean, std, zeros
-from skyfield import earthlib, nutationlib, planets, starlib
+from skyfield import earthlib, nutationlib, api, starlib
 
 from skyfield.constants import T0
 from skyfield.timelib import julian_date, JulianDate
@@ -16,8 +16,8 @@ D0 = 63.8285
 DA = 39.707
 DB = 66.8779
 
-earth = planets.earth
-jupiter = planets.jupiter
+earth = api.earth
+jupiter = api.jupiter
 star = starlib.Star(
     ra=1.59132070233, dec=8.5958876464,
     pm_ra=0.0, pm_dec=0.0,

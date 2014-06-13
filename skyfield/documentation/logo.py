@@ -15,9 +15,12 @@
 # convert -density 480 logo.pdf logo.png
 
 from math import cos, pi, sin
-from reportlab.pdfgen.canvas import Canvas
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
+try:
+    from reportlab.pdfgen.canvas import Canvas
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+except ImportError:
+    pass  # for when py.test discovers us but ReportLab is not installed
 
 tau = pi * 2.0
 quarter_tau = pi / 2.0
