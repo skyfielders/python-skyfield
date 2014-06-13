@@ -120,7 +120,7 @@ def test_star_deflected_by_jupiter(jd):
     star = starlib.Star(
         ra_hours=1.59132070233, dec_degrees=8.5958876464,
         ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-        parallax=0.0, radial_km_per_s=0.0,
+        parallax_mas=0.0, radial_km_per_s=0.0,
         )
     ra, dec, distance = earth(jd).observe(star).apparent().radec(epoch=jd)
 
@@ -369,7 +369,7 @@ def test_starvectors():
 
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
                         ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
-                        parallax=7.56, radial_km_per_s=-17.4)
+                        parallax_mas=7.56, radial_km_per_s=-17.4)
 
     p_epsilon = 1e3 * meter   # not bad for something 27 million AU distant
     v_epsilon = 1e-6 * meter  # per day

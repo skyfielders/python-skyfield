@@ -61,7 +61,7 @@ Here are all three effects applied to Barnard’s star:
                    dec_degrees=(4, 41, 36.2072),
                    ra_mas_per_year=-798.71,
                    dec_mas_per_year=+10337.77,
-                   parallax=545.4,
+                   parallax_mas=545.4,
                    radial_km_per_s=-110.6)
 
     astrometric = earth(now()).observe(barnard)

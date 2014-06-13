@@ -21,7 +21,7 @@ jupiter = api.jupiter
 star = starlib.Star(
     ra_hours=1.59132070233, dec_degrees=8.5958876464,
     ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-    parallax=0.0, radial_km_per_s=0.0,
+    parallax_mas=0.0, radial_km_per_s=0.0,
     )
 
 

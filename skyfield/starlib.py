@@ -11,7 +11,7 @@ class Star(object):
 
     def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,
                  ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                 parallax=0.0, radial_km_per_s=0.0):
+                 parallax_mas=0.0, radial_km_per_s=0.0):
 
         if ra_hours is not None:
             self.ra = Angle(hours=ra_hours)
@@ -31,7 +31,7 @@ class Star(object):
 
         self.ra_mas_per_year = ra_mas_per_year
         self.dec_mas_per_year = dec_mas_per_year
-        self.parallax = parallax
+        self.parallax_mas = parallax_mas
         self.radial_km_per_s = radial_km_per_s
 
         self._compute_vectors()
@@ -59,7 +59,7 @@ class Star(object):
 
         # Use 1 gigaparsec for stars whose parallax is zero.
 
-        parallax = self.parallax
+        parallax = self.parallax_mas
         if parallax <= 0.0:
             parallax = 1.0e-6
 
