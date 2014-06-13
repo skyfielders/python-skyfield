@@ -10,6 +10,9 @@ forget.
 Sprint Possibilities
 ====================
 
+* In `stars.rst`, document the other alternatives for how to set the RA
+  and dec of a new Star object.
+
 * What happens if an angle that's a vector of values has .dstr() or
   .hstr() called on it?  (And, those might not be those good method
   names.)  Make it return a list of strings.
