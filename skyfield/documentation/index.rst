@@ -67,4 +67,5 @@ on GitHub.
    positions
    time
    planets
+   stars
    earth-satellites
