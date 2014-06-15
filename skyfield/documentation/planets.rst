@@ -72,7 +72,7 @@ from the :mod:`~api` module:
 .. testsetup::
 
     import numpy as np
-    np.set_printoptions(suppress=True, formatter={'float': str})
+    np.set_printoptions(suppress=True, precision=4)
 
 .. testcode::
 
@@ -88,8 +88,8 @@ from the :mod:`~api` module:
 
 .. testoutput::
 
-    DE421: [31387022.7906 33032548.9719 14337050.8211]
-    DE423: [31387022.7693 33032548.7756 14337050.9898]
+    DE421: [ 31387022.7906  33032548.9719  14337050.8211]
+    DE423: [ 31387022.7693  33032548.7756  14337050.9898]
 
 These positions might look identical
 and make you wonder why the JPL even bothered to issue a new ephemeris.
@@ -100,3 +100,8 @@ While a few-hundred-meter difference
 might be impossible to see with your telescope,
 it is quite relevant for JPL professionals
 who need to know exactly where to aim delicate spacecraft for landings.
+
+.. testcleanup::
+
+    import numpy as np
+    np.set_printoptions(precision=8)
