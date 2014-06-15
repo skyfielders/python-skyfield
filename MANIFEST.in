@@ -1,2 +1,3 @@
 include README.rst
 include LICENSE
+include skyfield/documentation/*.rst
