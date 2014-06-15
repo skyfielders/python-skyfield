@@ -86,7 +86,7 @@ def observe_planet_from_topos(tt, delta_t):
     yield jd.tt
     yield jd.tdb
 
-    topos = Topos('71.1375 W', '42.6583 N', 0.0)
+    topos = Topos(latitude_degrees=42.6583, longitude_degrees=-71.1375)
     topos.ephemeris = earth.ephemeris
     observer = topos(jd)
 

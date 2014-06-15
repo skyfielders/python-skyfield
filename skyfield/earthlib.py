@@ -47,7 +47,7 @@ def terra(topos, st):
 
     """
     zero = zeros_like(st)
-    phi = topos.latitude
+    phi = topos.latitude.radians()
     sinphi = sin(phi)
     cosphi = cos(phi)
     c = 1.0 / sqrt(cosphi * cosphi +
@@ -59,7 +59,7 @@ def terra(topos, st):
 
     # Compute local sidereal time factors at the observer's longitude.
 
-    stlocl = st * 15.0 * DEG2RAD + topos.longitude
+    stlocl = st * 15.0 * DEG2RAD + topos.longitude.radians()
     sinst = sin(stlocl)
     cosst = cos(stlocl)
 

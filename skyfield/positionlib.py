@@ -10,7 +10,7 @@ from .functions import dots
 from .relativity import add_aberration, add_deflection
 from .timelib import JulianDate, takes_julian_date
 from .units import (Distance, Velocity, Angle, HourAngle, SignedAngle,
-                    interpret_longitude, interpret_latitude)
+                    _interpret_ltude)
 
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
 quarter_tau = 0.25 * TAU
@@ -85,12 +85,34 @@ class ICRCoordinates:
 
 class Topos(object):
 
-    def __init__(self, latitude, longitude, elevation=0.,
-                 temperature=10.0, pressure=1010.0):
-        self.latitude = lat = interpret_latitude(latitude)
-        self.longitude = lon = interpret_longitude(longitude)
+    def __init__(self, latitude=None, longitude=None,
+                 latitude_degrees=None, longitude_degrees=None,
+                 elevation=0., temperature=10.0, pressure=1010.0):
+
+        if latitude_degrees is not None:
+            latitude = Angle(degrees=latitude_degrees)
+        elif isinstance(latitude, str):
+            latitude = _interpret_ltude(latitude, 'latitude', 'N', 'S')
+        elif not isinstance(latitude, Angle):
+            raise TypeError('please provide either latitude_degrees=<float>'
+                            ' or else latitude=<skyfield.units.Angle object>'
+                            ' with north being positive')
+
+        if longitude_degrees is not None:
+            longitude = Angle(degrees=longitude_degrees)
+        elif isinstance(longitude, str):
+            longitude = _interpret_ltude(longitude, 'longitude', 'E', 'W')
+        elif not isinstance(longitude, Angle):
+            raise TypeError('please provide either longitude_degrees=<float>'
+                            ' or else longitude=<skyfield.units.Angle object>'
+                            ' with east being positive')
+
+        self.latitude = latitude
+        self.longitude = longitude
         self.elevation = elevation
 
+        lat = latitude.radians()
+        lon = longitude.radians()
         sinlat = sin(lat)
         coslat = cos(lat)
         sinlon = sin(lon)

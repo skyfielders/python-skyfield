@@ -234,24 +234,29 @@ def _unsexagesimalize(value):
                 value = component
     return value
 
-def interpret_longitude(value):
-    split = getattr(value, 'split', None)
-    if split is not None:
-        pieces = split()
-        degrees = float(pieces[0])
-        if len(pieces) > 1 and pieces[1].lower() == 'w':
-            degrees = - degrees
-        return degrees / 360. * tau
-    else:
-        return value
+def _interpret_ltude(value, name, psuffix, nsuffix):
+    """Interpret a string as a latitude or longitude angle.
 
-def interpret_latitude(value):
-    split = getattr(value, 'split', None)
-    if split is not None:
-        pieces = split()
-        degrees = float(pieces[0])
-        if len(pieces) > 1 and pieces[1].lower() == 's':
-            degrees = - degrees
-        return degrees / 360. * tau
+    `value` - The string to interpret.
+    `name` - 'latitude' or 'longitude', for use in exception messages.
+    `positive` - The string that indicates a positive angle ('N' or 'E').
+    `negative` - The string that indicates a negative angle ('S' or 'W').
+
+    """
+    value = value.strip().upper()
+
+    if value.endswith(psuffix):
+        sign = +1.0
+    elif value.endswith(nsuffix):
+        sign = -1.0
     else:
-        return value
+        raise ValueError('your {0} string {1!r} does not end with either {2!r}'
+                         ' or {3!r}'.format(name, value, psuffix, nsuffix))
+
+    try:
+        value = float(value[:-1])
+    except ValueError:
+        raise ValueError('your {0} string {1!r} cannot be parsed as a floating'
+                         ' point number'.format(name, value))
+
+    return Angle(degrees=sign * value)

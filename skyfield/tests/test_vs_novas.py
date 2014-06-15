@@ -179,8 +179,8 @@ def test_app_planet(jd, planet_name_and_code):
 
 def test_local_planet(jd, planet_name_and_code):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-    ggr = positionlib.Topos('45 N', '75 W', 0.0,
-                            temperature=10.0, pressure=1010.0)
+    ggr = positionlib.Topos(latitude_degrees=45.0, longitude_degrees=-75.0,
+                            elevation=0.0, temperature=10.0, pressure=1010.0)
     ggr.ephemeris = de405
 
     planet_name, planet_code = planet_name_and_code
@@ -199,8 +199,8 @@ def test_local_planet(jd, planet_name_and_code):
 
 def test_topo_planet(jd, planet_name_and_code):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-    ggr = positionlib.Topos('45 N', '75 W', 0.0,
-                            temperature=10.0, pressure=1010.0)
+    ggr = positionlib.Topos(latitude_degrees=45.0, longitude_degrees=-75.0,
+                            elevation=0.0, temperature=10.0, pressure=1010.0)
     ggr.ephemeris = de405
 
     planet_name, planet_code = planet_name_and_code
@@ -224,8 +224,8 @@ def test_altaz(jd, planet_name_and_code):
     """
     planet_name, planet_code = planet_name_and_code
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-    ggr = positionlib.Topos('45 N', '75 W', 0.0,
-                            temperature=10.0, pressure=1010.0)
+    ggr = positionlib.Topos(latitude_degrees=45.0, longitude_degrees=-75.0,
+                            elevation=0.0, temperature=10.0, pressure=1010.0)
     ggr.ephemeris = de405
     xp = yp = 0.0
 
@@ -292,8 +292,8 @@ def test_geocentric_position_and_velocity(jd):
     observer = c.make_observer_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     posu, velu = c.geo_posvel(jd.tt, jd.delta_t, observer)
 
-    topos = positionlib.Topos('45 N', '75 W', elevation=0.0,
-                              temperature=10.0, pressure=1010.0)
+    topos = positionlib.Topos(latitude_degrees=45.0, longitude_degrees=-75.0,
+                              elevation=0.0, temperature=10.0, pressure=1010.0)
     posv, velv = earthlib.geocentric_position_and_velocity(topos, jd)
 
     epsilon = 1e-6 * meter  # 13 to 14 digits of agreement
@@ -391,14 +391,8 @@ def test_ter2cel(jd):
 
 def test_terra():
     observer = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-
-    # Note that this class stands in for a NOVAS Topos structure, but
-    # not for our own Topos class!
-    class Topos(object):
-        latitude = 45.0 * DEG2RAD
-        longitude = -75.0 * DEG2RAD
-        elevation = 0.0
-    topos = Topos()
+    topos = positionlib.Topos(latitude_degrees=45.0, longitude_degrees=-75.0,
+                              elevation=0.0, temperature=10.0, pressure=1010.0)
 
     pos0, vel0 = array(c.terra(observer, 11.0))
     pos1, vel1 = array(c.terra(observer, 23.9))
