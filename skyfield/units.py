@@ -211,8 +211,8 @@ def _unsexagesimalize(value):
 
     When `value` is not a tuple, it is simply returned.
 
-    >>> _unsexagesimalize(3.14)
-    3.14
+    >>> _unsexagesimalize(3.25)
+    3.25
 
     But tuples are interpreted as units, minutes, and seconds.  Note
     that only the sign of `units` is significant!  All of the following
