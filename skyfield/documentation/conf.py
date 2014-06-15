@@ -40,8 +40,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Skyfield'
-copyright = u'2013, Brandon Rhodes'
+project = 'Skyfield'
+copyright = '2013, Brandon Rhodes'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -184,8 +184,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Skyfield.tex', u'Skyfield Documentation',
-   u'Brandon Rhodes', 'manual'),
+  ('index', 'Skyfield.tex', 'Skyfield Documentation',
+   'Brandon Rhodes', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -214,8 +214,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'skyfield', u'Skyfield Documentation',
-     [u'Brandon Rhodes'], 1)
+    ('index', 'skyfield', 'Skyfield Documentation',
+     ['Brandon Rhodes'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -228,8 +228,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Skyfield', u'Skyfield Documentation',
-   u'Brandon Rhodes', 'Skyfield', 'One line description of project.',
+  ('index', 'Skyfield', 'Skyfield Documentation',
+   'Brandon Rhodes', 'Skyfield', 'One line description of project.',
    'Miscellaneous'),
 ]
 
