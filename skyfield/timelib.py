@@ -136,6 +136,9 @@ class JulianDate(object):
         self.shape = getattr(self.tt, 'shape', ())
         self.delta_t = delta_t
 
+    def __repr__(self):
+        return '<JulianDate tt={0}>'.format(self.tt)
+
     def __getitem__(self, index):
         # TODO: also copy cached matrices?
         jd = JulianDate(tt=self.tt[index])
