@@ -109,10 +109,8 @@ where `value` can be either a Python float or a NumPy array of floats"""
 
 class Angle(object):
 
-    _unary_plus = False
-
     def __init__(self, angle=None, radians=None, degrees=None, hours=None,
-                 preference='degrees'):
+                 preference='degrees', signed=False):
 
         if angle is not None:
             if not isinstance(angle, Angle):
@@ -128,6 +126,7 @@ class Angle(object):
             self.radians = hours * _from_hours
 
         self.preference = preference
+        self.signed = signed
 
     def __getattr__(self, name):
         if name == '_hours':
@@ -169,7 +168,7 @@ class Angle(object):
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
         sgn, h, m, s, etc = _sexagesimalize_to_int(self._hours, places)
-        sign = '-' if sgn < 0.0 else '+' if (plus or self._unary_plus) else ''
+        sign = '-' if sgn < 0.0 else '+' if (plus or self.signed) else ''
         return '%s%02dh %02dm %02d.%0*ds' % (sign, h, m, s, places, etc)
 
     def dms(self, warn=True):
@@ -187,7 +186,7 @@ class Angle(object):
         if warn and self.preference != 'degrees':
             raise WrongUnitError('dstr')
         sgn, d, m, s, etc = _sexagesimalize_to_int(self._degrees, places)
-        sign = '-' if sgn < 0.0 else '+' if (plus or self._unary_plus) else ''
+        sign = '-' if sgn < 0.0 else '+' if (plus or self.signed) else ''
         return '%s%02ddeg %02d\' %02d.%0*d"' % (sign, d, m, s, places, etc)
 
 class WrongUnitError(ValueError):
@@ -202,11 +201,6 @@ class WrongUnitError(ValueError):
         else:
             message += ' then call {0}() with warn=False'.format(name)
         self.args = (message,)
-
-class SignedAngle(Angle):
-    """An Angle that prints a unary ``'+'`` when positive."""
-
-    _unary_plus = True
 
 def _sexagesimalize_to_float(value):
     """Decompose `value` into units, minutes, and seconds.
