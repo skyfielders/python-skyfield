@@ -66,8 +66,6 @@ Sprint Possibilities
 
 * Should a simple "print position.radec()" print something prettier?
 
-* And, should an RA really be called an Hour Angle?
-
 Longer-term goals
 =================
 

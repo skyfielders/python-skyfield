@@ -8,52 +8,97 @@
 Angle Classes
 -------------
 
-The :class:`Angle` class could have been very simple, and have provided
-symmetrical hours and degrees methods that were equally easy to call.
-But years of experience with maintaining PyEphem suggested that many
-users who are first dabbling in astronomy do not realize that right
-ascension is not typically expressed in degrees, and that users will
-frequently become confused — generating a long support tail — if the API
-makes it too natural to express right ascension using degrees.
+Years of experience with maintaining PyEphem suggested that many users
+who are first dabbling in astronomy do not realize that right ascension
+is not typically expressed in degrees, and that users will frequently
+become confused — generating a long support tail — if the API makes it
+too natural to express right ascension using degrees.
 
-So both the hours methods on angles (like :meth:`~BaseAngle.hms()` and
-:meth:`~BaseAngle.hstr()`) as well as the degrees methods (like
-:meth:`~BaseAngle.dms()` and :meth:`~BaseAngle.dstr()` are methods of
-:class:`BaseAngle` whose two subclasses, :class:`Angle` and
-:class:`HourAngle`, are instead very opinionated about how they are
-expressed.  :class:`Angle` hides the hour methods so that users are
-guided towards using degrees, while :class:`HourAngle` hides the degree
-methods instead so that it can safely be used for right ascension.
+Therefore, when faced with a request for degrees or hours, the
+:class:`Angle` class tries to protect the user from accessing the wrong
+one unless they have indicated that it is the value they really want.
+By default, all angles assume that degrees are the proper unit, and have
+no problem with the user accessing them as degrees:
 
-Both subclasses do allow the opposite kind of measure to be expressed,
-but the user has to say something like ``dms_anyway()`` instead of
-simply asking for ``dms()`` if the angle would not normally be expressed
-as degrees.  It is possible that the string ``anyway`` should be
-replaced with some more clear indication that this is an override that
-violates typical astronomical convention.  An early version of the API
-had ``dammit`` instead — which, it was thought, would properly express
-the frustration of the user who wanted degrees and who had just been
-told that they could not get them with a simple ``dms()`` call — but it
-was feared that the word would not make its users’ Python code look
-professional.
+>>> from skyfield.units import Angle
+>>> a = Angle(degrees=-54.0)
+>>> a.degrees
+-54.0
+>>> a.dstr()
+'-54deg 00\' 00.0"'
+>>> a.dms()
+(-54.0, -0.0, -0.0)
+>>> a.signed_dms()
+(-1.0, 54.0, 0.0, 0.0)
 
-One last issue was that the ``repr()`` of right ascension angle objects
-looked misleading:
+But exceptions will trigger if we try to express the angle in hours:
 
->>> from skyfield.units import HourAngle
->>> HourAngle(hours=12.5)
-HourAngle(12h 30m 00.00s)
+>>> a.hours
+Traceback (most recent call last):
+  ...
+WrongUnitError: this angle is usually expressed in degrees, not hours; if you want to use hours anyway, then please use the attribute _hours
+>>> a.hstr()
+Traceback (most recent call last):
+  ...
+WrongUnitError: this angle is usually expressed in degrees, not hours; if you want to use hours anyway, then call signed_hms() with warn=False
+>>> a.hms()
+Traceback (most recent call last):
+  ...
+WrongUnitError: this angle is usually expressed in degrees, not hours; if you want to use hours anyway, then call signed_hms() with warn=False
+>>> a.signed_hms()
+Traceback (most recent call last):
+  ...
+WrongUnitError: this angle is usually expressed in degrees, not hours; if you want to use hours anyway, then call signed_hms() with warn=False
 
-This looks wrong because the class name :class:`HourAngle`, which was
-simply chosen to indicate “an angle that prefers to be printed out using
-hours instead of degrees,” sounds like the technical term “hour angle”
-which is a different physical measurement than a right ascension.
+The remedies suggested by these exceptions indeed work:
 
-It is possible that :class:`HourAngle` should simply be renamed.  Maybe
-someone will suggest another name in the future.  But for now, the
-solution is a feature-identical subclass whose name is what you would
-actually expect for printing a right ascension.
+>>> a._hours
+-3.6
+>>> a.hstr(warn=False)
+'-03h 36m 00.00s'
+>>> a.hms(warn=False)
+(-3.0, -36.0, -0.0)
+>>> a.signed_hms(warn=False)
+(-1.0, 3.0, 36.0, 0.0)
 
->>> from skyfield.units import RightAscension
->>> RightAscension(hours=12.5)
-RightAscension(12h 30m 00.00s)
+An angle has the opposite behavior if it is given a preference of hours
+when it is created.  In that case, fetching its value in hours values
+becomes the easy operation:
+
+>>> a = Angle(degrees=-54.0, preference='hours')
+>>> a.hours
+-3.6
+>>> a.hstr()
+'-03h 36m 00.00s'
+>>> a.hms()
+(-3.0, -36.0, -0.0)
+>>> a.signed_hms()
+(-1.0, 3.0, 36.0, 0.0)
+
+And it is now degrees that take a bit of extra effort to retrieve.
+
+>>> a.degrees
+Traceback (most recent call last):
+  ...
+WrongUnitError: this angle is usually expressed in hours, not degrees; if you want to use degrees anyway, then please use the attribute _degrees
+>>> a.dstr()
+Traceback (most recent call last):
+  ...
+WrongUnitError: this angle is usually expressed in hours, not degrees; if you want to use degrees anyway, then call dstr() with warn=False
+>>> a.dms()
+Traceback (most recent call last):
+  ...
+WrongUnitError: this angle is usually expressed in hours, not degrees; if you want to use hours anyway, then call signed_hms() with warn=False
+>>> a.signed_dms()
+Traceback (most recent call last):
+  ...
+WrongUnitError: this angle is usually expressed in hours, not degrees; if you want to use hours anyway, then call signed_hms() with warn=False
+
+>>> a._degrees
+-54.0
+>>> a.dstr(warn=False)
+'-54deg 00\' 00.0"'
+>>> a.dms(warn=False)
+(-54.0, -0.0, -0.0)
+>>> a.signed_dms(warn=False)
+(-1.0, 54.0, 0.0, 0.0)

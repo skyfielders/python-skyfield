@@ -9,7 +9,7 @@ from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
 from .functions import dots
 from .relativity import add_aberration, add_deflection
 from .timelib import JulianDate, takes_julian_date
-from .units import (Distance, Velocity, Angle, RightAscension, SignedAngle,
+from .units import (Distance, Velocity, Angle, SignedAngle,
                     _interpret_ltude)
 
 ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
@@ -67,7 +67,8 @@ class ICRS(object):
                                  ' or the string "date" for epoch-of-date')
             position_AU = einsum('ij...,j...->i...', epoch.M, position_AU)
         r_AU, dec, ra = to_polar(position_AU)
-        return (RightAscension(radians=ra), SignedAngle(radians=dec),
+        return (Angle(radians=ra, preference='hours'),
+                SignedAngle(radians=dec),
                 Distance(r_AU))
 
 # class to represent a point in the IC reference frame

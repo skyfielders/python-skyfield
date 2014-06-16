@@ -107,13 +107,15 @@ Angle(hours=value)
 
 where `value` can be either a Python float or a NumPy array of floats"""
 
-class BaseAngle(object):
+class Angle(object):
 
     _unary_plus = False
 
-    def __init__(self, angle=None, radians=None, degrees=None, hours=None):
+    def __init__(self, angle=None, radians=None, degrees=None, hours=None,
+                 preference='degrees'):
+
         if angle is not None:
-            if not isinstance(angle, BaseAngle):
+            if not isinstance(angle, Angle):
                 raise ValueError(_instantiation_instructions)
             self.radians = angle.radians
         elif radians is not None:
@@ -125,6 +127,8 @@ class BaseAngle(object):
             self._hours = hours = _unsexagesimalize(hours)
             self.radians = hours * _from_hours
 
+        self.preference = preference
+
     def __getattr__(self, name):
         if name == '_hours':
             self._hours = _hours = self.radians * _to_hours
@@ -132,102 +136,77 @@ class BaseAngle(object):
         if name == '_degrees':
             self._degrees = _degrees = self.radians * _to_degrees
             return _degrees
+        if name == 'hours':
+            if self.preference != 'hours':
+                raise WrongUnitError('hours')
+            self.hours = hours = self._hours
+            return hours
+        if name == 'degrees':
+            if self.preference != 'degrees':
+                raise WrongUnitError('degrees')
+            self.degrees = degrees = self._degrees
+            return degrees
         raise AttributeError('no attribute named %r' % (name,))
 
-    def __format__(self, format_spec):
-        return self.dstr()
+    def __str__(self):
+        return self.dstr() if self.preference == 'degrees' else self.hstr()
 
-    @property
-    def hours(self):
-        return self._hours
+    def __repr__(self):
+        return '{0}({1})'.format(type(self).__name__, self)
 
-    def hms(self):
+    def hms(self, warn=True):
+        if warn and self.preference != 'hours':
+            raise WrongUnitError('hms')
         sign, units, minutes, seconds = _sexagesimalize_to_float(self._hours)
         return sign * units, sign * minutes, sign * seconds
 
-    def signed_hms(self):
+    def signed_hms(self, warn=True):
+        if warn and self.preference != 'hours':
+            raise WrongUnitError('signed_hms')
         return _sexagesimalize_to_float(self._hours)
 
-    def hstr(self, places=2, plus=False):
-        sgn, h, m, s, etc = _sexagesimalize_to_int(self.hours, places)
+    def hstr(self, places=2, plus=False, warn=True):
+        if warn and self.preference != 'hours':
+            raise WrongUnitError('hstr')
+        sgn, h, m, s, etc = _sexagesimalize_to_int(self._hours, places)
         sign = '-' if sgn < 0.0 else '+' if (plus or self._unary_plus) else ''
         return '%s%02dh %02dm %02d.%0*ds' % (sign, h, m, s, places, etc)
 
-    @property
-    def degrees(self):
-        return self._degrees
-
-    def dms(self):
+    def dms(self, warn=True):
+        if warn and self.preference != 'degrees':
+            raise WrongUnitError('dms')
         sign, units, minutes, seconds = _sexagesimalize_to_float(self._degrees)
         return sign * units, sign * minutes, sign * seconds
 
-    def signed_dms(self):
+    def signed_dms(self, warn=True):
+        if warn and self.preference != 'degrees':
+            raise WrongUnitError('signed_dms')
         return _sexagesimalize_to_float(self._degrees)
 
-    def dstr(self, places=1, plus=False):
-        sgn, d, m, s, etc = _sexagesimalize_to_int(self.degrees, places)
+    def dstr(self, places=1, plus=False, warn=True):
+        if warn and self.preference != 'degrees':
+            raise WrongUnitError('dstr')
+        sgn, d, m, s, etc = _sexagesimalize_to_int(self._degrees, places)
         sign = '-' if sgn < 0.0 else '+' if (plus or self._unary_plus) else ''
         return '%s%02ddeg %02d\' %02d.%0*d"' % (sign, d, m, s, places, etc)
 
-    hours_anyway = hours
-    hms_anyway = hms
-    hstr_anyway = hstr
-
-    degrees_anyway = degrees
-    dms_anyway = dms
-    dstr_anyway = dstr
-
 class WrongUnitError(ValueError):
 
-    def __init__(self, name, unit):
+    def __init__(self, name):
+        unit = 'hours' if (name.startswith('h') or '_h' in name) else 'degrees'
         usual = 'hours' if (unit == 'degrees') else 'degrees'
-        self.args = ('This angle is usually expressed in {0}, not {1};'
-                     ' if you want to express it in {1} anyway, use'
-                     ' {2}_anyway()'.format(usual, unit, name),)
-
-class Angle(BaseAngle):
-
-    __str__ = BaseAngle.dstr
-
-    def __repr__(self):
-        return '{0}({1})'.format(type(self).__name__, self.dstr())
-
-    # Protect naive users from accidentally calling hour methods.
-
-    def hours(self):
-        raise WrongUnitError('hours', 'hours')
-
-    def hms(self):
-        raise WrongUnitError('hms', 'hours')
-
-    def hstr(self):
-        raise WrongUnitError('hstr', 'hours')
+        message = ('this angle is usually expressed in {0}, not {1};'
+                   ' if you want to use {1} anyway,'.format(usual, unit))
+        if name == unit:
+            message += ' then please use the attribute _{0}'.format(unit)
+        else:
+            message += ' then call {0}() with warn=False'.format(name)
+        self.args = (message,)
 
 class SignedAngle(Angle):
     """An Angle that prints a unary ``'+'`` when positive."""
 
     _unary_plus = True
-
-class HourAngle(BaseAngle):
-
-    __str__ = BaseAngle.hstr
-
-    def __repr__(self):
-        return '{0}({1})'.format(type(self).__name__, self.hstr())
-
-    # Protect naive users from accidentally calling degree methods.
-
-    def degrees(self):
-        raise WrongUnitError('degrees', 'degrees')
-
-    def dms(self):
-        raise WrongUnitError('dms', 'degrees')
-
-    def dstr(self):
-        raise WrongUnitError('dstr', 'degrees')
-
-class RightAscension(HourAngle):
-    pass
 
 def _sexagesimalize_to_float(value):
     """Decompose `value` into units, minutes, and seconds.
@@ -256,9 +235,9 @@ def _sexagesimalize_to_float(value):
 def _sexagesimalize_to_int(value, places=0):
     """Decompose `value` into units, minutes, seconds, and second fractions.
 
-    This routine a value for sexagesimal display, with its seconds
-    fraction expressed as an integer with `places` digits.  The result
-    is a tuple of five integers:
+    This routine prepares a value for sexagesimal display, with its
+    seconds fraction expressed as an integer with `places` digits.  The
+    result is a tuple of five integers:
 
     ``(sign [either +1 or -1], units, minutes, seconds, second_fractions)``
 
@@ -285,9 +264,9 @@ def _unsexagesimalize(value):
     >>> _unsexagesimalize(3.25)
     3.25
 
-    But tuples are interpreted as units, minutes, and seconds.  Note
-    that only the sign of `units` is significant!  All of the following
-    tuples convert into exactly the same value:
+    An input tuple is interpreted as units, minutes, and seconds.  Note
+    that only the sign of `units` is significant!  So all of the
+    following tuples convert into exactly the same value:
 
     >>> '%f' % _unsexagesimalize((-1, 2, 3))
     '-1.034167'
