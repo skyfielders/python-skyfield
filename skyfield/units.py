@@ -18,17 +18,23 @@ class Distance(object):
     when building a ``Distance`` object.
 
     """
-    def __init__(self, AU=None, km=None):
+    def __init__(self, AU=None, km=None, m=None):
         if AU is not None:
             self.AU = AU
         elif km is not None:
             self.km = km
             self.AU = km / AU_KM
+        elif m is not None:
+            self.m = m
+            self.AU = m / AU_M
 
     def __getattr__(self, name):
         if name == 'km':
-            self.km = self.AU * AU_KM
-            return self.km
+            self.km = km = self.AU * AU_KM
+            return km
+        if name == 'm':
+            self.m = m = self.AU * AU_M
+            return m
         raise AttributeError('no attribute named %r' % (name,))
 
     def __str__(self):

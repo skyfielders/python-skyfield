@@ -53,7 +53,7 @@ def terra(topos, st):
     c = 1.0 / sqrt(cosphi * cosphi +
                    sinphi * sinphi * one_minus_flattening_squared)
     s = one_minus_flattening_squared * c
-    ht = topos.elevation
+    ht = topos.elevation.m
     ach = ERAD * c + ht
     ash = ERAD * s + ht
 

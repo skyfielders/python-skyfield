@@ -88,7 +88,7 @@ class Topos(object):
 
     def __init__(self, latitude=None, longitude=None,
                  latitude_degrees=None, longitude_degrees=None,
-                 elevation=0., temperature=10.0, pressure=1010.0):
+                 elevation_m=0.):
 
         if latitude_degrees is not None:
             latitude = Angle(degrees=latitude_degrees)
@@ -110,7 +110,7 @@ class Topos(object):
 
         self.latitude = latitude
         self.longitude = longitude
-        self.elevation = elevation
+        self.elevation = Distance(m=elevation_m)
 
         lat = latitude.radians
         lon = longitude.radians

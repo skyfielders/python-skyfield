@@ -64,8 +64,6 @@ Sprint Possibilities
   automated method of determining which particular constants in the code
   base our tests are not sensitive to.
 
-* The .topos() method should advertise real arguments, not varargs.
-
 * Should a simple "print position.radec()" print something prettier?
 
 * And, should an RA really be called an Hour Angle?

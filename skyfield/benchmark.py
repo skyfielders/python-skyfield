@@ -67,7 +67,7 @@ def bm_planet_observe_from(times, t):
 
 
 def bm_topo_planet_observe(times, t):
-    ggr = earth.topos('75 W', '45 N', 0.0, temperature=10.0, pressure=1010.0)
+    ggr = earth.topos('75 W', '45 N', elevation_m=0.0)
     run_benchmark(times, ggr(t).observe, jupiter)
 
 
@@ -94,7 +94,7 @@ def bm_coordinate_to_apparent(times, t):
 
 
 def bm_coordinate_horizontal(times, t):
-    ggr = earth.topos('75 W', '45 N', 0.0, temperature=10.0, pressure=1010.0)
+    ggr = earth.topos('75 W', '45 N', elevation_m=0.0)
     run_benchmark(times, ggr(t).observe(jupiter).apparent().horizontal)
 
 
