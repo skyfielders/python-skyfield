@@ -69,3 +69,4 @@ on GitHub.
    planets
    stars
    earth-satellites
+   design

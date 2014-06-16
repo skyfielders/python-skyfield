@@ -165,6 +165,9 @@ class Angle(BaseAngle):
 
     __str__ = BaseAngle.dstr
 
+    def __repr__(self):
+        return '{0}(degrees={1!r})'.format(type(self).__name__, self.dms())
+
     # Protect naive users from accidentally calling hour methods.
 
     def hours(self):
@@ -185,6 +188,9 @@ class HourAngle(BaseAngle):
 
     __str__ = BaseAngle.hstr
 
+    def __repr__(self):
+        return '{0}(degrees={1!r})'.format(type(self).__name__, self.hms())
+
     # Protect naive users from accidentally calling degree methods.
 
     def degrees(self):
@@ -195,6 +201,9 @@ class HourAngle(BaseAngle):
 
     def dstr(self):
         raise WrongUnitError('dstr', 'degrees')
+
+class RightAscension(HourAngle):
+    pass
 
 def _sexagesimalize(value, places=0):
     sign = int(np.sign(value))
