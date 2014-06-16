@@ -2,7 +2,7 @@
 
 """
 import numpy as np
-from numpy import copysign
+from numpy import abs, copysign
 from .constants import AU_KM, DAY_S, tau
 
 # Distance and velocity.
@@ -109,39 +109,49 @@ class BaseAngle(object):
         if angle is not None:
             if not isinstance(angle, BaseAngle):
                 raise ValueError(_instantiation_instructions)
-            self._radians = angle._radians
+            self.radians = angle.radians
         elif radians is not None:
-            self._radians = radians
+            self.radians = radians
         elif degrees is not None:
-            self._radians = _unsexagesimalize(degrees) * _from_degrees
+            self._degrees = degrees = _unsexagesimalize(degrees)
+            self.radians = degrees * _from_degrees
         elif hours is not None:
-            self._radians = _unsexagesimalize(hours) * _from_hours
+            self._hours = hours = _unsexagesimalize(hours)
+            self.radians = hours * _from_hours
+
+    def __getattr__(self, name):
+        if name == '_hours':
+            self._hours = _hours = self.radians * _to_hours
+            return _hours
+        if name == '_degrees':
+            self._degrees = _degrees = self.radians * _to_degrees
+            return _degrees
+        raise AttributeError('no attribute named %r' % (name,))
 
     def __format__(self, format_spec):
         return self.dstr()
 
-    def radians(self):
-        return self._radians
-
+    @property
     def hours(self):
-        return self._radians * _to_hours
+        return self._hours
 
     def hms(self):
-        return _sexagesimalize(self.hours())
+        return _sexagesimalize_to_float(self.hours)
 
     def hstr(self, places=2, plus=False):
-        sgn, h, m, s, etc = _sexagesimalize(self.hours(), places)
+        sgn, h, m, s, etc = _sexagesimalize_to_int(self.hours, places)
         sign = '-' if sgn < 0.0 else '+' if (plus or self._unary_plus) else ''
         return '%s%02dh %02dm %02d.%0*ds' % (sign, h, m, s, places, etc)
 
+    @property
     def degrees(self):
-        return self._radians * _to_degrees
+        return self._degrees
 
     def dms(self):
-        return _sexagesimalize(self.degrees())
+        return _sexagesimalize_to_float(self.degrees)
 
     def dstr(self, places=1, plus=False):
-        sgn, d, m, s, etc = _sexagesimalize(self.degrees(), places)
+        sgn, d, m, s, etc = _sexagesimalize_to_int(self.degrees, places)
         sign = '-' if sgn < 0.0 else '+' if (plus or self._unary_plus) else ''
         return '%s%02ddeg %02d\' %02d.%0*d"' % (sign, d, m, s, places, etc)
 
@@ -189,7 +199,7 @@ class HourAngle(BaseAngle):
     __str__ = BaseAngle.hstr
 
     def __repr__(self):
-        return '{0}(degrees={1!r})'.format(type(self).__name__, self.hms())
+        return '{0}(hours={1!r})'.format(type(self).__name__, self.hms())
 
     # Protect naive users from accidentally calling degree methods.
 
@@ -205,9 +215,49 @@ class HourAngle(BaseAngle):
 class RightAscension(HourAngle):
     pass
 
-def _sexagesimalize(value, places=0):
+def _sexagesimalize_to_float(value):
+    """Decompose `value` into units, minutes, and seconds.
+
+    Note that this routine is not appropriate for displaying a value,
+    because rounding to the smallest digit of display is necessary
+    before showing a value to the user.  Use `_sexagesimalize_to_int()`
+    for data being displayed to the user.
+
+    This routine simply decomposes the floating point `value` into
+    units, minutes, and seconds, returning the result in a three-element
+    tuple.  All three values will have the sign of `value` itself.
+
+    >>> _sexagesimalize_to_float(12.05125)
+    (12.0, 3.0, 4.5)
+    >>> _sexagesimalize_to_float(-12.05125)
+    (-12.0, -3.0, -4.5)
+
+    """
+    n = abs(value)
+    minutes, seconds = divmod(n * 3600.0, 60.0)
+    units, minutes = divmod(minutes, 60.0)
+    if value < 0.0:
+        return -units, -minutes, -seconds
+    else:
+        return units, minutes, seconds
+
+def _sexagesimalize_to_int(value, places=0):
+    """Decompose `value` into units, minutes, seconds, and second fractions.
+
+    This routine a value for sexagesimal display, with its seconds
+    fraction expressed as an integer with `places` digits.  The result
+    is a tuple of five integers:
+
+    ``(sign [either +1 or -1], units, minutes, seconds, second_fractions)``
+
+    The integers are properly rounded per astronomical convention so
+    that, for example, given ``places=3`` the result tuple ``(1, 11, 22,
+    33, 444)`` means that the input was closer to 11u 22' 33.444" than
+    to either 33.443" or 33.445" in its value.
+
+    """
     sign = int(np.sign(value))
-    value = np.absolute(value)
+    value = abs(value)
     power = 10 ** places
     n = int(7200 * power * value + 1) // 2
     n, fraction = divmod(n, power)

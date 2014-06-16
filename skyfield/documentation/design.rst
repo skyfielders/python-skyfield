@@ -40,8 +40,8 @@ One last issue was that the ``repr()`` of right ascension angle objects
 looked misleading:
 
 >>> from skyfield.units import HourAngle
->>> HourAngle(radians=1.0)
-HourAngle(degrees=(1, 3, 49, 11, 0))
+>>> HourAngle(hours=12.5)
+HourAngle(hours=(12.0, 30.0, 0.0))
 
 This looks wrong because the class name :class:`HourAngle`, which was
 simply chosen to indicate “an angle that prefers to be printed out using
@@ -54,5 +54,5 @@ solution is a feature-identical subclass whose name is what you would
 actually expect for printing a right ascension.
 
 >>> from skyfield.units import RightAscension
->>> RightAscension(radians=1.0)
-RightAscension(degrees=(1, 3, 49, 11, 0))
+>>> RightAscension(hours=12.5)
+RightAscension(hours=(12.0, 30.0, 0.0))

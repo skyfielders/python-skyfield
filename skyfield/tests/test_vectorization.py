@@ -52,14 +52,14 @@ def observe_planet_from_geocenter(tt, delta_t):
 
     ra, dec, distance = astrometric.radec()
 
-    yield ra.hours()
-    yield dec.degrees()
+    yield ra.hours
+    yield dec.degrees
     yield distance.AU
 
     ra, dec, distance = astrometric.radec(epoch=B1950)
 
-    yield ra.hours()
-    yield dec.degrees()
+    yield ra.hours
+    yield dec.degrees
     yield distance.AU
 
     apparent = astrometric.apparent()
@@ -69,14 +69,14 @@ def observe_planet_from_geocenter(tt, delta_t):
 
     ra, dec, distance = apparent.radec()
 
-    yield ra.hours()
-    yield dec.degrees()
+    yield ra.hours
+    yield dec.degrees
     yield distance.AU
 
     ra, dec, distance = apparent.radec(epoch=B1950)
 
-    yield ra.hours()
-    yield dec.degrees()
+    yield ra.hours
+    yield dec.degrees
     yield distance.AU
 
 def observe_planet_from_topos(tt, delta_t):
@@ -103,14 +103,14 @@ def observe_planet_from_topos(tt, delta_t):
 
     ra, dec, distance = astrometric.radec()
 
-    yield ra.hours()
-    yield dec.degrees()
+    yield ra.hours
+    yield dec.degrees
     yield distance.AU
 
     ra, dec, distance = astrometric.radec(epoch=B1950)
 
-    yield ra.hours()
-    yield dec.degrees()
+    yield ra.hours
+    yield dec.degrees
     yield distance.AU
 
     apparent = astrometric.apparent()
@@ -120,14 +120,14 @@ def observe_planet_from_topos(tt, delta_t):
 
     ra, dec, distance = apparent.radec()
 
-    yield ra.hours()
-    yield dec.degrees()
+    yield ra.hours
+    yield dec.degrees
     yield distance.AU
 
     ra, dec, distance = apparent.radec(epoch=B1950)
 
-    yield ra.hours()
-    yield dec.degrees()
+    yield ra.hours
+    yield dec.degrees
     yield distance.AU
 
 def compute_stellar_position(tt, delta_t):
@@ -140,8 +140,8 @@ def compute_stellar_position(tt, delta_t):
 
     ra, dec, distance = astrometric.radec()
 
-    yield ra.hours()
-    yield dec.degrees()
+    yield ra.hours
+    yield dec.degrees
     yield distance.AU
 
 def pytest_generate_tests(metafunc):

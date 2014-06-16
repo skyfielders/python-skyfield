@@ -124,8 +124,8 @@ def test_star_deflected_by_jupiter(jd):
         )
     ra, dec, distance = earth(jd).observe(star).apparent().radec(epoch=jd)
 
-    eq(ra0, ra.hours(), 1e-9 * arcsecond_in_hours)
-    eq(dec0, dec.degrees(), 1e-9 * arcsecond_in_degrees)
+    eq(ra0, ra.hours, 1e-9 * arcsecond_in_hours)
+    eq(dec0, dec.degrees, 1e-9 * arcsecond_in_degrees)
 
 # Tests of generating a full position or coordinate.
 
@@ -141,8 +141,8 @@ def test_astro_planet(jd, planet_name_and_code):
     distance = length_of((e - planet(jd)).position.AU)
     ra, dec, d = e.observe(planet).radec()
 
-    eq(ra0, ra.hours(), 1e-3 * arcsecond_in_hours)
-    eq(dec0, dec.degrees(), 1e-3 * arcsecond_in_degrees)
+    eq(ra0, ra.hours, 1e-3 * arcsecond_in_hours)
+    eq(dec0, dec.degrees, 1e-3 * arcsecond_in_degrees)
     eq(distance0, distance, 0.5 * meter)
 
 def test_virtual_planet(jd, planet_name_and_code):
@@ -157,8 +157,8 @@ def test_virtual_planet(jd, planet_name_and_code):
     distance = length_of((e - planet(jd)).position.AU)
     ra, dec, d = e.observe(planet).apparent().radec()
 
-    eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
-    eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
+    eq(ra0, ra.hours, 0.001 * arcsecond_in_hours)
+    eq(dec0, dec.degrees, 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.5 * meter)
 
 def test_app_planet(jd, planet_name_and_code):
@@ -173,8 +173,8 @@ def test_app_planet(jd, planet_name_and_code):
     distance = length_of((e - planet(jd)).position.AU)
     ra, dec, d = e.observe(planet).apparent().radec(epoch=jd)
 
-    eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
-    eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
+    eq(ra0, ra.hours, 0.001 * arcsecond_in_hours)
+    eq(dec0, dec.degrees, 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.5 * meter)
 
 def test_local_planet(jd, planet_name_and_code):
@@ -193,8 +193,8 @@ def test_local_planet(jd, planet_name_and_code):
     distance = length_of((g - planet(jd)).position.AU)
     ra, dec, d = g.observe(planet).apparent().radec()
 
-    eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
-    eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
+    eq(ra0, ra.hours, 0.001 * arcsecond_in_hours)
+    eq(dec0, dec.degrees, 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.5 * meter)
 
 def test_topo_planet(jd, planet_name_and_code):
@@ -213,8 +213,8 @@ def test_topo_planet(jd, planet_name_and_code):
     distance = length_of((g - planet(jd)).position.AU)
     ra, dec, d = g.observe(planet).apparent().radec(epoch=jd)
 
-    eq(ra0, ra.hours(), 0.001 * arcsecond_in_hours)
-    eq(dec0, dec.degrees(), 0.001 * arcsecond_in_degrees)
+    eq(ra0, ra.hours, 0.001 * arcsecond_in_hours)
+    eq(dec0, dec.degrees, 0.001 * arcsecond_in_degrees)
     eq(distance0, distance, 0.5 * meter)
 
 def test_altaz(jd, planet_name_and_code):
@@ -240,8 +240,8 @@ def test_altaz(jd, planet_name_and_code):
     distance = length_of((g - planet(jd)).position.AU)
     alt, az, d = g.observe(planet).apparent().altaz()
 
-    eq(az0, az.degrees(), 0.001 * arcsecond_in_degrees)
-    eq(alt0, alt.degrees(), 0.001 * arcsecond_in_degrees)
+    eq(az0, az.degrees, 0.001 * arcsecond_in_degrees)
+    eq(alt0, alt.degrees, 0.001 * arcsecond_in_degrees)
     eq(dis, distance, 0.5 * meter)
 
 # Tests for Basic Functions

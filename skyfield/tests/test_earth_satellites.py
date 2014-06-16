@@ -48,8 +48,8 @@ def test_iss_altitude(iss_transit):
     s = EarthSatellite(lines, earth)
     lake_zurich = earth.topos(latitude_degrees=42.2, longitude_degrees=-88.1)
     alt, az, d = lake_zurich(jd).observe(s).altaz()
-    print(dt, their_altitude, alt.degrees(), their_altitude - alt.degrees())
-    assert abs(alt.degrees() - their_altitude) < 2.5  # TODO: tighten this up?
+    print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
+    assert abs(alt.degrees - their_altitude) < 2.5  # TODO: tighten this up?
 
 # The following tests are based on the text of
 # http://www.celestrak.com/publications/AIAA/2006-6753/AIAA-2006-6753-Rev2.pdf

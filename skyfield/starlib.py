@@ -67,8 +67,8 @@ class Star(object):
         # vector in equatorial system with units of AU.
 
         dist = 1.0 / sin(parallax * 1.0e-3 * ASEC2RAD)
-        r = self.ra.radians()
-        d = self.dec.radians()
+        r = self.ra.radians
+        d = self.dec.radians
         cra = cos(r)
         sra = sin(r)
         cdc = cos(d)

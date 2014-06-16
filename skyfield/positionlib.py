@@ -112,8 +112,8 @@ class Topos(object):
         self.longitude = longitude
         self.elevation = elevation
 
-        lat = latitude.radians()
-        lon = longitude.radians()
+        lat = latitude.radians
+        lon = longitude.radians
         sinlat = sin(lat)
         coslat = cos(lat)
         sinlon = sin(lon)
