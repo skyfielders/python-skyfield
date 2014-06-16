@@ -190,7 +190,7 @@ class Angle(BaseAngle):
     __str__ = BaseAngle.dstr
 
     def __repr__(self):
-        return '{0}(degrees={1!r})'.format(type(self).__name__, self.dms())
+        return '{0}({1})'.format(type(self).__name__, self.dstr())
 
     # Protect naive users from accidentally calling hour methods.
 
@@ -213,7 +213,7 @@ class HourAngle(BaseAngle):
     __str__ = BaseAngle.hstr
 
     def __repr__(self):
-        return '{0}(hours={1!r})'.format(type(self).__name__, self.hms())
+        return '{0}({1})'.format(type(self).__name__, self.hstr())
 
     # Protect naive users from accidentally calling degree methods.
 

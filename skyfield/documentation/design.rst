@@ -42,7 +42,7 @@ looked misleading:
 
 >>> from skyfield.units import HourAngle
 >>> HourAngle(hours=12.5)
-HourAngle(hours=(12.0, 30.0, 0.0))
+HourAngle(12h 30m 00.00s)
 
 This looks wrong because the class name :class:`HourAngle`, which was
 simply chosen to indicate “an angle that prefers to be printed out using
@@ -56,4 +56,4 @@ actually expect for printing a right ascension.
 
 >>> from skyfield.units import RightAscension
 >>> RightAscension(hours=12.5)
-RightAscension(hours=(12.0, 30.0, 0.0))
+RightAscension(12h 30m 00.00s)
