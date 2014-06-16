@@ -136,11 +136,11 @@ class BaseAngle(object):
         return self._hours
 
     def hms(self):
-        sign, units, minutes, seconds = _sexagesimalize_to_float(self.hours)
+        sign, units, minutes, seconds = _sexagesimalize_to_float(self._hours)
         return sign * units, sign * minutes, sign * seconds
 
     def signed_hms(self):
-        return _sexagesimalize_to_float(self.hours)
+        return _sexagesimalize_to_float(self._hours)
 
     def hstr(self, places=2, plus=False):
         sgn, h, m, s, etc = _sexagesimalize_to_int(self.hours, places)
@@ -152,11 +152,11 @@ class BaseAngle(object):
         return self._degrees
 
     def dms(self):
-        sign, units, minutes, seconds = _sexagesimalize_to_float(self.degrees)
+        sign, units, minutes, seconds = _sexagesimalize_to_float(self._degrees)
         return sign * units, sign * minutes, sign * seconds
 
     def signed_dms(self):
-        return _sexagesimalize_to_float(self.degrees)
+        return _sexagesimalize_to_float(self._degrees)
 
     def dstr(self, places=1, plus=False):
         sgn, d, m, s, etc = _sexagesimalize_to_int(self.degrees, places)
