@@ -136,6 +136,10 @@ class BaseAngle(object):
         return self._hours
 
     def hms(self):
+        sign, units, minutes, seconds = _sexagesimalize_to_float(self.hours)
+        return sign * units, sign * minutes, sign * seconds
+
+    def signed_hms(self):
         return _sexagesimalize_to_float(self.hours)
 
     def hstr(self, places=2, plus=False):
@@ -148,6 +152,10 @@ class BaseAngle(object):
         return self._degrees
 
     def dms(self):
+        sign, units, minutes, seconds = _sexagesimalize_to_float(self.degrees)
+        return sign * units, sign * minutes, sign * seconds
+
+    def signed_dms(self):
         return _sexagesimalize_to_float(self.degrees)
 
     def dstr(self, places=1, plus=False):
@@ -223,23 +231,21 @@ def _sexagesimalize_to_float(value):
     before showing a value to the user.  Use `_sexagesimalize_to_int()`
     for data being displayed to the user.
 
-    This routine simply decomposes the floating point `value` into
-    units, minutes, and seconds, returning the result in a three-element
-    tuple.  All three values will have the sign of `value` itself.
+    This routine simply decomposes the floating point `value` into a
+    sign (+1.0 or -1.0), units, minutes, and seconds, returning the
+    result in a four-element tuple.
 
     >>> _sexagesimalize_to_float(12.05125)
-    (12.0, 3.0, 4.5)
+    (1.0, 12.0, 3.0, 4.5)
     >>> _sexagesimalize_to_float(-12.05125)
-    (-12.0, -3.0, -4.5)
+    (-1.0, 12.0, 3.0, 4.5)
 
     """
+    sign = np.sign(value)
     n = abs(value)
     minutes, seconds = divmod(n * 3600.0, 60.0)
     units, minutes = divmod(minutes, 60.0)
-    if value < 0.0:
-        return -units, -minutes, -seconds
-    else:
-        return units, minutes, seconds
+    return sign, units, minutes, seconds
 
 def _sexagesimalize_to_int(value, places=0):
     """Decompose `value` into units, minutes, seconds, and second fractions.
