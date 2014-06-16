@@ -1,6 +1,6 @@
 from numpy import abs, einsum, sqrt, where
 
-from .constants import C, AU, C_AUDAY, GS
+from .constants import C, AU_M, C_AUDAY, GS
 from .functions import dots, length_of
 
 
@@ -141,7 +141,7 @@ def _add_deflection(position, observer, deflector, rmass):
 
     # Compute scalar factors.
 
-    fac1 = 2.0 * GS / (C * C * emag * AU * rmass)
+    fac1 = 2.0 * GS / (C * C * emag * AU_M * rmass)
     fac2 = 1.0 + qdote
 
     # Correct position vector.

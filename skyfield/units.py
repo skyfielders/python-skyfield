@@ -3,7 +3,7 @@
 """
 import numpy as np
 from numpy import abs, copysign
-from .constants import AU_KM, DAY_S, tau
+from .constants import AU_KM, AU_M, DAY_S, tau
 
 # Distance and velocity.
 

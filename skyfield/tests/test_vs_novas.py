@@ -6,7 +6,7 @@ from numpy import array, einsum
 from skyfield import (positionlib, earthlib, framelib, nutationlib,
                       jpllib, precessionlib, starlib, timelib)
 
-from ..constants import ASEC2RAD, AU, DEG2RAD, T0
+from ..constants import ASEC2RAD, AU_M, DEG2RAD, T0
 from ..functions import length_of
 from ..timelib import JulianDate
 
@@ -51,7 +51,7 @@ arcminute = DEG2RAD / 60.0
 arcsecond = arcminute / 60.0
 arcsecond_in_hours = 24.0 / 360.0 / 60.0 / 60.0
 arcsecond_in_degrees = 1.0 / 60.0 / 60.0
-meter = 1.0 / AU
+meter = 1.0 / AU_M
 
 planet_codes = {
     'mercury': 1,

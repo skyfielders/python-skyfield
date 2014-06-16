@@ -3,12 +3,12 @@
 from numpy import (arcsin, arccos, array, clip, cos, einsum, fmod,
                    minimum, pi, sin, sqrt, zeros_like)
 
-from .constants import (AU, ANGVEL, DAY_S, DEG2RAD, ERAD,
+from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
                         IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0)
 from .functions import dots
 from .nutationlib import earth_tilt
 
-rade = ERAD / AU
+rade = ERAD / AU_M
 one_minus_flattening = 1.0 - 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
 one_minus_flattening_squared = one_minus_flattening * one_minus_flattening
 
@@ -66,12 +66,12 @@ def terra(topos, st):
     # Compute position vector components in kilometers.
 
     ac = ach * cosphi
-    pos = array((ac * cosst, ac * sinst, zero + ash * sinphi)) / AU
+    pos = array((ac * cosst, ac * sinst, zero + ash * sinphi)) / AU_M
 
     # Compute velocity vector components in kilometers/sec.
 
     aac = ANGVEL * ach * cosphi
-    vel = array((-aac * sinst, aac * cosst, zero)) / AU * DAY_S
+    vel = array((-aac * sinst, aac * cosst, zero)) / AU_M * DAY_S
 
     return pos, vel
 
