@@ -9,20 +9,21 @@ Angle Classes
 -------------
 
 The :class:`Angle` class could have been very simple, and have provided
-symmetrical :meth:`~BaseAngle.hours()` and :meth:`~BaseAngle.degrees()`
-methods that were equally easy to call.  But years of experience with
-maintaining PyEphem suggested that many users who are first dabbling in
-astronomy do not realize that right ascension is not typically expressed
-in degrees, and that users will frequently become confused — generating
-a long support tail — if the API makes it too natural to express right
-ascension using degrees.
+symmetrical hours and degrees methods that were equally easy to call.
+But years of experience with maintaining PyEphem suggested that many
+users who are first dabbling in astronomy do not realize that right
+ascension is not typically expressed in degrees, and that users will
+frequently become confused — generating a long support tail — if the API
+makes it too natural to express right ascension using degrees.
 
-So both :meth:`~BaseAngle.hours()` and :meth:`~BaseAngle.degrees()` are
-methods of :class:`BaseAngle` whose two subclasses, :class:`Angle` and
+So both the hours methods on angles (like :meth:`~BaseAngle.hms()` and
+:meth:`~BaseAngle.hstr()`) as well as the degrees methods (like
+:meth:`~BaseAngle.dms()` and :meth:`~BaseAngle.dstr()` are methods of
+:class:`BaseAngle` whose two subclasses, :class:`Angle` and
 :class:`HourAngle`, are instead very opinionated about how they are
 expressed.  :class:`Angle` hides the hour methods so that users are
-guided towards using degrees, while :class:`HourAngle` hides the degrees
-instead so that it can safely be used for right ascension.
+guided towards using degrees, while :class:`HourAngle` hides the degree
+methods instead so that it can safely be used for right ascension.
 
 Both subclasses do allow the opposite kind of measure to be expressed,
 but the user has to say something like ``dms_anyway()`` instead of

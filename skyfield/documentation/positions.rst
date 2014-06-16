@@ -42,17 +42,18 @@ together with all of the attributes and methods that they support:
 
     Angle like ra, dec, alt, and az
      │
-     ├── `radians() <api.html#Angle.radians>`_           →   6.266029488577352
+     ├── `radians <api.html#Angle.radians>`_             →   6.266029488577352
      │
-     ├── `hours() <api.html#Angle.hours>`_             →   23.934469599999996
-     ├── `hms() <api.html#Angle.hms>`_               →   (1, 23, 56, 4, 0)
+     ├── `hours <api.html#Angle.hours>`_               →   23.934469599999996
      ├── `hstr() <api.html#Angle.hstr>`_              →   '23h 56m 04.09s'
      ├── `hstr(places=4) <api.html#Angle.hstr>`_      →   '23h 56m 04.0906s'
+     ├── `hms() <api.html#Angle.hms>`_               →   (23.0, 56.0, 4.0)
+     ├── `signed_hms() <api.html#Angle.hms>`_        →   (1.0, 23.0, 56.0, 4.0)
      │
-     ├── `degrees() <api.html#Angle.degrees>`_           →   359.017044
-     ├── `dms() <api.html#Angle.dms>`_               →   (1, 359, 1, 1, 0)
+     ├── `degrees <api.html#Angle.degrees>`_             →   359.017044
      ├── `dstr() <api.html#Angle.dstr>`_              →   '359deg 01\' 01.4"'
-     └── `dstr(places=3) <api.html#Angle.dstr>`_      →   '359deg 01\' 01.358"'
+     ├── `dstr(places=3) <api.html#Angle.dstr>`_      →   '359deg 01\' 01.358"'
+     └── `signed_dms() <api.html#Angle.dms>`_        →   (1.0, 359.0, 1.0, 1.0)
 
 The rest of this page is simply designed to explain
 all of the features outlined in the quick reference above.
