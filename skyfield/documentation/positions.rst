@@ -96,6 +96,16 @@ and return its position as of that moment:
   from public TLE elements describing their current orbit,
   which you can download from Celestrak. ::
 
+  .. testsetup::
+
+    tle_text = """
+    ISS (ZARYA)             
+    1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082
+    2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
+    """
+
+  .. testcode::
+
     from skyfield.api import earth, now
     sat = earth.satellite(tle_text)
     position = sat(now())
