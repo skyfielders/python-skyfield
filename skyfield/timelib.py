@@ -67,7 +67,7 @@ def takes_julian_date(function):
         return function(self, jd)
     wrapper.__name__ = function.__name__
     synopsis, blank_line, description = function.__doc__.partition('\n\n')
-    wrapper.__doc__ = ''.join(synopsis + extra_documentation + description)
+    wrapper.__doc__ = synopsis + extra_documentation + description
     return wrapper
 
 def _to_array(value):
