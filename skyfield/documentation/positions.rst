@@ -94,7 +94,7 @@ and return its position as of that moment:
 
 * :doc:`earth-satellites` — Earth satellite positions can be generated
   from public TLE elements describing their current orbit,
-  which you can download from Celestrak. ::
+  which you can download from Celestrak.
 
   .. testsetup::
 
