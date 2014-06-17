@@ -159,11 +159,15 @@ class JulianDate(object):
 
         """
         dt, leap_second = self.utc_datetime()
-        normalize = getattr(tz, 'normalize', lambda d: d)
-        if self.shape:
+        normalize = getattr(tz, 'normalize', None)
+        if self.shape and normalize is not None:
             dt = [normalize(d.astimezone(tz)) for d in dt]
-        else:
+        elif self.shape:
+            dt = [d.astimezone(tz) for d in dt]
+        elif normalize is not None:
             dt = normalize(dt.astimezone(tz))
+        else:
+            dt = dt.astimezone(tz)
         return dt, leap_second
 
     def utc_datetime(self):
