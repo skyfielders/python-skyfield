@@ -283,6 +283,15 @@ class JulianDate(object):
         second += is_leap_second
         return year, month, day, hour.astype(int), minute.astype(int), second
 
+    def _utc_float(self):
+        """Return UTC as a floating point Julian date."""
+        tai = self.tai
+        leap_dates, leap_offsets = self.cache.run(usno_leapseconds)
+        leap_reverse_dates = leap_dates + leap_offsets / DAY_S
+        i = searchsorted(leap_reverse_dates, tai, 'right')
+        print tai, leap_offsets[i], leap_offsets[i] / DAY_S
+        return tai - leap_offsets[i] / DAY_S
+
     def __getattr__(self, name):
 
         # Cache of several expensive functions of time.
