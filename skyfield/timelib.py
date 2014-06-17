@@ -180,7 +180,8 @@ class JulianDate(object):
         returned.
 
         """
-        year, month, day, hour, minute, second = self._utc(_half_millisecond)
+        year, month, day, hour, minute, second = self._utc_tuple(
+            _half_millisecond)
         second, fraction = divmod(second, 1.0)
         second = second.astype(int)
         leap_second = second // 60
@@ -203,14 +204,14 @@ class JulianDate(object):
         if places:
             power_of_ten = 10 ** places
             offset = _half_second / power_of_ten
-            year, month, day, hour, minute, second = self._utc(offset)
+            year, month, day, hour, minute, second = self._utc_tuple(offset)
             second, fraction = divmod(second, 1.0)
             fraction *= power_of_ten
             format = '%%04d-%%02d-%%02dT%%02d:%%02d:%%02d.%%0%ddZ' % places
             args = (year, month, day, hour, minute, second, fraction)
         else:
             format = '%04d-%02d-%02dT%02d:%02d:%02dZ'
-            args = self._utc(_half_second)
+            args = self._utc_tuple(_half_second)
 
         if self.shape:
             return [format % tup for tup in zip(*args)]
@@ -224,7 +225,7 @@ class JulianDate(object):
 
         """
         offset = _half_second / 1e4
-        year, month, day, hour, minute, second = self._utc(offset)
+        year, month, day, hour, minute, second = self._utc_tuple(offset)
         second, fraction = divmod(second, 1.0)
         fraction *= 1e4
         bc = year < 1
@@ -246,7 +247,7 @@ class JulianDate(object):
         quick reference at http://strftime.org/.
 
         """
-        tup = self._utc(_half_second)
+        tup = self._utc_tuple(_half_second)
         year, month, day, hour, minute, second = tup
         second = second.astype(int)
         zero = zeros_like(year)
@@ -256,7 +257,7 @@ class JulianDate(object):
         else:
             return strftime(format, tup)
 
-    def _utc(self, offset=0.0):
+    def _utc_tuple(self, offset=0.0):
         """Return UTC as (year, month, day, hour, minute, second.fraction).
 
         The `offset` is added to the UTC time before it is split into
@@ -317,7 +318,7 @@ class JulianDate(object):
             return tai
 
         if name == 'utc':
-            utc = self._utc()
+            utc = self._utc_tuple()
             utc = array(utc) if self.shape else utc
             self.utc = utc = utc
             return utc
