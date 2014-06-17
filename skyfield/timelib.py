@@ -289,7 +289,6 @@ class JulianDate(object):
         leap_dates, leap_offsets = self.cache.run(usno_leapseconds)
         leap_reverse_dates = leap_dates + leap_offsets / DAY_S
         i = searchsorted(leap_reverse_dates, tai, 'right')
-        print tai, leap_offsets[i], leap_offsets[i] / DAY_S
         return tai - leap_offsets[i] / DAY_S
 
     def __getattr__(self, name):

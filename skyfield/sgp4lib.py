@@ -22,10 +22,12 @@ class EarthSatellite(object):
         """Return the raw true equator mean equinox (TEME) vectors from SGP4.
 
         Returns a tuple of NumPy arrays ``([x y z], [xdot ydot zdot])``
-        expressed in kilometers and kilometers per second.
+        expressed in kilometers and kilometers per second.  Note that we
+        assume the TLE epoch to be a UTC date, per AIAA 2006-6753.
 
         """
-        minutes_past_epoch = (jd.ut1 - self._sgp4_satellite.jdsatepoch) * 1440.
+        epoch = self._sgp4_satellite.jdsatepoch
+        minutes_past_epoch = (jd._utc_float() - epoch) * 1440.
         position, velocity = sgp4(self._sgp4_satellite, minutes_past_epoch)
         return (array(position), array(velocity))
 

@@ -39,9 +39,9 @@ to find out whether a satellite is above your local horizon:
 
 .. testoutput::
 
-    13deg 31' 26.0"
-    21deg 34' 12.0"
-    1296.58733908
+    13deg 49' 57.8"
+    357deg 51' 21.8"
+    1281.20477925
 
 Observing a satellite directly returns an :ref:`apparent`
 but without having to apply aberration and deflection,

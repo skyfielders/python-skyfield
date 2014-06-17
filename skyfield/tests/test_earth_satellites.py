@@ -96,8 +96,8 @@ def test_appendix_c_satellite():
 
     jd_epoch = sat._sgp4_satellite.jdsatepoch
     three_days_later = jd_epoch + 3.0
-    jd = JulianDate(tt=three_days_later)
-    jd.ut1 = array(three_days_later)
+    offset = JulianDate(tt=three_days_later)._utc_float() - three_days_later
+    jd = JulianDate(tt=three_days_later - offset)
 
     # First, a crucial sanity check (which is, technically, a test of
     # the `sgp4` package and not of Skyfield): are the right coordinates
