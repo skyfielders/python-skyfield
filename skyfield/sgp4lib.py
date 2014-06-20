@@ -1,6 +1,6 @@
 """An object representing an Earth-orbiting satellite."""
 
-from numpy import array, cross
+from numpy import array, cross, einsum, nan
 from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
@@ -8,7 +8,9 @@ from sgp4.propagation import sgp4
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
+from .timelib import takes_julian_date
 
+_nan3 = (nan, nan, nan)
 _minutes_per_day = 1440.
 
 class EarthSatellite(object):
@@ -28,8 +30,21 @@ class EarthSatellite(object):
         """
         epoch = self._sgp4_satellite.jdsatepoch
         minutes_past_epoch = (jd._utc_float() - epoch) * 1440.
-        position, velocity = sgp4(self._sgp4_satellite, minutes_past_epoch)
-        return (array(position), array(velocity))
+        if getattr(minutes_past_epoch, 'shape', None):
+            position = []
+            velocity = []
+            for m in minutes_past_epoch:
+                p, v = sgp4(self._sgp4_satellite, m)
+                position.append(_nan3 if (p is None) else p)
+                velocity.append(_nan3 if (v is None) else v)
+            return array(position).T, array(velocity).T
+        else:
+            position, velocity = sgp4(self._sgp4_satellite, minutes_past_epoch)
+            if position is None:
+                position = _nan3
+            if velocity is None:
+                velocity = _nan3
+            return array(position), array(velocity)
 
     def _compute_GCRS(self, jd):
         """Compute where satellite is in space on a given date."""
@@ -45,7 +60,13 @@ class EarthSatellite(object):
 
         return rGCRS, vGCRS
 
+    @takes_julian_date
     def gcrs(self, jd):
+        """Return a GCRS position for this Earth satellite.
+
+        Uses standard SGP4 theory to predict the satellite location.
+
+        """
         position_AU, velociy_AU_per_d = self._compute_GCRS(jd)
         return Geocentric(position_AU, velociy_AU_per_d)
 
@@ -92,10 +113,18 @@ def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
 
     """
     theta, theta_dot = theta_GMST1982(jd_ut1)
-    angular_velocity = array([0, 0, -theta_dot])
+    zero = theta_dot * 0.0
+    angular_velocity = array([zero, zero, -theta_dot])
     R = rot_z(-theta)
-    rPEF = (R).dot(rTEME)
-    vPEF = (R).dot(vTEME) + cross(angular_velocity, rPEF)
+
+    if len(rTEME.shape) == 1:
+        rPEF = (R).dot(rTEME)
+        vPEF = (R).dot(vTEME) + cross(angular_velocity, rPEF)
+    else:
+        rPEF = einsum('ij...,j...->i...', R, rTEME)
+        vPEF = einsum('ij...,j...->i...', R, vTEME) + cross(
+            angular_velocity, rPEF, 0, 0).T
+
     if xp == 0.0 and yp == 0.0:
         rITRF = rPEF
         vITRF = vPEF

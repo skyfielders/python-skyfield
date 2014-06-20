@@ -145,14 +145,35 @@ def compute_stellar_position(tt, delta_t):
     yield dec.degrees
     yield distance.AU
 
+def compute_satellite_geocentric_position(tt, delta_t):
+    tle_text = dedent("""
+    ISS (ZARYA)             
+    1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082
+    2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
+    """)
+
+    satellite = earth.satellite(tle_text)
+    apparent = satellite.gcrs(tt=tt, delta_t=delta_t)
+
+    yield apparent.position.AU
+    # yield apparent.velocity.AU_per_d
+
+    ra, dec, distance = apparent.radec()
+
+    yield ra.hours
+    yield dec.degrees
+    yield distance.AU
+
 def pytest_generate_tests(metafunc):
     if 'vector_vs_scalar' in metafunc.fixturenames:
         metafunc.parametrize(
-            'vector_vs_scalar',
-            list(generate_comparisons(compute_times_and_equinox_matrices)) +
-            list(generate_comparisons(observe_planet_from_geocenter)) +
-            list(generate_comparisons(observe_planet_from_topos)) +
-            list(generate_comparisons(compute_stellar_position)))
+            'vector_vs_scalar', []
+            + list(generate_comparisons(compute_times_and_equinox_matrices))
+            + list(generate_comparisons(observe_planet_from_geocenter))
+            + list(generate_comparisons(observe_planet_from_topos))
+            + list(generate_comparisons(compute_stellar_position))
+            + list(generate_comparisons(compute_satellite_geocentric_position))
+            )
 
 def generate_comparisons(computation):
     """Set up comparisons between vector and scalar outputs of `computation`.

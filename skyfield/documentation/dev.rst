@@ -9,7 +9,7 @@ of the conventions laid down in the existing code base.
 
 (Wondering how to do fundamental_arguments() without reshape:)
 
->>> from numpy import array, matrix, float64
+>>> from numpy import array, cross, matrix, float64
 >>> m = array([4.0,5.0,6.0])
 >>> arg1 = float64(2.0)
 >>> argn = array([2.0, 3.0])
@@ -92,3 +92,40 @@ entirely:
 Note that, in addition, an empty array does *not* qualify as a scalar:
 
 >>> assert getattr(np.array([]), 'shape', ()) != ()
+
+Cross products
+==============
+
+How can we compute a cross product while remaining agnostic about
+whether the two vectors we have been handed have a second dimension?
+
+>>> a = array([1, 2, 3])
+>>> b = array([6, 4, 5])
+
+>>> p = array([7, 8, 9])
+>>> q = array([1, 0, 2])
+
+The simple cross product between our 3-vectors:
+
+>>> cross(a, p, 0, 0).T
+array([-6, 12, -6])
+>>> cross(b, q, 0, 0).T
+array([ 8, -7, -4])
+
+Now we combine our vectors into stacks of values across the final
+dimension of a matrix:
+
+>>> ab = array([a, b]).T
+>>> ab
+array([[1, 6],
+       [2, 4],
+       [3, 5]])
+>>> pq = array([p, q]).T
+>>> pq
+array([[7, 1],
+       [8, 0],
+       [9, 2]])
+>>> cross(ab, pq, 0, 0).T
+array([[-6,  8],
+       [12, -7],
+       [-6, -4]])
