@@ -52,7 +52,7 @@ WrongUnitError: this angle is usually expressed in degrees, not hours; if you wa
 
 The remedies suggested by these exceptions indeed work:
 
->>> a._hours
+>>> print(a._hours)
 -3.6
 >>> a.hstr(warn=False)
 '-03h 36m 00.00s'
@@ -66,7 +66,7 @@ when it is created.  In that case, fetching its value in hours values
 becomes the easy operation:
 
 >>> a = Angle(degrees=-54.0, preference='hours')
->>> a.hours
+>>> print(a.hours)
 -3.6
 >>> a.hstr()
 '-03h 36m 00.00s'
