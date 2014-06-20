@@ -1,7 +1,8 @@
 """Determine whether arrays work as well as individual inputs."""
 
 import sys
-from numpy import array, rollaxis
+from textwrap import dedent
+from numpy import array, isnan, rollaxis
 from .. import starlib
 from ..constants import T0, B1950
 from ..api import earth, mars
@@ -172,13 +173,16 @@ def generate_comparisons(computation):
 def test_vector_vs_scalar(vector_vs_scalar):
     location, vector, i, scalar = vector_vs_scalar
     vectorT = rollaxis(vector, -1)
+    vectorTi = vectorT[i]
+
     assert vector is not None, (
         '{0}:\n  vector is None'.format(location))
-    assert vectorT[i].shape == scalar.shape, (
+    assert vectorTi.shape == scalar.shape, (
         '{0}:\n  {1}[{2}].shape != {3}.shape\n  shapes: {4} {5}'.format(
-            location, vector.T, i, scalar, vector.T[i].shape, scalar.shape))
+            location, vector.T, i, scalar, vectorTi.shape, scalar.shape))
 
-    vectorTi = vectorT[i]
+    if isnan(scalar).all() and isnan(vectorTi).all():
+        return
 
     # Yes, an auto-generated epsilon with no physical significance!
     # Why?  Because we are comparing the rounding differences in two
