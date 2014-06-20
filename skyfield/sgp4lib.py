@@ -7,7 +7,7 @@ from sgp4.propagation import sgp4
 
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
-from .positionlib import Apparent, ITRF_to_GCRS
+from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
 
 _minutes_per_day = 1440.
 
@@ -22,10 +22,12 @@ class EarthSatellite(object):
         """Return the raw true equator mean equinox (TEME) vectors from SGP4.
 
         Returns a tuple of NumPy arrays ``([x y z], [xdot ydot zdot])``
-        expressed in kilometers and kilometers per second.
+        expressed in kilometers and kilometers per second.  Note that we
+        assume the TLE epoch to be a UTC date, per AIAA 2006-6753.
 
         """
-        minutes_past_epoch = (jd.ut1 - self._sgp4_satellite.jdsatepoch) * 1440.
+        epoch = self._sgp4_satellite.jdsatepoch
+        minutes_past_epoch = (jd._utc_float() - epoch) * 1440.
         position, velocity = sgp4(self._sgp4_satellite, minutes_past_epoch)
         return (array(position), array(velocity))
 
@@ -42,6 +44,10 @@ class EarthSatellite(object):
         vGCRS = array((0.0, 0.0, 0.0))  # todo: someday also compute vGCRS?
 
         return rGCRS, vGCRS
+
+    def gcrs(self, jd):
+        position_AU, velociy_AU_per_d = self._compute_GCRS(jd)
+        return Geocentric(position_AU, velociy_AU_per_d)
 
     def observe_from(self, observer):
         # TODO: what if someone on Mars tries to look at the ISS?

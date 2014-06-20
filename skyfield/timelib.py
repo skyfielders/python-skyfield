@@ -67,7 +67,7 @@ def takes_julian_date(function):
         return function(self, jd)
     wrapper.__name__ = function.__name__
     synopsis, blank_line, description = function.__doc__.partition('\n\n')
-    wrapper.__doc__ = ''.join(synopsis + extra_documentation + description)
+    wrapper.__doc__ = synopsis + extra_documentation + description
     return wrapper
 
 def _to_array(value):
@@ -159,11 +159,15 @@ class JulianDate(object):
 
         """
         dt, leap_second = self.utc_datetime()
-        normalize = getattr(tz, 'normalize', lambda d: d)
-        if self.shape:
+        normalize = getattr(tz, 'normalize', None)
+        if self.shape and normalize is not None:
             dt = [normalize(d.astimezone(tz)) for d in dt]
-        else:
+        elif self.shape:
+            dt = [d.astimezone(tz) for d in dt]
+        elif normalize is not None:
             dt = normalize(dt.astimezone(tz))
+        else:
+            dt = dt.astimezone(tz)
         return dt, leap_second
 
     def utc_datetime(self):
@@ -176,7 +180,8 @@ class JulianDate(object):
         returned.
 
         """
-        year, month, day, hour, minute, second = self._utc(_half_millisecond)
+        year, month, day, hour, minute, second = self._utc_tuple(
+            _half_millisecond)
         second, fraction = divmod(second, 1.0)
         second = second.astype(int)
         leap_second = second // 60
@@ -199,14 +204,14 @@ class JulianDate(object):
         if places:
             power_of_ten = 10 ** places
             offset = _half_second / power_of_ten
-            year, month, day, hour, minute, second = self._utc(offset)
+            year, month, day, hour, minute, second = self._utc_tuple(offset)
             second, fraction = divmod(second, 1.0)
             fraction *= power_of_ten
             format = '%%04d-%%02d-%%02dT%%02d:%%02d:%%02d.%%0%ddZ' % places
             args = (year, month, day, hour, minute, second, fraction)
         else:
             format = '%04d-%02d-%02dT%02d:%02d:%02dZ'
-            args = self._utc(_half_second)
+            args = self._utc_tuple(_half_second)
 
         if self.shape:
             return [format % tup for tup in zip(*args)]
@@ -220,7 +225,7 @@ class JulianDate(object):
 
         """
         offset = _half_second / 1e4
-        year, month, day, hour, minute, second = self._utc(offset)
+        year, month, day, hour, minute, second = self._utc_tuple(offset)
         second, fraction = divmod(second, 1.0)
         fraction *= 1e4
         bc = year < 1
@@ -242,7 +247,7 @@ class JulianDate(object):
         quick reference at http://strftime.org/.
 
         """
-        tup = self._utc(_half_second)
+        tup = self._utc_tuple(_half_second)
         year, month, day, hour, minute, second = tup
         second = second.astype(int)
         zero = zeros_like(year)
@@ -252,7 +257,7 @@ class JulianDate(object):
         else:
             return strftime(format, tup)
 
-    def _utc(self, offset=0.0):
+    def _utc_tuple(self, offset=0.0):
         """Return UTC as (year, month, day, hour, minute, second.fraction).
 
         The `offset` is added to the UTC time before it is split into
@@ -277,6 +282,14 @@ class JulianDate(object):
         is_leap_second = j < leap_dates[i-1]
         second += is_leap_second
         return year, month, day, hour.astype(int), minute.astype(int), second
+
+    def _utc_float(self):
+        """Return UTC as a floating point Julian date."""
+        tai = self.tai
+        leap_dates, leap_offsets = self.cache.run(usno_leapseconds)
+        leap_reverse_dates = leap_dates + leap_offsets / DAY_S
+        i = searchsorted(leap_reverse_dates, tai, 'right')
+        return tai - leap_offsets[i] / DAY_S
 
     def __getattr__(self, name):
 
@@ -313,7 +326,7 @@ class JulianDate(object):
             return tai
 
         if name == 'utc':
-            utc = self._utc()
+            utc = self._utc_tuple()
             utc = array(utc) if self.shape else utc
             self.utc = utc = utc
             return utc

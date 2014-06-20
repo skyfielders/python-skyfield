@@ -37,7 +37,7 @@ def iss_transit(request):
     altitude = float(fields[7][:-1])
     return dt, altitude
 
-def test_iss_altitude(iss_transit):
+def test_iss_altitude_computed_with_bcrs(iss_transit):
     dt, their_altitude = iss_transit
 
     cst = timedelta(hours=-6) #, minutes=1)
@@ -47,7 +47,25 @@ def test_iss_altitude(iss_transit):
     lines = iss_tle.splitlines()
     s = EarthSatellite(lines, earth)
     lake_zurich = earth.topos(latitude_degrees=42.2, longitude_degrees=-88.1)
+
+    # Compute using Solar System coordinates:
+
     alt, az, d = lake_zurich(jd).observe(s).altaz()
+    print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
+    assert abs(alt.degrees - their_altitude) < 2.5  # TODO: tighten this up?
+
+def test_iss_altitude_computed_with_gcrs(iss_transit):
+    dt, their_altitude = iss_transit
+
+    cst = timedelta(hours=-6) #, minutes=1)
+    dt = dt - cst
+    jd = JulianDate(utc=dt, delta_t=67.2091)
+
+    lines = iss_tle.splitlines()
+    s = EarthSatellite(lines, earth)
+    lake_zurich = earth.topos(latitude_degrees=42.2, longitude_degrees=-88.1)
+
+    alt, az, d = lake_zurich.gcrs(jd).observe(s).altaz()
     print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
     assert abs(alt.degrees - their_altitude) < 2.5  # TODO: tighten this up?
 
@@ -96,8 +114,8 @@ def test_appendix_c_satellite():
 
     jd_epoch = sat._sgp4_satellite.jdsatepoch
     three_days_later = jd_epoch + 3.0
-    jd = JulianDate(tt=three_days_later)
-    jd.ut1 = array(three_days_later)
+    offset = JulianDate(tt=three_days_later)._utc_float() - three_days_later
+    jd = JulianDate(tt=three_days_later - offset)
 
     # First, a crucial sanity check (which is, technically, a test of
     # the `sgp4` package and not of Skyfield): are the right coordinates

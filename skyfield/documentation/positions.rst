@@ -72,33 +72,83 @@ Each object is a simple Python callable
 that can take a date as its argument
 and return its position as of that moment:
 
-* :doc:`planets` — the eight planets and Pluto are all supported,
+
+**The planets**
+  The eight planets and Pluto are all supported,
   thanks to the excellent work of the Jet Propulsion Laboratory (JPL)
   and to Skyfield’s support for their major solar system ephemerides.
+  :doc:`Read more <planets>`
 
   .. testcode::
 
-    from skyfield.api import earth, now
-    position = earth(now())
+    from skyfield.api import now, earth, mars
 
-* :doc:`stars` — stars and other fixed objects with catalog coordinates
+    jd = now()
+    boston = earth.topos('42.3583 N', '71.0603 W')
+
+    # Geocentric
+
+    barycentric = mars(jd)
+    astrometric = earth(jd).observe(mars)
+    apparent = earth(jd).observe(mars).apparent()
+
+    # Topocentric
+
+    astrometric = boston(jd).observe(mars)
+    apparent = boston(jd).observe(mars).apparent()
+
+**The stars**
+  Stars and other fixed objects with catalog coordinates
   generate their current astrometric position
-  when observed from a planet.
+  when observed from a planet. :doc:`Read more <stars>`
 
   .. testcode::
 
-    from skyfield.api import Star, earth, now
+    from skyfield.api import now, earth, Star
+
+    jd = now()
+    boston = earth.topos('42.3583 N', '71.0603 W')
     barnard = Star(ra_hours=(17, 57, 48.49803),
                    dec_degrees=(4, 41, 36.2072))
-    position = earth(now()).observe(barnard)
 
-* :doc:`earth-satellites` — Earth satellite positions can be generated
+    # Geocentric
+
+    astrometric = earth(jd).observe(barnard)
+    apparent = earth(jd).observe(barnard).apparent()
+
+    # Topocentric
+
+    astrometric = boston(jd).observe(barnard)
+    apparent = boston(jd).observe(barnard).apparent()
+
+**Earth satellites**
+  Earth satellite positions can be generated
   from public TLE elements describing their current orbit,
-  which you can download from Celestrak. ::
+  which you can download from Celestrak. :doc:`Read more <earth-satellites>`
 
-    from skyfield.api import earth, now
-    sat = earth.satellite(tle_text)
-    position = sat(now())
+  .. testsetup::
+
+    tle_text = """
+    ISS (ZARYA)             
+    1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082
+    2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
+    """
+
+  .. testcode::
+
+    from skyfield.api import now, earth
+
+    jd = now()
+    boston = earth.topos('42.3583 N', '71.0603 W')
+    satellite = earth.satellite(tle_text)
+
+    # Geocentric
+
+    apparent = satellite.gcrs(jd)
+
+    # Topocentric
+
+    apparent = boston.gcrs(jd).observe(satellite)
 
 Read :doc:`time` for more information
 about how to build dates and pass them to planets and satellites
@@ -132,6 +182,7 @@ by asking Skyfield for their :attr:`~Position.position` attribute:
     # BCRS positions of Earth and Jupiter
 
     from skyfield.api import earth, jupiter
+
     print(earth(utc=(1980, 1, 1)).position.AU)
     print(jupiter(utc=(1980, 1, 1)).position.AU)
 
@@ -155,7 +206,7 @@ Astrometric position
 ====================
 
 You might think that you could determine
-the position of Jupiter in the night sky
+the position of Jupiter in the night sky of Earth
 by simply subtracting these two positions
 to generate the vector difference between them.
 But that would ignore the fact that light takes several minutes
@@ -285,17 +336,17 @@ if you look up the position of Jupiter on 1980 January 1
 in an almanac or by using other astronomy software.
 
 Instead, apparent positions are usually expressed
-relative to the Earth’s real orientation
+relative to the Earth’s real equator and poles
 as its rolls and tumbles through space —
 which, after all,
 is how right ascension and declination were defined
 through most of human history,
 before the invention of the ICRS axes.
-The Earth’s poles and equator move at least slightly every day,
+The Earth’s equator and poles move at least slightly every day,
 and move by very large amounts as years add up to centuries.
 
 To ask for right ascension and declination
-relative to the real pole and equator of Earth,
+relative to the real equator and poles of Earth,
 and not the ideal permanent axes of the ICRS,
 simply add the keyword argument ``epoch='date'``
 when you ask the apparent position for coordinates:
