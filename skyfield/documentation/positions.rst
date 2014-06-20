@@ -81,11 +81,21 @@ and return its position as of that moment:
 
   .. testcode::
 
-    from skyfield.api import earth, mars, now
+    from skyfield.api import now, earth, mars
 
-    barycentric = mars(now())
-    astrometric = earth(now()).observe(mars)
-    apparent = earth(now()).observe(mars).apparent()
+    jd = now()
+    boston = earth.topos('42.3583 N', '71.0603 W')
+
+    # Geocentric
+
+    barycentric = mars(jd)
+    astrometric = earth(jd).observe(mars)
+    apparent = earth(jd).observe(mars).apparent()
+
+    # Topocentric
+
+    astrometric = boston(jd).observe(mars)
+    apparent = boston(jd).observe(mars).apparent()
 
 **The stars**
   Stars and other fixed objects with catalog coordinates
@@ -94,13 +104,22 @@ and return its position as of that moment:
 
   .. testcode::
 
-    from skyfield.api import Star, earth, now
+    from skyfield.api import now, earth, Star
 
+    jd = now()
+    boston = earth.topos('42.3583 N', '71.0603 W')
     barnard = Star(ra_hours=(17, 57, 48.49803),
                    dec_degrees=(4, 41, 36.2072))
 
-    astrometric = earth(now()).observe(barnard)
-    apparent = earth(now()).observe(barnard).apparent()
+    # Geocentric
+
+    astrometric = earth(jd).observe(barnard)
+    apparent = earth(jd).observe(barnard).apparent()
+
+    # Topocentric
+
+    astrometric = boston(jd).observe(barnard)
+    apparent = boston(jd).observe(barnard).apparent()
 
 **Earth satellites**
   Earth satellite positions can be generated
@@ -117,10 +136,19 @@ and return its position as of that moment:
 
   .. testcode::
 
-    from skyfield.api import earth, now
-    sat = earth.satellite(tle_text)
+    from skyfield.api import now, earth
 
-    position = earth(now()).observe(sat)
+    jd = now()
+    boston = earth.topos('42.3583 N', '71.0603 W')
+    satellite = earth.satellite(tle_text)
+
+    # Geocentric
+
+    apparent = satellite.gcrs(jd)
+
+    # Topocentric
+
+    apparent = boston.gcrs(jd).observe(satellite)
 
 Read :doc:`time` for more information
 about how to build dates and pass them to planets and satellites

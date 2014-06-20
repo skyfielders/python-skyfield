@@ -7,7 +7,7 @@ from sgp4.propagation import sgp4
 
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
-from .positionlib import Apparent, ITRF_to_GCRS
+from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
 
 _minutes_per_day = 1440.
 
@@ -44,6 +44,10 @@ class EarthSatellite(object):
         vGCRS = array((0.0, 0.0, 0.0))  # todo: someday also compute vGCRS?
 
         return rGCRS, vGCRS
+
+    def gcrs(self, jd):
+        position_AU, velociy_AU_per_d = self._compute_GCRS(jd)
+        return Geocentric(position_AU, velociy_AU_per_d)
 
     def observe_from(self, observer):
         # TODO: what if someone on Mars tries to look at the ISS?

@@ -137,6 +137,15 @@ class Topos(object):
         t.ephemeris = self.ephemeris
         return t
 
+    @takes_julian_date
+    def gcrs(self, jd):
+        """Compute where this location was in the GCRS on a given date."""
+        tpos_AU, tvel_AU_per_d = geocentric_position_and_velocity(self, jd)
+        t = Geocentric(tpos_AU, tvel_AU_per_d, jd)
+        t.topos = self
+        t.ephemeris = self.ephemeris
+        return t
+
 class ToposICRS(ICRS):
     """In ICRS, right?"""
 
@@ -233,6 +242,22 @@ class Apparent(ICRS):
         r_AU, alt, az = to_polar(position_AU)
         return Angle(radians=alt), Angle(radians=az), Distance(r_AU)
 
+class Geocentric(ICRS):
+    """A position referred to the GCRS as measured from the geocenter."""
+
+    def observe(self, other):
+        gcrs_method = getattr(other, 'gcrs')
+        if gcrs_method is None:
+            raise ValueError('currently a Geocentric location can only'
+                             ' observe an object that can generate a'
+                             ' GCRS position through a .gcrs() method')
+        g = gcrs_method(self.jd)
+        # TODO: light-travel-time backdating, if distant enough?
+        p = g.position.AU - self.position.AU
+        v = g.velocity.AU_per_d - self.velocity.AU_per_d
+        a = Apparent(p, v, self.jd)
+        a.observer = self
+        return a
 
 def to_polar(xyz):
     """Convert ``[x y z]`` into spherical coordinates ``(r, theta, phi)``.
@@ -245,6 +270,7 @@ def to_polar(xyz):
 
     """
     r = length_of(xyz)
+
     theta = arcsin(xyz[2] / r)
     phi = arctan2(-xyz[1], -xyz[0]) + pi
     return r, theta, phi
