@@ -32,7 +32,7 @@ def main():
     output({}, """\
 
         import pytest
-        from numpy import abs
+        from numpy import abs, max
         from skyfield.api import JulianDate, earth, mars
         from skyfield.constants import AU_M
         from skyfield.functions import length_of
@@ -49,7 +49,10 @@ def main():
         meter = 1.0 / AU_M
 
         def compare(value, benchmark_value, tolerance):
-            assert abs(value - benchmark_value) < tolerance
+            if hasattr(value, 'shape'):
+                assert max(abs(value - benchmark_value)) < tolerance
+            else:
+                assert abs(value - benchmark_value) < tolerance
 
         """)
 
@@ -57,7 +60,8 @@ def main():
     first_hubble_image = novas.julian_date(1990, 5, 20)
     voyager_intersellar = novas.julian_date(2012, 8, 25)
 
-    dates = [moon_landing, first_hubble_image, T0, voyager_intersellar]
+    date_vector = [moon_landing, first_hubble_image, T0, voyager_intersellar]
+    dates = date_vector + [date_vector]
 
     output_geocentric_tests(dates)
     output_topocentric_tests(dates)
@@ -67,9 +71,9 @@ def output_geocentric_tests(dates):
     for (planet, code), (i, jd) in product(planets, enumerate(dates)):
         obj = novas.make_object(0, code, 'planet{}'.format(code), None)
 
-        ra1, dec1, distance1 = novas.astro_planet(jd, obj)
-        ra2, dec2, distance2 = novas.virtual_planet(jd, obj)
-        ra3, dec3, distance3 = novas.app_planet(jd, obj)
+        ra1, dec1, distance1 = call(novas.astro_planet, jd, obj)
+        ra2, dec2, distance2 = call(novas.virtual_planet, jd, obj)
+        ra3, dec3, distance3 = call(novas.app_planet, jd, obj)
 
         assert distance1 == distance2 == distance3
 
@@ -103,12 +107,10 @@ def output_topocentric_tests(dates):
     usno = novas.make_on_surface(38.9215, -77.0669, 92.0, 10.0, 1010.0)
     for (planet, code), (i, jd) in product(planets, enumerate(dates)):
         obj = novas.make_object(0, code, 'planet{}'.format(code), None)
-        xp = yp = 0.0
 
-        ra1, dec1, distance1 = novas.local_planet(jd, 0.0, obj, usno)
-        ra2, dec2, distance2 = novas.topo_planet(jd, 0.0, obj, usno)
-        (zd, az), (ra, dec) = novas.equ2hor(jd, 0.0, xp, yp, usno, ra2, dec2)
-        alt = 90.0 - zd
+        ra1, dec1, distance1 = call(novas.local_planet, jd, 0.0, obj, usno)
+        ra2, dec2, distance2 = call(novas.topo_planet, jd, 0.0, obj, usno)
+        alt, az = call(altaz_maneuver, jd, obj, usno)
 
         output(locals(), """\
 
@@ -130,6 +132,23 @@ def output_topocentric_tests(dates):
             compare(az.degrees, {az!r}, 0.001 * arcsecond)
 
         """)
+
+
+def altaz_maneuver(jd, obj, place):
+    """Simplify a pair of complicated USNO calls to a single callable."""
+    xp = yp = 0.0
+    ra, dec, distance = novas.topo_planet(jd, 0.0, obj, place)
+    (zd, az), (ra, dec) = novas.equ2hor(jd, 0.0, xp, yp, place, ra, dec)
+    return 90.0 - zd, az
+
+def call(function, jd, *args):
+    """Call function either once, or as many times as `jd` dictates."""
+
+    if isinstance(jd, float):
+        return function(jd, *args)
+
+    answers = [function(n, *args) for n in jd]
+    return zip(*answers)
 
 
 def output(dictionary, template):
