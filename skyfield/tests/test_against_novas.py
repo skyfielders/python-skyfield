@@ -85,10 +85,10 @@ def test_equation_of_the_equinoxes_complimentary_terms_date3():
             array(-1.08231552739e-08), 0.0000000000000001 * arcsecond)
 
 def test_forward_frame_tie():
-    compare(framelib.ICRS_to_J2000.dot((1.1, 1.2, 1.3)), (1.100000019790573, 1.2000001208396125, 1.2999998717098593), 0.0)
+    compare(framelib.ICRS_to_J2000.dot((1.1, 1.2, 1.3)), (1.100000019790573, 1.2000001208396125, 1.2999998717098593), 1e-15)
 
 def test_reverse_frame_tie():
-    compare(framelib.ICRS_to_J2000.T.dot((1.1, 1.2, 1.3)), (1.0999999802094145, 1.1999998791603803, 1.300000128290131), 0.0)
+    compare(framelib.ICRS_to_J2000.T.dot((1.1, 1.2, 1.3)), (1.0999999802094145, 1.1999998791603803, 1.300000128290131), 1e-15)
 
 def test_fundamental_arguments_date0():
     compare(nutationlib.fundamental_arguments(-0.3044942961441969),
