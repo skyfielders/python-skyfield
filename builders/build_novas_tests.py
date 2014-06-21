@@ -1,6 +1,7 @@
 """Rebuild the test data that compares Skyfield to the NOVAS library."""
 
 from __future__ import print_function
+from itertools import product
 from sys import exit
 from textwrap import dedent
 
@@ -16,11 +17,15 @@ except ImportError:
 
         """))
     exit(2)
-else:
-    from novas.compat import eph_manager
-    from novas.constants import T0
-    nutation_function = novas.nutation
-    # from novas.compat import nutation as nutation_module
+
+from novas.compat import eph_manager
+from novas.constants import T0
+nutation_function = novas.nutation
+# from novas.compat import nutation as nutation_module
+
+planets = [('mercury', 1), ('venus', 2), ('mars', 4), ('jupiter', 5),
+           ('saturn', 6), ('uranus', 7), ('neptune', 8), ('pluto', 9),
+           ('sun', 10), ('moon', 11)]
 
 def main():
     jd_start, jd_end, number = eph_manager.ephem_open()
@@ -28,7 +33,9 @@ def main():
 
         import pytest
         from numpy import abs
-        from skyfield.api import earth, mars
+        from skyfield.api import JulianDate, earth, mars
+        from skyfield.constants import AU_M
+        from skyfield.functions import length_of
         from skyfield.jpllib import Ephemeris
 
         try:
@@ -39,13 +46,12 @@ def main():
 
         arcsecond = 1.0 / 60.0 / 60.0
         ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
+        meter = 1.0 / AU_M
 
         def compare(value, benchmark_value, tolerance):
             assert abs(value - benchmark_value) < tolerance
 
         """)
-    planet = 'mars'
-    code = 4
 
     moon_landing = novas.julian_date(1969, 7, 20, 20.0 + 18.0/60.0)
     first_hubble_image = novas.julian_date(1990, 5, 20)
@@ -53,13 +59,19 @@ def main():
 
     dates = [moon_landing, first_hubble_image, T0, voyager_intersellar]
 
-    for i, jd in enumerate(dates):
+    for (i, jd), (planet, code) in product(enumerate(dates), planets):
         obj = novas.make_object(0, code, 'planet{}'.format(code), None)
         ra, dec, distance = novas.astro_planet(jd, obj)
         output(locals(), """\
 
-        def test_{planet}{i}():
-            a = de405.earth(tt={jd!r}).observe(de405.{planet})
+        def test_{planet}_astrometric_{i}():
+            jd = JulianDate(tt={jd!r})
+
+            e = de405.earth(jd)
+            distance = length_of((e - de405.{planet}(jd)).position.AU)
+            compare(distance, {distance!r}, 0.5 * meter)
+
+            a = e.observe(de405.{planet})
             ra, dec, distance = a.radec()
             compare(ra.hours, {ra!r}, 0.001 * ra_arcsecond)
             compare(dec.degrees, {dec!r}, 0.001 * arcsecond)
