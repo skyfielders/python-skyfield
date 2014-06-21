@@ -114,10 +114,10 @@ def output_subroutine_tests(dates):
     tie2 = novas.frame_tie(vector, -1)
     output(locals(), """\
         def test_forward_frame_tie():
-            compare(framelib.ICRS_to_J2000.dot({vector}), {tie1}, 0.0)
+            compare(framelib.ICRS_to_J2000.dot({vector}), {tie1}, 1e-15)
 
         def test_reverse_frame_tie():
-            compare(framelib.ICRS_to_J2000.T.dot({vector}), {tie2}, 0.0)
+            compare(framelib.ICRS_to_J2000.T.dot({vector}), {tie2}, 1e-15)
         """)
 
     for i, jd in enumerate(date_floats):
