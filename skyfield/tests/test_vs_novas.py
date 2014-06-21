@@ -129,17 +129,6 @@ def test_star_deflected_by_jupiter(jd):
 
 # Tests for Basic Functions
 
-def test_iau2000a(jd_float_or_vector):
-    jd_tt = jd_float_or_vector
-    psi0, eps0 = c.nutation.iau2000a(jd_tt, 0.0)
-    psi1, eps1 = nutationlib.iau2000a(jd_tt)
-    to_tenths_of_microarcseconds = 1e7 / ASEC2RAD
-
-    epsilon = 4e-6  # tenths of micro arcseconds; 13 digits of precision
-
-    eq(psi0 * to_tenths_of_microarcseconds, psi1, epsilon)
-    eq(eps0 * to_tenths_of_microarcseconds, eps1, epsilon)
-
 def test_julian_date():
     epsilon = 0.0  # perfect
     for args in (

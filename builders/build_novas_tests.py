@@ -19,9 +19,9 @@ except ImportError:
     exit(2)
 
 from novas.compat import eph_manager
-from novas.constants import T0
+from novas.constants import ASEC2RAD, T0
 nutation_function = novas.nutation
-# from novas.compat import nutation as nutation_module
+import novas.compat.nutation as nutation_module
 
 planets = [('mercury', 1), ('venus', 2), ('mars', 4), ('jupiter', 5),
            ('saturn', 6), ('uranus', 7), ('neptune', 8), ('pluto', 9),
@@ -127,6 +127,16 @@ def output_subroutine_tests(dates):
             def test_fundamental_arguments_date{i}():
                 compare(nutationlib.fundamental_arguments({jcentury!r}),
                         array({arguments}), 0.000000001 * arcsecond)
+            """)
+
+    for i, jd in enumerate(date_floats):
+        psi, eps = nutation_module.iau2000a(jd, 0.0)
+        psi *= 1e7 / ASEC2RAD
+        eps *= 1e7 / ASEC2RAD
+        output(locals(), """\
+            def test_iau2000a_date{i}():
+                compare(nutationlib.iau2000a({jd!r}),
+                        array([{psi}, {eps}]), 0.001)
             """)
 
 

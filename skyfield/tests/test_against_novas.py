@@ -106,6 +106,22 @@ def test_fundamental_arguments_date3():
     compare(nutationlib.fundamental_arguments(0.12647501711156742),
             array((0.1518171948621994, 4.0231516222224455, 0.10917837795926603, 1.6234303368860232, -2.0869831884577685)), 0.000000001 * arcsecond)
 
+def test_iau2000a_date0():
+    compare(nutationlib.iau2000a(2440423.345833333),
+            array([26047275.2142, 88623490.0096]), 0.001)
+
+def test_iau2000a_date1():
+    compare(nutationlib.iau2000a(2448031.5),
+            array([116281481.42, 59319248.6982]), 0.001)
+
+def test_iau2000a_date2():
+    compare(nutationlib.iau2000a(2451545.0),
+            array([-139319963.31, -57693980.7647]), 0.001)
+
+def test_iau2000a_date3():
+    compare(nutationlib.iau2000a(2456164.5),
+            array([159767295.335, -42599231.7793]), 0.001)
+
 def test_mercury_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
     e = de405.earth(jd)
