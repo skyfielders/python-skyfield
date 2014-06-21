@@ -1,10 +1,11 @@
 import pytest
 from numpy import abs, array, max
+from skyfield import earthlib, timelib
 from skyfield.api import JulianDate, earth, mars
 from skyfield.constants import AU_M
 from skyfield.functions import length_of
 from skyfield.jpllib import Ephemeris
-from skyfield.timelib import calendar_date
+
 
 try:
     import de405
@@ -24,16 +25,32 @@ def compare(value, expected_value, epsilon):
         assert abs(value - expected_value) <= epsilon
 
 def test_calendar_date_0():
-    compare(calendar_date(2440423.345833333), array((1969, 7, 20.345833333209157)), 0.0)
+    compare(timelib.calendar_date(2440423.345833333), array((1969, 7, 20.345833333209157)), 0.0)
 
 def test_calendar_date_1():
-    compare(calendar_date(2448031.5), array((1990, 5, 19.5)), 0.0)
+    compare(timelib.calendar_date(2448031.5), array((1990, 5, 19.5)), 0.0)
 
 def test_calendar_date_2():
-    compare(calendar_date(2451545.0), array((2000, 1, 1.0)), 0.0)
+    compare(timelib.calendar_date(2451545.0), array((2000, 1, 1.0)), 0.0)
 
 def test_calendar_date_3():
-    compare(calendar_date(2456164.5), array((2012, 8, 24.5)), 0.0)
+    compare(timelib.calendar_date(2456164.5), array((2012, 8, 24.5)), 0.0)
+
+def test_earth_rotation_angle_date0():
+    compare(earthlib.earth_rotation_angle(2440423.345833333), 243.321607803,
+            0.000001 * arcsecond)
+
+def test_earth_rotation_angle_date1():
+    compare(earthlib.earth_rotation_angle(2448031.5), 237.511844179,
+            0.000001 * arcsecond)
+
+def test_earth_rotation_angle_date2():
+    compare(earthlib.earth_rotation_angle(2451545.0), 280.460618375,
+            0.000001 * arcsecond)
+
+def test_earth_rotation_angle_date3():
+    compare(earthlib.earth_rotation_angle(2456164.5), 333.496583196,
+            0.000001 * arcsecond)
 
 def test_mercury_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)

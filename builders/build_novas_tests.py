@@ -33,11 +33,12 @@ def main():
 
         import pytest
         from numpy import abs, array, max
+        from skyfield import earthlib, timelib
         from skyfield.api import JulianDate, earth, mars
         from skyfield.constants import AU_M
         from skyfield.functions import length_of
         from skyfield.jpllib import Ephemeris
-        from skyfield.timelib import calendar_date
+
 
         try:
             import de405
@@ -81,7 +82,15 @@ def output_subroutine_tests(dates):
         cal_date = call(shorter_cal_date, jd)
         output(locals(), """\
             def test_calendar_date_{i}():
-                compare(calendar_date({jd!r}), array({cal_date}), 0.0)
+                compare(timelib.calendar_date({jd!r}), array({cal_date}), 0.0)
+            """)
+
+    for i, jd in enumerate(boring_dates):
+        angle = novas.era(jd)
+        output(locals(), """\
+            def test_earth_rotation_angle_date{i}():
+                compare(earthlib.earth_rotation_angle({jd!r}), {angle},
+                        0.000001 * arcsecond)
             """)
 
 

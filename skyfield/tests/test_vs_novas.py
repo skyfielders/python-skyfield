@@ -129,13 +129,6 @@ def test_star_deflected_by_jupiter(jd):
 
 # Tests for Basic Functions
 
-def test_earth_rotation_angle(jd_float_or_vector):
-    jd_ut1 = jd_float_or_vector
-    u = c.era(jd_ut1)
-    v = earthlib.earth_rotation_angle(jd_ut1)
-    epsilon = 1e-12  # degrees; 14 to 15 digits of agreement
-    eq(u, v, epsilon)
-
 def test_earth_tilt(jd):
     u = c.e_tilt(jd.tdb)
     v = nutationlib.earth_tilt(jd)
