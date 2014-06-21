@@ -94,11 +94,19 @@ def output_subroutine_tests(dates):
             """)
 
     for i, jd in enumerate(boring_dates):
-        angle = novas.e_tilt(jd)
+        angles = novas.e_tilt(jd)
         output(locals(), """\
             def test_earth_tilt_date{i}():
                 compare(nutationlib.earth_tilt(JulianDate(tdb={jd!r})),
-                        array({angle}), 0.00001 * arcsecond)
+                        array({angles}), 0.00001 * arcsecond)
+            """)
+
+    for i, jd in enumerate(boring_dates):
+        terms = novas.ee_ct(jd, 0.0, 0)
+        output(locals(), """\
+            def test_equation_of_the_equinoxes_complimentary_terms_date{i}():
+                compare(nutationlib.equation_of_the_equinoxes_complimentary_terms({jd!r}),
+                        array({terms}), 0.0000000000000001 * arcsecond)
             """)
 
 

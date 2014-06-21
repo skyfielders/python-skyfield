@@ -68,6 +68,22 @@ def test_earth_tilt_date3():
     compare(nutationlib.earth_tilt(JulianDate(tdb=2456164.5)),
             array((23.43763397776759, 23.43645066577372, 0.9770876081702213, 15.97672953348014, -4.259923177932948)), 0.00001 * arcsecond)
 
+def test_equation_of_the_equinoxes_complimentary_terms_date0():
+    compare(nutationlib.equation_of_the_equinoxes_complimentary_terms(2440423.345833333),
+            array(-1.45924388432e-09), 0.0000000000000001 * arcsecond)
+
+def test_equation_of_the_equinoxes_complimentary_terms_date1():
+    compare(nutationlib.equation_of_the_equinoxes_complimentary_terms(2448031.5),
+            array(-9.90927067934e-09), 0.0000000000000001 * arcsecond)
+
+def test_equation_of_the_equinoxes_complimentary_terms_date2():
+    compare(nutationlib.equation_of_the_equinoxes_complimentary_terms(2451545.0),
+            array(1.0213300963e-08), 0.0000000000000001 * arcsecond)
+
+def test_equation_of_the_equinoxes_complimentary_terms_date3():
+    compare(nutationlib.equation_of_the_equinoxes_complimentary_terms(2456164.5),
+            array(-1.08231552739e-08), 0.0000000000000001 * arcsecond)
+
 def test_mercury_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
     e = de405.earth(jd)

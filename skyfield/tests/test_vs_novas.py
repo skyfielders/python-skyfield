@@ -129,14 +129,6 @@ def test_star_deflected_by_jupiter(jd):
 
 # Tests for Basic Functions
 
-def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
-    jd_tt = jd_float_or_vector
-    u = c.ee_ct(jd_tt, 0.0, 0)
-    v = nutationlib.equation_of_the_equinoxes_complimentary_terms(jd_tt)
-
-    epsilon = 1e-22  # radians; 14 digits of agreement
-    eq(u, v, epsilon)
-
 def test_frame_tie():
     xyz = array([1.1, 1.2, 1.3])
     epsilon = 1e-15  # but can be 0.0 when running outside of tox!
