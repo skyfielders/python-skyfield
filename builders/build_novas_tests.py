@@ -72,20 +72,20 @@ def main():
 
 
 def output_subroutine_tests(dates):
-    boring_dates = [d for d in dates if not isinstance(d, list)]
+    date_floats = [d for d in dates if not isinstance(d, list)]
 
     def shorter_cal_date(jd):
         y, m, d, h = novas.cal_date(jd)
         return y, m, d + h / 24.0 - 0.5
 
-    for i, jd in enumerate(boring_dates):
+    for i, jd in enumerate(date_floats):
         cal_date = call(shorter_cal_date, jd)
         output(locals(), """\
             def test_calendar_date_{i}():
                 compare(timelib.calendar_date({jd!r}), array({cal_date}), 0.0)
             """)
 
-    for i, jd in enumerate(boring_dates):
+    for i, jd in enumerate(date_floats):
         angle = novas.era(jd)
         output(locals(), """\
             def test_earth_rotation_angle_date{i}():
@@ -93,7 +93,7 @@ def output_subroutine_tests(dates):
                         0.000001 * arcsecond)
             """)
 
-    for i, jd in enumerate(boring_dates):
+    for i, jd in enumerate(date_floats):
         angles = novas.e_tilt(jd)
         output(locals(), """\
             def test_earth_tilt_date{i}():
@@ -101,7 +101,7 @@ def output_subroutine_tests(dates):
                         array({angles}), 0.00001 * arcsecond)
             """)
 
-    for i, jd in enumerate(boring_dates):
+    for i, jd in enumerate(date_floats):
         terms = novas.ee_ct(jd, 0.0, 0)
         output(locals(), """\
             def test_equation_of_the_equinoxes_complimentary_terms_date{i}():
@@ -119,6 +119,15 @@ def output_subroutine_tests(dates):
         def test_reverse_frame_tie():
             compare(framelib.ICRS_to_J2000.T.dot({vector}), {tie2}, 0.0)
         """)
+
+    for i, jd in enumerate(date_floats):
+        jcentury = (jd - T0) / 36525.0
+        arguments = novas.fund_args(jcentury)
+        output(locals(), """\
+            def test_fundamental_arguments_date{i}():
+                compare(nutationlib.fundamental_arguments({jcentury!r}),
+                        array({arguments}), 0.000000001 * arcsecond)
+            """)
 
 
 def output_geocentric_tests(dates):

@@ -90,6 +90,22 @@ def test_forward_frame_tie():
 def test_reverse_frame_tie():
     compare(framelib.ICRS_to_J2000.T.dot((1.1, 1.2, 1.3)), (1.0999999802094145, 1.1999998791603803, 1.300000128290131), 0.0)
 
+def test_fundamental_arguments_date0():
+    compare(nutationlib.fundamental_arguments(-0.3044942961441969),
+            array((-1.5597846169351661, -2.8619278194907327, -2.77483682691564, -4.947060102171716, 6.178085194718493)), 0.000000001 * arcsecond)
+
+def test_fundamental_arguments_date1():
+    compare(nutationlib.fundamental_arguments(-0.09619438740588637),
+            array((-0.8532784044768748, -3.9335791240915357, -5.37648684435492, -0.9485312704749193, 5.429677887938805)), 0.000000001 * arcsecond)
+
+def test_fundamental_arguments_date2():
+    compare(nutationlib.fundamental_arguments(0.0),
+            array((2.355555743493879, 6.24006012692298, 1.6279050815375191, 5.198466588650503, 2.182439196615671)), 0.000000001 * arcsecond)
+
+def test_fundamental_arguments_date3():
+    compare(nutationlib.fundamental_arguments(0.12647501711156742),
+            array((0.1518171948621994, 4.0231516222224455, 0.10917837795926603, 1.6234303368860232, -2.0869831884577685)), 0.000000001 * arcsecond)
+
 def test_mercury_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
     e = de405.earth(jd)

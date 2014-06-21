@@ -129,15 +129,6 @@ def test_star_deflected_by_jupiter(jd):
 
 # Tests for Basic Functions
 
-def test_fundamental_arguments(jd_float_or_vector):
-    jd_tdb = jd_float_or_vector
-    t = jcentury(jd_tdb)
-    u = c.fund_args(t)
-    v = nutationlib.fundamental_arguments(t)
-
-    epsilon = 1e-12  # radians; 13 digits of agreement
-    eq(u, v, epsilon)
-
 def test_geocentric_position_and_velocity(jd):
     observer = c.make_observer_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     posu, velu = c.geo_posvel(jd.tt, jd.delta_t, observer)
