@@ -1,9 +1,10 @@
 import pytest
-from numpy import abs, max
+from numpy import abs, array, max
 from skyfield.api import JulianDate, earth, mars
 from skyfield.constants import AU_M
 from skyfield.functions import length_of
 from skyfield.jpllib import Ephemeris
+from skyfield.timelib import calendar_date
 
 try:
     import de405
@@ -11,15 +12,28 @@ try:
 except ImportError:
     pytestmark = pytest.mark.skipif(True, reason='de405 unavailable')
 
+one_second = 1.0 / 24.0 / 60.0 / 60.0
 arcsecond = 1.0 / 60.0 / 60.0
 ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
 meter = 1.0 / AU_M
 
-def compare(value, benchmark_value, tolerance):
-    if hasattr(value, 'shape'):
-        assert max(abs(value - benchmark_value)) < tolerance
+def compare(value, expected_value, epsilon):
+    if hasattr(value, 'shape') or hasattr(expected_value, 'shape'):
+        assert max(abs(value - expected_value)) <= epsilon
     else:
-        assert abs(value - benchmark_value) < tolerance
+        assert abs(value - expected_value) <= epsilon
+
+def test_calendar_date_0():
+    compare(calendar_date(2440423.345833333), array((1969, 7, 20.345833333209157)), 0.0)
+
+def test_calendar_date_1():
+    compare(calendar_date(2448031.5), array((1990, 5, 19.5)), 0.0)
+
+def test_calendar_date_2():
+    compare(calendar_date(2451545.0), array((2000, 1, 1.0)), 0.0)
+
+def test_calendar_date_3():
+    compare(calendar_date(2456164.5), array((2012, 8, 24.5)), 0.0)
 
 def test_mercury_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)

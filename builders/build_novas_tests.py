@@ -32,11 +32,12 @@ def main():
     output({}, """\
 
         import pytest
-        from numpy import abs, max
+        from numpy import abs, array, max
         from skyfield.api import JulianDate, earth, mars
         from skyfield.constants import AU_M
         from skyfield.functions import length_of
         from skyfield.jpllib import Ephemeris
+        from skyfield.timelib import calendar_date
 
         try:
             import de405
@@ -44,15 +45,16 @@ def main():
         except ImportError:
             pytestmark = pytest.mark.skipif(True, reason='de405 unavailable')
 
+        one_second = 1.0 / 24.0 / 60.0 / 60.0
         arcsecond = 1.0 / 60.0 / 60.0
         ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
         meter = 1.0 / AU_M
 
-        def compare(value, benchmark_value, tolerance):
-            if hasattr(value, 'shape'):
-                assert max(abs(value - benchmark_value)) < tolerance
+        def compare(value, expected_value, epsilon):
+            if hasattr(value, 'shape') or hasattr(expected_value, 'shape'):
+                assert max(abs(value - expected_value)) <= epsilon
             else:
-                assert abs(value - benchmark_value) < tolerance
+                assert abs(value - expected_value) <= epsilon
 
         """)
 
@@ -63,8 +65,24 @@ def main():
     date_vector = [moon_landing, first_hubble_image, T0, voyager_intersellar]
     dates = date_vector + [date_vector]
 
+    output_subroutine_tests(dates)
     output_geocentric_tests(dates)
     output_topocentric_tests(dates)
+
+
+def output_subroutine_tests(dates):
+    boring_dates = [d for d in dates if not isinstance(d, list)]
+
+    def shorter_cal_date(jd):
+        y, m, d, h = novas.cal_date(jd)
+        return y, m, d + h / 24.0 - 0.5
+
+    for i, jd in enumerate(boring_dates):
+        cal_date = call(shorter_cal_date, jd)
+        output(locals(), """\
+            def test_calendar_date_{i}():
+                compare(calendar_date({jd!r}), array({cal_date}), 0.0)
+            """)
 
 
 def output_geocentric_tests(dates):
@@ -140,6 +158,7 @@ def altaz_maneuver(jd, obj, place):
     ra, dec, distance = novas.topo_planet(jd, 0.0, obj, place)
     (zd, az), (ra, dec) = novas.equ2hor(jd, 0.0, xp, yp, place, ra, dec)
     return 90.0 - zd, az
+
 
 def call(function, jd, *args):
     """Call function either once, or as many times as `jd` dictates."""
