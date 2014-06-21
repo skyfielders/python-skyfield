@@ -1,6 +1,6 @@
 import pytest
 from numpy import abs, array, max
-from skyfield import earthlib, nutationlib, timelib
+from skyfield import earthlib, framelib, nutationlib, timelib
 from skyfield.api import JulianDate, earth, mars
 from skyfield.constants import AU_M
 from skyfield.functions import length_of
@@ -84,6 +84,12 @@ def test_equation_of_the_equinoxes_complimentary_terms_date3():
     compare(nutationlib.equation_of_the_equinoxes_complimentary_terms(2456164.5),
             array(-1.08231552739e-08), 0.0000000000000001 * arcsecond)
 
+def test_forward_frame_tie():
+    compare(framelib.ICRS_to_J2000.dot((1.1, 1.2, 1.3)), (1.100000019790573, 1.2000001208396125, 1.2999998717098593), 0.0)
+
+def test_reverse_frame_tie():
+    compare(framelib.ICRS_to_J2000.T.dot((1.1, 1.2, 1.3)), (1.0999999802094145, 1.1999998791603803, 1.300000128290131), 0.0)
+
 def test_mercury_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
     e = de405.earth(jd)
@@ -103,7 +109,7 @@ def test_mercury_geocentric_date0():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 7.874971625095716, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 22.415970392044663, 0.001 * arcsecond)
+    compare(dec.degrees, 22.41597039204466, 0.001 * arcsecond)
 
 def test_mercury_geocentric_date1():
     jd = JulianDate(tt=2448031.5)

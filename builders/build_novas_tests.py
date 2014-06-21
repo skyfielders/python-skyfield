@@ -33,7 +33,7 @@ def main():
 
         import pytest
         from numpy import abs, array, max
-        from skyfield import earthlib, nutationlib, timelib
+        from skyfield import earthlib, framelib, nutationlib, timelib
         from skyfield.api import JulianDate, earth, mars
         from skyfield.constants import AU_M
         from skyfield.functions import length_of
@@ -108,6 +108,17 @@ def output_subroutine_tests(dates):
                 compare(nutationlib.equation_of_the_equinoxes_complimentary_terms({jd!r}),
                         array({terms}), 0.0000000000000001 * arcsecond)
             """)
+
+    vector = (1.1, 1.2, 1.3)
+    tie1 = novas.frame_tie(vector, 0)
+    tie2 = novas.frame_tie(vector, -1)
+    output(locals(), """\
+        def test_forward_frame_tie():
+            compare(framelib.ICRS_to_J2000.dot({vector}), {tie1}, 0.0)
+
+        def test_reverse_frame_tie():
+            compare(framelib.ICRS_to_J2000.T.dot({vector}), {tie2}, 0.0)
+        """)
 
 
 def output_geocentric_tests(dates):
