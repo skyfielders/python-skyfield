@@ -129,12 +129,6 @@ def test_star_deflected_by_jupiter(jd):
 
 # Tests for Basic Functions
 
-def test_cal_date():
-    for jd in 0.0, 2414988.5, 2415020.31352, 2442249.5, 2456335.2428472:
-        whole, fraction = divmod((jd + 0.5), 1.0)
-        y, m, d = timelib.calendar_date(int(whole))
-        assert c.cal_date(jd) == (y, m, d, 24.0 * fraction)
-
 def test_earth_rotation_angle(jd_float_or_vector):
     jd_ut1 = jd_float_or_vector
     u = c.era(jd_ut1)
