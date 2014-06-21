@@ -1,6 +1,6 @@
 import pytest
-from numpy import abs, array, max
-from skyfield import earthlib, framelib, nutationlib, timelib
+from numpy import abs, array, einsum, max
+from skyfield import earthlib, framelib, nutationlib, precessionlib, timelib
 from skyfield.api import JulianDate, earth, mars
 from skyfield.constants import AU_M
 from skyfield.functions import length_of
@@ -142,6 +142,70 @@ def test_julian_date_function_date5():
 
 def test_julian_date_function_date6():
     compare(timelib.julian_date(2000, 1, 1, 0.0), 2451544.5, 0.0)
+
+def test_mean_obliquity_date0():
+    compare(nutationlib.mean_obliquity(2440423.345833333),
+            84395.6674554696, 0.0)  # arcseconds
+
+def test_mean_obliquity_date1():
+    compare(nutationlib.mean_obliquity(2448031.5),
+            84385.91143082442, 0.0)  # arcseconds
+
+def test_mean_obliquity_date2():
+    compare(nutationlib.mean_obliquity(2451545.0),
+            84381.406, 0.0)  # arcseconds
+
+def test_mean_obliquity_date3():
+    compare(nutationlib.mean_obliquity(2456164.5),
+            84375.48231996332, 0.0)  # arcseconds
+
+def test_nutation_date0():
+    matrix = nutationlib.compute_nutation(JulianDate(tdb=2440423.345833333))
+    result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
+    compare((1.0999795659425045, 1.1999568871469581, 1.3000570847072532),
+            result, 1e-14)
+
+def test_nutation_date1():
+    matrix = nutationlib.compute_nutation(JulianDate(tdb=2448031.5))
+    result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
+    compare((1.0999087778623433, 1.2000195046911977, 1.300059178938428),
+            result, 1e-14)
+
+def test_nutation_date2():
+    matrix = nutationlib.compute_nutation(JulianDate(tdb=2451545.0))
+    result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
+    compare((1.100109290032102, 1.1999681897164485, 1.2999368806421698),
+            result, 1e-14)
+
+def test_nutation_date3():
+    matrix = nutationlib.compute_nutation(JulianDate(tdb=2456164.5))
+    result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
+    compare((1.0998746654010052, 1.2001050177909844, 1.3000091025381042),
+            result, 1e-14)
+
+def test_precession_date0():
+    matrix = precessionlib.compute_precession(2440423.345833333)
+    result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
+    compare((1.111985657355239, 1.1924703352076302, 1.296727572578774),
+            result, 1e-15)
+
+def test_precession_date1():
+    matrix = precessionlib.compute_precession(2448031.5)
+    result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
+    compare((1.103793140541002, 1.1976299348492718, 1.2989700697273823),
+            result, 1e-15)
+
+def test_precession_date2():
+    matrix = precessionlib.compute_precession(2451545.0)
+    result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
+    compare((1.1, 1.2, 1.3),
+            result, 1e-15)
+
+def test_precession_date3():
+    matrix = precessionlib.compute_precession(2456164.5)
+    result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
+    compare((1.0950034772583117, 1.2031039092689229, 1.301348672836777),
+            result, 1e-15)
 
 def test_mercury_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)

@@ -32,8 +32,8 @@ def main():
     output({}, """\
 
         import pytest
-        from numpy import abs, array, max
-        from skyfield import earthlib, framelib, nutationlib, timelib
+        from numpy import abs, array, einsum, max
+        from skyfield import earthlib, framelib, nutationlib, precessionlib, timelib
         from skyfield.api import JulianDate, earth, mars
         from skyfield.constants import AU_M
         from skyfield.functions import length_of
@@ -152,6 +152,36 @@ def output_subroutine_tests(dates):
         output(locals(), """\
             def test_julian_date_function_date{i}():
                 compare(timelib.julian_date{args}, {jd!r}, 0.0)
+            """)
+
+    for i, jd in enumerate(date_floats):
+        angle = novas.mean_obliq(jd)
+        output(locals(), """\
+            def test_mean_obliquity_date{i}():
+                compare(nutationlib.mean_obliquity({jd!r}),
+                        {angle!r}, 0.0)  # arcseconds
+            """)
+
+    for i, jd in enumerate(date_floats):
+        vector = [1.1, 1.2, 1.3]
+        result = nutation_function(jd, vector)
+        output(locals(), """\
+            def test_nutation_date{i}():
+                matrix = nutationlib.compute_nutation(JulianDate(tdb={jd!r}))
+                result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
+                compare({result},
+                        result, 1e-14)
+            """)
+
+    for i, jd in enumerate(date_floats):
+        vector = [1.1, 1.2, 1.3]
+        result = novas.precession(T0, vector, jd)
+        output(locals(), """\
+            def test_precession_date{i}():
+                matrix = precessionlib.compute_precession({jd!r})
+                result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
+                compare({result},
+                        result, 1e-15)
             """)
 
 

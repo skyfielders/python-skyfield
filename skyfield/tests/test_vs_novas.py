@@ -129,30 +129,6 @@ def test_star_deflected_by_jupiter(jd):
 
 # Tests for Basic Functions
 
-def test_mean_obliq(jd_float_or_vector):
-    jd_tdb = jd_float_or_vector
-    u = c.mean_obliq(jd_tdb)
-    v = nutationlib.mean_obliquity(jd_tdb)
-    epsilon = 0.0  # perfect
-    eq(u, v, epsilon)
-
-def test_nutation(jd):
-    xyz = [1.1, 1.2, 1.3]
-    u = c_nutation(jd.tdb, xyz)
-    xyz = array(xyz)
-    v = einsum('ij...,j...->i...', nutationlib.compute_nutation(jd), xyz)
-    epsilon = 1e-14  # 14 digits of agreement
-    eq(u, v, epsilon)
-
-def test_precession(jd_float_or_vector):
-    jd_tdb = jd_float_or_vector
-    xyz = [1.1, 1.2, 1.3]
-    u = c.precession(T0, xyz, jd_tdb)
-    matrix_or_matrices = precessionlib.compute_precession(jd_tdb)
-    v = einsum('ij...,j...->i...', matrix_or_matrices, array(xyz))
-    epsilon = 1e-15  # 15 digits of agreement
-    eq(u, v, epsilon)
-
 def test_sidereal_time_with_zero_delta_t(jd):
     jd.delta_t = 0.0
     u = c.sidereal_time(jd.ut1, 0.0, 0.0, False, True)
