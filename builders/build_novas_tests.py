@@ -139,6 +139,21 @@ def output_subroutine_tests(dates):
                         array([{psi}, {eps}]), 0.001)
             """)
 
+    for i, args in enumerate([
+          (-4712, 1, 1, 0.0),
+          (-4712, 3, 1, 0.0),
+          (-4712, 12, 31, 0.5),
+          (-241, 3, 25, 19.0),
+          (530, 9, 27, 23.5),
+          (1976, 3, 7, 12.5),
+          (2000, 1, 1, 0.0),
+          ]):
+        jd = novas.julian_date(*args)
+        output(locals(), """\
+            def test_julian_date_function_date{i}():
+                compare(timelib.julian_date{args}, {jd!r}, 0.0)
+            """)
+
 
 def output_geocentric_tests(dates):
     for (planet, code), (i, jd) in product(planets, enumerate(dates)):

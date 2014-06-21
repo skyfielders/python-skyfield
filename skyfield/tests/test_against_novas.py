@@ -122,6 +122,27 @@ def test_iau2000a_date3():
     compare(nutationlib.iau2000a(2456164.5),
             array([159767295.335, -42599231.7793]), 0.001)
 
+def test_julian_date_function_date0():
+    compare(timelib.julian_date(-4712, 1, 1, 0.0), 37.5, 0.0)
+
+def test_julian_date_function_date1():
+    compare(timelib.julian_date(-4712, 3, 1, 0.0), 97.5, 0.0)
+
+def test_julian_date_function_date2():
+    compare(timelib.julian_date(-4712, 12, 31, 0.5), 402.5208333333333, 0.0)
+
+def test_julian_date_function_date3():
+    compare(timelib.julian_date(-241, 3, 25, 19.0), 1633120.2916666667, 0.0)
+
+def test_julian_date_function_date4():
+    compare(timelib.julian_date(530, 9, 27, 23.5), 1914908.4791666667, 0.0)
+
+def test_julian_date_function_date5():
+    compare(timelib.julian_date(1976, 3, 7, 12.5), 2442845.0208333335, 0.0)
+
+def test_julian_date_function_date6():
+    compare(timelib.julian_date(2000, 1, 1, 0.0), 2451544.5, 0.0)
+
 def test_mercury_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
     e = de405.earth(jd)

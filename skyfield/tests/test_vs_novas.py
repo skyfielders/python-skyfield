@@ -129,19 +129,6 @@ def test_star_deflected_by_jupiter(jd):
 
 # Tests for Basic Functions
 
-def test_julian_date():
-    epsilon = 0.0  # perfect
-    for args in (
-          (-4712, 1, 1, 0.0),
-          (-4712, 3, 1, 0.0),
-          (-4712, 12, 31, 0.5),
-          (-241, 3, 25, 19.0),
-          (530, 9, 27, 23.5),
-          (1976, 3, 7, 12.5),
-          (2000, 1, 1, 0.0),
-          ):
-        eq(c.julian_date(*args), timelib.julian_date(*args), epsilon)
-
 def test_mean_obliq(jd_float_or_vector):
     jd_tdb = jd_float_or_vector
     u = c.mean_obliq(jd_tdb)
