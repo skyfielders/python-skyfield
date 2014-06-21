@@ -129,19 +129,6 @@ def test_star_deflected_by_jupiter(jd):
 
 # Tests for Basic Functions
 
-def test_geocentric_position_and_velocity(jd):
-    observer = c.make_observer_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
-    posu, velu = c.geo_posvel(jd.tt, jd.delta_t, observer)
-
-    topos = positionlib.Topos(latitude_degrees=45.0, longitude_degrees=-75.0,
-                              elevation_m=0.0)
-    posv, velv = earthlib.geocentric_position_and_velocity(topos, jd)
-
-    epsilon = 1e-6 * meter  # 13 to 14 digits of agreement
-
-    eq(posu, posv, epsilon)
-    eq(velu, velv, epsilon)
-
 def test_iau2000a(jd_float_or_vector):
     jd_tt = jd_float_or_vector
     psi0, eps0 = c.nutation.iau2000a(jd_tt, 0.0)
