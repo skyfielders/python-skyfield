@@ -33,7 +33,7 @@ def main():
 
         import pytest
         from numpy import abs, array, max
-        from skyfield import earthlib, timelib
+        from skyfield import earthlib, nutationlib, timelib
         from skyfield.api import JulianDate, earth, mars
         from skyfield.constants import AU_M
         from skyfield.functions import length_of
@@ -91,6 +91,14 @@ def output_subroutine_tests(dates):
             def test_earth_rotation_angle_date{i}():
                 compare(earthlib.earth_rotation_angle({jd!r}), {angle},
                         0.000001 * arcsecond)
+            """)
+
+    for i, jd in enumerate(boring_dates):
+        angle = novas.e_tilt(jd)
+        output(locals(), """\
+            def test_earth_tilt_date{i}():
+                compare(nutationlib.earth_tilt(JulianDate(tdb={jd!r})),
+                        array({angle}), 0.00001 * arcsecond)
             """)
 
 

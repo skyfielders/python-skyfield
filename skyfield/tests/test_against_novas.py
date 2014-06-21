@@ -1,6 +1,6 @@
 import pytest
 from numpy import abs, array, max
-from skyfield import earthlib, timelib
+from skyfield import earthlib, nutationlib, timelib
 from skyfield.api import JulianDate, earth, mars
 from skyfield.constants import AU_M
 from skyfield.functions import length_of
@@ -51,6 +51,22 @@ def test_earth_rotation_angle_date2():
 def test_earth_rotation_angle_date3():
     compare(earthlib.earth_rotation_angle(2456164.5), 333.496583196,
             0.000001 * arcsecond)
+
+def test_earth_tilt_date0():
+    compare(nutationlib.earth_tilt(JulianDate(tdb=2440423.345833333)),
+            array((23.443240959852666, 23.445702723464045, 0.15929455696954184, 2.60472752141637, 8.8623490009627)), 0.00001 * arcsecond)
+
+def test_earth_tilt_date1():
+    compare(nutationlib.earth_tilt(JulianDate(tdb=2448031.5)),
+            array((23.440530953006782, 23.442178709915066, 0.7110982205507759, 11.628148141964182, 5.93192486981946)), 0.00001 * arcsecond)
+
+def test_earth_tilt_date2():
+    compare(nutationlib.earth_tilt(JulianDate(tdb=2451545.0)),
+            array((23.439279444444445, 23.437676833867652, -0.8520167470908031, -13.931996330960066, -5.769398076465292)), 0.00001 * arcsecond)
+
+def test_earth_tilt_date3():
+    compare(nutationlib.earth_tilt(JulianDate(tdb=2456164.5)),
+            array((23.43763397776759, 23.43645066577372, 0.9770876081702213, 15.97672953348014, -4.259923177932948)), 0.00001 * arcsecond)
 
 def test_mercury_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)

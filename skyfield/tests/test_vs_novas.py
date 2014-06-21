@@ -129,12 +129,6 @@ def test_star_deflected_by_jupiter(jd):
 
 # Tests for Basic Functions
 
-def test_earth_tilt(jd):
-    u = c.e_tilt(jd.tdb)
-    v = nutationlib.earth_tilt(jd)
-    epsilon = 1e-9  # 9 to 11 digits of agreement; why not more?
-    eq(array(u), array(v), epsilon)
-
 def test_equation_of_the_equinoxes_complimentary_terms(jd_float_or_vector):
     jd_tt = jd_float_or_vector
     u = c.ee_ct(jd_tt, 0.0, 0)
