@@ -59,28 +59,49 @@ def main():
 
     dates = [moon_landing, first_hubble_image, T0, voyager_intersellar]
 
-    for (i, jd), (planet, code) in product(enumerate(dates), planets):
+    output_geocentric_tests(dates)
+
+
+def output_geocentric_tests(dates):
+    for (planet, code), (i, jd) in product(planets, enumerate(dates)):
         obj = novas.make_object(0, code, 'planet{}'.format(code), None)
-        ra, dec, distance = novas.astro_planet(jd, obj)
+
+        ra1, dec1, distance1 = novas.astro_planet(jd, obj)
+        ra2, dec2, distance2 = novas.virtual_planet(jd, obj)
+        ra3, dec3, distance3 = novas.app_planet(jd, obj)
+
+        assert distance1 == distance2 == distance3
+
         output(locals(), """\
 
-        def test_{planet}_astrometric_{i}():
+        def test_{planet}_geocentric_date{i}():
             jd = JulianDate(tt={jd!r})
 
             e = de405.earth(jd)
             distance = length_of((e - de405.{planet}(jd)).position.AU)
-            compare(distance, {distance!r}, 0.5 * meter)
+            compare(distance, {distance1!r}, 0.5 * meter)
 
-            a = e.observe(de405.{planet})
-            ra, dec, distance = a.radec()
-            compare(ra.hours, {ra!r}, 0.001 * ra_arcsecond)
-            compare(dec.degrees, {dec!r}, 0.001 * arcsecond)
+            astrometric = e.observe(de405.{planet})
+            ra, dec, distance = astrometric.radec()
+            compare(ra.hours, {ra1!r}, 0.001 * ra_arcsecond)
+            compare(dec.degrees, {dec1!r}, 0.001 * arcsecond)
+
+            apparent = astrometric.apparent()
+            ra, dec, distance = apparent.radec()
+            compare(ra.hours, {ra2!r}, 0.001 * ra_arcsecond)
+            compare(dec.degrees, {dec2!r}, 0.001 * arcsecond)
+
+            ra, dec, distance = apparent.radec(epoch='date')
+            compare(ra.hours, {ra3!r}, 0.001 * ra_arcsecond)
+            compare(dec.degrees, {dec3!r}, 0.001 * arcsecond)
 
         """)
+
 
 def output(dictionary, template):
     print(dedent(template).format(**dictionary).strip('\n'))
     print()
+
 
 if __name__ == '__main__':
     main()

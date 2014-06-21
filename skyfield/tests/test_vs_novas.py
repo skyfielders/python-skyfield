@@ -129,54 +129,6 @@ def test_star_deflected_by_jupiter(jd):
 
 # Tests of generating a full position or coordinate.
 
-def test_astro_planet(jd, planet_name_and_code):
-    planet_name, planet_code = planet_name_and_code
-
-    obj = c.make_object(0, planet_code, 'planet', None)
-    ra0, dec0, distance0 = c.astro_planet(jd.tt, obj)
-
-    earth = de405.earth
-    planet = getattr(de405, planet_name)
-    e = earth(jd)
-    distance = length_of((e - planet(jd)).position.AU)
-    ra, dec, d = e.observe(planet).radec()
-
-    eq(ra0, ra.hours, 1e-3 * arcsecond_in_hours)
-    eq(dec0, dec.degrees, 1e-3 * arcsecond_in_degrees)
-    eq(distance0, distance, 0.5 * meter)
-
-def test_virtual_planet(jd, planet_name_and_code):
-    planet_name, planet_code = planet_name_and_code
-
-    obj = c.make_object(0, planet_code, 'planet', None)
-    ra0, dec0, distance0 = c.virtual_planet(jd.tt, obj)
-
-    earth = de405.earth
-    planet = getattr(de405, planet_name)
-    e = earth(jd)
-    distance = length_of((e - planet(jd)).position.AU)
-    ra, dec, d = e.observe(planet).apparent().radec()
-
-    eq(ra0, ra.hours, 0.001 * arcsecond_in_hours)
-    eq(dec0, dec.degrees, 0.001 * arcsecond_in_degrees)
-    eq(distance0, distance, 0.5 * meter)
-
-def test_app_planet(jd, planet_name_and_code):
-    planet_name, planet_code = planet_name_and_code
-
-    obj = c.make_object(0, planet_code, 'planet', None)
-    ra0, dec0, distance0 = c.app_planet(jd.tt, obj)
-
-    earth = de405.earth
-    planet = getattr(de405, planet_name)
-    e = earth(jd)
-    distance = length_of((e - planet(jd)).position.AU)
-    ra, dec, d = e.observe(planet).apparent().radec(epoch=jd)
-
-    eq(ra0, ra.hours, 0.001 * arcsecond_in_hours)
-    eq(dec0, dec.degrees, 0.001 * arcsecond_in_degrees)
-    eq(distance0, distance, 0.5 * meter)
-
 def test_local_planet(jd, planet_name_and_code):
     position = c.make_on_surface(45.0, -75.0, 0.0, 10.0, 1010.0)
     ggr = positionlib.Topos(latitude_degrees=45.0, longitude_degrees=-75.0,
