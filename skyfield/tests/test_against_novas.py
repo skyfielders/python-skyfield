@@ -4,7 +4,7 @@ import pytest
 from numpy import abs, array, einsum, max
 from skyfield import (earthlib, framelib, nutationlib, positionlib,
                       precessionlib, starlib, timelib)
-from skyfield.api import JulianDate, earth, mars
+from skyfield.api import JulianDate
 from skyfield.constants import AU_M
 from skyfield.functions import length_of
 from skyfield.jpllib import Ephemeris
