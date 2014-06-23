@@ -2,7 +2,8 @@
 
 import pytest
 from numpy import abs, array, einsum, max
-from skyfield import earthlib, framelib, nutationlib, precessionlib, timelib
+from skyfield import (earthlib, framelib, nutationlib, positionlib,
+                      precessionlib, starlib, timelib)
 from skyfield.api import JulianDate, earth, mars
 from skyfield.constants import AU_M
 from skyfield.functions import length_of
@@ -208,6 +209,85 @@ def test_precession_date3():
     result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
     compare((1.0950034772583117, 1.2031039092689229, 1.301348672836777),
             result, 1e-15)
+
+def test_sidereal_time_on_date0():
+    jd = JulianDate(tt=2440423.345833333)
+    compare(earthlib.sidereal_time(jd), 16.195436227057254, 1e-13)
+
+def test_sidereal_time_with_nonzero_delta_t_on_date0():
+    jd = JulianDate(tt=2440423.345833333 + 99.9 * one_second, delta_t=99.9)
+    compare(earthlib.sidereal_time(jd), 16.19543622976054, 1e-13)
+
+def test_sidereal_time_on_date1():
+    jd = JulianDate(tt=2448031.5)
+    compare(earthlib.sidereal_time(jd), 15.825907460288208, 1e-13)
+
+def test_sidereal_time_with_nonzero_delta_t_on_date1():
+    jd = JulianDate(tt=2448031.5 + 99.9 * one_second, delta_t=99.9)
+    compare(earthlib.sidereal_time(jd), 15.825907462991834, 1e-13)
+
+def test_sidereal_time_on_date2():
+    jd = JulianDate(tt=2451545.0)
+    compare(earthlib.sidereal_time(jd), 18.697374826965625, 1e-13)
+
+def test_sidereal_time_with_nonzero_delta_t_on_date2():
+    jd = JulianDate(tt=2451545.0 + 99.9 * one_second, delta_t=99.9)
+    compare(earthlib.sidereal_time(jd), 18.69737482966941, 1e-13)
+
+def test_sidereal_time_on_date3():
+    jd = JulianDate(tt=2456164.5)
+    compare(earthlib.sidereal_time(jd), 22.24390849716581, 1e-13)
+
+def test_sidereal_time_with_nonzero_delta_t_on_date3():
+    jd = JulianDate(tt=2456164.5 + 99.9 * one_second, delta_t=99.9)
+    compare(earthlib.sidereal_time(jd), 22.243908499869796, 1e-13)
+
+def test_star_vector():
+    star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
+                        ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
+                        parallax_mas=7.56, radial_km_per_s=-17.4)
+    compare(star._position,
+            (276301.5236796437, 215517.39549460335, 27281454.187831223),
+            1e3 * meter)
+    compare(star._velocity,
+            (-0.006595734315371152, 0.015163885823867606, -0.010102577482634968),
+            1e-6 * meter)
+
+def test_ITRF_to_GCRS_conversion_on_date0():
+    jd = JulianDate(tt=2440423.345833333, delta_t=39.707)
+    position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
+    compare(position, (0.5701172053657843, -1.5232987806096496, 1.3017400651201705), 1e-13)
+
+def test_ITRF_to_GCRS_conversion_on_date1():
+    jd = JulianDate(tt=2448031.5, delta_t=57.1136)
+    position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
+    compare(position, (0.4136264927956394, -1.5741081933652463, 1.3004216700893525), 1e-13)
+
+def test_ITRF_to_GCRS_conversion_on_date2():
+    jd = JulianDate(tt=2451545.0, delta_t=63.8285)
+    position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
+    compare(position, (1.3757008573963423, -0.8702954291925711, 1.3000126987400913), 1e-13)
+
+def test_ITRF_to_GCRS_conversion_on_date3():
+    jd = JulianDate(tt=2456164.5, delta_t=66.7846)
+    position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
+    compare(position, (1.524357404968849, 0.5755748855663732, 1.2980940077752077), 1e-13)
+
+def test_tdb_minus_tt_on_date0():
+    result = timelib.tdb_minus_tt(2440423.345833333)
+    compare(result, -0.00046798717637515125, 1e-16)
+
+def test_tdb_minus_tt_on_date1():
+    result = timelib.tdb_minus_tt(2448031.5)
+    compare(result, 0.001158518592634921, 1e-16)
+
+def test_tdb_minus_tt_on_date2():
+    result = timelib.tdb_minus_tt(2451545.0)
+    compare(result, -9.575743486095212e-05, 1e-16)
+
+def test_tdb_minus_tt_on_date3():
+    result = timelib.tdb_minus_tt(2456164.5)
+    compare(result, -0.001241030165936061, 1e-16)
 
 def test_mercury_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)

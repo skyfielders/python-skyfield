@@ -23,6 +23,7 @@ from novas.constants import ASEC2RAD, T0
 nutation_function = novas.nutation
 import novas.compat.nutation as nutation_module
 
+one_second = 1.0 / 24.0 / 60.0 / 60.0
 planets = [('mercury', 1), ('venus', 2), ('mars', 4), ('jupiter', 5),
            ('saturn', 6), ('uranus', 7), ('neptune', 8), ('pluto', 9),
            ('sun', 10), ('moon', 11)]
@@ -34,7 +35,8 @@ def main():
 
         import pytest
         from numpy import abs, array, einsum, max
-        from skyfield import earthlib, framelib, nutationlib, precessionlib, timelib
+        from skyfield import (earthlib, framelib, nutationlib, positionlib,
+                              precessionlib, starlib, timelib)
         from skyfield.api import JulianDate, earth, mars
         from skyfield.constants import AU_M
         from skyfield.functions import length_of
@@ -74,6 +76,7 @@ def main():
 
 def output_subroutine_tests(dates):
     date_floats = [d for d in dates if not isinstance(d, list)]
+    delta_t_floats = [+39.707, +57.1136, +63.8285, +66.7846]
 
     def shorter_cal_date(jd):
         y, m, d, h = novas.cal_date(jd)
@@ -183,6 +186,55 @@ def output_subroutine_tests(dates):
                 result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
                 compare({result},
                         result, 1e-15)
+            """)
+
+    for i, jd in enumerate(date_floats):
+        result1 = novas.sidereal_time(jd, 0.0, 0.0, False, True)
+        result2 = novas.sidereal_time(jd, 0.0, 99.9, False, True)
+        output(locals(), """\
+            def test_sidereal_time_on_date{i}():
+                jd = JulianDate(tt={jd!r})
+                compare(earthlib.sidereal_time(jd), {result1!r}, 1e-13)
+
+            def test_sidereal_time_with_nonzero_delta_t_on_date{i}():
+                jd = JulianDate(tt={jd!r} + 99.9 * one_second, delta_t=99.9)
+                compare(earthlib.sidereal_time(jd), {result2!r}, 1e-13)
+            """)
+
+    p, v = novas.starvectors(novas.make_cat_entry(
+        'POLARIS', 'HIP', 0, 2.530301028, 89.264109444,
+        44.22, -11.75, 7.56, -17.4))
+    output(locals(), """\
+        def test_star_vector():
+            star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
+                                ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
+                                parallax_mas=7.56, radial_km_per_s=-17.4)
+            compare(star._position,
+                    {p},
+                    1e3 * meter)
+            compare(star._velocity,
+                    {v},
+                    1e-6 * meter)
+        """)
+
+    for i, (tt, delta_t) in enumerate(zip(date_floats, delta_t_floats)):
+        jd_low = xp = yp = 0.0
+        vector = [1.1, 1.2, 1.3]
+        ut1 = tt - delta_t * one_second
+        result = novas.ter2cel(ut1, jd_low, delta_t, xp, yp, vector)
+        output(locals(), """\
+            def test_ITRF_to_GCRS_conversion_on_date{i}():
+                jd = JulianDate(tt={tt!r}, delta_t={delta_t!r})
+                position = positionlib.ITRF_to_GCRS(jd, {vector!r})
+                compare(position, {result!r}, 1e-13)
+            """)
+
+    for i, jd_tdb in enumerate(date_floats):
+        result = novas.tdb2tt(jd_tdb)[1]
+        output(locals(), """\
+            def test_tdb_minus_tt_on_date{i}():
+                result = timelib.tdb_minus_tt({jd_tdb!r})
+                compare(result, {result!r}, 1e-16)
             """)
 
 
