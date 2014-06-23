@@ -1,3 +1,5 @@
+'Auto-generated accuracy tests vs NOVAS (see build_novas_tests.py).'
+
 import pytest
 from numpy import abs, array, einsum, max
 from skyfield import earthlib, framelib, nutationlib, precessionlib, timelib

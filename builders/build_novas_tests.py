@@ -30,6 +30,7 @@ planets = [('mercury', 1), ('venus', 2), ('mars', 4), ('jupiter', 5),
 def main():
     jd_start, jd_end, number = eph_manager.ephem_open()
     output({}, """\
+        'Auto-generated accuracy tests vs NOVAS (see build_novas_tests.py).'
 
         import pytest
         from numpy import abs, array, einsum, max
