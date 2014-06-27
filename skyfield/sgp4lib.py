@@ -1,6 +1,6 @@
-"""An object representing an Earth-orbiting satellite."""
+"""An interface between Skyfield and the Python ``sgp4`` library."""
 
-from numpy import array, cross, einsum, nan
+from numpy import array, cross, einsum
 from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
@@ -8,17 +8,18 @@ from sgp4.propagation import sgp4
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
-from .timelib import takes_julian_date
+from .timelib import JulianDate, takes_julian_date
 
-_nan3 = (nan, nan, nan)
 _minutes_per_day = 1440.
 
 class EarthSatellite(object):
     """An Earth satellite loaded from a TLE file and propagated with SGP4."""
 
     def __init__(self, lines, earth):
+        sat = twoline2rv(*lines[-2:], whichconst=wgs72)
+        self._sgp4_satellite = sat
         self._earth = earth
-        self._sgp4_satellite = twoline2rv(*lines[-2:], whichconst=wgs72)
+        self.epoch = JulianDate(utc=(sat.epochyr, 1, sat.epochdays - 1.0))
 
     def _position_and_velocity_TEME_km(self, jd):
         """Return the raw true equator mean equinox (TEME) vectors from SGP4.
@@ -28,28 +29,27 @@ class EarthSatellite(object):
         assume the TLE epoch to be a UTC date, per AIAA 2006-6753.
 
         """
-        epoch = self._sgp4_satellite.jdsatepoch
+        sat = self._sgp4_satellite
+        epoch = sat.jdsatepoch
         minutes_past_epoch = (jd._utc_float() - epoch) * 1440.
         if getattr(minutes_past_epoch, 'shape', None):
             position = []
             velocity = []
+            error = []
             for m in minutes_past_epoch:
-                p, v = sgp4(self._sgp4_satellite, m)
-                position.append(_nan3 if (p is None) else p)
-                velocity.append(_nan3 if (v is None) else v)
-            return array(position).T, array(velocity).T
+                p, v = sgp4(sat, m)
+                position.append(p)
+                velocity.append(v)
+                error.append(sat.error_message)
+            return array(position).T, array(velocity).T, error
         else:
-            position, velocity = sgp4(self._sgp4_satellite, minutes_past_epoch)
-            if position is None:
-                position = _nan3
-            if velocity is None:
-                velocity = _nan3
-            return array(position), array(velocity)
+            position, velocity = sgp4(sat, minutes_past_epoch)
+            return array(position), array(velocity), sat.error_message
 
     def _compute_GCRS(self, jd):
         """Compute where satellite is in space on a given date."""
 
-        rTEME, vTEME = self._position_and_velocity_TEME_km(jd)
+        rTEME, vTEME, error = self._position_and_velocity_TEME_km(jd)
         rTEME /= AU_KM
         vTEME /= AU_KM
         vTEME *= DAY_S
@@ -58,7 +58,7 @@ class EarthSatellite(object):
         rGCRS = ITRF_to_GCRS(jd, rITRF)
         vGCRS = array((0.0, 0.0, 0.0))  # todo: someday also compute vGCRS?
 
-        return rGCRS, vGCRS
+        return rGCRS, vGCRS, error
 
     @takes_julian_date
     def gcrs(self, jd):
@@ -67,16 +67,18 @@ class EarthSatellite(object):
         Uses standard SGP4 theory to predict the satellite location.
 
         """
-        position_AU, velociy_AU_per_d = self._compute_GCRS(jd)
-        return Geocentric(position_AU, velociy_AU_per_d)
+        position_AU, velociy_AU_per_d, error = self._compute_GCRS(jd)
+        g = Geocentric(position_AU, velociy_AU_per_d, jd)
+        g.sgp4_error = error
+        return g
 
     def observe_from(self, observer):
         # TODO: what if someone on Mars tries to look at the ISS?
 
-        rGCRS, vGCRS = self._compute_GCRS(observer.jd)
-        g = Apparent(rGCRS - observer.rGCRS,
-                     vGCRS - observer.vGCRS,
-                     observer.jd)
+        jd = observer.jd
+        rGCRS, vGCRS, error = self._compute_GCRS(jd)
+        g = Apparent(rGCRS - observer.rGCRS, vGCRS - observer.vGCRS, jd)
+        g.sgp4_error = error
         g.observer = observer
         # g.distance = euclidian_distance
         return g

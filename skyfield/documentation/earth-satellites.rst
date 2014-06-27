@@ -47,3 +47,37 @@ Observing a satellite directly returns an :ref:`apparent`
 but without having to apply aberration and deflection,
 because satellites travel with the Earth around the Sun
 in the same relativistic frame of reference.
+
+Propagation Errors
+==================
+
+# .. testcode::
+
+    text = """
+    SL-14 DEB               
+    1 29141U 85108AA  06170.26783845  .99999999  00000-0  13519-0 0   718
+    2 29141  82.4288 273.4882 0015848 277.2124  83.9133 15.93343074  6828
+    """
+
+    import numpy as np
+    from skyfield.api import JulianDate, earth
+
+    sat = earth.satellite(text)
+    print(sat.epoch.utc_jpl())
+
+    year, month, day, hour, minute, second = sat.epoch.utc
+    offsets = np.array([0, 100, 200, 300, 400, 500])
+    jd = JulianDate(utc=(year, month, hour, minute + offsets))
+    geocentric = sat.gcrs(jd)
+
+    ra, dec, distance = geocentric.radec(epoch='date')
+    print(ra)
+    print(dec)
+    print(distance.km)
+    print(geocentric.sgp4_error)
+
+.. testoutput::
+
+    13deg 49' 57.8"
+    357deg 51' 21.8"
+    1281.20477925

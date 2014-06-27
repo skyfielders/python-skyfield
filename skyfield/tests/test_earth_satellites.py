@@ -121,7 +121,7 @@ def test_appendix_c_satellite():
     # the `sgp4` package and not of Skyfield): are the right coordinates
     # being produced by our Python SGP4 propagator for this satellite?
 
-    rTEME, vTEME = sat._position_and_velocity_TEME_km(jd)
+    rTEME, vTEME, error = sat._position_and_velocity_TEME_km(jd)
 
     assert abs(-9060.47373569 - rTEME[0]) < 1e-8
     assert abs(4658.70952502 - rTEME[1]) < 1e-8

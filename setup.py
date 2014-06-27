@@ -37,5 +37,5 @@ setup(
         'jplephem>=1.2',
         'numpy',
         'requests>=1.2.3',
-        'sgp4>=1.1',
+        'sgp4>=1.3',
         ])

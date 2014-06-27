@@ -69,14 +69,14 @@ Skyfield already supports two kinds of object
 that can compute their position,
 and will soon be supporting more.
 Each object is a simple Python callable
-that can take a date as its argument
-and return its position as of that moment:
-
+that can take either a :doc:`Julian date <time>`
+or a :ref:`whole Julian date array <date-arrays>`
+as its argument and return a corresponding number of positions.
 
 **The planets**
   The eight planets and Pluto are all supported,
   thanks to the excellent work of the Jet Propulsion Laboratory (JPL)
-  and to Skyfield’s support for their major solar system ephemerides.
+  and Skyfield’s support for their major solar system ephemerides.
   :doc:`Read more <planets>`
 
   .. testcode::

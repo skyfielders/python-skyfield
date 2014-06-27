@@ -2,7 +2,7 @@
 
 """
 import numpy as np
-from numpy import abs, copysign
+from numpy import abs, copysign, isnan
 from .constants import AU_KM, AU_M, DAY_S, tau
 
 # Distance and velocity.
@@ -167,7 +167,10 @@ class Angle(object):
     def hstr(self, places=2, plus=False, warn=True):
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
-        sgn, h, m, s, etc = _sexagesimalize_to_int(self._hours, places)
+        hours = self._hours
+        if isnan(hours):
+            return 'nan'
+        sgn, h, m, s, etc = _sexagesimalize_to_int(hours, places)
         sign = '-' if sgn < 0.0 else '+' if (plus or self.signed) else ''
         return '%s%02dh %02dm %02d.%0*ds' % (sign, h, m, s, places, etc)
 
@@ -185,7 +188,10 @@ class Angle(object):
     def dstr(self, places=1, plus=False, warn=True):
         if warn and self.preference != 'degrees':
             raise WrongUnitError('dstr')
-        sgn, d, m, s, etc = _sexagesimalize_to_int(self._degrees, places)
+        degrees = self._degrees
+        if isnan(degrees):
+            return 'nan'
+        sgn, d, m, s, etc = _sexagesimalize_to_int(degrees, places)
         sign = '-' if sgn < 0.0 else '+' if (plus or self.signed) else ''
         return '%s%02ddeg %02d\' %02d.%0*d"' % (sign, d, m, s, places, etc)
 
