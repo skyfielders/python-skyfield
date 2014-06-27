@@ -2,7 +2,7 @@
 
 """
 import numpy as np
-from numpy import abs, copysign, isnan
+from numpy import abs, copysign, isnan, nan
 from .constants import AU_KM, AU_M, DAY_S, tau
 
 # Distance and velocity.
@@ -164,15 +164,13 @@ class Angle(object):
             raise WrongUnitError('signed_hms')
         return _sexagesimalize_to_float(self._hours)
 
-    def hstr(self, places=2, plus=False, warn=True):
+    def hstr(self, places=2, warn=True):
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
         hours = self._hours
-        if isnan(hours):
-            return 'nan'
-        sgn, h, m, s, etc = _sexagesimalize_to_int(hours, places)
-        sign = '-' if sgn < 0.0 else '+' if (plus or self.signed) else ''
-        return '%s%02dh %02dm %02d.%0*ds' % (sign, h, m, s, places, etc)
+        if getattr(hours, 'shape', None):
+            return [_hstr(h, places) for h in hours]
+        return _hstr(hours, places)
 
     def dms(self, warn=True):
         if warn and self.preference != 'degrees':
@@ -185,15 +183,14 @@ class Angle(object):
             raise WrongUnitError('signed_dms')
         return _sexagesimalize_to_float(self._degrees)
 
-    def dstr(self, places=1, plus=False, warn=True):
+    def dstr(self, places=1, warn=True):
         if warn and self.preference != 'degrees':
             raise WrongUnitError('dstr')
         degrees = self._degrees
-        if isnan(degrees):
-            return 'nan'
-        sgn, d, m, s, etc = _sexagesimalize_to_int(degrees, places)
-        sign = '-' if sgn < 0.0 else '+' if (plus or self.signed) else ''
-        return '%s%02ddeg %02d\' %02d.%0*d"' % (sign, d, m, s, places, etc)
+        signed = self.signed
+        if getattr(degrees, 'shape', None):
+            return [_dstr(d, places, signed) for d in degrees]
+        return _dstr(degrees, places, signed)
 
 class WrongUnitError(ValueError):
 
@@ -255,6 +252,43 @@ def _sexagesimalize_to_int(value, places=0):
     n, seconds = divmod(n, 60)
     n, minutes = divmod(n, 60)
     return sign, n, minutes, seconds, fraction
+
+def _hstr(hours, places=2):
+    """Convert floating point `hours` into a sexagesimal string.
+
+    >>> _hstr(12.125)
+    '12h 07m 30.00s'
+    >>> _hstr(12.125, places=4)
+    '12h 07m 30.0000s'
+    >>> _hstr(nan)
+    'nan'
+
+    """
+    if isnan(hours):
+        return 'nan'
+    sgn, h, m, s, etc = _sexagesimalize_to_int(hours, places)
+    sign = '-' if sgn < 0.0 else ''
+    return '%s%02dh %02dm %02d.%0*ds' % (sign, h, m, s, places, etc)
+
+def _dstr(degrees, places=1, signed=False):
+    r"""Convert floating point `degrees` into a sexagesimal string.
+
+    >>> _dstr(12.125)
+    '12deg 07\' 30.0"'
+    >>> _dstr(12.125, places=3)
+    '12deg 07\' 30.000"'
+    >>> _dstr(12.125, signed=True)
+    '+12deg 07\' 30.0"'
+    >>> _dstr(nan)
+    'nan'
+
+    """
+    if isnan(degrees):
+        return 'nan'
+    sgn, d, m, s, etc = _sexagesimalize_to_int(degrees, places)
+    sign = '-' if sgn < 0.0 else '+' if signed else ''
+    return '%s%02ddeg %02d\' %02d.%0*d"' % (sign, d, m, s, places, etc)
+
 
 def _unsexagesimalize(value):
     """Return `value` after interpreting a (units, minutes, seconds) tuple.

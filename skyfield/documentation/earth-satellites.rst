@@ -66,13 +66,13 @@ Propagation Errors
     print(sat.epoch.utc_jpl())
 
     year, month, day, hour, minute, second = sat.epoch.utc
-    offsets = np.array([0, 100, 200, 300, 400, 500])
+    offsets = np.array([200, 300, 400, 500, 600])
     jd = JulianDate(utc=(year, month, hour, minute + offsets))
     geocentric = sat.gcrs(jd)
 
     ra, dec, distance = geocentric.radec(epoch='date')
-    print(ra)
-    print(dec)
+    print(ra.hstr())
+    print(dec.dstr())
     print(distance.km)
     print(geocentric.sgp4_error)
 
