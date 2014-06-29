@@ -160,3 +160,7 @@ dry-run:
 
 sync:
 	rsync -crlv _build/html/ ~/Dropbox/rhodesmill.org/skyfield
+
+serve:
+	python -m webbrowser -t http://localhost:8123/_build/html/ && \
+	python -m SimpleHTTPServer 8123
