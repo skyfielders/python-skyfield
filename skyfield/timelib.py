@@ -142,7 +142,7 @@ class JulianDate(object):
     def __getitem__(self, index):
         # TODO: also copy cached matrices?
         jd = JulianDate(tt=self.tt[index])
-        for name in 'utc', 'tai', 'tdb', 'ut1', 'delta_t':
+        for name in 'tai', 'tdb', 'ut1', 'delta_t':
             value = getattr(self, name, None)
             if value is not None:
                 if getattr(value, 'shape', None):
