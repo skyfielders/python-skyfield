@@ -51,6 +51,9 @@ class ICRS(object):
     def observe(self, body):
         return body.observe_from(self)
 
+    def distance(self):
+        return Distance(length_of(self.position.AU))
+
     def radec(self, epoch=None):
         position_AU = self.position.AU
         if epoch is not None:

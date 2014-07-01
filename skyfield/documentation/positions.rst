@@ -33,8 +33,9 @@ together with all of the attributes and methods that they support:
      ├── `velocity <api.html#Position.velocity>`_.km_per_s   →   xdot, ydot, zdot
      ├── `velocity.to(unit) <api.html#Distance.to>`_   →   xdot, ydot, zdot
      │
+     ├── `radec(epoch=jd) <api.html#Position.radec>`_     →   ra, dec, distance
      ├── `radec() <api.html#Position.radec>`_             →   ra, dec, distance
-     └── `radec(epoch=jd) <api.html#Position.radec>`_     →   ra, dec, distance
+     └── `distance() <api.html#Position.distance>`_          →   distance
 
     Apparent position only
      │
