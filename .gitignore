@@ -11,3 +11,4 @@ skyfield/documentation/_build
 tmp*.py
 *.pyc
 *.egg-info
+*.ipynb_checkpoints
