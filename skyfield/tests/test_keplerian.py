@@ -1,8 +1,7 @@
 """Compare the output of Skyfield with the routines from NOVAS for keplerian orbiting bodies"""
 
 import skyfield.keplerianlib
-from skyfield.keplerianlib import KeplerianOrbit
-from skyfield.positionlib import ICRCoordinates
+from skyfield.keplerianlib import KeplerianOrbit, ICRCoordinates
 
 from ..timelib import JulianDate, julian_date
 
