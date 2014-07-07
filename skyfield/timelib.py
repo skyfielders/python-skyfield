@@ -170,7 +170,19 @@ class JulianDate(object):
             dt = dt.astimezone(tz)
         return dt, leap_second
 
+    def toordinal(self):
+        """Return the proleptic Gregorian ordinal of the TAI date.
+
+        This method makes Skyfield `JulianDate` objects compatible with
+        Python `datetime` objects from the point of view of libraries
+        like matplotlib.  Thanks to this method, a `JulianDate` can be
+        used as a coordinate for a plot.
+
+        """
+        return self._utc_float() - 1721424.5
+
     def utc_datetime(self):
+
         """Return a UTC ``datetime`` for this value.
 
         If the third-party ``pytz`` package is available, then its
