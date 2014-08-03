@@ -28,15 +28,6 @@ class Distance(object):
             self.m = m
             self.AU = m / AU_M
 
-    def __getattr__(self, name):
-        if name == 'km':
-            self.km = km = self.AU * AU_KM
-            return km
-        if name == 'm':
-            self.m = m = self.AU * AU_M
-            return m
-        raise AttributeError('no attribute named %r' % (name,))
-
     def __str__(self):
         return '%s AU' % self.AU
 
@@ -45,10 +36,39 @@ class Distance(object):
             'class': self.__class__.__name__, 'values': 'x, y, z',
             'attr1': 'AU', 'attr2': 'km'})
 
+    @property
+    def km(self):
+        return self.AU * AU_KM
+
+    @property
+    def m(self):
+        return self.AU * AU_M
+
     def to(self, unit):
         """Return this distance in the given AstroPy units."""
         from astropy.units import AU
         return (self.AU * AU).to(unit)
+
+def cache_properties(cls):
+    getters = {}
+    for name, value in vars(cls).items():
+        if not isinstance(value, property):
+            continue
+        getters[name] = value.__get__
+        delattr(cls, name)
+
+    def __getattr__(self, name):
+        getter = getters.get(name, None)
+        if getter is None:
+            raise ValueError('no such attribute %r' % (name,))
+        value = getter(self)
+        setattr(self, name, value)
+        return value
+
+    cls.__getattr__ = __getattr__
+    return cls
+
+Distance = cache_properties(Distance)
 
 class Velocity(object):
     """A velocity, stored internally as AU/day and available in other units.
