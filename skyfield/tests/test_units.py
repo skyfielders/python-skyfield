@@ -20,6 +20,14 @@ def test_iterating_over_raw_velocity():
     with pytest.raises(units.UnpackingError):
         x, y, z = velocity
 
+def test_converting_from_km_to_m():
+    distance = units.Distance(km=1.234)
+    assert abs(distance.m - 1234.0) < 1e-15
+
+def test_converting_from_m_to_km():
+    distance = units.Distance(m=1234.0)
+    assert abs(distance.km - 1.234) < 1e-15
+
 @needs_astropy
 def test_converting_distance_with_astropy():
     distance = units.Distance(AU=1.234)
