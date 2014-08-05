@@ -31,6 +31,9 @@ class Distance(object):
     def __str__(self):
         return '%s AU' % self.AU
 
+    def __repr__(self):
+        return '{0}({1:.6} AU)'.format(type(self).__name__, self.AU)
+
     def __iter__(self):
         raise UnpackingError(_iter_message % {
             'class': self.__class__.__name__, 'values': 'x, y, z',
