@@ -2,7 +2,7 @@
 
 """
 import numpy as np
-from numpy import abs, copysign, isnan, nan
+from numpy import abs, copysign, isnan
 from .constants import AU_KM, AU_M, DAY_S, tau
 
 # Distance and velocity.
@@ -281,7 +281,7 @@ def _hstr(hours, places=2):
     '12h 07m 30.00s'
     >>> _hstr(12.125, places=4)
     '12h 07m 30.0000s'
-    >>> _hstr(nan)
+    >>> _hstr(float('nan'))
     'nan'
 
     """
@@ -300,7 +300,7 @@ def _dstr(degrees, places=1, signed=False):
     '12deg 07\' 30.000"'
     >>> _dstr(12.125, signed=True)
     '+12deg 07\' 30.0"'
-    >>> _dstr(nan)
+    >>> _dstr(float('nan'))
     'nan'
 
     """
