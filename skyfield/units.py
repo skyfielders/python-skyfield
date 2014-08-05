@@ -51,7 +51,8 @@ class Distance(object):
 
 def cache_properties(cls):
     getters = {}
-    for name, value in vars(cls).items():
+
+    for name, value in list(vars(cls).items()):
         if not isinstance(value, property):
             continue
         getters[name] = value.__get__
