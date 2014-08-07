@@ -43,24 +43,11 @@ to find out whether a satellite is above your local horizon:
     357deg 51' 21.8"
     1281.20477925
 
-Observing a satellite directly returns an :ref:`apparent`
-but without having to apply aberration and deflection,
-because satellites travel with the Earth around the Sun
-in the same relativistic frame of reference.
-
-Propagation Errors
-==================
-
-If a satellite returns position and velocity vectors
-with the values ``(nan, nan, nan)`` instead of real numbers,
-it is because you are asking Skyfield about a date and time
-for which the TLE elements cannot generate a position.
-
-Earth satellite orbits are always in flux.
-Even when a satellite is not firing its thrusters to adjust course,
-it is constantly acted upon by effects
-that include tidal forces, the Moon’s gravity,
-and the (eventually fatal) drag of the Earth’s atmosphere.
+Beware: the two-line element format is very rigid.
+The meaning of each character
+is based on its exact offset from the beginning of the line —
+so you must download and use the element set’s text
+without making any change to its whitespace.
 
 The standard SGP4 theory of satellite motion that Skyfield uses
 is a rough enough model of the near-Earth environment
@@ -69,10 +56,14 @@ to within an accuracy of a few kilometers.
 This error grows larger as a TLE element set becomes several weeks old,
 until its predictions are no longer meaningful.
 
+Propagation Errors
+==================
+
 After building a satellite object,
-you can it ask for the date and time
-of the *epoch* moment when its TLE element set’s predictions
-are most accurate:
+you can examine the *epoch* date and time
+when the TLE element set’s predictions are most accurate.
+The ``epoch`` attribute is a :class:`JulianDate`,
+so it supports all of the standard Skyfield date methods:
 
 .. testcode::
 
@@ -93,63 +84,68 @@ for dates quite far from a satellite’s epoch,
 even if they are not likely to be meaningful.
 But it cannot generate a position
 beyond the point where the elements stop making physical sense.
-At that point, the satellite will start returning coordinates
-that are all the special floating-point value ``nan`` “not-a-number.”
+At that point, the satellite will return a position and velocity
+``(nan, nan, nan)`` where all of the quantities
+are the special floating-point value ``nan`` which means *not-a-number*.
 
-There is another, special case,
-which is illustrated by the GOCE satellite we have just loaded up:
-the orbital elements collapse
-after the object enters the Earth’s atmosphere
-and its orbit decays completely.
-The elements given above are for the moment just a few hundred minutes
-before the debris re-entered our atmosphere,
-and so we can watch the SGP4 derivation collapse
-once the satellite elements reach that age.
+When a propagation error occurs and you get ``nan`` values,
+you can examine the ``sgp4_error`` attribute of the returned position
+to learn the error that the SGP4 propagator encountered.
 
-Starting 300 minutes after at the TLE element set’s epoch moment,
-we can stride forward in 100 minute increments
-by passing a the standard ``utc`` tuple
-as described in :ref:`date-arrays`:
+We can take as an example the satellite elements above.
+They are the last elements ever issued for GOCE,
+about one day before the satellite re-entered the atmosphere
+after an extended and successful mission.
+Because of the steep decay of its orbit,
+the elements are valid over an unusually short period —
+from just before noon on Saturday to just past noon on Tuesday:
 
-x.. testcode::
+.. image:: _static/goce-decay.png
 
-    year, month, day, hour, minute, second = sat.epoch.utc
-    offsets = [100, 200, 300, 400, 500, 600]
-    # offsets = range(-100, -90)
-    jd = JulianDate(utc=(year, month, day, hour, minute-1000))
-    geocentric = sat.gcrs(jd)
+By asking for GOCE’s position just before or after this window,
+we can learn about the propagation errors
+that are limiting this TLE set’s predictions:
 
-    x, y, z = geocentric.position.km
-    print(jd.utc_jpl())
-    print(x)
+.. testcode::
 
-x.. testoutput::
-
-    
-
-x.. testcode::
-
-    ra, dec, distance = geocentric.radec(epoch='date')
-    print(ra.hms())
-
-x.. testoutput::
-
-    
-
-x.. testcode::
-
+    geocentric = sat.gcrs(utc=(2013, 11, 9))
+    print('Before:')
+    print(geocentric.position.km)
     print(geocentric.sgp4_error)
 
-x.. testoutput::
+    geocentric = sat.gcrs(utc=(2013, 11, 13))
+    print('\nAfter:')
+    print(geocentric.position.km)
+    print(geocentric.sgp4_error)
 
-    
+.. testoutput::
 
-.. testsetup::
+    Before:
+    [ nan  nan  nan]
+    mean eccentricity -0.001416 not within range 0.0 <= e < 1.0
 
-    import numpy as np
-    np.set_printoptions(suppress=True, precision=4)
+    After:
+    [ nan  nan  nan]
+    mrt 0.997178 is less than 1.0 indicating the satellite has decayed
 
-.. testcleanup::
+If you use a Julian date array to ask about an entire range of dates,
+then ``sgp4_error`` will be a sequence filled in with ``None``
+whenever the SGP4 propagator was successful
+and otherwise recording the propagator error:
 
-    import numpy as np
-    np.set_printoptions(precision=8)
+.. testcode::
+
+    from pprint import pprint
+
+    geocentric = sat.gcrs(utc=(2013, 11, [9, 10, 11, 12, 13]))
+    pprint(geocentric.sgp4_error)
+
+.. testoutput::
+
+    ['mean eccentricity -0.001416 not within range 0.0 <= e < 1.0',
+     None,
+     None,
+     None,
+     'mrt 0.997178 is less than 1.0 indicating the satellite has decayed']
+
+
