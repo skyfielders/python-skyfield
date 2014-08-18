@@ -62,6 +62,6 @@ Change Log
 0.3
 ---
 
-* The floating point values of an angle
+* The floating-point values of an angle
   ``a.radians``, ``a.degrees``, and ``a.hours``
-  are now attributes, instead of method calls like ``a.degrees()``.
+  are now attributes instead of method calls.

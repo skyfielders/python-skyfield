@@ -80,13 +80,21 @@ def _to_array(value):
 tt_minus_tai = array(32.184 / DAY_S)
 
 class JulianDate(object):
-    """Julian date.
+    """A single date and time, or an array, stored as a Julian date.
 
-    :param utc: Coordinated Universal Time
-    :param tai: International Atomic Time
-    :param tt: Terrestrial Time
-    :param delta_t: Difference between Terrestrial Time and UT1
-    :param cache: Cache for automatically fetching `delta_t` table
+    You can import this class from ``skyfield.api``.  For the Julian
+    date of the current date and time, use the separate function
+    ``skyfield.api.now()``.
+
+    Every Julian date object understands five different time scales,
+    which can be used during instantiation::
+
+        JulianDate(utc=(year, month, day, hour, minute, second))
+                       or Standard Library datetime or date)
+        JulianDate(tai=(year, month, day, ...) or float)
+        JulianDate(tt=(year, month, day, ...) or float)
+        JulianDate(tdb=(year, month, day, ...) or float)
+        JulianDate(ut1=(year, month, day, ...) or float)
 
     """
     def __init__(self, utc=None, tai=None, tt=None, tdb=None,
@@ -151,11 +159,13 @@ class JulianDate(object):
         return jd
 
     def astimezone(self, tz):
-        """Return a ``datetime`` for this value in a ``pytz`` timezone.
+        """Return as a Python ``datetime`` in a ``pytz`` provided timezone.
 
-        The third-party ``pytz`` package must be installed separately.
-        If this value is a date array, then a sequence of datetimes is
-        returned.
+        Convert this Julian date to a UTC date and time.  The timezone
+        `tz` should be one of the timezones provided by the third-party
+        ``pytz`` package, which must be installed separately.  If this
+        Julian date is an array, then a sequence of datetimes is
+        returned instead of a single value.
 
         """
         dt, leap_second = self.utc_datetime()
@@ -174,22 +184,21 @@ class JulianDate(object):
         """Return the proleptic Gregorian ordinal of the TAI date.
 
         This method makes Skyfield `JulianDate` objects compatible with
-        Python `datetime` objects from the point of view of libraries
-        like matplotlib.  Thanks to this method, a `JulianDate` can be
-        used as a coordinate for a plot.
+        Python `datetime` objects, which also provide a ``toordinal()``
+        method.  Thanks to this method, a `JulianDate` can often be used
+        directly as a coordinate for a plot.
 
         """
         return self._utc_float() - 1721424.5
 
     def utc_datetime(self):
-
-        """Return a UTC ``datetime`` for this value.
+        """Return a Python ``datetime`` for this Julian, expressed as UTC.
 
         If the third-party ``pytz`` package is available, then its
-        ``utc`` timezone is used.  Otherwise, a Skyfield built-in
-        alternative is used; the result should be the same either way.
-        If this value is a date array, then a sequence of datetimes is
-        returned.
+        ``utc`` timezone will be the timezone of the return value.
+        Otherwise, a Skyfield built-in alternative is used.  The result
+        will be the same either way.  If this Julian date an array, then
+        a sequence of datetimes is returned instead of a single value.
 
         """
         year, month, day, hour, minute, second = self._utc_tuple(
@@ -208,9 +217,10 @@ class JulianDate(object):
         return dt, leap_second
 
     def utc_iso(self, places=0):
-        """Return this UTC value as an ISO 8601 string or array of strings.
+        """Return an ISO 8601 string like ``2014-01-18T01:35:38Z`` in UTC.
 
-        For example: ``2014-01-18T01:35:38Z``
+        If this Julian date is an array of dates, then a sequence of
+        strings is returned instead of a single string.
 
         """
         if places:
@@ -231,9 +241,12 @@ class JulianDate(object):
             return format % args
 
     def utc_jpl(self):
-        """Return UTC in the format used by the JPL HORIZONS system.
+        """Convert to a string like ``A.D. 2014-Jan-18 01:35:37.5000 UT``.
 
-        For example: ``A.D. 2014-Jan-18 01:35:37.5000 UT``
+        Returns a string for this date and time in UTC, in the format
+        used by the JPL HORIZONS system.  If this Julian date is an
+        array of dates, then a sequence of strings is returned instead
+        of a single string.
 
         """
         offset = _half_second / 1e4
@@ -252,11 +265,13 @@ class JulianDate(object):
             return format % args
 
     def utc_strftime(self, format):
-        """Format this UTC time according to a standard format string.
+        """Format this UTC time according to a Python date-formatting string.
 
         This internally calls the Python ``strftime()`` routine from the
         Standard Library ``time()`` module, for which you can find a
-        quick reference at http://strftime.org/.
+        quick reference at ``http://strftime.org/``.  If this Julian
+        date is an array of dates, then a sequence of strings is
+        returned instead of a single string.
 
         """
         tup = self._utc_tuple(_half_second)
