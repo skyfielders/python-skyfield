@@ -1,5 +1,5 @@
 from distutils.core import setup
-import skyfield  # to learn the version
+import skyfield  # safe, because __init__.py contains no import statements
 
 setup(
     name='skyfield',
