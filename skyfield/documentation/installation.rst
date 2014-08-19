@@ -41,7 +41,7 @@ You can protect your project from any abrupt API changes
 by pinning a specific version of Skyfield
 in your ``requirements.txt`` or ``setup.py`` or install instructions::
 
-    skyfield==0.2
+    skyfield==0.3
 
 By preventing Skyfield from being upgraded
 until you are ready to advance the version number yourself,
