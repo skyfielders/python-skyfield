@@ -4,5 +4,5 @@ Most users will use Skyfield by importing ``skyfield.api`` and using the
 functions and classes there.
 
 """
-__version_info__ = (0, 2)
-__version__ = '%s.%s' % __version_info__
+VERSION = (0, 2)
+__version__ = '.'.join(map(str, VERSION))
