@@ -2,8 +2,15 @@
 
 """
 import numpy as np
-from numpy import abs, copysign, isnan
+from numpy import abs, array, copysign, isnan
 from .constants import AU_KM, AU_M, DAY_S, tau
+
+def _auto_convert(value):
+    """As a convenience, turn Python lists and tuples into NumPy arrays."""
+    if isinstance(value, (tuple, list)):
+        return array(value)
+    else:
+        return value
 
 # Distance and velocity.
 
@@ -20,12 +27,12 @@ class Distance(object):
     """
     def __init__(self, AU=None, km=None, m=None):
         if AU is not None:
-            self.AU = AU
+            self.AU = _auto_convert(AU)
         elif km is not None:
-            self.km = km
+            self.km = _auto_convert(km)
             self.AU = km / AU_KM
         elif m is not None:
-            self.m = m
+            self.m = _auto_convert(m)
             self.AU = m / AU_M
 
     def __getattr__(self, name):
