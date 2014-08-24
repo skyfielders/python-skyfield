@@ -28,7 +28,7 @@
 
     09h 14m 50.35s
     +17deg 13' 02.6"
-    2.18572863461 AU
+    2.18573 AU
 
 Skyfield is a pure-Python astronomy package
 that makes it easy to generate high precision research-grade

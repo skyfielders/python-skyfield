@@ -5,16 +5,26 @@
 
 (Not yet complete.)
 
+.. testsetup::
+
+    from skyfield.positionlib import *
+
 Positions
 =========
+
+.. autoclass:: skyfield.positionlib.ICRS
+   :members:
 
 .. autoclass:: skyfield.positionlib.Barycentric
    :members:
 
-.. autoclass:: skyfield.positionlib.Geocentric
+.. autoclass:: skyfield.positionlib.Astrometric
    :members:
 
 .. autoclass:: skyfield.positionlib.Apparent
+   :members:
+
+.. autoclass:: skyfield.positionlib.Geocentric
    :members:
 
 Time

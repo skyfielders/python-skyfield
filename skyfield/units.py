@@ -45,10 +45,10 @@ class Distance(object):
         raise AttributeError('no attribute named %r' % (name,))
 
     def __str__(self):
-        return '%s AU' % self.AU
+        return '{0:.6} AU'.format(self.AU)
 
     def __repr__(self):
-        return '{0}({1:.6} AU)'.format(type(self).__name__, self.AU)
+        return '<{0} {1}>'.format(type(self).__name__, self)
 
     def __iter__(self):
         raise UnpackingError(_iter_message % {
@@ -161,7 +161,7 @@ class Angle(object):
         return self.dstr() if self.preference == 'degrees' else self.hstr()
 
     def __repr__(self):
-        return '{0}({1})'.format(type(self).__name__, self)
+        return '<{0} {1}>'.format(type(self).__name__, self)
 
     def hms(self, warn=True):
         if warn and self.preference != 'hours':

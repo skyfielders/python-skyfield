@@ -49,12 +49,29 @@ class ICRS(object):
         return ICRS(p, v, self.jd)
 
     def observe(self, body):
+        """Return the astrometric position of `body` viewed from this position.
+
+        """
         return body.observe_from(self)
 
     def distance(self):
+        """Return the length of this vector.
+
+        >>> v = ICRS([1.0, 1.0, 0.0])
+        >>> print(v.distance())
+        1.41421 AU
+
+        """
         return Distance(length_of(self.position.AU))
 
     def radec(self, epoch=None):
+        """Return this position as a tuple (RA, declination, distance).
+
+        >>> v = ICRS([1.0, 1.0, 1.0])
+        >>> v.radec()
+        (<Angle 03h 00m 00.00s>, <Angle +35deg 15' 51.8">, <Distance 1.73205 AU>)
+
+        """
         position_AU = self.position.AU
         if epoch is not None:
             if isinstance(epoch, JulianDate):
@@ -85,7 +102,7 @@ class Topos(object):
             latitude = _interpret_ltude(latitude, 'latitude', 'N', 'S')
         elif not isinstance(latitude, Angle):
             raise TypeError('please provide either latitude_degrees=<float>'
-                            ' or else latitude=<skyfield.units.Angle object>'
+                            ' or latitude=<skyfield.units.Angle object>'
                             ' with north being positive')
 
         if longitude_degrees is not None:
@@ -94,7 +111,7 @@ class Topos(object):
             longitude = _interpret_ltude(longitude, 'longitude', 'E', 'W')
         elif not isinstance(longitude, Angle):
             raise TypeError('please provide either longitude_degrees=<float>'
-                            ' or else longitude=<skyfield.units.Angle object>'
+                            ' or longitude=<skyfield.units.Angle object>'
                             ' with east being positive')
 
         self.latitude = latitude
@@ -148,13 +165,27 @@ class Astrometric(ICRS):
 
     The *astrometric position* of a body is its position relative to an
     observer, adjusted for light-time delay: the position of the body
-    back when it emitted (or reflected) the light or other radiation
-    that is just now reaching the observer's eyes or telescope.  This is
-    always a difference between two BCRS vectors.
+    back when it emitted (or reflected) the light that is now reaching
+    the observer's eyes or telescope.  This is always a difference
+    between two BCRS vectors.
 
     """
     def apparent(self):
-        """Return the corresponding apparent position."""
+        """Return the apparent position where this will appear in the sky.
+
+        This method determines how relativity affects an image, and
+        returns the :class:`~skyfield.positionlib.Apparent` position
+        where the body will actually appear in the sky.  The effects
+        modeled are the deflection that the image will experience if its
+        light passes close to large masses in the Solar System, and the
+        aberration caused by the observer's own velocity.
+
+        These transforms convert the position from the BCRS reference
+        frame of the Solar System barycenter and to the reference frame
+        of the observer.  In the specific case of an Earth observer, the
+        output reference frame is the GCRS.
+
+        """
         jd = self.jd
         position_AU = self.position.AU.copy()
         observer = self.observer
@@ -195,11 +226,11 @@ class Apparent(ICRS):
 
     """
     def altaz(self):
-        """Return the position as a tuple ``(alt, az, d)``.
+        """Return the position as a tuple ``(alt, az, distance)``.
 
         `alt` - Altitude in degrees above the horizon.
         `az` - Azimuth angle east around the horizon from due-north.
-        `d` - Distance to the object.
+        `distance` - Distance to the object.
 
         """
         try:
