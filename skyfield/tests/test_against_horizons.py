@@ -18,8 +18,8 @@ $$EOE
 def test_ecliptic_latlon():
     astrometric = api.sun(utc=(1980, 1, 1)).observe(api.jupiter)
     lat, lon, distance = astrometric.ecliptic_latlon()
-    assert '{:.4f}'.format(lat.degrees) == '1.0130'
-    assert '{:.4f}'.format(lon.degrees) == '151.3227'
+    assert '{0:.4f}'.format(lat.degrees) == '1.0130'
+    assert '{0:.4f}'.format(lon.degrees) == '151.3227'
     # That last value should really be '151.3227' according to HORIZONS
     # but we are just getting started here so the tiny difference is
     # being filed away as something to look at later!
