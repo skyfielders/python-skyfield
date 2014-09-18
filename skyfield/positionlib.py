@@ -67,9 +67,13 @@ class ICRS(object):
     def radec(self, epoch=None):
         """Return this position as a tuple (RA, declination, distance).
 
-        >>> v = ICRS([1.0, 1.0, 1.0])
-        >>> v.radec()
-        (<Angle 03h 00m 00.00s>, <Angle +35deg 15' 51.8">, <Distance 1.73205 AU>)
+        >>> ra, dec, distance = ICRS([1.0, 1.0, 1.0]).radec()
+        >>> ra
+        <Angle 03h 00m 00.00s>
+        >>> dec
+        <Angle +35deg 15' 51.8">
+        >>> distance
+        <Distance 1.73205 AU>
 
         """
         position_AU = self.position.AU
