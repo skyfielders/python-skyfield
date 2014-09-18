@@ -2,11 +2,11 @@
 
 from numpy import arcsin, arctan2, array, cos, einsum, pi, sin
 
-from .constants import TAU
-from .functions import length_of, rot_x, spin_x
+from .constants import ASEC2RAD, T0, TAU
+from .functions import dots, length_of, rot_x, spin_x
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
-from .functions import dots
+from .nutationlib import mean_obliquity
 from .relativity import add_aberration, add_deflection
 from .timelib import JulianDate, takes_julian_date
 from .units import Distance, Velocity, Angle, _interpret_ltude
@@ -96,9 +96,11 @@ class ICRS(object):
 
     def ecliptic_latlon(self):
         """Return ecliptic latitude, longitude, and distance."""
-        # mean_obliquity(T0) * ASEC2RAD; should this change with date?
-        R = rot_x(0.4090926006005829)
-        P = (R).dot(self.position.AU)
+        position_AU = self.position.AU
+        #position_AU = einsum('ij...,j...->i...', self.jd.M, position_AU)
+        #epsilon = mean_obliquity(self.jd.tdb) * ASEC2RAD
+        epsilon = mean_obliquity(T0) * ASEC2RAD
+        P = (rot_x(epsilon)).dot(position_AU)
         d, lat, lon = to_polar(P)
         return (Angle(radians=lat),
                 Angle(radians=lon, signed=True),
