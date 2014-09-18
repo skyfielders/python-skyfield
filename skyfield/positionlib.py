@@ -3,7 +3,7 @@
 from numpy import arcsin, arctan2, array, cos, einsum, pi, sin
 
 from .constants import TAU
-from .functions import length_of, spin_x
+from .functions import length_of, rot_x, spin_x
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
 from .functions import dots
@@ -93,6 +93,16 @@ class ICRS(object):
         return (Angle(radians=ra, preference='hours'),
                 Angle(radians=dec, signed=True),
                 Distance(r_AU))
+
+    def ecliptic_latlon(self):
+        """Return ecliptic latitude, longitude, and distance."""
+        # mean_obliquity(T0) * ASEC2RAD; should this change with date?
+        R = rot_x(0.4090926006005829)
+        P = (R).dot(self.position.AU)
+        d, lat, lon = to_polar(P)
+        return (Angle(radians=lat),
+                Angle(radians=lon, signed=True),
+                Distance(AU=d))
 
 class Topos(object):
 
