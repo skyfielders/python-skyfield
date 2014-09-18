@@ -1,0 +1,196 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ Unable to negotiate connection within 2 seconds. Defaults: 
+                                                            
+ TERM= vt102, ROWS= 9999, COLUMNS= 9999, ECHO on, FULL-DUPLEX
+                                                            
+ Your terminal, command-line, telnet, or connection program 
+ may not be compliant with RFC 854 and RFC 1073 standards:  
+                                                            
+           http://tools.ietf.org/rfc/rfc854.txt             
+           http://tools.ietf.org/rfc/rfc1073.txt            
+                                                            
+ Using a different program to connect may solve the problem.
+                          -OR -                             
+ The network may be slow and need > 2 seconds (try again).  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ 
+  ======================================================================
+  |                     Jet Propulsion Laboratory                      |
+  |                                                                    |
+  |                  * * *    W A R N I N G   * * *                    |
+  |                                                                    |
+  |                          Property of the                           |
+  |                      UNITED STATES GOVERNMENT                      |
+  |                                                                    |
+  |    This computer is funded by the United States Government and     |
+  | operated by the California Institute of Technology in support of   |
+  | ongoing U.S. Government programs and activities.  If you are not   |
+  | authorized to access this system, disconnect now.  Users of this   |
+  | system have no expectation of privacy. By continuing, you consent  |
+  |     to your keystrokes and data content being monitored.           |
+  ======================================================================
+ 
+
+[H[J                                                                          
+     ___    _____     ___                                                 
+    /_ /|  /____/ \  /_ /|       Horizons On-line Ephemeris System v3.94  
+    | | | |  __ \ /| | | |       Solar System Dynamics Group              
+ ___| | | | |__) |/  | | |__     Jet Propulsion Laboratory                
+/___| | | |  ___/    | |/__ /|   Pasadena, CA, USA                        
+|_____|/  |_|/       |_____|/                                             
+ 
+ Establishing connection, stand-by ...  
+[H[J 
+JPL Horizons, version 3.94 
+Type `?' for brief intro, `?!' for more details 
+System news updated Aug 19, 2014
+ 
+Horizons> Horizons> 599
+[?1h=*******************************************************************************
+ Revised: Dec 02, 2013              Jupiter                                 599
+ 
+ PHYSICAL DATA (updated 2009-Jan-28):
+  Mass (10^24 kg)       =  1898.13+-.19   Density (g/cm^3)       =  1.326
+  Equat. radius (1 bar) = 71492+-4 km     Polar radius (km)      = 66854+-10
+  Volumetric mean radius= 69911+-6 km     Flattening             =  0.06487
+
+  Rotation period       = 9h 55m 29.685s  Rot. rate(10^-4 rad/s) =  1.75865
+  m = w^2a^3/GM         =  0.089195       Hydrostatic flat., fh  =  0.06509
+  Inferred rot. period  =  9.894+-0.02 hr ks = 3*J2/m            =  0.494
+  Mom. of inert. I/MRo^2=  0.254          I/MRo^2 (upper bound)  =  0.267 
+  Rocky core mass (Mc/M)=  0.0261         Y factor (He/H ratio)  =  0.18+-0.04
+
+  GM (km^3/s^2)         = 126,686,511     GM 1-sigma (km^3/s^2)  = +-100
+  Equ. grav, ge (m/s^2) = 24.79           Pol. grav, gp (m/s^2)  = 28.34
+
+  Geometric albedo      =  0.52           Visual magnitude V(1,0)= -9.40
+  Vis. mag. (opposition)= -2.70           Obliquity to orbit     =  3.12 deg
+  Sidereal orbit period = 11.862615 yr    Sidereal orbit period  = 4332.820 d
+  Mean daily motion     = 0.0831294 deg/d Mean orbit velocity    = 13.0697 km/s
+
+  Atmos. temp. (1 bar)  = 165+-5 K        Heat flow/mass (x10^7) = 15 erg/gm*s
+  Planetary Solar Const =  50.5 W/m^2     Dipole tilt/offset     = 9.6deg/0.1Rp 
+  Escape velocity (km/s)=  59.5           Mag.dip.mom(gauss-Rp^3)= 4.2 
+  A_roche(ice)/Rp       =  2.76           Hill's sphere rad. Rp  = 740
+*******************************************************************************
+[K[?1l> Select ... [E]phemeris, [F]tp, [M]ail, [R]edisplay, ?, <cr>: e
+ 
+ Observe, Elements, Vectors  [o,e,v,?] : o
+ Coordinate center [ <id>,coord,geo  ] : geo
+ Starting UT  [>=   1799-Dec-18 00:01] : 1980-Jan-1 00:00
+ Ending   UT  [<=   2200-Jan-13 23:58] : 1980-Jan-1 00:01
+ Output interval [ex: 10m, 1h, 1d, ? ] : 1d
+ 
+ Current output table defaults --
+   Reference frame       = ICRF/J2000.0
+   Time zone correction  = UT+00:00
+   Time format           = CAL
+   Time digits output    = MIN
+   R.A. format           = HMS 
+   RA/DEC extra precision= NO         
+   Apparent coord. type  = AIRLESS    
+   Range units           = AU  
+   Suppress range-rate   = NO  
+   Minimum elevation     = -90.0
+   Maximum airmass       = 38.0000
+   Rise-Transit-Set only = NO
+   Skip daylight         = NO
+   Solar elong. cut-off  = 0,180
+   Hour angle cut-off    =  0.000000000
+   CSV spreadsheet output= NO
+   Table quantities      = A
+ 
+ Accept default output [ cr=(y), n, ?] : y
+ Select table quantities [ <#,#..>, ?] : 18,19
+ 
+ Working ...   -  
+[?1h=*******************************************************************************
+Ephemeris / PORT_LOGIN Wed Sep 17 20:34:23 2014 Pasadena, USA    / Horizons    
+*******************************************************************************
+Target body name: Jupiter (599)                   {source: JUP310}
+Center body name: Earth (399)                     {source: DE-0431LE-0431}
+Center-site name: GEOCENTRIC
+*******************************************************************************
+Start time      : A.D. 1980-Jan-01 00:00:00.0000 UT      
+Stop  time      : A.D. 1980-Jan-01 00:01:00.0000 UT      
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : IAU_JUPITER                     {East-longitude -}
+Target radii    : 71492.0 x 71492.0 x 66854.0 km  {Equator, meridian, pole}    
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : High-precision EOP model        {East-longitude +}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}    
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: DE-0431LE-0431}
+Rel. light bend : Sun, EARTH                      {source: DE-0431LE-0431}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2                              
+Atmos refraction: NO (AIRLESS)
+RA format       : HMS
+Time format     : CAL 
+EOP file        : eop.140917.p141209                                           
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2014-SEP-17. PREDICTS-> 2014-DEC-08
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s 
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar Elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+*******************************************************************************
+ Date__(UT)__HR:MN     hEcl-Lon hEcl-Lat               r        rdot
+********************************************************************
+$$SOE
+ 1980-Jan-01 00:00     151.3229   1.0130  5.378949180806   0.4314383
+$$EOE
+*******************************************************************************
+Column meaning:
+ 
+TIME
+
+  Prior to 1962, times are UT1. Dates thereafter are UTC. Any 'b' symbol in
+the 1st-column denotes a B.C. date. First-column blank (" ") denotes an A.D.
+date. Calendar dates prior to 1582-Oct-15 are in the Julian calendar system.
+Later calendar dates are in the Gregorian system.
+
+  Time tags refer to the same instant throughout the universe, regardless of
+where the observer is located.
+
+  The dynamical Coordinate Time scale is used internally. It is equivalent to
+the current IAU definition of "TDB". Conversion between CT and the selected
+non-uniform UT output scale has not been determined for UTC times after the
+next July or January 1st.  The last known leap-second is used over any future
+interval.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+ 
+ hEcl-Lon hEcl-Lat =
+    Geometric heliocentric J2000 ecliptic longitude and latitude of target
+center at the instant light leaves it to be observed at print time (print time
+minus 1-way light-time).  Units: DEGREES
+ 
+ r       rdot =
+   Heliocentric range ("r", light-time corrected) and range-rate ("rdot")
+of the target center at the instant light seen by the observer at print-time
+would have left the target center (print-time minus down-leg light-time).
+The Sun-to-target distance traveled by a ray of light emanating from the
+center of the Sun that reaches the target center point at some instant and
+is recordable by the observer one down-leg light-time later at print-time.
+Units: AU and KM/S
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.Giorgini@jpl.nasa.gov
+
+*******************************************************************************
+[K[?1l> >>> Select... [A]gain, [N]ew-case, [F]tp, [K]ermit, [M]ail, [R]edisplay, ? : q
+                                                                          
+     ___    _____     ___                                                 
+    /_ /|  /____/ \  /_ /|       Horizons On-line Ephemeris System v3.94  
+    | | | |  __ \ /| | | |       Solar System Dynamics Group              
+ ___| | | | |__) |/  | | |__     Jet Propulsion Laboratory                
+/___| | | |  ___/    | |/__ /|   Pasadena, CA, USA                        
+|_____|/  |_|/       |_____|/                                             
+ 
