@@ -9,6 +9,7 @@ import de421
 from datetime import datetime
 from .starlib import Star
 from .timelib import JulianDate, now, utc
+from .units import Angle
 
 def build_ephemeris():
     from .data.horizons import festoon_ephemeris
