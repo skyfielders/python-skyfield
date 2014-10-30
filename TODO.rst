@@ -7,6 +7,9 @@ are appropriate for sprints and collaboration, and longer-term goals
 that the code base is not quite ready for yet but that we do not want to
 forget.
 
+* Make JD give a sensible error if the first argument is a number or
+  something.
+
 Sprint Possibilities
 ====================
 
