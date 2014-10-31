@@ -10,6 +10,16 @@ from .functions import rot_x, rot_y, rot_z
 from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
 from .timelib import JulianDate, takes_julian_date
 
+# important ones:
+# jdsatepoch
+# bstar
+# inclo - inclination
+# nodeo - right ascension of ascending node
+# ecco - eccentricity
+# argpo - argument of perigee
+# mo - mean anomaly
+# no - mean motion
+
 _minutes_per_day = 1440.
 
 class EarthSatellite(object):
