@@ -7,15 +7,8 @@ from datetime import datetime
 one_second = 1.0 / DAY_S
 epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
 
-
-@pytest.fixture(params=['tai', 'tt', 'tdb'])
-def time_parameter(request):
-    return request.param
-
-@pytest.fixture(params=[(1973, 1, 18, 1, 35, 37.5), 2441700.56640625])
-def time_value(request):
-    return request.param
-
+time_parameter = ['tai', 'tt', 'tdb']
+time_value = [(1973, 1, 18, 1, 35, 37.5), 2441700.56640625]
 
 def test_JulianDate_init(time_parameter, time_value):
     kw = {time_parameter: time_value}
