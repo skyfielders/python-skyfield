@@ -51,14 +51,19 @@ on the Earth’s surface:
     64deg 44' 50.1"
     184deg 17' 16.9"
 
-You can also visit the
-`Skyfield entry <https://pypi.python.org/pypi/skyfield>`_
-on the Python Package Index.
-If anything you need seems to be missing from the following pages,
-feel free to supplement the
-`list of project issues
-<https://github.com/brandon-rhodes/python-skyfield/issues>`_
-on GitHub.
+The official documentation is available through the links
+in the Table of Contents below.
+You can also visit:
+
+* Official `Python Package Index <https://pypi.python.org/pypi/skyfield>`_
+  entry
+
+* GitHub `project page <https://github.com/brandon-rhodes/python-skyfield/>`_
+
+* GitHub `issue tracker <https://github.com/brandon-rhodes/python-skyfield/issues>`_
+
+Table of Contents
+=================
 
 .. toctree::
    :maxdepth: 2
