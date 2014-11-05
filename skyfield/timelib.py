@@ -168,7 +168,7 @@ class JulianDate(object):
         returned instead of a single value.
 
         """
-        dt, leap_second = self.utc_datetime()
+        dt, leap_second = self.utc_datetime_and_leap_second()
         normalize = getattr(tz, 'normalize', None)
         if self.shape and normalize is not None:
             dt = [normalize(d.astimezone(tz)) for d in dt]
@@ -191,14 +191,14 @@ class JulianDate(object):
         """
         return self._utc_float() - 1721424.5
 
-    def utc_datetime(self):
+    def utc_datetime_and_leap_second(self):
         """Return a Python ``datetime`` for this Julian, expressed as UTC.
 
         If the third-party ``pytz`` package is available, then its
-        ``utc`` timezone will be the timezone of the return value.
-        Otherwise, a Skyfield built-in alternative is used.  The result
-        will be the same either way.  If this Julian date an array, then
-        a sequence of datetimes is returned instead of a single value.
+        ``utc`` timezone will be used as the timezone of the return
+        value.  Otherwise, an equivalent Skyfield ``utc`` timezone
+        object is used.  If this Julian date is an array, then a
+        sequence of datetimes is returned instead of a single value.
 
         """
         year, month, day, hour, minute, second = self._utc_tuple(
