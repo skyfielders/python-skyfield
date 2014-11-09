@@ -28,14 +28,14 @@ heavens_above_transits = """\
 if sys.version_info < (3,):
     heavens_above_transits = heavens_above_transits.decode('utf-8')
 
-@pytest.fixture(params=heavens_above_transits.splitlines())
-def iss_transit(request):
-    line = request.param
-    fields = line.split()
-    dt = datetime.strptime('2013 {0} {1} {6}'.format(*fields),
-                           '%Y %d %b %H:%M:%S').replace(tzinfo=utc)
-    altitude = float(fields[7][:-1])
-    return dt, altitude
+def iss_transit():
+    for line in heavens_above_transits.splitlines():
+        line = request.param
+        fields = line.split()
+        dt = datetime.strptime('2013 {0} {1} {6}'.format(*fields),
+                               '%Y %d %b %H:%M:%S').replace(tzinfo=utc)
+        altitude = float(fields[7][:-1])
+        yield dt, altitude
 
 def test_iss_altitude_computed_with_bcrs(iss_transit):
     dt, their_altitude = iss_transit

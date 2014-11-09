@@ -11,7 +11,8 @@ python:
 install:
   - "pip install -e ."
   - "pip install -r requirements.txt"
+  - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
 
 script:
-  - "py.test"
+  - "assay skyfield.tests"
   - "cd skyfield/documentation && make doctest"

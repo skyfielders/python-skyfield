@@ -186,7 +186,7 @@ for either the UTC date or your own timezone:
 
     # UTC datetime
 
-    dt, leap_second = jd.utc_datetime()
+    dt, leap_second = jd.utc_datetime_and_leap_second()
     print('UTC: ' + str(dt))
 
     # Converting back to an Eastern Time datetime.
