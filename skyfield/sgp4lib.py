@@ -1,6 +1,6 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
-from numpy import array, cross, einsum
+from numpy import array, cross, einsum, zeros_like
 from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
@@ -66,7 +66,7 @@ class EarthSatellite(object):
 
         rITRF, vITRF = TEME_to_ITRF(jd.ut1, rTEME, vTEME)
         rGCRS = ITRF_to_GCRS(jd, rITRF)
-        vGCRS = array((0.0, 0.0, 0.0))  # todo: someday also compute vGCRS?
+        vGCRS = zeros_like(rGCRS)  # todo: someday also compute vGCRS?
 
         return rGCRS, vGCRS, error
 
@@ -87,6 +87,8 @@ class EarthSatellite(object):
 
         jd = observer.jd
         rGCRS, vGCRS, error = self._compute_GCRS(jd)
+        rGCRS - observer.rGCRS
+        vGCRS - observer.vGCRS
         g = Apparent(rGCRS - observer.rGCRS, vGCRS - observer.vGCRS, jd)
         g.sgp4_error = error
         g.observer = observer
