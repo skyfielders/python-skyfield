@@ -211,7 +211,7 @@ class JulianDate(object):
         if self.shape:
             utcs = [utc] * self.shape[0]
             argsets = zip(year, month, day, hour, minute, second, milli, utcs)
-            dt = [datetime(*args) for args in argsets]
+            dt = array([datetime(*args) for args in argsets])
         else:
             dt = datetime(year, month, day, hour, minute, second, milli, utc)
         return dt, leap_second
