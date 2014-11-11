@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import pytest
 import sys
 from datetime import datetime, timedelta
 from numpy import array
