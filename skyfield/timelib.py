@@ -191,6 +191,31 @@ class JulianDate(object):
         """
         return self._utc_float() - 1721424.5
 
+    def utc_datetime(self):
+        """Return a Python ``datetime`` for this Julian, expressed as UTC.
+
+        If the third-party ``pytz`` package is available, then its
+        ``utc`` timezone will be used as the timezone of the return
+        value.  Otherwise, an equivalent Skyfield ``utc`` timezone
+        object is used.  If this Julian date is an array, then a
+        sequence of datetimes is returned instead of a single value.
+
+        """
+        year, month, day, hour, minute, second = self._utc_tuple(
+            _half_millisecond)
+        second, fraction = divmod(second, 1.0)
+        second = second.astype(int)
+        leap_second = second // 60
+        second -= leap_second
+        milli = (fraction * 1000).astype(int) * 1000
+        if self.shape:
+            utcs = [utc] * self.shape[0]
+            argsets = zip(year, month, day, hour, minute, second, milli, utcs)
+            dt = array([datetime(*args) for args in argsets])
+        else:
+            dt = datetime(year, month, day, hour, minute, second, milli, utc)
+        return dt
+
     def utc_datetime_and_leap_second(self):
         """Return a Python ``datetime`` for this Julian, expressed as UTC.
 
