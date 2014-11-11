@@ -29,7 +29,6 @@ if sys.version_info < (3,):
 
 def iss_transit():
     for line in heavens_above_transits.splitlines():
-        line = request.param
         fields = line.split()
         dt = datetime.strptime('2013 {0} {1} {6}'.format(*fields),
                                '%Y %d %b %H:%M:%S').replace(tzinfo=utc)
