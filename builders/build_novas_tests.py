@@ -130,7 +130,7 @@ def output_subroutine_tests(dates):
         output(locals(), """\
             def test_fundamental_arguments_date{i}():
                 compare(nutationlib.fundamental_arguments({jcentury!r}),
-                        array({arguments}), 0.000000001 * arcsecond)
+                        array({arguments}), 0.000000002 * arcsecond)
             """)
 
     for i, jd in enumerate(date_floats):

@@ -40,28 +40,28 @@ def test_calendar_date_3():
     compare(timelib.calendar_date(2456164.5), array((2012, 8, 24.5)), 0.0)
 
 def test_earth_rotation_angle_date0():
-    compare(earthlib.earth_rotation_angle(2440423.345833333), 243.321607803,
+    compare(earthlib.earth_rotation_angle(2440423.345833333), 243.32160780274833,
             0.000001 * arcsecond)
 
 def test_earth_rotation_angle_date1():
-    compare(earthlib.earth_rotation_angle(2448031.5), 237.511844179,
+    compare(earthlib.earth_rotation_angle(2448031.5), 237.5118441792128,
             0.000001 * arcsecond)
 
 def test_earth_rotation_angle_date2():
-    compare(earthlib.earth_rotation_angle(2451545.0), 280.460618375,
+    compare(earthlib.earth_rotation_angle(2451545.0), 280.46061837504,
             0.000001 * arcsecond)
 
 def test_earth_rotation_angle_date3():
-    compare(earthlib.earth_rotation_angle(2456164.5), 333.496583196,
+    compare(earthlib.earth_rotation_angle(2456164.5), 333.4965831957672,
             0.000001 * arcsecond)
 
 def test_earth_tilt_date0():
     compare(nutationlib.earth_tilt(JulianDate(tdb=2440423.345833333)),
-            array((23.443240959852666, 23.445702723464045, 0.15929455696954184, 2.60472752141637, 8.8623490009627)), 0.00001 * arcsecond)
+            array((23.443240959852666, 23.445702723464045, 0.1592945569695419, 2.604727521416371, 8.862349000962688)), 0.00001 * arcsecond)
 
 def test_earth_tilt_date1():
     compare(nutationlib.earth_tilt(JulianDate(tdb=2448031.5)),
-            array((23.440530953006782, 23.442178709915066, 0.7110982205507759, 11.628148141964182, 5.93192486981946)), 0.00001 * arcsecond)
+            array((23.440530953006782, 23.442178709915066, 0.7110982205507697, 11.62814814196408, 5.931924869819573)), 0.00001 * arcsecond)
 
 def test_earth_tilt_date2():
     compare(nutationlib.earth_tilt(JulianDate(tdb=2451545.0)),
@@ -69,23 +69,23 @@ def test_earth_tilt_date2():
 
 def test_earth_tilt_date3():
     compare(nutationlib.earth_tilt(JulianDate(tdb=2456164.5)),
-            array((23.43763397776759, 23.43645066577372, 0.9770876081702213, 15.97672953348014, -4.259923177932948)), 0.00001 * arcsecond)
+            array((23.43763397776759, 23.43645066577372, 0.977087608170225, 15.976729533480201, -4.259923177932991)), 0.00001 * arcsecond)
 
 def test_equation_of_the_equinoxes_complimentary_terms_date0():
     compare(nutationlib.equation_of_the_equinoxes_complimentary_terms(2440423.345833333),
-            array(-1.45924388432e-09), 0.0000000000000001 * arcsecond)
+            array(-1.4592438843164885e-09), 0.0000000000000001 * arcsecond)
 
 def test_equation_of_the_equinoxes_complimentary_terms_date1():
     compare(nutationlib.equation_of_the_equinoxes_complimentary_terms(2448031.5),
-            array(-9.90927067934e-09), 0.0000000000000001 * arcsecond)
+            array(-9.909270679336256e-09), 0.0000000000000001 * arcsecond)
 
 def test_equation_of_the_equinoxes_complimentary_terms_date2():
     compare(nutationlib.equation_of_the_equinoxes_complimentary_terms(2451545.0),
-            array(1.0213300963e-08), 0.0000000000000001 * arcsecond)
+            array(1.0213300963024648e-08), 0.0000000000000001 * arcsecond)
 
 def test_equation_of_the_equinoxes_complimentary_terms_date3():
     compare(nutationlib.equation_of_the_equinoxes_complimentary_terms(2456164.5),
-            array(-1.08231552739e-08), 0.0000000000000001 * arcsecond)
+            array(-1.082315527387237e-08), 0.0000000000000001 * arcsecond)
 
 def test_forward_frame_tie():
     compare(framelib.ICRS_to_J2000.dot((1.1, 1.2, 1.3)), (1.100000019790573, 1.2000001208396125, 1.2999998717098593), 1e-15)
@@ -95,35 +95,35 @@ def test_reverse_frame_tie():
 
 def test_fundamental_arguments_date0():
     compare(nutationlib.fundamental_arguments(-0.3044942961441969),
-            array((-1.5597846169351661, -2.8619278194907327, -2.77483682691564, -4.947060102171716, 6.178085194718493)), 0.000000001 * arcsecond)
+            array((-1.5597846169353031, -2.8619278194907483, -2.7748368269156427, -4.947060102171707, 6.178085194718492)), 0.000000002 * arcsecond)
 
 def test_fundamental_arguments_date1():
     compare(nutationlib.fundamental_arguments(-0.09619438740588637),
-            array((-0.8532784044768748, -3.9335791240915357, -5.37648684435492, -0.9485312704749193, 5.429677887938805)), 0.000000001 * arcsecond)
+            array((-0.8532784044768771, -3.933579124091533, -5.376486844354975, -0.9485312704748627, 5.429677887938805)), 0.000000002 * arcsecond)
 
 def test_fundamental_arguments_date2():
     compare(nutationlib.fundamental_arguments(0.0),
-            array((2.355555743493879, 6.24006012692298, 1.6279050815375191, 5.198466588650503, 2.182439196615671)), 0.000000001 * arcsecond)
+            array((2.355555743493879, 6.24006012692298, 1.6279050815375191, 5.198466588650503, 2.182439196615671)), 0.000000002 * arcsecond)
 
 def test_fundamental_arguments_date3():
     compare(nutationlib.fundamental_arguments(0.12647501711156742),
-            array((0.1518171948621994, 4.0231516222224455, 0.10917837795926603, 1.6234303368860232, -2.0869831884577685)), 0.000000001 * arcsecond)
+            array((0.15181719486225662, 4.0231516222224535, 0.10917837795923366, 1.6234303368860354, -2.086983188457769)), 0.000000002 * arcsecond)
 
 def test_iau2000a_date0():
     compare(nutationlib.iau2000a(2440423.345833333),
-            array([26047275.2142, 88623490.0096]), 0.001)
+            array([26047275.21416371, 88623490.00962688]), 0.001)
 
 def test_iau2000a_date1():
     compare(nutationlib.iau2000a(2448031.5),
-            array([116281481.42, 59319248.6982]), 0.001)
+            array([116281481.41964081, 59319248.69819573]), 0.001)
 
 def test_iau2000a_date2():
     compare(nutationlib.iau2000a(2451545.0),
-            array([-139319963.31, -57693980.7647]), 0.001)
+            array([-139319963.30960065, -57693980.76465292]), 0.001)
 
 def test_iau2000a_date3():
     compare(nutationlib.iau2000a(2456164.5),
-            array([159767295.335, -42599231.7793]), 0.001)
+            array([159767295.334802, -42599231.77932991]), 0.001)
 
 def test_julian_date_function_date0():
     compare(timelib.julian_date(-4712, 1, 1, 0.0), 37.5, 0.0)
@@ -212,23 +212,23 @@ def test_precession_date3():
 
 def test_sidereal_time_on_date0():
     jd = JulianDate(tt=2440423.345833333)
-    compare(earthlib.sidereal_time(jd), 16.195436227057254, 1e-13)
+    compare(earthlib.sidereal_time(jd), 16.19543622705723, 1e-13)
 
 def test_sidereal_time_with_nonzero_delta_t_on_date0():
     jd = JulianDate(tt=2440423.345833333 + 99.9 * one_second, delta_t=99.9)
-    compare(earthlib.sidereal_time(jd), 16.19543622976054, 1e-13)
+    compare(earthlib.sidereal_time(jd), 16.195436229760517, 1e-13)
 
 def test_sidereal_time_on_date1():
     jd = JulianDate(tt=2448031.5)
-    compare(earthlib.sidereal_time(jd), 15.825907460288208, 1e-13)
+    compare(earthlib.sidereal_time(jd), 15.825907460288224, 1e-13)
 
 def test_sidereal_time_with_nonzero_delta_t_on_date1():
     jd = JulianDate(tt=2448031.5 + 99.9 * one_second, delta_t=99.9)
-    compare(earthlib.sidereal_time(jd), 15.825907462991834, 1e-13)
+    compare(earthlib.sidereal_time(jd), 15.825907462991848, 1e-13)
 
 def test_sidereal_time_on_date2():
     jd = JulianDate(tt=2451545.0)
-    compare(earthlib.sidereal_time(jd), 18.697374826965625, 1e-13)
+    compare(earthlib.sidereal_time(jd), 18.69737482696563, 1e-13)
 
 def test_sidereal_time_with_nonzero_delta_t_on_date2():
     jd = JulianDate(tt=2451545.0 + 99.9 * one_second, delta_t=99.9)
@@ -236,11 +236,11 @@ def test_sidereal_time_with_nonzero_delta_t_on_date2():
 
 def test_sidereal_time_on_date3():
     jd = JulianDate(tt=2456164.5)
-    compare(earthlib.sidereal_time(jd), 22.24390849716581, 1e-13)
+    compare(earthlib.sidereal_time(jd), 22.243908497165812, 1e-13)
 
 def test_sidereal_time_with_nonzero_delta_t_on_date3():
     jd = JulianDate(tt=2456164.5 + 99.9 * one_second, delta_t=99.9)
-    compare(earthlib.sidereal_time(jd), 22.243908499869796, 1e-13)
+    compare(earthlib.sidereal_time(jd), 22.2439084998698, 1e-13)
 
 def test_star_vector():
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
@@ -250,28 +250,28 @@ def test_star_vector():
             (276301.5236796437, 215517.39549460335, 27281454.187831223),
             1e3 * meter)
     compare(star._velocity,
-            (-0.006595734315371152, 0.015163885823867606, -0.010102577482634968),
+            (-0.006595734315371152, 0.015163885823867606, -0.010102577482634966),
             1e-6 * meter)
 
 def test_ITRF_to_GCRS_conversion_on_date0():
     jd = JulianDate(tt=2440423.345833333, delta_t=39.707)
     position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
-    compare(position, (0.5701172053657843, -1.5232987806096496, 1.3017400651201705), 1e-13)
+    compare(position, (0.5701172053657788, -1.5232987806096516, 1.3017400651201705), 1e-13)
 
 def test_ITRF_to_GCRS_conversion_on_date1():
     jd = JulianDate(tt=2448031.5, delta_t=57.1136)
     position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
-    compare(position, (0.4136264927956394, -1.5741081933652463, 1.3004216700893525), 1e-13)
+    compare(position, (0.4136264927956479, -1.574108193365244, 1.3004216700893525), 1e-13)
 
 def test_ITRF_to_GCRS_conversion_on_date2():
     jd = JulianDate(tt=2451545.0, delta_t=63.8285)
     position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
-    compare(position, (1.3757008573963423, -0.8702954291925711, 1.3000126987400913), 1e-13)
+    compare(position, (1.375700857396341, -0.8702954291925735, 1.3000126987400913), 1e-13)
 
 def test_ITRF_to_GCRS_conversion_on_date3():
     jd = JulianDate(tt=2456164.5, delta_t=66.7846)
     position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
-    compare(position, (1.524357404968849, 0.5755748855663732, 1.2980940077752077), 1e-13)
+    compare(position, (1.5243574049688486, 0.5755748855663745, 1.2980940077752077), 1e-13)
 
 def test_tdb_minus_tt_on_date0():
     result = timelib.tdb_minus_tt(2440423.345833333)
@@ -560,7 +560,7 @@ def test_mars_geocentric_date2():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 22.034417492807563, 0.001 * ra_arcsecond)
-    compare(dec.degrees, -13.182689288940114, 0.001 * arcsecond)
+    compare(dec.degrees, -13.182689288940113, 0.001 * arcsecond)
 
 def test_mars_geocentric_date3():
     jd = JulianDate(tt=2456164.5)
@@ -602,7 +602,7 @@ def test_mars_geocentric_date4():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, (15.99950982315885, 23.536847630733252, 22.034417492807563, 13.9057161859901), 0.001 * ra_arcsecond)
-    compare(dec.degrees, (-24.046277103674843, -4.935089760397493, -13.182689288940114, -12.184654273116957), 0.001 * arcsecond)
+    compare(dec.degrees, (-24.046277103674843, -4.935089760397493, -13.182689288940113, -12.184654273116957), 0.001 * arcsecond)
 
 def test_jupiter_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -728,7 +728,7 @@ def test_saturn_geocentric_date0():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 2.4352879582290172, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 11.911566107576897, 0.001 * arcsecond)
+    compare(dec.degrees, 11.911566107576899, 0.001 * arcsecond)
 
 def test_saturn_geocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -749,7 +749,7 @@ def test_saturn_geocentric_date1():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 19.805277718955743, 0.001 * ra_arcsecond)
-    compare(dec.degrees, -20.958164640919684, 0.001 * arcsecond)
+    compare(dec.degrees, -20.958164640919687, 0.001 * arcsecond)
 
 def test_saturn_geocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -812,7 +812,7 @@ def test_saturn_geocentric_date4():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, (2.4352879582290172, 19.805277718955743, 2.5843611215084574, 13.639628746850631), 0.001 * ra_arcsecond)
-    compare(dec.degrees, (11.911566107576897, -20.958164640919684, 12.614774672730574, -7.7232016421026195), 0.001 * arcsecond)
+    compare(dec.degrees, (11.911566107576899, -20.958164640919687, 12.614774672730574, -7.7232016421026195), 0.001 * arcsecond)
 
 def test_uranus_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -833,7 +833,7 @@ def test_uranus_geocentric_date0():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 12.061052547705433, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 0.377499692903586, 0.001 * arcsecond)
+    compare(dec.degrees, 0.37749969290358604, 0.001 * arcsecond)
 
 def test_uranus_geocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -875,7 +875,7 @@ def test_uranus_geocentric_date2():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 21.164987614252272, 0.001 * ra_arcsecond)
-    compare(dec.degrees, -17.020320613172007, 0.001 * arcsecond)
+    compare(dec.degrees, -17.020320613172, 0.001 * arcsecond)
 
 def test_uranus_geocentric_date3():
     jd = JulianDate(tt=2456164.5)
@@ -895,8 +895,8 @@ def test_uranus_geocentric_date3():
     compare(dec.degrees, 2.3583696385163115, 0.001 * arcsecond)
 
     ra, dec, distance = apparent.radec(epoch='date')
-    compare(ra.hours, 0.5005500654503398, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 2.4297793410408026, 0.001 * arcsecond)
+    compare(ra.hours, 0.5005500654503396, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 2.429779341040802, 0.001 * arcsecond)
 
 def test_uranus_geocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
@@ -916,8 +916,8 @@ def test_uranus_geocentric_date4():
     compare(dec.degrees, (0.20832526777272886, -23.437016930580608, -17.020267168405788, 2.3583696385163115), 0.001 * arcsecond)
 
     ra, dec, distance = apparent.radec(epoch='date')
-    compare(ra.hours, (12.061052547705433, 18.659361133085376, 21.164987614252272, 0.5005500654503398), 0.001 * ra_arcsecond)
-    compare(dec.degrees, (0.377499692903586, -23.447681812488966, -17.020320613172007, 2.4297793410408026), 0.001 * arcsecond)
+    compare(ra.hours, (12.061052547705433, 18.659361133085376, 21.164987614252272, 0.5005500654503396), 0.001 * ra_arcsecond)
+    compare(dec.degrees, (0.37749969290358604, -23.447681812488966, -17.020320613172, 2.429779341040802), 0.001 * arcsecond)
 
 def test_neptune_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -1064,7 +1064,7 @@ def test_pluto_geocentric_date1():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 15.208581663980876, 0.001 * ra_arcsecond)
-    compare(dec.degrees, -1.302239488315164, 0.001 * arcsecond)
+    compare(dec.degrees, -1.3022394883151638, 0.001 * arcsecond)
 
 def test_pluto_geocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -1085,7 +1085,7 @@ def test_pluto_geocentric_date2():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 16.761277438459963, 0.001 * ra_arcsecond)
-    compare(dec.degrees, -11.394288734411237, 0.001 * arcsecond)
+    compare(dec.degrees, -11.394288734411235, 0.001 * arcsecond)
 
 def test_pluto_geocentric_date3():
     jd = JulianDate(tt=2456164.5)
@@ -1127,7 +1127,7 @@ def test_pluto_geocentric_date4():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, (11.989232654068259, 15.208581663980876, 16.761277438459963, 18.501338273669152), 0.001 * ra_arcsecond)
-    compare(dec.degrees, (16.792242650891883, -1.302239488315164, -11.394288734411237, -19.54122790974374), 0.001 * arcsecond)
+    compare(dec.degrees, (16.792242650891883, -1.3022394883151638, -11.394288734411235, -19.54122790974374), 0.001 * arcsecond)
 
 def test_sun_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -1148,7 +1148,7 @@ def test_sun_geocentric_date0():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 8.000108116572395, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 20.58493093599604, 0.001 * arcsecond)
+    compare(dec.degrees, 20.584930935996038, 0.001 * arcsecond)
 
 def test_sun_geocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -1232,7 +1232,7 @@ def test_sun_geocentric_date4():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, (8.000108116572395, 3.7666292045824337, 18.75183797477899, 10.279264504672037), 0.001 * ra_arcsecond)
-    compare(dec.degrees, (20.58493093599604, 19.87917377230974, -23.032488638722818, 10.68850786534133), 0.001 * arcsecond)
+    compare(dec.degrees, (20.584930935996038, 19.87917377230974, -23.032488638722818, 10.68850786534133), 0.001 * arcsecond)
 
 def test_moon_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -1253,7 +1253,7 @@ def test_moon_geocentric_date0():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 12.446262111681095, 0.001 * ra_arcsecond)
-    compare(dec.degrees, -4.3782279425133765, 0.001 * arcsecond)
+    compare(dec.degrees, -4.378227942513377, 0.001 * arcsecond)
 
 def test_moon_geocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -1337,7 +1337,7 @@ def test_moon_geocentric_date4():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, (12.446262111681095, 23.668278096873856, 14.82957327176072, 16.403831131432188), 0.001 * ra_arcsecond)
-    compare(dec.degrees, (-4.3782279425133765, 1.805189185726724, -10.897905576905867, -20.96508913558473), 0.001 * arcsecond)
+    compare(dec.degrees, (-4.378227942513377, 1.805189185726724, -10.897905576905867, -20.96508913558473), 0.001 * arcsecond)
 
 def test_mercury_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -1353,8 +1353,8 @@ def test_mercury_topocentric_date0():
     compare(dec.degrees, 22.41529463722477, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 46.321226756603956, 0.001 * arcsecond)
-    compare(az.degrees, 262.1859052156763, 0.001 * arcsecond)
+    compare(alt.degrees, 46.32122675660419, 0.001 * arcsecond)
+    compare(az.degrees, 262.1859052156761, 0.001 * arcsecond)
 
 def test_mercury_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -1370,8 +1370,8 @@ def test_mercury_topocentric_date1():
     compare(dec.degrees, 11.205182598299665, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -17.340667089884207, 0.001 * arcsecond)
-    compare(az.degrees, 300.9176579181714, 0.001 * arcsecond)
+    compare(alt.degrees, -17.340667089884377, 0.001 * arcsecond)
+    compare(az.degrees, 300.9176579181716, 0.001 * arcsecond)
 
 def test_mercury_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -1404,7 +1404,7 @@ def test_mercury_topocentric_date3():
     compare(dec.degrees, 16.630243128506475, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -9.116616855755922, 0.001 * arcsecond)
+    compare(alt.degrees, -9.116616855755936, 0.001 * arcsecond)
     compare(az.degrees, 300.14202643731034, 0.001 * arcsecond)
 
 def test_mercury_topocentric_date4():
@@ -1421,8 +1421,8 @@ def test_mercury_topocentric_date4():
     compare(dec.degrees, (22.41529463722477, 11.205182598299665, -24.420003066967507, 16.630243128506475), 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, (46.321226756603956, -17.340667089884207, -0.12765060376707993, -9.116616855755922), 0.001 * arcsecond)
-    compare(az.degrees, (262.1859052156763, 300.9176579181714, 121.97764361867154, 300.14202643731034), 0.001 * arcsecond)
+    compare(alt.degrees, (46.32122675660419, -17.340667089884377, -0.12765060376707993, -9.116616855755936), 0.001 * arcsecond)
+    compare(az.degrees, (262.1859052156761, 300.9176579181716, 121.97764361867154, 300.14202643731034), 0.001 * arcsecond)
 
 def test_venus_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -1438,8 +1438,8 @@ def test_venus_topocentric_date0():
     compare(dec.degrees, 20.165161469755116, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 11.1523740629913, 0.001 * arcsecond)
-    compare(az.degrees, 287.00307402395265, 0.001 * arcsecond)
+    compare(alt.degrees, 11.152374062991527, 0.001 * arcsecond)
+    compare(az.degrees, 287.0030740239525, 0.001 * arcsecond)
 
 def test_venus_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -1455,8 +1455,8 @@ def test_venus_topocentric_date1():
     compare(dec.degrees, 5.275819541572406, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -34.13491407646214, 0.001 * arcsecond)
-    compare(az.degrees, 313.64872862118403, 0.001 * arcsecond)
+    compare(alt.degrees, -34.134914076462266, 0.001 * arcsecond)
+    compare(az.degrees, 313.64872862118426, 0.001 * arcsecond)
 
 def test_venus_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -1489,8 +1489,8 @@ def test_venus_topocentric_date3():
     compare(dec.degrees, 19.84914957337174, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -24.359995410915417, 0.001 * arcsecond)
-    compare(az.degrees, 327.6405889699839, 0.001 * arcsecond)
+    compare(alt.degrees, -24.35999541091543, 0.001 * arcsecond)
+    compare(az.degrees, 327.640588969984, 0.001 * arcsecond)
 
 def test_venus_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
@@ -1506,8 +1506,8 @@ def test_venus_topocentric_date4():
     compare(dec.degrees, (20.165161469755116, 5.275819541572406, -18.450404301558013, 19.84914957337174), 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, (11.1523740629913, -34.13491407646214, 23.228910604670872, -24.359995410915417), 0.001 * arcsecond)
-    compare(az.degrees, (287.00307402395265, 313.64872862118403, 142.11613981416264, 327.6405889699839), 0.001 * arcsecond)
+    compare(alt.degrees, (11.152374062991527, -34.134914076462266, 23.228910604670872, -24.35999541091543), 0.001 * arcsecond)
+    compare(az.degrees, (287.0030740239525, 313.64872862118426, 142.11613981416264, 327.640588969984), 0.001 * arcsecond)
 
 def test_mars_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -1523,8 +1523,8 @@ def test_mars_topocentric_date0():
     compare(dec.degrees, -24.04896650222992, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -3.540294697029296, 0.001 * arcsecond)
-    compare(az.degrees, 118.3487763470746, 0.001 * arcsecond)
+    compare(alt.degrees, -3.540294697029495, 0.001 * arcsecond)
+    compare(az.degrees, 118.34877634707443, 0.001 * arcsecond)
 
 def test_mars_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -1540,8 +1540,8 @@ def test_mars_topocentric_date1():
     compare(dec.degrees, -4.93604274443558, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -54.108962874194816, 0.001 * arcsecond)
-    compare(az.degrees, 338.0117138951483, 0.001 * arcsecond)
+    compare(alt.degrees, -54.1089628741949, 0.001 * arcsecond)
+    compare(az.degrees, 338.0117138951488, 0.001 * arcsecond)
 
 def test_mars_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -1574,8 +1574,8 @@ def test_mars_topocentric_date3():
     compare(dec.degrees, -12.185661905051246, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 22.094794272017694, 0.001 * arcsecond)
-    compare(az.degrees, 231.63816638477607, 0.001 * arcsecond)
+    compare(alt.degrees, 22.094794272017666, 0.001 * arcsecond)
+    compare(az.degrees, 231.6381663847761, 0.001 * arcsecond)
 
 def test_mars_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
@@ -1591,8 +1591,8 @@ def test_mars_topocentric_date4():
     compare(dec.degrees, (-24.04896650222992, -4.93604274443558, -13.183338672731743, -12.185661905051246), 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, (-3.540294697029296, -54.108962874194816, -36.90573266459917, 22.094794272017694), 0.001 * arcsecond)
-    compare(az.degrees, (118.3487763470746, 338.0117138951483, 76.12368450672824, 231.63816638477607), 0.001 * arcsecond)
+    compare(alt.degrees, (-3.540294697029495, -54.1089628741949, -36.90573266459917, 22.094794272017666), 0.001 * arcsecond)
+    compare(az.degrees, (118.34877634707443, 338.0117138951488, 76.12368450672824, 231.6381663847761), 0.001 * arcsecond)
 
 def test_jupiter_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -1608,8 +1608,8 @@ def test_jupiter_topocentric_date0():
     compare(dec.degrees, 0.8213558931137472, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 49.40651603144651, 0.001 * arcsecond)
-    compare(az.degrees, 156.07088561561855, 0.001 * arcsecond)
+    compare(alt.degrees, 49.406516031446415, 0.001 * arcsecond)
+    compare(az.degrees, 156.07088561561812, 0.001 * arcsecond)
 
 def test_jupiter_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -1625,8 +1625,8 @@ def test_jupiter_topocentric_date1():
     compare(dec.degrees, 23.182536029964222, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 38.005051266910165, 0.001 * arcsecond)
-    compare(az.degrees, 270.6379555482052, 0.001 * arcsecond)
+    compare(alt.degrees, 38.005051266909966, 0.001 * arcsecond)
+    compare(az.degrees, 270.63795554820535, 0.001 * arcsecond)
 
 def test_jupiter_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -1660,7 +1660,7 @@ def test_jupiter_topocentric_date3():
 
     alt, az, distance = apparent.altaz()
     compare(alt.degrees, -29.289013841967986, 0.001 * arcsecond)
-    compare(az.degrees, 4.327425566855479, 0.001 * arcsecond)
+    compare(az.degrees, 4.327425566855531, 0.001 * arcsecond)
 
 def test_jupiter_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
@@ -1676,8 +1676,8 @@ def test_jupiter_topocentric_date4():
     compare(dec.degrees, (0.8213558931137472, 23.182536029964222, 8.593862752942394, 21.670171438742262), 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, (49.40651603144651, 38.005051266910165, -42.482560972481394, -29.289013841967986), 0.001 * arcsecond)
-    compare(az.degrees, (156.07088561561855, 270.6379555482052, 359.3596746827537, 4.327425566855479), 0.001 * arcsecond)
+    compare(alt.degrees, (49.406516031446415, 38.005051266909966, -42.482560972481394, -29.289013841967986), 0.001 * arcsecond)
+    compare(az.degrees, (156.07088561561812, 270.63795554820535, 359.3596746827537, 4.327425566855531), 0.001 * arcsecond)
 
 def test_saturn_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -1693,8 +1693,8 @@ def test_saturn_topocentric_date0():
     compare(dec.degrees, 11.911391441362449, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -20.662686940323454, 0.001 * arcsecond)
-    compare(az.degrees, 306.01978569992707, 0.001 * arcsecond)
+    compare(alt.degrees, -20.66268694032327, 0.001 * arcsecond)
+    compare(az.degrees, 306.01978569992684, 0.001 * arcsecond)
 
 def test_saturn_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -1710,8 +1710,8 @@ def test_saturn_topocentric_date1():
     compare(dec.degrees, -20.958246345579152, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -48.93337647839002, 0.001 * arcsecond)
-    compare(az.degrees, 76.88374449194428, 0.001 * arcsecond)
+    compare(alt.degrees, -48.93337647838982, 0.001 * arcsecond)
+    compare(az.degrees, 76.8837444919445, 0.001 * arcsecond)
 
 def test_saturn_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -1744,8 +1744,8 @@ def test_saturn_topocentric_date3():
     compare(dec.degrees, -7.723370683249702, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 22.966758516111895, 0.001 * arcsecond)
-    compare(az.degrees, 238.0062767287567, 0.001 * arcsecond)
+    compare(alt.degrees, 22.966758516111867, 0.001 * arcsecond)
+    compare(az.degrees, 238.00627672875675, 0.001 * arcsecond)
 
 def test_saturn_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
@@ -1761,8 +1761,8 @@ def test_saturn_topocentric_date4():
     compare(dec.degrees, (11.911391441362449, -20.958246345579152, 12.614560194137898, -7.723370683249702), 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, (-20.662686940323454, -48.93337647839002, -36.501918751911674, 22.966758516111895), 0.001 * arcsecond)
-    compare(az.degrees, (306.01978569992707, 76.88374449194428, 341.22347230453323, 238.0062767287567), 0.001 * arcsecond)
+    compare(alt.degrees, (-20.66268694032327, -48.93337647838982, -36.501918751911674, 22.966758516111867), 0.001 * arcsecond)
+    compare(az.degrees, (306.01978569992684, 76.8837444919445, 341.22347230453323, 238.00627672875675), 0.001 * arcsecond)
 
 def test_uranus_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -1775,11 +1775,11 @@ def test_uranus_topocentric_date0():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 12.061058763070791, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 0.3774188368346009, 0.001 * arcsecond)
+    compare(dec.degrees, 0.377418836834601, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 49.063968221447006, 0.001 * arcsecond)
-    compare(az.degrees, 156.65256040205153, 0.001 * arcsecond)
+    compare(alt.degrees, 49.06396822144691, 0.001 * arcsecond)
+    compare(az.degrees, 156.6525604020511, 0.001 * arcsecond)
 
 def test_uranus_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -1795,8 +1795,8 @@ def test_uranus_topocentric_date1():
     compare(dec.degrees, -23.447712978993902, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -37.0259637798914, 0.001 * arcsecond)
-    compare(az.degrees, 91.80748703145889, 0.001 * arcsecond)
+    compare(alt.degrees, -37.0259637798912, 0.001 * arcsecond)
+    compare(az.degrees, 91.80748703145905, 0.001 * arcsecond)
 
 def test_uranus_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -1829,8 +1829,8 @@ def test_uranus_topocentric_date3():
     compare(dec.degrees, 2.429695886841979, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -14.526044311926142, 0.001 * arcsecond)
-    compare(az.degrees, 74.60219420538259, 0.001 * arcsecond)
+    compare(alt.degrees, -14.5260443119261, 0.001 * arcsecond)
+    compare(az.degrees, 74.60219420538263, 0.001 * arcsecond)
 
 def test_uranus_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
@@ -1843,11 +1843,11 @@ def test_uranus_topocentric_date4():
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, (12.061058763070791, 18.65936510933368, 21.164991487815, 0.5005545778925), 0.001 * ra_arcsecond)
-    compare(dec.degrees, (0.3774188368346009, -23.447712978993902, -17.02036156614209, 2.429695886841979), 0.001 * arcsecond)
+    compare(dec.degrees, (0.377418836834601, -23.447712978993902, -17.02036156614209, 2.429695886841979), 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, (49.063968221447006, -37.0259637798914, -29.175475562665554, -14.526044311926142), 0.001 * arcsecond)
-    compare(az.degrees, (156.65256040205153, 91.80748703145889, 88.85671230431439, 74.60219420538259), 0.001 * arcsecond)
+    compare(alt.degrees, (49.06396822144691, -37.0259637798912, -29.175475562665554, -14.5260443119261), 0.001 * arcsecond)
+    compare(az.degrees, (156.6525604020511, 91.80748703145905, 88.85671230431439, 74.60219420538263), 0.001 * arcsecond)
 
 def test_neptune_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -1863,8 +1863,8 @@ def test_neptune_topocentric_date0():
     compare(dec.degrees, -17.583829722494016, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 4.869377826364712, 0.001 * arcsecond)
-    compare(az.degrees, 117.29043762875342, 0.001 * arcsecond)
+    compare(alt.degrees, 4.869377826364499, 0.001 * arcsecond)
+    compare(az.degrees, 117.29043762875322, 0.001 * arcsecond)
 
 def test_neptune_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -1880,8 +1880,8 @@ def test_neptune_topocentric_date1():
     compare(dec.degrees, -21.808061138689617, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -40.433186948110716, 0.001 * arcsecond)
-    compare(az.degrees, 86.51833613444339, 0.001 * arcsecond)
+    compare(alt.degrees, -40.43318694811052, 0.001 * arcsecond)
+    compare(az.degrees, 86.51833613444356, 0.001 * arcsecond)
 
 def test_neptune_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -1914,8 +1914,8 @@ def test_neptune_topocentric_date3():
     compare(dec.degrees, -11.4373712085964, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 2.416782904999806, 0.001 * arcsecond)
-    compare(az.degrees, 106.8092597257606, 0.001 * arcsecond)
+    compare(alt.degrees, 2.4167829049998346, 0.001 * arcsecond)
+    compare(az.degrees, 106.80925972576064, 0.001 * arcsecond)
 
 def test_neptune_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
@@ -1931,8 +1931,8 @@ def test_neptune_topocentric_date4():
     compare(dec.degrees, (-17.583829722494016, -21.808061138689617, -19.21325376377245, -11.4373712085964), 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, (4.869377826364712, -40.433186948110716, -21.10215467278759, 2.416782904999806), 0.001 * arcsecond)
-    compare(az.degrees, (117.29043762875342, 86.51833613444339, 98.1496208151544, 106.8092597257606), 0.001 * arcsecond)
+    compare(alt.degrees, (4.869377826364499, -40.43318694811052, -21.10215467278759, 2.4167829049998346), 0.001 * arcsecond)
+    compare(az.degrees, (117.29043762875322, 86.51833613444356, 98.1496208151544, 106.80925972576064), 0.001 * arcsecond)
 
 def test_pluto_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -1948,8 +1948,8 @@ def test_pluto_topocentric_date0():
     compare(dec.degrees, 16.792209116103166, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 64.72856074651945, 0.001 * arcsecond)
-    compare(az.degrees, 147.2138070056038, 0.001 * arcsecond)
+    compare(alt.degrees, 64.72856074651932, 0.001 * arcsecond)
+    compare(az.degrees, 147.2138070056032, 0.001 * arcsecond)
 
 def test_pluto_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -1965,8 +1965,8 @@ def test_pluto_topocentric_date1():
     compare(dec.degrees, -1.30229172206482, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 16.233734452123215, 0.001 * arcsecond)
-    compare(az.degrees, 105.39943656311941, 0.001 * arcsecond)
+    compare(alt.degrees, 16.2337344521234, 0.001 * arcsecond)
+    compare(az.degrees, 105.39943656311958, 0.001 * arcsecond)
 
 def test_pluto_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -1999,8 +1999,8 @@ def test_pluto_topocentric_date3():
     compare(dec.degrees, -19.541283736216645, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 28.33982206878914, 0.001 * arcsecond)
-    compare(az.degrees, 157.5178526627237, 0.001 * arcsecond)
+    compare(alt.degrees, 28.339822068789154, 0.001 * arcsecond)
+    compare(az.degrees, 157.51785266272373, 0.001 * arcsecond)
 
 def test_pluto_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
@@ -2016,8 +2016,8 @@ def test_pluto_topocentric_date4():
     compare(dec.degrees, (16.792209116103166, -1.30229172206482, -11.394334784193745, -19.541283736216645), 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, (64.72856074651945, 16.233734452123215, 22.700996363632996, 28.33982206878914), 0.001 * arcsecond)
-    compare(az.degrees, (147.2138070056038, 105.39943656311941, 127.81134408260581, 157.5178526627237), 0.001 * arcsecond)
+    compare(alt.degrees, (64.72856074651932, 16.2337344521234, 22.700996363632996, 28.339822068789154), 0.001 * arcsecond)
+    compare(az.degrees, (147.2138070056032, 105.39943656311958, 127.81134408260581, 157.51785266272373), 0.001 * arcsecond)
 
 def test_sun_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -2033,8 +2033,8 @@ def test_sun_topocentric_date0():
     compare(dec.degrees, 20.584000539289498, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 46.724033571488974, 0.001 * arcsecond)
-    compare(az.degrees, 258.55507178459493, 0.001 * arcsecond)
+    compare(alt.degrees, 46.72403357148921, 0.001 * arcsecond)
+    compare(az.degrees, 258.5550717845947, 0.001 * arcsecond)
 
 def test_sun_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -2050,8 +2050,8 @@ def test_sun_topocentric_date1():
     compare(dec.degrees, 19.87762515818775, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 2.2209469369834522, 0.001 * arcsecond)
-    compare(az.degrees, 293.9563663727213, 0.001 * arcsecond)
+    compare(alt.degrees, 2.2209469369832675, 0.001 * arcsecond)
+    compare(az.degrees, 293.95636637272145, 0.001 * arcsecond)
 
 def test_sun_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -2084,7 +2084,7 @@ def test_sun_topocentric_date3():
     compare(dec.degrees, 10.68696144441038, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -2.7384076915027435, 0.001 * arcsecond)
+    compare(alt.degrees, -2.738407691502772, 0.001 * arcsecond)
     compare(az.degrees, 286.09632001391725, 0.001 * arcsecond)
 
 def test_sun_topocentric_date4():
@@ -2101,8 +2101,8 @@ def test_sun_topocentric_date4():
     compare(dec.degrees, (20.584000539289498, 19.87762515818775, -23.034049570458144, 10.68696144441038), 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, (46.724033571488974, 2.2209469369834522, -5.486505415022833, -2.7384076915027435), 0.001 * arcsecond)
-    compare(az.degrees, (258.55507178459493, 293.9563663727213, 115.32008451470388, 286.09632001391725), 0.001 * arcsecond)
+    compare(alt.degrees, (46.72403357148921, 2.2209469369832675, -5.486505415022833, -2.738407691502772), 0.001 * arcsecond)
+    compare(az.degrees, (258.5550717845947, 293.95636637272145, 115.32008451470388, 286.09632001391725), 0.001 * arcsecond)
 
 def test_moon_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
@@ -2118,8 +2118,8 @@ def test_moon_topocentric_date0():
     compare(dec.degrees, -5.022075882873389, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, 41.92040135025379, 0.001 * arcsecond)
-    compare(az.degrees, 151.19707488767685, 0.001 * arcsecond)
+    compare(alt.degrees, 41.920401350253684, 0.001 * arcsecond)
+    compare(az.degrees, 151.19707488767648, 0.001 * arcsecond)
 
 def test_moon_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
@@ -2135,8 +2135,8 @@ def test_moon_topocentric_date1():
     compare(dec.degrees, 1.1749464194370667, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, -47.74510120858716, 0.001 * arcsecond)
-    compare(az.degrees, 338.1329529181219, 0.001 * arcsecond)
+    compare(alt.degrees, -47.74510120858724, 0.001 * arcsecond)
+    compare(az.degrees, 338.1329529181222, 0.001 * arcsecond)
 
 def test_moon_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
@@ -2170,7 +2170,7 @@ def test_moon_topocentric_date3():
 
     alt, az, distance = apparent.altaz()
     compare(alt.degrees, 28.439387966372543, 0.001 * arcsecond)
-    compare(az.degrees, 191.29497427201795, 0.001 * arcsecond)
+    compare(az.degrees, 191.294974272018, 0.001 * arcsecond)
 
 def test_moon_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
@@ -2186,6 +2186,6 @@ def test_moon_topocentric_date4():
     compare(dec.degrees, (-5.022075882873389, 1.1749464194370667, -11.587991888462232, -21.818976417687217), 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
-    compare(alt.degrees, (41.92040135025379, -47.74510120858716, 36.381265580736006, 28.439387966372543), 0.001 * arcsecond)
-    compare(az.degrees, (151.19707488767685, 338.1329529181219, 156.2971102404722, 191.29497427201795), 0.001 * arcsecond)
+    compare(alt.degrees, (41.920401350253684, -47.74510120858724, 36.381265580736006, 28.439387966372543), 0.001 * arcsecond)
+    compare(az.degrees, (151.19707488767648, 338.1329529181222, 156.2971102404722, 191.294974272018), 0.001 * arcsecond)
 
