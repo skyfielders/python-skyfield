@@ -37,13 +37,13 @@ class Star(object):
         self._compute_vectors()
 
     def observe_from(self, observer):
-        position, velocity = self._position, self._velocity
+        position, velocity = self._position_AU, self._velocity_AU_per_d
         jd = observer.jd
         dt = light_time_difference(position, observer.position.AU)
         if jd.shape:
-            position = (outer(velocity, T0 - jd.tdb - dt).T + position).T
+            position = (outer(velocity, jd.tdb + dt - T0).T + position).T
         else:
-            position = position + velocity * (T0 - jd.tdb - dt)
+            position = position + velocity * (jd.tdb + dt - T0)
         vector = position - observer.position.AU
         distance = length_of(vector)
         lighttime = distance / C_AUDAY
@@ -74,7 +74,7 @@ class Star(object):
         cdc = cos(d)
         sdc = sin(d)
 
-        self._position = array((
+        self._position_AU = array((
             dist * cdc * cra,
             dist * cdc * sra,
             dist * sdc,
@@ -94,7 +94,7 @@ class Star(object):
 
         # Transform motion vector to equatorial system.
 
-        self._velocity = array((
+        self._velocity_AU_per_d = array((
             - pmr * sra - pmd * sdc * cra + rvl * cdc * cra,
               pmr * cra - pmd * sdc * sra + rvl * cdc * sra,
               pmd * cdc + rvl * sdc,

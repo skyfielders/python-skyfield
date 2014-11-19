@@ -246,10 +246,10 @@ def test_star_vector():
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
                         ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
                         parallax_mas=7.56, radial_km_per_s=-17.4)
-    compare(star._position,
+    compare(star._position_AU,
             (276301.5236796437, 215517.39549460335, 27281454.187831223),
             1e3 * meter)
-    compare(star._velocity,
+    compare(star._velocity_AU_per_d,
             (-0.006595734315371152, 0.015163885823867606, -0.010102577482634966),
             1e-6 * meter)
 
@@ -1343,116 +1343,106 @@ def test_polaris_geocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
     e = de405.earth(jd)
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
-                        ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                        parallax_mas=0.0, radial_km_per_s=0.0)
-                      #  ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
-                      #  parallax_mas=7.56, radial_km_per_s=-17.4)
+                        ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
+                        parallax_mas=7.56, radial_km_per_s=-17.4)
 
     astrometric = e.observe(star)
     ra, dec, distance = astrometric.radec()
-    compare(ra.hours, 2.530301028001363, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.26410944399996, 0.001 * arcsecond)
+    compare(ra.hours, 2.528369749952934, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.26420848455291, 0.001 * arcsecond)
 
     apparent = astrometric.apparent()
     ra, dec, distance = apparent.radec()
-    compare(ra.hours, 2.524719460193264, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.25873029951381, 0.001 * arcsecond)
+    compare(ra.hours, 2.522801492978089, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.25882879505869, 0.001 * arcsecond)
 
     ra, dec, distance = apparent.radec(epoch='date')
-    compare(ra.hours, 2.040236665224029, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.11994064381352, 0.001 * arcsecond)
+    compare(ra.hours, 2.0385816433557027, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.11999387030946, 0.001 * arcsecond)
 
 def test_polaris_geocentric_date1():
     jd = JulianDate(tt=2448031.5)
     e = de405.earth(jd)
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
-                        ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                        parallax_mas=0.0, radial_km_per_s=0.0)
-                      #  ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
-                      #  parallax_mas=7.56, radial_km_per_s=-17.4)
+                        ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
+                        parallax_mas=7.56, radial_km_per_s=-17.4)
 
     astrometric = e.observe(star)
     ra, dec, distance = astrometric.radec()
-    compare(ra.hours, 2.530301028000439, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.26410944399974, 0.001 * arcsecond)
+    compare(ra.hours, 2.529691027594406, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.26413894692217, 0.001 * arcsecond)
 
     apparent = astrometric.apparent()
     ra, dec, distance = apparent.radec()
-    compare(ra.hours, 2.503966144530865, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.26198138358909, 0.001 * arcsecond)
+    compare(ra.hours, 2.5033568528110783, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.26201007627152, 0.001 * arcsecond)
 
     ra, dec, distance = apparent.radec(epoch='date')
-    compare(ra.hours, 2.333503732639098, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.22080555938845, 0.001 * arcsecond)
+    compare(ra.hours, 2.332921180528844, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.22082922133737, 0.001 * arcsecond)
 
 def test_polaris_geocentric_date2():
     jd = JulianDate(tt=2451545.0)
     e = de405.earth(jd)
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
-                        ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                        parallax_mas=0.0, radial_km_per_s=0.0)
-                      #  ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
-                      #  parallax_mas=7.56, radial_km_per_s=-17.4)
+                        ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
+                        parallax_mas=7.56, radial_km_per_s=-17.4)
 
     astrometric = e.observe(star)
     ra, dec, distance = astrometric.radec()
-    compare(ra.hours, 2.5303010279988305, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.26410944400011, 0.001 * arcsecond)
+    compare(ra.hours, 2.5302921882000122, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.26411027119273, 0.001 * arcsecond)
 
     apparent = astrometric.apparent()
     ra, dec, distance = apparent.radec()
-    compare(ra.hours, 2.544642100345669, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.26917791544086, 0.001 * arcsecond)
+    compare(ra.hours, 2.5446332154627274, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.26917874902797, 0.001 * arcsecond)
 
     ra, dec, distance = apparent.radec(epoch='date')
-    compare(ra.hours, 2.546007129239662, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.26697245019022, 0.001 * arcsecond)
+    compare(ra.hours, 2.5459982729094506, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.26697328449004, 0.001 * arcsecond)
 
 def test_polaris_geocentric_date3():
     jd = JulianDate(tt=2456164.5)
     e = de405.earth(jd)
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
-                        ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                        parallax_mas=0.0, radial_km_per_s=0.0)
-                      #  ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
-                      #  parallax_mas=7.56, radial_km_per_s=-17.4)
+                        ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
+                        parallax_mas=7.56, radial_km_per_s=-17.4)
 
     astrometric = e.observe(star)
     ra, dec, distance = astrometric.radec()
-    compare(ra.hours, 2.5303010280012863, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.26410944400013, 0.001 * arcsecond)
+    compare(ra.hours, 2.5311170656101485, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.26406906493732, 0.001 * arcsecond)
 
     apparent = astrometric.apparent()
     ra, dec, distance = apparent.radec()
-    compare(ra.hours, 2.540799426605146, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.2592745412168, 0.001 * arcsecond)
+    compare(ra.hours, 2.5416095337355356, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.25923373182653, 0.001 * arcsecond)
 
     ra, dec, distance = apparent.radec(epoch='date')
-    compare(ra.hours, 2.805616746944328, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.31374507601606, 0.001 * arcsecond)
+    compare(ra.hours, 2.806474133445645, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.3136939266471, 0.001 * arcsecond)
 
 def test_polaris_geocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     e = de405.earth(jd)
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
-                        ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                        parallax_mas=0.0, radial_km_per_s=0.0)
-                      #  ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
-                      #  parallax_mas=7.56, radial_km_per_s=-17.4)
+                        ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
+                        parallax_mas=7.56, radial_km_per_s=-17.4)
 
     astrometric = e.observe(star)
     ra, dec, distance = astrometric.radec()
-    compare(ra.hours, (2.530301028001363, 2.530301028000439, 2.5303010279988305, 2.5303010280012863), 0.001 * ra_arcsecond)
-    compare(dec.degrees, (89.26410944399996, 89.26410944399974, 89.26410944400011, 89.26410944400013), 0.001 * arcsecond)
+    compare(ra.hours, (2.528369749952934, 2.529691027594406, 2.5302921882000122, 2.5311170656101485), 0.001 * ra_arcsecond)
+    compare(dec.degrees, (89.26420848455291, 89.26413894692217, 89.26411027119273, 89.26406906493732), 0.001 * arcsecond)
 
     apparent = astrometric.apparent()
     ra, dec, distance = apparent.radec()
-    compare(ra.hours, (2.524719460193264, 2.503966144530865, 2.544642100345669, 2.540799426605146), 0.001 * ra_arcsecond)
-    compare(dec.degrees, (89.25873029951381, 89.26198138358909, 89.26917791544086, 89.2592745412168), 0.001 * arcsecond)
+    compare(ra.hours, (2.522801492978089, 2.5033568528110783, 2.5446332154627274, 2.5416095337355356), 0.001 * ra_arcsecond)
+    compare(dec.degrees, (89.25882879505869, 89.26201007627152, 89.26917874902797, 89.25923373182653), 0.001 * arcsecond)
 
     ra, dec, distance = apparent.radec(epoch='date')
-    compare(ra.hours, (2.040236665224029, 2.333503732639098, 2.546007129239662, 2.805616746944328), 0.001 * ra_arcsecond)
-    compare(dec.degrees, (89.11994064381352, 89.22080555938845, 89.26697245019022, 89.31374507601606), 0.001 * arcsecond)
+    compare(ra.hours, (2.0385816433557027, 2.332921180528844, 2.5459982729094506, 2.806474133445645), 0.001 * ra_arcsecond)
+    compare(dec.degrees, (89.11999387030946, 89.22082922133737, 89.26697328449004, 89.3136939266471), 0.001 * arcsecond)
 
 def test_mercury_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)

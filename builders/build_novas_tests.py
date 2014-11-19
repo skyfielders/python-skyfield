@@ -209,11 +209,11 @@ def output_subroutine_tests(dates):
             star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
                                 ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
                                 parallax_mas=7.56, radial_km_per_s=-17.4)
-            compare(star._position,
-                    {p},
+            compare(star._position_AU,
+                    {p!r},
                     1e3 * meter)
-            compare(star._velocity,
-                    {v},
+            compare(star._velocity_AU_per_d,
+                    {v!r},
                     1e-6 * meter)
         """)
 
@@ -277,8 +277,7 @@ def output_geocentric_tests(dates):
 
     polaris = novas.make_cat_entry(
         'POLARIS', 'HIP', 0, 2.530301028, 89.264109444,
-        0.0, 0.0, 0.0, 0.0)
-    #    44.22, -11.75, 7.56, -17.4)
+        44.22, -11.75, 7.56, -17.4)
 
     starlist = [('polaris', polaris)]
 
@@ -294,10 +293,8 @@ def output_geocentric_tests(dates):
             jd = JulianDate(tt={jd!r})
             e = de405.earth(jd)
             star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
-                                ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                                parallax_mas=0.0, radial_km_per_s=0.0)
-                              #  ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
-                              #  parallax_mas=7.56, radial_km_per_s=-17.4)
+                                ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
+                                parallax_mas=7.56, radial_km_per_s=-17.4)
 
             astrometric = e.observe(star)
             ra, dec, distance = astrometric.radec()
