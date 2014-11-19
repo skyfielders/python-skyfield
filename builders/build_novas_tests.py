@@ -273,6 +273,47 @@ def output_geocentric_tests(dates):
 
         """)
 
+    # And, one star.
+
+    polaris = novas.make_cat_entry(
+        'POLARIS', 'HIP', 0, 2.530301028, 89.264109444,
+        0.0, 0.0, 0.0, 0.0)
+    #    44.22, -11.75, 7.56, -17.4)
+
+    starlist = [('polaris', polaris)]
+
+    for (name, star), (i, jd) in product(starlist, enumerate(dates)):
+
+        ra1, dec1 = call(novas.astro_star, jd, star)
+        ra2, dec2 = call(novas.virtual_star, jd, star)
+        ra3, dec3 = call(novas.app_star, jd, star)
+
+        output(locals(), """\
+
+        def test_{name}_geocentric_date{i}():
+            jd = JulianDate(tt={jd!r})
+            e = de405.earth(jd)
+            star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
+                                ra_mas_per_year=0.0, dec_mas_per_year=0.0,
+                                parallax_mas=0.0, radial_km_per_s=0.0)
+                              #  ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
+                              #  parallax_mas=7.56, radial_km_per_s=-17.4)
+
+            astrometric = e.observe(star)
+            ra, dec, distance = astrometric.radec()
+            compare(ra.hours, {ra1!r}, 0.001 * ra_arcsecond)
+            compare(dec.degrees, {dec1!r}, 0.001 * arcsecond)
+
+            apparent = astrometric.apparent()
+            ra, dec, distance = apparent.radec()
+            compare(ra.hours, {ra2!r}, 0.001 * ra_arcsecond)
+            compare(dec.degrees, {dec2!r}, 0.001 * arcsecond)
+
+            ra, dec, distance = apparent.radec(epoch='date')
+            compare(ra.hours, {ra3!r}, 0.001 * ra_arcsecond)
+            compare(dec.degrees, {dec3!r}, 0.001 * arcsecond)
+
+        """)
 
 def output_topocentric_tests(dates):
     usno = novas.make_on_surface(38.9215, -77.0669, 92.0, 10.0, 1010.0)
