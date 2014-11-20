@@ -59,6 +59,16 @@ Good luck!
 Change Log
 ==========
 
+0.4
+---
+
+* To prevent confusion, the Julian date `~JulianDate.astimezone()`
+  and `~JulianDate.utc_datetime()` methods
+  have been changed to return only a ``datetime`` object.
+  If you also need a leap second flag returned,
+  call the new methods `~JulianDate.astimezone_and_leap_second()`
+  and `~JulianDate.utc_datetime_and_leap_second()`.
+
 0.3
 ---
 

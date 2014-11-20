@@ -161,19 +161,45 @@ class JulianDate(object):
     def astimezone(self, tz):
         """Return as a Python ``datetime`` in a ``pytz`` provided timezone.
 
-        Convert this Julian date to a UTC date and time.  The timezone
-        `tz` should be one of the timezones provided by the third-party
-        ``pytz`` package, which must be installed separately.  If this
-        Julian date is an array, then a sequence of datetimes is
-        returned instead of a single value.
+        Convert this Julian date to a ``datetime`` in the timezone `tz`,
+        which should be one of the timezones provided by the third-party
+        ``pytz`` package.  If this Julian date is an array, then an
+        array of datetimes is returned instead of a single value.
+
+        """
+        dt, leap_second = self.astimezone_and_leap_second(tz)
+        return dt
+
+    def astimezone_and_leap_second(self, tz):
+        """Return as a ``datetime`` plus leap second in a ``pytz`` timezone.
+
+        Convert this Julian date to a ``datetime`` and a leap second::
+
+            dt, leap_second = jd.astimezone_and_leap_second(tz)
+
+        The argument `tz` should be a timezone from the third-party
+        ``pytz`` package, which must be installed separately.  The date
+        and time returned will be for that time zone.
+
+        The leap second value is provided because a Python ``datetime``
+        can only number seconds ``0`` through ``59``, but leap seconds
+        have a designation of at least ``60``.  The leap second return
+        value will normally be ``0``, but will instead be ``1`` if the
+        date and time are a UTC leap second.  Add the leap second value
+        to the ``second`` field of the ``datetime`` to learn the real
+        name of the second.
+
+        If this Julian date is an array, then an array of ``datetime``
+        objects and an array of leap second integers is returned,
+        instead of a single value each.
 
         """
         dt, leap_second = self.utc_datetime_and_leap_second()
         normalize = getattr(tz, 'normalize', None)
         if self.shape and normalize is not None:
-            dt = [normalize(d.astimezone(tz)) for d in dt]
+            dt = array([normalize(d.astimezone(tz)) for d in dt])
         elif self.shape:
-            dt = [d.astimezone(tz) for d in dt]
+            dt = array([d.astimezone(tz) for d in dt])
         elif normalize is not None:
             dt = normalize(dt.astimezone(tz))
         else:
@@ -201,29 +227,31 @@ class JulianDate(object):
         sequence of datetimes is returned instead of a single value.
 
         """
-        year, month, day, hour, minute, second = self._utc_tuple(
-            _half_millisecond)
-        second, fraction = divmod(second, 1.0)
-        second = second.astype(int)
-        leap_second = second // 60
-        second -= leap_second
-        milli = (fraction * 1000).astype(int) * 1000
-        if self.shape:
-            utcs = [utc] * self.shape[0]
-            argsets = zip(year, month, day, hour, minute, second, milli, utcs)
-            dt = array([datetime(*args) for args in argsets])
-        else:
-            dt = datetime(year, month, day, hour, minute, second, milli, utc)
+        dt, leap_second = self.utc_datetime_and_leap_second()
         return dt
 
     def utc_datetime_and_leap_second(self):
-        """Return a Python ``datetime`` for this Julian, expressed as UTC.
+        """Return a ``datetime`` in UTC, plus a leap second value.
+
+        Convert this Julian date to a ``datetime`` and a leap second::
+
+            dt, leap_second = jd.utc_datetime_and_leap_second()
 
         If the third-party ``pytz`` package is available, then its
         ``utc`` timezone will be used as the timezone of the return
-        value.  Otherwise, an equivalent Skyfield ``utc`` timezone
-        object is used.  If this Julian date is an array, then a
-        sequence of datetimes is returned instead of a single value.
+        value.  Otherwise, Skyfield uses its own ``utc`` timezone.
+
+        The leap second value is provided because a Python ``datetime``
+        can only number seconds ``0`` through ``59``, but leap seconds
+        have a designation of at least ``60``.  The leap second return
+        value will normally be ``0``, but will instead be ``1`` if the
+        date and time are a UTC leap second.  Add the leap second value
+        to the ``second`` field of the ``datetime`` to learn the real
+        name of the second.
+
+        If this Julian date is an array, then an array of ``datetime``
+        objects and an array of leap second integers is returned,
+        instead of a single value each.
 
         """
         year, month, day, hour, minute, second = self._utc_tuple(

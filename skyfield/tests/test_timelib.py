@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from pytz import timezone
 from skyfield.constants import DAY_S
 from skyfield.timelib import JulianDate, utc
 from datetime import datetime
@@ -69,6 +70,30 @@ def test_early_utc():
     jd = JulianDate(utc=(1915, 12, 2, 3, 4, 5.6786786))
     assert abs(jd.tt - 2420833.6283317441) < epsilon
     assert jd.utc_iso() == '1915-12-02T03:04:06Z'
+
+def test_astimezone():
+    jd = JulianDate(utc=(1969, 7, 20, 20, 18))
+    tz = timezone('US/Eastern')
+    dt = jd.astimezone(tz)
+    assert dt == tz.localize(datetime(1969, 7, 20, 16, 18, 0, 0))
+
+def test_astimezone_and_leap_second():
+    jd = JulianDate(utc=(1969, 7, 20, 20, 18))
+    tz = timezone('US/Eastern')
+    dt, leap_second = jd.astimezone_and_leap_second(tz)
+    assert dt == tz.localize(datetime(1969, 7, 20, 16, 18, 0, 0))
+    assert leap_second == 0
+
+def test_utc_datetime():
+    jd = JulianDate(utc=(1969, 7, 20, 20, 18))
+    dt = jd.utc_datetime()
+    assert dt == datetime(1969, 7, 20, 20, 18, 0, 0, utc)
+
+def test_utc_datetime_and_leap_second():
+    jd = JulianDate(utc=(1969, 7, 20, 20, 18))
+    dt, leap_second = jd.utc_datetime_and_leap_second()
+    assert dt == datetime(1969, 7, 20, 20, 18, 0, 0, utc)
+    assert leap_second == 0
 
 def test_iso_of_decimal_that_rounds_up():
     jd = JulianDate(utc=(1915, 12, 2, 3, 4, 5.6786786))
