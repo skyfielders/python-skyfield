@@ -8,7 +8,7 @@ default JPL planetary ephemeris ``de421`` and create planet objects like
 import de421
 from datetime import datetime
 from .starlib import Star
-from .timelib import JulianDate, now, utc
+from .timelib import JulianDate, T0, now, utc
 from .units import Angle
 
 def build_ephemeris():
