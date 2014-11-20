@@ -36,6 +36,5 @@ setup(
         'de421==2008.1',
         'jplephem>=1.2',
         'numpy',
-        'requests>=1.2.3',
         'sgp4>=1.3',
         ])

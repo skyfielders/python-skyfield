@@ -1,7 +1,11 @@
-import requests
 import os
 from datetime import datetime, timedelta
 from numpy import load
+
+try:
+    from urllib.request import urlopen
+except:
+    from urllib2 import urlopen
 
 _missing = object()
 
@@ -49,10 +53,13 @@ def download_file(url, filename, days_old=0):
         if not is_days_old(filename, days_old):
             return
 
-    response = requests.get(url, stream=True)
+    response = urlopen(url)
     f = open(filename, 'wb')
-    for chunk in response.iter_content(1024):
-        f.write(chunk)
+    while True:
+        block = response.read(4096)
+        if not block:
+            break
+        f.write(block)
 
     f.close()
 

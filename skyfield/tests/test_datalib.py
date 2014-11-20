@@ -1,38 +1,35 @@
+import os
 from skyfield.io import download_file, is_days_old
 from datetime import datetime, timedelta
-import httpretty
-import os
+from mock import patch
 
-@httpretty.activate
+try:
+    from io import BytesIO
+except:
+    from StringIO import StringIO as BytesIO
+
 def test_simple_download():
-    httpretty.register_uri(httpretty.GET, 'http://foo.com/data.txt',
-                           body='FOOBAR')
+    with patch('skyfield.io.urlopen', lambda url: BytesIO(b'FOOBAR')):
+        download_file(url='http://foo.com/data.txt', filename='data.txt')
+        assert os.path.exists('data.txt')
+        assert open('data.txt', 'rb').read() == b'FOOBAR'
+        os.remove('data.txt')
 
-    download_file(url='http://foo.com/data.txt', filename='data.txt')
-    assert os.path.exists('data.txt')
-    assert open('data.txt', 'rb').read() == b'FOOBAR'
-    os.remove('data.txt')
-
-@httpretty.activate
 def test_simple_download_days_old_0():
-    httpretty.register_uri(httpretty.GET, 'http://foo.com/data.txt',
-                           body='FOOBAR')
-    write_file('data.txt', 'BAZ')
+    with patch('skyfield.io.urlopen', lambda url: BytesIO(b'FOOBAR')):
+        write_file('data.txt', 'BAZ')
+        download_file(url='http://foo.com/data.txt', filename='data.txt',
+                      days_old=0)
+        assert open('data.txt', 'rb').read() == b'FOOBAR'
+        os.remove('data.txt')
 
-    download_file(url='http://foo.com/data.txt', filename='data.txt', days_old=0)
-    assert open('data.txt', 'rb').read() == b'FOOBAR'
-    os.remove('data.txt')
-
-@httpretty.activate
 def test_simple_download_days_old_1():
-    httpretty.register_uri(httpretty.GET, 'http://foo.com/data.txt',
-                           body='FOOBAR')
-
-    write_file('data.txt', 'BAZ')
-
-    download_file(url='http://foo.com/data.txt', filename='data.txt', days_old=1)
-    assert open('data.txt', 'rb').read() == b'BAZ'
-    os.remove('data.txt')
+    with patch('skyfield.io.urlopen', lambda url: BytesIO(b'FOOBAR')):
+        write_file('data.txt', 'BAZ')
+        download_file(url='http://foo.com/data.txt', filename='data.txt',
+                      days_old=1)
+        assert open('data.txt', 'rb').read() == b'BAZ'
+        os.remove('data.txt')
 
 def test_is_days_old_true():
     write_file('data.txt', 'BAZ')

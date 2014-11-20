@@ -1,6 +1,6 @@
 astropy
 de405==1997.1
 de423==2010.1
-httpretty==0.6.3
+mock
 sphinx
 pytz
