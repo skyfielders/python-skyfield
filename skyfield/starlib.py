@@ -11,7 +11,7 @@ class Star(object):
 
     def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,
                  ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                 parallax_mas=0.0, radial_km_per_s=0.0):
+                 parallax_mas=0.0, radial_km_per_s=0.0, names=()):
 
         if ra_hours is not None:
             self.ra = Angle(hours=ra_hours)
@@ -33,8 +33,19 @@ class Star(object):
         self.dec_mas_per_year = dec_mas_per_year
         self.parallax_mas = parallax_mas
         self.radial_km_per_s = radial_km_per_s
+        self.names = names
 
         self._compute_vectors()
+
+    def __repr__(self):
+        opts = []
+        for name in ['ra_mas_per_year', 'dec_mas_per_year',
+                     'parallax_mas', 'radial_km_per_s', 'names']:
+            value = getattr(self, name)
+            if value:
+                opts.append(', {}={!r}'.format(name, value))
+        return 'Star(ra_hours={!r}, dec_degrees={!r}{})'.format(
+            self.ra.hours, self.dec.degrees, ''.join(opts))
 
     def observe_from(self, observer):
         position, velocity = self._position_AU, self._velocity_AU_per_d
