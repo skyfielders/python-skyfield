@@ -120,7 +120,7 @@ where `value` can be either a Python float or a NumPy array of floats"""
 class Angle(object):
 
     def __init__(self, angle=None, radians=None, degrees=None, hours=None,
-                 preference='degrees', signed=False):
+                 preference=None, signed=False):
 
         if angle is not None:
             if not isinstance(angle, Angle):
@@ -134,8 +134,9 @@ class Angle(object):
         elif hours is not None:
             self._hours = hours = _unsexagesimalize(hours)
             self.radians = hours * _from_hours
+            preference = 'hours'
 
-        self.preference = preference
+        self.preference = preference or 'degrees'
         self.signed = signed
 
     def __getattr__(self, name):
