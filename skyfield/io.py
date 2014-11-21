@@ -22,7 +22,7 @@ class Cache(object):
         if days_old is None:
             days_old = self.days_old
         download_file(url, path, days_old)
-        return open(path)
+        return open(path, 'rb')
 
     def run(self, function):
         """Return the result of running `function(this_cache)` one time only.
