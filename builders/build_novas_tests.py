@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 from itertools import product
+from numpy import array
 from sys import exit
 from textwrap import dedent
 
@@ -222,11 +223,11 @@ def output_subroutine_tests(dates):
     atp = product([-5, -1, 15, 89.95], [10, 25], [1010, 1013.25])
     for i, (angle, temperature, pressure) in enumerate(atp):
         location = novas.make_on_surface(0.0, 0.0, 0, temperature, pressure)
-        alt = novas.refract(location, 90 - angle, 2)
+        r = novas.refract(location, 90 - angle, 2)
         output(locals(), """\
-            def test_refract{i}():
-                alt = earthlib.diffract({angle}, {temperature}, {pressure})
-                compare(alt, {alt}, 0.001 * arcsecond)
+            def test_refraction{i}():
+                r = earthlib.refraction({angle}, {temperature}, {pressure})
+                compare(r, {r}, 0.001 * arcsecond)
             """)
 
     for i, (tt, delta_t) in enumerate(zip(date_floats, delta_t_floats)):
@@ -332,7 +333,7 @@ def output_topocentric_tests(dates):
 
         ra1, dec1, distance1 = call(novas.local_planet, jd, 0.0, obj, usno)
         ra2, dec2, distance2 = call(novas.topo_planet, jd, 0.0, obj, usno)
-        alt, az = call(altaz_maneuver, jd, obj, usno)
+        alt, az = call(altaz_maneuver, jd, usno, ra2, dec2)
 
         output(locals(), """\
 
@@ -378,22 +379,23 @@ def output_catalog_tests(dates):
         """)
 
 
-def altaz_maneuver(jd, obj, place):
+def altaz_maneuver(jd, place, ra, dec):
     """Simplify a pair of complicated USNO calls to a single callable."""
     xp = yp = 0.0
-    ra, dec, distance = novas.topo_planet(jd, 0.0, obj, place)
     (zd, az), (ra, dec) = novas.equ2hor(jd, 0.0, xp, yp, place, ra, dec)
     return 90.0 - zd, az
 
 
-def call(function, jd, *args):
-    """Call function either once, or as many times as `jd` dictates."""
+def call(function, *args):
+    """Call function as many times as any array arguments dictate."""
 
-    if isinstance(jd, float):
-        return function(jd, *args)
-
-    answers = [function(n, *args) for n in jd]
-    return zip(*answers)
+    length = max(len(arg) if hasattr(arg, '__len__') else 0 for arg in args)
+    if not length:
+        return function(*args)
+    argstacks = [(arg if hasattr(arg, '__len__') else [arg] * length)
+                 for arg in args]
+    answers = [function(*arglist) for arglist in zip(*argstacks)]
+    return list(zip(*answers))
 
 
 def output(dictionary, template):

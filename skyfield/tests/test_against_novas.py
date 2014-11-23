@@ -254,69 +254,69 @@ def test_star_vector():
             (-0.006595734315371152, 0.015163885823867606, -0.010102577482634966),
             1e-6 * meter)
 
-def test_refract0():
-    alt = earthlib.diffract(-5, 10, 1010)
-    compare(alt, 0.0, 0.001 * arcsecond)
+def test_refraction0():
+    r = earthlib.refraction(-5, 10, 1010)
+    compare(r, 0.0, 0.001 * arcsecond)
 
-def test_refract1():
-    alt = earthlib.diffract(-5, 10, 1013.25)
-    compare(alt, 0.0, 0.001 * arcsecond)
+def test_refraction1():
+    r = earthlib.refraction(-5, 10, 1013.25)
+    compare(r, 0.0, 0.001 * arcsecond)
 
-def test_refract2():
-    alt = earthlib.diffract(-5, 25, 1010)
-    compare(alt, 0.0, 0.001 * arcsecond)
+def test_refraction2():
+    r = earthlib.refraction(-5, 25, 1010)
+    compare(r, 0.0, 0.001 * arcsecond)
 
-def test_refract3():
-    alt = earthlib.diffract(-5, 25, 1013.25)
-    compare(alt, 0.0, 0.001 * arcsecond)
+def test_refraction3():
+    r = earthlib.refraction(-5, 25, 1013.25)
+    compare(r, 0.0, 0.001 * arcsecond)
 
-def test_refract4():
-    alt = earthlib.diffract(-1, 10, 1010)
-    compare(alt, 0.8296919418249878, 0.001 * arcsecond)
+def test_refraction4():
+    r = earthlib.refraction(-1, 10, 1010)
+    compare(r, 0.8296919418249878, 0.001 * arcsecond)
 
-def test_refract5():
-    alt = earthlib.diffract(-1, 10, 1013.25)
-    compare(alt, 0.8323617426278901, 0.001 * arcsecond)
+def test_refraction5():
+    r = earthlib.refraction(-1, 10, 1013.25)
+    compare(r, 0.8323617426278901, 0.001 * arcsecond)
 
-def test_refract6():
-    alt = earthlib.diffract(-1, 25, 1010)
-    compare(alt, 0.7879289246190321, 0.001 * arcsecond)
+def test_refraction6():
+    r = earthlib.refraction(-1, 25, 1010)
+    compare(r, 0.7879289246190321, 0.001 * arcsecond)
 
-def test_refract7():
-    alt = earthlib.diffract(-1, 25, 1013.25)
-    compare(alt, 0.7904643394754794, 0.001 * arcsecond)
+def test_refraction7():
+    r = earthlib.refraction(-1, 25, 1013.25)
+    compare(r, 0.7904643394754794, 0.001 * arcsecond)
 
-def test_refract8():
-    alt = earthlib.diffract(15, 10, 1010)
-    compare(alt, 0.06056215494995108, 0.001 * arcsecond)
+def test_refraction8():
+    r = earthlib.refraction(15, 10, 1010)
+    compare(r, 0.06056215494995108, 0.001 * arcsecond)
 
-def test_refract9():
-    alt = earthlib.diffract(15, 10, 1013.25)
-    compare(alt, 0.06075703317132469, 0.001 * arcsecond)
+def test_refraction9():
+    r = earthlib.refraction(15, 10, 1013.25)
+    compare(r, 0.06075703317132469, 0.001 * arcsecond)
 
-def test_refract10():
-    alt = earthlib.diffract(15, 25, 1010)
-    compare(alt, 0.057513724331664955, 0.001 * arcsecond)
+def test_refraction10():
+    r = earthlib.refraction(15, 25, 1010)
+    compare(r, 0.057513724331664955, 0.001 * arcsecond)
 
-def test_refract11():
-    alt = earthlib.diffract(15, 25, 1013.25)
-    compare(alt, 0.057698793246593584, 0.001 * arcsecond)
+def test_refraction11():
+    r = earthlib.refraction(15, 25, 1013.25)
+    compare(r, 0.057698793246593584, 0.001 * arcsecond)
 
-def test_refract12():
-    alt = earthlib.diffract(89.95, 10, 1010)
-    compare(alt, 0.0, 0.001 * arcsecond)
+def test_refraction12():
+    r = earthlib.refraction(89.95, 10, 1010)
+    compare(r, 0.0, 0.001 * arcsecond)
 
-def test_refract13():
-    alt = earthlib.diffract(89.95, 10, 1013.25)
-    compare(alt, 0.0, 0.001 * arcsecond)
+def test_refraction13():
+    r = earthlib.refraction(89.95, 10, 1013.25)
+    compare(r, 0.0, 0.001 * arcsecond)
 
-def test_refract14():
-    alt = earthlib.diffract(89.95, 25, 1010)
-    compare(alt, 0.0, 0.001 * arcsecond)
+def test_refraction14():
+    r = earthlib.refraction(89.95, 25, 1010)
+    compare(r, 0.0, 0.001 * arcsecond)
 
-def test_refract15():
-    alt = earthlib.diffract(89.95, 25, 1013.25)
-    compare(alt, 0.0, 0.001 * arcsecond)
+def test_refraction15():
+    r = earthlib.refraction(89.95, 25, 1013.25)
+    compare(r, 0.0, 0.001 * arcsecond)
 
 def test_ITRF_to_GCRS_conversion_on_date0():
     jd = JulianDate(tt=2440423.345833333, delta_t=39.707)

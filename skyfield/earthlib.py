@@ -1,7 +1,7 @@
 """Formulae for specific earth behaviors and effects."""
 
-from numpy import (arcsin, arccos, array, clip, cos, einsum, exp, fmod,
-                   minimum, pi, sin, sqrt, tan, zeros_like)
+from numpy import (abs, arcsin, arccos, array, clip, cos, einsum, exp, fmod,
+                   minimum, pi, sin, sqrt, tan, where, zeros_like)
 
 from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
                         IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0)
@@ -169,10 +169,28 @@ def earth_rotation_angle(jd_ut1):
     return (thet1 + thet3) % 1.0 * 360.0
 
 
-def diffract(alt, temperature_C, pressure_mbar):
+def refraction(alt, temperature_C, pressure_mbar):
+    """Given an observed altitude, return how much the image is refracted.
+
+    Zero refraction is returned both for objects very near the zenith,
+    as well as for objects more than one degree below the horizon.
+
+    """
+    # const double s = 9.1e3;
     # if pressure_mbar == 'standard':
     #     pressure_mbar = 1010.0 * exp(-location->height / s)
-    if not -1.0 <= alt <= 89.9:
-        return 0.0
     r = 0.016667 / tan((alt + 7.31 / (alt + 4.4)) * DEG2RAD)
-    return r * (0.28 * pressure_mbar / (temperature_C + 273.0))
+    d = r * (0.28 * pressure_mbar / (temperature_C + 273.0))
+    return where(-1.0 <= alt <= 89.9, d, 0.0)
+
+
+def unrefract(alt, temperature_C, pressure_mbar):
+    """Determine the real altitude that would result in the observed `alt`."""
+    alt0 = alt
+    while True:
+        alt1 = alt
+        alt = alt0 + refraction(alt, temperature_C, pressure_mbar)
+        converged = abs(alt - alt1) <= 3.0e-5
+        if converged.all():
+            break
+    return alt
