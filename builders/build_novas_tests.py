@@ -219,6 +219,16 @@ def output_subroutine_tests(dates):
                     1e-6 * meter)
         """)
 
+    atp = product([-5, -1, 15, 89.95], [10, 25], [1010, 1013.25])
+    for i, (angle, temperature, pressure) in enumerate(atp):
+        location = novas.make_on_surface(0.0, 0.0, 0, temperature, pressure)
+        alt = novas.refract(location, 90 - angle, 2)
+        output(locals(), """\
+            def test_refract{i}():
+                alt = earthlib.diffract({angle}, {temperature}, {pressure})
+                compare(alt, {alt}, 0.001 * arcsecond)
+            """)
+
     for i, (tt, delta_t) in enumerate(zip(date_floats, delta_t_floats)):
         jd_low = xp = yp = 0.0
         vector = [1.1, 1.2, 1.3]
@@ -314,6 +324,7 @@ def output_geocentric_tests(dates):
 
         """)
 
+
 def output_topocentric_tests(dates):
     usno = novas.make_on_surface(38.9215, -77.0669, 92.0, 10.0, 1010.0)
     for (planet, code), (i, jd) in product(planets, enumerate(dates)):
@@ -365,6 +376,7 @@ def output_catalog_tests(dates):
             compare(dec.degrees, {dec!r}, 0.001 * arcsecond)
 
         """)
+
 
 def altaz_maneuver(jd, obj, place):
     """Simplify a pair of complicated USNO calls to a single callable."""

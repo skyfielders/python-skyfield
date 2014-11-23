@@ -1,7 +1,7 @@
 """Formulae for specific earth behaviors and effects."""
 
-from numpy import (arcsin, arccos, array, clip, cos, einsum, fmod,
-                   minimum, pi, sin, sqrt, zeros_like)
+from numpy import (arcsin, arccos, array, clip, cos, einsum, exp, fmod,
+                   minimum, pi, sin, sqrt, tan, zeros_like)
 
 from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
                         IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0)
@@ -167,3 +167,12 @@ def earth_rotation_angle(jd_ut1):
     thet1 = 0.7790572732640 + 0.00273781191135448 * (jd_ut1 - T0)
     thet3 = jd_ut1 % 1.0
     return (thet1 + thet3) % 1.0 * 360.0
+
+
+def diffract(alt, temperature_C, pressure_mbar):
+    # if pressure_mbar == 'standard':
+    #     pressure_mbar = 1010.0 * exp(-location->height / s)
+    if not -1.0 <= alt <= 89.9:
+        return 0.0
+    r = 0.016667 / tan((alt + 7.31 / (alt + 4.4)) * DEG2RAD)
+    return r * (0.28 * pressure_mbar / (temperature_C + 273.0))
