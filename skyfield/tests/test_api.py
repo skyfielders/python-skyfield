@@ -1,5 +1,6 @@
 """Basic tests of the Skyfield API module and its contents."""
 
+import assay
 from skyfield import api
 from skyfield import positionlib
 
@@ -7,6 +8,10 @@ def test_whether_planets_have_radii():
     assert api.mercury.radius.km == 2440.0
     for planet in api.nine_planets:
         assert planet.radius.km > 0.0
+
+def test_sending_jd_that_is_not_a_julian_date():
+    with assay.raises(ValueError, 'your "jd" argument is not a JulianDate: '):
+        api.earth('blah')
 
 def test_apparent_position_class():
     p = api.earth(utc=(2014, 2, 9, 14, 50)).observe(api.mars).apparent()

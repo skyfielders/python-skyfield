@@ -62,8 +62,9 @@ def takes_julian_date(function):
         if jd is None:
             jd = JulianDate(utc=utc, tai=tai, tt=tt,
                             delta_t=delta_t, cache=cache)
-        else:
-            pass  # TODO: verify that they provided a JulianDate instance
+        elif not isinstance(jd, JulianDate):
+            s = 'your "jd" argument is not a JulianDate: {!r}'.format(jd)
+            raise ValueError(s)
         return function(self, jd)
     wrapper.__name__ = function.__name__
     synopsis, blank_line, description = function.__doc__.partition('\n\n')
