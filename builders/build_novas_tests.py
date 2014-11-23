@@ -73,7 +73,7 @@ def main():
     output_subroutine_tests(dates)
     output_geocentric_tests(dates)
     output_topocentric_tests(dates)
-    output_catalog_tests()
+    output_catalog_tests(dates)
 
 
 def output_subroutine_tests(dates):
@@ -345,22 +345,26 @@ def output_topocentric_tests(dates):
         """)
 
 
-def output_catalog_tests():
+def output_catalog_tests(dates):
     polaris1991 = novas.make_cat_entry(
         '11767', 'HIP', 0, 0.0, 89.26413805,
         44.22, -11.74, 7.56, 0.0)
     polaris1991.ra = 37.94614689  # HIP uses degrees, not hours
     polaris = novas.transform_hip(polaris1991)
+    for i, jd in enumerate(dates):
+        ra, dec = call(novas.astro_star, jd, polaris)
+        output(locals(), r"""
 
-    output(locals(), r"""
+        def test_hipparcos_conversion{i}():
+            line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
+            star = hipparcos.parse(line)
+            compare(star.ra.hours, {polaris.ra!r}, 0.001 * ra_arcsecond)
+            compare(star.dec.degrees, {polaris.dec!r}, 0.001 * arcsecond)
+            ra, dec, distance = de405.earth(tt={jd}).observe(star).radec()
+            compare(ra.hours, {ra!r}, 0.001 * ra_arcsecond)
+            compare(dec.degrees, {dec!r}, 0.001 * arcsecond)
 
-    def test_hipparcos_conversion():
-        line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
-        star = hipparcos.parse(line)
-        compare(star.ra.hours, {polaris.ra!r}, 0.001 * ra_arcsecond)
-        compare(star.dec.degrees, {polaris.dec!r}, 0.001 * arcsecond)
-
-    """)
+        """)
 
 def altaz_maneuver(jd, obj, place):
     """Simplify a pair of complicated USNO calls to a single callable."""

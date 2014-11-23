@@ -2295,9 +2295,48 @@ def test_moon_topocentric_date4():
     compare(alt.degrees, (41.920401350253684, -47.74510120858724, 36.381265580736006, 28.439387966372543), 0.001 * arcsecond)
     compare(az.degrees, (151.19707488767648, 338.1329529181222, 156.2971102404722, 191.294974272018), 0.001 * arcsecond)
 
-def test_hipparcos_conversion():
+def test_hipparcos_conversion0():
     line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
     star = hipparcos.parse(line)
     compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
     compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
+    ra, dec, distance = de405.earth(tt=2440423.345833333).observe(star).radec()
+    compare(ra.hours, 2.528369700052897, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.26420852419295, 0.001 * arcsecond)
+
+def test_hipparcos_conversion1():
+    line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
+    star = hipparcos.parse(line)
+    compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
+    compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
+    ra, dec, distance = de405.earth(tt=2448031.5).observe(star).radec()
+    compare(ra.hours, 2.5296910104479484, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.26413900274704, 0.001 * arcsecond)
+
+def test_hipparcos_conversion2():
+    line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
+    star = hipparcos.parse(line)
+    compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
+    compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
+    ra, dec, distance = de405.earth(tt=2451545.0).observe(star).radec()
+    compare(ra.hours, 2.5302921836971946, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.26411033462212, 0.001 * arcsecond)
+
+def test_hipparcos_conversion3():
+    line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
+    star = hipparcos.parse(line)
+    compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
+    compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
+    ra, dec, distance = de405.earth(tt=2456164.5).observe(star).radec()
+    compare(ra.hours, 2.53111707532574, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.2640691384828, 0.001 * arcsecond)
+
+def test_hipparcos_conversion4():
+    line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
+    star = hipparcos.parse(line)
+    compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
+    compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
+    ra, dec, distance = de405.earth(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5]).observe(star).radec()
+    compare(ra.hours, (2.528369700052897, 2.5296910104479484, 2.5302921836971946, 2.53111707532574), 0.001 * ra_arcsecond)
+    compare(dec.degrees, (89.26420852419295, 89.26413900274704, 89.26411033462212, 89.2640691384828), 0.001 * arcsecond)
 
