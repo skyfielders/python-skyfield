@@ -318,6 +318,38 @@ def test_refraction15():
     r = earthlib.refraction(89.95, 25, 1013.25)
     compare(r, 0.0, 0.001 * arcsecond)
 
+def test_refract0():
+    alt = earthlib.refract(-90, 10.0, 1010.0)
+    compare(alt, -90.0, 0.000000001 * arcsecond)
+
+def test_refract1():
+    alt = earthlib.refract(-2, 10.0, 1010.0)
+    compare(alt, -2.0, 0.000000001 * arcsecond)
+
+def test_refract2():
+    alt = earthlib.refract(-1, 10.0, 1010.0)
+    compare(alt, -0.34540033564054795, 0.000000001 * arcsecond)
+
+def test_refract3():
+    alt = earthlib.refract(0, 10.0, 1010.0)
+    compare(alt, 0.4819388815393779, 0.000000001 * arcsecond)
+
+def test_refract4():
+    alt = earthlib.refract(1, 10.0, 1010.0)
+    compare(alt, 1.362447444478633, 0.000000001 * arcsecond)
+
+def test_refract5():
+    alt = earthlib.refract(3, 10.0, 1010.0)
+    compare(alt, 3.227564692764261, 0.000000001 * arcsecond)
+
+def test_refract6():
+    alt = earthlib.refract(9, 10.0, 1010.0)
+    compare(alt, 9.098059272393698, 0.000000001 * arcsecond)
+
+def test_refract7():
+    alt = earthlib.refract(90, 10.0, 1010.0)
+    compare(alt, 90.0, 0.000000001 * arcsecond)
+
 def test_ITRF_to_GCRS_conversion_on_date0():
     jd = JulianDate(tt=2440423.345833333, delta_t=39.707)
     position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])

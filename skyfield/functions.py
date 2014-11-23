@@ -36,6 +36,19 @@ def to_polar(xyz):
     phi = arctan2(y, x) % tau
     return r, theta, phi
 
+def from_polar(r, theta, phi):
+    """Convert ``(r, theta, phi)`` to Cartesian coordinates ``[x y z]``.
+
+    ``r`` - vector length
+    ``theta`` - angle above (+) or below (-) the xy-plane
+    ``phi`` - angle around the z-axis
+
+    The order of the three arguments is intended to match ISO 31-11.
+
+    """
+    rxy = r * cos(phi)
+    return array((rxy * cos(theta), rxy * sin(theta), r * sin(phi)))
+
 def spin_x(theta):
     z = zeros_like(theta)
     u = ones_like(theta)

@@ -221,6 +221,7 @@ def output_subroutine_tests(dates):
         """)
 
     atp = product([-5, -1, 15, 89.95], [10, 25], [1010, 1013.25])
+
     for i, (angle, temperature, pressure) in enumerate(atp):
         location = novas.make_on_surface(0.0, 0.0, 0, temperature, pressure)
         r = novas.refract(location, 90 - angle, 2)
@@ -228,6 +229,16 @@ def output_subroutine_tests(dates):
             def test_refraction{i}():
                 r = earthlib.refraction({angle}, {temperature}, {pressure})
                 compare(r, {r}, 0.001 * arcsecond)
+            """)
+
+    northpole = novas.make_on_surface(90.0, 0.0, 0.0, 10.0, 1010.0)
+
+    for i, angle in enumerate([-90, -2, -1, 0, 1, 3, 9, 90]):
+        alt, az = altaz_maneuver(T0, northpole, 0.0, angle, ref=2)
+        output(locals(), """\
+            def test_refract{i}():
+                alt = earthlib.refract({angle!r}, 10.0, 1010.0)
+                compare(alt, {alt!r}, 0.000000001 * arcsecond)
             """)
 
     for i, (tt, delta_t) in enumerate(zip(date_floats, delta_t_floats)):
@@ -379,10 +390,10 @@ def output_catalog_tests(dates):
         """)
 
 
-def altaz_maneuver(jd, place, ra, dec):
+def altaz_maneuver(jd, place, ra, dec, ref=0):
     """Simplify a pair of complicated USNO calls to a single callable."""
     xp = yp = 0.0
-    (zd, az), (ra, dec) = novas.equ2hor(jd, 0.0, xp, yp, place, ra, dec)
+    (zd, az), (ra, dec) = novas.equ2hor(jd, 0.0, xp, yp, place, ra, dec, ref)
     return 90.0 - zd, az
 
 

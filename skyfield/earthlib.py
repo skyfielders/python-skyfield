@@ -169,7 +169,7 @@ def earth_rotation_angle(jd_ut1):
     return (thet1 + thet3) % 1.0 * 360.0
 
 
-def refraction(alt, temperature_C, pressure_mbar):
+def refraction(alt_degrees, temperature_C, pressure_mbar):
     """Given an observed altitude, return how much the image is refracted.
 
     Zero refraction is returned both for objects very near the zenith,
@@ -179,17 +179,17 @@ def refraction(alt, temperature_C, pressure_mbar):
     # const double s = 9.1e3;
     # if pressure_mbar == 'standard':
     #     pressure_mbar = 1010.0 * exp(-location->height / s)
-    r = 0.016667 / tan((alt + 7.31 / (alt + 4.4)) * DEG2RAD)
+    r = 0.016667 / tan((alt_degrees + 7.31 / (alt_degrees + 4.4)) * DEG2RAD)
     d = r * (0.28 * pressure_mbar / (temperature_C + 273.0))
-    return where(-1.0 <= alt <= 89.9, d, 0.0)
+    return where(-1.0 <= alt_degrees <= 89.9, d, 0.0)
 
 
-def unrefract(alt, temperature_C, pressure_mbar):
-    """Determine the real altitude that would result in the observed `alt`."""
-    alt0 = alt
+def refract(alt_degrees, temperature_C, pressure_mbar):
+    """Given an unrefracted `alt` determine where it will appear in the sky."""
+    alt = alt_degrees
     while True:
         alt1 = alt
-        alt = alt0 + refraction(alt, temperature_C, pressure_mbar)
+        alt = alt_degrees + refraction(alt, temperature_C, pressure_mbar)
         converged = abs(alt - alt1) <= 3.0e-5
         if converged.all():
             break
