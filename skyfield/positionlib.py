@@ -1,11 +1,11 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, cos, einsum, pi, sin
+from numpy import array, cos, einsum, exp, pi, sin
 
-from .constants import ASEC2RAD, T0, TAU
+from .constants import ASEC2RAD, RAD2DEG, T0, TAU
 from .functions import dots, length_of, rot_x, spin_x, to_polar
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
-                       sidereal_time)
+                       refract, sidereal_time)
 from .nutationlib import mean_obliquity
 from .relativity import add_aberration, add_deflection
 from .timelib import JulianDate, takes_julian_date
@@ -241,7 +241,7 @@ class Apparent(ICRS):
     but belongs to a GCRS-like system centered on that observer instead.
 
     """
-    def altaz(self):
+    def altaz(self, temperature_C=None, pressure_mbar='standard'):
         """Return the position as a tuple ``(alt, az, distance)``.
 
         `alt` - Altitude in degrees above the horizon.
@@ -276,7 +276,18 @@ class Apparent(ICRS):
         position_AU = array([pn, -pw, pz])
 
         r_AU, alt, az = to_polar(position_AU)
-        return Angle(radians=alt), Angle(radians=az), Distance(r_AU)
+
+        if temperature_C is None:
+            alt = Angle(radians=alt)
+        else:
+            if temperature_C == 'standard':
+                temperature_C = 10.0
+            if pressure_mbar == 'standard':
+                pressure_mbar = 1010.0 * exp(-topos.elevation.m / 9.1e3)
+            alt = refract(alt * RAD2DEG, temperature_C, pressure_mbar)
+            alt = Angle(degrees=alt)
+
+        return alt, Angle(radians=az), Distance(r_AU)
 
 class Geocentric(ICRS):
     """A position referred to the GCRS as measured from the geocenter."""

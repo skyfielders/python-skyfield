@@ -339,12 +339,15 @@ def output_geocentric_tests(dates):
 
 def output_topocentric_tests(dates):
     usno = novas.make_on_surface(38.9215, -77.0669, 92.0, 10.0, 1010.0)
+
     for (planet, code), (i, jd) in product(planets, enumerate(dates)):
         obj = novas.make_object(0, code, 'planet{}'.format(code), None)
 
         ra1, dec1, distance1 = call(novas.local_planet, jd, 0.0, obj, usno)
         ra2, dec2, distance2 = call(novas.topo_planet, jd, 0.0, obj, usno)
         alt, az = call(altaz_maneuver, jd, usno, ra2, dec2)
+        alt2, az2 = call(altaz_maneuver, jd, usno, ra2, dec2, 1)
+        alt3, az3 = call(altaz_maneuver, jd, usno, ra2, dec2, 2)
 
         output(locals(), """\
 
@@ -364,6 +367,14 @@ def output_topocentric_tests(dates):
             alt, az, distance = apparent.altaz()
             compare(alt.degrees, {alt!r}, 0.001 * arcsecond)
             compare(az.degrees, {az!r}, 0.001 * arcsecond)
+
+            alt, az, distance = apparent.altaz('standard')
+            compare(alt.degrees, {alt2!r}, 0.001 * arcsecond)
+            compare(az.degrees, {az2!r}, 0.001 * arcsecond)
+
+            alt, az, distance = apparent.altaz(10.0, 1010.0)
+            compare(alt.degrees, {alt3!r}, 0.001 * arcsecond)
+            compare(az.degrees, {az3!r}, 0.001 * arcsecond)
 
         """)
 

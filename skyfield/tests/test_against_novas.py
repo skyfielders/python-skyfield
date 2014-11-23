@@ -1558,6 +1558,14 @@ def test_mercury_topocentric_date0():
     compare(alt.degrees, 46.32122675660419, 0.001 * arcsecond)
     compare(az.degrees, 262.1859052156761, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 46.33688339908464, 0.001 * arcsecond)
+    compare(az.degrees, 262.1859052156761, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 46.33704240111, 0.001 * arcsecond)
+    compare(az.degrees, 262.1859052156761, 0.001 * arcsecond)
+
 def test_mercury_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1572,6 +1580,14 @@ def test_mercury_topocentric_date1():
     compare(dec.degrees, 11.205182598299665, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -17.340667089884377, 0.001 * arcsecond)
+    compare(az.degrees, 300.9176579181716, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -17.340667089884377, 0.001 * arcsecond)
+    compare(az.degrees, 300.9176579181716, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -17.340667089884377, 0.001 * arcsecond)
     compare(az.degrees, 300.9176579181716, 0.001 * arcsecond)
 
@@ -1592,6 +1608,14 @@ def test_mercury_topocentric_date2():
     compare(alt.degrees, -0.12765060376707993, 0.001 * arcsecond)
     compare(az.degrees, 121.97764361867154, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 0.36890915770102595, 0.001 * arcsecond)
+    compare(az.degrees, 121.97764361867154, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 0.3731892291678207, 0.001 * arcsecond)
+    compare(az.degrees, 121.97764361867154, 0.001 * arcsecond)
+
 def test_mercury_topocentric_date3():
     jd = JulianDate(tt=2456164.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1606,6 +1630,14 @@ def test_mercury_topocentric_date3():
     compare(dec.degrees, 16.630243128506475, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -9.116616855755936, 0.001 * arcsecond)
+    compare(az.degrees, 300.14202643731034, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -9.116616855755936, 0.001 * arcsecond)
+    compare(az.degrees, 300.14202643731034, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -9.116616855755936, 0.001 * arcsecond)
     compare(az.degrees, 300.14202643731034, 0.001 * arcsecond)
 
@@ -1626,6 +1658,14 @@ def test_mercury_topocentric_date4():
     compare(alt.degrees, (46.32122675660419, -17.340667089884377, -0.12765060376707993, -9.116616855755936), 0.001 * arcsecond)
     compare(az.degrees, (262.1859052156761, 300.9176579181716, 121.97764361867154, 300.14202643731034), 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, (46.33688339908464, -17.340667089884377, 0.36890915770102595, -9.116616855755936), 0.001 * arcsecond)
+    compare(az.degrees, (262.1859052156761, 300.9176579181716, 121.97764361867154, 300.14202643731034), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, (46.33704240111, -17.340667089884377, 0.3731892291678207, -9.116616855755936), 0.001 * arcsecond)
+    compare(az.degrees, (262.1859052156761, 300.9176579181716, 121.97764361867154, 300.14202643731034), 0.001 * arcsecond)
+
 def test_venus_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1643,6 +1683,14 @@ def test_venus_topocentric_date0():
     compare(alt.degrees, 11.152374062991527, 0.001 * arcsecond)
     compare(az.degrees, 287.0030740239525, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 11.231992752470703, 0.001 * arcsecond)
+    compare(az.degrees, 287.0030740239525, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 11.23279626216302, 0.001 * arcsecond)
+    compare(az.degrees, 287.0030740239525, 0.001 * arcsecond)
+
 def test_venus_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1657,6 +1705,14 @@ def test_venus_topocentric_date1():
     compare(dec.degrees, 5.275819541572406, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -34.134914076462266, 0.001 * arcsecond)
+    compare(az.degrees, 313.64872862118426, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -34.134914076462266, 0.001 * arcsecond)
+    compare(az.degrees, 313.64872862118426, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -34.134914076462266, 0.001 * arcsecond)
     compare(az.degrees, 313.64872862118426, 0.001 * arcsecond)
 
@@ -1677,6 +1733,14 @@ def test_venus_topocentric_date2():
     compare(alt.degrees, 23.228910604670872, 0.001 * arcsecond)
     compare(az.degrees, 142.11613981416264, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 23.266773672986062, 0.001 * arcsecond)
+    compare(az.degrees, 142.11613981416264, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 23.267157712313733, 0.001 * arcsecond)
+    compare(az.degrees, 142.11613981416264, 0.001 * arcsecond)
+
 def test_venus_topocentric_date3():
     jd = JulianDate(tt=2456164.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1691,6 +1755,14 @@ def test_venus_topocentric_date3():
     compare(dec.degrees, 19.84914957337174, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -24.35999541091543, 0.001 * arcsecond)
+    compare(az.degrees, 327.640588969984, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -24.35999541091543, 0.001 * arcsecond)
+    compare(az.degrees, 327.640588969984, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -24.35999541091543, 0.001 * arcsecond)
     compare(az.degrees, 327.640588969984, 0.001 * arcsecond)
 
@@ -1711,6 +1783,14 @@ def test_venus_topocentric_date4():
     compare(alt.degrees, (11.152374062991527, -34.134914076462266, 23.228910604670872, -24.35999541091543), 0.001 * arcsecond)
     compare(az.degrees, (287.0030740239525, 313.64872862118426, 142.11613981416264, 327.640588969984), 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, (11.231992752470703, -34.134914076462266, 23.266773672986062, -24.35999541091543), 0.001 * arcsecond)
+    compare(az.degrees, (287.0030740239525, 313.64872862118426, 142.11613981416264, 327.640588969984), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, (11.23279626216302, -34.134914076462266, 23.267157712313733, -24.35999541091543), 0.001 * arcsecond)
+    compare(az.degrees, (287.0030740239525, 313.64872862118426, 142.11613981416264, 327.640588969984), 0.001 * arcsecond)
+
 def test_mars_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1725,6 +1805,14 @@ def test_mars_topocentric_date0():
     compare(dec.degrees, -24.04896650222992, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -3.540294697029495, 0.001 * arcsecond)
+    compare(az.degrees, 118.34877634707443, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -3.540294697029495, 0.001 * arcsecond)
+    compare(az.degrees, 118.34877634707443, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -3.540294697029495, 0.001 * arcsecond)
     compare(az.degrees, 118.34877634707443, 0.001 * arcsecond)
 
@@ -1745,6 +1833,14 @@ def test_mars_topocentric_date1():
     compare(alt.degrees, -54.1089628741949, 0.001 * arcsecond)
     compare(az.degrees, 338.0117138951488, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -54.1089628741949, 0.001 * arcsecond)
+    compare(az.degrees, 338.0117138951488, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, -54.1089628741949, 0.001 * arcsecond)
+    compare(az.degrees, 338.0117138951488, 0.001 * arcsecond)
+
 def test_mars_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1759,6 +1855,14 @@ def test_mars_topocentric_date2():
     compare(dec.degrees, -13.183338672731743, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -36.90573266459917, 0.001 * arcsecond)
+    compare(az.degrees, 76.12368450672824, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -36.90573266459917, 0.001 * arcsecond)
+    compare(az.degrees, 76.12368450672824, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -36.90573266459917, 0.001 * arcsecond)
     compare(az.degrees, 76.12368450672824, 0.001 * arcsecond)
 
@@ -1779,6 +1883,14 @@ def test_mars_topocentric_date3():
     compare(alt.degrees, 22.094794272017666, 0.001 * arcsecond)
     compare(az.degrees, 231.6381663847761, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 22.134776069489533, 0.001 * arcsecond)
+    compare(az.degrees, 231.6381663847761, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 22.135181528743814, 0.001 * arcsecond)
+    compare(az.degrees, 231.6381663847761, 0.001 * arcsecond)
+
 def test_mars_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1794,6 +1906,14 @@ def test_mars_topocentric_date4():
 
     alt, az, distance = apparent.altaz()
     compare(alt.degrees, (-3.540294697029495, -54.1089628741949, -36.90573266459917, 22.094794272017666), 0.001 * arcsecond)
+    compare(az.degrees, (118.34877634707443, 338.0117138951488, 76.12368450672824, 231.6381663847761), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, (-3.540294697029495, -54.1089628741949, -36.90573266459917, 22.134776069489533), 0.001 * arcsecond)
+    compare(az.degrees, (118.34877634707443, 338.0117138951488, 76.12368450672824, 231.6381663847761), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, (-3.540294697029495, -54.1089628741949, -36.90573266459917, 22.135181528743814), 0.001 * arcsecond)
     compare(az.degrees, (118.34877634707443, 338.0117138951488, 76.12368450672824, 231.6381663847761), 0.001 * arcsecond)
 
 def test_jupiter_topocentric_date0():
@@ -1813,6 +1933,14 @@ def test_jupiter_topocentric_date0():
     compare(alt.degrees, 49.406516031446415, 0.001 * arcsecond)
     compare(az.degrees, 156.07088561561812, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 49.42056980196561, 0.001 * arcsecond)
+    compare(az.degrees, 156.07088561561812, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 49.420712533159296, 0.001 * arcsecond)
+    compare(az.degrees, 156.07088561561812, 0.001 * arcsecond)
+
 def test_jupiter_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1830,6 +1958,14 @@ def test_jupiter_topocentric_date1():
     compare(alt.degrees, 38.005051266909966, 0.001 * arcsecond)
     compare(az.degrees, 270.63795554820535, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 38.02600464378365, 0.001 * arcsecond)
+    compare(az.degrees, 270.63795554820535, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 38.026217393249304, 0.001 * arcsecond)
+    compare(az.degrees, 270.63795554820535, 0.001 * arcsecond)
+
 def test_jupiter_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1844,6 +1980,14 @@ def test_jupiter_topocentric_date2():
     compare(dec.degrees, 8.593862752942394, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -42.482560972481394, 0.001 * arcsecond)
+    compare(az.degrees, 359.3596746827537, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -42.482560972481394, 0.001 * arcsecond)
+    compare(az.degrees, 359.3596746827537, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -42.482560972481394, 0.001 * arcsecond)
     compare(az.degrees, 359.3596746827537, 0.001 * arcsecond)
 
@@ -1864,6 +2008,14 @@ def test_jupiter_topocentric_date3():
     compare(alt.degrees, -29.289013841967986, 0.001 * arcsecond)
     compare(az.degrees, 4.327425566855531, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -29.289013841967986, 0.001 * arcsecond)
+    compare(az.degrees, 4.327425566855531, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, -29.289013841967986, 0.001 * arcsecond)
+    compare(az.degrees, 4.327425566855531, 0.001 * arcsecond)
+
 def test_jupiter_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1881,6 +2033,14 @@ def test_jupiter_topocentric_date4():
     compare(alt.degrees, (49.406516031446415, 38.005051266909966, -42.482560972481394, -29.289013841967986), 0.001 * arcsecond)
     compare(az.degrees, (156.07088561561812, 270.63795554820535, 359.3596746827537, 4.327425566855531), 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, (49.42056980196561, 38.02600464378365, -42.482560972481394, -29.289013841967986), 0.001 * arcsecond)
+    compare(az.degrees, (156.07088561561812, 270.63795554820535, 359.3596746827537, 4.327425566855531), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, (49.420712533159296, 38.026217393249304, -42.482560972481394, -29.289013841967986), 0.001 * arcsecond)
+    compare(az.degrees, (156.07088561561812, 270.63795554820535, 359.3596746827537, 4.327425566855531), 0.001 * arcsecond)
+
 def test_saturn_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1895,6 +2055,14 @@ def test_saturn_topocentric_date0():
     compare(dec.degrees, 11.911391441362449, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -20.66268694032327, 0.001 * arcsecond)
+    compare(az.degrees, 306.01978569992684, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -20.66268694032327, 0.001 * arcsecond)
+    compare(az.degrees, 306.01978569992684, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -20.66268694032327, 0.001 * arcsecond)
     compare(az.degrees, 306.01978569992684, 0.001 * arcsecond)
 
@@ -1915,6 +2083,14 @@ def test_saturn_topocentric_date1():
     compare(alt.degrees, -48.93337647838982, 0.001 * arcsecond)
     compare(az.degrees, 76.8837444919445, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -48.93337647838982, 0.001 * arcsecond)
+    compare(az.degrees, 76.8837444919445, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, -48.93337647838982, 0.001 * arcsecond)
+    compare(az.degrees, 76.8837444919445, 0.001 * arcsecond)
+
 def test_saturn_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1929,6 +2105,14 @@ def test_saturn_topocentric_date2():
     compare(dec.degrees, 12.614560194137898, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -36.501918751911674, 0.001 * arcsecond)
+    compare(az.degrees, 341.22347230453323, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -36.501918751911674, 0.001 * arcsecond)
+    compare(az.degrees, 341.22347230453323, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -36.501918751911674, 0.001 * arcsecond)
     compare(az.degrees, 341.22347230453323, 0.001 * arcsecond)
 
@@ -1949,6 +2133,14 @@ def test_saturn_topocentric_date3():
     compare(alt.degrees, 22.966758516111867, 0.001 * arcsecond)
     compare(az.degrees, 238.00627672875675, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 23.005094362956058, 0.001 * arcsecond)
+    compare(az.degrees, 238.00627672875675, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 23.005483182929083, 0.001 * arcsecond)
+    compare(az.degrees, 238.00627672875675, 0.001 * arcsecond)
+
 def test_saturn_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1964,6 +2156,14 @@ def test_saturn_topocentric_date4():
 
     alt, az, distance = apparent.altaz()
     compare(alt.degrees, (-20.66268694032327, -48.93337647838982, -36.501918751911674, 22.966758516111867), 0.001 * arcsecond)
+    compare(az.degrees, (306.01978569992684, 76.8837444919445, 341.22347230453323, 238.00627672875675), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, (-20.66268694032327, -48.93337647838982, -36.501918751911674, 23.005094362956058), 0.001 * arcsecond)
+    compare(az.degrees, (306.01978569992684, 76.8837444919445, 341.22347230453323, 238.00627672875675), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, (-20.66268694032327, -48.93337647838982, -36.501918751911674, 23.005483182929083), 0.001 * arcsecond)
     compare(az.degrees, (306.01978569992684, 76.8837444919445, 341.22347230453323, 238.00627672875675), 0.001 * arcsecond)
 
 def test_uranus_topocentric_date0():
@@ -1983,6 +2183,14 @@ def test_uranus_topocentric_date0():
     compare(alt.degrees, 49.06396822144691, 0.001 * arcsecond)
     compare(az.degrees, 156.6525604020511, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 49.07819253506017, 0.001 * arcsecond)
+    compare(az.degrees, 156.6525604020511, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 49.078336997561024, 0.001 * arcsecond)
+    compare(az.degrees, 156.6525604020511, 0.001 * arcsecond)
+
 def test_uranus_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -1997,6 +2205,14 @@ def test_uranus_topocentric_date1():
     compare(dec.degrees, -23.447712978993902, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -37.0259637798912, 0.001 * arcsecond)
+    compare(az.degrees, 91.80748703145905, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -37.0259637798912, 0.001 * arcsecond)
+    compare(az.degrees, 91.80748703145905, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -37.0259637798912, 0.001 * arcsecond)
     compare(az.degrees, 91.80748703145905, 0.001 * arcsecond)
 
@@ -2017,6 +2233,14 @@ def test_uranus_topocentric_date2():
     compare(alt.degrees, -29.175475562665554, 0.001 * arcsecond)
     compare(az.degrees, 88.85671230431439, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -29.175475562665554, 0.001 * arcsecond)
+    compare(az.degrees, 88.85671230431439, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, -29.175475562665554, 0.001 * arcsecond)
+    compare(az.degrees, 88.85671230431439, 0.001 * arcsecond)
+
 def test_uranus_topocentric_date3():
     jd = JulianDate(tt=2456164.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2031,6 +2255,14 @@ def test_uranus_topocentric_date3():
     compare(dec.degrees, 2.429695886841979, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -14.5260443119261, 0.001 * arcsecond)
+    compare(az.degrees, 74.60219420538263, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -14.5260443119261, 0.001 * arcsecond)
+    compare(az.degrees, 74.60219420538263, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -14.5260443119261, 0.001 * arcsecond)
     compare(az.degrees, 74.60219420538263, 0.001 * arcsecond)
 
@@ -2051,6 +2283,14 @@ def test_uranus_topocentric_date4():
     compare(alt.degrees, (49.06396822144691, -37.0259637798912, -29.175475562665554, -14.5260443119261), 0.001 * arcsecond)
     compare(az.degrees, (156.6525604020511, 91.80748703145905, 88.85671230431439, 74.60219420538263), 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, (49.07819253506017, -37.0259637798912, -29.175475562665554, -14.5260443119261), 0.001 * arcsecond)
+    compare(az.degrees, (156.6525604020511, 91.80748703145905, 88.85671230431439, 74.60219420538263), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, (49.078336997561024, -37.0259637798912, -29.175475562665554, -14.5260443119261), 0.001 * arcsecond)
+    compare(az.degrees, (156.6525604020511, 91.80748703145905, 88.85671230431439, 74.60219420538263), 0.001 * arcsecond)
+
 def test_neptune_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2068,6 +2308,14 @@ def test_neptune_topocentric_date0():
     compare(alt.degrees, 4.869377826364499, 0.001 * arcsecond)
     compare(az.degrees, 117.29043762875322, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 5.031511017144567, 0.001 * arcsecond)
+    compare(az.degrees, 117.29043762875322, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 5.033116634142289, 0.001 * arcsecond)
+    compare(az.degrees, 117.29043762875322, 0.001 * arcsecond)
+
 def test_neptune_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2082,6 +2330,14 @@ def test_neptune_topocentric_date1():
     compare(dec.degrees, -21.808061138689617, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -40.43318694811052, 0.001 * arcsecond)
+    compare(az.degrees, 86.51833613444356, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -40.43318694811052, 0.001 * arcsecond)
+    compare(az.degrees, 86.51833613444356, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -40.43318694811052, 0.001 * arcsecond)
     compare(az.degrees, 86.51833613444356, 0.001 * arcsecond)
 
@@ -2102,6 +2358,14 @@ def test_neptune_topocentric_date2():
     compare(alt.degrees, -21.10215467278759, 0.001 * arcsecond)
     compare(az.degrees, 98.1496208151544, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -21.10215467278759, 0.001 * arcsecond)
+    compare(az.degrees, 98.1496208151544, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, -21.10215467278759, 0.001 * arcsecond)
+    compare(az.degrees, 98.1496208151544, 0.001 * arcsecond)
+
 def test_neptune_topocentric_date3():
     jd = JulianDate(tt=2456164.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2117,6 +2381,14 @@ def test_neptune_topocentric_date3():
 
     alt, az, distance = apparent.altaz()
     compare(alt.degrees, 2.4167829049998346, 0.001 * arcsecond)
+    compare(az.degrees, 106.80925972576064, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 2.6713913487619294, 0.001 * arcsecond)
+    compare(az.degrees, 106.80925972576064, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 2.6738334093304843, 0.001 * arcsecond)
     compare(az.degrees, 106.80925972576064, 0.001 * arcsecond)
 
 def test_neptune_topocentric_date4():
@@ -2136,6 +2408,14 @@ def test_neptune_topocentric_date4():
     compare(alt.degrees, (4.869377826364499, -40.43318694811052, -21.10215467278759, 2.4167829049998346), 0.001 * arcsecond)
     compare(az.degrees, (117.29043762875322, 86.51833613444356, 98.1496208151544, 106.80925972576064), 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, (5.031511017144567, -40.43318694811052, -21.10215467278759, 2.6713913487619294), 0.001 * arcsecond)
+    compare(az.degrees, (117.29043762875322, 86.51833613444356, 98.1496208151544, 106.80925972576064), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, (5.033116634142289, -40.43318694811052, -21.10215467278759, 2.6738334093304843), 0.001 * arcsecond)
+    compare(az.degrees, (117.29043762875322, 86.51833613444356, 98.1496208151544, 106.80925972576064), 0.001 * arcsecond)
+
 def test_pluto_topocentric_date0():
     jd = JulianDate(tt=2440423.345833333)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2151,6 +2431,14 @@ def test_pluto_topocentric_date0():
 
     alt, az, distance = apparent.altaz()
     compare(alt.degrees, 64.72856074651932, 0.001 * arcsecond)
+    compare(az.degrees, 147.2138070056032, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 64.73630449169255, 0.001 * arcsecond)
+    compare(az.degrees, 147.2138070056032, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 64.7363831493004, 0.001 * arcsecond)
     compare(az.degrees, 147.2138070056032, 0.001 * arcsecond)
 
 def test_pluto_topocentric_date1():
@@ -2170,6 +2458,14 @@ def test_pluto_topocentric_date1():
     compare(alt.degrees, 16.2337344521234, 0.001 * arcsecond)
     compare(az.degrees, 105.39943656311958, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 16.288892801912894, 0.001 * arcsecond)
+    compare(az.degrees, 105.39943656311958, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 16.28945132964904, 0.001 * arcsecond)
+    compare(az.degrees, 105.39943656311958, 0.001 * arcsecond)
+
 def test_pluto_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2185,6 +2481,14 @@ def test_pluto_topocentric_date2():
 
     alt, az, distance = apparent.altaz()
     compare(alt.degrees, 22.700996363632996, 0.001 * arcsecond)
+    compare(az.degrees, 127.81134408260581, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 22.739821647292274, 0.001 * arcsecond)
+    compare(az.degrees, 127.81134408260581, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 22.74021541578692, 0.001 * arcsecond)
     compare(az.degrees, 127.81134408260581, 0.001 * arcsecond)
 
 def test_pluto_topocentric_date3():
@@ -2204,6 +2508,14 @@ def test_pluto_topocentric_date3():
     compare(alt.degrees, 28.339822068789154, 0.001 * arcsecond)
     compare(az.degrees, 157.51785266272373, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 28.37007124206125, 0.001 * arcsecond)
+    compare(az.degrees, 157.51785266272373, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 28.370378222043676, 0.001 * arcsecond)
+    compare(az.degrees, 157.51785266272373, 0.001 * arcsecond)
+
 def test_pluto_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2219,6 +2531,14 @@ def test_pluto_topocentric_date4():
 
     alt, az, distance = apparent.altaz()
     compare(alt.degrees, (64.72856074651932, 16.2337344521234, 22.700996363632996, 28.339822068789154), 0.001 * arcsecond)
+    compare(az.degrees, (147.2138070056032, 105.39943656311958, 127.81134408260581, 157.51785266272373), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, (64.73630449169255, 16.288892801912894, 22.739821647292274, 28.37007124206125), 0.001 * arcsecond)
+    compare(az.degrees, (147.2138070056032, 105.39943656311958, 127.81134408260581, 157.51785266272373), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, (64.7363831493004, 16.28945132964904, 22.74021541578692, 28.370378222043676), 0.001 * arcsecond)
     compare(az.degrees, (147.2138070056032, 105.39943656311958, 127.81134408260581, 157.51785266272373), 0.001 * arcsecond)
 
 def test_sun_topocentric_date0():
@@ -2238,6 +2558,14 @@ def test_sun_topocentric_date0():
     compare(alt.degrees, 46.72403357148921, 0.001 * arcsecond)
     compare(az.degrees, 258.5550717845947, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 46.73947196634785, 0.001 * arcsecond)
+    compare(az.degrees, 258.5550717845947, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 46.73962875307822, 0.001 * arcsecond)
+    compare(az.degrees, 258.5550717845947, 0.001 * arcsecond)
+
 def test_sun_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2255,6 +2583,14 @@ def test_sun_topocentric_date1():
     compare(alt.degrees, 2.2209469369832675, 0.001 * arcsecond)
     compare(az.degrees, 293.95636637272145, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 2.486840978779398, 0.001 * arcsecond)
+    compare(az.degrees, 293.95636637272145, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 2.489379891081043, 0.001 * arcsecond)
+    compare(az.degrees, 293.95636637272145, 0.001 * arcsecond)
+
 def test_sun_topocentric_date2():
     jd = JulianDate(tt=2451545.0)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2269,6 +2605,14 @@ def test_sun_topocentric_date2():
     compare(dec.degrees, -23.034049570458144, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -5.486505415022833, 0.001 * arcsecond)
+    compare(az.degrees, 115.32008451470388, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -5.486505415022833, 0.001 * arcsecond)
+    compare(az.degrees, 115.32008451470388, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -5.486505415022833, 0.001 * arcsecond)
     compare(az.degrees, 115.32008451470388, 0.001 * arcsecond)
 
@@ -2289,6 +2633,14 @@ def test_sun_topocentric_date3():
     compare(alt.degrees, -2.738407691502772, 0.001 * arcsecond)
     compare(az.degrees, 286.09632001391725, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -2.738407691502772, 0.001 * arcsecond)
+    compare(az.degrees, 286.09632001391725, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, -2.738407691502772, 0.001 * arcsecond)
+    compare(az.degrees, 286.09632001391725, 0.001 * arcsecond)
+
 def test_sun_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2304,6 +2656,14 @@ def test_sun_topocentric_date4():
 
     alt, az, distance = apparent.altaz()
     compare(alt.degrees, (46.72403357148921, 2.2209469369832675, -5.486505415022833, -2.738407691502772), 0.001 * arcsecond)
+    compare(az.degrees, (258.5550717845947, 293.95636637272145, 115.32008451470388, 286.09632001391725), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, (46.73947196634785, 2.486840978779398, -5.486505415022833, -2.738407691502772), 0.001 * arcsecond)
+    compare(az.degrees, (258.5550717845947, 293.95636637272145, 115.32008451470388, 286.09632001391725), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, (46.73962875307822, 2.489379891081043, -5.486505415022833, -2.738407691502772), 0.001 * arcsecond)
     compare(az.degrees, (258.5550717845947, 293.95636637272145, 115.32008451470388, 286.09632001391725), 0.001 * arcsecond)
 
 def test_moon_topocentric_date0():
@@ -2323,6 +2683,14 @@ def test_moon_topocentric_date0():
     compare(alt.degrees, 41.920401350253684, 0.001 * arcsecond)
     compare(az.degrees, 151.19707488767648, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 41.938650930938635, 0.001 * arcsecond)
+    compare(az.degrees, 151.19707488767648, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 41.93883624837601, 0.001 * arcsecond)
+    compare(az.degrees, 151.19707488767648, 0.001 * arcsecond)
+
 def test_moon_topocentric_date1():
     jd = JulianDate(tt=2448031.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2337,6 +2705,14 @@ def test_moon_topocentric_date1():
     compare(dec.degrees, 1.1749464194370667, 0.001 * arcsecond)
 
     alt, az, distance = apparent.altaz()
+    compare(alt.degrees, -47.74510120858724, 0.001 * arcsecond)
+    compare(az.degrees, 338.1329529181222, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, -47.74510120858724, 0.001 * arcsecond)
+    compare(az.degrees, 338.1329529181222, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
     compare(alt.degrees, -47.74510120858724, 0.001 * arcsecond)
     compare(az.degrees, 338.1329529181222, 0.001 * arcsecond)
 
@@ -2357,6 +2733,14 @@ def test_moon_topocentric_date2():
     compare(alt.degrees, 36.381265580736006, 0.001 * arcsecond)
     compare(az.degrees, 156.2971102404722, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 36.40348032108538, 0.001 * arcsecond)
+    compare(az.degrees, 156.2971102404722, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 36.403705864717196, 0.001 * arcsecond)
+    compare(az.degrees, 156.2971102404722, 0.001 * arcsecond)
+
 def test_moon_topocentric_date3():
     jd = JulianDate(tt=2456164.5)
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2374,6 +2758,14 @@ def test_moon_topocentric_date3():
     compare(alt.degrees, 28.439387966372543, 0.001 * arcsecond)
     compare(az.degrees, 191.294974272018, 0.001 * arcsecond)
 
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, 28.46951344291743, 0.001 * arcsecond)
+    compare(az.degrees, 191.294974272018, 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, 28.46981916998486, 0.001 * arcsecond)
+    compare(az.degrees, 191.294974272018, 0.001 * arcsecond)
+
 def test_moon_topocentric_date4():
     jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     usno = de405.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
@@ -2389,6 +2781,14 @@ def test_moon_topocentric_date4():
 
     alt, az, distance = apparent.altaz()
     compare(alt.degrees, (41.920401350253684, -47.74510120858724, 36.381265580736006, 28.439387966372543), 0.001 * arcsecond)
+    compare(az.degrees, (151.19707488767648, 338.1329529181222, 156.2971102404722, 191.294974272018), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz('standard')
+    compare(alt.degrees, (41.938650930938635, -47.74510120858724, 36.40348032108538, 28.46951344291743), 0.001 * arcsecond)
+    compare(az.degrees, (151.19707488767648, 338.1329529181222, 156.2971102404722, 191.294974272018), 0.001 * arcsecond)
+
+    alt, az, distance = apparent.altaz(10.0, 1010.0)
+    compare(alt.degrees, (41.93883624837601, -47.74510120858724, 36.403705864717196, 28.46981916998486), 0.001 * arcsecond)
     compare(az.degrees, (151.19707488767648, 338.1329529181222, 156.2971102404722, 191.294974272018), 0.001 * arcsecond)
 
 def test_hipparcos_conversion0():

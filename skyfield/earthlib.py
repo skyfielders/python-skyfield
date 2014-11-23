@@ -1,7 +1,7 @@
 """Formulae for specific earth behaviors and effects."""
 
 from numpy import (abs, arcsin, arccos, array, clip, cos, einsum, exp, fmod,
-                   minimum, pi, sin, sqrt, tan, where, zeros_like)
+                   logical_and, minimum, pi, sin, sqrt, tan, where, zeros_like)
 
 from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
                         IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0)
@@ -176,12 +176,9 @@ def refraction(alt_degrees, temperature_C, pressure_mbar):
     as well as for objects more than one degree below the horizon.
 
     """
-    # const double s = 9.1e3;
-    # if pressure_mbar == 'standard':
-    #     pressure_mbar = 1010.0 * exp(-location->height / s)
     r = 0.016667 / tan((alt_degrees + 7.31 / (alt_degrees + 4.4)) * DEG2RAD)
     d = r * (0.28 * pressure_mbar / (temperature_C + 273.0))
-    return where(-1.0 <= alt_degrees <= 89.9, d, 0.0)
+    return where((-1.0 <= alt_degrees) & (alt_degrees <= 89.9), d, 0.0)
 
 
 def refract(alt_degrees, temperature_C, pressure_mbar):
