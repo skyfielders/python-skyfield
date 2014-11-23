@@ -1,6 +1,6 @@
 import gzip
 from skyfield.data import cache as default_cache
-from skyfield.positionlib import to_polar
+from skyfield.functions import to_polar
 from skyfield.starlib import Star
 from skyfield.timelib import T0
 from skyfield.units import Angle

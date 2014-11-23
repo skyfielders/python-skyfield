@@ -1,4 +1,5 @@
-from numpy import array, cos, ones_like, sin, sqrt, zeros_like
+from numpy import arcsin, arctan2, array, cos, ones_like, sin, sqrt, zeros_like
+from skyfield.constants import tau
 
 def dots(v, u):
     """Given one or more vectors in `v` and `u`, return their dot products.
@@ -18,6 +19,22 @@ def length_of(xyz):
 
     """
     return sqrt((xyz * xyz).sum(axis=0))
+
+def to_polar(xyz):
+    """Convert ``[x y z]`` into spherical coordinates ``(r, theta, phi)``.
+
+    ``r`` - vector length
+    ``theta`` - angle above (+) or below (-) the xy-plane
+    ``phi`` - angle around the z-axis
+
+    The order of the three return values is intended to match ISO 31-11.
+
+    """
+    r = length_of(xyz)
+    x, y, z = xyz
+    theta = arcsin(z / r)
+    phi = arctan2(y, x) % tau
+    return r, theta, phi
 
 def spin_x(theta):
     z = zeros_like(theta)

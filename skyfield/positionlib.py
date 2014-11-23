@@ -1,9 +1,9 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import arcsin, arctan2, array, cos, einsum, pi, sin
+from numpy import array, cos, einsum, pi, sin
 
 from .constants import ASEC2RAD, T0, TAU
-from .functions import dots, length_of, rot_x, spin_x
+from .functions import dots, length_of, rot_x, spin_x, to_polar
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        sidereal_time)
 from .nutationlib import mean_obliquity
@@ -294,22 +294,6 @@ class Geocentric(ICRS):
         a = Apparent(p, v, self.jd)
         a.observer = self
         return a
-
-def to_polar(xyz):
-    """Convert ``[x y z]`` into spherical coordinates ``(r, theta, phi)``.
-
-    ``r`` - vector length
-    ``theta`` - angle above (+) or below (-) the xy-plane
-    ``phi`` - angle around the z-axis
-
-    The order of the three return values is intended to match ISO 31-11.
-
-    """
-    r = length_of(xyz)
-
-    theta = arcsin(xyz[2] / r)
-    phi = arctan2(-xyz[1], -xyz[0]) + pi
-    return r, theta, phi
 
 def ITRF_to_GCRS(jd, rITRF):  # todo: velocity
 
