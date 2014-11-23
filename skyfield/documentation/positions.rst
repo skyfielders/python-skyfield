@@ -39,7 +39,7 @@ together with all of the attributes and methods that they support:
 
     Apparent position only
      │
-     └── `altaz() <api.html#Position.altaz>`_             →   alt, az, distance
+     └── `altaz(…) <api.html#Position.altaz>`_            →   alt, az, distance
 
     Angle like ra, dec, alt, and az
      │
@@ -396,7 +396,7 @@ by calling the :meth:`~Apparent.altaz()` method on an apparent position.
 But because the method needs to know whose local horizon to use,
 it does not work
 on the plain geocentric (“Earth centered”) positions
-that have been generating so far:
+that we have been generating so far:
 
 .. testcode::
 
@@ -411,7 +411,7 @@ that have been generating so far:
 Instead, you have to give Skyfield your geographic location.
 Astronomers use the term *topocentric*
 for a position measured relative to a specific location on Earth,
-so Skyfield represents Earth locations using a :class:`Topos` class
+so Skyfield represents Earth locations using :class:`Topos` objects
 that you can generate by using the :meth:`Earth.topos` method
 of an Earth object:
 
@@ -421,17 +421,56 @@ of an Earth object:
     # specific geographic location
 
     boston = earth.topos('42.3583 N', '71.0603 W')
-    astro = boston(utc=(1980, 1, 1)).observe(jupiter)
-    alt, az, distance = astro.apparent().altaz()
+    astro = boston(utc=(1980, 3, 1)).observe(jupiter)
+    app = astro.apparent()
+
+    alt, az, distance = app.altaz()
     print(alt.dstr())
     print(az.dstr())
     print(distance.AU)
 
 .. testoutput::
 
-    -23deg 22' 47.8"
-    51deg 43' 29.6"
-    4.82600082194
+    23deg 00' 25.5"
+    96deg 03' 03.2"
+    4.40689420989
 
-So Jupiter was more than 23° below the horizon for Bostonians
-on 1980 January 1 at midnight UTC.
+So Jupiter was more than 23° above the horizon for Bostonians
+on 1980 March 1 at midnight UTC.
+
+The altitude returned from a plain :meth:`~Apparent.altaz()` call
+is the ideal position
+that you would observe if the Earth had no atmosphere.
+You can also ask Skyfield to estimate
+where an object might actually appear in the sky
+after the Earth’s atmosphere has *refracted* their image higher.
+If you know the weather conditions, you can specify them.
+
+.. testcode::
+
+    alt, az, distance = app.altaz(temperature_C=15.0,
+                                  pressure_mbar=1005.0)
+    print(alt.dstr())
+
+.. testoutput::
+
+    23deg 02' 41.6"
+
+Or you can ask Skyfield to use a standard temperature and pressure
+when generating its rough simulation of the effects of refraction.
+
+.. testcode::
+
+    alt, az, distance = app.altaz('standard')
+    print(alt.dstr())
+
+.. testoutput::
+
+    23deg 02' 44.7"
+
+Keep in mind that these are simply guesses.
+The effects of the atmosphere,
+with its many layers of heat and cold and wind and weather,
+cannot be accurately modeled or predicted.
+And note that refraction is only applied to objects above the horizon.
+Objects below −1.0° altitude are not adjusted for refraction.

@@ -1,9 +1,7 @@
 
-===============
- API Reference
-===============
-
-(Not yet complete.)
+==================================
+ API Reference (work in progress)
+==================================
 
 .. testsetup::
 

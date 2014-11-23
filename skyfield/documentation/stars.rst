@@ -79,8 +79,8 @@ Here are all three effects applied to Barnard’s star:
 
 .. testoutput::
 
-    17h 57m 49.27s
-    +04deg 39' 10.9"
+    17h 57m 47.76s
+    +04deg 44' 01.3"
 
 Note that the above position is different than the input right ascension
 and declination but not because we have asked for dynamic coordinates.

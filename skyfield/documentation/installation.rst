@@ -3,6 +3,8 @@
  Installation
 ==============
 
+.. currentmodule:: skyfield.api
+
 Skyfield has only a single binary dependency,
 the `NumPy <http://www.numpy.org/>`_ vector library,
 and is designed to install cleanly with a single invocation
@@ -17,7 +19,7 @@ there are several other ways to get NumPy installed:
   `a science-ready version of Python
   <http://www.scipy.org/install.html#scientific-python-distributions>`_
   that comes with NumPy built-in,
-  like the `Anaconda <http://docs.continuum.io/anaconda/install.html>`_
+  like the `Anaconda <http://continuum.io/downloads>`_
   distribution.
 
 * | There are several approaches described in the `SciPy install instructions <http://www.scipy.org/install.html>`_.
@@ -41,7 +43,7 @@ You can protect your project from any abrupt API changes
 by pinning a specific version of Skyfield
 in your ``requirements.txt`` or ``setup.py`` or install instructions::
 
-    skyfield==0.3
+    skyfield==0.4
 
 By preventing Skyfield from being upgraded
 until you are ready to advance the version number yourself,
@@ -62,12 +64,12 @@ Change Log
 0.4
 ---
 
-* To prevent confusion, the Julian date `~JulianDate.astimezone()`
-  and `~JulianDate.utc_datetime()` methods
+* To prevent confusion, the Julian date :meth:`~JulianDate.astimezone()`
+  and :meth:`~JulianDate.utc_datetime()` methods
   have been changed to return only a ``datetime`` object.
   If you also need a leap second flag returned,
-  call the new methods `~JulianDate.astimezone_and_leap_second()`
-  and `~JulianDate.utc_datetime_and_leap_second()`.
+  call the new methods :meth:`~JulianDate.astimezone_and_leap_second()`
+  and :meth:`~JulianDate.utc_datetime_and_leap_second()`.
 
 0.3
 ---

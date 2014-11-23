@@ -124,9 +124,11 @@ to represent the year, month, and day of a calendar date:
 
 And by scraping together the minimal support for UTC
 that exists in the Python Standard Library,
-Skyfield is able to return the current time as a Julian date object
+Skyfield is able to offer a :func:`~skyfield.api.now()` function
+that reads your system clock
+and returns the current time as a Julian date object
 (assuming that your operating system clock is correct
-and is configured with the correct time zone):
+and configured with the correct time zone):
 
 .. testsetup::
 
@@ -186,12 +188,12 @@ for either the UTC date or your own timezone:
 
     # UTC datetime
 
-    dt, leap_second = jd.utc_datetime_and_leap_second()
+    dt = jd.utc_datetime()
     print('UTC: ' + str(dt))
 
     # Converting back to an Eastern Time datetime.
 
-    dt, leap_second = jd.astimezone(eastern)
+    dt = jd.astimezone(eastern)
     print('EST: ' + str(dt))
 
 .. testoutput::
@@ -203,8 +205,6 @@ As we would expect,
 1:32 AM in the Eastern time zone in January
 is 6:32 AM local time in Greenwich, England,
 five hours to the east across the Atlantic.
-The extra return value ``leap_second``
-is explained in the next section, :ref:`leap-seconds`.
 
 Note that Skyfield’s :meth:`~JulianDate.astimezone()` method
 will detect that you are using a ``pytz`` timezone
@@ -259,8 +259,8 @@ The most recent leap second was in June 2012:
 Note that Skyfield has no problem with a calendar tuple
 that has hours, minutes, or — as in this case —
 seconds that are out of range.
-It simply added as many seconds as we specified
-and let the value overflow cleanly into the beginning of July.
+It simply adds as many seconds as we specified
+and lets the value overflow cleanly into the beginning of July.
 
 Keep two consequences in mind when using UTC in your calculations.
 
@@ -291,15 +291,20 @@ because it refuses to accept seconds greater than 59:
       ...
     ValueError: second must be in 0..59
 
-That is why operations that return a ``datetime``
-always include a second return value, ``leap_second``,
-which is usually ``0`` but jumps to ``1``
+That is why Skyfield offers a second version
+of each method that returns a ``datetime``::
+
+    jd.utc_datetime_and_leap_second()
+    jd.astimezone_and_leap_second(tz)
+
+These more accurate alternatives also return a ``leap_second``,
+which usually has the value ``0`` but jumps to ``1``
 when Skyfield is forced to represent a leap second
-as a duplicate 23:59:59, as is the case here:
+as a ``datetime`` with the incorrect time 23:59:59.
 
 .. testcode::
 
-    dt, leap_second = jd.astimezone(eastern)
+    dt, leap_second = jd.astimezone_and_leap_second(eastern)
 
     for dt_i, leap_second_i in zip(dt, leap_second):
         print(str(dt_i) + ' leap_second = ' + str(leap_second_i))
@@ -319,22 +324,6 @@ If your application cannot avoid using ``datetime`` objects,
 then you will have to decide
 whether to simply ignore the ``leap_second`` value
 or to somehow output the leap second information.
-
-You should always to use the ``leap_second`` name in your code,
-even when you do nothing with the value,
-to document its meaning and make explicit
-your decision to ignore it in a particular case:
-
-.. testcode::
-
-    # Bad - your code fails to document what it is ignoring.
-
-    dt = jd.astimezone(eastern)[0]
-
-    # Good - the meaning of the second value is explicit,
-    # even if you make no further use of the `leap_second`.
-
-    dt, leap_second = jd.astimezone(eastern)
 
 .. _date-arrays:
 
