@@ -1,5 +1,5 @@
 import numpy as np
-import pytest
+from assay import assert_raises
 from pytz import timezone
 from skyfield.constants import DAY_S
 from skyfield.timelib import JulianDate, utc
@@ -24,9 +24,9 @@ def test_building_JulianDate_from_utc_tuple_with_array_inside():
         assert jd.tai[i] == JulianDate(utc=(1973, 12, 29, 23, 59, second)).tai
 
 def test_building_JulianDate_from_naive_datetime_raises_exception():
-    with pytest.raises(ValueError) as excinfo:
+    with assert_raises(ValueError) as info:
         JulianDate(utc=datetime(1973, 12, 29, 23, 59, 48))
-    assert 'import timezone' in str(excinfo.value)
+    assert 'import timezone' in str(info.exception)
 
 def test_building_JulianDate_from_single_utc_datetime():
     jd = JulianDate(utc=datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc))

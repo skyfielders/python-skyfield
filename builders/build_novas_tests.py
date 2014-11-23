@@ -2,7 +2,6 @@
 
 from __future__ import print_function
 from itertools import product
-from numpy import array
 from sys import exit
 from textwrap import dedent
 
@@ -34,7 +33,7 @@ def main():
     output({}, """\
         'Auto-generated accuracy tests vs NOVAS (see build_novas_tests.py).'
 
-        import pytest
+        import assay
         from numpy import abs, array, einsum, max
         from skyfield import (earthlib, framelib, nutationlib, positionlib,
                               precessionlib, starlib, timelib)
@@ -44,12 +43,8 @@ def main():
         from skyfield.functions import length_of
         from skyfield.jpllib import Ephemeris
 
-
-        try:
-            import de405
-            de405 = Ephemeris(de405)
-        except ImportError:
-            pytestmark = pytest.mark.skipif(True, reason='de405 unavailable')
+        import de405
+        de405 = Ephemeris(de405)
 
         one_second = 1.0 / 24.0 / 60.0 / 60.0
         arcsecond = 1.0 / 60.0 / 60.0
