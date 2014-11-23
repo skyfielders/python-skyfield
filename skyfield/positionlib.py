@@ -107,10 +107,10 @@ class ICRS(object):
                 Distance(AU=d))
 
 class Topos(object):
+    """An object representing a specific location on the Earth's surface."""
 
-    def __init__(self, latitude=None, longitude=None,
-                 latitude_degrees=None, longitude_degrees=None,
-                 elevation_m=0.):
+    def __init__(self, latitude=None, longitude=None, latitude_degrees=None,
+                 longitude_degrees=None, elevation_m=0.0):
 
         if latitude_degrees is not None:
             latitude = Angle(degrees=latitude_degrees)
