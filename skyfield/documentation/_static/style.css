@@ -67,7 +67,10 @@ h1, h2 {
     width: 480px;
     height: 240px;
     background: #ffffff url('logo.png') no-repeat left top;
-    text-indent:-9999px;  /* so screen reader will still read the title */
+    color: transparent;
+}
+#skyfield h1 > a.headerlink {
+    display: none;
 }
 .headerlink {
     color: #f8f8ff;
