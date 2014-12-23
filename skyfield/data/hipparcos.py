@@ -26,7 +26,8 @@ def parse(line):
 
 def load(is_match, cache=default_cache):
     with cache.open_url(url, days_old=9999) as f:
-        for line in gzip.open(f):
+        data = gzip.GzipFile(fileobj=f)
+        for line in data.readlines():
             id = line[8:14]
             if is_match(id):
                 yield parse(line)
