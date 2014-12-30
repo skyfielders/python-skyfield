@@ -32,7 +32,7 @@ def load(is_match, cache=default_cache):
                 yield parse(line)
 
 def get(which, cache=default_cache):
-    print(repr(which).rjust(6))
+    #print(repr(which).rjust(6))
     if isinstance(which, str):
         is_match = which.rjust(6).encode('ascii').__eq__
         for star in load(is_match):
