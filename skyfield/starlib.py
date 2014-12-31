@@ -11,7 +11,7 @@ class Star(object):
 
     def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,
                  ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                 parallax_mas=0.0, radial_km_per_s=0.0, names=()):
+                 parallax_mas=0.0, radial_km_per_s=0.0, names={}):
 
         if ra_hours is not None:
             self.ra = Angle(hours=ra_hours)

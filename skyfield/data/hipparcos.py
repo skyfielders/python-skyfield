@@ -16,7 +16,7 @@ def parse(line):
         ra_mas_per_year=float(line[87:95]),
         dec_mas_per_year=float(line[96:104]),
         parallax_mas=float(line[79:86]),
-        names=[('HIP', int(line[8:14]))],
+        names={'HIP':int(line[8:14])},
         )
     star._position_AU += star._velocity_AU_per_d * days
     distance, dec, ra = to_polar(star._position_AU)
