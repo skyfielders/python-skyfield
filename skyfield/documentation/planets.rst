@@ -1,6 +1,6 @@
-=============
- The Planets
-=============
+====================================
+ Planets, and Choosing an Ephemeris
+====================================
 
 .. currentmodule:: skyfield.api
 
