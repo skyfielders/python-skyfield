@@ -10,6 +10,8 @@ forget.
 * Make JD give a sensible error if the first argument is a number or
   something.
 
+* And make JD give an informative error for earth((2015, 1, 13)).
+
 Sprint Possibilities
 ====================
 
