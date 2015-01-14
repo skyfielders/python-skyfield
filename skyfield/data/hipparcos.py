@@ -9,6 +9,7 @@ days = T0 - 2448349.0625
 url = 'ftp://cdsarc.u-strasbg.fr/cats/I/239/hip_main.dat.gz'
 
 def parse(line):
+    """Return a `Star` build by parsing a Hipparcos catalog entry `line`."""
     # See ftp://cdsarc.u-strasbg.fr/cats/I/239/ReadMe
     star = Star(
         ra=Angle(degrees=float(line[51:63])),
@@ -24,20 +25,24 @@ def parse(line):
     star.dec = Angle(radians=dec)
     return star
 
-def load(is_match, cache=default_cache):
+def load(match_function, cache=default_cache):
+    """Yield the Hipparcos stars for which `match_function(line)` is true."""
     with cache.open_url(url, days_old=9999) as f:
-        for line in gzip.open(f):
-            id = line[8:14]
-            if is_match(id):
+        for line in gzip.GzipFile(fileobj=f):
+            if match_function(line):
                 yield parse(line)
 
 def get(which, cache=default_cache):
-    #print(repr(which).rjust(6))
+    """Return a single star, or a list of stars, from the Hipparcos catalog.
+
+    A call like `get('54061')` returns a single `Star` object, while
+    `get(['54061', '53910'])` returns a list of stars.
+
+    """
     if isinstance(which, str):
-        is_match = which.rjust(6).encode('ascii').__eq__
-        for star in load(is_match):
+        pattern = b'H|      %6s' % which.encode('ascii')
+        for star in load(lambda line: line.startswith(pattern)):
             return star
     else:
-        id_set = set(str(id).encode('ascii').rjust(6) for id in which)
-        is_match = id_set.__contains__
-        return list(load(is_match))
+        patterns = set(id.encode('ascii').rjust(6) for id in which)
+        return list(load(lambda line: line[8:14] in patterns))
