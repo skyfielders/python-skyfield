@@ -63,7 +63,7 @@ def takes_julian_date(function):
             jd = JulianDate(utc=utc, tai=tai, tt=tt,
                             delta_t=delta_t, cache=cache)
         elif not isinstance(jd, JulianDate):
-            s = 'your "jd" argument is not a JulianDate: {!r}'.format(jd)
+            s = 'your "jd" argument is not a JulianDate: {0!r}'.format(jd)
             raise ValueError(s)
         return function(self, jd)
     wrapper.__name__ = function.__name__

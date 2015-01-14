@@ -43,8 +43,8 @@ class Star(object):
                      'parallax_mas', 'radial_km_per_s', 'names']:
             value = getattr(self, name)
             if value:
-                opts.append(', {}={!r}'.format(name, value))
-        return 'Star(ra_hours={!r}, dec_degrees={!r}{})'.format(
+                opts.append(', {0}={1!r}'.format(name, value))
+        return 'Star(ra_hours={0!r}, dec_degrees={1!r}{2})'.format(
             self.ra.hours, self.dec.degrees, ''.join(opts))
 
     def observe_from(self, observer):
