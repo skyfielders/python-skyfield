@@ -14,5 +14,6 @@ install:
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
 
 script:
+  - "pip install unittest2"
   - "assay --batch skyfield.tests"
   - "cd skyfield/documentation && make doctest"
