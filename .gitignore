@@ -12,3 +12,4 @@ tmp*.py
 *.pyc
 *.egg-info
 *.ipynb_checkpoints
+Untitled*.ipynb
