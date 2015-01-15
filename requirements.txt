@@ -2,5 +2,7 @@ astropy
 de405==1997.1
 de423==2010.1
 mock
-sphinx
+sphinx==1.2.3
+docutils==0.12
+pygments==2.0.1
 pytz
