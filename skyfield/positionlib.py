@@ -94,16 +94,19 @@ class ICRS(object):
                 Angle(radians=dec, signed=True),
                 Distance(r_AU))
 
+    def _ecliptic_vector(self):
+        epsilon = mean_obliquity(T0) * ASEC2RAD  # should T0 be date instead?
+        return rot_x(epsilon).dot(self.position.AU)
+
+    def ecliptic_position(self):
+        """Return an x,y,z position relative to the ecliptic plane."""
+        return Distance(self._ecliptic_vector())
+
     def ecliptic_latlon(self):
         """Return ecliptic latitude, longitude, and distance."""
-        position_AU = self.position.AU
-        #position_AU = einsum('ij...,j...->i...', self.jd.M, position_AU)
-        #epsilon = mean_obliquity(self.jd.tdb) * ASEC2RAD
-        epsilon = mean_obliquity(T0) * ASEC2RAD
-        P = (rot_x(epsilon)).dot(position_AU)
-        d, lat, lon = to_polar(P)
-        return (Angle(radians=lat),
-                Angle(radians=lon, signed=True),
+        d, lat, lon = to_polar(self._ecliptic_vector())
+        return (Angle(radians=lat, signed=True),
+                Angle(radians=lon),
                 Distance(AU=d))
 
 class Topos(object):

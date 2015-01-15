@@ -20,6 +20,9 @@ def test_ecliptic_latlon():
     lat, lon, distance = astrometric.ecliptic_latlon()
     assert '{0:.4f}'.format(lat.degrees) == '1.0130'
     assert '{0:.4f}'.format(lon.degrees) == '151.3227'
+
+    assert str(lat) == '''+01deg 00' 46.7"'''
+    assert str(lon) == '''151deg 19' 21.7"'''
     # That last value should really be '151.3229' according to HORIZONS
     # (see string above) but we are just getting started here so the
     # tiny difference is being filed away as something to look at later!
