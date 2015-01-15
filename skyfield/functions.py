@@ -46,8 +46,8 @@ def from_polar(r, theta, phi):
     The order of the three arguments is intended to match ISO 31-11.
 
     """
-    rxy = r * cos(phi)
-    return array((rxy * cos(theta), rxy * sin(theta), r * sin(phi)))
+    rxy = r * cos(theta)
+    return array((rxy * cos(phi), rxy * sin(phi), r * sin(theta)))
 
 def spin_x(theta):
     z = zeros_like(theta)
