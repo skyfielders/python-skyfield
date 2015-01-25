@@ -48,12 +48,6 @@ class ICRS(object):
             v = body.velocity.AU_per_d - self.velocity.AU_per_d
         return ICRS(p, v, self.jd)
 
-    def observe(self, body):
-        """Return the astrometric position of `body` viewed from this position.
-
-        """
-        return body.observe_from(self)
-
     def distance(self):
         """Return the length of this vector.
 
@@ -109,6 +103,7 @@ class ICRS(object):
                 Angle(radians=lon),
                 Distance(AU=d))
 
+
 class Topos(object):
     """An object representing a specific location on the Earth's surface."""
 
@@ -153,9 +148,9 @@ class Topos(object):
         """Compute where this Earth location was in space on a given date."""
         e = self.ephemeris.earth(jd)
         tpos_AU, tvel_AU_per_d = geocentric_position_and_velocity(self, jd)
-        t = ToposICRS(e.position.AU + tpos_AU,
-                      e.velocity.AU_per_d + tvel_AU_per_d,
-                      jd)
+        t = Barycentric(e.position.AU + tpos_AU,
+                        e.velocity.AU_per_d + tvel_AU_per_d,
+                        jd)
         t.rGCRS = tpos_AU
         t.vGCRS = tvel_AU_per_d
         t.topos = self
@@ -171,13 +166,23 @@ class Topos(object):
         t.ephemeris = self.ephemeris
         return t
 
+
 class ToposICRS(ICRS):
     """In ICRS, right?"""
 
     geocentric = False
 
+
 class Barycentric(ICRS):
-    """An ICRS x,y,z position referenced to the Solar System barycenter."""
+    """BCRS: an ICRS x,y,z position measured from the Solar System barycenter.
+
+    """
+    def observe(self, body):
+        """Return the astrometric position of `body` viewed from this position.
+
+        """
+        return body._observe_from_bcrs(self)
+
 
 class Astrometric(ICRS):
     """An astrometric position as an x,y,z vector in the ICRS.

@@ -47,7 +47,7 @@ class Star(object):
         return 'Star(ra_hours={0!r}, dec_degrees={1!r}{2})'.format(
             self.ra.hours, self.dec.degrees, ''.join(opts))
 
-    def observe_from(self, observer):
+    def _observe_from_bcrs(self, observer):
         position, velocity = self._position_AU, self._velocity_AU_per_d
         jd = observer.jd
         dt = light_time_difference(position, observer.position.AU)

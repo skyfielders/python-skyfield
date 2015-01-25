@@ -55,7 +55,7 @@ class Planet(object):
             pv = pv[:,0]
         return pv[:3], pv[3:]
 
-    def observe_from(self, observer):
+    def _observe_from_bcrs(self, observer):
         # TODO: should also accept another ICRS?
 
         jd_tdb = observer.jd.tdb

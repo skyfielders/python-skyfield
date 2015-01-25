@@ -82,7 +82,7 @@ class EarthSatellite(object):
         g.sgp4_error = error
         return g
 
-    def observe_from(self, observer):
+    def _observe_from_bcrs(self, observer):
         # TODO: what if someone on Mars tries to look at the ISS?
 
         jd = observer.jd
