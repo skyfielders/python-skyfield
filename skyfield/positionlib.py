@@ -95,7 +95,7 @@ class ICRS(object):
                 Distance(r_AU))
 
     def _ecliptic_vector(self):
-        epsilon = mean_obliquity(T0) * ASEC2RAD  # should T0 be date instead?
+        epsilon = mean_obliquity(T0) * ASEC2RAD
         return rot_x(epsilon).dot(self.position.AU)
 
     def ecliptic_position(self):
