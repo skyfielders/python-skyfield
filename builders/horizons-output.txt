@@ -33,7 +33,7 @@
 
 [H[J                                                                          
      ___    _____     ___                                                 
-    /_ /|  /____/ \  /_ /|       Horizons On-line Ephemeris System v3.94  
+    /_ /|  /____/ \  /_ /|       Horizons On-line Ephemeris System v3.97  
     | | | |  __ \ /| | | |       Solar System Dynamics Group              
  ___| | | | |__) |/  | | |__     Jet Propulsion Laboratory                
 /___| | | |  ___/    | |/__ /|   Pasadena, CA, USA                        
@@ -41,9 +41,9 @@
  
  Establishing connection, stand-by ...  
 [H[J 
-JPL Horizons, version 3.94 
+JPL Horizons, version 3.97 
 Type `?' for brief intro, `?!' for more details 
-System news updated Aug 19, 2014
+System news updated Jan 08, 2015
  
 Horizons> Horizons> 599
 [?1h=*******************************************************************************
@@ -105,7 +105,7 @@ Horizons> Horizons> 599
  
  Working ...   -  
 [?1h=*******************************************************************************
-Ephemeris / PORT_LOGIN Wed Sep 17 20:34:23 2014 Pasadena, USA    / Horizons    
+Ephemeris / PORT_LOGIN Sun Jan 25 10:18:53 2015 Pasadena, USA    / Horizons    
 *******************************************************************************
 Target body name: Jupiter (599)                   {source: JUP310}
 Center body name: Earth (399)                     {source: DE-0431LE-0431}
@@ -128,8 +128,8 @@ Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
 Atmos refraction: NO (AIRLESS)
 RA format       : HMS
 Time format     : CAL 
-EOP file        : eop.140917.p141209                                           
-EOP coverage    : DATA-BASED 1962-JAN-20 TO 2014-SEP-17. PREDICTS-> 2014-DEC-08
+EOP file        : eop.150123.p150416                                           
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2015-JAN-23. PREDICTS-> 2015-APR-15
 Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s 
 Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
 Table cut-offs 2: Solar Elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
@@ -188,7 +188,7 @@ Units: AU and KM/S
 [K[?1l> >>> Select... [A]gain, [N]ew-case, [F]tp, [K]ermit, [M]ail, [R]edisplay, ? : q
                                                                           
      ___    _____     ___                                                 
-    /_ /|  /____/ \  /_ /|       Horizons On-line Ephemeris System v3.94  
+    /_ /|  /____/ \  /_ /|       Horizons On-line Ephemeris System v3.97  
     | | | |  __ \ /| | | |       Solar System Dynamics Group              
  ___| | | | |__) |/  | | |__     Jet Propulsion Laboratory                
 /___| | | |  ___/    | |/__ /|   Pasadena, CA, USA                        
