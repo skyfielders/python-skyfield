@@ -1,28 +1,23 @@
-"""Tests against HORIZONS numbers."""
+'Auto-generated accuracy tests vs HORIZONS (build_horizons_tests.py).'
 
+from numpy import max
 from skyfield import api
+from skyfield.constants import AU_M
 
-# see the top-level project ./horizons/ directory for where the
-# following numbers come from; soon, we should automate the fetching of
-# such numbers and their injection into test cases, as we do for results
-# from NOVAS.
+one_second = 1.0 / 24.0 / 60.0 / 60.0
+arcsecond = 1.0 / 60.0 / 60.0
+ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
+meter = 1.0 / AU_M
 
-"""
- Date__(UT)__HR:MN     hEcl-Lon hEcl-Lat               r        rdot
-********************************************************************
-$$SOE
- 1980-Jan-01 00:00     151.3229   1.0130  5.378949180806   0.4314383
-$$EOE
-"""
+def compare(value, expected_value, epsilon):
+    if hasattr(value, 'shape') or hasattr(expected_value, 'shape'):
+        assert max(abs(value - expected_value)) <= epsilon
+    else:
+        assert abs(value - expected_value) <= epsilon
 
-def test_ecliptic_latlon():
-    astrometric = api.sun(utc=(1980, 1, 1)).observe(api.jupiter)
-    lat, lon, distance = astrometric.ecliptic_latlon()
-    assert '{0:.4f}'.format(lat.degrees) == '1.0130'
-    assert '{0:.4f}'.format(lon.degrees) == '151.3227'
+def test_jupiter1():
+    astrometric = api.sun(utc=(1980, 1, 1, 0, 0)).observe(api.jupiter)
+    hlat, hlon, d = astrometric.ecliptic_latlon()
+    compare(hlat.degrees, 1.013, 0.001)
+    compare(hlon.degrees, 151.3229, 0.001)
 
-    assert str(lat) == '''+01deg 00' 46.7"'''
-    assert str(lon) == '''151deg 19' 21.7"'''
-    # That last value should really be '151.3229' according to HORIZONS
-    # (see string above) but we are just getting started here so the
-    # tiny difference is being filed away as something to look at later!
