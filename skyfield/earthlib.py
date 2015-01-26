@@ -1,6 +1,6 @@
 """Formulae for specific earth behaviors and effects."""
 
-from numpy import (abs, arcsin, arccos, array, clip, cos, einsum,
+from numpy import (abs, arcsin, arccos, array, clip, cos,
                    minimum, pi, sin, sqrt, tan, where, zeros_like)
 
 from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
@@ -10,29 +10,6 @@ from .functions import dots
 earth_radius_AU = ERAD / AU_M
 one_minus_flattening = 1.0 - 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
 one_minus_flattening_squared = one_minus_flattening * one_minus_flattening
-
-
-def geocentric_position_and_velocity(topos, jd):
-    """Compute the GCRS position and velocity of a terrestrial observer.
-
-    `topos` - `Topos` object describing a location.
-    `jd` - a JulianDate.
-
-    The return value is a 2-element tuple `(pos, vel)` of 3-vectors
-    which each measure position in AU long the axes of the ICRS.
-
-    """
-    pos, vel = terra(
-        topos.latitude.radians,
-        topos.longitude.radians,
-        topos.elevation.AU,
-        jd.gast,
-        )
-
-    pos = einsum('ij...,j...->i...', jd.MT, pos)
-    vel = einsum('ij...,j...->i...', jd.MT, vel)
-
-    return pos, vel
 
 
 def terra(latitude, longitude, elevation, gast):

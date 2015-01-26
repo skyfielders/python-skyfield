@@ -4,8 +4,7 @@ from numpy import array, cos, einsum, exp, sin
 
 from .constants import RAD2DEG, TAU, rotation_to_ecliptic
 from .functions import dots, length_of, to_polar, rot_z
-from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
-                       refract)
+from .earthlib import compute_limb_angle, refract, terra
 from .relativity import add_aberration, add_deflection
 from .timelib import JulianDate, takes_julian_date
 from .units import Distance, Velocity, Angle, _interpret_ltude
@@ -142,7 +141,7 @@ class Topos(object):
     def __call__(self, jd):
         """Compute where this Earth location was in space on a given date."""
         e = self.ephemeris.earth(jd)
-        tpos_AU, tvel_AU_per_d = geocentric_position_and_velocity(self, jd)
+        tpos_AU, tvel_AU_per_d = self._position_and_velocity(jd)
         t = Barycentric(e.position.AU + tpos_AU,
                         e.velocity.AU_per_d + tvel_AU_per_d,
                         jd)
@@ -156,11 +155,19 @@ class Topos(object):
     @takes_julian_date
     def gcrs(self, jd):
         """Compute where this location was in the GCRS on a given date."""
-        tpos_AU, tvel_AU_per_d = geocentric_position_and_velocity(self, jd)
+        tpos_AU, tvel_AU_per_d = self._position_and_velocity(jd)
         t = Geocentric(tpos_AU, tvel_AU_per_d, jd)
         t.topos = self
         t.ephemeris = self.ephemeris
         return t
+
+    def _position_and_velocity(self, jd):
+        """Return the GCRS position, velocity of this Topos at `jd`."""
+        pos, vel = terra(self.latitude.radians, self.longitude.radians,
+                         self.elevation.AU, jd.gast)
+        pos = einsum('ij...,j...->i...', jd.MT, pos)
+        vel = einsum('ij...,j...->i...', jd.MT, vel)
+        return pos, vel
 
 
 class Barycentric(ICRS):
