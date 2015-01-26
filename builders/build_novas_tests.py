@@ -92,7 +92,7 @@ def output_subroutine_tests(dates):
         angle = novas.era(jd)
         output(locals(), """\
             def test_earth_rotation_angle_date{i}():
-                compare(earthlib.earth_rotation_angle({jd!r}), {angle},
+                compare(earthlib.earth_rotation_angle({jd!r}) * 360.0, {angle},
                         0.000001 * arcsecond)
             """)
 

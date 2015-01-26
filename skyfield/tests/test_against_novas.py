@@ -9,6 +9,7 @@ from skyfield.constants import AU_M
 from skyfield.data import hipparcos
 from skyfield.functions import length_of
 from skyfield.jpllib import Ephemeris
+from skyfield.positionlib import Apparent
 
 import de405
 de405 = Ephemeris(de405)
@@ -37,19 +38,19 @@ def test_calendar_date_3():
     compare(timelib.calendar_date(2456164.5), array((2012, 8, 24.5)), 0.0)
 
 def test_earth_rotation_angle_date0():
-    compare(earthlib.earth_rotation_angle(2440423.345833333), 243.32160780274833,
+    compare(earthlib.earth_rotation_angle(2440423.345833333) * 360.0, 243.32160780274833,
             0.000001 * arcsecond)
 
 def test_earth_rotation_angle_date1():
-    compare(earthlib.earth_rotation_angle(2448031.5), 237.5118441792128,
+    compare(earthlib.earth_rotation_angle(2448031.5) * 360.0, 237.5118441792128,
             0.000001 * arcsecond)
 
 def test_earth_rotation_angle_date2():
-    compare(earthlib.earth_rotation_angle(2451545.0), 280.46061837504,
+    compare(earthlib.earth_rotation_angle(2451545.0) * 360.0, 280.46061837504,
             0.000001 * arcsecond)
 
 def test_earth_rotation_angle_date3():
-    compare(earthlib.earth_rotation_angle(2456164.5), 333.4965831957672,
+    compare(earthlib.earth_rotation_angle(2456164.5) * 360.0, 333.4965831957672,
             0.000001 * arcsecond)
 
 def test_earth_tilt_date0():
@@ -1513,7 +1514,7 @@ def test_polaris_geocentric_date3():
     compare(dec.degrees, 89.25923373182653, 0.001 * arcsecond)
 
     ra, dec, distance = apparent.radec(epoch='date')
-    compare(ra.hours, 2.806474133445645, 0.001 * ra_arcsecond)
+    compare(ra.hours, 2.8064741334456444, 0.001 * ra_arcsecond)
     compare(dec.degrees, 89.3136939266471, 0.001 * arcsecond)
 
 def test_polaris_geocentric_date4():
@@ -1534,7 +1535,7 @@ def test_polaris_geocentric_date4():
     compare(dec.degrees, (89.25882879505869, 89.26201007627152, 89.26917874902797, 89.25923373182653), 0.001 * arcsecond)
 
     ra, dec, distance = apparent.radec(epoch='date')
-    compare(ra.hours, (2.0385816433557027, 2.332921180528844, 2.5459982729094506, 2.806474133445645), 0.001 * ra_arcsecond)
+    compare(ra.hours, (2.0385816433557027, 2.332921180528844, 2.5459982729094506, 2.8064741334456444), 0.001 * ra_arcsecond)
     compare(dec.degrees, (89.11999387030946, 89.22082922133737, 89.26697328449004, 89.3136939266471), 0.001 * arcsecond)
 
 def test_mercury_topocentric_date0():

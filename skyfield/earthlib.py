@@ -40,20 +40,21 @@ def geocentric_position_and_velocity(topos, jd):
     return pos, vel
 
 
-def terra(latitude, longitude, elevation, st):
+def terra(latitude, longitude, elevation, gast):
     """Compute the position and velocity of a terrestrial observer.
 
     `latitude` - Latitude in radians.
     `longitude` - Longitude in radians.
     `elevation` - Elevation above sea level in AU.
-    `st` - Array of sidereal times in floating-point hours.
+    `gast` - Hours of Greenwich Apparent Sidereal Time (can be an array).
 
     The return value is a tuple of two 3-vectors `(pos, vel)` in the
-    dynamical reference system whose components are measured in AU with
-    respect to the center of the Earth.
+    dynamical reference system (the true equator and equinox of date)
+    whose components are measured in AU with respect to the center of
+    the Earth.
 
     """
-    zero = zeros_like(st)
+    zero = zeros_like(gast)
     sinphi = sin(latitude)
     cosphi = cos(latitude)
     c = 1.0 / sqrt(cosphi * cosphi +
@@ -64,7 +65,7 @@ def terra(latitude, longitude, elevation, st):
 
     # Compute local sidereal time factors at the observer's longitude.
 
-    stlocl = st * 15.0 * DEG2RAD + longitude
+    stlocl = gast * 15.0 * DEG2RAD + longitude
     sinst = sin(stlocl)
     cosst = cos(stlocl)
 
@@ -156,22 +157,19 @@ def sidereal_time(jd, use_eqeq=False):
 
     # Form the Greenwich sidereal time.
 
-    gst = fmod((st / 3600.0 + theta), 360.0) / 15.0
-
-    gst += 24.0 * (gst < 0.0)
-
-    return gst
+    return (st / 54000.0 + theta * 24.0) % 24.0
 
 
 def earth_rotation_angle(jd_ut1):
     """Return the value of the Earth Rotation Angle (theta) for a UT1 date.
 
     Uses the expression from the note to IAU Resolution B1.8 of 2000.
+    Returns a fraction between 0.0 and 1.0 whole rotations.
 
     """
     thet1 = 0.7790572732640 + 0.00273781191135448 * (jd_ut1 - T0)
     thet3 = jd_ut1 % 1.0
-    return (thet1 + thet3) % 1.0 * 360.0
+    return (thet1 + thet3) % 1.0
 
 
 def refraction(alt_degrees, temperature_C, pressure_mbar):
