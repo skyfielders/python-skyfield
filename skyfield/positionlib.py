@@ -21,7 +21,7 @@ class ICRS(object):
     old series of equinox-based systems like B1900, B1950, and J2000.
 
     """
-    geocentric = True  # TODO: figure out what this meant and get rid of it
+    geocentric = True
 
     def __init__(self, position_AU, velocity_AU_per_d=None, jd=None):
         self.jd = jd
@@ -151,6 +151,7 @@ class Topos(object):
         t = Barycentric(e.position.AU + tpos_AU,
                         e.velocity.AU_per_d + tvel_AU_per_d,
                         jd)
+        t.geocentric = False  # test, then get rid of this attribute
         t.rGCRS = tpos_AU
         t.vGCRS = tvel_AU_per_d
         t.topos = self
@@ -165,12 +166,6 @@ class Topos(object):
         t.topos = self
         t.ephemeris = self.ephemeris
         return t
-
-
-class ToposICRS(ICRS):
-    """In ICRS, right?"""
-
-    geocentric = False
 
 
 class Barycentric(ICRS):
