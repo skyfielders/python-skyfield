@@ -32,13 +32,14 @@ T0 = 2451545.0
 B1950 = 2433282.4235
 DAY_S = 86400.0
 
+# import numpy
+# numpy.set_printoptions(formatter={'float': repr})
 # from .constants import ASEC2RAD, T0
 # from .nutationlib import mean_obliquity
 # from .functions import rot_x
 # ecliptic_obliquity_radians = mean_obliquity(T0) * ASEC2RAD
-# print(repr(rot_x(ecliptic_obliquity.radians)))
-#   (TODO: how do we print this with more significant digits?)
+# print(repr(rot_x(ecliptic_obliquity_radians)))
 
-rotation_to_ecliptic = array([[ 1.        ,  0.        ,  0.        ],
-                              [ 0.        ,  0.91748214,  0.39777697],
-                              [ 0.        , -0.39777697,  0.91748214]])
+rotation_to_ecliptic = array(((1.0, 0.0, 0.0),
+       (0.0, 0.91748214306524178, 0.39777696911260602),
+       (0.0, -0.39777696911260602, 0.91748214306524178)))
