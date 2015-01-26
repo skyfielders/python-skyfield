@@ -3,7 +3,7 @@
 from numpy import array, cos, einsum, exp, sin
 
 from .constants import RAD2DEG, TAU, rotation_to_ecliptic
-from .functions import dots, length_of, spin_x, to_polar
+from .functions import dots, from_polar, length_of, spin_x, to_polar
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        refract, sidereal_time)
 from .relativity import add_aberration, add_deflection
@@ -286,6 +286,11 @@ class Apparent(ICRS):
             alt = Angle(degrees=alt)
 
         return alt, Angle(radians=az), Distance(r_AU)
+
+    # @classmethod
+    # def from_altaz(cls, alt_degrees, az_degrees):
+    #     r = 0.1  # close enough to make gravitational refraction irrelevant
+    #     return cls(from_polar(r, alt_degrees, az_degrees))
 
 class Geocentric(ICRS):
     """A position referred to the GCRS as measured from the geocenter."""

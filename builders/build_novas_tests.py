@@ -42,6 +42,7 @@ def main():
         from skyfield.data import hipparcos
         from skyfield.functions import length_of
         from skyfield.jpllib import Ephemeris
+        from skyfield.positionlib import Apparent
 
         import de405
         de405 = Ephemeris(de405)
@@ -236,6 +237,16 @@ def output_subroutine_tests(dates):
                 compare(alt, {alt!r}, 0.000000001 * arcsecond)
             """)
 
+    # ra, dec = 12.34, 67.89
+    # alt, az = altaz_maneuver(T0, northpole, ra, dec, ref=0)
+    # output(locals(), """\
+    #     def test_from_altaz{i}():
+    #         a = Apparent.from_altaz(alt_degrees={alt!r}, az_degrees={az!r})
+    #         ra, dec, distance = a.radec()
+    #         compare(ra.hours, {ra!r}, 0.000000001 * arcsecond)
+    #         compare(dec.degrees, {dec!r}, 0.000000001 * arcsecond)
+    #     """)
+
     for i, (tt, delta_t) in enumerate(zip(date_floats, delta_t_floats)):
         jd_low = xp = yp = 0.0
         vector = [1.1, 1.2, 1.3]
@@ -397,7 +408,7 @@ def output_catalog_tests(dates):
 
 
 def altaz_maneuver(jd, place, ra, dec, ref=0):
-    """Simplify a pair of complicated USNO calls to a single callable."""
+    """Wrapped that simplifies a complicated USNO call."""
     xp = yp = 0.0
     (zd, az), (ra, dec) = novas.equ2hor(jd, 0.0, xp, yp, place, ra, dec, ref)
     return 90.0 - zd, az
