@@ -4,7 +4,7 @@ from time import strftime
 from .constants import T0, DAY_S
 from .earthlib import sidereal_time
 from .framelib import ICRS_to_J2000 as B
-from .nutationlib import compute_nutation
+from .nutationlib import compute_nutation, earth_tilt
 from .precessionlib import compute_precession
 
 try:
@@ -425,6 +425,10 @@ class JulianDate(object):
         if name == 'gmst':
             self.gmst = gmst = sidereal_time(self)
             return gmst
+
+        if name == 'gast':
+            self.gast = gast = self.gmst + earth_tilt(self)[2] / 3600.0
+            return gast
 
         raise AttributeError('no such attribute %r' % name)
 

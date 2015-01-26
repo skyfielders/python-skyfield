@@ -1,12 +1,11 @@
 """Formulae for specific earth behaviors and effects."""
 
-from numpy import (abs, arcsin, arccos, array, clip, cos, einsum, fmod,
+from numpy import (abs, arcsin, arccos, array, clip, cos, einsum,
                    minimum, pi, sin, sqrt, tan, where, zeros_like)
 
 from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
                         IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0)
 from .functions import dots
-from .nutationlib import earth_tilt
 
 earth_radius_AU = ERAD / AU_M
 one_minus_flattening = 1.0 - 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
@@ -23,15 +22,11 @@ def geocentric_position_and_velocity(topos, jd):
     which each measure position in AU long the axes of the ICRS.
 
     """
-    gmst = jd.gmst
-    x1, x2, eqeq, x3, x4 = earth_tilt(jd)
-    gast = gmst + eqeq / 3600.0
-
     pos, vel = terra(
         topos.latitude.radians,
         topos.longitude.radians,
         topos.elevation.AU,
-        gast,
+        jd.gast,
         )
 
     pos = einsum('ij...,j...->i...', jd.MT, pos)
@@ -127,18 +122,10 @@ def compute_limb_angle(position, observer):
     return limb_angle, nadir_angle
 
 
-def sidereal_time(jd, use_eqeq=False):
+def sidereal_time(jd):
     """Compute Greenwich sidereal time at Julian date `jd`."""
 
     t = (jd.tdb - T0) / 36525.0
-
-    # Equation of equinoxes.
-
-    if use_eqeq:
-        ee = earth_tilt(jd)[2]
-        eqeq = ee * 15.0
-    else:
-        eqeq = 0.0
 
     # Compute the Earth Rotation Angle.  Time argument is UT1.
 
@@ -148,7 +135,7 @@ def sidereal_time(jd, use_eqeq=False):
     # Precession-in-RA terms in mean sidereal time taken from third
     # reference, eq. (42), with coefficients in arcseconds.
 
-    st = eqeq + ( 0.014506 +
+    st =        ( 0.014506 +
         (((( -    0.0000000368   * t
              -    0.000029956  ) * t
              -    0.00000044   ) * t
