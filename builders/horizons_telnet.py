@@ -18,7 +18,7 @@ def main(in_path, out_path):
 
 if __name__ == '__main__':
     try:
-        main('horizons-input.txt', 'horizons-output.txt')
+        main('horizons_input.txt', 'horizons_output.txt')
     except EOFError:
         print
         print('EOF')
