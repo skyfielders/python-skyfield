@@ -1,14 +1,14 @@
 """Formulae for specific earth behaviors and effects."""
 
-from numpy import (abs, arcsin, arccos, array, clip, cos, einsum, exp, fmod,
-                   logical_and, minimum, pi, sin, sqrt, tan, where, zeros_like)
+from numpy import (abs, arcsin, arccos, array, clip, cos, einsum, fmod,
+                   minimum, pi, sin, sqrt, tan, where, zeros_like)
 
 from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
                         IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0)
 from .functions import dots
 from .nutationlib import earth_tilt
 
-rade = ERAD / AU_M
+earth_radius_AU = ERAD / AU_M
 one_minus_flattening = 1.0 - 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
 one_minus_flattening_squared = one_minus_flattening * one_minus_flattening
 
@@ -30,7 +30,7 @@ def geocentric_position_and_velocity(topos, jd):
     pos, vel = terra(
         topos.latitude.radians,
         topos.longitude.radians,
-        topos.elevation.m,
+        topos.elevation.AU,
         gast,
         )
 
@@ -45,7 +45,7 @@ def terra(latitude, longitude, elevation, st):
 
     `latitude` - Latitude in radians.
     `longitude` - Longitude in radians.
-    `elevation` - Elevation in meters.
+    `elevation` - Elevation above sea level in AU.
     `st` - Array of sidereal times in floating-point hours.
 
     The return value is a tuple of two 3-vectors `(pos, vel)` in the
@@ -59,9 +59,8 @@ def terra(latitude, longitude, elevation, st):
     c = 1.0 / sqrt(cosphi * cosphi +
                    sinphi * sinphi * one_minus_flattening_squared)
     s = one_minus_flattening_squared * c
-    ht = elevation
-    ach = (ERAD * c + ht) / AU_M
-    ash = (ERAD * s + ht) / AU_M
+    ach = earth_radius_AU * c + elevation
+    ash = earth_radius_AU * s + elevation
 
     # Compute local sidereal time factors at the observer's longitude.
 
@@ -104,7 +103,7 @@ def compute_limb_angle(position, observer):
 
     # Compute apparent angular radius of Earth's limb.
 
-    aprad = arcsin(minimum(rade / disobs, 1.0))
+    aprad = arcsin(minimum(earth_radius_AU / disobs, 1.0))
 
     # Compute zenith distance of Earth's limb.
 
