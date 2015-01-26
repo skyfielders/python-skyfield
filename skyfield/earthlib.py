@@ -60,8 +60,8 @@ def terra(latitude, longitude, elevation, st):
                    sinphi * sinphi * one_minus_flattening_squared)
     s = one_minus_flattening_squared * c
     ht = elevation
-    ach = ERAD * c + ht
-    ash = ERAD * s + ht
+    ach = (ERAD * c + ht) / AU_M
+    ash = (ERAD * s + ht) / AU_M
 
     # Compute local sidereal time factors at the observer's longitude.
 
@@ -72,12 +72,12 @@ def terra(latitude, longitude, elevation, st):
     # Compute position vector components in kilometers.
 
     ac = ach * cosphi
-    pos = array((ac * cosst, ac * sinst, zero + ash * sinphi)) / AU_M
+    pos = array((ac * cosst, ac * sinst, zero + ash * sinphi))
 
     # Compute velocity vector components in kilometers/sec.
 
     aac = ANGVEL * ach * cosphi
-    vel = array((-aac * sinst, aac * cosst, zero)) / AU_M * DAY_S
+    vel = array((-aac * sinst, aac * cosst, zero)) * DAY_S
 
     return pos, vel
 
