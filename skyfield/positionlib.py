@@ -3,7 +3,7 @@
 from numpy import array, cos, einsum, exp, sin
 
 from .constants import RAD2DEG, TAU, rotation_to_ecliptic
-from .functions import dots, from_polar, length_of, spin_x, to_polar
+from .functions import dots, length_of, to_polar, rot_z
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        refract, sidereal_time)
 from .relativity import add_aberration, add_deflection
@@ -259,8 +259,8 @@ class Apparent(ICRS):
 
         # TODO: wobble
 
-        gast = sidereal_time(self.jd, use_eqeq=True)
-        spin = spin_x(-gast * TAU / 24.0)
+        gast = sidereal_time(self.jd, use_eqeq=True) # an angle
+        spin = rot_z(-gast * TAU / 24.0)            # a 3x3 matrix
         uz = einsum('i...,ij...->j...', uze, spin)
         un = einsum('i...,ij...->j...', une, spin)
         uw = einsum('i...,ij...->j...', uwe, spin)
@@ -314,6 +314,6 @@ def ITRF_to_GCRS(jd, rITRF):  # todo: velocity
     # Todo: wobble
 
     gast = sidereal_time(jd, use_eqeq=True)
-    spin = spin_x(-gast * TAU / 24.0)
+    spin = rot_z(-gast * TAU / 24.0)
     position = einsum('i...,ij...->j...', array(rITRF), spin)
     return einsum('ij...,j...->i...', jd.MT, position)

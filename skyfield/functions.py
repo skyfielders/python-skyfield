@@ -1,4 +1,4 @@
-from numpy import arcsin, arctan2, array, cos, ones_like, sin, sqrt, zeros_like
+from numpy import arcsin, arctan2, array, cos, sin, sqrt
 from skyfield.constants import tau
 
 def dots(v, u):
@@ -48,13 +48,6 @@ def from_polar(r, theta, phi):
     """
     rxy = r * cos(theta)
     return array((rxy * cos(phi), rxy * sin(phi), r * sin(theta)))
-
-def spin_x(theta):
-    z = zeros_like(theta)
-    u = ones_like(theta)
-    c = cos(theta)
-    s = sin(theta)
-    return array(((c, -s, z), (s, c, z), (z, z, u)))
 
 def rot_x(theta):
     c = cos(theta)
