@@ -23,7 +23,7 @@ def geocentric_position_and_velocity(topos, jd):
     which each measure position in AU long the axes of the ICRS.
 
     """
-    gmst = sidereal_time(jd)
+    gmst = jd.gmst
     x1, x2, eqeq, x3, x4 = earth_tilt(jd)
     gast = gmst + eqeq / 3600.0
 
@@ -128,7 +128,7 @@ def compute_limb_angle(position, observer):
 
 
 def sidereal_time(jd, use_eqeq=False):
-    """Compute Greenwich sidereal time at Julian date `jd_ut1`."""
+    """Compute Greenwich sidereal time at Julian date `jd`."""
 
     t = (jd.tdb - T0) / 36525.0
 

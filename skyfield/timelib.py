@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta, tzinfo
 from numpy import array, einsum, rollaxis, searchsorted, sin, where, zeros_like
 from time import strftime
 from .constants import T0, DAY_S
+from .earthlib import sidereal_time
 from .framelib import ICRS_to_J2000 as B
 from .nutationlib import compute_nutation
 from .precessionlib import compute_precession
@@ -420,6 +421,10 @@ class JulianDate(object):
         if name == 'ut1':
             self.ut1 = ut1 = self.tt - self.delta_t / DAY_S
             return ut1
+
+        if name == 'gmst':
+            self.gmst = gmst = sidereal_time(self)
+            return gmst
 
         raise AttributeError('no such attribute %r' % name)
 
