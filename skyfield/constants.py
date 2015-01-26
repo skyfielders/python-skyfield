@@ -1,5 +1,7 @@
 """Various constants required by Skyfield."""
 
+from numpy import array
+
 # Angles.
 ASEC360 = 1296000.0
 ASEC2RAD = 4.848136811095359935899141e-6
@@ -29,3 +31,14 @@ GS = 1.32712440017987e+20
 T0 = 2451545.0
 B1950 = 2433282.4235
 DAY_S = 86400.0
+
+# from .constants import ASEC2RAD, T0
+# from .nutationlib import mean_obliquity
+# from .functions import rot_x
+# ecliptic_obliquity_radians = mean_obliquity(T0) * ASEC2RAD
+# print(repr(rot_x(ecliptic_obliquity.radians)))
+#   (TODO: how do we print this with more significant digits?)
+
+rotation_to_ecliptic = array([[ 1.        ,  0.        ,  0.        ],
+                              [ 0.        ,  0.91748214,  0.39777697],
+                              [ 0.        , -0.39777697,  0.91748214]])

@@ -1,18 +1,15 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, cos, einsum, exp, pi, sin
+from numpy import array, cos, einsum, exp, sin
 
-from .constants import ASEC2RAD, RAD2DEG, T0, TAU
-from .functions import dots, length_of, rot_x, spin_x, to_polar
+from .constants import RAD2DEG, TAU, rotation_to_ecliptic
+from .functions import dots, length_of, spin_x, to_polar
 from .earthlib import (compute_limb_angle, geocentric_position_and_velocity,
                        refract, sidereal_time)
-from .nutationlib import mean_obliquity
 from .relativity import add_aberration, add_deflection
 from .timelib import JulianDate, takes_julian_date
 from .units import Distance, Velocity, Angle, _interpret_ltude
 
-ecliptic_obliquity = (23 + (26/60.) + (21.406/3600.)) * pi / 180.
-quarter_tau = 0.25 * TAU
 
 class ICRS(object):
     """An x,y,z position whose axes are oriented to the ICRS system.
@@ -88,17 +85,15 @@ class ICRS(object):
                 Angle(radians=dec, signed=True),
                 Distance(r_AU))
 
-    def _ecliptic_vector(self):
-        epsilon = mean_obliquity(T0) * ASEC2RAD
-        return rot_x(epsilon).dot(self.position.AU)
-
     def ecliptic_position(self):
         """Return an x,y,z position relative to the ecliptic plane."""
-        return Distance(self._ecliptic_vector())
+        vector = rotation_to_ecliptic.dot(self.position.AU)
+        return Distance(vector)
 
     def ecliptic_latlon(self):
         """Return ecliptic latitude, longitude, and distance."""
-        d, lat, lon = to_polar(self._ecliptic_vector())
+        vector = rotation_to_ecliptic.dot(self.position.AU)
+        d, lat, lon = to_polar(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
                 Distance(AU=d))
