@@ -266,10 +266,10 @@ class Apparent(ICRS):
 
         # TODO: wobble
 
-        spin = rot_z(-self.jd.gast * TAU / 24.0)            # a 3x3 matrix
-        uz = einsum('i...,ij...->j...', uze, spin)
-        un = einsum('i...,ij...->j...', une, spin)
-        uw = einsum('i...,ij...->j...', uwe, spin)
+        spin = rot_z(self.jd.gast * TAU / 24.0)            # a 3x3 matrix
+        uz = einsum('ij...,j...->i...', spin, uze)
+        un = einsum('ij...,j...->i...', spin, une)
+        uw = einsum('ij...,j...->i...', spin, uwe)
 
         p = einsum('ij...,j...->i...', self.jd.M, self.position.AU)
 
@@ -319,6 +319,6 @@ def ITRF_to_GCRS(jd, rITRF):  # todo: velocity
 
     # Todo: wobble
 
-    spin = rot_z(-jd.gast * TAU / 24.0)
-    position = einsum('i...,ij...->j...', array(rITRF), spin)
+    spin = rot_z(jd.gast * TAU / 24.0)
+    position = einsum('ij...,j...->i...', spin, array(rITRF))
     return einsum('ij...,j...->i...', jd.MT, position)
