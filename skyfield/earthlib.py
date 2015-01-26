@@ -54,12 +54,12 @@ def terra(latitude, longitude, elevation, gast):
     return pos, vel
 
 
-def compute_limb_angle(position, observer):
+def compute_limb_angle(position_AU, observer_AU):
     """Determine the angle of an object above or below the Earth's limb.
 
-    Given an object's GCRS `position` [x,y,z] in AU and the position of
-    an `observer` in the same coordinate system, return a tuple that is
-    composed of `(limb_ang, nadir_ang)`:
+    Given an object's GCRS `position_AU` [x,y,z] vector and the position
+    of an `observer_AU` as a vector in the same coordinate system,
+    return a tuple that provides `(limb_ang, nadir_ang)`:
 
     limb_angle
         Angle of observed object above (+) or below (-) limb in degrees.
@@ -71,8 +71,8 @@ def compute_limb_angle(position, observer):
     """
     # Compute the distance to the object and the distance to the observer.
 
-    disobj = sqrt(dots(position, position))
-    disobs = sqrt(dots(observer, observer))
+    disobj = sqrt(dots(position_AU, position_AU))
+    disobs = sqrt(dots(observer_AU, observer_AU))
 
     # Compute apparent angular radius of Earth's limb.
 
@@ -84,7 +84,7 @@ def compute_limb_angle(position, observer):
 
     # Compute zenith distance of observed object.
 
-    coszd = dots(position, observer) / (disobj * disobs)
+    coszd = dots(position_AU, observer_AU) / (disobj * disobs)
     coszd = clip(coszd, -1.0, 1.0)
     zdobj = arccos(coszd)
 
