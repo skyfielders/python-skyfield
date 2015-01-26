@@ -27,7 +27,12 @@ def geocentric_position_and_velocity(topos, jd):
     x1, x2, eqeq, x3, x4 = earth_tilt(jd)
     gast = gmst + eqeq / 3600.0
 
-    pos, vel = terra(topos, gast)
+    pos, vel = terra(
+        topos.latitude.radians,
+        topos.longitude.radians,
+        topos.elevation.m,
+        gast,
+        )
 
     pos = einsum('ij...,j...->i...', jd.MT, pos)
     vel = einsum('ij...,j...->i...', jd.MT, vel)
@@ -35,10 +40,12 @@ def geocentric_position_and_velocity(topos, jd):
     return pos, vel
 
 
-def terra(topos, st):
+def terra(latitude, longitude, elevation, st):
     """Compute the position and velocity of a terrestrial observer.
 
-    `topos` - `Topos` object describing a geographic position.
+    `latitude` - Latitude in radians.
+    `longitude` - Longitude in radians.
+    `elevation` - Elevation in meters.
     `st` - Array of sidereal times in floating-point hours.
 
     The return value is a tuple of two 3-vectors `(pos, vel)` in the
@@ -47,19 +54,18 @@ def terra(topos, st):
 
     """
     zero = zeros_like(st)
-    phi = topos.latitude.radians
-    sinphi = sin(phi)
-    cosphi = cos(phi)
+    sinphi = sin(latitude)
+    cosphi = cos(latitude)
     c = 1.0 / sqrt(cosphi * cosphi +
                    sinphi * sinphi * one_minus_flattening_squared)
     s = one_minus_flattening_squared * c
-    ht = topos.elevation.m
+    ht = elevation
     ach = ERAD * c + ht
     ash = ERAD * s + ht
 
     # Compute local sidereal time factors at the observer's longitude.
 
-    stlocl = st * 15.0 * DEG2RAD + topos.longitude.radians
+    stlocl = st * 15.0 * DEG2RAD + longitude
     sinst = sin(stlocl)
     cosst = cos(stlocl)
 
