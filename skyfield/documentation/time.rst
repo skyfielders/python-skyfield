@@ -646,6 +646,12 @@ there are several more functions of time
 that live on Julian date objects
 since they are often needed repeatedly during a calculation.
 
+``gmst``
+    Greenwich Mean Sidereal Time.
+
+``gast``
+    Greenwich Apparent Sidereal Time.
+
 ``P``
     The precession matrix **P** for rotating an *x,y,z* vector
     to the true equator and equinox — the “epoch” — of this Julian date.
