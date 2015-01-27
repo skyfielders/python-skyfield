@@ -4,17 +4,23 @@
 from telnetlib import Telnet
 
 def main(in_path, out_path):
-    with open(in_path) as f:
-        lines = f.read().split('\n')
+    lines = read_lines(open(in_path))
     tn = Telnet('horizons.jpl.nasa.gov', 6775)
     out = open(out_path, 'w')
     for line in lines:
         print(repr(line))
-        tn.write(line + '\r\n')
-        data = tn.read_until('DUMMY PATTERN', 2.0)
-        print(data)
+        tn.write(line.encode('ascii') + b'\r\n')
+        data = tn.read_until(b'DUMMY PATTERN', 5.0).decode('ascii')
+        print(repr(data))
         out.write(data)
         out.flush()
+
+def read_lines(f):
+    for line in f:
+        line = line.strip()
+        if (not line) or line.startswith('#'):
+            continue
+        yield line
 
 if __name__ == '__main__':
     try:
