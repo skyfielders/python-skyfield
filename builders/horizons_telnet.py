@@ -10,7 +10,9 @@ def main(in_path, out_path):
     for line in lines:
         print(repr(line))
         tn.write(line.encode('ascii') + b'\r\n')
-        data = tn.read_until(b'DUMMY PATTERN', 5.0).decode('ascii')
+        index, match, data1 = tn.expect([b'.'], 5.0)
+        data2 = tn.read_until(b'DUMMY PATTERN', 1.0)
+        data = (data1 + data2).decode('ascii')
         print(repr(data))
         out.write(data)
         out.flush()
