@@ -258,7 +258,7 @@ class Apparent(ICRS):
             topos = self.observer.topos
             uze = topos.up
             une = topos.north
-            uwe = topos.west
+            uwe = -topos.west
         except AttributeError:
             raise ValueError('to compute an apparent position, you must'
                              ' observe from a specific Earth location that'
@@ -273,7 +273,7 @@ class Apparent(ICRS):
 
         p = einsum('ij...,j...->i...', self.jd.M, self.position.AU)
 
-        u = array([un, -uw, uz])
+        u = array([un, uw, uz])
         position_AU = einsum('ij...,j...->i...', u, p)
 
         r_AU, alt, az = to_polar(position_AU)
