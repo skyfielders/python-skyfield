@@ -3,7 +3,7 @@
 from numpy import array, cos, einsum, exp, sin
 
 from .constants import RAD2DEG, TAU, rotation_to_ecliptic
-from .functions import dots, length_of, to_polar, rot_z
+from .functions import length_of, to_polar, rot_x, rot_y, rot_z
 from .earthlib import compute_limb_angle, refract, terra
 from .relativity import add_aberration, add_deflection
 from .timelib import JulianDate, takes_julian_date
@@ -126,17 +126,6 @@ class Topos(object):
         self.longitude = longitude
         self.elevation = Distance(m=elevation_m)
 
-        lat = latitude.radians
-        lon = longitude.radians
-        sinlat = sin(lat)
-        coslat = cos(lat)
-        sinlon = sin(lon)
-        coslon = cos(lon)
-
-        self.up = array([coslat * coslon, coslat * sinlon, sinlat])
-        self.north = array([-sinlat * coslon, -sinlat * sinlon, coslat])
-        self.west = array([sinlon, -coslon, 0.0])
-
     @takes_julian_date
     def __call__(self, jd):
         """Compute where this Earth location was in space on a given date."""
@@ -173,10 +162,9 @@ class Topos(object):
 
     def _altaz_rotation(self, jd):
         """Compute the rotation from the ICRS into the alt-az system."""
-        spin = rot_z(jd.gast * TAU / 24.0)
-        u = array([self.north, -self.west, self.up]).T
-        spin_u = einsum('ij...,jk...->ki...', spin, u)
-        return einsum('ij...,jk...->ik...', spin_u, jd.M)
+        R_lon = rot_z(- self.longitude.radians - jd.gast * TAU / 24.0)
+        R_lat = rot_y(self.latitude.radians)[::-1]
+        return einsum('ij...,jk...,kl...->il...', R_lat, R_lon, jd.M)
 
 
 class Barycentric(ICRS):

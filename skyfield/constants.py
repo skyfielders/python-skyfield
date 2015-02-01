@@ -38,7 +38,7 @@ DAY_S = 86400.0
 # from .nutationlib import mean_obliquity
 # from .functions import rot_x
 # ecliptic_obliquity_radians = mean_obliquity(T0) * ASEC2RAD
-# print(repr(rot_x(ecliptic_obliquity_radians)))
+# print(repr(rot_x(-ecliptic_obliquity_radians)))
 
 rotation_to_ecliptic = array(((1.0, 0.0, 0.0),
        (0.0, 0.91748214306524178, 0.39777696911260602),

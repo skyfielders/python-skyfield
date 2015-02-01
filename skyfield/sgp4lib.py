@@ -143,7 +143,7 @@ def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
         rITRF = rPEF
         vITRF = vPEF
     else:
-        W = (rot_x(-yp)).dot(rot_y(-xp))
+        W = (rot_x(yp)).dot(rot_y(xp))
         rITRF = (W).dot(rPEF)
         vITRF = (W).dot(vPEF)
     return rITRF, vITRF
