@@ -347,82 +347,74 @@ def test_refract7():
     compare(alt, 90.0, 0.000000001 * arcsecond)
 
 def test_from_altaz_0():
-    return
     jd = JulianDate(tt=2440423.345833333)
     usno = de405.earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
-    a = usno(jd).from_altaz(alt_degrees=59.152982782850785, az_degrees=13.9943724122569)
-    ra, dec, distance = a.radec()
+    a = usno(jd).from_altaz(alt_degrees=68.12871390985195, az_degrees=28.97924422088555)
+    ra, dec, distance = a.radec(epoch=jd)
     compare(ra.hours, 12.34, 0.000000001 * arcsecond)
-    compare(dec.degrees, 67.89, 0.000000001 * arcsecond)
+    compare(dec.degrees, 56.78, 0.000000001 * arcsecond)
 
 def test_from_altaz_1():
-    return
     jd = JulianDate(tt=2440423.345833333)
     usno = de405.earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno(jd).from_altaz(alt_degrees=-17.792497521319106, az_degrees=172.5174218081666)
-    ra, dec, distance = a.radec()
+    ra, dec, distance = a.radec(epoch=jd)
     compare(ra.hours, 12.34, 0.000000001 * arcsecond)
     compare(dec.degrees, -67.89, 0.000000001 * arcsecond)
 
 def test_from_altaz_2():
-    return
     jd = JulianDate(tt=2448031.5)
     usno = de405.earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
-    a = usno(jd).from_altaz(alt_degrees=57.987597110323925, az_degrees=17.310127233646657)
-    ra, dec, distance = a.radec()
+    a = usno(jd).from_altaz(alt_degrees=65.86509135735979, az_degrees=34.15875636061595)
+    ra, dec, distance = a.radec(epoch=jd)
     compare(ra.hours, 12.34, 0.000000001 * arcsecond)
-    compare(dec.degrees, 67.89, 0.000000001 * arcsecond)
+    compare(dec.degrees, 56.78, 0.000000001 * arcsecond)
 
 def test_from_altaz_3():
-    return
     jd = JulianDate(tt=2448031.5)
     usno = de405.earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno(jd).from_altaz(alt_degrees=-18.431863895525524, az_degrees=170.42969631720953)
-    ra, dec, distance = a.radec()
+    ra, dec, distance = a.radec(epoch=jd)
     compare(ra.hours, 12.34, 0.000000001 * arcsecond)
     compare(dec.degrees, -67.89, 0.000000001 * arcsecond)
 
 def test_from_altaz_4():
-    return
     jd = JulianDate(tt=2451545.0)
     usno = de405.earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
-    a = usno(jd).from_altaz(alt_degrees=59.32692405885477, az_degrees=346.6118387869193)
-    ra, dec, distance = a.radec()
+    a = usno(jd).from_altaz(alt_degrees=68.47898348962794, az_degrees=332.0510941943416)
+    ra, dec, distance = a.radec(epoch=jd)
     compare(ra.hours, 12.34, 0.000000001 * arcsecond)
-    compare(dec.degrees, 67.89, 0.000000001 * arcsecond)
+    compare(dec.degrees, 56.78, 0.000000001 * arcsecond)
 
 def test_from_altaz_5():
-    return
     jd = JulianDate(tt=2451545.0)
     usno = de405.earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno(jd).from_altaz(alt_degrees=-17.699091955922242, az_degrees=187.12243108963492)
-    ra, dec, distance = a.radec()
+    ra, dec, distance = a.radec(epoch=jd)
     compare(ra.hours, 12.34, 0.000000001 * arcsecond)
     compare(dec.degrees, -67.89, 0.000000001 * arcsecond)
 
 def test_from_altaz_6():
-    return
     jd = JulianDate(tt=2456164.5)
     usno = de405.earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
-    a = usno(jd).from_altaz(alt_degrees=42.45353327371208, az_degrees=331.0690265782186)
-    ra, dec, distance = a.radec()
+    a = usno(jd).from_altaz(alt_degrees=41.365298291141826, az_degrees=316.19259712235026)
+    ra, dec, distance = a.radec(epoch=jd)
     compare(ra.hours, 12.34, 0.000000001 * arcsecond)
-    compare(dec.degrees, 67.89, 0.000000001 * arcsecond)
+    compare(dec.degrees, 56.78, 0.000000001 * arcsecond)
 
 def test_from_altaz_7():
-    return
     jd = JulianDate(tt=2456164.5)
     usno = de405.earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno(jd).from_altaz(alt_degrees=-29.282626410822004, az_degrees=204.1557062303077)
-    ra, dec, distance = a.radec()
+    ra, dec, distance = a.radec(epoch=jd)
     compare(ra.hours, 12.34, 0.000000001 * arcsecond)
     compare(dec.degrees, -67.89, 0.000000001 * arcsecond)
 

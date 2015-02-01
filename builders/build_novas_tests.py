@@ -239,16 +239,15 @@ def output_subroutine_tests(dates):
     usno = novas.make_on_surface(38.9215, -77.0669, 92.0, 10.0, 1010.0)
 
     ra = 12.34
-    for i, (tt, dec) in enumerate(product(date_floats, [67.89, -67.89])):
+    for i, (tt, dec) in enumerate(product(date_floats, [56.78, -67.89])):
         alt, az = altaz_maneuver(tt, usno, ra, dec, ref=0)
         output(locals(), """\
             def test_from_altaz_{i}():
-                return
                 jd = JulianDate(tt={tt!r})
                 usno = de405.earth.topos(
                     '38.9215 N', '77.0669 W', elevation_m=92.0)
                 a = usno(jd).from_altaz(alt_degrees={alt!r}, az_degrees={az!r})
-                ra, dec, distance = a.radec()
+                ra, dec, distance = a.radec(epoch=jd)
                 compare(ra.hours, {ra!r}, 0.000000001 * arcsecond)
                 compare(dec.degrees, {dec!r}, 0.000000001 * arcsecond)
             """)
@@ -414,7 +413,7 @@ def output_catalog_tests(dates):
 
 
 def altaz_maneuver(jd, place, ra, dec, ref=0):
-    """Wrapped that simplifies a complicated USNO call."""
+    """Wrapper that simplifies a complicated USNO call."""
     xp = yp = 0.0
     (zd, az), (ra, dec) = novas.equ2hor(jd, 0.0, xp, yp, place, ra, dec, ref)
     return 90.0 - zd, az
