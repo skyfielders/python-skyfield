@@ -126,6 +126,8 @@ class Topos(object):
         self.longitude = longitude
         self.elevation = Distance(m=elevation_m)
 
+        self.R_lat = rot_y(latitude.radians)[::-1]
+
     @takes_julian_date
     def __call__(self, jd):
         """Compute where this Earth location was in space on a given date."""
@@ -163,8 +165,7 @@ class Topos(object):
     def _altaz_rotation(self, jd):
         """Compute the rotation from the ICRS into the alt-az system."""
         R_lon = rot_z(- self.longitude.radians - jd.gast * TAU / 24.0)
-        R_lat = rot_y(self.latitude.radians)[::-1]
-        return einsum('ij...,jk...,kl...->il...', R_lat, R_lon, jd.M)
+        return einsum('ij...,jk...,kl...->il...', self.R_lat, R_lon, jd.M)
 
 
 class Barycentric(ICRS):
