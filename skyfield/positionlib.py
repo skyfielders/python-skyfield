@@ -150,6 +150,7 @@ class Topos(object):
         t.vGCRS = tvel_AU_per_d
         t.topos = self
         t.ephemeris = self.ephemeris
+        t.altaz_rotation = self._altaz_rotation(jd)
         return t
 
     @takes_julian_date
@@ -159,6 +160,7 @@ class Topos(object):
         t = Geocentric(tpos_AU, tvel_AU_per_d, jd)
         t.topos = self
         t.ephemeris = self.ephemeris
+        t.altaz_rotation = self._altaz_rotation(jd)
         return t
 
     def _position_and_velocity(self, jd):
@@ -168,6 +170,13 @@ class Topos(object):
         pos = einsum('ij...,j...->i...', jd.MT, pos)
         vel = einsum('ij...,j...->i...', jd.MT, vel)
         return pos, vel
+
+    def _altaz_rotation(self, jd):
+        """Compute the rotation from the ICRS into the alt-az system."""
+        spin = rot_z(jd.gast * TAU / 24.0)
+        u = array([self.north, -self.west, self.up]).T
+        spin_u = einsum('ij...,jk...->ki...', spin, u)
+        return einsum('ij...,jk...->ik...', spin_u, jd.M)
 
 
 class Barycentric(ICRS):
@@ -256,9 +265,7 @@ class Apparent(ICRS):
         """
         try:
             topos = self.observer.topos
-            uze = topos.up
-            une = topos.north
-            uwe = -topos.west
+            R = self.observer.altaz_rotation
         except AttributeError:
             raise ValueError('to compute an apparent position, you must'
                              ' observe from a specific Earth location that'
@@ -266,16 +273,7 @@ class Apparent(ICRS):
 
         # TODO: wobble
 
-        spin = rot_z(self.jd.gast * TAU / 24.0)            # a 3x3 matrix
-        uz = einsum('ij...,j...->i...', spin, uze)
-        un = einsum('ij...,j...->i...', spin, une)
-        uw = einsum('ij...,j...->i...', spin, uwe)
-
-        p = einsum('ij...,j...->i...', self.jd.M, self.position.AU)
-
-        u = array([un, uw, uz])
-        position_AU = einsum('ij...,j...->i...', u, p)
-
+        position_AU = einsum('ij...,j...->i...', R, self.position.AU)
         r_AU, alt, az = to_polar(position_AU)
 
         if temperature_C is None:
