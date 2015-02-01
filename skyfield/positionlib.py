@@ -273,11 +273,8 @@ class Apparent(ICRS):
 
         p = einsum('ij...,j...->i...', self.jd.M, self.position.AU)
 
-        pz = dots(p, uz)
-        pn = dots(p, un)
-        pw = dots(p, uw)
-
-        position_AU = array([pn, -pw, pz])
+        u = array([un, -uw, uz])
+        position_AU = einsum('ij...,j...->i...', u, p)
 
         r_AU, alt, az = to_polar(position_AU)
 
