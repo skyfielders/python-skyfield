@@ -29,3 +29,19 @@ def test_star_position_class():
     star = api.Star(ra_hours=0, dec_degrees=0)
     p = api.earth(utc=(2014, 2, 9, 15, 1)).observe(star)
     assert isinstance(p, positionlib.Astrometric)
+
+def test_from_altaz_needs_topos():
+    p = positionlib.ICRS([0.0, 0.0, 0.0])
+    with assert_raises(ValueError, 'the orientation of the horizon'):
+        p.from_altaz(alt_degrees=0, az_degrees=0)
+
+def test_from_altaz_parameters():
+    usno = api.earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    p = usno(tt=api.T0)
+    a = api.Angle(degrees=10.0)
+    with assert_raises(ValueError, 'the alt= parameter with an Angle'):
+        p.from_altaz(alt='Bad value', alt_degrees=0, az_degrees=0)
+    with assert_raises(ValueError, 'the az= parameter with an Angle'):
+        p.from_altaz(az='Bad value', alt_degrees=0, az_degrees=0)
+    p.from_altaz(alt=a, alt_degrees='bad', az_degrees=0)
+    p.from_altaz(az=a, alt_degrees=0, az_degrees='bad')

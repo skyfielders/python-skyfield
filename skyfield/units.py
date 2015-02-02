@@ -329,6 +329,24 @@ def _unsexagesimalize(value):
                 value = component
     return value
 
+def _interpret_angle(name, angle_object, angle_float, unit='degrees'):
+    """Return an angle in radians from one of two arguments.
+
+    It is common for Skyfield routines to accept both an argument like
+    `alt` that takes an Angle object as well as an `alt_degrees` that
+    can be given a bare float or a sexagesimal tuple.  A pair of such
+    arguments can be passed to this routine for interpretation.
+
+    """
+    if angle_object is not None:
+        if isinstance(angle_object, Angle):
+            return angle_object.radians
+    elif angle_float is not None:
+        return _unsexagesimalize(angle_float) * _from_degrees
+    raise ValueError('you must either provide the {0}= parameter with'
+                     ' an Angle argument or supply the {0}_{1}= parameter'
+                     ' with a numeric argument'.format(name, unit))
+
 def _interpret_ltude(value, name, psuffix, nsuffix):
     """Interpret a string as a latitude or longitude angle.
 
