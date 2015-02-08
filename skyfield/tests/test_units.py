@@ -1,6 +1,7 @@
 """Tests of whether units behave."""
 
 from assay import assert_raises
+from numpy import array
 from skyfield import units
 
 try:
@@ -9,6 +10,10 @@ except ImportError:
     u = None
 
 # needs_astropy = pytest.mark.skipif(u is None, reason='cannot import AstroPy')
+
+def test_stringifying_vector_distance():
+    a = array([1.23, 4.56])
+    assert str(units.Distance(AU=a)) == '[ 1.23  4.56] AU'
 
 def test_iterating_over_raw_measurement():
     distance = units.Distance(AU=1.234)

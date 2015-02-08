@@ -34,6 +34,8 @@ class Distance(object):
         elif m is not None:
             self.m = _auto_convert(m)
             self.AU = m / AU_M
+        else:
+            raise ValueError('to construct a Distance provide AU, km, or m')
 
     def __getattr__(self, name):
         if name == 'km':
@@ -45,7 +47,8 @@ class Distance(object):
         raise AttributeError('no attribute named %r' % (name,))
 
     def __str__(self):
-        return '{0:.6} AU'.format(self.AU)
+        AU = self.AU
+        return ('{0} AU' if hasattr(AU, 'shape') else '{0:.6} AU').format(AU)
 
     def __repr__(self):
         return '<{0} {1}>'.format(type(self).__name__, self)
