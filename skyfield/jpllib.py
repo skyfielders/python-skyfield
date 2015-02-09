@@ -66,7 +66,7 @@ class Body(object):
                 if code not in paths:
                     paths[code] = paths[here] + (segment,)
                     if code == there:
-                        return Solution(paths[code])
+                        return Solution(self.code, there, paths[there])
                     places.append(code)
 
         raise ValueError('{0} cannot observe {1}'.format(self.code, body.code))
@@ -78,8 +78,35 @@ def _other(segment, code):
 
 
 class Solution(object):
-    def __init__(self, path):
+    def __init__(self, center, target, path):
+        self.center = center
+        self.target = target
         self.path = path
+
+        self.ops = []
+        for segment in path:
+            if segment.center == center:
+                self.ops.append((1.0, segment))
+                center = segment.target
+            else:
+                self.ops.append((-1.0, segment))
+                center = segment.center
+
+    @takes_julian_date
+    def at(self, jd):
+        """(Simple geometric solution for now.)"""
+        tdb = jd.tdb
+        position = velocity = 0.0
+        for sign, segment in self.ops:
+            if segment.data_type == 2:
+                p, v = segment.compute_and_differentiate(tdb)
+                position += sign * p
+                velocity += sign * v
+            elif segment.data_type == 3:
+                six = sign * segment.compute(tdb)
+                position += six[:3]
+                velocity += six[3:]
+        return Astrometric(position / AU_KM, velocity / AU_KM, jd)
 
 
 class Planet(object):
