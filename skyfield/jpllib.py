@@ -6,10 +6,11 @@ from jplephem.spk import SPK
 from jplephem.names import target_names
 from numpy import max, min
 
-from .constants import C_AUDAY
+from .constants import C_AUDAY, DAY_S
 from .functions import length_of
 from .positionlib import Astrometric, Barycentric, ICRS, Topos
 from .timelib import takes_julian_date
+
 
 class Kernel(object):
     def __init__(self, open_file):
@@ -104,7 +105,7 @@ class Solution(object):
             elif segment.data_type == 3:
                 six = sign * segment.compute(tdb)
                 position += six[:3]
-                velocity += six[3:]
+                velocity += six[3:] * DAY_S
         cls = Barycentric if self.center == 0 else ICRS
 
         AU_M = 149597870700             # per IAU 2012 Resolution B2
