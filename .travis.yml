@@ -12,7 +12,7 @@ install:
   - "pip install -e ."
   - "pip install -r requirements.txt"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
-  - "wget http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp"
+  - "wget http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup310.bsp"
 
 script:
   - "pip install unittest2"
