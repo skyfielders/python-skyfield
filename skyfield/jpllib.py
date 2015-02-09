@@ -1,10 +1,86 @@
+"""An interface between JPL ephemerides and Skyfield."""
+
 import jplephem
+from collections import defaultdict, deque
+from jplephem.spk import SPK
+from jplephem.names import target_names
 from numpy import max, min
 
 from .constants import AU_KM, C_AUDAY
 from .functions import length_of
 from .positionlib import Barycentric, Astrometric, Topos
 from .timelib import takes_julian_date
+
+
+class Kernel(object):
+    def __init__(self, open_file):
+        self.spk = SPK(open_file)
+
+        edges = defaultdict(list)
+        for segment in self.spk.segments:
+            for code in segment.center, segment.target:
+                edges[code].append(segment)
+
+        self.edges = edges
+        self.codes = set(edges.keys())
+        self.leaves = set(code for code in self.codes if len(edges[code]) == 1)
+
+        for code in self.codes:
+            name = target_names[code].lower().replace(' ', '_')
+            setattr(self, name, Body(self, code))
+
+
+class Body(object):
+    def __init__(self, kernel, code):
+        self.kernel = kernel
+        self.code = code
+        self.targets = {}
+
+    def observe(self, body):
+        if body in self.targets:
+            return self.targets
+
+        if self.kernel is not body.kernel:
+            raise ValueError('cross-kernel positions not yet implemented')
+
+        here, there = self.code, body.code
+
+        if here == there:
+            raise ValueError('a body cannot observe itself')
+
+        # For efficiency, we pretend to have already visited leaf nodes
+        # because they, by definition, cannot move us toward the target.
+
+        paths = dict.fromkeys(self.kernel.leaves)
+        paths.pop(there, None)
+        paths[here] = ()
+
+        # Standard breadth-first search.
+
+        places = deque()
+        places.append(here)
+        while places:
+            here = places.popleft()
+            for segment in self.kernel.edges[here]:
+                code = _other(segment, here)
+                if code not in paths:
+                    paths[code] = paths[here] + (segment,)
+                    if code == there:
+                        return Solution(paths[code])
+                    places.append(code)
+
+        raise ValueError('{0} cannot observe {1}'.format(self.code, body.code))
+
+
+def _other(segment, code):
+    """Return the other code besides `code` that a segment names."""
+    return segment.center if (segment.target == code) else segment.target
+
+
+class Solution(object):
+    def __init__(self, path):
+        self.path = path
+
 
 class Planet(object):
     def __init__(self, ephemeris, jplephemeris, jplname):
