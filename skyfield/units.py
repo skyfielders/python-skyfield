@@ -47,8 +47,8 @@ class Distance(object):
         raise AttributeError('no attribute named %r' % (name,))
 
     def __str__(self):
-        AU = self.AU
-        return ('{0} AU' if hasattr(AU, 'shape') else '{0:.6} AU').format(AU)
+        n = self.AU
+        return ('{0} AU' if getattr(n, 'shape', 0) else '{0:.6} AU').format(n)
 
     def __repr__(self):
         return '<{0} {1}>'.format(type(self).__name__, self)
