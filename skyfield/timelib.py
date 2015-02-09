@@ -58,11 +58,10 @@ def takes_julian_date(function):
     that the JulianDate constructor itself supports.
 
     """
-    def wrapper(self, jd=None, utc=None, tai=None, tt=None,
+    def wrapper(self, jd=None, utc=None, tai=None, tt=None, tdb=None,
                 delta_t=0.0, cache=None):
         if jd is None:
-            jd = JulianDate(utc=utc, tai=tai, tt=tt,
-                            delta_t=delta_t, cache=cache)
+            jd = JulianDate(utc, tai, tt, tdb, delta_t, cache)
         elif not isinstance(jd, JulianDate):
             s = 'your "jd" argument is not a JulianDate: {0!r}'.format(jd)
             raise ValueError(s)
