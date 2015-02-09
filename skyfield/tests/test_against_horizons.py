@@ -1,4 +1,4 @@
-'Auto-generated accuracy tests vs HORIZONS (build_horizons_tests.py).'
+"""Accuracy tests against data pulled from HORIZONS."""
 
 from numpy import max
 from skyfield import api
@@ -22,7 +22,7 @@ def test_jupiter1():
     compare(hlat.degrees, 1.013, 0.001)
     compare(hlon.degrees, 151.3229, 0.001)
 
-def test_callisto():
+def test_callisto_geometry():
     k = Kernel(open('jup310.bsp'))
     a = k.earth.observe(k.callisto).geometry_at(tdb=2471184.5)
     compare(a.position.AU,
