@@ -34,8 +34,8 @@ def test_callisto_geometry():
 
 def test_callisto_astrometric():
     k = Kernel(open('jup310.bsp', 'rb'))
-    a = k.earth.geometry_of(k.callisto).at(utc=(2053, 10, 9))
+    a = k.earth.observe(k.callisto).at(utc=(2053, 10, 9))
     ra, dec, distance = a.radec()
-    compare(ra._degrees, 217.1839292, 1e-7)
-    compare(dec.degrees, -13.6892791, 1e-7)
-    compare(distance.AU, 6.31079291776184, 0.0001 * meter)
+    compare(ra._degrees, 217.1839292, 0.001 * arcsecond)
+    compare(dec.degrees, -13.6892791, 0.001 * arcsecond)
+    compare(distance.AU, 6.31079291776184, 0.1 * meter)

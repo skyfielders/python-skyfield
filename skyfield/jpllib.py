@@ -47,6 +47,19 @@ class Body(object):
         chain = _build_chain(path, self.code)
         return Geometry(self.code, body.code, chain)
 
+    def observe(self, body):
+        if body in self.targets:
+            return self.targets
+
+        if self.kernel is not body.kernel:
+            raise ValueError('cross-kernel positions not yet implemented')
+
+        cpath = _find_segments_connecting(self.kernel, 0, self.code)
+        tpath = _find_segments_connecting(self.kernel, 0, body.code)
+        center_chain = _build_chain(cpath, 0)
+        target_chain = _build_chain(tpath, 0)
+        return Solution(self.code, body.code, center_chain, target_chain)
+
 
 def _other(segment, code):
     """Return the other code besides `code` that a segment names."""
@@ -64,33 +77,38 @@ class Geometry(object):
         """Return the geometric cartesian position and velociy."""
         position, velocity = _tally_chain(self.chain, jd.tdb)
         cls = Barycentric if self.center == 0 else ICRS
-        #AU_M = 149597870700             # per IAU 2012 Resolution B2
-        AU_KM = 149597870.700
-        return cls(position / AU_KM, velocity / AU_KM, jd)
+        return cls(position, velocity, jd)
 
 
-class Solution(Geometry):
+class Solution(object):
+    def __init__(self, center, target, center_chain, target_chain):
+        self.center = center
+        self.target = target
+        self.center_chain = center_chain
+        self.target_chain = target_chain
+
     @takes_julian_date
     def at(self, jd):
         """Return a light-time corrected astrometric position and velocity."""
         jd_tdb = jd.tdb
-        position, velocity = self._geometry_at(jd_tdb)
-        distance = length_of(position)
+        cposition, cvelocity = _tally_chain(self.center_chain, jd_tdb)
+        tposition, tvelocity = _tally_chain(self.target_chain, jd_tdb)
+        distance = length_of(tposition - cposition)
         lighttime0 = 0.0
         for i in range(10):
             lighttime = distance / C_AUDAY
             delta = lighttime - lighttime0
             if -1e-12 < min(delta) and max(delta) < 1e-12:
                 break
+            tposition, tvelocity = _tally_chain(self.target_chain,
+                                                jd_tdb - lighttime)
+            distance = length_of(tposition - cposition)
             lighttime0 = lighttime
-            print('***', distance, lighttime)
-            position, velocity = self._geometry_at(jd_tdb - lighttime)
-            distance = length_of(position)
         else:
             raise ValueError('observe_from() light-travel time'
                              ' failed to converge')
         cls = Barycentric if self.center == 0 else ICRS
-        return cls(position, velocity, jd)
+        return cls(tposition - cposition, tvelocity - cvelocity, jd)
 
 
 def _find_segments_connecting(kernel, center, target):
@@ -151,7 +169,9 @@ def _tally_chain(chain, jd_tdb):
         else:
             raise ValueError('SPK data type {} not yet supported segment'
                              .format(segment.data_type))
-    return position, velocity
+    #AU_M = 149597870700             # per IAU 2012 Resolution B2
+    AU_KM = 149597870.700
+    return position / AU_KM, velocity / AU_KM
 
 
 # The older ephemerides that the code below tackles use a different
