@@ -44,6 +44,7 @@ class Body(object):
             raise ValueError('cross-kernel positions not yet implemented')
 
         path = _find_segments_connecting(self.kernel, self.code, body.code)
+        path = _annotate_path(path, self.code)
         return Geometry(self.code, body.code, path)
 
 
@@ -58,19 +59,10 @@ class Geometry(object):
         self.target = target
         self.path = path
 
-        self.ops = []
-        for segment in path:
-            if segment.center == center:
-                self.ops.append((1.0, segment))
-                center = segment.target
-            else:
-                self.ops.append((-1.0, segment))
-                center = segment.center
-
     def _geometry_at(self, jd_tdb):
         print(jd_tdb)
         position = velocity = 0.0
-        for sign, segment in self.ops:
+        for sign, segment in self.path:
             if segment.data_type == 2:
                 p, v = segment.compute_and_differentiate(jd_tdb)
                 position += sign * p
@@ -144,6 +136,19 @@ def _find_segments_connecting(kernel, center, target):
                 places.append(code)
 
     raise ValueError('{0} cannot observe {1}'.format(center, target))
+
+
+def _annotate_path(plain_path, center):
+    """Return an annotated `path` with whether to add or subtract each term."""
+    path = []
+    for segment in plain_path:
+        if segment.center == center:
+            path.append((1.0, segment))
+            center = segment.target
+        else:
+            path.append((-1.0, segment))
+            center = segment.center
+    return path
 
 
 # The older ephemerides that the code below tackles use a different
