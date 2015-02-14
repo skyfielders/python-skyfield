@@ -44,8 +44,8 @@ class Body(object):
             raise ValueError('cross-kernel positions not yet implemented')
 
         path = _find_segments_connecting(self.kernel, self.code, body.code)
-        path = _annotate_path(path, self.code)
-        return Geometry(self.code, body.code, path)
+        chain = _build_chain(path, self.code)
+        return Geometry(self.code, body.code, chain)
 
 
 def _other(segment, code):
@@ -54,33 +54,19 @@ def _other(segment, code):
 
 
 class Geometry(object):
-    def __init__(self, center, target, path):
+    def __init__(self, center, target, chain):
         self.center = center
         self.target = target
-        self.path = path
-
-    def _geometry_at(self, jd_tdb):
-        print(jd_tdb)
-        position = velocity = 0.0
-        for sign, segment in self.path:
-            if segment.data_type == 2:
-                p, v = segment.compute_and_differentiate(jd_tdb)
-                position += sign * p
-                velocity += sign * v
-            elif segment.data_type == 3:
-                six = sign * segment.compute(jd_tdb)
-                position += six[:3]
-                velocity += six[3:] * DAY_S
-        #AU_M = 149597870700             # per IAU 2012 Resolution B2
-        AU_KM = 149597870.700
-        return position / AU_KM, velocity / AU_KM
+        self.chain = chain
 
     @takes_julian_date
     def at(self, jd):
         """Return the geometric cartesian position and velociy."""
-        position, velocity = self._geometry_at(jd.tdb)
+        position, velocity = _tally_chain(self.chain, jd.tdb)
         cls = Barycentric if self.center == 0 else ICRS
-        return cls(position, velocity, jd)
+        #AU_M = 149597870700             # per IAU 2012 Resolution B2
+        AU_KM = 149597870.700
+        return cls(position / AU_KM, velocity / AU_KM, jd)
 
 
 class Solution(Geometry):
@@ -138,17 +124,34 @@ def _find_segments_connecting(kernel, center, target):
     raise ValueError('{0} cannot observe {1}'.format(center, target))
 
 
-def _annotate_path(plain_path, center):
-    """Return an annotated `path` with whether to add or subtract each term."""
-    path = []
-    for segment in plain_path:
+def _build_chain(path, center):
+    """Return a chain of segments that should be added or subtracted."""
+    chain = []
+    for segment in path:
         if segment.center == center:
-            path.append((1.0, segment))
+            chain.append((1.0, segment))
             center = segment.target
         else:
-            path.append((-1.0, segment))
+            chain.append((-1.0, segment))
             center = segment.center
-    return path
+    return chain
+
+
+def _tally_chain(chain, jd_tdb):
+    position = velocity = 0.0
+    for sign, segment in chain:
+        if segment.data_type == 2:
+            p, v = segment.compute_and_differentiate(jd_tdb)
+            position += sign * p
+            velocity += sign * v
+        elif segment.data_type == 3:
+            six = sign * segment.compute(jd_tdb)
+            position += six[:3]
+            velocity += six[3:] * DAY_S
+        else:
+            raise ValueError('SPK data type {} not yet supported segment'
+                             .format(segment.data_type))
+    return position, velocity
 
 
 # The older ephemerides that the code below tackles use a different
