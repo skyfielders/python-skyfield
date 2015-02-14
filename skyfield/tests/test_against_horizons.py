@@ -23,11 +23,19 @@ def test_jupiter1():
     compare(hlon.degrees, 151.3229, 0.001)
 
 def test_callisto_geometry():
-    k = Kernel(open('jup310.bsp'))
-    a = k.earth.observe(k.callisto).geometry_at(tdb=2471184.5)
+    k = Kernel(open('jup310.bsp', 'rb'))
+    a = k.earth.geometry_of(k.callisto).at(tdb=2471184.5)
     compare(a.position.AU,
       [-4.884815926454119E+00, -3.705745549073268E+00, -1.493487818022234E+00],
       0.0001 * meter)
     compare(a.velocity.AU_per_d,
       [9.604665478763035E-03, -1.552997751083403E-02, -6.678445860769302E-03],
       0.000001 * meter)
+
+def test_callisto_astrometric():
+    k = Kernel(open('jup310.bsp', 'rb'))
+    a = k.earth.observe(k.callisto).at(utc=(2053, 10, 9))
+    ra, dec, distance = a.radec()
+    compare(ra._degrees, 217.1839292, 0.001 * arcsecond)
+    compare(dec.degrees, -13.6892791, 0.001 * arcsecond)
+    compare(distance.AU, 6.31079291776184, 0.1 * meter)
