@@ -24,7 +24,7 @@ def test_jupiter1():
 
 def test_callisto_geometry():
     k = Kernel(open('jup310.bsp', 'rb'))
-    a = k.earth.observe(k.callisto).geometry_at(tdb=2471184.5)
+    a = k.earth.geometry_of(k.callisto).at(tdb=2471184.5)
     compare(a.position.AU,
       [-4.884815926454119E+00, -3.705745549073268E+00, -1.493487818022234E+00],
       0.0001 * meter)
@@ -34,7 +34,7 @@ def test_callisto_geometry():
 
 def test_callisto_astrometric():
     k = Kernel(open('jup310.bsp', 'rb'))
-    a = k.earth.observe(k.callisto).at(utc=(2053, 10, 9))
+    a = k.earth.geometry_of(k.callisto).at(utc=(2053, 10, 9))
     ra, dec, distance = a.radec()
     compare(ra._degrees, 217.1839292, 1e-7)
     compare(dec.degrees, -13.6892791, 1e-7)

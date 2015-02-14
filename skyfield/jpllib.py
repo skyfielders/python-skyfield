@@ -36,7 +36,7 @@ class Body(object):
         self.code = code
         self.targets = {}
 
-    def observe(self, body):
+    def geometry_of(self, body):
         if body in self.targets:
             return self.targets
 
@@ -66,7 +66,7 @@ class Body(object):
                 if code not in paths:
                     paths[code] = paths[here] + (segment,)
                     if code == there:
-                        return Solution(self.code, there, paths[there])
+                        return Geometry(self.code, there, paths[there])
                     places.append(code)
 
         raise ValueError('{0} cannot observe {1}'.format(self.code, body.code))
@@ -77,7 +77,7 @@ def _other(segment, code):
     return segment.center if (segment.target == code) else segment.target
 
 
-class Solution(object):
+class Geometry(object):
     def __init__(self, center, target, path):
         self.center = center
         self.target = target
@@ -109,12 +109,14 @@ class Solution(object):
         return position / AU_KM, velocity / AU_KM
 
     @takes_julian_date
-    def geometry_at(self, jd):
+    def at(self, jd):
         """Return the geometric cartesian position and velociy."""
         position, velocity = self._geometry_at(jd.tdb)
         cls = Barycentric if self.center == 0 else ICRS
         return cls(position, velocity, jd)
 
+
+class Solution(Geometry):
     @takes_julian_date
     def at(self, jd):
         """Return a light-time corrected astrometric position and velocity."""
@@ -136,6 +138,7 @@ class Solution(object):
                              ' failed to converge')
         cls = Barycentric if self.center == 0 else ICRS
         return cls(position, velocity, jd)
+
 
 # The older ephemerides that the code below tackles use a different
 # value for the AU, so, for now (until we fix our tests?):
