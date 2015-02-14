@@ -27,7 +27,7 @@ def test_callisto_geometry():
     a = k.earth.geometry_of(k.callisto).at(tdb=2471184.5)
     compare(a.position.AU,
       [-4.884815926454119E+00, -3.705745549073268E+00, -1.493487818022234E+00],
-      0.0001 * meter)
+      0.001 * meter)
     compare(a.velocity.AU_per_d,
       [9.604665478763035E-03, -1.552997751083403E-02, -6.678445860769302E-03],
       0.000001 * meter)
