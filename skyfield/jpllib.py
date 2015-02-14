@@ -43,33 +43,8 @@ class Body(object):
         if self.kernel is not body.kernel:
             raise ValueError('cross-kernel positions not yet implemented')
 
-        here, there = self.code, body.code
-
-        if here == there:
-            raise ValueError('a body cannot observe itself')
-
-        # For efficiency, we pretend to have already visited leaf nodes
-        # because they, by definition, cannot move us toward the target.
-
-        paths = dict.fromkeys(self.kernel.leaves)
-        paths.pop(there, None)
-        paths[here] = ()
-
-        # Standard breadth-first search.
-
-        places = deque()
-        places.append(here)
-        while places:
-            here = places.popleft()
-            for segment in self.kernel.edges[here]:
-                code = _other(segment, here)
-                if code not in paths:
-                    paths[code] = paths[here] + (segment,)
-                    if code == there:
-                        return Geometry(self.code, there, paths[there])
-                    places.append(code)
-
-        raise ValueError('{0} cannot observe {1}'.format(self.code, body.code))
+        path = _find_segments_connecting(self.kernel, self.code, body.code)
+        return Geometry(self.code, body.code, path)
 
 
 def _other(segment, code):
@@ -138,6 +113,37 @@ class Solution(Geometry):
                              ' failed to converge')
         cls = Barycentric if self.center == 0 else ICRS
         return cls(position, velocity, jd)
+
+
+def _find_segments_connecting(kernel, center, target):
+    """Return a path from `center` to `target` using the `kernel`."""
+
+    here, there = center, target
+    if here == there:
+        raise ValueError('a body cannot observe itself')
+
+    # For efficiency, we pretend to have already visited leaf nodes
+    # because they, by definition, cannot move us toward the target.
+
+    paths = dict.fromkeys(kernel.leaves)
+    paths.pop(there, None)
+    paths[here] = ()
+
+    # Standard breadth-first search.
+
+    places = deque()
+    places.append(here)
+    while places:
+        here = places.popleft()
+        for segment in kernel.edges[here]:
+            code = _other(segment, here)
+            if code not in paths:
+                paths[code] = paths[here] + (segment,)
+                if code == there:
+                    return paths[there]
+                places.append(code)
+
+    raise ValueError('{0} cannot observe {1}'.format(center, target))
 
 
 # The older ephemerides that the code below tackles use a different
