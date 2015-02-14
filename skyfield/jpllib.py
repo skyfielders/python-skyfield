@@ -92,27 +92,50 @@ class Solution(object):
                 self.ops.append((-1.0, segment))
                 center = segment.center
 
-    @takes_julian_date
-    def geometry_at(self, jd):
-        """Return the geometric cartesian position and velociy."""
-        tdb = jd.tdb
+    def _geometry_at(self, jd_tdb):
+        print(jd_tdb)
         position = velocity = 0.0
         for sign, segment in self.ops:
             if segment.data_type == 2:
-                p, v = segment.compute_and_differentiate(tdb)
+                p, v = segment.compute_and_differentiate(jd_tdb)
                 position += sign * p
                 velocity += sign * v
             elif segment.data_type == 3:
-                six = sign * segment.compute(tdb)
+                six = sign * segment.compute(jd_tdb)
                 position += six[:3]
                 velocity += six[3:] * DAY_S
-        cls = Barycentric if self.center == 0 else ICRS
-
-        AU_M = 149597870700             # per IAU 2012 Resolution B2
+        #AU_M = 149597870700             # per IAU 2012 Resolution B2
         AU_KM = 149597870.700
+        return position / AU_KM, velocity / AU_KM
 
-        return cls(position / AU_KM, velocity / AU_KM, jd)
+    @takes_julian_date
+    def geometry_at(self, jd):
+        """Return the geometric cartesian position and velociy."""
+        position, velocity = self._geometry_at(jd.tdb)
+        cls = Barycentric if self.center == 0 else ICRS
+        return cls(position, velocity, jd)
 
+    @takes_julian_date
+    def at(self, jd):
+        """Return a light-time corrected astrometric position and velocity."""
+        jd_tdb = jd.tdb
+        position, velocity = self._geometry_at(jd_tdb)
+        distance = length_of(position)
+        lighttime0 = 0.0
+        for i in range(10):
+            lighttime = distance / C_AUDAY
+            delta = lighttime - lighttime0
+            if -1e-12 < min(delta) and max(delta) < 1e-12:
+                break
+            lighttime0 = lighttime
+            print('***', distance, lighttime)
+            position, velocity = self._geometry_at(jd_tdb - lighttime)
+            distance = length_of(position)
+        else:
+            raise ValueError('observe_from() light-travel time'
+                             ' failed to converge')
+        cls = Barycentric if self.center == 0 else ICRS
+        return cls(position, velocity, jd)
 
 # The older ephemerides that the code below tackles use a different
 # value for the AU, so, for now (until we fix our tests?):
