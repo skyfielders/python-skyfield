@@ -31,6 +31,11 @@ class EarthSatellite(object):
         self._earth = earth
         self.epoch = JulianDate(utc=(sat.epochyr, 1, sat.epochdays - 1.0))
 
+    def __repr__(self):
+        sat = self._sgp4_satellite
+        return '<EarthSatellite number={1!r} epoch={0}>'.format(
+            self.epoch.utc_iso(), sat.satnum)
+
     def _position_and_velocity_TEME_km(self, jd):
         """Return the raw true equator mean equinox (TEME) vectors from SGP4.
 
