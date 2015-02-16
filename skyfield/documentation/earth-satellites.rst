@@ -13,9 +13,15 @@ from the
 `NORAD Two-Line Element Sets <http://celestrak.com/NORAD/elements/>`_
 (TLE) page of the Celestrak web site.
 
+Beware — the two-line element (TLE) format is very rigid.
+The meaning of each character
+is based on its exact offset from the beginning of the line.
+You must download and use the element set’s text
+without making any change to its whitespace.
+
 Once you have acquired the two-line orbital elements,
 simply read them from a file or paste them directly into your script
-to find out whether a satellite is above your local horizon:
+to compute its apparent position relative to a location on Earth:
 
 .. testcode::
 
@@ -31,7 +37,16 @@ to find out whether a satellite is above your local horizon:
     tup = (2014, 1, 21, 11, 18, 7)
 
     sat = earth.satellite(text)
-    alt, az, distance = bluffton(utc=tup).observe(sat).altaz()
+    position = bluffton(utc=tup).observe(sat)
+
+To find out whether the satellite is above your local horizon,
+you will want to ask for its altitude and azimuth.
+Negative altitudes lie below your horizon,
+while positive altitude places the satellite above the horizon:
+
+.. testcode::
+
+    alt, az, distance = position.altaz()
 
     print(alt)
     print(az)
@@ -43,11 +58,37 @@ to find out whether a satellite is above your local horizon:
     357deg 51' 21.8"
     1281.20477925
 
-Beware: the two-line element format is very rigid.
-The meaning of each character
-is based on its exact offset from the beginning of the line —
-so you must download and use the element set’s text
-without making any change to its whitespace.
+You can also ask for the position
+to be expressed as right ascension and declination
+relative to the fixed axes of the ICRS,
+or else in dynamical coordinates
+that are relative to the actual position
+of the celestial equator and equinox on the date in question.
+See :doc:`positions` to learn more about these possibilities:
+
+.. testcode::
+
+    ra, dec, distance = position.radec()  # ICRS/J2000
+
+    print(ra)
+    print(dec)
+
+.. testoutput::
+
+    02h 03m 52.69s
+    +62deg 48' 26.3"
+
+.. testcode::
+
+    ra, dec, distance = position.radec(epoch='date')
+
+    print(ra)
+    print(dec)
+
+.. testoutput::
+
+    02h 04m 56.65s
+    +62deg 52' 27.1"
 
 The standard SGP4 theory of satellite motion that Skyfield uses
 is a rough enough model of the near-Earth environment
