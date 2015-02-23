@@ -6,7 +6,7 @@ from jplephem.spk import SPK
 from jplephem.names import target_names
 from numpy import max, min
 
-from .constants import C_AUDAY, DAY_S
+from .constants import AU_KM, C_AUDAY, DAY_S
 from .functions import length_of
 from .positionlib import Astrometric, Barycentric, ICRS, Topos
 from .timelib import takes_julian_date
@@ -157,6 +157,7 @@ def _build_chain(path, center):
 
 def _tally_chain(chain, jd_tdb):
     position = velocity = 0.0
+
     for sign, segment in chain:
         if segment.data_type == 2:
             p, v = segment.compute_and_differentiate(jd_tdb)
@@ -169,16 +170,12 @@ def _tally_chain(chain, jd_tdb):
         else:
             raise ValueError('SPK data type {} not yet supported segment'
                              .format(segment.data_type))
-    #AU_M = 149597870700             # per IAU 2012 Resolution B2
-    AU_KM = 149597870.700
+
     return position / AU_KM, velocity / AU_KM
 
 
 # The older ephemerides that the code below tackles use a different
 # value for the AU, so, for now (until we fix our tests?):
-
-from .constants import AU_KM
-
 
 class Planet(object):
     def __init__(self, ephemeris, jplephemeris, jplname):

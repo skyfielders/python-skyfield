@@ -9,6 +9,8 @@ from .units import Angle
 
 class Star(object):
 
+    au_km = AU_KM
+
     def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,
                  ra_mas_per_year=0.0, dec_mas_per_year=0.0,
                  parallax_mas=0.0, radial_km_per_s=0.0, names=()):
@@ -101,7 +103,7 @@ class Star(object):
 
         pmr = self.ra_mas_per_year / (parallax * 365.25) * k
         pmd = self.dec_mas_per_year / (parallax * 365.25) * k
-        rvl = self.radial_km_per_s * DAY_S / AU_KM * k
+        rvl = self.radial_km_per_s * DAY_S / self.au_km * k
 
         # Transform motion vector to equatorial system.
 

@@ -37,14 +37,15 @@ def main():
         from skyfield import (earthlib, framelib, nutationlib, positionlib,
                               precessionlib, starlib, timelib)
         from skyfield.api import JulianDate
-        from skyfield.constants import AU_M
+        from skyfield.constants import AU_KM, AU_M
         from skyfield.data import hipparcos
         from skyfield.functions import length_of
         from skyfield.jpllib import Ephemeris
-        from skyfield.positionlib import Apparent
 
         import de405
         de405 = Ephemeris(de405)
+
+        OLD_AU = AU_KM / de405.jplephemeris.AU
 
         one_second = 1.0 / 24.0 / 60.0 / 60.0
         arcsecond = 1.0 / 60.0 / 60.0
@@ -207,12 +208,14 @@ def output_subroutine_tests(dates):
             star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
                                 ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
                                 parallax_mas=7.56, radial_km_per_s=-17.4)
+            star.au_km = de405.jplephemeris.AU
+            star._compute_vectors()
             compare(star._position_AU,
                     {p!r},
                     1e3 * meter)
             compare(star._velocity_AU_per_d,
                     {v!r},
-                    1e-6 * meter)
+                    1e-3 * meter)  # TODO: was 1e-6 before switch to modern AU
         """)
 
     atp = product([-5, -1, 15, 89.95], [10, 25], [1010, 1013.25])
@@ -290,7 +293,8 @@ def output_geocentric_tests(dates):
             e = de405.earth(jd)
 
             distance = length_of((e - de405.{planet}(jd)).position.AU)
-            compare(distance, {distance1!r}, 0.5 * meter)
+            print(OLD_AU)
+            compare(distance * OLD_AU, {distance1!r}, 0.5 * meter)
 
             astrometric = e.observe(de405.{planet})
             ra, dec, distance = astrometric.radec()
