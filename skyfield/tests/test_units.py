@@ -13,15 +13,15 @@ except ImportError:
 
 def test_stringifying_vector_distance():
     a = array([1.23, 4.56])
-    assert str(units.Distance(AU=a)) == '[ 1.23  4.56] AU'
+    assert str(units.Distance(au=a)) == '[ 1.23  4.56] au'
 
 def test_iterating_over_raw_measurement():
-    distance = units.Distance(AU=1.234)
+    distance = units.Distance(au=1.234)
     with assert_raises(units.UnpackingError):
         x, y, z = distance
 
 def test_iterating_over_raw_velocity():
-    velocity = units.Velocity(AU_per_d=1.234)
+    velocity = units.Velocity(au_per_d=1.234)
     with assert_raises(units.UnpackingError):
         x, y, z = velocity
 
@@ -35,7 +35,7 @@ def test_converting_from_m_to_km():
 
 # @needs_astropy
 def test_converting_distance_with_astropy():
-    distance = units.Distance(AU=1.234)
+    distance = units.Distance(au=1.234)
     value1 = distance.km
     value2 = distance.to(u.km)
     epsilon = 0.02         # definitions of AU seem to disagree slightly
@@ -43,7 +43,7 @@ def test_converting_distance_with_astropy():
 
 # @needs_astropy
 def test_converting_velocity_with_astropy():
-    velocity = units.Velocity(AU_per_d=1.234)
+    velocity = units.Velocity(au_per_d=1.234)
     value1 = velocity.km_per_s
     value2 = velocity.to(u.km / u.s)
     epsilon = 1e-6

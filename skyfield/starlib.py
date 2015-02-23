@@ -50,18 +50,18 @@ class Star(object):
             self.ra.hours, self.dec.degrees, ''.join(opts))
 
     def _observe_from_bcrs(self, observer):
-        position, velocity = self._position_AU, self._velocity_AU_per_d
+        position, velocity = self._position_au, self._velocity_au_per_d
         jd = observer.jd
-        dt = light_time_difference(position, observer.position.AU)
+        dt = light_time_difference(position, observer.position.au)
         if jd.shape:
             position = (outer(velocity, jd.tdb + dt - T0).T + position).T
         else:
             position = position + velocity * (jd.tdb + dt - T0)
-        vector = position - observer.position.AU
+        vector = position - observer.position.au
         distance = length_of(vector)
         lighttime = distance / C_AUDAY
 
-        g = Astrometric(vector, (observer.velocity.AU_per_d.T - velocity).T, jd)
+        g = Astrometric(vector, (observer.velocity.au_per_d.T - velocity).T, jd)
         g.observer = observer
         g.distance = distance
         g.lighttime = lighttime
@@ -77,7 +77,7 @@ class Star(object):
             parallax = 1.0e-6
 
         # Convert right ascension, declination, and parallax to position
-        # vector in equatorial system with units of AU.
+        # vector in equatorial system with units of au.
 
         dist = 1.0 / sin(parallax * 1.0e-3 * ASEC2RAD)
         r = self.ra.radians
@@ -87,7 +87,7 @@ class Star(object):
         cdc = cos(d)
         sdc = sin(d)
 
-        self._position_AU = array((
+        self._position_au = array((
             dist * cdc * cra,
             dist * cdc * sra,
             dist * sdc,
@@ -99,7 +99,7 @@ class Star(object):
         k = 1.0 / (1.0 - self.radial_km_per_s / C * 1000.0)
 
         # Convert proper motion and radial velocity to orthogonal
-        # components of motion with units of AU/Day.
+        # components of motion with units of au/day.
 
         pmr = self.ra_mas_per_year / (parallax * 365.25) * k
         pmd = self.dec_mas_per_year / (parallax * 365.25) * k
@@ -107,7 +107,7 @@ class Star(object):
 
         # Transform motion vector to equatorial system.
 
-        self._velocity_AU_per_d = array((
+        self._velocity_au_per_d = array((
             - pmr * sra - pmd * sdc * cra + rvl * cdc * cra,
               pmr * cra - pmd * sdc * sra + rvl * cdc * sra,
               pmd * cdc + rvl * sdc,

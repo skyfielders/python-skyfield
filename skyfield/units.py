@@ -1,7 +1,10 @@
 """Simple distance, velocity, and angle support for Skyfield.
 
 """
+from __future__ import print_function
+
 import numpy as np
+import sys
 from numpy import abs, array, copysign, isnan
 from .constants import AU_KM, AU_M, DAY_S, tau
 
@@ -18,37 +21,46 @@ class UnpackingError(Exception):
     """You cannot iterate directly over a Skyfield measurement object."""
 
 class Distance(object):
-    """A distance, stored internally as AU and available in other units.
+    """A distance, stored internally as au and available in other units.
 
     You can initialize a ``Distance`` by providing a single float or a
-    float array as either an ``AU=`` parameter or a ``km=`` parameter
+    float array as either an ``au=`` parameter or a ``km=`` parameter
     when building a ``Distance`` object.
 
     """
-    def __init__(self, AU=None, km=None, m=None):
-        if AU is not None:
-            self.AU = _auto_convert(AU)
+    _warned = False
+
+    def __init__(self, au=None, km=None, m=None):
+        if au is not None:
+            self.au = _auto_convert(au)
         elif km is not None:
             self.km = _auto_convert(km)
-            self.AU = km / AU_KM
+            self.au = km / AU_KM
         elif m is not None:
             self.m = _auto_convert(m)
-            self.AU = m / AU_M
+            self.au = m / AU_M
         else:
-            raise ValueError('to construct a Distance provide AU, km, or m')
+            raise ValueError('to construct a Distance provide au, km, or m')
 
     def __getattr__(self, name):
         if name == 'km':
-            self.km = km = self.AU * AU_KM
+            self.km = km = self.au * AU_KM
             return km
         if name == 'm':
-            self.m = m = self.AU * AU_M
+            self.m = m = self.au * AU_M
             return m
+        if name == 'AU':
+            if not Distance._warned:
+                print('WARNING: the IAU has renamed the astronomical unit to'
+                      ' lowercase "au" so Skyfield will soon remove uppercase'
+                      ' "AU" from Distance objects', file=sys.stdout)
+                Distance._warned = True
+            return self.au
         raise AttributeError('no attribute named %r' % (name,))
 
     def __str__(self):
-        n = self.AU
-        return ('{0} AU' if getattr(n, 'shape', 0) else '{0:.6} AU').format(n)
+        n = self.au
+        return ('{0} au' if getattr(n, 'shape', 0) else '{0:.6} au').format(n)
 
     def __repr__(self):
         return '<{0} {1}>'.format(type(self).__name__, self)
@@ -56,41 +68,51 @@ class Distance(object):
     def __iter__(self):
         raise UnpackingError(_iter_message % {
             'class': self.__class__.__name__, 'values': 'x, y, z',
-            'attr1': 'AU', 'attr2': 'km'})
+            'attr1': 'au', 'attr2': 'km'})
 
     def to(self, unit):
         """Return this distance in the given AstroPy units."""
-        from astropy.units import AU
-        return (self.AU * AU).to(unit)
+        from astropy.units import au
+        return (self.au * au).to(unit)
 
 class Velocity(object):
-    """A velocity, stored internally as AU/day and available in other units.
+    """A velocity, stored internally as au/day and available in other units.
 
     You can initialize a ``Velocity`` by providing a single float or a
-    float array as either an ``AU_per_d=`` parameter.
+    float array as either an ``au_per_d=`` parameter.
 
     """
-    def __init__(self, AU_per_d):
-        self.AU_per_d = AU_per_d
+    _warned = False
+
+    def __init__(self, au_per_d):
+        self.au_per_d = au_per_d
 
     def __getattr__(self, name):
         if name == 'km_per_s':
-            self.km_per_s = self.AU_per_d * AU_KM / DAY_S
+            self.km_per_s = self.au_per_d * AU_KM / DAY_S
             return self.km_per_s
+        if name == 'AU_per_d':
+            if not Velocity._warned:
+                print('WARNING: the IAU has renamed the astronomical unit to'
+                      ' lowercase "au" so Skyfield will soon remove'
+                      ' "AU_per_day" in favor of "au_per_day"',
+                      file=sys.stdout)
+                Velocity._warned = True
+            return self.au_per_d
         raise AttributeError('no attribute named %r' % (name,))
 
     def __str__(self):
-        return '%s AU/day' % self.AU_per_d
+        return '%s au/day' % self.au_per_d
 
     def __iter__(self):
         raise UnpackingError(_iter_message % {
             'class': self.__class__.__name__, 'values': 'xdot, ydot, zdot',
-            'attr1': 'AU_per_d', 'attr2': 'km_per_s'})
+            'attr1': 'au_per_d', 'attr2': 'km_per_s'})
 
     def to(self, unit):
         """Return this velocity in the given AstroPy units."""
-        from astropy.units import AU, d
-        return (self.AU_per_d * AU / d).to(unit)
+        from astropy.units import au, d
+        return (self.au_per_d * au / d).to(unit)
 
 _iter_message = """\
 cannot directly unpack a %(class)s into several values

@@ -82,8 +82,8 @@ class EarthSatellite(object):
         Uses standard SGP4 theory to predict the satellite location.
 
         """
-        position_AU, velociy_AU_per_d, error = self._compute_GCRS(jd)
-        g = Geocentric(position_AU, velociy_AU_per_d, jd)
+        position_au, velociy_au_per_d, error = self._compute_GCRS(jd)
+        g = Geocentric(position_au, velociy_au_per_d, jd)
         g.sgp4_error = error
         return g
 

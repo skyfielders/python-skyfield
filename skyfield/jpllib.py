@@ -232,7 +232,7 @@ class Planet(object):
         jd_tdb = observer.jd.tdb
         lighttime0 = 0.0
         position, velocity = self._position_and_velocity(jd_tdb)
-        vector = position - observer.position.AU
+        vector = position - observer.position.au
         euclidian_distance = distance = length_of(vector)
 
         for i in range(10):
@@ -242,13 +242,13 @@ class Planet(object):
                 break
             lighttime0 = lighttime
             position, velocity = self._position_and_velocity(jd_tdb - lighttime)
-            vector = position - observer.position.AU
+            vector = position - observer.position.au
             distance = length_of(vector)
         else:
             raise ValueError('observe_from() light-travel time'
                              ' failed to converge')
 
-        g = Astrometric(vector, velocity - observer.velocity.AU_per_d,
+        g = Astrometric(vector, velocity - observer.velocity.au_per_d,
                         observer.jd)
         g.observer = observer
         g.distance = euclidian_distance

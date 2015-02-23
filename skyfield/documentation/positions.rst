@@ -25,11 +25,11 @@ together with all of the attributes and methods that they support:
 
     Barycentric, Astrometric, or Apparent position
      │
-     ├── `position <api.html#Position.position>`_.AU         →   x, y, z
+     ├── `position <api.html#Position.position>`_.au         →   x, y, z
      ├── `position <api.html#Position.position>`_.km         →   x, y, z
      ├── `position.to(unit) <api.html#Distance.to>`_   →   x, y, z
      │
-     ├── `velocity <api.html#Position.velocity>`_.AU_per_d   →   xdot, ydot, zdot
+     ├── `velocity <api.html#Position.velocity>`_.au_per_d   →   xdot, ydot, zdot
      ├── `velocity <api.html#Position.velocity>`_.km_per_s   →   xdot, ydot, zdot
      ├── `velocity.to(unit) <api.html#Distance.to>`_   →   xdot, ydot, zdot
      │
@@ -184,8 +184,8 @@ by asking Skyfield for their :attr:`~Position.position` attribute:
 
     from skyfield.api import earth, jupiter
 
-    print(earth(utc=(1980, 1, 1)).position.AU)
-    print(jupiter(utc=(1980, 1, 1)).position.AU)
+    print(earth(utc=(1980, 1, 1)).position.au)
+    print(jupiter(utc=(1980, 1, 1)).position.au)
 
 .. testoutput::
 
@@ -193,7 +193,7 @@ by asking Skyfield for their :attr:`~Position.position` attribute:
     [-4.71061475  2.32932129  1.11328106]
 
 The coordinates shown above are measured
-using the Astronomical Unit (AU),
+using the Astronomical Unit (au),
 which is the average distance from the Earth to the Sun.
 So the value ``-4.71`` indicates a distance
 nearly five times farther from the Sun than that of the Earth.
@@ -239,7 +239,7 @@ that we see in our sky:
     # Observing Jupiter from the Earth's position
 
     astrometric = earth(utc=(1980, 1, 1)).observe(jupiter)
-    print(astrometric.position.AU)
+    print(astrometric.position.au)
 
 .. testoutput::
 
@@ -259,13 +259,13 @@ and :meth:`~Angle.dstr()` methods:
     ra, dec, distance = astrometric.radec()
     print(ra.hstr())
     print(dec.dstr())
-    print(distance.AU)
+    print(distance)
 
 .. testoutput::
 
     10h 49m 38.71s
     +08deg 41' 00.6"
-    4.82598384993
+    4.82598 au
 
 As we will explore in the next section,
 objects never appear at exactly the position in the sky
@@ -322,13 +322,13 @@ is typically expressed as the angles
 
     print(ra.hstr())
     print(dec.dstr())
-    print(distance.AU)
+    print(distance)
 
 .. testoutput::
 
     10h 49m 39.34s
     +08deg 40' 56.4"
-    4.82598384993
+    4.82598 au
 
 But it is actually unusual to print apparent coordinates
 in a permanent unchanging reference frame like the ICRS,
@@ -360,13 +360,13 @@ when you ask the apparent position for coordinates:
 
     print(ra.hstr())
     print(dec.dstr())
-    print(distance.AU)
+    print(distance)
 
 .. testoutput::
 
     10h 48m 36.02s
     +08deg 47' 18.6"
-    4.82598384993
+    4.82598 au
 
 These are the coordinates
 that should match other astronomy software
@@ -427,13 +427,13 @@ of an Earth object:
     alt, az, distance = app.altaz()
     print(alt.dstr())
     print(az.dstr())
-    print(distance.AU)
+    print(distance)
 
 .. testoutput::
 
     23deg 00' 25.5"
     96deg 03' 03.2"
-    4.40689420989
+    4.40689 au
 
 So Jupiter was more than 23° above the horizon for Bostonians
 on 1980 March 1 at midnight UTC.

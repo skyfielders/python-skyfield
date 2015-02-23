@@ -210,12 +210,12 @@ def output_subroutine_tests(dates):
                                 parallax_mas=7.56, radial_km_per_s=-17.4)
             star.au_km = de405.jplephemeris.AU
             star._compute_vectors()
-            compare(star._position_AU,
+            compare(star._position_au,
                     {p!r},
                     1e3 * meter)
-            compare(star._velocity_AU_per_d,
+            compare(star._velocity_au_per_d,
                     {v!r},
-                    1e-3 * meter)  # TODO: was 1e-6 before switch to modern AU
+                    1e-3 * meter)  # TODO: was 1e-6 before switch to modern au
         """)
 
     atp = product([-5, -1, 15, 89.95], [10, 25], [1010, 1013.25])
@@ -292,7 +292,7 @@ def output_geocentric_tests(dates):
             jd = JulianDate(tt={jd!r})
             e = de405.earth(jd)
 
-            distance = length_of((e - de405.{planet}(jd)).position.AU)
+            distance = length_of((e - de405.{planet}(jd)).position.au)
             print(OLD_AU)
             compare(distance * OLD_AU, {distance1!r}, 0.5 * meter)
 

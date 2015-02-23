@@ -21,29 +21,29 @@ class ICRS(object):
     geocentric = True
     altaz_rotation = None
 
-    def __init__(self, position_AU, velocity_AU_per_d=None, jd=None):
+    def __init__(self, position_au, velocity_au_per_d=None, jd=None):
         self.jd = jd
-        self.position = Distance(position_AU)
-        if velocity_AU_per_d is None:
+        self.position = Distance(position_au)
+        if velocity_au_per_d is None:
             self.velocity = None
         else:
-            self.velocity = Velocity(velocity_AU_per_d)
+            self.velocity = Velocity(velocity_au_per_d)
 
     def __repr__(self):
-        return '<%s position x,y,z AU%s%s>' % (
+        return '<%s position x,y,z au%s%s>' % (
             self.__class__.__name__,
             '' if (self.velocity is None) else
-            ' and velocity xdot,ydot,zdot AU/day',
+            ' and velocity xdot,ydot,zdot au/day',
             '' if self.jd is None else ' at date jd',
             )
 
     def __sub__(self, body):
         """Subtract two ICRS vectors to produce a third."""
-        p = self.position.AU - body.position.AU
+        p = self.position.au - body.position.au
         if self.velocity is None or body.velocity is None:
             v = None
         else:
-            v = body.velocity.AU_per_d - self.velocity.AU_per_d
+            v = body.velocity.au_per_d - self.velocity.au_per_d
         return ICRS(p, v, self.jd)
 
     def distance(self):
@@ -51,10 +51,10 @@ class ICRS(object):
 
         >>> v = ICRS([1.0, 1.0, 0.0])
         >>> print(v.distance())
-        1.41421 AU
+        1.41421 au
 
         """
-        return Distance(length_of(self.position.AU))
+        return Distance(length_of(self.position.au))
 
     def radec(self, epoch=None):
         """Return this position as a tuple (RA, declination, distance).
@@ -65,10 +65,10 @@ class ICRS(object):
         >>> dec
         <Angle +35deg 15' 51.8">
         >>> distance
-        <Distance 1.73205 AU>
+        <Distance 1.73205 au>
 
         """
-        position_AU = self.position.AU
+        position_au = self.position.au
         if epoch is not None:
             if isinstance(epoch, JulianDate):
                 pass
@@ -80,24 +80,24 @@ class ICRS(object):
                 raise ValueError('the epoch= must be a Julian date,'
                                  ' a floating point Terrestrial Time (TT),'
                                  ' or the string "date" for epoch-of-date')
-            position_AU = einsum('ij...,j...->i...', epoch.M, position_AU)
-        r_AU, dec, ra = to_polar(position_AU)
+            position_au = einsum('ij...,j...->i...', epoch.M, position_au)
+        r_au, dec, ra = to_polar(position_au)
         return (Angle(radians=ra, preference='hours'),
                 Angle(radians=dec, signed=True),
-                Distance(r_AU))
+                Distance(r_au))
 
     def ecliptic_position(self):
         """Return an x,y,z position relative to the ecliptic plane."""
-        vector = rotation_to_ecliptic.dot(self.position.AU)
+        vector = rotation_to_ecliptic.dot(self.position.au)
         return Distance(vector)
 
     def ecliptic_latlon(self):
         """Return ecliptic latitude, longitude, and distance."""
-        vector = rotation_to_ecliptic.dot(self.position.AU)
+        vector = rotation_to_ecliptic.dot(self.position.au)
         d, lat, lon = to_polar(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
-                Distance(AU=d))
+                Distance(au=d))
 
     def from_altaz(self, alt=None, az=None, alt_degrees=None, az_degrees=None):
         """Generate an Apparent position from an altitude and azimuth.
@@ -157,13 +157,13 @@ class Topos(object):
     def __call__(self, jd):
         """Compute where this Earth location was in space on a given date."""
         e = self.ephemeris.earth(jd)
-        tpos_AU, tvel_AU_per_d = self._position_and_velocity(jd)
-        t = Barycentric(e.position.AU + tpos_AU,
-                        e.velocity.AU_per_d + tvel_AU_per_d,
+        tpos_au, tvel_au_per_d = self._position_and_velocity(jd)
+        t = Barycentric(e.position.au + tpos_au,
+                        e.velocity.au_per_d + tvel_au_per_d,
                         jd)
         t.geocentric = False  # test, then get rid of this attribute
-        t.rGCRS = tpos_AU
-        t.vGCRS = tvel_AU_per_d
+        t.rGCRS = tpos_au
+        t.vGCRS = tvel_au_per_d
         t.topos = self
         t.ephemeris = self.ephemeris
         t.altaz_rotation = self._altaz_rotation(jd)
@@ -172,8 +172,8 @@ class Topos(object):
     @takes_julian_date
     def gcrs(self, jd):
         """Compute where this location was in the GCRS on a given date."""
-        tpos_AU, tvel_AU_per_d = self._position_and_velocity(jd)
-        t = Geocentric(tpos_AU, tvel_AU_per_d, jd)
+        tpos_au, tvel_au_per_d = self._position_and_velocity(jd)
+        t = Geocentric(tpos_au, tvel_au_per_d, jd)
         t.topos = self
         t.ephemeris = self.ephemeris
         t.altaz_rotation = self._altaz_rotation(jd)
@@ -182,7 +182,7 @@ class Topos(object):
     def _position_and_velocity(self, jd):
         """Return the GCRS position, velocity of this Topos at `jd`."""
         pos, vel = terra(self.latitude.radians, self.longitude.radians,
-                         self.elevation.AU, jd.gast)
+                         self.elevation.au, jd.gast)
         pos = einsum('ij...,j...->i...', jd.MT, pos)
         vel = einsum('ij...,j...->i...', jd.MT, vel)
         return pos, vel
@@ -231,21 +231,21 @@ class Astrometric(ICRS):
 
         """
         jd = self.jd
-        position_AU = self.position.AU.copy()
+        position_au = self.position.au.copy()
         observer = self.observer
 
         if observer.geocentric:
             include_earth_deflection = array((False,))
         else:
             limb_angle, nadir_angle = compute_limb_angle(
-                position_AU, observer.position.AU)
+                position_au, observer.position.au)
             include_earth_deflection = limb_angle >= 0.8
 
-        add_deflection(position_AU, observer.position.AU, observer.ephemeris,
+        add_deflection(position_au, observer.position.au, observer.ephemeris,
                        jd.tdb, include_earth_deflection)
-        add_aberration(position_AU, observer.velocity.AU_per_d, self.lighttime)
+        add_aberration(position_au, observer.velocity.au_per_d, self.lighttime)
 
-        a = Apparent(position_AU, jd=jd)
+        a = Apparent(position_au, jd=jd)
         a.observer = self.observer
         return a
 
@@ -288,8 +288,8 @@ class Apparent(ICRS):
 
         # TODO: wobble
 
-        position_AU = einsum('ij...,j...->i...', R, self.position.AU)
-        r_AU, alt, az = to_polar(position_AU)
+        position_au = einsum('ij...,j...->i...', R, self.position.au)
+        r_au, alt, az = to_polar(position_au)
 
         if temperature_C is None:
             alt = Angle(radians=alt)
@@ -301,7 +301,7 @@ class Apparent(ICRS):
             alt = refract(alt * RAD2DEG, temperature_C, pressure_mbar)
             alt = Angle(degrees=alt)
 
-        return alt, Angle(radians=az), Distance(r_AU)
+        return alt, Angle(radians=az), Distance(r_au)
 
 
 class Geocentric(ICRS):
@@ -315,8 +315,8 @@ class Geocentric(ICRS):
                              ' GCRS position through a .gcrs() method')
         g = gcrs_method(self.jd)
         # TODO: light-travel-time backdating, if distant enough?
-        p = g.position.AU - self.position.AU
-        v = g.velocity.AU_per_d - self.velocity.AU_per_d
+        p = g.position.au - self.position.au
+        v = g.velocity.au_per_d - self.velocity.au_per_d
         a = Apparent(p, v, self.jd)
         a.observer = self
         return a

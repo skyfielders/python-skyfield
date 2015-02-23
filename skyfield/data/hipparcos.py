@@ -19,8 +19,8 @@ def parse(line):
         parallax_mas=float(line[79:86]),
         names=[('HIP', int(line[8:14]))],
         )
-    star._position_AU += star._velocity_AU_per_d * days
-    distance, dec, ra = to_polar(star._position_AU)
+    star._position_au += star._velocity_au_per_d * days
+    distance, dec, ra = to_polar(star._position_au)
     star.ra = Angle(radians=ra, preference='hours')
     star.dec = Angle(radians=dec)
     return star

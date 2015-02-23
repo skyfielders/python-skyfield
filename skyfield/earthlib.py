@@ -7,7 +7,7 @@ from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
                         IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0)
 from .functions import dots
 
-earth_radius_AU = ERAD / AU_M
+earth_radius_au = ERAD / AU_M
 one_minus_flattening = 1.0 - 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
 one_minus_flattening_squared = one_minus_flattening * one_minus_flattening
 
@@ -17,12 +17,12 @@ def terra(latitude, longitude, elevation, gast):
 
     `latitude` - Latitude in radians.
     `longitude` - Longitude in radians.
-    `elevation` - Elevation above sea level in AU.
+    `elevation` - Elevation above sea level in au.
     `gast` - Hours of Greenwich Apparent Sidereal Time (can be an array).
 
     The return value is a tuple of two 3-vectors `(pos, vel)` in the
     dynamical reference system (the true equator and equinox of date)
-    whose components are measured in AU with respect to the center of
+    whose components are measured in au with respect to the center of
     the Earth.
 
     """
@@ -32,8 +32,8 @@ def terra(latitude, longitude, elevation, gast):
     c = 1.0 / sqrt(cosphi * cosphi +
                    sinphi * sinphi * one_minus_flattening_squared)
     s = one_minus_flattening_squared * c
-    ach = earth_radius_AU * c + elevation
-    ash = earth_radius_AU * s + elevation
+    ach = earth_radius_au * c + elevation
+    ash = earth_radius_au * s + elevation
 
     # Compute local sidereal time factors at the observer's longitude.
 
@@ -54,11 +54,11 @@ def terra(latitude, longitude, elevation, gast):
     return pos, vel
 
 
-def compute_limb_angle(position_AU, observer_AU):
+def compute_limb_angle(position_au, observer_au):
     """Determine the angle of an object above or below the Earth's limb.
 
-    Given an object's GCRS `position_AU` [x,y,z] vector and the position
-    of an `observer_AU` as a vector in the same coordinate system,
+    Given an object's GCRS `position_au` [x,y,z] vector and the position
+    of an `observer_au` as a vector in the same coordinate system,
     return a tuple that provides `(limb_ang, nadir_ang)`:
 
     limb_angle
@@ -71,12 +71,12 @@ def compute_limb_angle(position_AU, observer_AU):
     """
     # Compute the distance to the object and the distance to the observer.
 
-    disobj = sqrt(dots(position_AU, position_AU))
-    disobs = sqrt(dots(observer_AU, observer_AU))
+    disobj = sqrt(dots(position_au, position_au))
+    disobs = sqrt(dots(observer_au, observer_au))
 
     # Compute apparent angular radius of Earth's limb.
 
-    aprad = arcsin(minimum(earth_radius_AU / disobs, 1.0))
+    aprad = arcsin(minimum(earth_radius_au / disobs, 1.0))
 
     # Compute zenith distance of Earth's limb.
 
@@ -84,7 +84,7 @@ def compute_limb_angle(position_AU, observer_AU):
 
     # Compute zenith distance of observed object.
 
-    coszd = dots(position_AU, observer_AU) / (disobj * disobs)
+    coszd = dots(position_au, observer_au) / (disobj * disobs)
     coszd = clip(coszd, -1.0, 1.0)
     zdobj = arccos(coszd)
 
