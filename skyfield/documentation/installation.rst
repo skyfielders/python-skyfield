@@ -61,6 +61,17 @@ Good luck!
 Change Log
 ==========
 
+0.5
+---
+
+* Per IAU 2012 Resolution B2, Skyfield now uses lowercase *au* for the
+  astronomical unit and defines it as exactly 149597870700 meters.
+  While this API change is awkward for existing users, I wanted to make
+  the change while Skyfield is still pre-1.0.  If this breaks a program
+  that you already have running, please remember that a quick ``pip``
+  ``install`` ``skyfield==0.4`` will get you up and running again until
+  you have time to edit your code and turn ``AU`` into ``au``.
+
 0.4
 ---
 
