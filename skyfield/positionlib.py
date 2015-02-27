@@ -1,6 +1,6 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, einsum, exp
+from numpy import arctan, arctan2, array, einsum, exp, floor, pi, sqrt
 
 from .constants import RAD2DEG, TAU
 from .data.spice import inertial_frames
@@ -329,6 +329,21 @@ class Apparent(ICRS):
 
         return alt, Angle(radians=az), Distance(r_au)
 
+    def over_topos(self):
+        """
+        Return a Topos instance for the point on the Earth over which
+        the body at this position is in the zenith.
+
+        >>> from skyfield.api import earth, JulianDate, sun
+        >>> e = earth(JulianDate(utc=(2015, 1, 1, 0, 0, 0)))
+        >>> topos = e.observe(sun).apparent().over_topos()
+        >>> topos.latitude
+        <Angle -23deg 03' 33.3">
+        >>> topos.longitude
+        <Angle -179deg 13' 02.6">
+        """
+        return GCRS_to_Topos(self.position.au, self.jd)
+
 
 class Geocentric(ICRS):
     """A position referred to the GCRS as measured from the geocenter."""
@@ -355,3 +370,27 @@ def ITRF_to_GCRS(jd, rITRF):  # todo: velocity
     spin = rot_z(jd.gast * TAU / 24.0)
     position = einsum('ij...,j...->i...', spin, array(rITRF))
     return einsum('ij...,j...->i...', jd.MT, position)
+
+
+def GCRS_to_Topos(xyz, jd):
+    dublin_julian_date = jd.tt - 2415020
+    x, y, z = xyz
+
+    # the following block is ported from GetSubSatPoint() in
+    # earthsat.c of libastro 3.7.6
+    sidereal_solar = 1.0027379093
+    sid_day = floor(dublin_julian_date)
+    t = (sid_day - 0.5) / 36525
+    sid_reference = (6.6460656 + (2400.051262 * t) +
+                     (0.00002581 * (t**2))) / 24
+    sid_reference -= floor(sid_reference)
+    lon = 2 * pi * ((dublin_julian_date - sid_day) *
+                    sidereal_solar + sid_reference) - arctan2(y, x)
+    lon = lon % (2 * pi)
+    lon -= pi
+    lat = arctan(z / sqrt(x**2 + y**2))
+
+    return Topos(
+        latitude_degrees=lat * RAD2DEG,
+        longitude_degrees=-lon * RAD2DEG,
+    )
