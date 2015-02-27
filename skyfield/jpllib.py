@@ -41,12 +41,8 @@ class Body(object):
     def __init__(self, kernel, code):
         self.kernel = kernel
         self.code = code
-        self.targets = {}
 
     def geometry_of(self, body):
-        if body in self.targets:
-            return self.targets
-
         if self.kernel is not body.kernel:
             raise ValueError('cross-kernel positions not yet implemented')
 
@@ -55,9 +51,6 @@ class Body(object):
         return Geometry(self.code, body.code, chain)
 
     def observe(self, body):
-        if body in self.targets:
-            return self.targets
-
         if self.kernel is not body.kernel:
             raise ValueError('cross-kernel positions not yet implemented')
 
