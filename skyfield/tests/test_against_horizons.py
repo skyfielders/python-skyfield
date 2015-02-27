@@ -3,12 +3,16 @@
 from numpy import max
 from skyfield import api
 from skyfield.constants import AU_M
+from skyfield.io import download
 from skyfield.jpllib import Kernel
 
 one_second = 1.0 / 24.0 / 60.0 / 60.0
 arcsecond = 1.0 / 60.0 / 60.0
 ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
 meter = 1.0 / AU_M
+
+base = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk'
+url = base + '/satellites/jup310.bsp'
 
 def compare(value, expected_value, epsilon):
     if hasattr(value, 'shape') or hasattr(expected_value, 'shape'):
@@ -23,7 +27,7 @@ def test_jupiter1():
     compare(hlon.degrees, 151.3229, 0.001)
 
 def test_callisto_geometry():
-    k = Kernel(open('jup310.bsp', 'rb'))
+    k = Kernel(download(url))
     a = k.earth.geometry_of(k.callisto).at(tdb=2471184.5)
     compare(a.position.au,
       [-4.884815926454119E+00, -3.705745549073268E+00, -1.493487818022234E+00],
@@ -33,7 +37,7 @@ def test_callisto_geometry():
       0.000001 * meter)
 
 def test_callisto_astrometric():
-    k = Kernel(open('jup310.bsp', 'rb'))
+    k = Kernel(download(url))
     a = k.earth.observe(k.callisto).at(utc=(2053, 10, 9))
     ra, dec, distance = a.radec()
     compare(ra._degrees, 217.1839292, 0.001 * arcsecond)
