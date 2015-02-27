@@ -29,8 +29,12 @@ class Kernel(dict):
         self.leaves = set(code for code in self.codes if len(edges[code]) == 1)
 
         for code in self.codes:
-            name = target_names[code].lower().replace(' ', '_')
-            setattr(self, name, Body(self, code))
+            body = Body(self, code)
+            self[code] = body
+            raw_name = target_names.get(code, None)
+            if raw_name is not None:
+                name = raw_name.lower().replace(' ', '_')
+                setattr(self, name, Body(self, code))
 
 
 class Body(object):
