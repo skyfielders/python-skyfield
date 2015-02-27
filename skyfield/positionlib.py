@@ -1,6 +1,7 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, arccos, clip, einsum, exp
+from numpy import (arctan, arctan2, array, arccos, clip, einsum, exp,
+                   floor, pi, sqrt)
 
 from .constants import RAD2DEG, tau
 from .data.spice import inertial_frames
@@ -8,6 +9,7 @@ from .functions import dots, from_polar, length_of, to_polar, rot_z
 from .earthlib import compute_limb_angle, refract
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
+from .toposlib import Topos
 from .units import Distance, Velocity, Angle, _interpret_angle
 
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
@@ -365,9 +367,23 @@ class Apparent(ICRF):
         return _to_altaz(self.position.au, self.observer_data,
                          temperature_C, pressure_mbar)
 
-
 class Geocentric(ICRF):
     """An (x,y,z) position measured from the geocenter."""
+
+    def over_topos(self):
+        """
+        Return a Topos instance for the point on the Earth over which
+        the body at this position is in the zenith.
+
+        >>> from skyfield.api import earth, JulianDate, sun
+        >>> e = earth(JulianDate(utc=(2015, 1, 1, 0, 0, 0)))
+        >>> topos = e.observe(sun).apparent().over_topos()
+        >>> topos.latitude
+        <Angle -23deg 03' 33.3">
+        >>> topos.longitude
+        <Angle -179deg 13' 02.6">
+        """
+        return GCRS_to_Topos(self.position.au, self.jd)
 
 
 def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):
@@ -407,3 +423,27 @@ def ITRF_to_GCRS(t, rITRF):  # todo: velocity
     spin = rot_z(t.gast * tau / 24.0)
     position = einsum('ij...,j...->i...', spin, array(rITRF))
     return einsum('ij...,j...->i...', t.MT, position)
+
+
+def GCRS_to_Topos(xyz, jd):
+    dublin_julian_date = jd.tt - 2415020
+    x, y, z = xyz
+
+    # the following block is ported from GetSubSatPoint() in
+    # earthsat.c of libastro 3.7.6
+    sidereal_solar = 1.0027379093
+    sid_day = floor(dublin_julian_date)
+    t = (sid_day - 0.5) / 36525
+    sid_reference = (6.6460656 + (2400.051262 * t) +
+                     (0.00002581 * (t**2))) / 24
+    sid_reference -= floor(sid_reference)
+    lon = 2 * pi * ((dublin_julian_date - sid_day) *
+                    sidereal_solar + sid_reference) - arctan2(y, x)
+    lon = lon % (2 * pi)
+    lon -= pi
+    lat = arctan(z / sqrt(x**2 + y**2))
+
+    return Topos(
+        latitude_degrees=lat * RAD2DEG,
+        longitude_degrees=-lon * RAD2DEG,
+    )
