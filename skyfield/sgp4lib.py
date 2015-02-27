@@ -7,8 +7,8 @@ from sgp4.propagation import sgp4
 
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
-from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
-from .timelib import JulianDate, Timescale
+from .positionlib import Apparent, Geocentric, GCRS_to_Topos, ITRF_to_GCRS
+from .timelib import JulianDate, takes_julian_date, Timescale
 
 # important ones:
 # jdsatepoch
@@ -87,6 +87,24 @@ class EarthSatellite(object):
         g = Geocentric(position_au, velociy_au_per_d, jd)
         g.sgp4_error = error
         return g
+
+    @takes_julian_date
+    def over_topos(self, jd):
+        """Return a Topos instance for the point on the Earth over which
+        this satellite will be at the given date.
+
+        >>> from skyfield.api import earth, JulianDate
+        >>> tle = ("ISS (ZARYA)\n"
+        ... "1 25544U 98067A   15058.48161588  .00023857  00000-0  35618-3 0  9991\n"
+        ... "2 25544  51.6478 271.9610 0008043  54.4849  18.6646 15.54887163930964")
+        >>> iss = earth.satellite(tle)
+        >>> topos = iss.over_topos(JulianDate(utc=(2015, 2, 27, 22, 22, 0)))
+        >>> topos.latitude
+        <Angle 49deg 19' 48.3">
+        >>> topos.longitude
+        <Angle -155deg 37' 41.8">
+        """
+        return GCRS_to_Topos(self.gcrs(jd).position.km, jd)
 
     def _observe_from_bcrs(self, observer):
         # TODO: what if someone on Mars tries to look at the ISS?
