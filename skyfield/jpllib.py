@@ -12,9 +12,12 @@ from .positionlib import Astrometric, Barycentric, ICRS, Topos
 from .timelib import takes_julian_date
 
 
-class Kernel(object):
-    def __init__(self, open_file):
-        self.spk = SPK(open_file)
+class Kernel(dict):
+    def __init__(self, file):
+        if isinstance(file, str):
+            file = open(file, 'rb')
+
+        self.spk = SPK(file)
 
         edges = defaultdict(list)
         for segment in self.spk.segments:
