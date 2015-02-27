@@ -9,6 +9,16 @@ except:
 
 _missing = object()
 
+
+def download(url):
+    filename = url.rstrip('/').rsplit('/', 1)[1]
+    if not os.path.exists(filename):
+        data = urlopen(url).read()
+        with open(filename, 'wb') as f:
+            f.write(data)
+    return filename
+
+
 class Cache(object):
     def __init__(self, cache_path, days_old=0):
         self.cache_path = cache_path
