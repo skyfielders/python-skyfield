@@ -93,6 +93,21 @@ See :doc:`positions` to learn more about these possibilities:
     01h 55m 39.18s
     +62deg 55' 57.4"
 
+Finally, you can find the point on the Earth's surface over which the
+satellite is flying:
+
+.. testcode::
+
+    topos = sat.over_topos(JulianDate(utc=tup))
+
+    print(topos.latitude)
+    print(topos.longitude)
+
+.. testoutput::
+
+    51deg 20' 12.0"
+    -84deg 09' 38.5"
+
 The standard SGP4 theory of satellite motion that Skyfield uses
 is a rough enough model of the near-Earth environment
 that it can only predict a satellite position
