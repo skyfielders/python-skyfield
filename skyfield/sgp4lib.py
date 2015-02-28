@@ -1,11 +1,13 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
-from numpy import array, cross, einsum, zeros_like
+from datetime import timedelta
+
+from numpy import array, cross, einsum, pi, sqrt, zeros_like
 from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
 
-from .constants import AU_KM, DAY_S, T0, tau
+from .constants import AU_KM, DAY_S, GE, T0, tau
 from .earthlib import earth_radius_at_latitude
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import Apparent, Geocentric, GCRS_to_Topos, ITRF_to_GCRS
@@ -101,6 +103,19 @@ class EarthSatellite(object):
         g.sgp4_error = error
         return g
 
+    @property
+    def mean_motion(self):
+        # revolutions per second
+        return self._sgp4_satellite.no / 60
+
+    @takes_julian_date
+    def orbital_speed(self, jd):
+        """Return orbital speed of this satellite in meters per second.
+        """
+        elevation = self.gcrs(jd).distance().m
+        semi_major_axis = self.semi_major_axis.m
+        return sqrt(GE * ((2 / elevation) - (1 / semi_major_axis)))
+
     @takes_julian_date
     def over_topos(self, jd):
         """Return a Topos instance for the point on the Earth over which
@@ -131,6 +146,10 @@ class EarthSatellite(object):
         g.observer = observer
         # g.distance = euclidian_distance
         return g
+
+    @property
+    def semi_major_axis(self):
+        return Distance(m=(GE / (self.mean_motion ** 2)) ** (1/3))
 
 
 _second = 1.0 / (24.0 * 60.0 * 60.0)

@@ -29,6 +29,8 @@ EPS_COR = 0.0
 
 # Heliocentric gravitational constant in meters^3 / second^2, from DE-405.
 GS = 1.32712440017987e+20
+# same for geocentric
+GE = 3.986004418e+14
 
 # Time.
 T0 = 2451545.0
