@@ -6,9 +6,11 @@ from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
 
 from .constants import AU_KM, DAY_S, T0, tau
+from .earthlib import earth_radius_at_latitude
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import Apparent, Geocentric, GCRS_to_Topos, ITRF_to_GCRS
 from .timelib import JulianDate, takes_julian_date
+from .units import Distance
 
 # important ones:
 # jdsatepoch
@@ -74,6 +76,18 @@ class EarthSatellite(object):
         vGCRS = zeros_like(rGCRS)  # todo: someday also compute vGCRS?
 
         return rGCRS, vGCRS, error
+
+    @takes_julian_date
+    def elevation(self, jd):
+        """Return elevation of this satellite over ground.
+
+        Return value is Distance adjusted for approximate shape of the
+        Earth.
+
+        """
+        latitude = self.over_topos(jd).latitude
+        earth_radius = earth_radius_at_latitude(latitude.radians)
+        return Distance(m=self.gcrs(jd).distance().m - earth_radius)
 
     @takes_julian_date
     def gcrs(self, jd):

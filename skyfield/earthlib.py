@@ -4,12 +4,29 @@ from numpy import (abs, arcsin, arccos, array, clip, cos,
                    minimum, pi, sin, sqrt, tan, where, zeros_like)
 
 from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
-                        IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0)
+                        IERS_2010_EARTH_FLATTENING, RAD2DEG, T0)
 from .functions import dots
 
 earth_radius_au = ERAD / AU_M
-one_minus_flattening = 1.0 - 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
+one_minus_flattening = 1.0 - IERS_2010_EARTH_FLATTENING
 one_minus_flattening_squared = one_minus_flattening * one_minus_flattening
+
+
+def earth_radius_at_latitude(latitude):
+    """Compute approximate Earth radius at the given latitude.
+
+    `latitude` - Latitude in radians.
+
+    Returns meters.
+
+    """
+    return ERAD * sqrt(
+        1 -
+        (2 * IERS_2010_EARTH_FLATTENING -
+            (IERS_2010_EARTH_FLATTENING ** 2)
+        )
+        * (sin(abs(latitude)) ** 2)
+    )
 
 
 def terra(latitude, longitude, elevation, gast):
