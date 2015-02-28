@@ -40,6 +40,7 @@ together with all of the attributes and methods that they support:
     Apparent position only
      │
      └── `altaz(…) <api.html#Position.altaz>`_            →   alt, az, distance
+     └── `over_topos(…) <api.html#Apparent.over_topos>`_  →   topos
 
     Angle like ra, dec, alt, and az
      │
@@ -108,6 +109,10 @@ as its argument and return a corresponding number of positions.
     astrometric = boston.at(jd).observe(mars)
     apparent = boston.at(jd).observe(mars).apparent()
 
+    # Earth location where in zenith at date
+
+    topos = apparent.over_topos(jd)
+
 **The stars**
   Stars and other fixed objects with catalog coordinates
   are able to generate their current astrometric position
@@ -164,6 +169,10 @@ as its argument and return a corresponding number of positions.
     # Topocentric
 
     #apparent = boston.gcrs(jd).observe(satellite)
+
+    # Earth location over which the satellite will be
+
+    topos = satellite.over_topos(jd)
 
 Read :doc:`time` for more information
 about how to build dates and pass them to planets and satellites
