@@ -117,7 +117,7 @@ as its argument and return a corresponding number of positions.
 
     # Earth location where in zenith at date
 
-    topos = apparent.over_topos(jd)
+    topos = apparent.over_topos()
 
 **The stars**
   Stars and other fixed objects with catalog coordinates
