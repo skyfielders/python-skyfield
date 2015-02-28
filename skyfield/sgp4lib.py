@@ -108,6 +108,10 @@ class EarthSatellite(object):
         # revolutions per second
         return self._sgp4_satellite.no / 60
 
+    @property
+    def orbital_period(self):
+        return timedelta(seconds=2 * pi / self.mean_motion)
+
     @takes_julian_date
     def orbital_speed(self, jd):
         """Return orbital speed of this satellite in meters per second.
