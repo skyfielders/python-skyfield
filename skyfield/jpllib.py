@@ -20,7 +20,8 @@ class Kernel(dict):
 
         segments = [Segment(s.center, s.target, _build_compute(s))
                     for s in self.spk.segments]
-        codes = {s.center for s in segments} | {s.target for s in segments}
+        codes = set(s.center for s in segments).union(
+                    s.target for s in segments)
 
         for code in codes:
             body = Body(code, segments)
