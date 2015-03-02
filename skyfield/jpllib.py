@@ -1,14 +1,14 @@
 """An interface between JPL ephemerides and Skyfield."""
 
 import jplephem
-from collections import defaultdict, deque
 from jplephem.spk import SPK
 from jplephem.names import target_names
 from numpy import max, min
 
+from .chaining import Body, Segment
 from .constants import AU_KM, C_AUDAY, DAY_S
 from .functions import length_of
-from .positionlib import Astrometric, Barycentric, ICRS, Topos
+from .positionlib import Astrometric, Barycentric, Topos
 from .timelib import takes_julian_date
 
 
@@ -16,162 +16,39 @@ class Kernel(dict):
     def __init__(self, file):
         if isinstance(file, str):
             file = open(file, 'rb')
-
         self.spk = SPK(file)
 
-        edges = defaultdict(list)
-        for segment in self.spk.segments:
-            for code in segment.center, segment.target:
-                edges[code].append(segment)
+        segments = [Segment(s.center, s.target, _build_compute(s))
+                    for s in self.spk.segments]
+        codes = {s.center for s in segments} | {s.target for s in segments}
 
-        self.edges = edges
-        self.codes = set(edges.keys())
-        self.leaves = set(code for code in self.codes if len(edges[code]) == 1)
-
-        for code in self.codes:
-            body = Body(self, code)
+        for code in codes:
+            body = Body(code, segments)
             self[code] = body
             raw_name = target_names.get(code, None)
-            if raw_name is not None:
-                name = raw_name.lower().replace(' ', '_')
-                setattr(self, name, Body(self, code))
+            if raw_name is None:
+                continue
+            name = raw_name.lower().replace(' ', '_')
+            setattr(self, name, body)
 
 
-class Body(object):
-    def __init__(self, kernel, code):
-        self.kernel = kernel
-        self.code = code
+def _build_compute(segment):
+    """Build a Skyfield `compute` callback for the SPK `segment`."""
 
-    def geometry_of(self, body):
-        if self.kernel is not body.kernel:
-            raise ValueError('cross-kernel positions not yet implemented')
+    if segment.data_type == 2:
+        def compute(jd):
+            position, velocity = segment.compute_and_differentiate(jd.tdb)
+            return position / AU_KM, velocity / AU_KM
 
-        path = _find_segments_connecting(self.kernel, self.code, body.code)
-        chain = _build_chain(path, self.code)
-        return Geometry(self.code, body.code, chain)
+    elif segment.data_type == 3:
+        def compute(jd):
+            six = segment.compute(jd.tdb)
+            return six[:3] / AU_KM, six[3:] * DAY_S / AU_KM
 
-    def observe(self, body):
-        if self.kernel is not body.kernel:
-            raise ValueError('cross-kernel positions not yet implemented')
-
-        cpath = _find_segments_connecting(self.kernel, 0, self.code)
-        tpath = _find_segments_connecting(self.kernel, 0, body.code)
-        center_chain = _build_chain(cpath, 0)
-        target_chain = _build_chain(tpath, 0)
-        return Solution(self.code, body.code, center_chain, target_chain)
-
-
-def _other(segment, code):
-    """Return the other code besides `code` that a segment names."""
-    return segment.center if (segment.target == code) else segment.target
-
-
-class Geometry(object):
-    def __init__(self, center, target, chain):
-        self.center = center
-        self.target = target
-        self.chain = chain
-
-    @takes_julian_date
-    def at(self, jd):
-        """Return the geometric cartesian position and velociy."""
-        position, velocity = _tally_chain(self.chain, jd.tdb)
-        cls = Barycentric if self.center == 0 else ICRS
-        return cls(position, velocity, jd)
-
-
-class Solution(object):
-    def __init__(self, center, target, center_chain, target_chain):
-        self.center = center
-        self.target = target
-        self.center_chain = center_chain
-        self.target_chain = target_chain
-
-    @takes_julian_date
-    def at(self, jd):
-        """Return a light-time corrected astrometric position and velocity."""
-        jd_tdb = jd.tdb
-        cposition, cvelocity = _tally_chain(self.center_chain, jd_tdb)
-        tposition, tvelocity = _tally_chain(self.target_chain, jd_tdb)
-        distance = length_of(tposition - cposition)
-        lighttime0 = 0.0
-        for i in range(10):
-            lighttime = distance / C_AUDAY
-            delta = lighttime - lighttime0
-            if -1e-12 < min(delta) and max(delta) < 1e-12:
-                break
-            tposition, tvelocity = _tally_chain(self.target_chain,
-                                                jd_tdb - lighttime)
-            distance = length_of(tposition - cposition)
-            lighttime0 = lighttime
-        else:
-            raise ValueError('observe_from() light-travel time'
-                             ' failed to converge')
-        cls = Barycentric if self.center == 0 else ICRS
-        return cls(tposition - cposition, tvelocity - cvelocity, jd)
-
-
-def _find_segments_connecting(kernel, center, target):
-    """Return a path from `center` to `target` using the `kernel`."""
-
-    here, there = center, target
-    if here == there:
-        raise ValueError('a body cannot observe itself')
-
-    # For efficiency, we pretend to have already visited leaf nodes
-    # because they, by definition, cannot move us toward the target.
-
-    paths = dict.fromkeys(kernel.leaves)
-    paths.pop(there, None)
-    paths[here] = ()
-
-    # Standard breadth-first search.
-
-    places = deque()
-    places.append(here)
-    while places:
-        here = places.popleft()
-        for segment in kernel.edges[here]:
-            code = _other(segment, here)
-            if code not in paths:
-                paths[code] = paths[here] + (segment,)
-                if code == there:
-                    return paths[there]
-                places.append(code)
-
-    raise ValueError('{0} cannot observe {1}'.format(center, target))
-
-
-def _build_chain(path, center):
-    """Return a chain of segments that should be added or subtracted."""
-    chain = []
-    for segment in path:
-        if segment.center == center:
-            chain.append((1.0, segment))
-            center = segment.target
-        else:
-            chain.append((-1.0, segment))
-            center = segment.center
-    return chain
-
-
-def _tally_chain(chain, jd_tdb):
-    position = velocity = 0.0
-
-    for sign, segment in chain:
-        if segment.data_type == 2:
-            p, v = segment.compute_and_differentiate(jd_tdb)
-            position += sign * p
-            velocity += sign * v
-        elif segment.data_type == 3:
-            six = sign * segment.compute(jd_tdb)
-            position += six[:3]
-            velocity += six[3:] * DAY_S
-        else:
-            raise ValueError('SPK data type {} not yet supported segment'
-                             .format(segment.data_type))
-
-    return position / AU_KM, velocity / AU_KM
+    else:
+        raise ValueError('SPK data type {} not yet supported segment'
+                         .format(segment.data_type))
+    return compute
 
 
 # The older ephemerides that the code below tackles use a different
