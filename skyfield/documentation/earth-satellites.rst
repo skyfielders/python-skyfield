@@ -98,7 +98,7 @@ satellite is flying:
 
 .. testcode::
 
-    topos = sat.over_topos(JulianDate(utc=tup))
+    topos = sat.over_location(JulianDate(utc=tup))
 
     print(topos.latitude)
     print(topos.longitude)

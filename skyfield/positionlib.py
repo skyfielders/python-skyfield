@@ -329,14 +329,14 @@ class Apparent(ICRS):
 
         return alt, Angle(radians=az), Distance(r_au)
 
-    def over_topos(self):
+    def over_location(self):
         """
         Return a Topos instance for the point on the Earth over which
         the body at this position is in the zenith.
 
         >>> from skyfield.api import earth, JulianDate, sun
         >>> e = earth(JulianDate(utc=(2015, 1, 1, 0, 0, 0)))
-        >>> topos = e.observe(sun).apparent().over_topos()
+        >>> topos = e.observe(sun).apparent().over_location()
         >>> topos.latitude
         <Angle -23deg 03' 33.3">
         >>> topos.longitude
