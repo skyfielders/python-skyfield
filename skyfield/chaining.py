@@ -22,7 +22,7 @@ class Body(object):
 
     def observe(self, body):
         every = self.segments + body.segments
-        segment_dict = {segment.target: segment for segment in every}
+        segment_dict = dict((segment.target, segment) for segment in every)
         center_chain = list(_center(self.code, segment_dict))[::-1]
         target_chain = list(_center(body.code, segment_dict))[::-1]
         if not center_chain[0].center == target_chain[0].center == 0:
@@ -34,7 +34,7 @@ class Body(object):
 def _connect(body1, body2):
     """Return ``(sign, segment)`` tuple list leading from body1 to body2."""
     every = body1.segments + body2.segments
-    segment_dict = {segment.target: segment for segment in every}
+    segment_dict = dict((segment.target, segment) for segment in every)
     segments1 = list(_center(body1.code, segment_dict))[::-1]
     segments2 = list(_center(body2.code, segment_dict))[::-1]
     if segments1[0].center != segments2[0].center:
