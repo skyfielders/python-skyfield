@@ -49,6 +49,24 @@ extra_documentation = """
 
 """
 
+def cache_for_julian_date(method):
+    """Decorator that can be applied to methods that take a JulianDate
+    as first argument. Will cache method return value for any subsequent
+    calls with the same JulianDate.
+    """
+    def cached_method(self, *args, **kwargs):
+        if self._cached_jd is None or args[0] != self._cached_jd:
+            self._cached_jd = args[0]
+            self._cached_jd_values = {}
+        try:
+            return self._cached_jd_values[method.__name__]
+        except KeyError:
+            return_value = method(self, *args, **kwargs)
+            self._cached_jd_values[method.__name__] = return_value
+            return return_value
+    cached_method.__doc__ = method.__doc__
+    return cached_method
+
 def takes_julian_date(function):
     """Wrap `function` so it accepts the standard Julian date arguments.
 
