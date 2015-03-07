@@ -39,8 +39,8 @@ together with all of the attributes and methods that they support:
 
     Apparent position only
      │
-     └── `altaz(…) <api.html#Position.altaz>`_            →   alt, az, distance
-     └── `over_topos(…) <api.html#Apparent.over_topos>`_  →   topos
+     └── `altaz(…) <api.html#Position.altaz>`_                 →   alt, az, distance
+     └── `over_location(…) <api.html#Apparent.over_location>`_ →   topos
 
     Angle like ra, dec, alt, and az
      │
@@ -101,7 +101,7 @@ as its argument and return a corresponding number of positions.
 
     # Earth location where in zenith at date
 
-    topos = apparent.over_topos()
+    topos = apparent.over_location()
 
 **The stars**
   Stars and other fixed objects with catalog coordinates
@@ -158,7 +158,7 @@ as its argument and return a corresponding number of positions.
 
     # Earth location over which the satellite will be
 
-    topos = satellite.over_topos(jd)
+    topos = satellite.over_location(jd)
 
 Read :doc:`time` for more information
 about how to build dates and pass them to planets and satellites

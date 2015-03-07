@@ -87,7 +87,7 @@ class EarthSatellite(object):
         Earth.
 
         """
-        latitude = self.over_topos(jd).latitude
+        latitude = self.over_location(jd).latitude
         earth_radius = earth_radius_at_latitude(latitude.radians)
         return Distance(m=self.gcrs(jd).distance().m - earth_radius)
 
@@ -121,7 +121,7 @@ class EarthSatellite(object):
         return sqrt(GE * ((2 / elevation) - (1 / semi_major_axis)))
 
     @takes_julian_date
-    def over_topos(self, jd):
+    def over_location(self, jd):
         """Return a Topos instance for the point on the Earth over which
         this satellite will be at the given date.
 
@@ -130,7 +130,7 @@ class EarthSatellite(object):
         ... "1 25544U 98067A   15058.48161588  .00023857  00000-0  35618-3 0  9991\n"
         ... "2 25544  51.6478 271.9610 0008043  54.4849  18.6646 15.54887163930964")
         >>> iss = earth.satellite(tle)
-        >>> topos = iss.over_topos(JulianDate(utc=(2015, 2, 27, 22, 22, 0)))
+        >>> topos = iss.over_location(JulianDate(utc=(2015, 2, 27, 22, 22, 0)))
         >>> topos.latitude
         <Angle 49deg 19' 48.3">
         >>> topos.longitude
