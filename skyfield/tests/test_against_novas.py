@@ -462,7 +462,6 @@ def test_mercury_geocentric_date0():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.mercury(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 1.3278115470600746, 0.5 * meter)
 
     astrometric = e.observe(de405.mercury)
@@ -484,7 +483,6 @@ def test_mercury_geocentric_date1():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.mercury(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 0.6507044512046538, 0.5 * meter)
 
     astrometric = e.observe(de405.mercury)
@@ -506,7 +504,6 @@ def test_mercury_geocentric_date2():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.mercury(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 1.4155249674526948, 0.5 * meter)
 
     astrometric = e.observe(de405.mercury)
@@ -528,7 +525,6 @@ def test_mercury_geocentric_date3():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.mercury(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 1.1264323486728112, 0.5 * meter)
 
     astrometric = e.observe(de405.mercury)
@@ -550,7 +546,6 @@ def test_mercury_geocentric_date4():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.mercury(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, (1.3278115470600746, 0.6507044512046538, 1.4155249674526948, 1.1264323486728112), 0.5 * meter)
 
     astrometric = e.observe(de405.mercury)
@@ -572,7 +567,6 @@ def test_venus_geocentric_date0():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.venus(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 0.9646045654448725, 0.5 * meter)
 
     astrometric = e.observe(de405.venus)
@@ -594,7 +588,6 @@ def test_venus_geocentric_date1():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.venus(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 1.0711674186789975, 0.5 * meter)
 
     astrometric = e.observe(de405.venus)
@@ -616,7 +609,6 @@ def test_venus_geocentric_date2():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.venus(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 1.1376890757925104, 0.5 * meter)
 
     astrometric = e.observe(de405.venus)
@@ -638,7 +630,6 @@ def test_venus_geocentric_date3():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.venus(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 0.7824924286112764, 0.5 * meter)
 
     astrometric = e.observe(de405.venus)
@@ -660,7 +651,6 @@ def test_venus_geocentric_date4():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.venus(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, (0.9646045654448725, 1.0711674186789975, 1.1376890757925104, 0.7824924286112764), 0.5 * meter)
 
     astrometric = e.observe(de405.venus)
@@ -682,7 +672,6 @@ def test_mars_geocentric_date0():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.mars(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 0.5912188976380217, 0.5 * meter)
 
     astrometric = e.observe(de405.mars)
@@ -704,7 +693,6 @@ def test_mars_geocentric_date1():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.mars(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 1.430250679602913, 0.5 * meter)
 
     astrometric = e.observe(de405.mars)
@@ -726,7 +714,6 @@ def test_mars_geocentric_date2():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.mars(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 1.8496039270835372, 0.5 * meter)
 
     astrometric = e.observe(de405.mars)
@@ -748,7 +735,6 @@ def test_mars_geocentric_date3():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.mars(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 1.7665523168668773, 0.5 * meter)
 
     astrometric = e.observe(de405.mars)
@@ -770,7 +756,6 @@ def test_mars_geocentric_date4():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.mars(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, (0.5912188976380217, 1.430250679602913, 1.8496039270835372, 1.7665523168668773), 0.5 * meter)
 
     astrometric = e.observe(de405.mars)
@@ -792,7 +777,6 @@ def test_jupiter_geocentric_date0():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.jupiter(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 5.8416003192317465, 0.5 * meter)
 
     astrometric = e.observe(de405.jupiter)
@@ -814,7 +798,6 @@ def test_jupiter_geocentric_date1():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.jupiter(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 5.913287883102948, 0.5 * meter)
 
     astrometric = e.observe(de405.jupiter)
@@ -836,7 +819,6 @@ def test_jupiter_geocentric_date2():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.jupiter(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 4.621126565890217, 0.5 * meter)
 
     astrometric = e.observe(de405.jupiter)
@@ -858,7 +840,6 @@ def test_jupiter_geocentric_date3():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.jupiter(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 5.129958529243068, 0.5 * meter)
 
     astrometric = e.observe(de405.jupiter)
@@ -880,7 +861,6 @@ def test_jupiter_geocentric_date4():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.jupiter(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, (5.8416003192317465, 5.913287883102948, 4.621126565890217, 5.129958529243068), 0.5 * meter)
 
     astrometric = e.observe(de405.jupiter)
@@ -902,7 +882,6 @@ def test_saturn_geocentric_date0():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.saturn(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 9.382032444401025, 0.5 * meter)
 
     astrometric = e.observe(de405.saturn)
@@ -924,7 +903,6 @@ def test_saturn_geocentric_date1():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.saturn(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 9.420484451056101, 0.5 * meter)
 
     astrometric = e.observe(de405.saturn)
@@ -946,7 +924,6 @@ def test_saturn_geocentric_date2():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.saturn(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 8.652750126001484, 0.5 * meter)
 
     astrometric = e.observe(de405.saturn)
@@ -968,7 +945,6 @@ def test_saturn_geocentric_date3():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.saturn(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 10.326368974662916, 0.5 * meter)
 
     astrometric = e.observe(de405.saturn)
@@ -990,7 +966,6 @@ def test_saturn_geocentric_date4():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.saturn(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, (9.382032444401025, 9.420484451056101, 8.652750126001484, 10.326368974662916), 0.5 * meter)
 
     astrometric = e.observe(de405.saturn)
@@ -1012,7 +987,6 @@ def test_uranus_geocentric_date0():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.uranus(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 18.75197906203834, 0.5 * meter)
 
     astrometric = e.observe(de405.uranus)
@@ -1034,7 +1008,6 @@ def test_uranus_geocentric_date1():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.uranus(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 18.622417009295177, 0.5 * meter)
 
     astrometric = e.observe(de405.uranus)
@@ -1056,7 +1029,6 @@ def test_uranus_geocentric_date2():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.uranus(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 20.727159134679393, 0.5 * meter)
 
     astrometric = e.observe(de405.uranus)
@@ -1078,7 +1050,6 @@ def test_uranus_geocentric_date3():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.uranus(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 19.234768680195387, 0.5 * meter)
 
     astrometric = e.observe(de405.uranus)
@@ -1100,7 +1071,6 @@ def test_uranus_geocentric_date4():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.uranus(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, (18.75197906203834, 18.622417009295177, 20.727159134679393, 19.234768680195387), 0.5 * meter)
 
     astrometric = e.observe(de405.uranus)
@@ -1122,7 +1092,6 @@ def test_neptune_geocentric_date0():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.neptune(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 29.83221264621946, 0.5 * meter)
 
     astrometric = e.observe(de405.neptune)
@@ -1144,7 +1113,6 @@ def test_neptune_geocentric_date1():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.neptune(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 29.490001740438892, 0.5 * meter)
 
     astrometric = e.observe(de405.neptune)
@@ -1166,7 +1134,6 @@ def test_neptune_geocentric_date2():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.neptune(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 31.024491920354496, 0.5 * meter)
 
     astrometric = e.observe(de405.neptune)
@@ -1188,7 +1155,6 @@ def test_neptune_geocentric_date3():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.neptune(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 28.984118029716345, 0.5 * meter)
 
     astrometric = e.observe(de405.neptune)
@@ -1210,7 +1176,6 @@ def test_neptune_geocentric_date4():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.neptune(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, (29.83221264621946, 29.490001740438892, 31.024491920354496, 28.984118029716345), 0.5 * meter)
 
     astrometric = e.observe(de405.neptune)
@@ -1232,7 +1197,6 @@ def test_pluto_geocentric_date0():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.pluto(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 32.312971776632494, 0.5 * meter)
 
     astrometric = e.observe(de405.pluto)
@@ -1254,7 +1218,6 @@ def test_pluto_geocentric_date1():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.pluto(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 28.707485955458118, 0.5 * meter)
 
     astrometric = e.observe(de405.pluto)
@@ -1276,7 +1239,6 @@ def test_pluto_geocentric_date2():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.pluto(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 31.064412196006614, 0.5 * meter)
 
     astrometric = e.observe(de405.pluto)
@@ -1298,7 +1260,6 @@ def test_pluto_geocentric_date3():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.pluto(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 31.69909782133193, 0.5 * meter)
 
     astrometric = e.observe(de405.pluto)
@@ -1320,7 +1281,6 @@ def test_pluto_geocentric_date4():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.pluto(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, (32.312971776632494, 28.707485955458118, 31.064412196006614, 31.69909782133193), 0.5 * meter)
 
     astrometric = e.observe(de405.pluto)
@@ -1342,7 +1302,6 @@ def test_sun_geocentric_date0():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.sun(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 1.0160878650466754, 0.5 * meter)
 
     astrometric = e.observe(de405.sun)
@@ -1364,7 +1323,6 @@ def test_sun_geocentric_date1():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.sun(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 1.0118605934887042, 0.5 * meter)
 
     astrometric = e.observe(de405.sun)
@@ -1386,7 +1344,6 @@ def test_sun_geocentric_date2():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.sun(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 0.9833276788862821, 0.5 * meter)
 
     astrometric = e.observe(de405.sun)
@@ -1408,7 +1365,6 @@ def test_sun_geocentric_date3():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.sun(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 1.0107820040799866, 0.5 * meter)
 
     astrometric = e.observe(de405.sun)
@@ -1430,7 +1386,6 @@ def test_sun_geocentric_date4():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.sun(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, (1.0160878650466754, 1.0118605934887042, 0.9833276788862821, 1.0107820040799866), 0.5 * meter)
 
     astrometric = e.observe(de405.sun)
@@ -1452,7 +1407,6 @@ def test_moon_geocentric_date0():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.moon(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 0.0026034424248854585, 0.5 * meter)
 
     astrometric = e.observe(de405.moon)
@@ -1474,7 +1428,6 @@ def test_moon_geocentric_date1():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.moon(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 0.0024815092296598847, 0.5 * meter)
 
     astrometric = e.observe(de405.moon)
@@ -1496,7 +1449,6 @@ def test_moon_geocentric_date2():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.moon(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 0.002690202988513297, 0.5 * meter)
 
     astrometric = e.observe(de405.moon)
@@ -1518,7 +1470,6 @@ def test_moon_geocentric_date3():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.moon(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, 0.0024739078649309238, 0.5 * meter)
 
     astrometric = e.observe(de405.moon)
@@ -1540,7 +1491,6 @@ def test_moon_geocentric_date4():
     e = de405.earth(jd)
 
     distance = length_of((e - de405.moon(jd)).position.au)
-    print(OLD_AU)
     compare(distance * OLD_AU, (0.0026034424248854585, 0.0024815092296598847, 0.002690202988513297, 0.0024739078649309238), 0.5 * meter)
 
     astrometric = e.observe(de405.moon)
