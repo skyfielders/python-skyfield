@@ -9,6 +9,7 @@ MANIFEST
 htmlcov/
 skyfield/documentation/_build
 tmp*.py
+*.bsp
 *.pyc
 *.egg-info
 *.ipynb_checkpoints
