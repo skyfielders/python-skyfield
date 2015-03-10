@@ -241,8 +241,9 @@ class Astrometric(ICRS):
                 position_au, observer.position.au)
             include_earth_deflection = limb_angle >= 0.8
 
-        add_deflection(position_au, observer.position.au, observer.ephemeris,
-                       jd.tdb, include_earth_deflection)
+        if hasattr(observer, 'ephemeris'):
+            add_deflection(position_au, observer.position.au, observer.ephemeris,
+                           jd.tdb, include_earth_deflection)
         add_aberration(position_au, observer.velocity.au_per_d, self.lighttime)
 
         a = Apparent(position_au, jd=jd)

@@ -17,12 +17,10 @@ class Kernel(dict):
         if isinstance(file, str):
             file = open(file, 'rb')
         self.spk = SPK(file)
-
         segments = [Segment(s.center, s.target, _build_compute(s))
                     for s in self.spk.segments]
         codes = set(s.center for s in segments).union(
                     s.target for s in segments)
-
         for code in codes:
             body = Body(code, segments)
             self[code] = body
@@ -31,6 +29,9 @@ class Kernel(dict):
                 continue
             name = raw_name.lower().replace(' ', '_')
             setattr(self, name, body)
+
+    def __str__(self):
+        return str(self.spk)
 
 
 def _build_compute(segment):

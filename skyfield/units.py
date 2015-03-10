@@ -373,7 +373,7 @@ def _interpret_angle(name, angle_object, angle_float, unit='degrees'):
                      ' with a numeric argument'.format(name, unit))
 
 def _interpret_ltude(value, name, psuffix, nsuffix):
-    """Interpret a string as a latitude or longitude angle.
+    """Interpret a string, float, or tuple as a latitude or longitude angle.
 
     `value` - The string to interpret.
     `name` - 'latitude' or 'longitude', for use in exception messages.
@@ -381,6 +381,9 @@ def _interpret_ltude(value, name, psuffix, nsuffix):
     `negative` - The string that indicates a negative angle ('S' or 'W').
 
     """
+    if not isinstance(value, str):
+        return Angle(degrees=_unsexagesimalize(value))
+
     value = value.strip().upper()
 
     if value.endswith(psuffix):

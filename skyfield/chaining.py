@@ -5,8 +5,9 @@ from numpy import max, min
 
 from .constants import C_AUDAY
 from .functions import length_of
-from .positionlib import Barycentric, ICRS
+from .positionlib import Astrometric, Barycentric, ICRS
 from .timelib import JulianDate, takes_julian_date
+from .units import Distance, Velocity
 
 Segment = namedtuple('Segment', 'center target compute')
 
@@ -73,6 +74,12 @@ class Solution(object):
         self.center_chain = center_chain
         self.target_chain = target_chain
 
+    def __str__(self):
+        lines = [' - {0}'.format(c) for c in self.center_chain]
+        lines.extend(' + {0}'.format(c) for c in self.target_chain)
+        return 'Solution center={0} target={1}:\n{2}'.format(
+            self.center, self.target, '\n'.join(lines))
+
     @takes_julian_date
     def at(self, jd):
         """Return a light-time corrected astrometric position and velocity."""
@@ -93,8 +100,17 @@ class Solution(object):
         else:
             raise ValueError('observe_from() light-travel time'
                              ' failed to converge')
-        cls = Barycentric if self.center == 0 else ICRS
-        return cls(tposition - cposition, tvelocity - cvelocity, jd)
+        cls = Barycentric if self.center == 0 else Astrometric
+        pos = cls(tposition - cposition, tvelocity - cvelocity, jd)
+        pos.lighttime = lighttime
+        class Observer(object):
+            pass
+        pos.observer = Observer()
+        pos.observer.position = Distance(cposition)
+        pos.observer.velocity = Velocity(cvelocity)
+        pos.observer.geocentric = False  # TODO
+        #pos.observer.ephemeris = None
+        return pos
 
 
 def _tally(minus_chain, plus_chain, jd):

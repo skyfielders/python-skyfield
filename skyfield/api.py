@@ -10,6 +10,7 @@ from datetime import datetime
 from .constants import tau
 from .starlib import Star
 from .timelib import JulianDate, T0, now, utc
+from .toposlib import Topos
 from .units import Angle
 
 def build_ephemeris():
