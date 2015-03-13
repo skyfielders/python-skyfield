@@ -59,6 +59,11 @@ class Geometry(object):
         self.center_chain = center_chain
         self.target_chain = target_chain
 
+    def __str__(self):
+        return 'Geometry\n{0}'.format('\n'.join(
+            ' {0}'.format(c)
+            for c in self.center_chain + self.target_chain))
+
     @takes_julian_date
     def at(self, jd):
         """Return the geometric Cartesian position and velocity."""

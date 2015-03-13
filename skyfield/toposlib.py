@@ -1,7 +1,8 @@
 from numpy import array, einsum, exp
 
+from .constants import ASEC2RAD
 from .earthlib import compute_limb_angle, refract, terra
-from .functions import from_polar, length_of, to_polar, rot_y, rot_z
+from .functions import from_polar, length_of, to_polar, rot_x, rot_y, rot_z
 from .chaining import Body, Segment
 from .timelib import takes_julian_date
 from .units import (Distance, Velocity, Angle, _interpret_angle,
@@ -12,7 +13,7 @@ class Topos(Body):
     """An object representing a specific location on the Earth's surface."""
 
     def __init__(self, latitude=None, longitude=None, latitude_degrees=None,
-                 longitude_degrees=None, elevation_m=0.0):
+                 longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
 
         if latitude_degrees is not None:
             latitude = Angle(degrees=latitude_degrees)
@@ -35,14 +36,18 @@ class Topos(Body):
         self.latitude = latitude
         self.longitude = longitude
         self.elevation = Distance(m=elevation_m)
-        self.R_lat = rot_y(latitude.radians)[::-1]
+        self.x = x
+        self.y = y
 
+        self.R_lat = rot_y(latitude.radians)[::-1]
         self.code = self
         self.segments = [Segment(399, self, self.compute)]
 
+    def __repr__(self):
+        return '<Topos {0} N, {1} E>'.format(self.latitude, self.longitude)
+
     def compute(self, jd):
         position, velocity = self._position_and_velocity(jd)
-        #print('*   ', position)
         return position, velocity
 
     # @takes_julian_date
@@ -77,6 +82,13 @@ class Topos(Body):
                          self.elevation.au, jd.gast)
         pos = einsum('ij...,j...->i...', jd.MT, pos)
         vel = einsum('ij...,j...->i...', jd.MT, vel)
+        if self.x:
+            R = rot_y(self.x * ASEC2RAD)
+            pos = einsum('ij...,j...->i...', R, pos)
+        if self.y:
+            R = rot_x(self.y * ASEC2RAD)
+            pos = einsum('ij...,j...->i...', R, pos)
+        # TODO: also rotate velocity
         return pos, vel
 
     def _altaz_rotation(self, jd):
