@@ -43,9 +43,15 @@ extra_documentation = """
 
             # International Atomic Time
             tai=2442046.5
+            tai=(1973, 12, 29, 23, 59, 48.0)
 
             # Terrestrial Time
             tt=2442046.5
+            tt=(1973, 12, 29, 23, 59, 48.0)
+
+            # Barycentric Dynamical Time
+            tdb=2442046.5
+            tdb=(1973, 12, 29, 23, 59, 48.0)
 
 """
 
