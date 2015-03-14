@@ -153,7 +153,7 @@ class EarthSatellite(object):
 
     @property
     def semi_major_axis(self):
-        return Distance(m=(GE / (self.mean_motion ** 2)) ** (1/3))
+        return Distance(m=(GE / (self.mean_motion ** 2)) ** (1.0/3))
 
 
 _second = 1.0 / (24.0 * 60.0 * 60.0)
