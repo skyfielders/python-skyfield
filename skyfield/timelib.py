@@ -69,13 +69,26 @@ def takes_julian_date(function):
         if jd is None:
             jd = JulianDate(utc, tai, tt, tdb, delta_t, cache)
         elif not isinstance(jd, JulianDate):
-            s = 'your "jd" argument is not a JulianDate: {0!r}'.format(jd)
+            if not isinstance(jd, tuple):
+                s = _tuple_error
+            else:
+                s = 'your "jd" argument is not a JulianDate: {0!r}'.format(jd)
             raise ValueError(s)
         return function(self, jd)
     wrapper.__name__ = function.__name__
     synopsis, blank_line, description = function.__doc__.partition('\n\n')
     wrapper.__doc__ = synopsis + extra_documentation + description
     return wrapper
+
+_tuple_error = """was expecting a JulianDate.
+
+Are you trying to pass in a tuple to represent a time? A time scale must
+accompany tuples. For example:
+
+    utc=(2014, 1, 18)
+
+Other time scales include tai, tt, tdb, and ut1.
+"""
 
 def _to_array(value):
     """When `value` is a plain Python sequence, return it as a NumPy array."""
