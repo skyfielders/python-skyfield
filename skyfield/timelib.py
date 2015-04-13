@@ -106,7 +106,7 @@ class JulianDate(object):
     date of the current date and time, use the separate function
     ``skyfield.api.now()``.
 
-    Every Julian date object understands five different time scales,
+    Every Julian date object understands four different time scales,
     which can be used during instantiation::
 
         JulianDate(utc=(year, month, day, hour, minute, second))
@@ -114,7 +114,6 @@ class JulianDate(object):
         JulianDate(tai=(year, month, day, ...) or float)
         JulianDate(tt=(year, month, day, ...) or float)
         JulianDate(tdb=(year, month, day, ...) or float)
-        JulianDate(ut1=(year, month, day, ...) or float)
 
     """
     def __init__(self, utc=None, tai=None, tt=None, tdb=None,
