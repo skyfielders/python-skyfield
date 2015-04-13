@@ -87,7 +87,9 @@ accompany tuples. For example:
 
     utc=(2014, 1, 18)
 
-Other time scales include tai, tt, tdb, and ut1.
+Other time scales include tai, tt, and tdb. Please refer to the
+```JulianDate``` docstring for more information on these time scales.
+
 """
 
 def _to_array(value):
@@ -109,11 +111,22 @@ class JulianDate(object):
     Every Julian date object understands four different time scales,
     which can be used during instantiation::
 
+        # Coordinated Universal Time
         JulianDate(utc=(year, month, day, hour, minute, second))
-                       or Standard Library datetime or date)
-        JulianDate(tai=(year, month, day, ...) or float)
-        JulianDate(tt=(year, month, day, ...) or float)
-        JulianDate(tdb=(year, month, day, ...) or float)
+        JulianDate(utc=datetime(year, month, day, hour, minute, second))
+        JulianDate(utc=date(year, month, day))
+
+        # International Atomic Time
+        JulianDate(tai=2442046.5)  <- Julian day represented by a float
+        JulianDate(tai=(year, month, day, hour, minute, second))
+
+        # Terrestrial Time
+        JulianDate(tt=2442046.5)  <- Julian day represented by a float
+        JulianDate(tt=(year, month, day, hour, minute, second))
+
+        # Barycentric Dynamical Time
+        JulianDate(tdb=2442046.5)  <- Julian day represented by a float
+        JulianDate(tdb=(year, month, day, hour, minute, second))
 
     """
     def __init__(self, utc=None, tai=None, tt=None, tdb=None,
