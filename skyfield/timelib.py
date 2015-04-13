@@ -69,7 +69,7 @@ def takes_julian_date(function):
         if jd is None:
             jd = JulianDate(utc, tai, tt, tdb, delta_t, cache)
         elif not isinstance(jd, JulianDate):
-            if not isinstance(jd, tuple):
+            if isinstance(jd, tuple):
                 s = _tuple_error
             else:
                 s = 'your "jd" argument is not a JulianDate: {0!r}'.format(jd)
