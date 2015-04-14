@@ -40,7 +40,7 @@ def get(which, cache=default_cache):
 
     """
     if isinstance(which, str):
-        pattern = b'H|      %6s' % which.encode('ascii')
+        pattern = ('H|      %6s' % which).encode('ascii')
         for star in load(lambda line: line.startswith(pattern)):
             return star
     else:
