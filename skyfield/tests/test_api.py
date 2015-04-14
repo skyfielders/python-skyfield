@@ -45,3 +45,11 @@ def test_from_altaz_parameters():
         p.from_altaz(az='Bad value', alt_degrees=0, az_degrees=0)
     p.from_altaz(alt=a, alt_degrees='bad', az_degrees=0)
     p.from_altaz(az=a, alt_degrees=0, az_degrees='bad')
+
+def test_named_star_throws_valueerror():
+    with assert_raises(ValueError, 'No star named foo known to skyfield'):
+        api.NamedStar('foo')
+
+def test_named_star_returns_star():
+    s = api.NamedStar('Polaris')
+    assert isinstance(s, api.Star)
