@@ -12,6 +12,7 @@ from .starlib import Star
 from .timelib import JulianDate, T0, now, utc
 from .toposlib import Topos
 from .units import Angle
+from .named_stars import NamedStar
 
 def build_ephemeris():
     from .data.horizons import festoon_ephemeris
