@@ -205,7 +205,11 @@ class Angle(object):
             raise WrongUnitError('hstr')
         hours = self._hours
         if getattr(hours, 'shape', None):
-            return [_hstr(h, places) for h in hours]
+            return "{0} values from {1} to {2}".format(
+                len(degrees),
+                _hstr(min(degrees),places,signed),
+                _hstr(max(degrees),places,signed)
+            )
         return _hstr(hours, places)
 
     def dms(self, warn=True):
@@ -225,7 +229,11 @@ class Angle(object):
         degrees = self._degrees
         signed = self.signed
         if getattr(degrees, 'shape', None):
-            return [_dstr(d, places, signed) for d in degrees]
+            return "{0} values from {1} to {2}".format(
+                len(degrees),
+                _dstr(min(degrees),places,signed),
+                _dstr(max(degrees),places,signed)
+            )
         return _dstr(degrees, places, signed)
 
 class WrongUnitError(ValueError):
