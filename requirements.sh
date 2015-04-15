@@ -1,3 +1,10 @@
-conda install astropy mock numpy sphinx pytz
+#!/bin/bash
+
+if conda --version >/dev/null 2>&1
+then
+    conda install astropy mock numpy sphinx pytz
+else
+    pip install astropy mock numpy sphinx pytz
+fi
 pip install de405==1997.1 de423==2010.1
 pip install -e .
