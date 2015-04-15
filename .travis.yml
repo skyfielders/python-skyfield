@@ -9,8 +9,8 @@ python:
   - "3.4"
 
 install:
+  - "./requirements.sh"
   - "pip install -e ."
-  - "pip install -r requirements.txt"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
 
 script:
