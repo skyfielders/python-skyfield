@@ -56,3 +56,15 @@ TBD
 
 Pushing your local development branch to your GitHub Fork
 ----------------------------------------------------------
+
+TBD
+
+Submitting a pull request of your development branch
+----------------------------------------------------
+
+TBD
+
+Pulling from the master repo into your own master or development branches
+-------------------------------------------------------------------------
+
+TBD
