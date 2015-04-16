@@ -6,7 +6,8 @@
 There are many ways you can contribute to Skyfield.  
 
 * **Contributing documentation** in the form of python doc, and documents like this.
-* **Using Skyfield;** reporting bugs and patches into the issue tracker.  https://github.com/skyfielders/python-skyfield/issues
+* **Using Skyfield;** reporting bugs and patches into the issue tracker.  
+ * https://github.com/skyfielders/python-skyfield/issues
 * **Following up on current Issues** by posting comments and/or pull requests.
 
 Because we are using Github the process for contributing is as follows:
