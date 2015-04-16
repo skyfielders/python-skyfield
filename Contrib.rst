@@ -5,22 +5,12 @@
 
 There are many ways you can contribute to Skyfield.  
 
-* **Contributing documentation** in the form of HOWTO's, python doc, and documents like this.
- * `Creating a HOWTO <https://github.com/ozialien/python-skyfield/blob/readme_collaboration/Contrib.rst#creating-a-howto>`_
- * `Creating some Python doc <https://github.com/ozialien/python-skyfield/blob/readme_collaboration/Contrib.rst#creating-some-python-documention>`_
 * **Using Skyfield;** reporting bugs and patches into the issue tracker.  
  * **Forking Fixing and Pull Requests**  `Using github features to fix an issue <>`_
  * `Creating an Issue <https://github.com/ozialien/python-skyfield/blob/readme_collaboration/Contrib.rst#creating-an-issue-in-the-issue-trackerlink>`_
-
-Creating a HOWTO
-----------------
-
-TBD
-
-Creating some Python Documention
---------------------------------
-
-TBD
+* **Contributing documentation** in the form of HOWTO's, python doc, and documents like this.
+ * `Creating a HOWTO <https://github.com/ozialien/python-skyfield/blob/readme_collaboration/Contrib.rst#creating-a-howto>`_
+ * `Creating some Python doc <https://github.com/ozialien/python-skyfield/blob/readme_collaboration/Contrib.rst#creating-some-python-documention>`_
 
 Creating an Issue in the Issue Tracker
 --------------------------------------
