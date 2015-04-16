@@ -46,4 +46,5 @@ Creating a local development branch in your own local working copy
 
 TBD
 
-Pushing your local development branch to your GitHub Fork.
+Pushing your local development branch to your GitHub Fork
+----------------------------------------------------------
