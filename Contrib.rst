@@ -10,6 +10,9 @@ There are many ways you can contribute to Skyfield.
  * https://github.com/skyfielders/python-skyfield/issues
 * **Following up on current Issues** by posting comments and/or pull requests.
 
+Contributing Overview
+---------------------
+
 Because we are using Github the process for contributing is as follows:
 
 1. We acquire a github account. https://github.com
