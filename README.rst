@@ -39,9 +39,6 @@ Here are the essential project links:
 * `Skyfield package <https://pypi.python.org/pypi/skyfield>`_
   on the Python Package Index.
 
-* `Skyfield package <https://pypi.python.org/pypi/skyfield>`_
-  on the Python Package Index.
-
 * `Issue tracker
   <https://github.com/brandon-rhodes/python-skyfield/issues>`_
   on GitHub.
