@@ -15,6 +15,8 @@ Contributing Overview
 
 Because we are using Github the process for contributing is as follows:
 
+<TBD Diagram of what is going on for the visual people>
+
 1. We acquire a github account. 
  * https://github.com
 2. We fork Brandon/Skyfield's repo. 
