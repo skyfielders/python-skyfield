@@ -27,7 +27,7 @@ Creating an Issue in the Issue Tracker
 
 * `Go to the Skyfield issues page <https://github.com/skyfielders/python-skyfield/issues>`_
 * Create a new issue.
-* Optionally attach a patch. `Creating and Submitting a patch https://github.com/ozialien/python-skyfield/blob/readme_collaboration/Contrib.rst#creating-and-submitting-a-patch>`_
+* Optionally attach a patch. see `Creating and Submitting a patch <https://github.com/ozialien/python-skyfield/blob/readme_collaboration/Contrib.rst#creating-and-submitting-a-patch>`_
 * We will confirm the patch and add it to the repository with your name in lights! :)
 
 Creating and Submitting a patch
