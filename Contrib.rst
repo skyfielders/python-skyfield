@@ -5,21 +5,16 @@
 
 There are many ways you can contribute to Skyfield.  
 
+* **Contributing documentation** in the form of python doc, and documents like this.
 * **Using Skyfield;** reporting bugs and patches into the issue tracker.  
- * **Forking Fixing and Pull Requests**  `Using github features to fix an issue <>`_
- * `Creating an Issue <https://github.com/ozialien/python-skyfield/blob/readme_collaboration/Contrib.rst#creating-an-issue-in-the-issue-trackerlink>`_
-* **Contributing documentation** in the form of HOWTO's, python doc, and documents like this.
- * `Creating a HOWTO <https://github.com/ozialien/python-skyfield/blob/readme_collaboration/Contrib.rst#creating-a-howto>`_
- * `Creating some Python doc <https://github.com/ozialien/python-skyfield/blob/readme_collaboration/Contrib.rst#creating-some-python-documention>`_
+* **Following up on current Issues**.
 
-Creating an Issue in the Issue Tracker
---------------------------------------
+Because we are using Github the process for contributing is as follows:
 
-* `Go to the Skyfield issues page <https://github.com/skyfielders/python-skyfield/issues>`_
-* Create a new issue.
-* Optionally attach a patch. see `Creating and Submitting a patch <https://github.com/ozialien/python-skyfield/blob/readme_collaboration/Contrib.rst#creating-and-submitting-a-patch>`_
-* We will confirm the patch and add it to the repository with your name in lights! :)
+1. We acquire a github account
+2. We fork Brandon/Skyfield's repo 
+3. We create development branches in our own fork
+4. We submit a pull request from our forked branches into Brandon/Skyfield's main repo.
 
-Creating and Submitting a patch
--------------------------------
-
+We give our pull requests the name verbage as an Issue we created or commented on in the main repo.
+ 
