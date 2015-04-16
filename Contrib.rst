@@ -13,8 +13,9 @@ Because we are using Github the process for contributing is as follows:
 
 1. We acquire a github account. https://github.com
 2. We fork Brandon/Skyfield's repo. https://github.com/skyfielders/python-skyfield
-3. We git clone our Fork to a local working copy on our own machine. git clone https://github.com/YOUR ID HERE/python-skyfield
+3. We git clone our Fork to a local working copy on our own machine. git clone https://github.com/<YOUR ID HERE>/python-skyfield
 4. We create development branches in our own working copy. git checkout -b Issue14
-5. We add documentation, a fix etc.....
+5. We code by adding/modifying/deleting documentation or code
+6. We commit git commit -m "#31 Fix involved: blah blah blah"
 6. We push our fix branches to our Forked repo. git push origin Issue14
 7. We submit a pull request from our forked branches into Brandon/Skyfield's main repo.
