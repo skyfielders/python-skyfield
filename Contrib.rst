@@ -10,3 +10,24 @@ There are many ways you can contribute to Skyfield.
  * `Creating some Python doc </>`_
 * **Using Skyfield;** reporting bugs and patches into the issue tracker.  `Creating an Issue/and/or/patch </>`_
 * **Posting your patches** into the comments off an issue.  `Creating and Submitting a patch </>`_
+
+
+Creating a HOWTO
+----------------
+
+TBD
+
+Creating some Python Documention
+--------------------------------
+
+TBD
+
+Creating an Issue in the Issue Tracker
+--------------------------------------
+
+TBD
+
+Creating and Submitting a patch
+-------------------------------
+
+TBD
