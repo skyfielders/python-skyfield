@@ -6,8 +6,8 @@
 There are many ways you can contribute to Skyfield.  
 
 * **Contributing documentation** in the form of python doc, and documents like this.
-* **Using Skyfield;** reporting bugs and patches into the issue tracker.  
-* **Following up on current Issues**.
+* **Using Skyfield;** reporting bugs and patches into the issue tracker.  https://github.com/skyfielders/python-skyfield/issues
+* **Following up on current Issues** by posting comments and/or pull requests.
 
 Because we are using Github the process for contributing is as follows:
 
@@ -22,3 +22,24 @@ Because we are using Github the process for contributing is as follows:
 
 Between fixes we can do pull requests from Brandon/Skyfield's repo into our own Fork's master branch keeping our master updated.
 
+Acquiring a GitHub Account
+--------------------------
+
+TBD
+
+Forking the Skyfield Repository
+-------------------------------
+
+TBD
+
+Cloning your Fork into a local working copy
+-------------------------------------------
+
+TBD
+
+Creating a local development branch in your own local working copy
+------------------------------------------------------------------
+
+TBD
+
+Pushing your local development branch to your GitHub Fork.
