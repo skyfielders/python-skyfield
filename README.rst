@@ -33,6 +33,9 @@ Here are the essential project links:
 * `Home page and documentation
   <http://rhodesmill.org/skyfield>`_.
 
+* `Contributing to Skyfield
+  <https://github.com/brandon-rhode/python-skyfield/Contrib.rst>`_.
+
 * `Skyfield package <https://pypi.python.org/pypi/skyfield>`_
   on the Python Package Index.
 
