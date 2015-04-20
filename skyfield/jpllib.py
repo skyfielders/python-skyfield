@@ -53,9 +53,6 @@ def _build_compute(segment):
     return compute
 
 
-# The older ephemerides that the code below tackles use a different
-# value for the AU, so, for now (until we fix our tests?):
-
 class Planet(object):
     def __init__(self, ephemeris, jplephemeris, jplname):
         self.ephemeris = ephemeris
