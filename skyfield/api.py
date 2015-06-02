@@ -7,12 +7,17 @@ default JPL planetary ephemeris ``de421`` and create planet objects like
 """
 import de421
 from datetime import datetime
+from math import pi
 from .constants import tau
+from .jpllib import Kernel
 from .starlib import Star
 from .timelib import JulianDate, T0, now, utc
 from .toposlib import Topos
 from .units import Angle
 from .named_stars import NamedStar
+
+__all__ = ['Angle', 'Kernel', 'JulianDate', 'NamedStar', 'Star', 'Topos',
+           'datetime', 'now', 'utc', 'T0', 'pi', 'tau']
 
 def build_ephemeris():
     from .data.horizons import festoon_ephemeris
