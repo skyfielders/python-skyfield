@@ -34,7 +34,7 @@ setup(
         },
     install_requires=[
         'de421==2008.1',
-        'jplephem>=1.2',
+        'jplephem>=2.2',
         'numpy',
         'sgp4>=1.3',
         ])

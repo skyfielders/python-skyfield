@@ -13,10 +13,8 @@ from .timelib import takes_julian_date
 
 
 class Kernel(dict):
-    def __init__(self, file):
-        if isinstance(file, str):
-            file = open(file, 'rb')
-        self.spk = SPK(file)
+    def __init__(self, filename):
+        self.spk = SPK.open(filename)
         segments = [Segment(s.center, s.target, _build_compute(s))
                     for s in self.spk.segments]
         codes = set(s.center for s in segments).union(
