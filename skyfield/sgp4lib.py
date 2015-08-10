@@ -29,7 +29,7 @@ class EarthSatellite(object):
         sat = twoline2rv(*lines[-2:], whichconst=wgs72)
         self._sgp4_satellite = sat
         self._earth = earth
-        self.epoch = JulianDate(utc=(sat.epochyr, 1, sat.epochdays - 1.0))
+        self.epoch = JulianDate(utc=(sat.epochyr, 1, sat.epochdays))
 
     def __repr__(self):
         sat = self._sgp4_satellite

@@ -128,3 +128,9 @@ def test_appendix_c_satellite():
     assert abs(-2.232832783 - vTEME[0]) < 1e-9
     assert abs(-4.110453490 - vTEME[1]) < 1e-9
     assert abs(-3.157345433 - vTEME[2]) < 1e-9
+
+def test_epoch_date():
+    # Example from https://celestrak.com/columns/v04n03/
+    s = appendix_c_example.replace('00179.78495062', '98001.00000000')
+    sat = EarthSatellite(s.splitlines(), earth)
+    assert sat.epoch.utc_jpl() == 'A.D. 1998-Jan-01 00:00:00.0000 UT'
