@@ -118,7 +118,7 @@ so it supports all of the standard Skyfield date methods:
 
 .. testoutput::
 
-    A.D. 2013-Nov-09 23:03:03.9479 UT
+    A.D. 2013-Nov-10 23:03:03.9479 UT
 
 Skyfield is willing to generate positions
 for dates quite far from a satellite’s epoch,
