@@ -9,6 +9,8 @@
 
 .. testsetup::
 
+    import os
+    os.chdir('../..')  # same directory as de430.bsp, hopefully
     from skyfield import api
     def now():
         """Return a constant "now"."""
@@ -17,8 +19,9 @@
 
 .. testcode::
 
-    from skyfield.api import earth, mars, now
-    ra, dec, distance = earth(now()).observe(mars).radec()
+    from skyfield.api import load, now
+    e = load('de430.bsp')
+    ra, dec, distance = e('earth').observe('mars barycenter').at(now()).radec()
 
     print(ra)
     print(dec)
@@ -40,8 +43,8 @@ on the Earth’s surface:
 
 .. testcode::
 
-    boston = earth.topos('42.3583 N', '71.0636 W')
-    alt, az, d = boston(now()).observe(mars).apparent().altaz()
+    boston = e('earth').topos('42.3583 N', '71.0636 W')
+    alt, az, d = boston.observe('mars barycenter').at(now()).apparent().altaz()
 
     print(alt)
     print(az)

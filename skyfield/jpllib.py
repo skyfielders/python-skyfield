@@ -2,7 +2,7 @@
 
 import jplephem
 from jplephem.spk import SPK
-from jplephem.names import target_names
+from jplephem.names import target_names as _names
 from numpy import max, min
 
 from .chaining import Body, Segment
@@ -11,25 +11,45 @@ from .functions import length_of
 from .positionlib import Astrometric, Barycentric, Topos
 from .timelib import takes_julian_date
 
+_targets = dict((name, target) for (target, name) in _names.items())
+
 
 class Kernel(dict):
     def __init__(self, filename):
+        self.filename = filename
         self.spk = SPK.open(filename)
-        segments = [Segment(s.center, s.target, _build_compute(s))
-                    for s in self.spk.segments]
-        codes = set(s.center for s in segments).union(
-                    s.target for s in segments)
-        for code in codes:
-            body = Body(code, segments)
-            self[code] = body
-            raw_name = target_names.get(code, None)
-            if raw_name is None:
-                continue
-            name = raw_name.lower().replace(' ', '_')
-            setattr(self, name, body)
+        self.segments = [Segment(s.center, s.target, _build_compute(s))
+                         for s in self.spk.segments]
+        self.codes = set(s.center for s in self.segments).union(
+                         s.target for s in self.segments)
+        # for code in codes:
+        #     body = Body(code, segments)
+        #     self[code] = body
+        #     raw_name = target_names.get(code, None)
+        #     if raw_name is None:
+        #         continue
+        #     name = raw_name.lower().replace(' ', '_')
+        #     setattr(self, name, body)
 
     def __str__(self):
         return str(self.spk)
+
+    def __call__(self, name):
+        code = self.decode(name)
+        return Body(self, code)
+
+    def decode(self, name):
+        if isinstance(name, int):
+            return name
+        name = name.upper()
+        code = _targets.get(name)
+        if code is None:
+            raise KeyError('unknown SPICE target name {0!r}'.format(name))
+        if code not in self.codes:
+            names = ', '.join(_names[c] for c in self.codes)
+            raise KeyError('this kernel is missing {0!r} - the targets it'
+                           ' supports are {1}'.format(name, names))
+        return code
 
 
 def _build_compute(segment):

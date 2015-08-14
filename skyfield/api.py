@@ -17,7 +17,7 @@ from .units import Angle
 from .named_stars import NamedStar
 
 __all__ = ['Angle', 'Kernel', 'JulianDate', 'NamedStar', 'Star', 'Topos',
-           'datetime', 'now', 'utc', 'T0', 'pi', 'tau']
+           'datetime', 'load', 'now', 'utc', 'T0', 'pi', 'tau']
 
 def build_ephemeris():
     from .data.horizons import festoon_ephemeris
@@ -25,6 +25,12 @@ def build_ephemeris():
     ephemeris = Ephemeris(de421)
     festoon_ephemeris(ephemeris)
     return ephemeris
+
+def load(filename):
+    if filename.endswith('.bsp'):
+        return Kernel(filename)
+    else:
+        raise ValueError('Skyfield does not recognize that file extension')
 
 ephemeris = build_ephemeris()
 del build_ephemeris

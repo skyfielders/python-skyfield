@@ -13,23 +13,43 @@ Segment = namedtuple('Segment', 'center target compute')
 
 
 class Body(object):
-    def __init__(self, code, segments):
+    def __init__(self, ephemeris, code):
+        self.ephemeris = ephemeris
+        self.segments = ephemeris.segments
         self.code = code
-        self.segments = segments
 
     def geometry_of(self, body):
+        if not isinstance(body, Body):
+            code = self.ephemeris.decode(body)
+            body = Body(self.ephemeris, code)
         center_chain, target_chain = _connect(self, body)
         return Geometry(self.code, body.code, center_chain, target_chain)
 
     def observe(self, body):
-        every = self.segments + body.segments
-        segment_dict = dict((segment.target, segment) for segment in every)
-        center_chain = list(_center(self.code, segment_dict))[::-1]
-        target_chain = list(_center(body.code, segment_dict))[::-1]
+        segments = self.segments
+        center = self.code
+        if isinstance(body, Body):
+            segments += body.segments
+            target = body.code
+        else:
+            target = self.ephemeris.decode(body)
+        segment_dict = dict((segment.target, segment) for segment in segments)
+        center_chain = list(_center(center, segment_dict))[::-1]
+        target_chain = list(_center(target, segment_dict))[::-1]
         if not center_chain[0].center == target_chain[0].center == 0:
             raise ValueError('cannot observe() unless both bodies can be'
                              ' referenced to the solar system barycenter')
-        return Solution(self.code, body.code, center_chain, target_chain)
+        return Solution(center, target, center_chain, target_chain)
+
+    def topos(self, latitude=None, longitude=None, latitude_degrees=None,
+              longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
+        assert self.code == 399
+        from .toposlib import Topos
+        t = Topos(latitude, longitude, latitude_degrees,
+                  longitude_degrees, elevation_m, x, y)
+        t.ephemeris = self.ephemeris
+        t.segments += self.segments
+        return t
 
 
 def _connect(body1, body2):
@@ -115,6 +135,9 @@ class Solution(object):
         pos.observer.velocity = Velocity(cvelocity)
         pos.observer.geocentric = False  # TODO
         #pos.observer.ephemeris = None
+        if hasattr(self.center, '_altaz_rotation'):
+            pos.observer.topos = self.center
+            pos.observer.altaz_rotation = self.center._altaz_rotation(jd)
         return pos
 
 

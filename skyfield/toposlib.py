@@ -1,6 +1,6 @@
 from numpy import array, einsum, exp
 
-from .constants import ASEC2RAD
+from .constants import ASEC2RAD, tau
 from .earthlib import compute_limb_angle, refract, terra
 from .functions import from_polar, length_of, to_polar, rot_x, rot_y, rot_z
 from .chaining import Body, Segment
@@ -42,6 +42,7 @@ class Topos(Body):
         self.R_lat = rot_y(latitude.radians)[::-1]
         self.code = self
         self.segments = [Segment(399, self, self.compute)]
+        self.ephemeris = self
 
     def __repr__(self):
         return '<Topos {0} N, {1} E>'.format(self.latitude, self.longitude)
@@ -93,5 +94,5 @@ class Topos(Body):
 
     def _altaz_rotation(self, jd):
         """Compute the rotation from the ICRS into the alt-az system."""
-        R_lon = rot_z(- self.longitude.radians - jd.gast * TAU / 24.0)
+        R_lon = rot_z(- self.longitude.radians - jd.gast * tau / 24.0)
         return einsum('ij...,jk...,kl...->il...', self.R_lat, R_lon, jd.M)
