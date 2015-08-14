@@ -4,12 +4,12 @@
 import os
 from datetime import date
 from numpy import save
-from skyfield import io
+from skyfield import iokit
 from skyfield import timelib
 
 _dirname = os.path.dirname(__file__)
 
-cache = io.Cache('.')
+cache = iokit.Cache('.')
 cache.npy_dirname = _dirname
 functions = set([
     timelib.usno_leapseconds,

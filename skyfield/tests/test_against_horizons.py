@@ -3,7 +3,7 @@
 from numpy import max
 from skyfield import api
 from skyfield.constants import AU_M
-from skyfield.io import download
+from skyfield.iokit import download
 from skyfield.jpllib import Kernel
 
 one_second = 1.0 / 24.0 / 60.0 / 60.0
