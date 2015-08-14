@@ -16,4 +16,4 @@ install:
 script:
   - "pip install unittest2"
   - "assay --batch skyfield.tests"
-  - "cd skyfield/documentation && make doctest"
+  - "make -C skyfield/documentation doctest"
