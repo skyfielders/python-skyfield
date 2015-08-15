@@ -14,14 +14,16 @@
     from skyfield import api
     def now():
         """Return a constant "now"."""
-        return api.JulianDate(utc=(2013, 9, 22, 14))
+        return api.JulianDate(utc=(2015, 8, 15, 18))
     api.now = now
 
 .. testcode::
 
     from skyfield.api import load, now
+
     e = load('de430.bsp')
-    ra, dec, distance = e('earth').observe('mars barycenter').at(now()).radec()
+    t = now()
+    ra, dec, distance = e('earth').observe('venus').at(t).radec()
 
     print(ra)
     print(dec)
@@ -29,9 +31,9 @@
 
 .. testoutput::
 
-    09h 14m 50.35s
-    +17deg 13' 02.6"
-    2.18573 au
+    09h 29m 05.03s
+    +06deg 36' 01.7"
+    0.288446 au
 
 Skyfield is a pure-Python astronomy package
 that makes it easy to generate high precision research-grade
@@ -44,15 +46,15 @@ on the Earth’s surface:
 .. testcode::
 
     boston = e('earth').topos('42.3583 N', '71.0636 W')
-    alt, az, d = boston.observe('mars barycenter').at(now()).apparent().altaz()
+    alt, az, d = boston.observe('venus').at(t).apparent().altaz()
 
     print(alt)
     print(az)
 
 .. testoutput::
 
-    64deg 44' 50.1"
-    184deg 17' 16.9"
+    49deg 48' 40.0"
+    212deg 45' 09.5"
 
 The official documentation is available through the links
 in the Table of Contents below.
