@@ -15,8 +15,6 @@ Contributing Overview
 
 Because we are using Github the process for contributing is as follows:
 
-<TBD Diagram of what is going on for the visual people>
-
 1. We acquire a github account. 
  * https://github.com
 2. We fork Brandon/Skyfield's repo. 
@@ -32,39 +30,38 @@ Because we are using Github the process for contributing is as follows:
  * git push origin Issue31
 8. On Github we submit a pull request from this forked branch into Brandon/Skyfield's main repo.
 
-Between fixes we can do pull requests from Brandon/Skyfield's repo into our own Fork's master branch keeping our master updated.
+Very small Git Example of Contributing
+--------------------------------------
 
-Acquiring a GitHub Account
---------------------------
+You can experiment with what works for you from a git perspective. The following is just some examples of what a developer can do.
 
-TBD
+1. Created a Fork in my own github space.
+2. Cloned my Forks master branch.
+ * git clone git@github.com:ozialien/python-skyfield.git
+3. Add skyfield reference to my local git repo.
+ * git remote add skyfield git@github.com:skyfielders/python-skyfield.git
+ * git fetch skyfield
+ * git branch -r  <-- Shows me what remote repo's I have fetched references from
+4. Make sure my master is up to date with the main repo.
+ * git checkout master
+ * git rebase skyfield/master
+5. Fork a development branch
+ * git checkout -b fix42
+6. Commit the change
+ * git commit -m "#42 I fixed by ....."
+7. Push the development branch to GitHub
+ * git push origin fix42
+8. Login to GitHub and issue a Pull request for my fix42 branch
 
-Forking the Skyfield Repository
--------------------------------
+From this point you can actually keep fetching from skyfield repo as follows:
 
-TBD
+1. Make sure things are up to date
+ * git checkout master
+ * git rebase skyfield/master
+2. create a new development branch
+ * git checkout -b issue43
 
-Cloning your Fork into a local working copy
--------------------------------------------
+You could even do this:
 
-TBD
-
-Creating a local development branch in your own local working copy
-------------------------------------------------------------------
-
-TBD
-
-Pushing your local development branch to your GitHub Fork
-----------------------------------------------------------
-
-TBD
-
-Submitting a pull request of your development branch
-----------------------------------------------------
-
-TBD
-
-Pulling from the master repo into your own master or development branches
--------------------------------------------------------------------------
-
-TBD
+* git fetch skyfield
+* git checkout -b issue43 skyfield/master
