@@ -6,6 +6,7 @@ build
 .project
 .pydevproject
 MANIFEST
+hip_main.dat.gz
 htmlcov/
 skyfield/documentation/_build
 tmp*.py
