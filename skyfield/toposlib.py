@@ -2,8 +2,8 @@ from numpy import array, einsum, exp
 
 from .constants import ASEC2RAD, tau
 from .earthlib import compute_limb_angle, refract, terra
+from .ephemerislib import Body, Segment
 from .functions import from_polar, length_of, to_polar, rot_x, rot_y, rot_z
-from .chaining import Body, Segment
 from .timelib import takes_julian_date
 from .units import (Distance, Velocity, Angle, _interpret_angle,
                     _interpret_ltude)
