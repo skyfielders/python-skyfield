@@ -18,6 +18,15 @@ class Body(object):
         self.segments = ephemeris.segments
         self.code = code
 
+    @takes_julian_date
+    def at(self, jd):
+        """Compute the Solar System position of this body at a given time."""
+        segments = self.segments
+        segment_dict = dict((segment.target, segment) for segment in segments)
+        chain = list(_center(self.code, segment_dict))[::-1]
+        pos, vel = _tally((), chain, jd)
+        return Barycentric(pos, vel, jd)
+
     def geometry_of(self, body):
         if not isinstance(body, Body):
             code = self.ephemeris.decode(body)

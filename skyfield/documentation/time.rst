@@ -63,12 +63,14 @@ come out exactly the same:
 
 .. testcode::
 
-    from skyfield.api import earth
+    from skyfield.api import load
+    planets = load('de421.bsp')
+    earth = planets('earth')
 
     jd = JulianDate(utc=(2014, 1, 1))
-    print(earth(jd).position.au)
+    print(earth.at(jd).position.au)
 
-    print(earth(utc=(2014, 1, 1)).position.au)
+    print(earth.at(utc=(2014, 1, 1)).position.au)
 
 .. testoutput::
 
@@ -371,7 +373,7 @@ We can compute the position of the Earth as an example:
     # Single Earth position
 
     jd = JulianDate(utc=(2014, 1, 1))
-    pos = earth(jd).position.au
+    pos = earth.at(jd).position.au
     print(pos)
 
 .. testoutput::
@@ -384,7 +386,7 @@ We can compute the position of the Earth as an example:
 
     days = [1, 2, 3, 4]
     jd = JulianDate(utc=(2014, 1, days))
-    pos = earth(jd).position.au
+    pos = earth.at(jd).position.au
     print(pos)
 
 .. testoutput::

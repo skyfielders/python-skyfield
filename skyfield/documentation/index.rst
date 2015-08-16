@@ -20,10 +20,10 @@
 .. testcode::
 
     from skyfield.api import load, now
-
-    e = load('de430.bsp')
+    planets = load('de421.bsp')
     t = now()
-    ra, dec, distance = e('earth').observe('venus').at(t).radec()
+
+    ra, dec, distance = planets('earth').observe('venus').at(t).radec()
 
     print(ra)
     print(dec)
@@ -45,7 +45,7 @@ on the Earth’s surface:
 
 .. testcode::
 
-    boston = e('earth').topos('42.3583 N', '71.0636 W')
+    boston = planets('earth').topos('42.3583 N', '71.0636 W')
     alt, az, d = boston.observe('venus').at(t).apparent().altaz()
 
     print(alt)
