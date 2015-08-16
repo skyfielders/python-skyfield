@@ -1,6 +1,8 @@
 import os
+import numpy as np
 from datetime import datetime, timedelta
-from numpy import load
+
+from .jpllib import Kernel
 
 try:
     from urllib.request import urlopen
@@ -8,6 +10,24 @@ except:
     from urllib2 import urlopen
 
 _missing = object()
+
+
+def load(filename):
+    if filename.endswith('.bsp'):
+        if not os.path.exists(filename):
+            url = url_for(filename)
+            download(url)
+        return Kernel(filename)
+    else:
+        raise ValueError('Skyfield does not recognize that file extension')
+
+
+def url_for(filename):
+    if filename.endswith('.bsp'):
+        url = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/'
+        if filename < 'de430':
+            url += 'a_old_versions/'
+        return url + filename
 
 
 def download(url):
@@ -49,7 +69,7 @@ class Cache(object):
             path = os.path.join(self.npy_dirname, function.__name__ + '.npy')
             if os.path.exists(path):
                 # TODO: check whether data is recent enough
-                result = load(path)
+                result = np.load(path)
                 self.ram_cache[function] = result
                 return result
 

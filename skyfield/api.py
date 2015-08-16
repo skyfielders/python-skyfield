@@ -9,6 +9,7 @@ import de421
 from datetime import datetime
 from math import pi
 from .constants import tau
+from .iokit import load
 from .jpllib import Kernel
 from .starlib import Star
 from .timelib import JulianDate, T0, now, utc
@@ -25,12 +26,6 @@ def build_ephemeris():
     ephemeris = Ephemeris(de421)
     festoon_ephemeris(ephemeris)
     return ephemeris
-
-def load(filename):
-    if filename.endswith('.bsp'):
-        return Kernel(filename)
-    else:
-        raise ValueError('Skyfield does not recognize that file extension')
 
 ephemeris = build_ephemeris()
 del build_ephemeris
