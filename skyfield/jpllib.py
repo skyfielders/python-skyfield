@@ -39,8 +39,9 @@ class SpiceKernel(object):
             raise KeyError('unknown SPICE target name {0!r}'.format(name))
         if code not in self.codes:
             names = ', '.join(_names[c] for c in self.codes)
-            raise KeyError('this kernel is missing {0!r} - the targets it'
-                           ' supports are {1}'.format(name, names))
+            raise KeyError('kernel {0} is missing {1!r} -'
+                           ' the targets it supports are: {2}'
+                           .format(self.filename, name, names))
         return code
 
 
