@@ -39,7 +39,7 @@ to compute its apparent position relative to a location on Earth:
     tup = (2014, 1, 21, 11, 18, 7)
 
     sat = earth.satellite(text)
-    position = bluffton(utc=tup).observe(sat)
+    position = bluffton.at(utc=tup).observe(sat)
 
 To find out whether the satellite is above your local horizon,
 you will want to ask for its altitude and azimuth.

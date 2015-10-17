@@ -36,22 +36,6 @@ class Body(object):
         center_chain, target_chain = _connect(self, body)
         return Geometry(self.code, body.code, center_chain, target_chain)
 
-    def observe(self, body):
-        segments = self.segments
-        center = self.code
-        if isinstance(body, Body):
-            segments += body.segments
-            target = body.code
-        else:
-            target = self.ephemeris.decode(body)
-        segment_dict = dict((segment.target, segment) for segment in segments)
-        center_chain = list(_center(center, segment_dict))[::-1]
-        target_chain = list(_center(target, segment_dict))[::-1]
-        if not center_chain[0].center == target_chain[0].center == 0:
-            raise ValueError('cannot observe() unless both bodies can be'
-                             ' referenced to the solar system barycenter')
-        return Solution(center, target, center_chain, target_chain)
-
     def _observe_from_bcrs(self, observer):
         return observe(observer, self)
 
@@ -64,6 +48,12 @@ class Body(object):
         t.ephemeris = self.ephemeris
         t.segments += self.segments
         return t
+
+    def satellite(self, text):
+        assert self.code == 399
+        from .sgp4lib import EarthSatellite
+        lines = text.splitlines()
+        return EarthSatellite(lines, self)
 
 
 def observe(observer, target):

@@ -98,8 +98,8 @@ as its argument and return a corresponding number of positions.
 
     # Topocentric
 
-    astrometric = boston.observe('mars').at(jd)
-    apparent = boston.observe('mars').at(jd).apparent()
+    astrometric = boston.at(jd).observe(mars)
+    apparent = boston.at(jd).observe(mars).apparent()
 
 **The stars**
   Stars and other fixed objects with catalog coordinates
@@ -250,7 +250,7 @@ that we see in our sky:
 
     # Observing Mars from the Earth's position
 
-    astrometric = planets['earth'].observe('mars').at(utc=(1980, 1, 1))
+    astrometric = earth.at(utc=(1980, 1, 1)).observe(mars)
     print(astrometric.position.au)
 
 .. testoutput::
@@ -433,7 +433,7 @@ of an Earth object:
     # specific geographic location
 
     boston = earth.topos('42.3583 N', '71.0603 W')
-    astro = boston.observe(mars).at(utc=(1980, 3, 1))
+    astro = boston.at(utc=(1980, 3, 1)).observe(mars)
     app = astro.apparent()
 
     alt, az, distance = app.altaz()
