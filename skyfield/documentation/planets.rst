@@ -77,7 +77,6 @@ from the :mod:`~api` module:
 .. testcode::
 
     from skyfield import api
-    from skyfield.jpllib import Ephemeris
 
     de423 = api.load('de421.bsp')
     de430 = api.load('de423.bsp')

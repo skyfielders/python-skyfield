@@ -157,21 +157,3 @@ class Earth(Planet):
         from .sgp4lib import EarthSatellite
         lines = text.splitlines()
         return EarthSatellite(lines, self)
-
-class Ephemeris(object):
-
-    def __init__(self, module):
-
-        self.jplephemeris = jplephem.Ephemeris(module)
-
-        self.sun = Planet(self, self.jplephemeris, 'sun')
-        self.mercury = Planet(self, self.jplephemeris, 'mercury')
-        self.venus = Planet(self, self.jplephemeris, 'venus')
-        self.earth = Earth(self, self.jplephemeris, 'earth')
-        self.moon = Planet(self, self.jplephemeris, 'moon')
-        self.mars = Planet(self, self.jplephemeris, 'mars')
-        self.jupiter = Planet(self, self.jplephemeris, 'jupiter')
-        self.saturn = Planet(self, self.jplephemeris, 'saturn')
-        self.uranus = Planet(self, self.jplephemeris, 'uranus')
-        self.neptune = Planet(self, self.jplephemeris, 'neptune')
-        self.pluto = Planet(self, self.jplephemeris, 'pluto')
