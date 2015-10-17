@@ -29,7 +29,6 @@ def build_ephemeris():
 ephemeris = build_ephemeris()
 del build_ephemeris
 
-sun = ephemeris.sun
 mercury = ephemeris.mercury
 venus = ephemeris.venus
 earth = ephemeris.earth

@@ -22,7 +22,8 @@ def compare(value, expected_value, epsilon):
         assert abs(value - expected_value) <= epsilon
 
 def test_jupiter1():
-    astrometric = api.sun(utc=(1980, 1, 1, 0, 0)).observe(api.jupiter)
+    e = api.load('de421.bsp')
+    astrometric = e['sun'].at(utc=(1980, 1, 1, 0, 0)).observe(api.jupiter)
     hlat, hlon, d = astrometric.ecliptic_latlon()
     compare(hlat.degrees, 1.013, 0.001)
     compare(hlon.degrees, 151.3229, 0.001)

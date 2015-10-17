@@ -18,7 +18,7 @@ when you import the planets from the API module:
 
 .. testcode::
 
-    from skyfield.api import sun, earth, moon #...
+    from skyfield.api import load
 
 There are four other ephemerides (the plural of “ephemeris”)
 available from the Python Package Index
@@ -76,15 +76,15 @@ from the :mod:`~api` module:
 
 .. testcode::
 
-    import de423
     from skyfield import api
     from skyfield.jpllib import Ephemeris
 
-    eph = Ephemeris(de423)
+    de423 = api.load('de421.bsp')
+    de430 = api.load('de423.bsp')
     jd = api.JulianDate(utc=(1993, 5, 15))
 
-    print('DE421: {0}'.format(api.mercury(jd).position.km))
-    print('DE423: {0}'.format(eph.mercury(jd).position.km))
+    print('DE421: {0}'.format(de423['mercury'].at(jd).position.km))
+    print('DE423: {0}'.format(de430['mercury'].at(jd).position.km))
 
 .. testoutput::
 

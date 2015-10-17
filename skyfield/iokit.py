@@ -27,13 +27,18 @@ def url_for(filename):
         url = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/'
         if filename < 'de430':
             url += 'a_old_versions/'
+            if filename == 'de423.bsp':
+                url += 'de423_for_mercury_and_venus/'
         return url + filename
 
 
 def download(url):
     filename = url.rstrip('/').rsplit('/', 1)[1]
     if not os.path.exists(filename):
-        data = urlopen(url).read()
+        try:
+            data = urlopen(url).read()
+        except Exception as e:
+            raise IOError('error getting {} - {}'.format(url, e))
         with open(filename, 'wb') as f:
             f.write(data)
     return filename
