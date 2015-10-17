@@ -28,7 +28,3 @@ def build_ephemeris():
 
 ephemeris = build_ephemeris()
 del build_ephemeris
-
-earth = ephemeris.earth
-mars = ephemeris.mars
-jupiter = ephemeris.jupiter

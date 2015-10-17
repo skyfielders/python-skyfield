@@ -4,6 +4,7 @@ from .constants import ASEC2RAD, tau
 from .earthlib import compute_limb_angle, refract, terra
 from .ephemerislib import Body, Segment
 from .functions import from_polar, length_of, to_polar, rot_x, rot_y, rot_z
+from .positionlib import Geocentric
 from .timelib import takes_julian_date
 from .units import (Distance, Velocity, Angle, _interpret_angle,
                     _interpret_ltude)
@@ -42,7 +43,7 @@ class Topos(Body):
         self.R_lat = rot_y(latitude.radians)[::-1]
         self.code = self
         self.segments = [Segment(399, self, self.compute)]
-        self.ephemeris = self
+        self.ephemeris = None
 
     def __repr__(self):
         return '<Topos {0} N, {1} E>'.format(self.latitude, self.longitude)
@@ -54,8 +55,14 @@ class Topos(Body):
     @takes_julian_date
     def at(self, jd):
         """Compute where this Earth location was in space on a given date."""
-        e = self.ephemeris['earth'].at(jd)
         tpos_au, tvel_au_per_d = self._position_and_velocity(jd)
+        if self.ephemeris is None:
+            g = Geocentric(tpos_au, tvel_au_per_d, jd)
+            g.topos = self
+            g.ephemeris = self.ephemeris
+            g.altaz_rotation = self._altaz_rotation(jd)
+            return g
+        e = self.ephemeris['earth'].at(jd)
         from .positionlib import Barycentric
         t = Barycentric(e.position.au + tpos_au,
                         e.velocity.au_per_d + tvel_au_per_d,

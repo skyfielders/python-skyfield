@@ -3,7 +3,7 @@
 import sys
 from datetime import datetime, timedelta
 from numpy import array
-from skyfield.api import earth
+from skyfield import api
 from skyfield.sgp4lib import EarthSatellite, TEME_to_ITRF
 from skyfield.timelib import JulianDate, utc
 
@@ -43,12 +43,13 @@ def test_iss_altitude_computed_with_bcrs(iss_transit):
     jd = JulianDate(utc=dt, delta_t=67.2091)
 
     lines = iss_tle.splitlines()
-    s = EarthSatellite(lines, earth)
+    s = EarthSatellite(lines, None)
+    earth = api.load('de421.bsp')['earth']
     lake_zurich = earth.topos(latitude_degrees=42.2, longitude_degrees=-88.1)
 
     # Compute using Solar System coordinates:
 
-    alt, az, d = lake_zurich(jd).observe(s).altaz()
+    alt, az, d = lake_zurich.at(jd).observe(s).altaz()
     print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
     assert abs(alt.degrees - their_altitude) < 2.5  # TODO: tighten this up?
 
@@ -60,10 +61,10 @@ def test_iss_altitude_computed_with_gcrs(iss_transit):
     jd = JulianDate(utc=dt, delta_t=67.2091)
 
     lines = iss_tle.splitlines()
-    s = EarthSatellite(lines, earth)
-    lake_zurich = earth.topos(latitude_degrees=42.2, longitude_degrees=-88.1)
+    s = EarthSatellite(lines, None)
+    lake_zurich = api.Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
 
-    alt, az, d = lake_zurich.gcrs(jd).observe(s).altaz()
+    alt, az, d = lake_zurich.at(jd).observe(s).altaz()
     print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
     assert abs(alt.degrees - their_altitude) < 2.5  # TODO: tighten this up?
 
@@ -108,7 +109,7 @@ def test_appendix_c_conversion_from_TEME_to_ITRF():
 
 def test_appendix_c_satellite():
     lines = appendix_c_example.splitlines()
-    sat = EarthSatellite(lines, earth)
+    sat = EarthSatellite(lines, None)
 
     jd_epoch = sat._sgp4_satellite.jdsatepoch
     three_days_later = jd_epoch + 3.0
@@ -132,5 +133,5 @@ def test_appendix_c_satellite():
 def test_epoch_date():
     # Example from https://celestrak.com/columns/v04n03/
     s = appendix_c_example.replace('00179.78495062', '98001.00000000')
-    sat = EarthSatellite(s.splitlines(), earth)
+    sat = EarthSatellite(s.splitlines(), None)
     assert sat.epoch.utc_jpl() == 'A.D. 1998-Jan-01 00:00:00.0000 UT'

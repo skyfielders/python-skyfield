@@ -3,7 +3,6 @@
 from numpy import max
 from skyfield import api
 from skyfield.constants import AU_M
-from skyfield.iokit import download
 
 one_second = 1.0 / 24.0 / 60.0 / 60.0
 arcsecond = 1.0 / 60.0 / 60.0
@@ -23,7 +22,8 @@ def compare(value, expected_value, epsilon):
 
 def test_jupiter1():
     e = api.load('de421.bsp')
-    astrometric = e['sun'].at(utc=(1980, 1, 1, 0, 0)).observe(api.jupiter)
+    jup = e['jupiter barycenter']
+    astrometric = e['sun'].at(utc=(1980, 1, 1, 0, 0)).observe(jup)
     hlat, hlon, d = astrometric.ecliptic_latlon()
     compare(hlat.degrees, 1.013, 0.001)
     compare(hlon.degrees, 151.3229, 0.001)
