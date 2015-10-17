@@ -13,6 +13,20 @@ forget.
 Sprint Possibilities
 ====================
 
+* To test in `add_deflection()` whether Jupiter itself is available in
+  an ephemeris, or whether the Jupiter Barycenter should be used in its
+  place, I tried writing the test `if name not in ephemeris:` and was
+  surprised when this sent the test into an infinite loop.  Why does
+  `in` not work on an ephemeris object, and can this be fixed and a test
+  added to make sure it keeps working?
+
+* The deflection code should really use integer identifiers instead of
+  using names, which are slower.
+
+* The deflection code should have a quick way to reach in and ask an
+  ephemeris for a raw position in au, without having to spin up a body
+  object and have it spin up a `Distance`.
+
 * In `stars.rst`, document the other alternatives for how to set the RA
   and dec of a new Star object.
 

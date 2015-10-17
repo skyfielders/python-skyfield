@@ -25,7 +25,9 @@ class Body(object):
         segment_dict = dict((segment.target, segment) for segment in segments)
         chain = list(_center(self.code, segment_dict))[::-1]
         pos, vel = _tally((), chain, jd)
-        return Barycentric(pos, vel, jd)
+        barycentric = Barycentric(pos, vel, jd)
+        barycentric.ephemeris = self.ephemeris
+        return barycentric
 
     def geometry_of(self, body):
         if not isinstance(body, Body):
@@ -106,11 +108,10 @@ def observe(observer, target):
     pos.observer.position = Distance(cposition)
     pos.observer.velocity = Velocity(cvelocity)
     pos.observer.geocentric = False  # TODO
-    #pos.observer.ephemeris = None
-    open('/tmp/x', 'a').write(repr(observer) + '\n')
-    if hasattr(observer, 'altaz_rotation'):
-        pos.observer.topos = observer
+    pos.observer.ephemeris = target.ephemeris
+    if observer.altaz_rotation is not None:
         pos.observer.altaz_rotation = observer.altaz_rotation
+        pos.observer.topos = observer.topos
     return pos
 
 
@@ -198,7 +199,8 @@ class Solution(object):
         pos.observer.geocentric = False  # TODO
         #pos.observer.ephemeris = None
         if hasattr(self.center, '_altaz_rotation'):
-            pos.observer.topos = self.center
+            #asdf
+            pos.observer.topos = self.center.topos
             pos.observer.altaz_rotation = self.center._altaz_rotation(jd)
         return pos
 

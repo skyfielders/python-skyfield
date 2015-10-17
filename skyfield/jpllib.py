@@ -1,4 +1,4 @@
-"""An interface between JPL ephemerides and Skyfield."""
+"""n interface between JPL ephemerides and Skyfield."""
 
 import jplephem
 from jplephem.spk import SPK
@@ -76,6 +76,7 @@ class Planet(object):
     @takes_julian_date
     def __call__(self, jd):
         """Return the x,y,z position of this planet at the given time."""
+        #asdf
         position, velocity = self._position_and_velocity(jd.tdb)
         i = Barycentric(position, velocity, jd)
         i.ephemeris = self.ephemeris
@@ -174,9 +175,3 @@ class Ephemeris(object):
         self.uranus = Planet(self, self.jplephemeris, 'uranus')
         self.neptune = Planet(self, self.jplephemeris, 'neptune')
         self.pluto = Planet(self, self.jplephemeris, 'pluto')
-
-    def _position(self, name, jd):
-        return getattr(self, name)._position(jd)
-
-    def _position_and_velocity(self, name, jd):
-        return getattr(self, name)._position_and_velocity(jd)

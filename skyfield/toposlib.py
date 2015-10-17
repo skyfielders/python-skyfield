@@ -64,16 +64,16 @@ class Topos(Body):
             return g
         e = self.ephemeris['earth'].at(jd)
         from .positionlib import Barycentric
-        t = Barycentric(e.position.au + tpos_au,
+        b = Barycentric(e.position.au + tpos_au,
                         e.velocity.au_per_d + tvel_au_per_d,
                         jd)
-        t.geocentric = False  # test, then get rid of this attribute
-        t.rGCRS = tpos_au
-        t.vGCRS = tvel_au_per_d
-        t.topos = self
-        t.ephemeris = self.ephemeris
-        t.altaz_rotation = self._altaz_rotation(jd)
-        return t
+        b.geocentric = False  # test, then get rid of this attribute
+        b.rGCRS = tpos_au
+        b.vGCRS = tvel_au_per_d
+        b.topos = self
+        b.ephemeris = self.ephemeris
+        b.altaz_rotation = self._altaz_rotation(jd)
+        return b
 
     # @takes_julian_date
     # def gcrs(self, jd):

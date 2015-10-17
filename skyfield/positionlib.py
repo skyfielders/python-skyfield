@@ -201,7 +201,8 @@ class Barycentric(ICRS):
         """Return the astrometric position of `body` viewed from this position.
 
         """
-        return body._observe_from_bcrs(self)
+        astrometric = body._observe_from_bcrs(self)
+        return astrometric
 
 
 class Astrometric(ICRS):
@@ -241,9 +242,8 @@ class Astrometric(ICRS):
                 position_au, observer.position.au)
             include_earth_deflection = limb_angle >= 0.8
 
-        if hasattr(observer, 'ephemeris'):
-            add_deflection(position_au, observer.position.au, observer.ephemeris,
-                           jd.tdb, include_earth_deflection)
+        add_deflection(position_au, observer.position.au, observer.ephemeris,
+                       jd.tdb, include_earth_deflection)
         add_aberration(position_au, observer.velocity.au_per_d, self.light_time)
 
         a = Apparent(position_au, jd=jd)
