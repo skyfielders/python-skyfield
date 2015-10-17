@@ -24,11 +24,15 @@ def load(filename):
 
 def url_for(filename):
     if filename.endswith('.bsp'):
-        url = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/'
-        if filename < 'de430':
-            url += 'a_old_versions/'
-            if filename == 'de423.bsp':
-                url += 'de423_for_mercury_and_venus/'
+        url = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/'
+        if filename.startswith('de'):
+            url += 'planets/'
+            if filename < 'de430':
+                url += 'a_old_versions/'
+                if filename == 'de423.bsp':
+                    url += 'de423_for_mercury_and_venus/'
+        elif filename.startswith('jup'):
+            url += 'satellites/'
         return url + filename
 
 
