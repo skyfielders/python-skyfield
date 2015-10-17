@@ -10,14 +10,13 @@ from datetime import datetime
 from math import pi
 from .constants import tau
 from .iokit import load
-from .jpllib import Kernel
 from .starlib import Star
 from .timelib import JulianDate, T0, now, utc
 from .toposlib import Topos
 from .units import Angle
 from .named_stars import NamedStar
 
-__all__ = ['Angle', 'Kernel', 'JulianDate', 'NamedStar', 'Star', 'Topos',
+__all__ = ['Angle', 'JulianDate', 'NamedStar', 'Star', 'Topos',
            'datetime', 'load', 'now', 'utc', 'T0', 'pi', 'tau']
 
 def build_ephemeris():

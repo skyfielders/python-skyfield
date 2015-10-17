@@ -65,7 +65,7 @@ come out exactly the same:
 
     from skyfield.api import load
     planets = load('de421.bsp')
-    earth = planets('earth')
+    earth = planets['earth']
 
     jd = JulianDate(utc=(2014, 1, 1))
     print(earth.at(jd).position.au)

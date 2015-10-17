@@ -59,12 +59,12 @@ class Star(object):
             position = position + velocity * (jd.tdb + dt - T0)
         vector = position - observer.position.au
         distance = length_of(vector)
-        lighttime = distance / C_AUDAY
+        light_time = distance / C_AUDAY
 
         g = Astrometric(vector, (observer.velocity.au_per_d.T - velocity).T, jd)
         g.observer = observer
         g.distance = distance
-        g.lighttime = lighttime
+        g.light_time = light_time
         return g
 
     def _compute_vectors(self):

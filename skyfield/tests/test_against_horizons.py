@@ -4,7 +4,6 @@ from numpy import max
 from skyfield import api
 from skyfield.constants import AU_M
 from skyfield.iokit import download
-from skyfield.jpllib import Kernel
 
 one_second = 1.0 / 24.0 / 60.0 / 60.0
 arcsecond = 1.0 / 60.0 / 60.0
@@ -29,8 +28,8 @@ def test_jupiter1():
     compare(hlon.degrees, 151.3229, 0.001)
 
 def test_callisto_geometry():
-    e = Kernel(download(jup310_url))
-    a = e('earth').geometry_of('callisto').at(tdb=2471184.5)
+    e = api.load('jup310.bsp')
+    a = e['earth'].geometry_of('callisto').at(tdb=2471184.5)
     compare(a.position.au,
       [-4.884815926454119E+00, -3.705745549073268E+00, -1.493487818022234E+00],
       0.001 * meter)
@@ -39,17 +38,17 @@ def test_callisto_geometry():
       0.000001 * meter)
 
 def test_callisto_astrometric():
-    e = Kernel(download(jup310_url))
-    a = e('earth').observe('callisto').at(utc=(2053, 10, 9))
+    e = api.load('jup310.bsp')
+    a = e['earth'].observe('callisto').at(utc=(2053, 10, 9))
     ra, dec, distance = a.radec()
     compare(ra._degrees, 217.1839292, 0.001 * arcsecond)
     compare(dec.degrees, -13.6892791, 0.001 * arcsecond)
     compare(distance.au, 6.31079291776184, 0.1 * meter)
 
 def test_boston_geometry():
-    e = Kernel(download(de430_url))
+    e = api.load('jup310.bsp')
     jd = api.JulianDate(tdb=(2015, 3, 2), delta_t=67.185390 + 0.5285957)
-    boston = e('earth').topos((42, 21, 24.1), (-71, 3, 24.8),
+    boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
     a = boston.geometry_of('earth').at(jd)
     compare(a.position.km,
@@ -57,9 +56,9 @@ def test_boston_geometry():
       0.0027)  # TODO: try to get this < 1 meter
 
 def test_moon_from_boston_geometry():
-    e = Kernel(download(de430_url))
+    e = api.load('de430.bsp')
     jd = api.JulianDate(tdb=(2015, 3, 2), delta_t=67.185390 + 0.5285957)
-    boston = e('earth').topos((42, 21, 24.1), (-71, 3, 24.8),
+    boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
     a = boston.geometry_of('moon').at(jd)
     compare(a.position.au,
@@ -67,11 +66,11 @@ def test_moon_from_boston_geometry():
       1.7 * meter)  # TODO: improve this
 
 def test_moon_from_boston_astrometric():
-    e = Kernel(download(de430_url))
+    e = api.load('de430.bsp')
     jd = api.JulianDate(tdb=(2015, 3, 2), delta_t=67.185390 + 0.5285957)
-    boston = e('earth').topos((42, 21, 24.1), (-71, 3, 24.8),
+    boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
-    a = boston.observe('moon').at(jd)
+    a = boston.at(jd).observe(e['moon'])
     ra, dec, distance = a.radec()
     compare(ra._degrees, 121.4796470, 0.001 * arcsecond)
     compare(dec.degrees, 14.9108450, 0.001 * arcsecond)

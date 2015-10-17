@@ -50,6 +50,9 @@ class Body(object):
                              ' referenced to the solar system barycenter')
         return Solution(center, target, center_chain, target_chain)
 
+    def _observe_from_bcrs(self, observer):
+        return observe(observer, self)
+
     def topos(self, latitude=None, longitude=None, latitude_degrees=None,
               longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
         assert self.code == 399
@@ -59,6 +62,56 @@ class Body(object):
         t.ephemeris = self.ephemeris
         t.segments += self.segments
         return t
+
+
+def observe(observer, target):
+    """Return a light-time corrected astrometric position and velocity.
+
+    Given an `observer` that is a `Barycentric` position somewhere in
+    the solar system, compute where in the sky they will see the body
+    `target`, by computing the light-time between them and figuring out
+    where `target` was back when the light was leaving it that is now
+    reaching the eyes or instruments of the `observer`.
+
+    """
+    # cposition, cvelocity = _tally([], self.center_chain, jd)
+    # tposition, tvelocity = _tally([], self.target_chain, jd)
+    jd = observer.jd
+    cposition = observer.position.au
+    cvelocity = observer.velocity.au_per_d
+    tjd = target.at(jd)
+    tposition = tjd.position.au
+    distance = length_of(tposition - cposition)
+    light_time0 = 0.0
+    jd_tdb = jd.tdb
+    for i in range(10):
+        light_time = distance / C_AUDAY
+        delta = light_time - light_time0
+        if -1e-12 < min(delta) and max(delta) < 1e-12:
+            break
+        jd2 = JulianDate(tdb=jd_tdb - light_time)
+        tjd = target.at(jd2)
+        tposition = tjd.position.au
+        distance = length_of(tposition - cposition)
+        light_time0 = light_time
+    else:
+        raise ValueError('observe_from() light-travel time'
+                         ' failed to converge')
+    tvelocity = tjd.velocity.au_per_d
+    pos = Astrometric(tposition - cposition, tvelocity - cvelocity, jd)
+    pos.light_time = light_time
+    class Observer(object):
+        pass
+    pos.observer = Observer()
+    pos.observer.position = Distance(cposition)
+    pos.observer.velocity = Velocity(cvelocity)
+    pos.observer.geocentric = False  # TODO
+    #pos.observer.ephemeris = None
+    open('/tmp/x', 'a').write(repr(observer) + '\n')
+    if hasattr(observer, 'altaz_rotation'):
+        pos.observer.topos = observer
+        pos.observer.altaz_rotation = observer.altaz_rotation
+    return pos
 
 
 def _connect(body1, body2):
@@ -120,23 +173,23 @@ class Solution(object):
         cposition, cvelocity = _tally([], self.center_chain, jd)
         tposition, tvelocity = _tally([], self.target_chain, jd)
         distance = length_of(tposition - cposition)
-        lighttime0 = 0.0
+        light_time0 = 0.0
         jd_tdb = jd.tdb
         for i in range(10):
-            lighttime = distance / C_AUDAY
-            delta = lighttime - lighttime0
+            light_time = distance / C_AUDAY
+            delta = light_time - light_time0
             if -1e-12 < min(delta) and max(delta) < 1e-12:
                 break
-            jd2 = JulianDate(tdb=jd_tdb - lighttime)
+            jd2 = JulianDate(tdb=jd_tdb - light_time)
             tposition, tvelocity = _tally([], self.target_chain, jd2)
             distance = length_of(tposition - cposition)
-            lighttime0 = lighttime
+            light_time0 = light_time
         else:
             raise ValueError('observe_from() light-travel time'
                              ' failed to converge')
         cls = Barycentric if self.center == 0 else Astrometric
         pos = cls(tposition - cposition, tvelocity - cvelocity, jd)
-        pos.lighttime = lighttime
+        pos.light_time = light_time
         class Observer(object):
             pass
         pos.observer = Observer()

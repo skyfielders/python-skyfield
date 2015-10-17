@@ -86,13 +86,15 @@ as its argument and return a corresponding number of positions.
 
     jd = now()
     planets = load('de421.bsp')
-    boston = planets('earth').topos('42.3583 N', '71.0603 W')
+    earth = planets['earth']
+    mars = planets['mars']
+    boston = earth.topos('42.3583 N', '71.0603 W')
 
     # Geocentric
 
-    barycentric = planets('mars').at(jd)
-    astrometric = planets('earth').observe('mars').at(jd)
-    apparent = planets('earth').observe('mars').at(jd).apparent()
+    barycentric = mars.at(jd)
+    astrometric = earth.at(jd).observe(mars)
+    apparent = earth.at(jd).observe(mars).apparent()
 
     # Topocentric
 
@@ -190,9 +192,12 @@ by asking Skyfield for their :attr:`~Position.position` attribute:
     from skyfield.api import load
 
     planets = load('de421.bsp')
+    venus = planets['venus']
+    earth = planets['earth']
+    mars = planets['mars']
 
-    print(planets('earth').at(utc=(1980, 1, 1)).position.au)
-    print(planets('venus').at(utc=(1980, 1, 1)).position.au)
+    print(earth.at(utc=(1980, 1, 1)).position.au)
+    print(venus.at(utc=(1980, 1, 1)).position.au)
 
 .. testoutput::
 
@@ -245,7 +250,7 @@ that we see in our sky:
 
     # Observing Mars from the Earth's position
 
-    astrometric = planets('earth').observe('mars').at(utc=(1980, 1, 1))
+    astrometric = planets['earth'].observe('mars').at(utc=(1980, 1, 1))
     print(astrometric.position.au)
 
 .. testoutput::
@@ -427,8 +432,8 @@ of an Earth object:
     # Altitude and azimuth in the sky of a
     # specific geographic location
 
-    boston = planets('earth').topos('42.3583 N', '71.0603 W')
-    astro = boston.observe('mars').at(utc=(1980, 3, 1))
+    boston = earth.topos('42.3583 N', '71.0603 W')
+    astro = boston.observe(mars).at(utc=(1980, 3, 1))
     app = astro.apparent()
 
     alt, az, distance = app.altaz()

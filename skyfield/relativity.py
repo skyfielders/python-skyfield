@@ -151,17 +151,17 @@ def _add_deflection(position, observer, deflector, rmass):
 
 #
 
-def add_aberration(position, velocity, lighttime):
+def add_aberration(position, velocity, light_time):
     """Correct a relative position vector for aberration of light.
 
     Given the relative `position` [x,y,z] of an object (AU) from a
     particular observer, the `velocity` [dx,dy,dz] at which the observer
-    is traveling (AU/day), and the light propagation delay `lighttime`
+    is traveling (AU/day), and the light propagation delay `light_time`
     to the object (days), this function updates `position` in-place to
     give the object's apparent position due to the aberration of light.
 
     """
-    p1mag = lighttime * C_AUDAY
+    p1mag = light_time * C_AUDAY
     vemag = length_of(velocity)
     beta = vemag / C_AUDAY
     dot = dots(position, velocity)
@@ -169,7 +169,7 @@ def add_aberration(position, velocity, lighttime):
     cosd = dot / (p1mag * vemag)
     gammai = sqrt(1.0 - beta * beta)
     p = beta * cosd
-    q = (1.0 + p / (1.0 + gammai)) * lighttime
+    q = (1.0 + p / (1.0 + gammai)) * light_time
     r = 1.0 + p
 
     position *= gammai

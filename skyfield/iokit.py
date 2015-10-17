@@ -2,7 +2,7 @@ import os
 import numpy as np
 from datetime import datetime, timedelta
 
-from .jpllib import Kernel
+from .jpllib import SpiceKernel
 
 try:
     from urllib.request import urlopen
@@ -17,7 +17,7 @@ def load(filename):
         if not os.path.exists(filename):
             url = url_for(filename)
             download(url)
-        return Kernel(filename)
+        return SpiceKernel(filename)
     else:
         raise ValueError('Skyfield does not recognize that file extension')
 

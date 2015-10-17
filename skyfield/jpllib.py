@@ -14,7 +14,7 @@ from .timelib import takes_julian_date
 _targets = dict((name, target) for (target, name) in _names.items())
 
 
-class Kernel(dict):
+class SpiceKernel(object):
     def __init__(self, filename):
         self.filename = filename
         self.spk = SPK.open(filename)
@@ -22,19 +22,11 @@ class Kernel(dict):
                          for s in self.spk.segments]
         self.codes = set(s.center for s in self.segments).union(
                          s.target for s in self.segments)
-        # for code in codes:
-        #     body = Body(code, segments)
-        #     self[code] = body
-        #     raw_name = target_names.get(code, None)
-        #     if raw_name is None:
-        #         continue
-        #     name = raw_name.lower().replace(' ', '_')
-        #     setattr(self, name, body)
 
     def __str__(self):
         return str(self.spk)
 
-    def __call__(self, name):
+    def __getitem__(self, name):
         code = self.decode(name)
         return Body(self, code)
 
@@ -124,18 +116,18 @@ class Planet(object):
         # TODO: should also accept another ICRS?
 
         jd_tdb = observer.jd.tdb
-        lighttime0 = 0.0
+        light_time0 = 0.0
         position, velocity = self._position_and_velocity(jd_tdb)
         vector = position - observer.position.au
         euclidian_distance = distance = length_of(vector)
 
         for i in range(10):
-            lighttime = distance / C_AUDAY
-            delta = lighttime - lighttime0
+            light_time = distance / C_AUDAY
+            delta = light_time - light_time0
             if -1e-12 < min(delta) and max(delta) < 1e-12:
                 break
-            lighttime0 = lighttime
-            position, velocity = self._position_and_velocity(jd_tdb - lighttime)
+            light_time0 = light_time
+            position, velocity = self._position_and_velocity(jd_tdb - light_time)
             vector = position - observer.position.au
             distance = length_of(vector)
         else:
@@ -146,7 +138,7 @@ class Planet(object):
                         observer.jd)
         g.observer = observer
         g.distance = euclidian_distance
-        g.lighttime = lighttime
+        g.light_time = light_time
         return g
 
 class Earth(Planet):

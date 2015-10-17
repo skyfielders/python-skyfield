@@ -244,7 +244,7 @@ class Astrometric(ICRS):
         if hasattr(observer, 'ephemeris'):
             add_deflection(position_au, observer.position.au, observer.ephemeris,
                            jd.tdb, include_earth_deflection)
-        add_aberration(position_au, observer.velocity.au_per_d, self.lighttime)
+        add_aberration(position_au, observer.velocity.au_per_d, self.light_time)
 
         a = Apparent(position_au, jd=jd)
         a.observer = self.observer

@@ -51,21 +51,22 @@ class Topos(Body):
         position, velocity = self._position_and_velocity(jd)
         return position, velocity
 
-    # @takes_julian_date
-    # def __call__(self, jd):
-    #     """Compute where this Earth location was in space on a given date."""
-    #     e = self.ephemeris.earth(jd)
-    #     tpos_au, tvel_au_per_d = self._position_and_velocity(jd)
-    #     t = Barycentric(e.position.au + tpos_au,
-    #                     e.velocity.au_per_d + tvel_au_per_d,
-    #                     jd)
-    #     t.geocentric = False  # test, then get rid of this attribute
-    #     t.rGCRS = tpos_au
-    #     t.vGCRS = tvel_au_per_d
-    #     t.topos = self
-    #     t.ephemeris = self.ephemeris
-    #     t.altaz_rotation = self._altaz_rotation(jd)
-    #     return t
+    @takes_julian_date
+    def at(self, jd):
+        """Compute where this Earth location was in space on a given date."""
+        e = self.ephemeris['earth'].at(jd)
+        tpos_au, tvel_au_per_d = self._position_and_velocity(jd)
+        from .positionlib import Barycentric
+        t = Barycentric(e.position.au + tpos_au,
+                        e.velocity.au_per_d + tvel_au_per_d,
+                        jd)
+        t.geocentric = False  # test, then get rid of this attribute
+        t.rGCRS = tpos_au
+        t.vGCRS = tvel_au_per_d
+        t.topos = self
+        t.ephemeris = self.ephemeris
+        t.altaz_rotation = self._altaz_rotation(jd)
+        return t
 
     # @takes_julian_date
     # def gcrs(self, jd):
