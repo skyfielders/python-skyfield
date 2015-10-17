@@ -33,8 +33,7 @@ setup(
         'skyfield.data': ['*.npy', '*.txt'],
         },
     install_requires=[
-        'de421==2008.1',
-        'jplephem>=2.2',
+        'jplephem>=2.3',
         'numpy',
-        'sgp4>=1.3',
+        'sgp4>=1.4',
         ])

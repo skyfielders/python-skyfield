@@ -5,7 +5,6 @@ default JPL planetary ephemeris ``de421`` and create planet objects like
 ``earth`` and ``mars`` that are ready for your use.
 
 """
-import de421
 from datetime import datetime
 from math import pi
 from .constants import tau
@@ -18,13 +17,3 @@ from .named_stars import NamedStar
 
 __all__ = ['Angle', 'JulianDate', 'NamedStar', 'Star', 'Topos',
            'datetime', 'load', 'now', 'utc', 'T0', 'pi', 'tau']
-
-def build_ephemeris():
-    from .data.horizons import festoon_ephemeris
-    from .jpllib import Ephemeris
-    ephemeris = Ephemeris(de421)
-    festoon_ephemeris(ephemeris)
-    return ephemeris
-
-ephemeris = build_ephemeris()
-del build_ephemeris
