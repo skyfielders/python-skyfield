@@ -142,18 +142,3 @@ class Planet(object):
         g.distance = euclidian_distance
         g.light_time = light_time
         return g
-
-class Earth(Planet):
-
-    def topos(self, latitude=None, longitude=None, latitude_degrees=None,
-              longitude_degrees=None, elevation_m=0.0):
-        """Return a ``Topos`` object for a specific location on Earth."""
-        t = Topos(latitude, longitude, latitude_degrees,
-                  longitude_degrees, elevation_m)
-        t.ephemeris = self.ephemeris
-        return t
-
-    def satellite(self, text):
-        from .sgp4lib import EarthSatellite
-        lines = text.splitlines()
-        return EarthSatellite(lines, self)
