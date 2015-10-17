@@ -1,13 +1,12 @@
-from numpy import array, einsum, exp
+from numpy import einsum
 
 from .constants import ASEC2RAD, tau
-from .earthlib import compute_limb_angle, refract, terra
+from .earthlib import terra
 from .ephemerislib import Body, Segment
-from .functions import from_polar, length_of, to_polar, rot_x, rot_y, rot_z
-from .positionlib import Geocentric
+from .functions import rot_x, rot_y, rot_z
+from .positionlib import Barycentric, Geocentric
 from .timelib import takes_julian_date
-from .units import (Distance, Velocity, Angle, _interpret_angle,
-                    _interpret_ltude)
+from .units import Distance, Angle, _interpret_ltude
 
 
 class Topos(Body):
@@ -57,33 +56,19 @@ class Topos(Body):
         """Compute where this Earth location was in space on a given date."""
         tpos_au, tvel_au_per_d = self._position_and_velocity(jd)
         if self.ephemeris is None:
-            g = Geocentric(tpos_au, tvel_au_per_d, jd)
-            g.topos = self
-            g.ephemeris = self.ephemeris
-            g.altaz_rotation = self._altaz_rotation(jd)
-            return g
-        e = self.ephemeris['earth'].at(jd)
-        from .positionlib import Barycentric
-        b = Barycentric(e.position.au + tpos_au,
-                        e.velocity.au_per_d + tvel_au_per_d,
-                        jd)
-        b.geocentric = False  # test, then get rid of this attribute
-        b.rGCRS = tpos_au
-        b.vGCRS = tvel_au_per_d
-        b.topos = self
-        b.ephemeris = self.ephemeris
-        b.altaz_rotation = self._altaz_rotation(jd)
-        return b
-
-    # @takes_julian_date
-    # def gcrs(self, jd):
-    #     """Compute where this location was in the GCRS on a given date."""
-    #     tpos_au, tvel_au_per_d = self._position_and_velocity(jd)
-    #     t = Geocentric(tpos_au, tvel_au_per_d, jd)
-    #     t.topos = self
-    #     t.ephemeris = self.ephemeris
-    #     t.altaz_rotation = self._altaz_rotation(jd)
-        # return t
+            c = Geocentric(tpos_au, tvel_au_per_d, jd)
+        else:
+            e = self.ephemeris['earth'].at(jd)
+            c = Barycentric(e.position.au + tpos_au,
+                            e.velocity.au_per_d + tvel_au_per_d,
+                            jd)
+            c.geocentric = False  # test, then get rid of this attribute
+        c.rGCRS = tpos_au
+        c.vGCRS = tvel_au_per_d
+        c.topos = self
+        c.ephemeris = self.ephemeris
+        c.altaz_rotation = self._altaz_rotation(jd)
+        return c
 
     def _position_and_velocity(self, jd):
         """Return the GCRS position, velocity of this Topos at `jd`."""
