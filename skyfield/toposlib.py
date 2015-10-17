@@ -2,8 +2,8 @@ from numpy import einsum
 
 from .constants import ASEC2RAD, tau
 from .earthlib import terra
-from .ephemerislib import Body, Segment
 from .functions import rot_x, rot_y, rot_z
+from .jpllib import Body, Segment
 from .positionlib import Barycentric, Geocentric
 from .timelib import takes_julian_date
 from .units import Distance, Angle, _interpret_ltude
