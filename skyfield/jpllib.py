@@ -146,16 +146,7 @@ def observe(observer, target):
     tvelocity = tjd.velocity.au_per_d
     pos = Astrometric(tposition - cposition, tvelocity - cvelocity, jd)
     pos.light_time = light_time
-    class Observer(object):
-        pass
-    pos.observer = Observer()
-    pos.observer.position = Distance(cposition)
-    pos.observer.velocity = Velocity(cvelocity)
-    pos.observer.geocentric = False  # TODO
-    pos.observer.ephemeris = target.ephemeris
-    if observer.altaz_rotation is not None:
-        pos.observer.altaz_rotation = observer.altaz_rotation
-        pos.observer.topos = observer.topos
+    pos.observer = observer
     return pos
 
 
