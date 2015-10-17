@@ -145,56 +145,6 @@ class Geometry(object):
         return cls(pos, vel, jd)
 
 
-class Solution(object):
-    def __init__(self, center, target, center_chain, target_chain):
-        self.center = center
-        self.target = target
-        self.center_chain = center_chain
-        self.target_chain = target_chain
-
-    def __str__(self):
-        lines = [' - {0}'.format(c) for c in self.center_chain]
-        lines.extend(' + {0}'.format(c) for c in self.target_chain)
-        return 'Solution center={0} target={1}:\n{2}'.format(
-            self.center, self.target, '\n'.join(lines))
-
-    @takes_julian_date
-    def at(self, jd):
-        """Return a light-time corrected astrometric position and velocity."""
-        cposition, cvelocity = _tally([], self.center_chain, jd)
-        tposition, tvelocity = _tally([], self.target_chain, jd)
-        distance = length_of(tposition - cposition)
-        light_time0 = 0.0
-        jd_tdb = jd.tdb
-        for i in range(10):
-            light_time = distance / C_AUDAY
-            delta = light_time - light_time0
-            if -1e-12 < min(delta) and max(delta) < 1e-12:
-                break
-            jd2 = JulianDate(tdb=jd_tdb - light_time)
-            tposition, tvelocity = _tally([], self.target_chain, jd2)
-            distance = length_of(tposition - cposition)
-            light_time0 = light_time
-        else:
-            raise ValueError('observe_from() light-travel time'
-                             ' failed to converge')
-        cls = Barycentric if self.center == 0 else Astrometric
-        pos = cls(tposition - cposition, tvelocity - cvelocity, jd)
-        pos.light_time = light_time
-        class Observer(object):
-            pass
-        pos.observer = Observer()
-        pos.observer.position = Distance(cposition)
-        pos.observer.velocity = Velocity(cvelocity)
-        pos.observer.geocentric = False  # TODO
-        #pos.observer.ephemeris = None
-        if hasattr(self.center, '_altaz_rotation'):
-            #asdf
-            pos.observer.topos = self.center.topos
-            pos.observer.altaz_rotation = self.center._altaz_rotation(jd)
-        return pos
-
-
 def _tally(minus_chain, plus_chain, jd):
     position = velocity = 0.0
     for segment in minus_chain:
