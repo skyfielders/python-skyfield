@@ -1,15 +1,10 @@
 """n interface between JPL ephemerides and Skyfield."""
 
-import jplephem
 from jplephem.spk import SPK
 from jplephem.names import target_names as _names
-from numpy import max, min
 
-from .constants import AU_KM, C_AUDAY, DAY_S
+from .constants import AU_KM, DAY_S
 from .ephemerislib import Body, Segment
-from .functions import length_of
-from .positionlib import Astrometric, Barycentric, Topos
-from .timelib import takes_julian_date
 
 _targets = dict((name, target) for (target, name) in _names.items())
 
