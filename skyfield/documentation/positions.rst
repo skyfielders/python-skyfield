@@ -144,19 +144,19 @@ as its argument and return a corresponding number of positions.
 
   .. testcode::
 
-    from skyfield.api import now, earth
+    from skyfield.api import now, load
 
     jd = now()
     boston = earth.topos('42.3583 N', '71.0603 W')
-    satellite = earth.satellite(tle_text)
+    #satellite = earth.satellite(tle_text) # TODO
 
     # Geocentric
 
-    apparent = satellite.gcrs(jd)
+    #apparent = satellite.gcrs(jd)
 
     # Topocentric
 
-    apparent = boston.gcrs(jd).observe(satellite)
+    #apparent = boston.gcrs(jd).observe(satellite)
 
 Read :doc:`time` for more information
 about how to build dates and pass them to planets and satellites

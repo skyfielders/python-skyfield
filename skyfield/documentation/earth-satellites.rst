@@ -31,7 +31,9 @@ to compute its apparent position relative to a location on Earth:
     2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
     """
 
-    from skyfield.api import JulianDate, earth
+    from skyfield import api
+    eph = api.load('de421.bsp')
+    earth = eph['earth']
 
     bluffton = earth.topos('40.8939 N', '83.8917 W')
     tup = (2014, 1, 21, 11, 18, 7)
