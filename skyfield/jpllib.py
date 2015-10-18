@@ -10,7 +10,6 @@ from .constants import AU_KM, C_AUDAY, DAY_S
 from .functions import length_of
 from .positionlib import Astrometric, Barycentric, ICRS
 from .timelib import JulianDate, takes_julian_date
-from .units import Distance, Velocity
 
 Segment = namedtuple('Segment', 'center target compute')
 _targets = dict((name, target) for (target, name) in _names.items())

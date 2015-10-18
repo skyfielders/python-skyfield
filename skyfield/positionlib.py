@@ -8,7 +8,7 @@ from .earthlib import compute_limb_angle, refract, terra
 from .relativity import add_aberration, add_deflection
 from .timelib import JulianDate, takes_julian_date
 from .units import (Distance, Velocity, Angle, _interpret_angle,
-                    _from_degrees, _interpret_ltude)
+                    _interpret_ltude)
 
 
 class ICRS(object):
