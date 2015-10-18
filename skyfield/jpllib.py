@@ -7,6 +7,7 @@ from jplephem.spk import SPK
 from jplephem.names import target_names as _names
 
 from .constants import AU_KM, C_AUDAY, DAY_S
+from .errors import DeprecationError
 from .functions import length_of
 from .positionlib import Astrometric, Barycentric, ICRS
 from .timelib import JulianDate, takes_julian_date
@@ -108,6 +109,26 @@ class Body(object):
         lines = text.splitlines()
         return EarthSatellite(lines, self)
 
+    def __call__(self, jd):
+        """Deprecated alternative to the new at() method."""
+        raise DeprecationError("""use method body.at(jd), not the call body(jd)
+
+If you simply want your old Skyfield script to start working again,
+downgrade to Skyfield version 0.4 using a command like:
+
+        pip install skyfield==0.4
+
+Otherwise, you can upgrade your script to modern Skyfield by finding
+each place you called a body like a function to generate a position:
+
+        position = body(jd)
+
+Instead, Skyfield now offers a method named at(jd) to makes the
+operation easier to read and more symmetrical with other method calls:
+
+        position = body.at(jd)
+
+More documentation can be found at: http://rhodesmill.org/skyfield/""")
 
 def observe(observer, target):
     """Return a light-time corrected astrometric position and velocity.
