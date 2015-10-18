@@ -60,7 +60,7 @@ def download(url, verbose=True):
         raise IOError('error getting {} - {}'.format(url, e))
     try:
         os.rename(tempname, filename)
-    except:
+    except Exception as e:
         raise IOError('cannot rename temporary {} to its real name {} - {}'
                       .format(tempname, filename, e))
     return filename
