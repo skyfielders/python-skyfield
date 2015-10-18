@@ -16,6 +16,7 @@ _missing = object()
 
 
 def load(filename, autodownload=True, verbose=True):
+    """Load the given file, possibly downloading it if it is not present."""
     if filename.endswith('.bsp'):
         url = url_for(filename)
         cls = SpiceKernel
@@ -32,6 +33,7 @@ def load(filename, autodownload=True, verbose=True):
 
 
 def url_for(filename):
+    """Given a recognized filename, return its URL."""
     if filename.endswith('.bsp'):
         url = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/'
         if filename.startswith('de'):
@@ -46,6 +48,7 @@ def url_for(filename):
 
 
 def download(url, verbose=True):
+    """Download a file from a URL, possibly displaying a progress bar."""
     filename = os.path.basename(url2pathname(url))
     if os.path.exists(filename):
         return filename
