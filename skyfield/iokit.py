@@ -1,25 +1,34 @@
+from __future__ import print_function
 import os
 import numpy as np
+import sys
 from datetime import datetime, timedelta
+from time import time
 
 from .jpllib import SpiceKernel
 
 try:
-    from urllib.request import urlopen
+    from urllib.request import urlretrieve, url2pathname
 except:
-    from urllib2 import urlopen
+    from urllib import urlretrieve, url2pathname
 
 _missing = object()
 
 
-def load(filename):
+def load(filename, autodownload=True, verbose=True):
     if filename.endswith('.bsp'):
-        if not os.path.exists(filename):
-            url = url_for(filename)
-            download(url)
-        return SpiceKernel(filename)
+        url = url_for(filename)
+        cls = SpiceKernel
     else:
         raise ValueError('Skyfield does not recognize that file extension')
+    if not os.path.exists(filename):
+        if not autodownload:
+            raise IOError('you specified autodownload=False but {!r} cannot'
+                          ' be found in the current directory'
+                          .format(filename))
+        url = url_for(filename)
+        download(url, verbose)
+    return cls(filename)
 
 
 def url_for(filename):
@@ -36,19 +45,44 @@ def url_for(filename):
         return url + filename
 
 
-def download(url):
-    filename = url.rstrip('/').rsplit('/', 1)[1]
-    if not os.path.exists(filename):
-        try:
-            data = urlopen(url).read()
-        except Exception as e:
-            raise IOError('error getting {} - {}'.format(url, e))
-        with open(filename, 'wb') as f:
-            f.write(data)
+def download(url, verbose=True):
+    filename = os.path.basename(url2pathname(url))
+    if os.path.exists(filename):
+        return filename
+    tempname = filename + '.download'
+    report = ProgressBar(filename).report if verbose else tuple
+    try:
+        urlretrieve(url, tempname, report)
+    except Exception as e:
+        raise IOError('error getting {} - {}'.format(url, e))
+    try:
+        os.rename(tempname, filename)
+    except:
+        raise IOError('cannot rename temporary {} to its real name {} - {}'
+                      .format(tempname, filename, e))
     return filename
 
 
+class ProgressBar(object):
+    def __init__(self, filename):
+        self.filename = filename
+        self.t0 = 0
+
+    def report(self, blocks, blocksize, filesize):
+        if filesize < 0:
+            return
+        percent = 100 * blocks * blocksize // filesize
+        if (percent != 100) and (time() - self.t0 < 0.5):
+            return
+        self.t0 = time()
+        marks = percent // 3
+        print('\r[{:33}] {:3}% {}'.format('#' * marks, percent, self.filename),
+              end='\n' if (percent == 100) else '')
+        sys.stdout.flush()
+
+
 class Cache(object):
+    """Early experiment in being sensitive to file dates and age."""
     def __init__(self, cache_path, days_old=0):
         self.cache_path = cache_path
         self.days_old = days_old
@@ -88,6 +122,7 @@ class Cache(object):
 
 
 def download_file(url, filename, days_old=0):
+    """Early experiment in what download logic might look like."""
     if os.path.exists(filename):
         if not is_days_old(filename, days_old):
             return
@@ -103,6 +138,7 @@ def download_file(url, filename, days_old=0):
     f.close()
 
 def is_days_old(filename, days_old):
+    """Early experiment in being sensitive to file dates."""
     min_old = datetime.now()-timedelta(days=days_old)
     modified = datetime.fromtimestamp(os.path.getmtime(filename))
     return modified < min_old
