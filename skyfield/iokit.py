@@ -79,6 +79,7 @@ def download(url, verbose=True, blocksize=128*1024):
                 length += len(data)
                 if verbose:
                     bar.report(length, content_length)
+            w.flush()
             os.rename(tempname, filename)
         except KeyboardInterrupt:# Exception as e:
             raise IOError('error getting {0} - {1}'.format(url, e))
