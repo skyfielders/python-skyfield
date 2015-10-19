@@ -1,4 +1,4 @@
-"""n interface between JPL ephemerides and Skyfield."""
+"""An interface between JPL ephemerides and Skyfield."""
 
 from collections import namedtuple
 from numpy import max, min
@@ -27,20 +27,20 @@ class SpiceKernel(object):
 
     def __str__(self):
         segments = self.spk.segments
-        lines = ['SPICE kernel file {!r} has {} segments'
+        lines = ['SPICE kernel file {0!r} has {1} segments'
                  .format(self.filename, len(segments))]
-        format_date = '{}-{:02}-{:02}'.format
+        format_date = '{0}-{1:02}-{2:02}'.format
         start = end = None
         for s in segments:
             if start != s.start_jd or end != s.end_jd:
                 start, end = s.start_jd, s.end_jd
                 starts = format_date(*calendar_date(int(start)))
                 ends = format_date(*calendar_date(int(end)))
-                lines.append('    JD {} - JD {}  ({} through {})'
+                lines.append('    JD {0} - JD {1}  ({2} through {3})'
                              .format(start, end, starts, ends))
             cname = _names.get(s.center, 'unknown')
             tname = _names.get(s.target, 'unknown')
-            lines.append('        {:3} -> {:<3}  {} -> {}'
+            lines.append('        {0:3} -> {1:<3}  {2} -> {3}'
                          .format(s.center, s.target, cname, tname))
         return '\n'.join(lines)
 
@@ -77,7 +77,7 @@ def _build_compute(segment):
             return six[:3] / AU_KM, six[3:] * DAY_S / AU_KM
 
     else:
-        raise ValueError('SPK data type {} not yet supported segment'
+        raise ValueError('SPK data type {0} not yet supported segment'
                          .format(segment.data_type))
     return compute
 

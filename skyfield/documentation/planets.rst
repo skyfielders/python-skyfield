@@ -20,10 +20,7 @@ and is only 17 MB in size:
 
 .. testsetup::
 
-   from skyfield import api
-   from functools import partial
-   api.load = partial(api.load, verbose=False)
-   del api
+   __import__('skyfield.tests.fixes').tests.fixes.setup()
 
 .. testcode::
 
@@ -118,6 +115,5 @@ to learn about all the positions that you can use it to generate.
 
 .. testsetup::
 
-   from skyfield import api
-   from skyfield.iokit import load
-   api.load = load
+   __import__('skyfield.tests.fixes').tests.fixes.teardown()
+

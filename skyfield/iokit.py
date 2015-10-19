@@ -58,7 +58,7 @@ def download(url, verbose=True, blocksize=128*1024):
     try:
         connection = urlopen(url)
     except Exception as e:
-        raise IOError('cannot fetch file {!r} from URL {} because {}'
+        raise IOError('cannot fetch file {0!r} from URL {1} because {2}'
                       .format(filename, url, e))
     content_length = int(connection.headers.get('content-length', -1))
     report = ProgressBar(filename).report if verbose else tuple
@@ -79,7 +79,7 @@ def download(url, verbose=True, blocksize=128*1024):
                 report(length, content_length)
             os.rename(tempname, filename)
         except KeyboardInterrupt:# Exception as e:
-            raise IOError('error getting {} - {}'.format(url, e))
+            raise IOError('error getting {0} - {1}'.format(url, e))
         finally:
             if lockf is not None:
                 lockf(fd, LOCK_UN)
@@ -98,10 +98,9 @@ class ProgressBar(object):
         if (percent != 100) and (time() - self.t0 < 0.5):
             return
         self.t0 = time()
-        marks = percent // 3
-        print('\r[{:33}] {:3}% {}'.format('#' * marks, percent, self.filename),
+        bar = '#' * (percent // 3)
+        print('\r[{0:33}] {1:3}% {2}'.format(bar, percent, self.filename),
               end='\n' if (percent == 100) else '')
-        print(os.getpid())
         sys.stdout.flush()
 
 

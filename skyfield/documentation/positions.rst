@@ -74,6 +74,10 @@ that can take either a :doc:`Julian date <time>`
 or a :ref:`whole Julian date array <date-arrays>`
 as its argument and return a corresponding number of positions.
 
+.. testsetup::
+
+   __import__('skyfield.tests.fixes').tests.fixes.setup()
+
 **The planets**
   The eight planets and Pluto are all supported,
   thanks to the excellent work of the Jet Propulsion Laboratory (JPL)
@@ -147,7 +151,7 @@ as its argument and return a corresponding number of positions.
 
   .. testcode::
 
-    from skyfield.api import now, load
+    from skyfield.api import now
 
     jd = now()
     boston = earth.topos('42.3583 N', '71.0603 W')
@@ -487,3 +491,7 @@ with its many layers of heat and cold and wind and weather,
 cannot be accurately modeled or predicted.
 And note that refraction is only applied to objects above the horizon.
 Objects below −1.0° altitude are not adjusted for refraction.
+
+.. testcleanup::
+
+   __import__('skyfield.tests.fixes').tests.fixes.teardown()

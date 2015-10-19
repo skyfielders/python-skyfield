@@ -9,13 +9,10 @@
 
 .. testsetup::
 
-    import os
-    os.chdir('../..')  # same directory as de430.bsp, hopefully
-    from skyfield import api
-    def now():
-        """Return a constant "now"."""
-        return api.JulianDate(utc=(2015, 10, 11, 10))
-    api.now = now
+   __import__('skyfield.tests.fixes').tests.fixes.setup()
+
+   import os
+   os.chdir('../..')  # same directory as de430.bsp, hopefully
 
 .. testcode::
 
@@ -85,3 +82,7 @@ Table of Contents
    earth-satellites
    api
    design
+
+.. testcleanup::
+
+   __import__('skyfield.tests.fixes').tests.fixes.teardown()

@@ -28,6 +28,13 @@ To build a Julian date object,
 simply use one of these time scales
 as a keyword argument to specify the moment you want to represent.
 
+.. testsetup::
+
+   __import__('skyfield.tests.fixes').tests.fixes.setup()
+
+   import numpy as np
+   np.set_printoptions(suppress=True)
+
 .. testcode::
 
     from skyfield.api import JulianDate
@@ -60,13 +67,6 @@ that you would have used to build the Julian date
 and Skyfield will construct the date internally.
 So the following two calculations for January 1st
 come out exactly the same:
-
-.. testsetup::
-
-   from skyfield import api
-   from functools import partial
-   api.load = partial(api.load, verbose=False)
-   del api
 
 .. testcode::
 
@@ -139,17 +139,6 @@ and returns the current time as a Julian date object
 (assuming that your operating system clock is correct
 and configured with the correct time zone):
 
-.. testsetup::
-
-    import numpy as np
-    np.set_printoptions(suppress=True)
-
-    from skyfield import api
-    def now():
-        """Return a constant "now"."""
-        return api.JulianDate(utc=(2014, 1, 18, 23, 10, 9))
-    api.now = now
-
 .. testcode::
 
     from skyfield.api import now
@@ -159,7 +148,7 @@ and configured with the correct time zone):
 
 .. testoutput::
 
-    A.D. 2014-Jan-18 23:10:09.0000 UT
+    A.D. 2015-Oct-11 10:00:00.0000 UT
 
 But to move beyond UTC to working with actual timezones,
 you will need to install
@@ -692,7 +681,6 @@ in the dynamical reference system.
 .. _pytz: http://pytz.sourceforge.net/
 .. _requirements.txt: https://pip.pypa.io/en/latest/user_guide.html#requirements-files
 
-.. testsetup::
+.. testcleanup::
 
-   from skyfield.iokit import load
-   api.load = load
+   __import__('skyfield.tests.fixes').tests.fixes.teardown()
