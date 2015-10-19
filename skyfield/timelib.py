@@ -176,6 +176,9 @@ class JulianDate(object):
         self.shape = getattr(self.tt, 'shape', ())
         self.delta_t = delta_t
 
+    def __len__(self):
+        return self.shape[0]
+
     def __repr__(self):
         return '<JulianDate tt={0}>'.format(self.tt)
 
