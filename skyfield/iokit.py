@@ -8,9 +8,9 @@ from time import time
 from .jpllib import SpiceKernel
 
 try:
-    from urllib.request import urlretrieve, url2pathname
+    from urllib.request import urlopen, url2pathname
 except:
-    from urllib import urlretrieve, url2pathname
+    from urllib2 import urlopen, url2pathname
 
 _missing = object()
 
@@ -35,29 +35,40 @@ def load(filename, autodownload=True, verbose=True):
 def url_for(filename):
     """Given a recognized filename, return its URL."""
     if filename.endswith('.bsp'):
-        url = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/'
         if filename.startswith('de'):
-            url += 'planets/'
-            if filename < 'de430':
-                url += 'a_old_versions/'
-                if filename == 'de423.bsp':
-                    url += 'de423_for_mercury_and_venus/'
+            return 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/' + filename
         elif filename.startswith('jup'):
-            url += 'satellites/'
-        return url + filename
+            return ('http://naif.jpl.nasa.gov/pub/naif/generic_kernels'
+                    '/spk/satellites/' + filename)
+        raise ValueError('Skyfield does not know where to download {!r} from'
+                         .format(filename))
 
 
-def download(url, verbose=True):
+def download(url, verbose=True, blocksize=128*1024):
     """Download a file from a URL, possibly displaying a progress bar."""
     filename = os.path.basename(url2pathname(url))
     if os.path.exists(filename):
         return filename
     tempname = filename + '.download'
-    report = ProgressBar(filename).report if verbose else tuple
     try:
-        urlretrieve(url, tempname, report)
+        connection = urlopen(url)
     except Exception as e:
-        raise IOError('error getting {} - {}'.format(url, e))
+        raise IOError('cannot fetch file {!r} from URL {} because {}'
+                      .format(filename, url, e))
+    content_length = int(connection.headers.get('content-length', -1))
+    report = ProgressBar(filename).report if verbose else tuple
+    with open(tempname, 'wb') as w:
+        try:
+            length = 0
+            while True:
+                data = connection.read(blocksize)
+                if not data:
+                    break
+                w.write(data)
+                length += len(data)
+                report(length, content_length)
+        except Exception as e:
+            raise IOError('error getting {} - {}'.format(url, e))
     try:
         os.rename(tempname, filename)
     except Exception as e:
@@ -71,10 +82,10 @@ class ProgressBar(object):
         self.filename = filename
         self.t0 = 0
 
-    def report(self, blocks, blocksize, filesize):
-        if filesize < 0:
+    def report(self, bytes_so_far, bytes_total):
+        if bytes_total < 0:
             return
-        percent = 100 * blocks * blocksize // filesize
+        percent = 100 * bytes_so_far // bytes_total
         if (percent != 100) and (time() - self.t0 < 0.5):
             return
         self.t0 = time()

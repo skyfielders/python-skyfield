@@ -43,8 +43,8 @@ Instead, load the ephemeris like DE421 explicitly, look up the body in
 the ephemeris, and use the method at() to generate a position:
 
         from skyfield.api import load
-        eph = load('de421.bsp')
-        {body} = eph['{body}']
+        planets = load('de421.bsp')
+        {body} = planets['{body}']
         position = {body}.at(jd)
 
 More documentation can be found at: http://rhodesmill.org/skyfield/"""
@@ -69,8 +69,8 @@ Instead, load the ephemeris like DE421 explicitly, look up Earth in the
 ephemeris, and use the method at() to generate a position:
 
         from skyfield.api import load
-        eph = load('de421.bsp')
-        earth = eph['earth']
+        planets = load('de421.bsp')
+        earth = planets['earth']
         place = earth.topos(...)
 
 More documentation can be found at: http://rhodesmill.org/skyfield/""")

@@ -19,7 +19,7 @@ together with all of the attributes and methods that they support:
 
     Three positions
 
-    obj(time)           →  Barycentric position (BCRS)
+    obj.at(time)        →  Barycentric position (BCRS)
      └─ observe(obj2)   →  Astrometric position (ΔBCRS)
          └─ apparent()  →  Apparent position (GCRS)
 
@@ -56,20 +56,20 @@ together with all of the attributes and methods that they support:
      ├── `dstr(places=3) <api.html#Angle.dstr>`_      →   '359deg 01\' 01.358"'
      └── `signed_dms() <api.html#Angle.dms>`_        →   (1.0, 359.0, 1.0, 1.0)
 
-The rest of this page is simply designed to explain
+The rest of this page is designed to explain
 all of the features outlined in the quick reference above.
 All hyperlinked attributes and method names,
 both in the text above and in the explanations below,
 lead to the low-level :doc:`api`
 which explains each option in even greater detail.
 
-Generating positions
-====================
+Quick reference to generating positions
+=======================================
 
-Skyfield already supports two kinds of object
+Skyfield already supports three kinds of object
 that can compute their position,
 and will soon be supporting more.
-Each object is a simple Python callable
+Each object offers an ``at()`` method
 that can take either a :doc:`Julian date <time>`
 or a :ref:`whole Julian date array <date-arrays>`
 as its argument and return a corresponding number of positions.
@@ -88,22 +88,25 @@ as its argument and return a corresponding number of positions.
     planets = load('de421.bsp')
     earth = planets['earth']
     mars = planets['mars']
-    boston = earth.topos('42.3583 N', '71.0603 W')
 
-    # Geocentric
+    # From the center of the Solar System (Barycentric)
 
     barycentric = mars.at(jd)
+
+    # From the center of the Earth (Geocentric)
+
     astrometric = earth.at(jd).observe(mars)
     apparent = earth.at(jd).observe(mars).apparent()
 
-    # Topocentric
+    # From a place on Earth (Topocentric)
 
+    boston = earth.topos('42.3583 N', '71.0603 W')
     astrometric = boston.at(jd).observe(mars)
     apparent = boston.at(jd).observe(mars).apparent()
 
 **The stars**
   Stars and other fixed objects with catalog coordinates
-  generate their current astrometric position
+  are able to generate their current astrometric position
   when observed from a planet. :doc:`Read more <stars>`
 
   .. TODO - turn the following back into test code
@@ -117,12 +120,12 @@ as its argument and return a corresponding number of positions.
     barnard = Star(ra_hours=(17, 57, 48.49803),
                    dec_degrees=(4, 41, 36.2072))
 
-    # Geocentric
+    # From the center of the Earth (Geocentric)
 
     astrometric = earth(jd).observe(barnard)
     apparent = earth(jd).observe(barnard).apparent()
 
-    # Topocentric
+    # From a place on Earth (Topocentric)
 
     astrometric = boston(jd).observe(barnard)
     apparent = boston(jd).observe(barnard).apparent()
@@ -192,28 +195,25 @@ by asking Skyfield for their :attr:`~Position.position` attribute:
     from skyfield.api import load
 
     planets = load('de421.bsp')
-    venus = planets['venus']
     earth = planets['earth']
     mars = planets['mars']
 
     print(earth.at(utc=(1980, 1, 1)).position.au)
-    print(venus.at(utc=(1980, 1, 1)).position.au)
+    print(mars.at(utc=(1980, 1, 1)).position.au)
 
 .. testoutput::
 
     [-0.16287311  0.88787399  0.38473904]
-    [ 0.73245691 -0.01760889 -0.05403112]
+    [-1.09202418  1.10723168  0.53739021]
 
 The coordinates shown above are measured
 using the Astronomical Unit (au),
 which is the average distance from the Earth to the Sun.
-So the value ``-4.71`` indicates a distance
-nearly five times farther from the Sun than that of the Earth.
 You can, if you want, ask for these coordinates
 in kilometers with the :attr:`~Position.km` attribute.
 And if you have the third-party AstroPy package installed,
 then you can convert these coordinates
-into any length unit with the :meth:`~Position.to()` method.
+into any length unit with the :meth:`~Position.to` method.
 
 Astrometric position
 ====================
@@ -285,7 +285,7 @@ predicted by the simple and ideal astrometric position.
 But it is useful for mapping the planet
 against the background of stars in a
 `printed star atlas <http://www.amazon.com/s/?_encoding=UTF8&camp=1789&creative=390957&linkCode=ur2&pageMinusResults=1&suo=1389754954253&tag=letsdisthemat-20&url=search-alias%3Daps#/ref=nb_sb_noss_1?url=search-alias%3Daps&field-keywords=star%20atlas&sprefix=star+%2Caps&rh=i%3Aaps%2Ck%3Astar%20atlas&sepatfbtf=true&tc=1389754955568>`_,
-because star atlases also use astrometric positions.
+because star atlases use astrometric positions.
 
 .. _apparent:
 
@@ -302,7 +302,7 @@ two further effects must be taken into account:
   if the light passes close to another large mass
   on its way to the observer.
   This will happen if the object lies very near to the Sun in the sky,
-  for example, or is nearly behind Mars.
+  for example, or is nearly behind Jupiter.
   The effect is small,
   but must be taken into account for research-grade results.
 
@@ -314,7 +314,7 @@ two further effects must be taken into account:
   appears to be slanting towards you
   because of your own motion.
   The effect is small enough — at most about 20 arcseconds —
-  that it was not both observed and explained until 1728,
+  that only in 1728 was it finally observed and explained,
   when James Bradley realized that it provided the long-awaited proof
   that the Earth is indeed in motion in an orbit around the Sun.
 
@@ -356,7 +356,7 @@ is how right ascension and declination were defined
 through most of human history,
 before the invention of the ICRS axes.
 The Earth’s equator and poles move at least slightly every day,
-and move by very large amounts as years add up to centuries.
+and move by larger amounts as years add up to centuries.
 
 To ask for right ascension and declination
 relative to the real equator and poles of Earth,
@@ -391,17 +391,18 @@ Azimuth and altitude
 ====================
 
 The final result that many users seek
-is the *altitude* and *azimuth* of an object
-relative to their own location on the Earth’s surface.
+is the altitude and azimuth of an object
+above their own local horizon.
 
-The altitude measures the angle above or below the horizon,
-with a positive number of degrees meaning “above”
-and a negative number indicating that the object
-is below the horizon (and impossible to view).
-Azimuth measures the angle around the sky from the north pole,
-so 0° means that the object is straight north,
-90° indicates that the object lies to the east,
-180° means south, and 270° means that the object is straight west.
+* *Altitude* measures the angle above or below the horizon,
+  with a positive number of degrees meaning “above”
+  and a negative number indicating that the object
+  is below the horizon (and impossible to view).
+
+* *Azimuth* measures the angle around the sky from the north pole,
+  so 0° means that the object is straight north,
+  90° indicates that the object lies to the east,
+  180° means south, and 270° means that the object is straight west.
 
 Altitude and azimuth are computed
 by calling the :meth:`~Apparent.altaz()` method on an apparent position.

@@ -10,7 +10,7 @@ from .constants import AU_KM, C_AUDAY, DAY_S
 from .errors import DeprecationError
 from .functions import length_of
 from .positionlib import Astrometric, Barycentric, ICRS
-from .timelib import JulianDate, takes_julian_date
+from .timelib import JulianDate, takes_julian_date, calendar_date
 
 Segment = namedtuple('Segment', 'center target compute')
 _targets = dict((name, target) for (target, name) in _names.items())
@@ -26,7 +26,23 @@ class SpiceKernel(object):
                          s.target for s in self.segments)
 
     def __str__(self):
-        return str(self.spk)
+        segments = self.spk.segments
+        lines = ['SPICE kernel file {!r} has {} segments'
+                 .format(self.filename, len(segments))]
+        format_date = '{}-{:02}-{:02}'.format
+        start = end = None
+        for s in segments:
+            if start != s.start_jd or end != s.end_jd:
+                start, end = s.start_jd, s.end_jd
+                starts = format_date(*calendar_date(int(start)))
+                ends = format_date(*calendar_date(int(end)))
+                lines.append('    JD {} - JD {}  ({} through {})'
+                             .format(start, end, starts, ends))
+            cname = _names.get(s.center, 'unknown')
+            tname = _names.get(s.target, 'unknown')
+            lines.append('        {:3} -> {:<3}  {} -> {}'
+                         .format(s.center, s.target, cname, tname))
+        return '\n'.join(lines)
 
     def __getitem__(self, name):
         code = self.decode(name)
@@ -41,7 +57,7 @@ class SpiceKernel(object):
             raise KeyError('unknown SPICE target name {0!r}'.format(name))
         if code not in self.codes:
             names = ', '.join(_names[c] for c in self.codes)
-            raise KeyError('kernel {0} is missing {1!r} -'
+            raise KeyError('kernel {0!r} is missing {1!r} -'
                            ' the targets it supports are: {2}'
                            .format(self.filename, name, names))
         return code

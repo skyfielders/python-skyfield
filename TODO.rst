@@ -31,6 +31,14 @@ Sprint Possibilities
   moment it is created, instead of doing it over again every time its
   `at()` method is called.
 
+* We currently download most SPICE kernels from NAIF, but have to use
+  FTP for fetching DE422.  Are the files from the two sites equivalent
+  and do they have the same data?  Should we prefer one or the other?
+
+* We should have an illustration of Earth satellite heights above the
+  surface, plotted against a blue atmosphere fading out into the black
+  of space as the plot goes upwards towards the top.
+
 
 
 * In `stars.rst`, document the other alternatives for how to set the RA

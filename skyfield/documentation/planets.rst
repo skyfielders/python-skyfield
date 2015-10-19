@@ -4,103 +4,107 @@
 
 .. currentmodule:: skyfield.api
 
-As you install Skyfield,
-``pip`` will also download and install
-the `de421 <https://pypi.python.org/pypi/de421>`_ package for Python.
-It provides the DE421 Jet Propulsion Laboratory ephemeris
-that lists high-precision planetary positions
-for the years 1900 through 2050.
-Its moderate 27 MB size, high accuracy, and use of very recent data
-made it the best choice for Skyfield’s default ephemeris.
+If you are interested in observing the planets,
+the Jet Propulsion Laboratory (JPL) has prepared long tables
+recording where the planets were positioned in the past
+and where they are predicted to be in the future.
+A table of positions is called an *ephemeris*
+and those supplied by the JPL are of very high accuracy.
 
-The DE421 ephemeris is used automatically
-when you import the planets from the API module:
+You can download an ephemeris by giving :func:`load()` a filename.
+
+A popular choice of ephemeris is DE421.
+It is recent, has good precision,
+was designed for general purpose use,
+and is only 17 MB in size:
 
 .. testcode::
 
     from skyfield.api import load
+    planets = load('de421.bsp')
 
-There are four other ephemerides (the plural of “ephemeris”)
-available from the Python Package Index
-that you might consider installing.
-Here is the full list:
+Once an ephemeris file has been downloaded to your current directly,
+re-running your program will simply reuse the copy on disk
+instead of downloading it all over again.
 
-=========  ======== ========== ==============
-Ephemeris    Size      Years       Issued
-=========  ======== ========== ==============
-DE405       52.1 MB  1600–2200 May 1997
-DE406      170.0 MB -3000–3000 May 1997
-DE421       13.0 MB  1900–2050 February 2008
-DE422      519.6 MB -3000–3000 September 2009
-DE423       34.6 MB  1800–2200 February 2010
-=========  ======== ========== ==============
-
-`DE405 <https://pypi.python.org/pypi/de405>`_
-  A standard ephemeris from 1997 that has seen wide use
-  and requires 54 MB to cover the years 1600–2200.
-
-`DE406 <https://pypi.python.org/pypi/de406>`_
-  A longer-term source of planetary positions, also published in 1997,
-  that has enjoyed very widespread use
-  and that stands behind several recent editions
-  of the United States Naval Observatory’s Astronomical Almanac.
-  Covers the years -3000–3000 at the cost of 190 MB of storage.
-
-`DE421 <https://pypi.python.org/pypi/de421>`_
-  The Skyfield default, discussed above,
-  issued in 2008 which covers years 1900–2050.
-
-`DE422 <https://pypi.python.org/pypi/de422>`_
-  The most recent general-purpose long-period ephemeris from the JPL,
-  issued in 2009 and covering the six thousand years
-  from -3000–3000 but weighing in at 531 MB of storage.
-
-`DE423 <https://pypi.python.org/pypi/de406>`_
-  The most recent JPL ephemeris that has been packaged for Python,
-  issued in 2010 and whose particular goal
-  was high accuracy for Mercury and Venus
-  since it was used for the MESSENGER mission to those planets.
-  It covers the years 1800–2200.
-
-To use one of these alternative ephemerides,
-simply install it with the ``pip`` ``install`` command,
-import it, and wrap it in a Skyfield :class:`~jpllib.Ephemeris`.
-You can then use its planet attributes to turn dates into positions,
-just like the planets that you can import
-from the :mod:`~api` module:
-
-.. testsetup::
-
-    import numpy as np
-    np.set_printoptions(suppress=True, precision=4)
+You can ``print()`` an ephemeris to learn which objects it supports.
 
 .. testcode::
 
-    from skyfield import api
-
-    de423 = api.load('de421.bsp')
-    de430 = api.load('de423.bsp')
-    jd = api.JulianDate(utc=(1993, 5, 15))
-
-    print('DE421: {0}'.format(de423['mercury'].at(jd).position.km))
-    print('DE423: {0}'.format(de430['mercury'].at(jd).position.km))
+    print(planets)
 
 .. testoutput::
 
-    DE421: [ 31387022.7906  33032548.9719  14337050.8211]
-    DE423: [ 31387022.7693  33032548.7756  14337050.9898]
+    SPICE kernel file 'de421.bsp' has 15 segments
+        JD 2414864.5 - JD 2471184.5  (1899-07-28 through 2053-10-08)
+              0 -> 1    SOLAR SYSTEM BARYCENTER -> MERCURY BARYCENTER
+              0 -> 2    SOLAR SYSTEM BARYCENTER -> VENUS BARYCENTER
+              0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
+              0 -> 4    SOLAR SYSTEM BARYCENTER -> MARS BARYCENTER
+              0 -> 5    SOLAR SYSTEM BARYCENTER -> JUPITER BARYCENTER
+              0 -> 6    SOLAR SYSTEM BARYCENTER -> SATURN BARYCENTER
+              0 -> 7    SOLAR SYSTEM BARYCENTER -> URANUS BARYCENTER
+              0 -> 8    SOLAR SYSTEM BARYCENTER -> NEPTUNE BARYCENTER
+              0 -> 9    SOLAR SYSTEM BARYCENTER -> PLUTO BARYCENTER
+              0 -> 10   SOLAR SYSTEM BARYCENTER -> SUN
+              3 -> 301  EARTH BARYCENTER -> MOON
+              3 -> 399  EARTH BARYCENTER -> EARTH
+              1 -> 199  MERCURY BARYCENTER -> MERCURY
+              2 -> 299  VENUS BARYCENTER -> VENUS
+              4 -> 499  MARS BARYCENTER -> MARS
 
-These positions might look identical
-and make you wonder why the JPL even bothered to issue a new ephemeris.
-But remember that these positions are in kilometers.
-Read all the way down to the very last digits —
-these predicted positions do differ by one or two hundred meters.
-While a few-hundred-meter difference
-might be impossible to see with your telescope,
-it is quite relevant for JPL professionals
-who need to know exactly where to aim delicate spacecraft for landings.
+Bodies in JPL ephemeris files are each identified by an integer,
+but Skyfield translates them so that you do not have to remember
+that a code like 399 stands for the Earth and 499 for Mars.
 
-.. testcleanup::
+Each ephemeris segment predicts the position of one body
+with respect to another,
+so several segments sometimes have to be combined
+to generate a complete position.
+The DE421 ephemeris shown above, for example,
+can produce the position of the Sun directly.
+But if you ask it for the position of Earth
+then it will have to add together two distances:
 
-    import numpy as np
-    np.set_printoptions(precision=8)
+* From the Solar System’s center (0) to the Earth-Moon barycenter (3)
+* From the Earth-Moon barycenter (3) to the Earth itself (399)
+
+This happens automatically behind the scenes.
+All you have to say is ``planets[399]`` or ``planets['Earth']``
+and Skyfield will put together a solution using the segments provided.
+
+Here are several popular ephemerides that you can use with Skyfield.
+The filenames matching ``de*``
+predict the positions of many or all of the major planets,
+while ``jup310.bsp`` focuses on Jupiter and its major moons:
+
+==========  ====== ============= ==============
+Ephemeris    Size      Years        Issued
+==========  ====== ============= ==============
+de405.bsp    63 MB  1600 to 2200 May 1997
+de406.bsp   287 MB -3000 to 3000 May 1997
+de421.bsp    17 MB  1900 to 2050 February 2008
+de422.bsp   623 MB -3000 to 3000 September 2009
+de430.bsp   128 MB  1550 to 2650 February 2010
+jup310.bsp  932 MB  1900 to 2100 December 2013
+==========  ====== ============= ==============
+
+You can think of negative years, as cited in the above table,
+as being almost like years BC except that they are off by one.
+Historians invented our calendar back before zero was a counting number,
+so AD 1 was immediately preceded by 1 BC without a year in between.
+But astronomers count backwards AD 2, AD 1, 0, −1, −2, and so forth.
+
+So if you are curious about the positions of the planets back in 44 BC,
+when Julius Caesar was assassinated,
+be careful to ask an astronomer about the year −43 instead.
+“The fault, dear Brutus, is not in our stars, but in ourselves.”
+
+Once you have loaded an ephemeris and used a statement like
+
+.. testcode::
+
+    mars = planets['Mars']
+
+to retrieve a planet, consult the chapter :doc:`positions`
+to learn about all the positions that you can use it to generate.

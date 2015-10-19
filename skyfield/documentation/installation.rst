@@ -64,8 +64,20 @@ Change Log
 0.5
 ---
 
+* Skyfield has dropped the 16-megabyte JPL ephemeris DE421 as an install
+  dependency, since users might choose another ephemeris, or might not
+  need one at all.  You now ask for a SPICE ephemeris to be downloaded
+  at runtime with a call like ``planets = load('de421.bsp')``.
+
+* Planets are no longer offered as magic attributes, but are looked up
+  through the square bracket operator.  So instead of typing
+  ``planets.mars`` you should now type ``planets['mars']``.  You can run
+  ``print(planets)`` to learn which bodies an ephemeris supports.
+
+* | Ask for planet positions with ``body.at(jd)`` instead of ``body(jd)``.
+
 * Per IAU 2012 Resolution B2, Skyfield now uses lowercase *au* for the
-  astronomical unit and defines it as exactly 149597870700 meters.
+  astronomical unit, and defines it as exactly 149 597 870 700 meters.
   While this API change is awkward for existing users, I wanted to make
   the change while Skyfield is still pre-1.0.  If this breaks a program
   that you already have running, please remember that a quick ``pip``
