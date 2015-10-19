@@ -62,7 +62,7 @@ def download(url, verbose=True, blocksize=128*1024):
                       .format(filename, url, e))
     content_length = int(connection.headers.get('content-length', -1))
     if verbose:
-        report = ProgressBar(filename)
+        bar = ProgressBar(filename)
     with open(tempname, 'ab') as w:
         try:
             if lockf is not None:
@@ -78,7 +78,7 @@ def download(url, verbose=True, blocksize=128*1024):
                 w.write(data)
                 length += len(data)
                 if verbose:
-                    report(length, content_length)
+                    bar.report(length, content_length)
             os.rename(tempname, filename)
         except KeyboardInterrupt:# Exception as e:
             raise IOError('error getting {0} - {1}'.format(url, e))
