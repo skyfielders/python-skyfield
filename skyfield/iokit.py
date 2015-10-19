@@ -61,7 +61,8 @@ def download(url, verbose=True, blocksize=128*1024):
         raise IOError('cannot fetch file {0!r} from URL {1} because {2}'
                       .format(filename, url, e))
     content_length = int(connection.headers.get('content-length', -1))
-    report = ProgressBar(filename).report if verbose else tuple
+    if verbose:
+        report = ProgressBar(filename)
     with open(tempname, 'ab') as w:
         try:
             if lockf is not None:
@@ -76,7 +77,8 @@ def download(url, verbose=True, blocksize=128*1024):
                     break
                 w.write(data)
                 length += len(data)
-                report(length, content_length)
+                if verbose:
+                    report(length, content_length)
             os.rename(tempname, filename)
         except KeyboardInterrupt:# Exception as e:
             raise IOError('error getting {0} - {1}'.format(url, e))
