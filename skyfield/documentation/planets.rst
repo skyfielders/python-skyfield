@@ -113,7 +113,7 @@ Once you have loaded an ephemeris and used a statement like
 to retrieve a planet, consult the chapter :doc:`positions`
 to learn about all the positions that you can use it to generate.
 
-.. testsetup::
+.. testcleanup::
 
    __import__('skyfield.tests.fixes').tests.fixes.teardown()
 
