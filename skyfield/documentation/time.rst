@@ -61,6 +61,13 @@ and Skyfield will construct the date internally.
 So the following two calculations for January 1st
 come out exactly the same:
 
+.. testsetup::
+
+   from skyfield import api
+   from functools import partial
+   api.load = partial(api.load, verbose=False)
+   del api
+
 .. testcode::
 
     from skyfield.api import load
@@ -684,3 +691,8 @@ in the dynamical reference system.
 .. _matplotlib: http://matplotlib.org/
 .. _pytz: http://pytz.sourceforge.net/
 .. _requirements.txt: https://pip.pypa.io/en/latest/user_guide.html#requirements-files
+
+.. testsetup::
+
+   from skyfield.iokit import load
+   api.load = load

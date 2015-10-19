@@ -18,6 +18,13 @@ It is recent, has good precision,
 was designed for general purpose use,
 and is only 17 MB in size:
 
+.. testsetup::
+
+   from skyfield import api
+   from functools import partial
+   api.load = partial(api.load, verbose=False)
+   del api
+
 .. testcode::
 
     from skyfield.api import load
@@ -108,3 +115,9 @@ Once you have loaded an ephemeris and used a statement like
 
 to retrieve a planet, consult the chapter :doc:`positions`
 to learn about all the positions that you can use it to generate.
+
+.. testsetup::
+
+   from skyfield import api
+   from skyfield.iokit import load
+   api.load = load
