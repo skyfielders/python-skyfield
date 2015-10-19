@@ -8,6 +8,11 @@ from time import time
 from .jpllib import SpiceKernel
 
 try:
+    from fcntl import LOCK_EX, LOCK_UN, lockf
+except:
+    lockf = None
+
+try:
     from urllib.request import urlopen, url2pathname
 except:
     from urllib2 import urlopen, url2pathname
@@ -57,8 +62,13 @@ def download(url, verbose=True, blocksize=128*1024):
                       .format(filename, url, e))
     content_length = int(connection.headers.get('content-length', -1))
     report = ProgressBar(filename).report if verbose else tuple
-    with open(tempname, 'wb') as w:
+    with open(tempname, 'ab') as w:
         try:
+            if lockf is not None:
+                fd = w.fileno()
+                lockf(fd, LOCK_EX)
+                if os.fstat(fd).st_size:
+                    return  # someone else wrote the file contents
             length = 0
             while True:
                 data = connection.read(blocksize)
@@ -67,13 +77,12 @@ def download(url, verbose=True, blocksize=128*1024):
                 w.write(data)
                 length += len(data)
                 report(length, content_length)
-        except Exception as e:
+            os.rename(tempname, filename)
+        except KeyboardInterrupt:# Exception as e:
             raise IOError('error getting {} - {}'.format(url, e))
-    try:
-        os.rename(tempname, filename)
-    except Exception as e:
-        raise IOError('cannot rename temporary {} to its real name {} - {}'
-                      .format(tempname, filename, e))
+        finally:
+            if lockf is not None:
+                lockf(fd, LOCK_UN)
     return filename
 
 
@@ -92,6 +101,7 @@ class ProgressBar(object):
         marks = percent // 3
         print('\r[{:33}] {:3}% {}'.format('#' * marks, percent, self.filename),
               end='\n' if (percent == 100) else '')
+        print(os.getpid())
         sys.stdout.flush()
 
 
