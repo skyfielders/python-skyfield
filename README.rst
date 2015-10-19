@@ -10,18 +10,24 @@ positions for planets and Earth satellites.
 
 ::
 
-    from skyfield.api import earth, mars, now
-    ra, dec, distance = earth(now()).observe(mars).radec()
+   from skyfield.api import load, now
 
-    print(ra)
-    print(dec)
-    print(distance)
+   planets = load('de421.bsp')
+   earth, mars = planets['earth'], planets['mars']
+
+   jd = now()
+   position = earth.at(jd).observe(mars)
+   ra, dec, distance = position.radec()
+
+   print(ra)
+   print(dec)
+   print(distance)
 
 ::
 
-    09h 14m 50.35s
-    +17deg 13' 02.6"
-    2.18572863461 AU
+   10h 47m 56.24s
+   +09deg 03' 23.1"
+   2.33251 au
 
 Its only binary dependency is NumPy.
 Skyfield can usually be installed with::
