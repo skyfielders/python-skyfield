@@ -37,6 +37,8 @@ as a keyword argument to specify the moment you want to represent.
 
 .. testcode::
 
+    # Building a date object
+
     from skyfield.api import JulianDate
     JulianDate(utc=(2014, 1, 18))
 
@@ -74,8 +76,12 @@ come out exactly the same:
     planets = load('de421.bsp')
     earth = planets['earth']
 
+    # Building a date and using it with at()
+
     jd = JulianDate(utc=(2014, 1, 1))
     print(earth.at(jd).position.au)
+
+    # Letting at() build the date for you
 
     print(earth.at(utc=(2014, 1, 1)).position.au)
 
@@ -142,6 +148,8 @@ and configured with the correct time zone):
 .. testcode::
 
     from skyfield.api import now
+
+    # Asking the current date and time
 
     jd = now()
     print(jd.utc_jpl())
@@ -239,6 +247,8 @@ The most recent leap second was in June 2012:
 
 .. testcode::
 
+    # Display 5 seconds around a leap second
+
     five_seconds = range(58, 58 + 5)
     tup = (2012, 6, 30, 23, 59, five_seconds)
     jd = JulianDate(utc=tup)
@@ -301,6 +311,8 @@ when Skyfield is forced to represent a leap second
 as a ``datetime`` with the incorrect time 23:59:59.
 
 .. testcode::
+
+    # Asking for the leap_second flag to learn the whole story
 
     dt, leap_second = jd.astimezone_and_leap_second(eastern)
 
@@ -476,6 +488,8 @@ So twelve noon was the moment of Julian date zero:
 
 .. testcode::
 
+    # When was Julian date zero?
+
     bc_4714 = -4713
     print(JulianDate(tt=(bc_4714, 11, 24, 12)).tt)
 
@@ -498,6 +512,8 @@ More than two million days have passed since 4714 BC
 so modern dates tend to be rather large numbers:
 
 .. testcode::
+
+    # 2014 January 1 as a Julian Date
 
     jd = JulianDate(utc=(2014, 1, 1))
     print('TAI = %r' % jd.tai)
