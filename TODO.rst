@@ -10,6 +10,27 @@ forget.
 Sprint Possibilities
 ====================
 
+* This should not raise an exception, it should interpret the tuple as a
+  calendar date:
+
+    dates = JulianDate(tt=(1980, 1, range(1000)))
+
+* And if we are going to allow times like TT to be submitted using
+  calendar dates, then we should probably provide methods that would
+  fetch them back as calendar dates.
+
+* After running a line like:
+
+    dates = JulianDate(utc=(1980, 1, range(1000)))
+
+  displaying ``dates`` on the screen shows way too much output.  The
+  ``repr()`` should be re-crafted so that the length of the array is
+  stated, but the actual entries excerpted so that only the first few
+  and the last few are shown.  Maybe the ``repr()`` should use calendar
+  dates too instead of just showing the JD numbers?
+
+* We should rename ``ecliptic_position()`` to ``ecliptic_xyz()``.
+
 * Make JD give a sensible error if the first argument is a number or
   something.
 
@@ -38,6 +59,23 @@ Sprint Possibilities
 * We should have an illustration of Earth satellite heights above the
   surface, plotted against a blue atmosphere fading out into the black
   of space as the plot goes upwards towards the top.
+
+* Ephemeris objects should have more interesting repr's, that maybe give
+  the name of the ephemeris.  And maybe the objects inside?  Maybe the
+  start and end date?
+
+* Iterating across an ephemeris should probably give you object names.
+
+* The repr() of a Body object should name the body and the filename of
+  the ephemeris it is pulled from.
+
+* See about switching ``requirements.sh`` to be a conda environment
+  file.
+
+* Update the earth satellite IPython Notebook to the new API, or remove
+  it in favor of keeping notebooks in the separate astronomy notebook
+  repository.
+
 
 
 
