@@ -159,9 +159,10 @@ class Angle(object):
         elif hours is not None:
             self._hours = hours = _unsexagesimalize(hours)
             self.radians = hours * _from_hours
-            preference = 'hours'
 
-        self.preference = preference or 'degrees'
+        self.preference = (preference if preference is not None
+                           else 'hours' if hours is not None
+                           else 'degrees')
         self.signed = signed
 
     def __getattr__(self, name):
@@ -204,12 +205,12 @@ class Angle(object):
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
         hours = self._hours
-        if getattr(hours, 'shape', None):
+        if hasattr(hours, 'shape'):
             return "{0} values from {1} to {2}".format(
-                len(degrees),
-                _hstr(min(degrees),places,signed),
-                _hstr(max(degrees),places,signed)
-            )
+                len(hours),
+                _hstr(min(hours), places),
+                _hstr(max(hours), places),
+                )
         return _hstr(hours, places)
 
     def dms(self, warn=True):
@@ -228,12 +229,12 @@ class Angle(object):
             raise WrongUnitError('dstr')
         degrees = self._degrees
         signed = self.signed
-        if getattr(degrees, 'shape', None):
+        if hasattr(degrees, 'shape'):
             return "{0} values from {1} to {2}".format(
                 len(degrees),
-                _dstr(min(degrees),places,signed),
-                _dstr(max(degrees),places,signed)
-            )
+                _dstr(min(degrees), places, signed),
+                _dstr(max(degrees), places, signed),
+                )
         return _dstr(degrees, places, signed)
 
 class WrongUnitError(ValueError):
