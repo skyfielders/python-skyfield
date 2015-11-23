@@ -40,7 +40,7 @@ def test_callisto_geometry():
 
 def test_callisto_astrometric():
     e = api.load('jup310.bsp')
-    a = e['earth'].at(utc=(2053, 10, 9)).observe(e['callisto'])
+    a = e['earth'].at(utc=(2053, 10, 8, 23, 59, 59)).observe(e['callisto'])
     ra, dec, distance = a.radec()
     compare(ra._degrees, 217.1839292, 0.001 * arcsecond)
     compare(dec.degrees, -13.6892791, 0.001 * arcsecond)
