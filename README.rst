@@ -4,7 +4,7 @@
 ====================================
 
 Skyfield is a pure-Python astronomy package
-that is compatible with both Python 2 and 3
+that is compatible with both Python 2 and 3
 and makes it easy to generate high precision research-grade
 positions for planets and Earth satellites.
 
