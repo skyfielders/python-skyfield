@@ -27,7 +27,7 @@ and is only 17 MB in size:
     from skyfield.api import load
     planets = load('de421.bsp')
 
-Once an ephemeris file has been downloaded to your current directly,
+Once an ephemeris file has been downloaded to your current directory,
 re-running your program will simply reuse the copy on disk
 instead of downloading it all over again.
 
