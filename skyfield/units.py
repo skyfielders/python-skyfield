@@ -205,7 +205,7 @@ class Angle(object):
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
         hours = self._hours
-        if hasattr(hours, 'shape'):
+        if getattr(hours, 'shape', ()):
             return "{0} values from {1} to {2}".format(
                 len(hours),
                 _hstr(min(hours), places),
@@ -229,7 +229,7 @@ class Angle(object):
             raise WrongUnitError('dstr')
         degrees = self._degrees
         signed = self.signed
-        if hasattr(degrees, 'shape'):
+        if getattr(degrees, 'shape', ()):
             return "{0} values from {1} to {2}".format(
                 len(degrees),
                 _dstr(min(degrees), places, signed),

@@ -26,6 +26,10 @@ def test_degree_rounding():
     assert str(Angle(degrees=tenth * 600.25)) == '00deg 01\' 00.0"'
     assert str(Angle(degrees=tenth * 600.75)) == '00deg 01\' 00.1"'
 
+def test_angle_scalar_strs():
+    assert str(Angle(degrees=np.array(91))) == '''91deg 00' 00.0"'''
+    assert str(Angle(hours=np.array(12))) == '''12h 00m 00.00s'''
+
 def test_angle_array_strs():
     assert str(Angle(degrees=np.array([90, 91, 92]))) == (
         '''3 values from 90deg 00' 00.0" to 92deg 00' 00.0"'''
