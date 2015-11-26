@@ -2,7 +2,8 @@
 
 from numpy import array, einsum, exp
 
-from .constants import RAD2DEG, TAU, rotation_to_ecliptic
+from .constants import RAD2DEG, TAU
+from .data.spice import inertial_frames
 from .functions import from_polar, length_of, to_polar, rot_y, rot_z
 from .earthlib import compute_limb_angle, refract, terra
 from .relativity import add_aberration, add_deflection
@@ -10,6 +11,7 @@ from .timelib import JulianDate, takes_julian_date
 from .units import (Distance, Velocity, Angle, _interpret_angle,
                     _interpret_ltude)
 
+_ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 
 class ICRS(object):
     """An x,y,z position whose axes are oriented to the ICRS system.
@@ -88,12 +90,12 @@ class ICRS(object):
 
     def ecliptic_position(self):
         """Return an x,y,z position relative to the ecliptic plane."""
-        vector = rotation_to_ecliptic.dot(self.position.au)
+        vector = _ECLIPJ2000.dot(self.position.au)
         return Distance(vector)
 
     def ecliptic_latlon(self):
         """Return ecliptic latitude, longitude, and distance."""
-        vector = rotation_to_ecliptic.dot(self.position.au)
+        vector = _ECLIPJ2000.dot(self.position.au)
         d, lat, lon = to_polar(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),

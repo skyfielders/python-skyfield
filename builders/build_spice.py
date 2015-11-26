@@ -44,11 +44,11 @@ if __name__ == '__main__':
     for name, rotation in zip(names, rotations):
         fields = rotation.replace(',', ' ').split()
         M = None
-        for i in range(0, len(fields), 2):
+        for i in reversed(range(0, len(fields), 2)):
             theta, axis = fields[i:i+2]
             theta = float(theta.replace('D', 'E')) * ASEC2RAD
             f = axes[axis]
-            R = f(theta)
+            R = f(-theta)
             M = R if (M is None) else R * M
         base = bases[name]
         while base != 'J2000':
