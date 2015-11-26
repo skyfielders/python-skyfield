@@ -1,5 +1,5 @@
 import gzip
-from skyfield.data import cache as default_cache
+from skyfield.data.cachelib import cache as default_cache
 from skyfield.functions import to_polar
 from skyfield.starlib import Star
 from skyfield.timelib import T0

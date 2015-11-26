@@ -135,7 +135,7 @@ class JulianDate(object):
         self.delta_t = _to_array(delta_t)
 
         if cache is None:
-            from skyfield.data import cache
+            from skyfield.data.cachelib import cache
         self.cache = cache
 
         if tai is None and utc is not None:
