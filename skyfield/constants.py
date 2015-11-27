@@ -1,7 +1,5 @@
 """Various constants required by Skyfield."""
 
-from numpy import array
-
 # Definitions.
 AU_M = 149597870700             # per IAU 2012 Resolution B2
 AU_KM = 149597870.700
