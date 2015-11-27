@@ -8,6 +8,7 @@ import sys
 from pprint import pformat
 from textwrap import dedent
 
+import numpy as np
 from skyfield.constants import ASEC2RAD
 from skyfield.functions import rot_x, rot_y, rot_z
 
@@ -38,25 +39,29 @@ if __name__ == '__main__':
     bases = re.findall(r"DATA BASES[^']*'([^']+)", fortran)
     rotations = re.findall(r"DATA DEFS[^']*'([^']+)", fortran)
     assert len(names) == len(bases) == len(rotations) == 21
+
     bases = {name: base for name, base in zip(names, bases)}
     frames = {}
     framelist = []
+
     for name, rotation in zip(names, rotations):
         fields = rotation.replace(',', ' ').split()
-        M = None
-        for i in reversed(range(0, len(fields), 2)):
+        matrices = []
+        for i in range(0, len(fields), 2):
             theta, axis = fields[i:i+2]
             theta = float(theta.replace('D', 'E')) * ASEC2RAD
-            f = axes[axis]
-            R = f(-theta)
-            M = R if (M is None) else R * M
+            rot = axes[axis]
+            matrices.append(rot(-theta))
         base = bases[name]
-        while base != 'J2000':
-            M = frames[base] * M
-            base = bases[base]
-        lists = list(list(row) for row in M)
-        frames[name] = lists
-        framelist.append((name, lists))
+        if base != 'J2000':
+            matrices.extend(frames[base])
+
+        M = None
+        for R in reversed(matrices):
+            M = R if (M is None) else (R).dot(M)
+
+        frames[name] = matrices
+        framelist.append((name, list(list(row) for row in M)))
 
     # The pformat() function produces terrible output if its own
     # `indent` keyword is set, so we rig up our own indentation, and

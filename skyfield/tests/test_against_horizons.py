@@ -20,13 +20,29 @@ def compare(value, expected_value, epsilon):
     else:
         assert abs(value - expected_value) <= epsilon
 
-def test_jupiter1():
+def test_ecliptic_frame():
     e = api.load('de421.bsp')
     jup = e['jupiter barycenter']
     astrometric = e['sun'].at(utc=(1980, 1, 1, 0, 0)).observe(jup)
     hlat, hlon, d = astrometric.ecliptic_latlon()
     compare(hlat.degrees, 1.013, 0.001)
     compare(hlon.degrees, 151.3229, 0.001)
+
+def test_fk4_frame():
+    e = api.load('de421.bsp')
+    astrometric = e['earth'].at(utc=(1980, 1, 1, 0, 0)).observe(e['moon'])
+    ra, dec, d = astrometric.to_spice_frame('B1950')
+    print(ra._degrees, dec.degrees)
+    compare(ra._degrees, 82.36186, 0.00006) # TODO: why is this not 0.00001?
+    compare(dec.degrees, 18.53432, 0.00006)
+
+def test_galactic_frame():
+    e = api.load('de421.bsp')
+    astrometric = e['earth'].at(utc=(1980, 1, 1, 0, 0)).observe(e['moon'])
+    glat, glon, d = astrometric.galactic_latlon()
+    print(glat, glat.degrees, glon, glon.degrees)
+    compare(glat.degrees, -8.047315, 0.005)  # TODO: awful! Track this down.
+    compare(glon.degrees, 187.221794, 0.005)
 
 def test_callisto_geometry():
     e = api.load('jup310.bsp')

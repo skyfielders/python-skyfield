@@ -4,6 +4,7 @@ from numpy import array, einsum, exp
 
 from .constants import RAD2DEG, TAU
 from .data.spice import inertial_frames
+#from .framelib import ICRS_to_J2000
 from .functions import from_polar, length_of, to_polar, rot_y, rot_z
 from .earthlib import compute_limb_angle, refract, terra
 from .relativity import add_aberration, add_deflection
@@ -12,6 +13,7 @@ from .units import (Distance, Velocity, Angle, _interpret_angle,
                     _interpret_ltude)
 
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
+_GALACTIC = inertial_frames['GALACTIC']
 
 class ICRS(object):
     """An x,y,z position whose axes are oriented to the ICRS system.
@@ -99,6 +101,22 @@ class ICRS(object):
         d, lat, lon = to_polar(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
+                Distance(au=d))
+
+    def galactic_latlon(self):
+        """Return galactic latitude, longitude, and distance."""
+        vector = _GALACTIC.dot(self.position.au)
+        d, lat, lon = to_polar(vector)
+        return (Angle(radians=lat, signed=True),
+                Angle(radians=lon),
+                Distance(au=d))
+
+    def to_spice_frame(self, name):
+        vector = self.position.au
+        vector = inertial_frames[name].dot(vector)
+        d, dec, ra = to_polar(vector)
+        return (Angle(radians=ra, preference='hours', signed=True),
+                Angle(radians=dec),
                 Distance(au=d))
 
     def from_altaz(self, alt=None, az=None, alt_degrees=None, az_degrees=None):
