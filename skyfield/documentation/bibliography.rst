@@ -41,3 +41,6 @@ http://maia.usno.navy.mil/ser7/deltat.preds
 http://maia.usno.navy.mil/ser7/historic_deltat.data
 
 http://www.iers.org/IERS/EN/DataProducts/EarthOrientationData/eop.html
+
+
+ftp://ssd.jpl.nasa.gov/pub/eph/planets/ioms/  !
