@@ -103,6 +103,11 @@ class ICRS(object):
                 Angle(radians=lon),
                 Distance(au=d))
 
+    def galactic_position(self):
+        """Return an x,y,z position relative to the galactic plane."""
+        vector = _GALACTIC.dot(self.position.au)
+        return Distance(vector)
+
     def galactic_latlon(self):
         """Return galactic latitude, longitude, and distance."""
         vector = _GALACTIC.dot(self.position.au)
