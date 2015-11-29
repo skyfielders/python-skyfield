@@ -61,6 +61,17 @@ Good luck!
 Change Log
 ==========
 
+0.6
+---
+
+* Skyfield now automatically generates an estimate for `delta_t` if the
+  user does not supply their own `delta_t` when specifying a date.  This
+  should make altitude and azimuth measurements much more precise.
+
+* The leap-second table has been updated to include 2015 July 1.
+
+* Both ecliptic and galactic coordinates are now supported.
+
 0.5
 ---
 

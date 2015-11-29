@@ -35,7 +35,12 @@ together with all of the attributes and methods that they support:
      │
      ├── `radec(epoch=jd) <api.html#Position.radec>`_     →   ra, dec, distance
      ├── `radec() <api.html#Position.radec>`_             →   ra, dec, distance
-     └── `distance() <api.html#Position.distance>`_          →   distance
+     ├── `distance() <api.html#Position.distance>`_          →   distance
+     │
+     ├── `ecliptic_position() <api.html#Position.ecliptic_position>`_ →   x, y, z
+     ├── `ecliptic_latlon() <api.html#Position.ecliptic_latlon>`_   →   lat, lon, distance
+     ├── `galactic_position() <api.html#Position.galactic_position>`_ →   x, y, z
+     └── `galactic_latlon() <api.html#Position.galactic_latlon>`_   →   lat, lon, distance
 
     Apparent position only
      │
@@ -448,8 +453,8 @@ of an Earth object:
 
 .. testoutput::
 
-    24deg 39' 49.8"
-    93deg 13' 17.3"
+    24deg 30' 27.2"
+    93deg 04' 29.5"
     0.678874 au
 
 So Mars was more than 24° above the horizon for Bostonians
@@ -471,7 +476,7 @@ If you know the weather conditions, you can specify them.
 
 .. testoutput::
 
-    24deg 41' 55.8"
+    24deg 32' 34.1"
 
 Or you can ask Skyfield to use a standard temperature and pressure
 when generating its rough simulation of the effects of refraction.
@@ -483,7 +488,7 @@ when generating its rough simulation of the effects of refraction.
 
 .. testoutput::
 
-    24deg 41' 58.6"
+    24deg 32' 37.0"
 
 Keep in mind that these are simply guesses.
 The effects of the atmosphere,

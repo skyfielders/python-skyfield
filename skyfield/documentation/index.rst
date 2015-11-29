@@ -54,8 +54,8 @@ on the Earth’s surface:
 
 .. testoutput::
 
-    25deg 40' 03.0"
-    101deg 46' 14.8"
+    25deg 27' 53.8"
+    101deg 33' 43.9"
 
 The official documentation is available through the links
 in the Table of Contents below.

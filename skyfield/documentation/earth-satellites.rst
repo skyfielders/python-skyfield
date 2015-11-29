@@ -56,9 +56,9 @@ while positive altitude places the satellite above the horizon:
 
 .. testoutput::
 
-    13deg 49' 57.8"
-    357deg 51' 21.8"
-    1281.20477925
+    13deg 50' 46.6"
+    358deg 48' 55.9"
+    1280.53654286
 
 You can also ask for the position
 to be expressed as right ascension and declination
@@ -77,8 +77,8 @@ See :doc:`positions` to learn more about these possibilities:
 
 .. testoutput::
 
-    02h 03m 52.69s
-    +62deg 48' 26.3"
+    01h 54m 36.45s
+    +62deg 51' 50.6"
 
 .. testcode::
 
@@ -89,8 +89,8 @@ See :doc:`positions` to learn more about these possibilities:
 
 .. testoutput::
 
-    02h 04m 56.65s
-    +62deg 52' 27.1"
+    01h 55m 39.18s
+    +62deg 55' 57.4"
 
 The standard SGP4 theory of satellite motion that Skyfield uses
 is a rough enough model of the near-Earth environment
