@@ -66,7 +66,7 @@ def takes_julian_date(function):
 
     """
     def wrapper(self, jd=None, utc=None, tai=None, tt=None, tdb=None,
-                delta_t=0.0, cache=None):
+                delta_t=None, cache=None):
         if jd is None:
             jd = JulianDate(utc, tai, tt, tdb, delta_t, cache)
         elif not isinstance(jd, JulianDate):
