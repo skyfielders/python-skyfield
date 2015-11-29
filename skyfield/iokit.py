@@ -22,7 +22,11 @@ _missing = object()
 
 def load(filename, autodownload=True, verbose=True):
     """Load the given file, possibly downloading it if it is not present."""
-    if filename.endswith('.bsp'):
+    if '/' in filename:
+        url = filename
+        filename = url.split('/')[-1]
+        cls = None
+    elif filename.endswith('.bsp'):
         url = url_for(filename)
         cls = SpiceKernel
     else:
@@ -32,9 +36,8 @@ def load(filename, autodownload=True, verbose=True):
             raise IOError('you specified autodownload=False but {!r} cannot'
                           ' be found in the current directory'
                           .format(filename))
-        url = url_for(filename)
         download(url, verbose)
-    return cls(filename)
+    return open(filename) if (cls is None) else cls(filename)
 
 
 def url_for(filename):

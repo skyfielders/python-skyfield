@@ -1,5 +1,6 @@
 from datetime import date, datetime, timedelta, tzinfo
-from numpy import array, einsum, rollaxis, searchsorted, sin, where, zeros_like
+from numpy import (array, einsum, float_, rollaxis,
+                   searchsorted, sin, where, zeros_like)
 from time import strftime
 from .constants import T0, DAY_S
 from .earthlib import sidereal_time
@@ -94,10 +95,12 @@ Other time scales include tai, tt, and tdb. Please refer to the
 
 def _to_array(value):
     """When `value` is a plain Python sequence, return it as a NumPy array."""
-    if not hasattr(value, 'shape') and hasattr(value, '__len__'):
+    if hasattr(value, 'shape'):
+        return value
+    elif hasattr(value, '__len__'):
         return array(value)
     else:
-        return value
+        return float_(value)
 
 tt_minus_tai = array(32.184 / DAY_S)
 
@@ -406,6 +409,14 @@ class JulianDate(object):
         i = searchsorted(leap_reverse_dates, tai, 'right')
         return tai - leap_offsets[i] / DAY_S
 
+    def tai_tuple(self):
+        """Return TAI as a tuple (year, month, day, hour, minute, second)."""
+        return calendar_tuple(self.tai)
+
+    def tt_tuple(self):
+        """Return TT as a tuple (year, month, day, hour, minute, second)."""
+        return calendar_tuple(self.tt)
+
     def __getattr__(self, name):
 
         # Cache of several expensive functions of time.
@@ -512,6 +523,25 @@ def calendar_date(jd_integer):
 
     return year, month, day
 
+def calendar_tuple(jd_float, offset=0.0):
+    """Return a (year, month, day, hour, minute, second.fraction) tuple.
+
+    The `offset` is added to the time before it is split into its
+    components.  This is useful if the user is going to round the
+    result before displaying it.  If the result is going to be
+    displayed as seconds, for example, set `offset` to half a second
+    and then throw away the fraction; if the result is going to be
+    displayed as minutes, set `offset` to thirty seconds and then
+    throw away the seconds; and so forth.
+
+    """
+    whole, fraction = divmod(jd_float + 0.5, 1.0)
+    whole = whole.astype(whole)
+    year, month, day = calendar_date(whole)
+    hour, hfrac = divmod(fraction * 24.0, 1.0)
+    minute, second = divmod(hfrac * 3600.0, 60.0)
+    return year, month, day, hour.astype(int), minute.astype(int), second
+
 def tdb_minus_tt(jd_tdb):
     """Computes how far TDB is in advance of TT, given TDB.
 
@@ -562,6 +592,11 @@ def usno_leapseconds(cache):
     offsets.insert(1, offsets[0])
 
     return array([dates, offsets])
+
+def delta_t_formula_morrison_and_stephenson_2004(tt):
+    """Delta T formula from Morrison and Stephenson, 2004."""
+    t = (tt - 2385800.5) / 36525.0  # centuries before or after 1820
+    return 32.0 * t * t - 20.0
 
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
     try:

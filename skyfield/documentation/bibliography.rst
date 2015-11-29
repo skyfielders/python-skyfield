@@ -15,12 +15,12 @@
 http://aa.usno.navy.mil/software/novas/novas_f/NOVAS_F3.1_Guide.pdf
 
 http://eclipse.gsfc.nasa.gov/SEcat5/deltat.html
-
+==
 http://eclipse.gsfc.nasa.gov/SEhelp/deltat2004.html
 
-http://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html
+http://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html # the polynomial
 
-http://eclipse.gsfc.nasa.gov/SEhelp/deltaT2.html     # TODO?
+http://eclipse.gsfc.nasa.gov/SEhelp/deltaT2.html     # out of date
 
 http://adsabs.harvard.edu/full/2004JHA....35..327M
 
