@@ -197,7 +197,7 @@ def output_subroutine_tests(dates):
         result2 = novas.sidereal_time(jd, 0.0, 99.9, False, True)
         output(locals(), """\
             def test_sidereal_time_on_date{i}():
-                jd = JulianDate(tt={jd!r})
+                jd = JulianDate(tt={jd!r}, delta_t=0.0)
                 compare(earthlib.sidereal_time(jd), {result1!r}, 1e-13)
 
             def test_sidereal_time_with_nonzero_delta_t_on_date{i}():
@@ -251,7 +251,7 @@ def output_subroutine_tests(dates):
         alt, az = altaz_maneuver(tt, usno, ra, dec, ref=0)
         output(locals(), """\
             def test_from_altaz_{i}(earth):
-                jd = JulianDate(tt={tt!r})
+                jd = JulianDate(tt={tt!r}, delta_t=0.0)
                 usno = earth.topos(
                     '38.9215 N', '77.0669 W', elevation_m=92.0)
                 a = usno.at(jd).from_altaz(alt_degrees={alt!r}, az_degrees={az!r})
@@ -373,7 +373,7 @@ def output_topocentric_tests(dates):
         output(locals(), """\
 
         def test_{slug}_topocentric_date{i}(de405):
-            jd = JulianDate(tt={jd!r})
+            jd = JulianDate(tt={jd!r}, delta_t=0.0)
             earth = de405['earth']
             usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 

@@ -1,5 +1,5 @@
 from datetime import date, datetime, timedelta, tzinfo
-from numpy import (array, einsum, float_, rollaxis,
+from numpy import (array, einsum, float_, interp, isnan, nan, rollaxis,
                    searchsorted, sin, where, zeros_like)
 from time import strftime
 from .constants import T0, DAY_S
@@ -133,9 +133,7 @@ class JulianDate(object):
 
     """
     def __init__(self, utc=None, tai=None, tt=None, tdb=None,
-                 delta_t=0.0, cache=None):
-
-        self.delta_t = _to_array(delta_t)
+                 delta_t=None, cache=None):
 
         if cache is None:
             from skyfield.data.cachelib import cache
@@ -175,9 +173,13 @@ class JulianDate(object):
         elif isinstance(tt, tuple):
             tt = julian_date(*tt)
 
-        self.tt = _to_array(tt)
-        self.shape = getattr(self.tt, 'shape', ())
-        self.delta_t = delta_t
+        self.tt = tt = _to_array(tt)
+        self.shape = getattr(tt, 'shape', ())
+
+        if delta_t is None:
+            self.delta_t = interpolate_delta_t(cache, tt)
+        else:
+            self.delta_t = _to_array(delta_t)
 
     def __len__(self):
         return self.shape[0]
@@ -592,6 +594,18 @@ def usno_leapseconds(cache):
     offsets.insert(1, offsets[0])
 
     return array([dates, offsets])
+
+def interpolate_delta_t(cache, tt):
+    """Given TT, return interpolated Delta T, falling back to a formula."""
+    def delta_t():  # TODO
+        "Fake placeholder function, until I rewrite how the cache works."
+    x, y = cache.run(delta_t)
+    delta_t = interp(tt, x, y, nan, nan)
+    missing = isnan(delta_t)
+    if missing.any():
+        tt = tt[missing]
+        delta_t[missing] = delta_t_formula_morrison_and_stephenson_2004(tt)
+    return delta_t
 
 def delta_t_formula_morrison_and_stephenson_2004(tt):
     """Delta T formula from Morrison and Stephenson, 2004."""

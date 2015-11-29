@@ -213,7 +213,7 @@ def test_precession_date3():
             result, 1e-15)
 
 def test_sidereal_time_on_date0():
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     compare(earthlib.sidereal_time(jd), 16.195436227057314, 1e-13)
 
 def test_sidereal_time_with_nonzero_delta_t_on_date0():
@@ -221,7 +221,7 @@ def test_sidereal_time_with_nonzero_delta_t_on_date0():
     compare(earthlib.sidereal_time(jd), 16.195436229760602, 1e-13)
 
 def test_sidereal_time_on_date1():
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     compare(earthlib.sidereal_time(jd), 15.825907460288224, 1e-13)
 
 def test_sidereal_time_with_nonzero_delta_t_on_date1():
@@ -229,7 +229,7 @@ def test_sidereal_time_with_nonzero_delta_t_on_date1():
     compare(earthlib.sidereal_time(jd), 15.825907462991848, 1e-13)
 
 def test_sidereal_time_on_date2():
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     compare(earthlib.sidereal_time(jd), 18.69737482696563, 1e-13)
 
 def test_sidereal_time_with_nonzero_delta_t_on_date2():
@@ -237,7 +237,7 @@ def test_sidereal_time_with_nonzero_delta_t_on_date2():
     compare(earthlib.sidereal_time(jd), 18.69737482966941, 1e-13)
 
 def test_sidereal_time_on_date3():
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     compare(earthlib.sidereal_time(jd), 22.243908497165812, 1e-13)
 
 def test_sidereal_time_with_nonzero_delta_t_on_date3():
@@ -354,7 +354,7 @@ def test_refract7():
     compare(alt, 90.0, 0.000000001 * arcsecond)
 
 def test_from_altaz_0(earth):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     usno = earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=68.12871390985244, az_degrees=28.979244220884173)
@@ -363,7 +363,7 @@ def test_from_altaz_0(earth):
     compare(dec.degrees, 56.78, 0.000000001 * arcsecond)
 
 def test_from_altaz_1(earth):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     usno = earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=-17.792497521318964, az_degrees=172.51742180816711)
@@ -372,7 +372,7 @@ def test_from_altaz_1(earth):
     compare(dec.degrees, -67.89, 0.000000001 * arcsecond)
 
 def test_from_altaz_2(earth):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     usno = earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=65.8650913573598, az_degrees=34.158756360615946)
@@ -381,7 +381,7 @@ def test_from_altaz_2(earth):
     compare(dec.degrees, 56.78, 0.000000001 * arcsecond)
 
 def test_from_altaz_3(earth):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     usno = earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=-18.43186389552551, az_degrees=170.42969631720953)
@@ -390,7 +390,7 @@ def test_from_altaz_3(earth):
     compare(dec.degrees, -67.89, 0.000000001 * arcsecond)
 
 def test_from_altaz_4(earth):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     usno = earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=68.47898348962792, az_degrees=332.05109419434154)
@@ -399,7 +399,7 @@ def test_from_altaz_4(earth):
     compare(dec.degrees, 56.78, 0.000000001 * arcsecond)
 
 def test_from_altaz_5(earth):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     usno = earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=-17.699091955922242, az_degrees=187.12243108963492)
@@ -408,7 +408,7 @@ def test_from_altaz_5(earth):
     compare(dec.degrees, -67.89, 0.000000001 * arcsecond)
 
 def test_from_altaz_6(earth):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     usno = earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=41.36529829114181, az_degrees=316.19259712235026)
@@ -417,7 +417,7 @@ def test_from_altaz_6(earth):
     compare(dec.degrees, 56.78, 0.000000001 * arcsecond)
 
 def test_from_altaz_7(earth):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     usno = earth.topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=-29.282626410822033, az_degrees=204.1557062303077)
@@ -1662,7 +1662,7 @@ def test_polaris_geocentric_date4(earth):
     compare(dec.degrees, (89.11999387030946, 89.22082922133737, 89.26697328449004, 89.3136939266471), 0.001 * arcsecond)
 
 def test_mercury_topocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1688,7 +1688,7 @@ def test_mercury_topocentric_date0(de405):
     compare(az.degrees, 262.18590521567705, 0.001 * arcsecond)
 
 def test_mercury_topocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1714,7 +1714,7 @@ def test_mercury_topocentric_date1(de405):
     compare(az.degrees, 300.9176579181716, 0.001 * arcsecond)
 
 def test_mercury_topocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1740,7 +1740,7 @@ def test_mercury_topocentric_date2(de405):
     compare(az.degrees, 121.97764361867154, 0.001 * arcsecond)
 
 def test_mercury_topocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1766,7 +1766,7 @@ def test_mercury_topocentric_date3(de405):
     compare(az.degrees, 300.1420264373104, 0.001 * arcsecond)
 
 def test_mercury_topocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5], delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1792,7 +1792,7 @@ def test_mercury_topocentric_date4(de405):
     compare(az.degrees, (262.18590521567705, 300.9176579181716, 121.97764361867154, 300.1420264373104), 0.001 * arcsecond)
 
 def test_venus_topocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1818,7 +1818,7 @@ def test_venus_topocentric_date0(de405):
     compare(az.degrees, 287.0030740239532, 0.001 * arcsecond)
 
 def test_venus_topocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1844,7 +1844,7 @@ def test_venus_topocentric_date1(de405):
     compare(az.degrees, 313.64872862118426, 0.001 * arcsecond)
 
 def test_venus_topocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1870,7 +1870,7 @@ def test_venus_topocentric_date2(de405):
     compare(az.degrees, 142.1161398141626, 0.001 * arcsecond)
 
 def test_venus_topocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1896,7 +1896,7 @@ def test_venus_topocentric_date3(de405):
     compare(az.degrees, 327.640588969984, 0.001 * arcsecond)
 
 def test_venus_topocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5], delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1922,7 +1922,7 @@ def test_venus_topocentric_date4(de405):
     compare(az.degrees, (287.0030740239532, 313.64872862118426, 142.1161398141626, 327.640588969984), 0.001 * arcsecond)
 
 def test_mars_topocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1948,7 +1948,7 @@ def test_mars_topocentric_date0(de405):
     compare(az.degrees, 118.34877634707522, 0.001 * arcsecond)
 
 def test_mars_topocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -1974,7 +1974,7 @@ def test_mars_topocentric_date1(de405):
     compare(az.degrees, 338.0117138951488, 0.001 * arcsecond)
 
 def test_mars_topocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2000,7 +2000,7 @@ def test_mars_topocentric_date2(de405):
     compare(az.degrees, 76.12368450672822, 0.001 * arcsecond)
 
 def test_mars_topocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2026,7 +2026,7 @@ def test_mars_topocentric_date3(de405):
     compare(az.degrees, 231.6381663847761, 0.001 * arcsecond)
 
 def test_mars_topocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5], delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2052,7 +2052,7 @@ def test_mars_topocentric_date4(de405):
     compare(az.degrees, (118.34877634707522, 338.0117138951488, 76.12368450672822, 231.6381663847761), 0.001 * arcsecond)
 
 def test_jupiter_barycenter_topocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2078,7 +2078,7 @@ def test_jupiter_barycenter_topocentric_date0(de405):
     compare(az.degrees, 156.07088561561997, 0.001 * arcsecond)
 
 def test_jupiter_barycenter_topocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2104,7 +2104,7 @@ def test_jupiter_barycenter_topocentric_date1(de405):
     compare(az.degrees, 270.63795554820535, 0.001 * arcsecond)
 
 def test_jupiter_barycenter_topocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2130,7 +2130,7 @@ def test_jupiter_barycenter_topocentric_date2(de405):
     compare(az.degrees, 359.3596746827537, 0.001 * arcsecond)
 
 def test_jupiter_barycenter_topocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2156,7 +2156,7 @@ def test_jupiter_barycenter_topocentric_date3(de405):
     compare(az.degrees, 4.327425566855523, 0.001 * arcsecond)
 
 def test_jupiter_barycenter_topocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5], delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2182,7 +2182,7 @@ def test_jupiter_barycenter_topocentric_date4(de405):
     compare(az.degrees, (156.07088561561997, 270.63795554820535, 359.3596746827537, 4.327425566855523), 0.001 * arcsecond)
 
 def test_saturn_barycenter_topocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2208,7 +2208,7 @@ def test_saturn_barycenter_topocentric_date0(de405):
     compare(az.degrees, 306.01978569992787, 0.001 * arcsecond)
 
 def test_saturn_barycenter_topocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2234,7 +2234,7 @@ def test_saturn_barycenter_topocentric_date1(de405):
     compare(az.degrees, 76.8837444919445, 0.001 * arcsecond)
 
 def test_saturn_barycenter_topocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2260,7 +2260,7 @@ def test_saturn_barycenter_topocentric_date2(de405):
     compare(az.degrees, 341.22347230453323, 0.001 * arcsecond)
 
 def test_saturn_barycenter_topocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2286,7 +2286,7 @@ def test_saturn_barycenter_topocentric_date3(de405):
     compare(az.degrees, 238.00627672875672, 0.001 * arcsecond)
 
 def test_saturn_barycenter_topocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5], delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2312,7 +2312,7 @@ def test_saturn_barycenter_topocentric_date4(de405):
     compare(az.degrees, (306.01978569992787, 76.8837444919445, 341.22347230453323, 238.00627672875672), 0.001 * arcsecond)
 
 def test_uranus_barycenter_topocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2338,7 +2338,7 @@ def test_uranus_barycenter_topocentric_date0(de405):
     compare(az.degrees, 156.65256040205296, 0.001 * arcsecond)
 
 def test_uranus_barycenter_topocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2364,7 +2364,7 @@ def test_uranus_barycenter_topocentric_date1(de405):
     compare(az.degrees, 91.80748703145906, 0.001 * arcsecond)
 
 def test_uranus_barycenter_topocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2390,7 +2390,7 @@ def test_uranus_barycenter_topocentric_date2(de405):
     compare(az.degrees, 88.85671230431439, 0.001 * arcsecond)
 
 def test_uranus_barycenter_topocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2416,7 +2416,7 @@ def test_uranus_barycenter_topocentric_date3(de405):
     compare(az.degrees, 74.60219420538265, 0.001 * arcsecond)
 
 def test_uranus_barycenter_topocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5], delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2442,7 +2442,7 @@ def test_uranus_barycenter_topocentric_date4(de405):
     compare(az.degrees, (156.65256040205296, 91.80748703145906, 88.85671230431439, 74.60219420538265), 0.001 * arcsecond)
 
 def test_neptune_barycenter_topocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2468,7 +2468,7 @@ def test_neptune_barycenter_topocentric_date0(de405):
     compare(az.degrees, 117.29043762875409, 0.001 * arcsecond)
 
 def test_neptune_barycenter_topocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2494,7 +2494,7 @@ def test_neptune_barycenter_topocentric_date1(de405):
     compare(az.degrees, 86.51833613444356, 0.001 * arcsecond)
 
 def test_neptune_barycenter_topocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2520,7 +2520,7 @@ def test_neptune_barycenter_topocentric_date2(de405):
     compare(az.degrees, 98.14962081515444, 0.001 * arcsecond)
 
 def test_neptune_barycenter_topocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2546,7 +2546,7 @@ def test_neptune_barycenter_topocentric_date3(de405):
     compare(az.degrees, 106.8092597257607, 0.001 * arcsecond)
 
 def test_neptune_barycenter_topocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5], delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2572,7 +2572,7 @@ def test_neptune_barycenter_topocentric_date4(de405):
     compare(az.degrees, (117.29043762875409, 86.51833613444356, 98.14962081515444, 106.8092597257607), 0.001 * arcsecond)
 
 def test_pluto_barycenter_topocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2598,7 +2598,7 @@ def test_pluto_barycenter_topocentric_date0(de405):
     compare(az.degrees, 147.2138070056058, 0.001 * arcsecond)
 
 def test_pluto_barycenter_topocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2624,7 +2624,7 @@ def test_pluto_barycenter_topocentric_date1(de405):
     compare(az.degrees, 105.3994365631196, 0.001 * arcsecond)
 
 def test_pluto_barycenter_topocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2650,7 +2650,7 @@ def test_pluto_barycenter_topocentric_date2(de405):
     compare(az.degrees, 127.81134408260581, 0.001 * arcsecond)
 
 def test_pluto_barycenter_topocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2676,7 +2676,7 @@ def test_pluto_barycenter_topocentric_date3(de405):
     compare(az.degrees, 157.51785266272373, 0.001 * arcsecond)
 
 def test_pluto_barycenter_topocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5], delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2702,7 +2702,7 @@ def test_pluto_barycenter_topocentric_date4(de405):
     compare(az.degrees, (147.2138070056058, 105.3994365631196, 127.81134408260581, 157.51785266272373), 0.001 * arcsecond)
 
 def test_sun_topocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2728,7 +2728,7 @@ def test_sun_topocentric_date0(de405):
     compare(az.degrees, 258.5550717845957, 0.001 * arcsecond)
 
 def test_sun_topocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2754,7 +2754,7 @@ def test_sun_topocentric_date1(de405):
     compare(az.degrees, 293.95636637272145, 0.001 * arcsecond)
 
 def test_sun_topocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2780,7 +2780,7 @@ def test_sun_topocentric_date2(de405):
     compare(az.degrees, 115.32008451470392, 0.001 * arcsecond)
 
 def test_sun_topocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2806,7 +2806,7 @@ def test_sun_topocentric_date3(de405):
     compare(az.degrees, 286.09632001391725, 0.001 * arcsecond)
 
 def test_sun_topocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5], delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2832,7 +2832,7 @@ def test_sun_topocentric_date4(de405):
     compare(az.degrees, (258.5550717845957, 293.95636637272145, 115.32008451470392, 286.09632001391725), 0.001 * arcsecond)
 
 def test_moon_topocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+    jd = JulianDate(tt=2440423.345833333, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2858,7 +2858,7 @@ def test_moon_topocentric_date0(de405):
     compare(az.degrees, 151.19707488767745, 0.001 * arcsecond)
 
 def test_moon_topocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+    jd = JulianDate(tt=2448031.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2884,7 +2884,7 @@ def test_moon_topocentric_date1(de405):
     compare(az.degrees, 338.13295291812307, 0.001 * arcsecond)
 
 def test_moon_topocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+    jd = JulianDate(tt=2451545.0, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2910,7 +2910,7 @@ def test_moon_topocentric_date2(de405):
     compare(az.degrees, 156.2971102404744, 0.001 * arcsecond)
 
 def test_moon_topocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+    jd = JulianDate(tt=2456164.5, delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -2936,7 +2936,7 @@ def test_moon_topocentric_date3(de405):
     compare(az.degrees, 191.29497427201525, 0.001 * arcsecond)
 
 def test_moon_topocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5], delta_t=0.0)
     earth = de405['earth']
     usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 

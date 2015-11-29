@@ -1,12 +1,10 @@
 """Routines to download Earth orientation data."""
 
+import numpy as np
 import pandas as pd
 from skyfield.iokit import load
 from skyfield.timelib import (delta_t_formula_morrison_and_stephenson_2004,
                               julian_date)
-
-# T = -20 + 32 * t^2 seconds
-# where: t = (year-1820)/100
 
 def morrison_and_stephenson_2004_table():
     """Table of smoothed Delta T values from Morrison and Stephenson, 2004."""
@@ -66,3 +64,7 @@ def build_delta_t_table():
     end = pd.DataFrame({'tt': [tt], 'delta_t': [f(tt)]})
 
     return pd.concat([start, s, h, m, p, end])
+
+def delta_t(cache):
+    table = build_delta_t_table()
+    return np.array([table.tt.values, table.delta_t.values])

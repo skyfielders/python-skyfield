@@ -5,12 +5,14 @@ from datetime import date
 from numpy import save
 from skyfield import iokit
 from skyfield import timelib
+from . import earth_orientation
 
 _dirname = os.path.dirname(__file__)
 
 cache = iokit.Cache('.')
 cache.npy_dirname = _dirname
 functions = set([
+    earth_orientation.delta_t,
     timelib.usno_leapseconds,
     ])
 
@@ -22,15 +24,6 @@ def rebuild(remove_old_files=True):
         python -m skyfield.data
 
     """
-    from skyfield import iokit
-    from skyfield import timelib
-
-    cache = iokit.Cache('.')
-    cache.npy_dirname = _dirname
-    functions = set([
-        timelib.usno_leapseconds,
-        ])
-
     if remove_old_files:
         for filename in os.listdir(_dirname):
             if filename.endswith('.npy'):

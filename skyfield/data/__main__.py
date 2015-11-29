@@ -1,2 +1,2 @@
-import skyfield.data
-skyfield.data.rebuild()
+import skyfield.data.cachelib
+skyfield.data.cachelib.rebuild()
