@@ -176,9 +176,7 @@ class JulianDate(object):
         self.tt = tt = _to_array(tt)
         self.shape = getattr(tt, 'shape', ())
 
-        if delta_t is None:
-            self.delta_t = interpolate_delta_t(cache, tt)
-        else:
+        if delta_t is not None:
             self.delta_t = _to_array(delta_t)
 
     def __len__(self):
@@ -467,6 +465,10 @@ class JulianDate(object):
         if name == 'ut1':
             self.ut1 = ut1 = self.tt - self.delta_t / DAY_S
             return ut1
+
+        if name == 'delta_t':
+            self.delta_t = delta_t = interpolate_delta_t(self.cache, self.tt)
+            return delta_t
 
         if name == 'gmst':
             self.gmst = gmst = sidereal_time(self)
