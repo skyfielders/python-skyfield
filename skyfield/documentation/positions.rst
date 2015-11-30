@@ -25,26 +25,26 @@ together with all of the attributes and methods that they support:
 
     Barycentric, Astrometric, or Apparent position
      │
-     ├── `position <api.html#Position.position>`_.au         →   x, y, z
-     ├── `position <api.html#Position.position>`_.km         →   x, y, z
+     ├── `position <api.html#skyfield.positionlib.ICRS.position>`_.au         →   x, y, z
+     ├── `position <api.html#skyfield.positionlib.ICRS.position>`_.km         →   x, y, z
      ├── `position.to(unit) <api.html#Distance.to>`_   →   x, y, z
      │
-     ├── `velocity <api.html#Position.velocity>`_.au_per_d   →   xdot, ydot, zdot
-     ├── `velocity <api.html#Position.velocity>`_.km_per_s   →   xdot, ydot, zdot
+     ├── `velocity <api.html#skyfield.positionlib.ICRS.velocity>`_.au_per_d   →   xdot, ydot, zdot
+     ├── `velocity <api.html#skyfield.positionlib.ICRS.velocity>`_.km_per_s   →   xdot, ydot, zdot
      ├── `velocity.to(unit) <api.html#Distance.to>`_   →   xdot, ydot, zdot
      │
-     ├── `radec(epoch=jd) <api.html#Position.radec>`_     →   ra, dec, distance
-     ├── `radec() <api.html#Position.radec>`_             →   ra, dec, distance
-     ├── `distance() <api.html#Position.distance>`_          →   distance
+     ├── `radec(epoch=jd) <api.html#skyfield.positionlib.ICRS.radec>`_     →   ra, dec, distance
+     ├── `radec() <api.html#skyfield.positionlib.ICRS.radec>`_             →   ra, dec, distance
+     ├── `distance() <api.html#skyfield.positionlib.ICRS.distance>`_          →   distance
      │
-     ├── `ecliptic_position() <api.html#Position.ecliptic_position>`_ →   x, y, z
-     ├── `ecliptic_latlon() <api.html#Position.ecliptic_latlon>`_   →   lat, lon, distance
-     ├── `galactic_position() <api.html#Position.galactic_position>`_ →   x, y, z
-     └── `galactic_latlon() <api.html#Position.galactic_latlon>`_   →   lat, lon, distance
+     ├── `ecliptic_position() <api.html#skyfield.positionlib.ICRS.ecliptic_position>`_ →   x, y, z
+     ├── `ecliptic_latlon() <api.html#skyfield.positionlib.ICRS.ecliptic_latlon>`_   →   lat, lon, distance
+     ├── `galactic_position() <api.html#skyfield.positionlib.ICRS.galactic_position>`_ →   x, y, z
+     └── `galactic_latlon() <api.html#skyfield.positionlib.ICRS.galactic_latlon>`_   →   lat, lon, distance
 
     Apparent position only
      │
-     └── `altaz(…) <api.html#Position.altaz>`_            →   alt, az, distance
+     └── `altaz(…) <api.html#skyfield.positionlib.Apparent.altaz>`_            →   alt, az, distance
 
     Angle like ra, dec, alt, and az
      │
