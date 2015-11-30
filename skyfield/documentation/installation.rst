@@ -43,7 +43,7 @@ You can protect your project from any abrupt API changes
 by pinning a specific version of Skyfield
 in your ``requirements.txt`` or ``setup.py`` or install instructions::
 
-    skyfield==0.5
+    skyfield==0.6
 
 By preventing Skyfield from being upgraded
 until you are ready to advance the version number yourself,
@@ -64,9 +64,9 @@ Change Log
 0.6
 ---
 
-* Skyfield now automatically generates an estimate for `delta_t` if the
-  user does not supply their own `delta_t` when specifying a date.  This
-  should make altitude and azimuth measurements much more precise.
+* Skyfield now generates its own estimate for ``delta_t`` if the user
+  does not supply their own ``delta_t=`` keyword when specifying a date.
+  This should make altitude and azimuth angles much more precise.
 
 * The leap-second table has been updated to include 2015 July 1.
 
