@@ -34,12 +34,12 @@ def test_instantiate_8077_hoyle():
                             hoyle_8077['mean_anomaly'],
                             hoyle_8077['epoch'])
 
-    assert hoyle != None
+    assert hoyle is not None
 
 def test_instantiate_coordinates():
     coords = ICRCoordinates(x=500.25, y=10.76, z=0.1125)
 
-    assert coords != None
+    assert coords is not None
 
 def test_coordinatesEquivalence():
     coords_the_first = ICRCoordinates(x=500.25, y=10.76, z=0.1125)
