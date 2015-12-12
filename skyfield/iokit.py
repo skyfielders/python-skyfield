@@ -13,14 +13,14 @@ except:
     lockf = None
 
 try:
-    from urllib.request import urlopen, url2pathname
+    from urllib.request import urlopen
 except:
-    from urllib2 import urlopen, url2pathname
+    from urllib2 import urlopen
 
 _missing = object()
 
 
-def load(filename, autodownload=True, verbose=True):
+def load(filename, directory='.', autodownload=True, verbose=True):
     """Load the given file, possibly downloading it if it is not present."""
     if '/' in filename:
         url = filename
@@ -31,13 +31,17 @@ def load(filename, autodownload=True, verbose=True):
         cls = SpiceKernel
     else:
         raise ValueError('Skyfield does not recognize that file extension')
-    if not os.path.exists(filename):
+    if directory == '.':
+        path = filename
+    else:
+        directory = os.path.expanduser(directory)
+        path = os.path.join(directory, filename)
+    if not os.path.exists(path):
         if not autodownload:
-            raise IOError('you specified autodownload=False but {!r} cannot'
-                          ' be found in the current directory'
-                          .format(filename))
-        download(url, verbose)
-    return open(filename) if (cls is None) else cls(filename)
+            raise IOError('you specified autodownload=False but the file'
+                          ' does not exist: {}'.format(path))
+        download(url, path, verbose=verbose)
+    return open(path) if (cls is None) else cls(path)
 
 
 def url_for(filename):
@@ -52,34 +56,44 @@ def url_for(filename):
                          .format(filename))
 
 
-def download(url, verbose=True, blocksize=128*1024):
+def download(url, path, verbose=None, blocksize=128*1024):
     """Download a file from a URL, possibly displaying a progress bar.
 
-    Raises an IOError if there is any problem downloading the file or
-    writing it to disk.
+    Saves the output to the file named by `path`.  If the URL cannot be
+    downloaded or the file cannot be written, an IOError is raised.
+
+    Normally, if the standard error output is a terminal, then a
+    progress bar is displayed to keep the user entertained.  Specify
+    `verbose=True` or `verbose=False` to control this behavior.
 
     """
-    filename = os.path.basename(url2pathname(url))
-    if os.path.exists(filename):
-        return filename
-    tempname = filename + '.download'
+    tempname = path + '.download'
     try:
         connection = urlopen(url)
     except Exception as e:
-        raise IOError('cannot fetch file {0!r} from URL {1} because {2}'
-                      .format(filename, url, e))
+        raise IOError('cannot get {1} because {2}'.format(url, e))
+    if verbose is None:
+        verbose = sys.stderr.isatty()
     if verbose:
-        bar = ProgressBar(filename)
+        bar = ProgressBar(path)
         content_length = int(connection.headers.get('content-length', -1))
-    with open(tempname, 'ab') as w:
+
+    # Python open() provides no way to achieve O_CREAT without also
+    # truncating the file, which would ruin the work of another process
+    # that is trying to download the same file at the same time.  So:
+
+    flags = getattr(os, 'O_BINARY', 0) | os.O_CREAT | os.O_RDWR
+    fd = os.open(tempname, flags)
+    with os.fdopen(fd, 'wb') as w:
         try:
             if lockf is not None:
                 fd = w.fileno()
                 lockf(fd, LOCK_EX)           # only one download at a time
-                if os.path.exists(filename): # did someone else finish first?
+                if os.path.exists(path): # did someone else finish first?
                     if os.path.exists(tempname):
                         os.unlink(tempname)
-                    return filename
+                    return
+            w.seek(0)
             length = 0
             while True:
                 data = connection.read(blocksize)
@@ -90,30 +104,29 @@ def download(url, verbose=True, blocksize=128*1024):
                 if verbose:
                     bar.report(length, content_length)
             w.flush()
+            if lockf is not None:
+                # On Unix, rename while still protected by the lock.
+                try:
+                    os.rename(tempname, path)
+                except Exception as e:
+                    raise IOError('error renaming {0} to {1} - {2}'.format(
+                        tempname, path, e))
         except Exception as e:
             raise IOError('error getting {0} - {1}'.format(url, e))
         finally:
             if lockf is not None:
-                # On Unix, rename while still protected by the lock.
-                try:
-                    os.rename(tempname, filename)
-                except Exception as e:
-                    raise IOError('error renaming {0} to {1} - {2}'.format(
-                        tempname, filename, e))
                 lockf(fd, LOCK_UN)
     if lockf is None:
-        # On Windows, rename out here because the file needs to be closed.
+        # On Windows, rename here because the file needs to be closed first.
         try:
-            os.rename(tempname, filename)
+            os.rename(tempname, path)
         except Exception as e:
             raise IOError('error renaming {0} to {1} - {2}'.format(
-                tempname, filename, e))
-    return filename
-
+                tempname, path, e))
 
 class ProgressBar(object):
-    def __init__(self, filename):
-        self.filename = filename
+    def __init__(self, path):
+        self.filename = os.path.basename(path)
         self.t0 = 0
 
     def report(self, bytes_so_far, bytes_total):
@@ -125,8 +138,8 @@ class ProgressBar(object):
         self.t0 = time()
         bar = '#' * (percent // 3)
         print('\r[{0:33}] {1:3}% {2}'.format(bar, percent, self.filename),
-              end='\n' if (percent == 100) else '')
-        sys.stdout.flush()
+              end='\n' if (percent == 100) else '', file=sys.stderr)
+        sys.stderr.flush()
 
 
 class Cache(object):
