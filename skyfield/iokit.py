@@ -53,7 +53,12 @@ def url_for(filename):
 
 
 def download(url, verbose=True, blocksize=128*1024):
-    """Download a file from a URL, possibly displaying a progress bar."""
+    """Download a file from a URL, possibly displaying a progress bar.
+
+    Raises an IOError if there is any problem downloading the file or
+    writing it to disk.
+
+    """
     filename = os.path.basename(url2pathname(url))
     if os.path.exists(filename):
         return filename
@@ -63,16 +68,18 @@ def download(url, verbose=True, blocksize=128*1024):
     except Exception as e:
         raise IOError('cannot fetch file {0!r} from URL {1} because {2}'
                       .format(filename, url, e))
-    content_length = int(connection.headers.get('content-length', -1))
     if verbose:
         bar = ProgressBar(filename)
+        content_length = int(connection.headers.get('content-length', -1))
     with open(tempname, 'ab') as w:
         try:
             if lockf is not None:
                 fd = w.fileno()
-                lockf(fd, LOCK_EX)
-                if os.fstat(fd).st_size:
-                    return  # someone else wrote the file contents
+                lockf(fd, LOCK_EX)           # only one download at a time
+                if os.path.exists(filename): # did someone else finish first?
+                    if os.path.exists(tempname):
+                        os.unlink(tempname)
+                    return filename
             length = 0
             while True:
                 data = connection.read(blocksize)
@@ -83,12 +90,24 @@ def download(url, verbose=True, blocksize=128*1024):
                 if verbose:
                     bar.report(length, content_length)
             w.flush()
-            os.rename(tempname, filename)
-        except KeyboardInterrupt:# Exception as e:
+        except Exception as e:
             raise IOError('error getting {0} - {1}'.format(url, e))
         finally:
             if lockf is not None:
+                # On Unix, rename while still protected by the lock.
+                try:
+                    os.rename(tempname, filename)
+                except Exception as e:
+                    raise IOError('error renaming {0} to {1} - {2}'.format(
+                        tempname, filename, e))
                 lockf(fd, LOCK_UN)
+    if lockf is None:
+        # On Windows, rename out here because the file needs to be closed.
+        try:
+            os.rename(tempname, filename)
+        except Exception as e:
+            raise IOError('error renaming {0} to {1} - {2}'.format(
+                tempname, filename, e))
     return filename
 
 
