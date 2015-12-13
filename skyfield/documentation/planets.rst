@@ -40,22 +40,22 @@ You can ``print()`` an ephemeris to learn which objects it supports.
 .. testoutput::
 
     SPICE kernel file 'de421.bsp' has 15 segments
-        JD 2414864.5 - JD 2471184.5  (1899-07-28 through 2053-10-08)
-              0 -> 1    SOLAR SYSTEM BARYCENTER -> MERCURY BARYCENTER
-              0 -> 2    SOLAR SYSTEM BARYCENTER -> VENUS BARYCENTER
-              0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
-              0 -> 4    SOLAR SYSTEM BARYCENTER -> MARS BARYCENTER
-              0 -> 5    SOLAR SYSTEM BARYCENTER -> JUPITER BARYCENTER
-              0 -> 6    SOLAR SYSTEM BARYCENTER -> SATURN BARYCENTER
-              0 -> 7    SOLAR SYSTEM BARYCENTER -> URANUS BARYCENTER
-              0 -> 8    SOLAR SYSTEM BARYCENTER -> NEPTUNE BARYCENTER
-              0 -> 9    SOLAR SYSTEM BARYCENTER -> PLUTO BARYCENTER
-              0 -> 10   SOLAR SYSTEM BARYCENTER -> SUN
-              3 -> 301  EARTH BARYCENTER -> MOON
-              3 -> 399  EARTH BARYCENTER -> EARTH
-              1 -> 199  MERCURY BARYCENTER -> MERCURY
-              2 -> 299  VENUS BARYCENTER -> VENUS
-              4 -> 499  MARS BARYCENTER -> MARS
+      JD 2414864.50 - JD 2471184.50  (1899-07-28 through 2053-10-08)
+          0 -> 1    SOLAR SYSTEM BARYCENTER -> MERCURY BARYCENTER
+          0 -> 2    SOLAR SYSTEM BARYCENTER -> VENUS BARYCENTER
+          0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
+          0 -> 4    SOLAR SYSTEM BARYCENTER -> MARS BARYCENTER
+          0 -> 5    SOLAR SYSTEM BARYCENTER -> JUPITER BARYCENTER
+          0 -> 6    SOLAR SYSTEM BARYCENTER -> SATURN BARYCENTER
+          0 -> 7    SOLAR SYSTEM BARYCENTER -> URANUS BARYCENTER
+          0 -> 8    SOLAR SYSTEM BARYCENTER -> NEPTUNE BARYCENTER
+          0 -> 9    SOLAR SYSTEM BARYCENTER -> PLUTO BARYCENTER
+          0 -> 10   SOLAR SYSTEM BARYCENTER -> SUN
+          3 -> 301  EARTH BARYCENTER -> MOON
+          3 -> 399  EARTH BARYCENTER -> EARTH
+          1 -> 199  MERCURY BARYCENTER -> MERCURY
+          2 -> 299  VENUS BARYCENTER -> VENUS
+          4 -> 499  MARS BARYCENTER -> MARS
 
 Bodies in JPL ephemeris files are each identified by an integer,
 but Skyfield translates them so that you do not have to remember
