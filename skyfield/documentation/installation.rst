@@ -43,7 +43,7 @@ You can protect your project from any abrupt API changes
 by pinning a specific version of Skyfield
 in your ``requirements.txt`` or ``setup.py`` or install instructions::
 
-    skyfield==0.6
+    skyfield==0.6.1
 
 By preventing Skyfield from being upgraded
 until you are ready to advance the version number yourself,
@@ -60,6 +60,18 @@ Good luck!
 
 Change Log
 ==========
+
+0.6.1
+-----
+
+* Users can now supply a target ``directory`` when downloading a file::
+
+    load('de421.bsp', directory='~/ephemerides')
+
+* Fix: removed inadvertent dependency on the Pandas library.
+
+* Fix: ``load()`` was raising a ``PermissionError`` on Windows after a
+  successful download when it tried to rename the new file.
 
 0.6
 ---
