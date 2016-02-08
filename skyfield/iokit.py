@@ -71,7 +71,7 @@ def download(url, path, verbose=None, blocksize=128*1024):
     try:
         connection = urlopen(url)
     except Exception as e:
-        raise IOError('cannot get {1} because {2}'.format(url, e))
+        raise IOError('cannot get {0} because {1}'.format(url, e))
     if verbose is None:
         verbose = sys.stderr.isatty()
     if verbose:
