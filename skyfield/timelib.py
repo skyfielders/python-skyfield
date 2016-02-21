@@ -111,9 +111,8 @@ class TimeScales(object):
     def __init__(self):
         from skyfield.data.cachelib import cache
         self.leap_dates, self.leap_offsets = cache.run(usno_leapseconds)
-        def delta_t():  # TODO
-            "Fake placeholder function, until I rewrite how the cache works."
-        self.delta_t_table = cache.run(delta_t)
+        from skyfield.iokit import load_bundled_npy
+        self.delta_t_table = load_bundled_npy('delta_t')
 
 class JulianDate(object):
     """A single date and time, or an array, stored as a Julian date.

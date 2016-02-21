@@ -3,6 +3,7 @@ import os
 import numpy as np
 import sys
 from datetime import datetime, timedelta
+from pkgutil import get_data
 from time import time
 
 from .jpllib import SpiceKernel
@@ -13,11 +14,21 @@ except:
     lockf = None
 
 try:
+    from io import BytesIO
+except:
+    from StringIO import StringIO as BytesIO
+
+try:
     from urllib.request import urlopen
 except:
     from urllib2 import urlopen
 
 _missing = object()
+
+
+def load_bundled_npy(filename):
+    data = get_data('skyfield', 'data/{}.npy'.format(filename))
+    return np.load(BytesIO(data))
 
 
 def load(filename, directory='.', autodownload=True, verbose=True):
@@ -52,8 +63,8 @@ def url_for(filename):
         elif filename.startswith('jup'):
             return ('http://naif.jpl.nasa.gov/pub/naif/generic_kernels'
                     '/spk/satellites/' + filename)
-        raise ValueError('Skyfield does not know where to download {!r} from'
-                         .format(filename))
+    raise ValueError('Skyfield does not know where to download {!r} from'
+                     .format(filename))
 
 
 def download(url, path, verbose=None, blocksize=128*1024):

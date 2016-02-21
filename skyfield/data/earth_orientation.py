@@ -70,6 +70,6 @@ def build_delta_t_table():
 
     return pd.concat([start, s, h, m, p, end])
 
-def delta_t(cache):
+def delta_t():
     table = build_delta_t_table()
     return np.array([table.tt.values, table.delta_t.values])
