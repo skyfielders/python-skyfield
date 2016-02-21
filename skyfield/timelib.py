@@ -108,11 +108,24 @@ class TimeScales(object):
     """The data necessary to convert between different time scales.
 
     """
+    utcnow = datetime.utcnow
+
     def __init__(self):
         from skyfield.iokit import load_bundled_npy
         self.leap_dates, self.leap_offsets = load_bundled_npy(
             'usno_leapseconds')
         self.delta_t_table = load_bundled_npy('delta_t')
+
+    def now(self):
+        """Return a `JulianDate` for the current date and time.
+
+        For the return value to be correct, your operating system time
+        and timezone settings must be set so that the Python Standard
+        Library constructor ``datetime.datetime.utcnow()`` returns a
+        correct UTC date and time.
+
+        """
+        return JulianDate(utc=self.utcnow().replace(tzinfo=utc), ts=self)
 
 class JulianDate(object):
     """A single date and time, or an array, stored as a Julian date.
@@ -142,9 +155,10 @@ class JulianDate(object):
         JulianDate(tdb=(year, month, day, hour, minute, second))
 
     """
-    def __init__(self, utc=None, tai=None, tt=None, tdb=None, delta_t=None):
+    def __init__(self, utc=None, tai=None, tt=None, tdb=None, delta_t=None,
+                 ts=None):
 
-        self.ts = TimeScales()
+        self.ts = TimeScales() if (ts is None) else ts
 
         if tai is None and utc is not None:
             leap_dates, leap_offsets = (
@@ -495,15 +509,10 @@ class JulianDate(object):
 
 
 def now():
-    """Return the current date and time as a `JulianDate` object.
-
-    For the return value to be correct, your operating system time and
-    timezone settings must be set so that the Python Standard Library
-    constructor ``datetime.datetime.utcnow()`` returns a correct UTC
-    date and time.
+    """Obsolete helper function.
 
     """
-    return JulianDate(utc=datetime.utcnow().replace(tzinfo=utc))
+    return TimeScales().now()
 
 def julian_day(year, month=1, day=1):
     """Given a proleptic Gregorian calendar date, return a Julian day int."""

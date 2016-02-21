@@ -28,7 +28,7 @@ Positions
 Time
 ====
 
-.. autofunction:: skyfield.api.now
+.. autoclass:: skyfield.api.TimeScales
 
 .. autoclass:: skyfield.api.JulianDate
    :members:

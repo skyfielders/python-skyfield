@@ -16,12 +16,13 @@
 
 .. testcode::
 
-    from skyfield.api import load, now
+    from skyfield.api import load, TimeScales
 
+    ts = TimeScales()
     planets = load('de421.bsp')
     earth, mars = planets['earth'], planets['mars']
 
-    jd = now()
+    jd = ts.now()
     position = earth.at(jd).observe(mars)
     ra, dec, distance = position.radec()
 
