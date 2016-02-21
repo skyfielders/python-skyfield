@@ -66,9 +66,9 @@ def takes_julian_date(function):
 
     """
     def wrapper(self, jd=None, utc=None, tai=None, tt=None, tdb=None,
-                delta_t=None, cache=None):
+                delta_t=None):
         if jd is None:
-            jd = JulianDate(utc, tai, tt, tdb, delta_t, cache)
+            jd = JulianDate(utc, tai, tt, tdb, delta_t)
         elif not isinstance(jd, JulianDate):
             if isinstance(jd, tuple):
                 s = _tuple_error
@@ -104,6 +104,17 @@ def _to_array(value):
 
 tt_minus_tai = array(32.184 / DAY_S)
 
+class TimeScales(object):
+    """The data necessary to convert between different time scales.
+
+    """
+    def __init__(self):
+        from skyfield.data.cachelib import cache
+        self.leap_dates, self.leap_offsets = cache.run(usno_leapseconds)
+        def delta_t():  # TODO
+            "Fake placeholder function, until I rewrite how the cache works."
+        self.delta_t_table = cache.run(delta_t)
+
 class JulianDate(object):
     """A single date and time, or an array, stored as a Julian date.
 
@@ -132,15 +143,13 @@ class JulianDate(object):
         JulianDate(tdb=(year, month, day, hour, minute, second))
 
     """
-    def __init__(self, utc=None, tai=None, tt=None, tdb=None,
-                 delta_t=None, cache=None):
+    def __init__(self, utc=None, tai=None, tt=None, tdb=None, delta_t=None):
 
-        if cache is None:
-            from skyfield.data.cachelib import cache
-        self.cache = cache
+        self.ts = TimeScales()
 
         if tai is None and utc is not None:
-            leap_dates, leap_offsets = cache.run(usno_leapseconds)
+            leap_dates, leap_offsets = (
+                self.ts.leap_dates, self.ts.leap_offsets)
             if isinstance(utc, datetime):
                 tai = _utc_datetime_to_tai(leap_dates, leap_offsets, utc)
             elif isinstance(utc, date):
@@ -388,7 +397,8 @@ class JulianDate(object):
 
         """
         tai = self.tai + offset
-        leap_dates, leap_offsets = self.cache.run(usno_leapseconds)
+        leap_dates = self.ts.leap_dates
+        leap_offsets = self.ts.leap_offsets
         leap_reverse_dates = leap_dates + leap_offsets / DAY_S
         i = searchsorted(leap_reverse_dates, tai, 'right')
         j = tai - leap_offsets[i] / DAY_S
@@ -404,7 +414,8 @@ class JulianDate(object):
     def _utc_float(self):
         """Return UTC as a floating point Julian date."""
         tai = self.tai
-        leap_dates, leap_offsets = self.cache.run(usno_leapseconds)
+        leap_dates = self.ts.leap_dates
+        leap_offsets = self.ts.leap_offsets
         leap_reverse_dates = leap_dates + leap_offsets / DAY_S
         i = searchsorted(leap_reverse_dates, tai, 'right')
         return tai - leap_offsets[i] / DAY_S
@@ -467,7 +478,7 @@ class JulianDate(object):
             return ut1
 
         if name == 'delta_t':
-            self.delta_t = delta_t = interpolate_delta_t(self.cache, self.tt)
+            self.delta_t = delta_t = interpolate_delta_t(self.ts, self.tt)
             return delta_t
 
         if name == 'gmst':
@@ -597,11 +608,9 @@ def usno_leapseconds(cache):
 
     return array([dates, offsets])
 
-def interpolate_delta_t(cache, tt):
+def interpolate_delta_t(ts, tt):
     """Given TT, return interpolated Delta T, falling back to a formula."""
-    def delta_t():  # TODO
-        "Fake placeholder function, until I rewrite how the cache works."
-    x, y = cache.run(delta_t)
+    x, y = ts.delta_t_table
     delta_t = interp(tt, x, y, nan, nan)
     missing = isnan(delta_t)
     if missing.any():
