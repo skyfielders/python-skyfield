@@ -1,5 +1,5 @@
 import gzip
-from skyfield.data.cachelib import cache as default_cache
+from skyfield import iokit
 from skyfield.functions import to_polar
 from skyfield.starlib import Star
 from skyfield.timelib import T0
@@ -25,14 +25,14 @@ def parse(line):
     star.dec = Angle(radians=dec)
     return star
 
-def load(match_function, cache=default_cache):
+def load(match_function):
     """Yield the Hipparcos stars for which `match_function(line)` is true."""
-    with cache.open_url(url, days_old=9999) as f:
+    with iokit.load(url) as f:
         for line in gzip.GzipFile(fileobj=f):
             if match_function(line):
                 yield parse(line)
 
-def get(which, cache=default_cache):
+def get(which):
     """Return a single star, or a list of stars, from the Hipparcos catalog.
 
     A call like `get('54061')` returns a single `Star` object, while

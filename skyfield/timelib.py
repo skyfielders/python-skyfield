@@ -109,9 +109,9 @@ class TimeScales(object):
 
     """
     def __init__(self):
-        from skyfield.data.cachelib import cache
-        self.leap_dates, self.leap_offsets = cache.run(usno_leapseconds)
         from skyfield.iokit import load_bundled_npy
+        self.leap_dates, self.leap_offsets = load_bundled_npy(
+            'usno_leapseconds')
         self.delta_t_table = load_bundled_npy('delta_t')
 
 class JulianDate(object):
