@@ -508,12 +508,6 @@ class JulianDate(object):
         return self.tt == other_jd.tt
 
 
-def now():
-    """Obsolete helper function.
-
-    """
-    return Timescale().now()
-
 def julian_day(year, month=1, day=1):
     """Given a proleptic Gregorian calendar date, return a Julian day int."""
     janfeb = month < 3

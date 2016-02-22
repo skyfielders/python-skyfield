@@ -139,7 +139,7 @@ to represent the year, month, and day of a calendar date:
 
 And by scraping together the minimal support for UTC
 that exists in the Python Standard Library,
-Skyfield is able to offer a :func:`~skyfield.api.now()` function
+Skyfield is able to offer a :func:`~skyfield.timelib.Timescale.now()` function
 that reads your system clock
 and returns the current time as a Julian date object
 (assuming that your operating system clock is correct
@@ -147,11 +147,12 @@ and configured with the correct time zone):
 
 .. testcode::
 
-    from skyfield.api import now
+    from skyfield.api import Timescale
 
     # Asking the current date and time
 
-    jd = now()
+    ts = Timescale()
+    jd = ts.now()
     print(jd.utc_jpl())
 
 .. testoutput::
