@@ -16,9 +16,9 @@
 
 .. testcode::
 
-    from skyfield.api import load, TimeScales
+    from skyfield.api import load, Timescale
 
-    ts = TimeScales()
+    ts = Timescale()
     planets = load('de421.bsp')
     earth, mars = planets['earth'], planets['mars']
 

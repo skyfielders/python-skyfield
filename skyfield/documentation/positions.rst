@@ -91,9 +91,9 @@ as its argument and return a corresponding number of positions.
 
   .. testcode::
 
-    from skyfield.api import TimeScales, load
+    from skyfield.api import Timescale, load
 
-    ts = TimeScales()
+    ts = Timescale()
     jd = ts.now()
     planets = load('de421.bsp')
     earth = planets['earth']
@@ -123,9 +123,9 @@ as its argument and return a corresponding number of positions.
 
   ::
 
-    from skyfield.api import Star, TimeScales
+    from skyfield.api import Star, Timescale
 
-    ts = TimeScales()
+    ts = Timescale()
     jd = ts.now()
     boston = earth.topos('42.3583 N', '71.0603 W')
     barnard = Star(ra_hours=(17, 57, 48.49803),
@@ -158,9 +158,9 @@ as its argument and return a corresponding number of positions.
 
   .. testcode::
 
-    from skyfield.api import TimeScales
+    from skyfield.api import Timescale
 
-    ts = TimeScales()
+    ts = Timescale()
     jd = ts.now()
     boston = earth.topos('42.3583 N', '71.0603 W')
     #satellite = earth.satellite(tle_text) # TODO

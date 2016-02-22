@@ -104,7 +104,7 @@ def _to_array(value):
 
 tt_minus_tai = array(32.184 / DAY_S)
 
-class TimeScales(object):
+class Timescale(object):
     """The data necessary to convert between different time scales.
 
     """
@@ -158,7 +158,7 @@ class JulianDate(object):
     def __init__(self, utc=None, tai=None, tt=None, tdb=None, delta_t=None,
                  ts=None):
 
-        self.ts = TimeScales() if (ts is None) else ts
+        self.ts = Timescale() if (ts is None) else ts
 
         if tai is None and utc is not None:
             leap_dates, leap_offsets = (
@@ -512,7 +512,7 @@ def now():
     """Obsolete helper function.
 
     """
-    return TimeScales().now()
+    return Timescale().now()
 
 def julian_day(year, month=1, day=1):
     """Given a proleptic Gregorian calendar date, return a Julian day int."""
