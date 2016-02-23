@@ -14,6 +14,9 @@ de430_url = base + '/planets/de430.bsp'
 de431_url = base + '/planets/de431.bsp'
 jup310_url = base + '/satellites/jup310.bsp'
 
+def ts():
+    yield api.Timescale()
+
 def compare(value, expected_value, epsilon):
     if hasattr(value, 'shape') or hasattr(expected_value, 'shape'):
         assert max(abs(value - expected_value)) <= epsilon
@@ -44,9 +47,9 @@ def test_galactic_frame():
     compare(glat.degrees, -8.047315, 0.005)  # TODO: awful! Track this down.
     compare(glon.degrees, 187.221794, 0.005)
 
-def test_callisto_geometry():
+def test_callisto_geometry(ts):
     e = api.load('jup310.bsp')
-    a = e['earth'].geometry_of('callisto').at(tdb=2471184.5)
+    a = e['earth'].geometry_of('callisto').at(ts.tdb(2471184.5))
     compare(a.position.au,
       [-4.884815926454119E+00, -3.705745549073268E+00, -1.493487818022234E+00],
       0.001 * meter)

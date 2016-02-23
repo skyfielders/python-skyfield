@@ -218,7 +218,6 @@ class Geometry(object):
             ' {0}'.format(c)
             for c in self.center_chain + self.target_chain))
 
-    @takes_julian_date
     def at(self, jd):
         """Return the geometric Cartesian position and velocity."""
         pos, vel = _tally(self.center_chain, self.target_chain, jd)
