@@ -635,7 +635,7 @@ and provide it to your Julian date manually:
 
 .. testcode::
 
-    JulianDate(utc=(2014, 1, 1), delta_t=67.2810)
+    Timescale(delta_t=67.2810).utc((2014, 1, 1))
 
 .. _date-cache:
 

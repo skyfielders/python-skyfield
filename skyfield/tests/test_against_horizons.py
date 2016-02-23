@@ -64,7 +64,7 @@ def test_callisto_astrometric():
 
 def test_boston_geometry():
     e = api.load('jup310.bsp')
-    jd = api.JulianDate(tdb=(2015, 3, 2), delta_t=67.185390 + 0.5285957)
+    jd = api.Timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
     a = boston.geometry_of('earth').at(jd)
@@ -74,7 +74,7 @@ def test_boston_geometry():
 
 def test_moon_from_boston_geometry():
     e = api.load('de430.bsp')
-    jd = api.JulianDate(tdb=(2015, 3, 2), delta_t=67.185390 + 0.5285957)
+    jd = api.Timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
     a = boston.geometry_of('moon').at(jd)
@@ -84,7 +84,7 @@ def test_moon_from_boston_geometry():
 
 def test_moon_from_boston_astrometric():
     e = api.load('de430.bsp')
-    jd = api.JulianDate(tdb=(2015, 3, 2), delta_t=67.185390 + 0.5285957)
+    jd = api.Timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
     a = boston.at(jd).observe(e['moon'])

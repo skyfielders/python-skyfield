@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from numpy import array
 from skyfield import api
 from skyfield.sgp4lib import EarthSatellite, TEME_to_ITRF
-from skyfield.timelib import JulianDate, utc
+from skyfield.timelib import Timescale, JulianDate, utc
 
 iss_tle = ("""\
 ISS (ZARYA)             \n\
@@ -40,7 +40,7 @@ def test_iss_altitude_computed_with_bcrs(iss_transit):
 
     cst = timedelta(hours=-6) #, minutes=1)
     dt = dt - cst
-    jd = JulianDate(utc=dt, delta_t=67.2091)
+    jd = Timescale(delta_t=67.2091).utc(dt)
 
     lines = iss_tle.splitlines()
     s = EarthSatellite(lines, None)
@@ -58,7 +58,7 @@ def test_iss_altitude_computed_with_gcrs(iss_transit):
 
     cst = timedelta(hours=-6) #, minutes=1)
     dt = dt - cst
-    jd = JulianDate(utc=dt, delta_t=67.2091)
+    jd = Timescale(delta_t=67.2091).utc(dt)
 
     lines = iss_tle.splitlines()
     s = EarthSatellite(lines, None)

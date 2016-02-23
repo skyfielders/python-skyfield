@@ -110,11 +110,15 @@ class Timescale(object):
     """
     utcnow = datetime.utcnow
 
-    def __init__(self):
+    def __init__(self, delta_t=None):
         from skyfield.iokit import load_bundled_npy
         self.leap_dates, self.leap_offsets = load_bundled_npy(
             'usno_leapseconds')
-        self.delta_t_table = load_bundled_npy('delta_t')
+        if delta_t is None:
+            self.delta_t_table = load_bundled_npy('delta_t')
+        else:
+            # TODO: make this pretty.  Can this use inf and -inf instead?
+            self.delta_t_table = array([[-1e99, 1e99], [delta_t, delta_t]])
 
     def now(self):
         """Return a `JulianDate` for the current date and time.
@@ -126,6 +130,18 @@ class Timescale(object):
 
         """
         return JulianDate(utc=self.utcnow().replace(tzinfo=utc), ts=self)
+
+    def utc(self, utc):
+        """Return the JulianDate corresponding to a specific moment in UTC."""
+        return JulianDate(utc=utc, ts=self)
+
+    def tt(self, tt):
+        """Return the JulianDate corresponding to a specific moment in TT."""
+        return JulianDate(tt=tt, ts=self)
+
+    def tdb(self, tdb):
+        """Return the JulianDate corresponding to a specific moment in TDB."""
+        return JulianDate(tdb=tdb, ts=self)
 
 class JulianDate(object):
     """A single date and time, or an array, stored as a Julian date.
@@ -155,8 +171,7 @@ class JulianDate(object):
         JulianDate(tdb=(year, month, day, hour, minute, second))
 
     """
-    def __init__(self, utc=None, tai=None, tt=None, tdb=None, delta_t=None,
-                 ts=None):
+    def __init__(self, utc=None, tai=None, tt=None, tdb=None, ts=None):
 
         self.ts = Timescale() if (ts is None) else ts
 
@@ -197,9 +212,6 @@ class JulianDate(object):
 
         self.tt = tt = _to_array(tt)
         self.shape = getattr(tt, 'shape', ())
-
-        if delta_t is not None:
-            self.delta_t = _to_array(delta_t)
 
     def __len__(self):
         return self.shape[0]
