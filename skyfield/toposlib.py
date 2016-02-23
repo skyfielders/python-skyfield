@@ -5,7 +5,6 @@ from .earthlib import terra
 from .functions import rot_x, rot_y, rot_z
 from .jpllib import Body, Segment
 from .positionlib import Barycentric, Geocentric
-from .timelib import takes_julian_date
 from .units import Distance, Angle, _interpret_ltude
 
 

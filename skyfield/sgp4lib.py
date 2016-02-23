@@ -8,7 +8,7 @@ from sgp4.propagation import sgp4
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
-from .timelib import JulianDate, takes_julian_date
+from .timelib import JulianDate
 
 # important ones:
 # jdsatepoch
@@ -75,7 +75,6 @@ class EarthSatellite(object):
 
         return rGCRS, vGCRS, error
 
-    @takes_julian_date
     def gcrs(self, jd):
         """Return a GCRS position for this Earth satellite.
 

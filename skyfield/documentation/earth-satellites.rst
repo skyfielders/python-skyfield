@@ -152,12 +152,12 @@ that are limiting this TLE set’s predictions:
 
 .. testcode::
 
-    geocentric = sat.gcrs(utc=(2013, 11, 9))
+    geocentric = sat.gcrs(ts.utc((2013, 11, 9)))
     print('Before:')
     print(geocentric.position.km)
     print(geocentric.sgp4_error)
 
-    geocentric = sat.gcrs(utc=(2013, 11, 13))
+    geocentric = sat.gcrs(ts.utc((2013, 11, 13)))
     print('\nAfter:')
     print(geocentric.position.km)
     print(geocentric.sgp4_error)
@@ -181,7 +181,7 @@ and otherwise recording the propagator error:
 
     from pprint import pprint
 
-    geocentric = sat.gcrs(utc=(2013, 11, [9, 10, 11, 12, 13]))
+    geocentric = sat.gcrs(ts.utc((2013, 11, [9, 10, 11, 12, 13])))
     pprint(geocentric.sgp4_error)
 
 .. testoutput::
