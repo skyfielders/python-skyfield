@@ -180,7 +180,6 @@ class Topos(object):
 
         self.R_lat = rot_y(latitude.radians)[::-1]
 
-    @takes_julian_date
     def __call__(self, jd):
         """Compute where this Earth location was in space on a given date."""
         e = self.ephemeris.earth(jd)
