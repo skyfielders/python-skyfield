@@ -2,7 +2,7 @@ import numpy as np
 from assay import assert_raises
 from pytz import timezone
 from skyfield.constants import DAY_S
-from skyfield.timelib import JulianDate, takes_julian_date, utc
+from skyfield.timelib import JulianDate, utc
 from datetime import datetime
 
 one_second = 1.0 / DAY_S
@@ -10,16 +10,6 @@ epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
 
 time_parameter = ['tai', 'tt', 'tdb']
 time_value = [(1973, 1, 18, 1, 35, 37.5), 2441700.56640625]
-
-def test_tuple_error_raised():
-    def fake_function():
-        """ The decorator requires a docstring. """
-    decorated_function = takes_julian_date(fake_function)
-    tuple_argument = (2014, 1, 23)
-    self = None
-    with assert_raises(ValueError) as info:
-        decorated_function(self, tuple_argument)
-    assert 'Are you trying to pass in a tuple' in str(info.exception)
 
 def test_JulianDate_init(time_parameter, time_value):
     kw = {time_parameter: time_value}

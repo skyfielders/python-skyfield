@@ -56,31 +56,6 @@ extra_documentation = """
 
 """
 
-def takes_julian_date(function):
-    """Wrap `function` so it accepts the standard Julian date arguments.
-
-    A function that takes two arguments, `self` and `jd`, may be wrapped
-    with this decorator if it wants to support optional auto-creation of
-    its `jd` argument by accepting all of the same keyword arguments
-    that the JulianDate constructor itself supports.
-
-    """
-    def wrapper(self, jd=None, utc=None, tai=None, tt=None, tdb=None):
-        if jd is None:
-            ts = Timescale()
-            jd = JulianDate(utc, tai, tt, tdb, ts=ts)
-        elif not isinstance(jd, JulianDate):
-            if isinstance(jd, tuple):
-                s = _tuple_error
-            else:
-                s = 'your "jd" argument is not a JulianDate: {0!r}'.format(jd)
-            raise ValueError(s)
-        return function(self, jd)
-    wrapper.__name__ = function.__name__
-    synopsis, blank_line, description = function.__doc__.partition('\n\n')
-    wrapper.__doc__ = synopsis + extra_documentation + description
-    return wrapper
-
 _tuple_error = """was expecting a JulianDate.
 
 Are you trying to pass in a tuple to represent a time? A time scale must
