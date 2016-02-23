@@ -51,7 +51,6 @@ class Topos(Body):
         position, velocity = self._position_and_velocity(jd)
         return position, velocity
 
-    @takes_julian_date
     def at(self, jd):
         """Compute where this Earth location was in space on a given date."""
         tpos_au, tvel_au_per_d = self._position_and_velocity(jd)

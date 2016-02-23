@@ -4,6 +4,9 @@ from assay import assert_raises
 from skyfield import api
 from skyfield import positionlib
 
+def ts():
+    yield api.Timescale()
+
 def test_whether_planets_have_radii():
     return # TODO: how will we support this again?
     assert api.mercury.radius.km == 2440.0
@@ -41,10 +44,11 @@ def test_from_altaz_needs_topos():
     with assert_raises(ValueError, 'the orientation of the horizon'):
         p.from_altaz(alt_degrees=0, az_degrees=0)
 
-def test_from_altaz_parameters():
+def test_from_altaz_parameters(ts):
     e = api.load('de421.bsp')
     usno = e['earth'].topos('38.9215 N', '77.0669 W', elevation_m=92.0)
-    p = usno.at(tt=api.T0)
+    jd = ts.tt(api.T0)
+    p = usno.at(jd)
     a = api.Angle(degrees=10.0)
     with assert_raises(ValueError, 'the alt= parameter with an Angle'):
         p.from_altaz(alt='Bad value', alt_degrees=0, az_degrees=0)

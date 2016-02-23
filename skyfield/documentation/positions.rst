@@ -446,7 +446,7 @@ of an Earth object:
     # specific geographic location
 
     boston = earth.topos('42.3583 N', '71.0603 W')
-    astro = boston.at(utc=(1980, 3, 1)).observe(mars)
+    astro = boston.at(ts.utc((1980, 3, 1))).observe(mars)
     app = astro.apparent()
 
     alt, az, distance = app.altaz()
