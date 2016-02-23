@@ -72,7 +72,9 @@ come out exactly the same:
 
 .. testcode::
 
-    from skyfield.api import load
+    from skyfield.api import Timescale, load
+
+    ts = Timescale()
     planets = load('de421.bsp')
     earth = planets['earth']
 
@@ -83,7 +85,7 @@ come out exactly the same:
 
     # Letting at() build the date for you
 
-    print(earth.at(utc=(2014, 1, 1)).position.au)
+    print(earth.at(ts.utc((2014, 1, 1))).position.au)
 
 .. testoutput::
 

@@ -37,7 +37,7 @@ def main():
         from numpy import abs, array, einsum, max
         from skyfield import (earthlib, framelib, nutationlib, positionlib,
                               precessionlib, starlib, timelib)
-        from skyfield.api import JulianDate, TimeScales, load
+        from skyfield.api import JulianDate, Timescale, load
         from skyfield.constants import AU_KM, AU_M
         from skyfield.data import hipparcos
         from skyfield.functions import length_of
@@ -197,11 +197,11 @@ def output_subroutine_tests(dates):
         result2 = novas.sidereal_time(jd, 0.0, 99.9, False, True)
         output(locals(), """\
             def test_sidereal_time_on_date{i}():
-                jd = TimeScales(delta_t=0.0).tt({jd!r})
+                jd = Timescale(delta_t=0.0).tt({jd!r})
                 compare(earthlib.sidereal_time(jd), {result1!r}, 1e-13)
 
             def test_sidereal_time_with_nonzero_delta_t_on_date{i}():
-                jd = TimeScales(delta_t=99.9).tt({jd!r} + 99.9 * one_second)
+                jd = Timescale(delta_t=99.9).tt({jd!r} + 99.9 * one_second)
                 compare(earthlib.sidereal_time(jd), {result2!r}, 1e-13)
             """)
 
@@ -251,7 +251,7 @@ def output_subroutine_tests(dates):
         alt, az = altaz_maneuver(tt, usno, ra, dec, ref=0)
         output(locals(), """\
             def test_from_altaz_{i}(earth):
-                jd = TimeScales(delta_t=0.0).tt({tt!r})
+                jd = Timescale(delta_t=0.0).tt({tt!r})
                 usno = earth.topos(
                     '38.9215 N', '77.0669 W', elevation_m=92.0)
                 a = usno.at(jd).from_altaz(alt_degrees={alt!r}, az_degrees={az!r})
@@ -267,7 +267,7 @@ def output_subroutine_tests(dates):
         result = novas.ter2cel(ut1, jd_low, delta_t, xp, yp, vector)
         output(locals(), """\
             def test_ITRF_to_GCRS_conversion_on_date{i}():
-                jd = TimeScales(delta_t={delta_t!r}).tt({tt!r})
+                jd = Timescale(delta_t={delta_t!r}).tt({tt!r})
                 position = positionlib.ITRF_to_GCRS(jd, {vector!r})
                 compare(position, {result!r}, 1e-13)
             """)
@@ -335,7 +335,7 @@ def output_geocentric_tests(dates):
         output(locals(), """\
 
         def test_{name}_geocentric_date{i}(earth):
-            e = earth.at(tt={jd!r})
+            e = earth.at(Timescale().tt({jd!r}))
             star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
                                 ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
                                 parallax_mas=7.56, radial_km_per_s=-17.4)
@@ -373,7 +373,7 @@ def output_topocentric_tests(dates):
         output(locals(), """\
 
         def test_{slug}_topocentric_date{i}(de405):
-            jd = TimeScales(delta_t=0.0).tt({jd!r})
+            jd = Timescale(delta_t=0.0).tt({jd!r})
             earth = de405['earth']
             usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -416,7 +416,7 @@ def output_catalog_tests(dates):
             star = hipparcos.parse(line)
             compare(star.ra.hours, {polaris.ra!r}, 0.001 * ra_arcsecond)
             compare(star.dec.degrees, {polaris.dec!r}, 0.001 * arcsecond)
-            ra, dec, distance = earth.at(tt={jd}).observe(star).radec()
+            ra, dec, distance = earth.at(Timescale().tt({jd})).observe(star).radec()
             compare(ra.hours, {ra!r}, 0.001 * ra_arcsecond)
             compare(dec.degrees, {dec!r}, 0.001 * arcsecond)
 

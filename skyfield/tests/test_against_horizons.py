@@ -23,25 +23,25 @@ def compare(value, expected_value, epsilon):
     else:
         assert abs(value - expected_value) <= epsilon
 
-def test_ecliptic_frame():
+def test_ecliptic_frame(ts):
     e = api.load('de421.bsp')
     jup = e['jupiter barycenter']
-    astrometric = e['sun'].at(utc=(1980, 1, 1, 0, 0)).observe(jup)
+    astrometric = e['sun'].at(ts.utc((1980, 1, 1, 0, 0))).observe(jup)
     hlat, hlon, d = astrometric.ecliptic_latlon()
     compare(hlat.degrees, 1.013, 0.001)
     compare(hlon.degrees, 151.3229, 0.001)
 
-def test_fk4_frame():
+def test_fk4_frame(ts):
     e = api.load('de421.bsp')
-    astrometric = e['earth'].at(utc=(1980, 1, 1, 0, 0)).observe(e['moon'])
+    astrometric = e['earth'].at(ts.utc((1980, 1, 1, 0, 0))).observe(e['moon'])
     ra, dec, d = astrometric.to_spice_frame('B1950')
     print(ra._degrees, dec.degrees)
     compare(ra._degrees, 82.36186, 0.00006) # TODO: why is this not 0.00001?
     compare(dec.degrees, 18.53432, 0.00006)
 
-def test_galactic_frame():
+def test_galactic_frame(ts):
     e = api.load('de421.bsp')
-    astrometric = e['earth'].at(utc=(1980, 1, 1, 0, 0)).observe(e['moon'])
+    astrometric = e['earth'].at(ts.utc((1980, 1, 1, 0, 0))).observe(e['moon'])
     glat, glon, d = astrometric.galactic_latlon()
     print(glat, glat.degrees, glon, glon.degrees)
     compare(glat.degrees, -8.047315, 0.005)  # TODO: awful! Track this down.
@@ -57,9 +57,9 @@ def test_callisto_geometry(ts):
       [9.604665478763035E-03, -1.552997751083403E-02, -6.678445860769302E-03],
       0.000001 * meter)
 
-def test_callisto_astrometric():
+def test_callisto_astrometric(ts):
     e = api.load('jup310.bsp')
-    a = e['earth'].at(utc=(2053, 10, 8, 23, 59, 59)).observe(e['callisto'])
+    a = e['earth'].at(ts.utc((2053, 10, 8, 23, 59, 59))).observe(e['callisto'])
     ra, dec, distance = a.radec()
     compare(ra._degrees, 217.1839292, 0.001 * arcsecond)
     compare(dec.degrees, -13.6892791, 0.001 * arcsecond)

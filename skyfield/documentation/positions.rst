@@ -210,8 +210,8 @@ by asking Skyfield for their :attr:`~Position.position` attribute:
     earth = planets['earth']
     mars = planets['mars']
 
-    print(earth.at(utc=(1980, 1, 1)).position.au)
-    print(mars.at(utc=(1980, 1, 1)).position.au)
+    print(earth.at(ts.utc((1980, 1, 1))).position.au)
+    print(mars.at(ts.utc((1980, 1, 1))).position.au)
 
 .. testoutput::
 
@@ -262,7 +262,7 @@ that we see in our sky:
 
     # Observing Mars from the Earth's position
 
-    astrometric = earth.at(utc=(1980, 1, 1)).observe(mars)
+    astrometric = earth.at(ts.utc((1980, 1, 1))).observe(mars)
     print(astrometric.position.au)
 
 .. testoutput::

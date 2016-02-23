@@ -1562,7 +1562,7 @@ def test_moon_geocentric_date4(de405):
     compare(dec.degrees, (-4.378227942512158, 1.8051891857266409, -10.897905576904787, -20.96508913558473), 0.001 * arcsecond)
 
 def test_polaris_geocentric_date0(earth):
-    e = earth.at(tt=2440423.345833333)
+    e = earth.at(Timescale().tt(2440423.345833333))
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
                         ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
                         parallax_mas=7.56, radial_km_per_s=-17.4)
@@ -1582,7 +1582,7 @@ def test_polaris_geocentric_date0(earth):
     compare(dec.degrees, 89.11999387030946, 0.001 * arcsecond)
 
 def test_polaris_geocentric_date1(earth):
-    e = earth.at(tt=2448031.5)
+    e = earth.at(Timescale().tt(2448031.5))
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
                         ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
                         parallax_mas=7.56, radial_km_per_s=-17.4)
@@ -1602,7 +1602,7 @@ def test_polaris_geocentric_date1(earth):
     compare(dec.degrees, 89.22082922133737, 0.001 * arcsecond)
 
 def test_polaris_geocentric_date2(earth):
-    e = earth.at(tt=2451545.0)
+    e = earth.at(Timescale().tt(2451545.0))
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
                         ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
                         parallax_mas=7.56, radial_km_per_s=-17.4)
@@ -1622,7 +1622,7 @@ def test_polaris_geocentric_date2(earth):
     compare(dec.degrees, 89.26697328449004, 0.001 * arcsecond)
 
 def test_polaris_geocentric_date3(earth):
-    e = earth.at(tt=2456164.5)
+    e = earth.at(Timescale().tt(2456164.5))
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
                         ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
                         parallax_mas=7.56, radial_km_per_s=-17.4)
@@ -1642,7 +1642,7 @@ def test_polaris_geocentric_date3(earth):
     compare(dec.degrees, 89.3136939266471, 0.001 * arcsecond)
 
 def test_polaris_geocentric_date4(earth):
-    e = earth.at(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    e = earth.at(Timescale().tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5]))
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
                         ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
                         parallax_mas=7.56, radial_km_per_s=-17.4)
@@ -2966,8 +2966,8 @@ def test_hipparcos_conversion0(earth):
     star = hipparcos.parse(line)
     compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
     compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
-    ra, dec, distance = earth.at(tt=2440423.34583).observe(star).radec()
-    compare(ra.hours, 2.5283697000528966, 0.001 * ra_arcsecond)
+    ra, dec, distance = earth.at(Timescale().tt(2440423.345833333)).observe(star).radec()
+    compare(ra.hours, 2.528369700052897, 0.001 * ra_arcsecond)
     compare(dec.degrees, 89.26420852419295, 0.001 * arcsecond)
 
 def test_hipparcos_conversion1(earth):
@@ -2975,8 +2975,8 @@ def test_hipparcos_conversion1(earth):
     star = hipparcos.parse(line)
     compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
     compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
-    ra, dec, distance = earth.at(tt=2448031.5).observe(star).radec()
-    compare(ra.hours, 2.529691010447949, 0.001 * ra_arcsecond)
+    ra, dec, distance = earth.at(Timescale().tt(2448031.5)).observe(star).radec()
+    compare(ra.hours, 2.5296910104479484, 0.001 * ra_arcsecond)
     compare(dec.degrees, 89.26413900274704, 0.001 * arcsecond)
 
 def test_hipparcos_conversion2(earth):
@@ -2984,7 +2984,7 @@ def test_hipparcos_conversion2(earth):
     star = hipparcos.parse(line)
     compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
     compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
-    ra, dec, distance = earth.at(tt=2451545.0).observe(star).radec()
+    ra, dec, distance = earth.at(Timescale().tt(2451545.0)).observe(star).radec()
     compare(ra.hours, 2.5302921836971946, 0.001 * ra_arcsecond)
     compare(dec.degrees, 89.26411033462212, 0.001 * arcsecond)
 
@@ -2993,16 +2993,16 @@ def test_hipparcos_conversion3(earth):
     star = hipparcos.parse(line)
     compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
     compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
-    ra, dec, distance = earth.at(tt=2456164.5).observe(star).radec()
-    compare(ra.hours, 2.5311170753257395, 0.001 * ra_arcsecond)
-    compare(dec.degrees, 89.26406913848278, 0.001 * arcsecond)
+    ra, dec, distance = earth.at(Timescale().tt(2456164.5)).observe(star).radec()
+    compare(ra.hours, 2.53111707532574, 0.001 * ra_arcsecond)
+    compare(dec.degrees, 89.2640691384828, 0.001 * arcsecond)
 
 def test_hipparcos_conversion4(earth):
     line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
     star = hipparcos.parse(line)
     compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
     compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
-    ra, dec, distance = earth.at(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5]).observe(star).radec()
-    compare(ra.hours, (2.5283697000528966, 2.529691010447949, 2.5302921836971946, 2.5311170753257395), 0.001 * ra_arcsecond)
-    compare(dec.degrees, (89.26420852419295, 89.26413900274704, 89.26411033462212, 89.26406913848278), 0.001 * arcsecond)
+    ra, dec, distance = earth.at(Timescale().tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])).observe(star).radec()
+    compare(ra.hours, (2.528369700052897, 2.5296910104479484, 2.5302921836971946, 2.53111707532574), 0.001 * ra_arcsecond)
+    compare(dec.degrees, (89.26420852419295, 89.26413900274704, 89.26411033462212, 89.2640691384828), 0.001 * arcsecond)
 
