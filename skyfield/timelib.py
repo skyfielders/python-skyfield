@@ -65,10 +65,10 @@ def takes_julian_date(function):
     that the JulianDate constructor itself supports.
 
     """
-    def wrapper(self, jd=None, utc=None, tai=None, tt=None, tdb=None,
-                delta_t=None):
+    def wrapper(self, jd=None, utc=None, tai=None, tt=None, tdb=None):
         if jd is None:
-            jd = JulianDate(utc, tai, tt, tdb, delta_t)
+            ts = Timescale()
+            jd = JulianDate(utc, tai, tt, tdb, ts=ts)
         elif not isinstance(jd, JulianDate):
             if isinstance(jd, tuple):
                 s = _tuple_error
