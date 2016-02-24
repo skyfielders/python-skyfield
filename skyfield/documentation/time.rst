@@ -39,8 +39,9 @@ as a keyword argument to specify the moment you want to represent.
 
     # Building a date object
 
-    from skyfield.api import JulianDate
-    JulianDate(utc=(2014, 1, 18))
+    from skyfield.api import Timescale
+    ts = Timescale()
+    ts.utc((2014, 1, 18))
 
 The possibilities that will be explored in the course of this page
 are::
@@ -80,7 +81,7 @@ come out exactly the same:
 
     # Building a date and using it with at()
 
-    jd = JulianDate(utc=(2014, 1, 1))
+    jd = ts.utc((2014, 1, 1))
     print(earth.at(jd).position.au)
 
     # Letting at() build the date for you
@@ -118,10 +119,10 @@ to represent the year, month, and day of a calendar date:
 
     # Four ways to specify 2014 January 18 01:35:37.5
 
-    jd  = JulianDate(utc=(2014, 1, 18.06640625))
-    jd2 = JulianDate(utc=(2014, 1, 18, 1.59375))
-    jd3 = JulianDate(utc=(2014, 1, 18, 1, 35.625))
-    jd4 = JulianDate(utc=(2014, 1, 18, 1, 35, 37.5))
+    jd  = ts.utc((2014, 1, 18.06640625))
+    jd2 = ts.utc((2014, 1, 18, 1.59375))
+    jd3 = ts.utc((2014, 1, 18, 1, 35.625))
+    jd4 = ts.utc((2014, 1, 18, 1, 35, 37.5))
 
     assert jd == jd2 == jd3 == jd4
 
@@ -187,7 +188,7 @@ and pass the result to Skyfield:
 
     d = datetime(2014, 1, 16, 1, 32, 9)
     e = eastern.localize(d)
-    jd = JulianDate(utc=e)
+    jd = ts.utc(e)
 
 And if Skyfield returns a Julian date at the end of a calculation,
 you can ask the Julian date object to build a ``datetime`` object
@@ -254,7 +255,7 @@ The most recent leap second was in June 2012:
 
     five_seconds = range(58, 58 + 5)
     tup = (2012, 6, 30, 23, 59, five_seconds)
-    jd = JulianDate(utc=tup)
+    jd = ts.utc(tup)
 
     for string in jd.utc_jpl():
         print(string)
@@ -383,7 +384,7 @@ We can compute the position of the Earth as an example:
 
     # Single Earth position
 
-    jd = JulianDate(utc=(2014, 1, 1))
+    jd = ts.utc((2014, 1, 1))
     pos = earth.at(jd).position.au
     print(pos)
 
@@ -396,7 +397,7 @@ We can compute the position of the Earth as an example:
     # Whole array of Earth positions
 
     days = [1, 2, 3, 4]
-    jd = JulianDate(utc=(2014, 1, days))
+    jd = ts.utc((2014, 1, days))
     pos = earth.at(jd).position.au
     print(pos)
 
@@ -494,7 +495,7 @@ So twelve noon was the moment of Julian date zero:
     # When was Julian date zero?
 
     bc_4714 = -4713
-    print(JulianDate(tt=(bc_4714, 11, 24, 12)).tt)
+    print(ts.tt((bc_4714, 11, 24, 12)).tt)
 
 .. testoutput::
 
@@ -518,7 +519,7 @@ so modern dates tend to be rather large numbers:
 
     # 2014 January 1 as a Julian Date
 
-    jd = JulianDate(utc=(2014, 1, 1))
+    jd = ts.utc((2014, 1, 1))
     print('TAI = %r' % jd.tai)
     print('TT  = %r' % jd.tt)
     print('TDB = %r' % jd.tdb)

@@ -27,6 +27,9 @@ heavens_above_transits = """\
 if sys.version_info < (3,):
     heavens_above_transits = heavens_above_transits.decode('utf-8')
 
+def ts():
+    yield Timescale()
+
 def iss_transit():
     for line in heavens_above_transits.splitlines():
         fields = line.split()

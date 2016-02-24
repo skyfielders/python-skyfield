@@ -8,7 +8,7 @@ from sgp4.propagation import sgp4
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
-from .timelib import JulianDate
+from .timelib import JulianDate, Timescale
 
 # important ones:
 # jdsatepoch
@@ -29,7 +29,9 @@ class EarthSatellite(object):
         sat = twoline2rv(*lines[-2:], whichconst=wgs72)
         self._sgp4_satellite = sat
         self._earth = earth
-        self.epoch = JulianDate(utc=(sat.epochyr, 1, sat.epochdays))
+        # TODO: Drat. Where should this Timescale come from?
+        # Should they have to pass it in?
+        self.epoch = Timescale().utc((sat.epochyr, 1, sat.epochdays))
 
     def __repr__(self):
         sat = self._sgp4_satellite

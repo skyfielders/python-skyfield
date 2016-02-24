@@ -104,11 +104,24 @@ class Timescale(object):
         correct UTC date and time.
 
         """
-        return JulianDate(utc=self.utcnow().replace(tzinfo=utc), ts=self)
+        return self.utc(self.utcnow().replace(tzinfo=utc))
 
     def utc(self, utc):
         """Return the JulianDate corresponding to a specific moment in UTC."""
-        return JulianDate(utc=utc, ts=self)
+        leap_dates, leap_offsets = self.leap_dates, self.leap_offsets
+        if isinstance(utc, datetime):
+            tai = _utc_datetime_to_tai(leap_dates, leap_offsets, utc)
+        elif isinstance(utc, date):
+            tai = _utc_date_to_tai(leap_dates, leap_offsets, utc)
+        elif isinstance(utc, tuple):
+            values = [_to_array(value) for value in utc]
+            tai = _utc_to_tai(leap_dates, leap_offsets, *values)
+        else:
+            tai = array([
+                _utc_datetime_to_tai(leap_dates, leap_offsets, dt)
+                for dt in utc])
+        jd = JulianDate(tai=tai, ts=self)
+        return jd
 
     def tai(self, tai):
         """Return the JulianDate corresponding to a specific moment in TAI."""
@@ -156,24 +169,9 @@ class JulianDate(object):
         JulianDate(tdb=(year, month, day, hour, minute, second))
 
     """
-    def __init__(self, utc=None, tai=None, tt=None, ts=None):
+    def __init__(self, tai=None, tt=None, ts=None):
 
         self.ts = Timescale() if (ts is None) else ts
-
-        if tai is None and utc is not None:
-            leap_dates, leap_offsets = (
-                self.ts.leap_dates, self.ts.leap_offsets)
-            if isinstance(utc, datetime):
-                tai = _utc_datetime_to_tai(leap_dates, leap_offsets, utc)
-            elif isinstance(utc, date):
-                tai = _utc_date_to_tai(leap_dates, leap_offsets, utc)
-            elif isinstance(utc, tuple):
-                values = [_to_array(value) for value in utc]
-                tai = _utc_to_tai(leap_dates, leap_offsets, *values)
-            else:
-                tai = array([
-                    _utc_datetime_to_tai(leap_dates, leap_offsets, dt)
-                    for dt in utc])
 
         if tai is not None:
             if isinstance(tai, tuple):
