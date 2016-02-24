@@ -2,7 +2,7 @@ import numpy as np
 from assay import assert_raises
 from pytz import timezone
 from skyfield.constants import DAY_S
-from skyfield.timelib import JulianDate, utc
+from skyfield.timelib import Timescale, JulianDate, utc
 from datetime import datetime
 
 one_second = 1.0 / DAY_S
@@ -12,8 +12,8 @@ time_parameter = ['tai', 'tt', 'tdb']
 time_value = [(1973, 1, 18, 1, 35, 37.5), 2441700.56640625]
 
 def test_JulianDate_init(time_parameter, time_value):
-    kw = {time_parameter: time_value}
-    jd = JulianDate(**kw)
+    method = getattr(Timescale(), time_parameter)
+    jd = method(time_value)
     assert getattr(jd, time_parameter) == 2441700.56640625
 
 def test_building_JulianDate_from_utc_tuple_with_array_inside():

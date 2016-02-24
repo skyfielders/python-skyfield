@@ -50,6 +50,9 @@ def main():
         ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
         meter = 1.0 / AU_M
 
+        def ts():
+            yield Timescale()
+
         def compare(value, expected_value, epsilon):
             if hasattr(value, 'shape') or hasattr(expected_value, 'shape'):
                 assert max(abs(value - expected_value)) <= epsilon
@@ -104,8 +107,8 @@ def output_subroutine_tests(dates):
     for i, jd in enumerate(date_floats):
         angles = novas.e_tilt(jd)
         output(locals(), """\
-            def test_earth_tilt_date{i}():
-                compare(nutationlib.earth_tilt(JulianDate(tdb={jd!r})),
+            def test_earth_tilt_date{i}(ts):
+                compare(nutationlib.earth_tilt(ts.tdb({jd!r})),
                         array({angles}), 0.00001 * arcsecond)
             """)
 
@@ -174,8 +177,8 @@ def output_subroutine_tests(dates):
         vector = [1.1, 1.2, 1.3]
         result = nutation_function(jd, vector)
         output(locals(), """\
-            def test_nutation_date{i}():
-                matrix = nutationlib.compute_nutation(JulianDate(tdb={jd!r}))
+            def test_nutation_date{i}(ts):
+                matrix = nutationlib.compute_nutation(ts.tdb({jd!r}))
                 result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
                 compare({result},
                         result, 1e-14)

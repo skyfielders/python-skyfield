@@ -16,6 +16,9 @@ arcsecond = 1.0 / 60.0 / 60.0
 ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
 meter = 1.0 / AU_M
 
+def ts():
+    yield Timescale()
+
 def compare(value, expected_value, epsilon):
     if hasattr(value, 'shape') or hasattr(expected_value, 'shape'):
         assert max(abs(value - expected_value)) <= epsilon
@@ -57,20 +60,20 @@ def test_earth_rotation_angle_date3():
     compare(earthlib.earth_rotation_angle(2456164.5) * 360.0, 333.4965831957672,
             0.000001 * arcsecond)
 
-def test_earth_tilt_date0():
-    compare(nutationlib.earth_tilt(JulianDate(tdb=2440423.345833333)),
+def test_earth_tilt_date0(ts):
+    compare(nutationlib.earth_tilt(ts.tdb(2440423.345833333)),
             array((23.443240959852666, 23.445702723464045, 0.1592945569695419, 2.604727521416371, 8.862349000962688)), 0.00001 * arcsecond)
 
-def test_earth_tilt_date1():
-    compare(nutationlib.earth_tilt(JulianDate(tdb=2448031.5)),
+def test_earth_tilt_date1(ts):
+    compare(nutationlib.earth_tilt(ts.tdb(2448031.5)),
             array((23.440530953006782, 23.442178709915066, 0.7110982205507697, 11.62814814196408, 5.931924869819573)), 0.00001 * arcsecond)
 
-def test_earth_tilt_date2():
-    compare(nutationlib.earth_tilt(JulianDate(tdb=2451545.0)),
+def test_earth_tilt_date2(ts):
+    compare(nutationlib.earth_tilt(ts.tdb(2451545.0)),
             array((23.439279444444445, 23.437676833867652, -0.8520167470908031, -13.931996330960066, -5.769398076465292)), 0.00001 * arcsecond)
 
-def test_earth_tilt_date3():
-    compare(nutationlib.earth_tilt(JulianDate(tdb=2456164.5)),
+def test_earth_tilt_date3(ts):
+    compare(nutationlib.earth_tilt(ts.tdb(2456164.5)),
             array((23.43763397776759, 23.43645066577372, 0.977087608170225, 15.976729533480201, -4.259923177932991)), 0.00001 * arcsecond)
 
 def test_equation_of_the_equinoxes_complimentary_terms_date0():
@@ -164,26 +167,26 @@ def test_mean_obliquity_date3():
     compare(nutationlib.mean_obliquity(2456164.5),
             84375.48231996332, 0.0)  # arcseconds
 
-def test_nutation_date0():
-    matrix = nutationlib.compute_nutation(JulianDate(tdb=2440423.345833333))
+def test_nutation_date0(ts):
+    matrix = nutationlib.compute_nutation(ts.tdb(2440423.345833333))
     result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
     compare((1.0999795659425045, 1.1999568871469581, 1.3000570847072532),
             result, 1e-14)
 
-def test_nutation_date1():
-    matrix = nutationlib.compute_nutation(JulianDate(tdb=2448031.5))
+def test_nutation_date1(ts):
+    matrix = nutationlib.compute_nutation(ts.tdb(2448031.5))
     result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
     compare((1.0999087778623433, 1.2000195046911977, 1.300059178938428),
             result, 1e-14)
 
-def test_nutation_date2():
-    matrix = nutationlib.compute_nutation(JulianDate(tdb=2451545.0))
+def test_nutation_date2(ts):
+    matrix = nutationlib.compute_nutation(ts.tdb(2451545.0))
     result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
     compare((1.100109290032102, 1.1999681897164485, 1.2999368806421698),
             result, 1e-14)
 
-def test_nutation_date3():
-    matrix = nutationlib.compute_nutation(JulianDate(tdb=2456164.5))
+def test_nutation_date3(ts):
+    matrix = nutationlib.compute_nutation(ts.tdb(2456164.5))
     result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
     compare((1.0998746654010052, 1.2001050177909844, 1.3000091025381042),
             result, 1e-14)

@@ -110,13 +110,23 @@ class Timescale(object):
         """Return the JulianDate corresponding to a specific moment in UTC."""
         return JulianDate(utc=utc, ts=self)
 
+    def tai(self, tai):
+        """Return the JulianDate corresponding to a specific moment in TAI."""
+        return JulianDate(tai=tai, ts=self)
+
     def tt(self, tt):
         """Return the JulianDate corresponding to a specific moment in TT."""
         return JulianDate(tt=tt, ts=self)
 
     def tdb(self, tdb):
         """Return the JulianDate corresponding to a specific moment in TDB."""
-        return JulianDate(tdb=tdb, ts=self)
+        if isinstance(tdb, tuple):
+            tdb = julian_date(*tdb)
+        tdb = _to_array(tdb)
+        tt = tdb - tdb_minus_tt(tdb) / DAY_S
+        jd = JulianDate(tt=tt, ts=self)
+        jd.tdb = tdb
+        return jd
 
 class JulianDate(object):
     """A single date and time, or an array, stored as a Julian date.
@@ -146,7 +156,7 @@ class JulianDate(object):
         JulianDate(tdb=(year, month, day, hour, minute, second))
 
     """
-    def __init__(self, utc=None, tai=None, tt=None, tdb=None, ts=None):
+    def __init__(self, utc=None, tai=None, tt=None, ts=None):
 
         self.ts = Timescale() if (ts is None) else ts
 
@@ -171,13 +181,6 @@ class JulianDate(object):
             self.tai = _to_array(tai)
             if tt is None:
                 tt = tai + tt_minus_tai
-
-        if tdb is not None:
-            if isinstance(tdb, tuple):
-                tdb = julian_date(*tdb)
-            self.tdb = _to_array(tdb)
-            if tt is None:
-                tt = tdb - tdb_minus_tt(tdb) / DAY_S
 
         if tt is None:
             raise ValueError('You must supply either utc, tai, tt, or tdb'
