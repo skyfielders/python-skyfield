@@ -297,8 +297,8 @@ def output_geocentric_tests(dates):
 
         output(locals(), """\
 
-        def test_{slug}_geocentric_date{i}(de405):
-            jd = JulianDate(tt={jd!r})
+        def test_{slug}_geocentric_date{i}(de405, ts):
+            jd = ts.tt({jd!r})
             e = de405['earth'].at(jd)
             p = de405[{planet!r}]
 

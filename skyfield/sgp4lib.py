@@ -8,7 +8,7 @@ from sgp4.propagation import sgp4
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
-from .timelib import JulianDate, Timescale
+from .timelib import Timescale
 
 # important ones:
 # jdsatepoch

@@ -10,7 +10,7 @@ from .constants import AU_KM, C_AUDAY, DAY_S
 from .errors import DeprecationError
 from .functions import length_of
 from .positionlib import Astrometric, Barycentric, ICRS
-from .timelib import JulianDate, calendar_date
+from .timelib import calendar_date
 
 Segment = namedtuple('Segment', 'center target compute')
 _targets = dict((name, target) for (target, name) in _names.items())

@@ -120,7 +120,7 @@ class Timescale(object):
             tai = array([
                 _utc_datetime_to_tai(leap_dates, leap_offsets, dt)
                 for dt in utc])
-        jd = JulianDate(tt=tai + tt_minus_tai, ts=self)
+        jd = JulianDate(self, tai + tt_minus_tai)
         jd.tai = tai
         return jd
 
@@ -128,13 +128,13 @@ class Timescale(object):
         """Return the JulianDate corresponding to a specific moment in TAI."""
         if isinstance(tai, tuple):
             tai = julian_date(*tai)
-        jd = JulianDate(tt=tai + tt_minus_tai, ts=self)
+        jd = JulianDate(self, tai + tt_minus_tai)
         jd.tai = tai
         return jd
 
     def tt(self, tt):
         """Return the JulianDate corresponding to a specific moment in TT."""
-        return JulianDate(tt=tt, ts=self)
+        return JulianDate(self, tt)
 
     def tdb(self, tdb):
         """Return the JulianDate corresponding to a specific moment in TDB."""
@@ -142,7 +142,7 @@ class Timescale(object):
             tdb = julian_date(*tdb)
         tdb = _to_array(tdb)
         tt = tdb - tdb_minus_tt(tdb) / DAY_S
-        jd = JulianDate(tt=tt, ts=self)
+        jd = JulianDate(self, tt)
         jd.tdb = tdb
         return jd
 
@@ -174,14 +174,13 @@ class JulianDate(object):
         JulianDate(tdb=(year, month, day, hour, minute, second))
 
     """
-    def __init__(self, tt, ts=None):
-
-        self.ts = Timescale() if (ts is None) else ts
-
+    def __init__(self, ts, tt):
         if isinstance(tt, tuple):
             tt = julian_date(*tt)
-
-        self.tt = tt = _to_array(tt)
+        else:
+            tt = _to_array(tt)
+        self.tt = tt
+        self.ts = ts
         self.shape = getattr(tt, 'shape', ())
 
     def __len__(self):
@@ -192,7 +191,7 @@ class JulianDate(object):
 
     def __getitem__(self, index):
         # TODO: also copy cached matrices?
-        jd = JulianDate(tt=self.tt[index])
+        jd = JulianDate(self.ts, self.tt[index])
         for name in 'tai', 'tdb', 'ut1', 'delta_t':
             value = getattr(self, name, None)
             if value is not None:

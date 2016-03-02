@@ -464,8 +464,8 @@ def test_tdb_minus_tt_on_date3():
     result = timelib.tdb_minus_tt(2456164.5)
     compare(result, -0.001241030165936061, 1e-16)
 
-def test_mercury_geocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+def test_mercury_geocentric_date0(de405, ts):
+    jd = ts.tt(2440423.345833333)
     e = de405['earth'].at(jd)
     p = de405['mercury']
 
@@ -486,8 +486,8 @@ def test_mercury_geocentric_date0(de405):
     compare(ra.hours, 7.874971625095716, 0.001 * ra_arcsecond)
     compare(dec.degrees, 22.41597039204466, 0.001 * arcsecond)
 
-def test_mercury_geocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+def test_mercury_geocentric_date1(de405, ts):
+    jd = ts.tt(2448031.5)
     e = de405['earth'].at(jd)
     p = de405['mercury']
 
@@ -508,8 +508,8 @@ def test_mercury_geocentric_date1(de405):
     compare(ra.hours, 2.461676722646477, 0.001 * ra_arcsecond)
     compare(dec.degrees, 11.20778549324496, 0.001 * arcsecond)
 
-def test_mercury_geocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+def test_mercury_geocentric_date2(de405, ts):
+    jd = ts.tt(2451545.0)
     e = de405['earth'].at(jd)
     p = de405['mercury']
 
@@ -530,8 +530,8 @@ def test_mercury_geocentric_date2(de405):
     compare(ra.hours, 18.138225455402914, 0.001 * ra_arcsecond)
     compare(dec.degrees, -24.418845803732097, 0.001 * arcsecond)
 
-def test_mercury_geocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+def test_mercury_geocentric_date3(de405, ts):
+    jd = ts.tt(2456164.5)
     e = de405['earth'].at(jd)
     p = de405['mercury']
 
@@ -552,8 +552,8 @@ def test_mercury_geocentric_date3(de405):
     compare(ra.hours, 9.307566088097712, 0.001 * ra_arcsecond)
     compare(dec.degrees, 16.631743449679668, 0.001 * arcsecond)
 
-def test_mercury_geocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+def test_mercury_geocentric_date4(de405, ts):
+    jd = ts.tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     e = de405['earth'].at(jd)
     p = de405['mercury']
 
@@ -574,8 +574,8 @@ def test_mercury_geocentric_date4(de405):
     compare(ra.hours, (7.874971625095716, 2.461676722646477, 18.138225455402914, 9.307566088097712), 0.001 * ra_arcsecond)
     compare(dec.degrees, (22.41597039204466, 11.20778549324496, -24.418845803732097, 16.631743449679668), 0.001 * arcsecond)
 
-def test_venus_geocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+def test_venus_geocentric_date0(de405, ts):
+    jd = ts.tt(2440423.345833333)
     e = de405['earth'].at(jd)
     p = de405['venus']
 
@@ -596,8 +596,8 @@ def test_venus_geocentric_date0(de405):
     compare(ra.hours, 4.93668626355443, 0.001 * ra_arcsecond)
     compare(dec.degrees, 20.166644671858098, 0.001 * arcsecond)
 
-def test_venus_geocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+def test_venus_geocentric_date1(de405, ts):
+    jd = ts.tt(2448031.5)
     e = de405['earth'].at(jd)
     p = de405['venus']
 
@@ -618,8 +618,8 @@ def test_venus_geocentric_date1(de405):
     compare(ra.hours, 1.1534174784892792, 0.001 * ra_arcsecond)
     compare(dec.degrees, 5.277365365528824, 0.001 * arcsecond)
 
-def test_venus_geocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+def test_venus_geocentric_date2(de405, ts):
+    jd = ts.tt(2451545.0)
     e = de405['earth'].at(jd)
     p = de405['venus']
 
@@ -640,8 +640,8 @@ def test_venus_geocentric_date2(de405):
     compare(ra.hours, 15.99279010971033, 0.001 * ra_arcsecond)
     compare(dec.degrees, -18.448718976425834, 0.001 * arcsecond)
 
-def test_venus_geocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+def test_venus_geocentric_date3(de405, ts):
+    jd = ts.tt(2456164.5)
     e = de405['earth'].at(jd)
     p = de405['venus']
 
@@ -662,8 +662,8 @@ def test_venus_geocentric_date3(de405):
     compare(ra.hours, 7.188033727750362, 0.001 * ra_arcsecond)
     compare(dec.degrees, 19.851678563902254, 0.001 * arcsecond)
 
-def test_venus_geocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+def test_venus_geocentric_date4(de405, ts):
+    jd = ts.tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     e = de405['earth'].at(jd)
     p = de405['venus']
 
@@ -684,8 +684,8 @@ def test_venus_geocentric_date4(de405):
     compare(ra.hours, (4.93668626355443, 1.1534174784892792, 15.99279010971033, 7.188033727750362), 0.001 * ra_arcsecond)
     compare(dec.degrees, (20.166644671858098, 5.277365365528824, -18.448718976425834, 19.851678563902254), 0.001 * arcsecond)
 
-def test_mars_geocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+def test_mars_geocentric_date0(de405, ts):
+    jd = ts.tt(2440423.345833333)
     e = de405['earth'].at(jd)
     p = de405['mars']
 
@@ -706,8 +706,8 @@ def test_mars_geocentric_date0(de405):
     compare(ra.hours, 15.99950982315885, 0.001 * ra_arcsecond)
     compare(dec.degrees, -24.046277103674843, 0.001 * arcsecond)
 
-def test_mars_geocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+def test_mars_geocentric_date1(de405, ts):
+    jd = ts.tt(2448031.5)
     e = de405['earth'].at(jd)
     p = de405['mars']
 
@@ -728,8 +728,8 @@ def test_mars_geocentric_date1(de405):
     compare(ra.hours, 23.536847630733252, 0.001 * ra_arcsecond)
     compare(dec.degrees, -4.935089760397493, 0.001 * arcsecond)
 
-def test_mars_geocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+def test_mars_geocentric_date2(de405, ts):
+    jd = ts.tt(2451545.0)
     e = de405['earth'].at(jd)
     p = de405['mars']
 
@@ -750,8 +750,8 @@ def test_mars_geocentric_date2(de405):
     compare(ra.hours, 22.034417492807563, 0.001 * ra_arcsecond)
     compare(dec.degrees, -13.182689288940113, 0.001 * arcsecond)
 
-def test_mars_geocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+def test_mars_geocentric_date3(de405, ts):
+    jd = ts.tt(2456164.5)
     e = de405['earth'].at(jd)
     p = de405['mars']
 
@@ -772,8 +772,8 @@ def test_mars_geocentric_date3(de405):
     compare(ra.hours, 13.9057161859901, 0.001 * ra_arcsecond)
     compare(dec.degrees, -12.184654273116957, 0.001 * arcsecond)
 
-def test_mars_geocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+def test_mars_geocentric_date4(de405, ts):
+    jd = ts.tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     e = de405['earth'].at(jd)
     p = de405['mars']
 
@@ -794,8 +794,8 @@ def test_mars_geocentric_date4(de405):
     compare(ra.hours, (15.99950982315885, 23.536847630733252, 22.034417492807563, 13.9057161859901), 0.001 * ra_arcsecond)
     compare(dec.degrees, (-24.046277103674843, -4.935089760397493, -13.182689288940113, -12.184654273116957), 0.001 * arcsecond)
 
-def test_jupiter_barycenter_geocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+def test_jupiter_barycenter_geocentric_date0(de405, ts):
+    jd = ts.tt(2440423.345833333)
     e = de405['earth'].at(jd)
     p = de405['jupiter barycenter']
 
@@ -816,8 +816,8 @@ def test_jupiter_barycenter_geocentric_date0(de405):
     compare(ra.hours, 12.07798204538282, 0.001 * ra_arcsecond)
     compare(dec.degrees, 0.8216129394812306, 0.001 * arcsecond)
 
-def test_jupiter_barycenter_geocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+def test_jupiter_barycenter_geocentric_date1(de405, ts):
+    jd = ts.tt(2448031.5)
     e = de405['earth'].at(jd)
     p = de405['jupiter barycenter']
 
@@ -838,8 +838,8 @@ def test_jupiter_barycenter_geocentric_date1(de405):
     compare(ra.hours, 6.755383083025231, 0.001 * ra_arcsecond)
     compare(dec.degrees, 23.18268469367657, 0.001 * arcsecond)
 
-def test_jupiter_barycenter_geocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+def test_jupiter_barycenter_geocentric_date2(de405, ts):
+    jd = ts.tt(2451545.0)
     e = de405['earth'].at(jd)
     p = de405['jupiter barycenter']
 
@@ -860,8 +860,8 @@ def test_jupiter_barycenter_geocentric_date2(de405):
     compare(ra.hours, 1.5911888424331277, 0.001 * ra_arcsecond)
     compare(dec.degrees, 8.594250857972389, 0.001 * arcsecond)
 
-def test_jupiter_barycenter_geocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+def test_jupiter_barycenter_geocentric_date3(de405, ts):
+    jd = ts.tt(2456164.5)
     e = de405['earth'].at(jd)
     p = de405['jupiter barycenter']
 
@@ -882,8 +882,8 @@ def test_jupiter_barycenter_geocentric_date3(de405):
     compare(ra.hours, 4.835670404865467, 0.001 * ra_arcsecond)
     compare(dec.degrees, 21.670586389437943, 0.001 * arcsecond)
 
-def test_jupiter_barycenter_geocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+def test_jupiter_barycenter_geocentric_date4(de405, ts):
+    jd = ts.tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     e = de405['earth'].at(jd)
     p = de405['jupiter barycenter']
 
@@ -904,8 +904,8 @@ def test_jupiter_barycenter_geocentric_date4(de405):
     compare(ra.hours, (12.07798204538282, 6.755383083025231, 1.5911888424331277, 4.835670404865467), 0.001 * ra_arcsecond)
     compare(dec.degrees, (0.8216129394812306, 23.18268469367657, 8.594250857972389, 21.670586389437943), 0.001 * arcsecond)
 
-def test_saturn_barycenter_geocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+def test_saturn_barycenter_geocentric_date0(de405, ts):
+    jd = ts.tt(2440423.345833333)
     e = de405['earth'].at(jd)
     p = de405['saturn barycenter']
 
@@ -926,8 +926,8 @@ def test_saturn_barycenter_geocentric_date0(de405):
     compare(ra.hours, 2.4352879582290172, 0.001 * ra_arcsecond)
     compare(dec.degrees, 11.911566107576899, 0.001 * arcsecond)
 
-def test_saturn_barycenter_geocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+def test_saturn_barycenter_geocentric_date1(de405, ts):
+    jd = ts.tt(2448031.5)
     e = de405['earth'].at(jd)
     p = de405['saturn barycenter']
 
@@ -948,8 +948,8 @@ def test_saturn_barycenter_geocentric_date1(de405):
     compare(ra.hours, 19.805277718955743, 0.001 * ra_arcsecond)
     compare(dec.degrees, -20.958164640919687, 0.001 * arcsecond)
 
-def test_saturn_barycenter_geocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+def test_saturn_barycenter_geocentric_date2(de405, ts):
+    jd = ts.tt(2451545.0)
     e = de405['earth'].at(jd)
     p = de405['saturn barycenter']
 
@@ -970,8 +970,8 @@ def test_saturn_barycenter_geocentric_date2(de405):
     compare(ra.hours, 2.5843611215084574, 0.001 * ra_arcsecond)
     compare(dec.degrees, 12.614774672730574, 0.001 * arcsecond)
 
-def test_saturn_barycenter_geocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+def test_saturn_barycenter_geocentric_date3(de405, ts):
+    jd = ts.tt(2456164.5)
     e = de405['earth'].at(jd)
     p = de405['saturn barycenter']
 
@@ -992,8 +992,8 @@ def test_saturn_barycenter_geocentric_date3(de405):
     compare(ra.hours, 13.639628746850631, 0.001 * ra_arcsecond)
     compare(dec.degrees, -7.7232016421026195, 0.001 * arcsecond)
 
-def test_saturn_barycenter_geocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+def test_saturn_barycenter_geocentric_date4(de405, ts):
+    jd = ts.tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     e = de405['earth'].at(jd)
     p = de405['saturn barycenter']
 
@@ -1014,8 +1014,8 @@ def test_saturn_barycenter_geocentric_date4(de405):
     compare(ra.hours, (2.4352879582290172, 19.805277718955743, 2.5843611215084574, 13.639628746850631), 0.001 * ra_arcsecond)
     compare(dec.degrees, (11.911566107576899, -20.958164640919687, 12.614774672730574, -7.7232016421026195), 0.001 * arcsecond)
 
-def test_uranus_barycenter_geocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+def test_uranus_barycenter_geocentric_date0(de405, ts):
+    jd = ts.tt(2440423.345833333)
     e = de405['earth'].at(jd)
     p = de405['uranus barycenter']
 
@@ -1036,8 +1036,8 @@ def test_uranus_barycenter_geocentric_date0(de405):
     compare(ra.hours, 12.061052547705433, 0.001 * ra_arcsecond)
     compare(dec.degrees, 0.37749969290358604, 0.001 * arcsecond)
 
-def test_uranus_barycenter_geocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+def test_uranus_barycenter_geocentric_date1(de405, ts):
+    jd = ts.tt(2448031.5)
     e = de405['earth'].at(jd)
     p = de405['uranus barycenter']
 
@@ -1058,8 +1058,8 @@ def test_uranus_barycenter_geocentric_date1(de405):
     compare(ra.hours, 18.659361133085376, 0.001 * ra_arcsecond)
     compare(dec.degrees, -23.447681812488966, 0.001 * arcsecond)
 
-def test_uranus_barycenter_geocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+def test_uranus_barycenter_geocentric_date2(de405, ts):
+    jd = ts.tt(2451545.0)
     e = de405['earth'].at(jd)
     p = de405['uranus barycenter']
 
@@ -1080,8 +1080,8 @@ def test_uranus_barycenter_geocentric_date2(de405):
     compare(ra.hours, 21.164987614252272, 0.001 * ra_arcsecond)
     compare(dec.degrees, -17.020320613172, 0.001 * arcsecond)
 
-def test_uranus_barycenter_geocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+def test_uranus_barycenter_geocentric_date3(de405, ts):
+    jd = ts.tt(2456164.5)
     e = de405['earth'].at(jd)
     p = de405['uranus barycenter']
 
@@ -1102,8 +1102,8 @@ def test_uranus_barycenter_geocentric_date3(de405):
     compare(ra.hours, 0.5005500654503396, 0.001 * ra_arcsecond)
     compare(dec.degrees, 2.429779341040802, 0.001 * arcsecond)
 
-def test_uranus_barycenter_geocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+def test_uranus_barycenter_geocentric_date4(de405, ts):
+    jd = ts.tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     e = de405['earth'].at(jd)
     p = de405['uranus barycenter']
 
@@ -1124,8 +1124,8 @@ def test_uranus_barycenter_geocentric_date4(de405):
     compare(ra.hours, (12.061052547705433, 18.659361133085376, 21.164987614252272, 0.5005500654503396), 0.001 * ra_arcsecond)
     compare(dec.degrees, (0.37749969290358604, -23.447681812488966, -17.020320613172, 2.429779341040802), 0.001 * arcsecond)
 
-def test_neptune_barycenter_geocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+def test_neptune_barycenter_geocentric_date0(de405, ts):
+    jd = ts.tt(2440423.345833333)
     e = de405['earth'].at(jd)
     p = de405['neptune barycenter']
 
@@ -1146,8 +1146,8 @@ def test_neptune_barycenter_geocentric_date0(de405):
     compare(ra.hours, 15.608486730597074, 0.001 * ra_arcsecond)
     compare(dec.degrees, -17.58379328551931, 0.001 * arcsecond)
 
-def test_neptune_barycenter_geocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+def test_neptune_barycenter_geocentric_date1(de405, ts):
+    jd = ts.tt(2448031.5)
     e = de405['earth'].at(jd)
     p = de405['neptune barycenter']
 
@@ -1168,8 +1168,8 @@ def test_neptune_barycenter_geocentric_date1(de405):
     compare(ra.hours, 19.02716408230529, 0.001 * ra_arcsecond)
     compare(dec.degrees, -21.808047913986798, 0.001 * arcsecond)
 
-def test_neptune_barycenter_geocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+def test_neptune_barycenter_geocentric_date2(de405, ts):
+    jd = ts.tt(2451545.0)
     e = de405['earth'].at(jd)
     p = de405['neptune barycenter']
 
@@ -1190,8 +1190,8 @@ def test_neptune_barycenter_geocentric_date2(de405):
     compare(ra.hours, 20.36218815756048, 0.001 * ra_arcsecond)
     compare(dec.degrees, -19.213233798897665, 0.001 * arcsecond)
 
-def test_neptune_barycenter_geocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+def test_neptune_barycenter_geocentric_date3(de405, ts):
+    jd = ts.tt(2456164.5)
     e = de405['earth'].at(jd)
     p = de405['neptune barycenter']
 
@@ -1212,8 +1212,8 @@ def test_neptune_barycenter_geocentric_date3(de405):
     compare(ra.hours, 22.2643158309744, 0.001 * ra_arcsecond)
     compare(dec.degrees, -11.437330191299896, 0.001 * arcsecond)
 
-def test_neptune_barycenter_geocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+def test_neptune_barycenter_geocentric_date4(de405, ts):
+    jd = ts.tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     e = de405['earth'].at(jd)
     p = de405['neptune barycenter']
 
@@ -1234,8 +1234,8 @@ def test_neptune_barycenter_geocentric_date4(de405):
     compare(ra.hours, (15.608486730597074, 19.02716408230529, 20.36218815756048, 22.2643158309744), 0.001 * ra_arcsecond)
     compare(dec.degrees, (-17.58379328551931, -21.808047913986798, -19.213233798897665, -11.437330191299896), 0.001 * arcsecond)
 
-def test_pluto_barycenter_geocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+def test_pluto_barycenter_geocentric_date0(de405, ts):
+    jd = ts.tt(2440423.345833333)
     e = de405['earth'].at(jd)
     p = de405['pluto barycenter']
 
@@ -1256,8 +1256,8 @@ def test_pluto_barycenter_geocentric_date0(de405):
     compare(ra.hours, 11.989232654068259, 0.001 * ra_arcsecond)
     compare(dec.degrees, 16.792242650891883, 0.001 * arcsecond)
 
-def test_pluto_barycenter_geocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+def test_pluto_barycenter_geocentric_date1(de405, ts):
+    jd = ts.tt(2448031.5)
     e = de405['earth'].at(jd)
     p = de405['pluto barycenter']
 
@@ -1278,8 +1278,8 @@ def test_pluto_barycenter_geocentric_date1(de405):
     compare(ra.hours, 15.208581663980876, 0.001 * ra_arcsecond)
     compare(dec.degrees, -1.3022394883151638, 0.001 * arcsecond)
 
-def test_pluto_barycenter_geocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+def test_pluto_barycenter_geocentric_date2(de405, ts):
+    jd = ts.tt(2451545.0)
     e = de405['earth'].at(jd)
     p = de405['pluto barycenter']
 
@@ -1300,8 +1300,8 @@ def test_pluto_barycenter_geocentric_date2(de405):
     compare(ra.hours, 16.761277438459963, 0.001 * ra_arcsecond)
     compare(dec.degrees, -11.394288734411235, 0.001 * arcsecond)
 
-def test_pluto_barycenter_geocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+def test_pluto_barycenter_geocentric_date3(de405, ts):
+    jd = ts.tt(2456164.5)
     e = de405['earth'].at(jd)
     p = de405['pluto barycenter']
 
@@ -1322,8 +1322,8 @@ def test_pluto_barycenter_geocentric_date3(de405):
     compare(ra.hours, 18.501338273669152, 0.001 * ra_arcsecond)
     compare(dec.degrees, -19.54122790974374, 0.001 * arcsecond)
 
-def test_pluto_barycenter_geocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+def test_pluto_barycenter_geocentric_date4(de405, ts):
+    jd = ts.tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     e = de405['earth'].at(jd)
     p = de405['pluto barycenter']
 
@@ -1344,8 +1344,8 @@ def test_pluto_barycenter_geocentric_date4(de405):
     compare(ra.hours, (11.989232654068259, 15.208581663980876, 16.761277438459963, 18.501338273669152), 0.001 * ra_arcsecond)
     compare(dec.degrees, (16.792242650891883, -1.3022394883151638, -11.394288734411235, -19.54122790974374), 0.001 * arcsecond)
 
-def test_sun_geocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+def test_sun_geocentric_date0(de405, ts):
+    jd = ts.tt(2440423.345833333)
     e = de405['earth'].at(jd)
     p = de405['sun']
 
@@ -1366,8 +1366,8 @@ def test_sun_geocentric_date0(de405):
     compare(ra.hours, 8.000108116572395, 0.001 * ra_arcsecond)
     compare(dec.degrees, 20.584930935996038, 0.001 * arcsecond)
 
-def test_sun_geocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+def test_sun_geocentric_date1(de405, ts):
+    jd = ts.tt(2448031.5)
     e = de405['earth'].at(jd)
     p = de405['sun']
 
@@ -1388,8 +1388,8 @@ def test_sun_geocentric_date1(de405):
     compare(ra.hours, 3.7666292045824337, 0.001 * ra_arcsecond)
     compare(dec.degrees, 19.87917377230974, 0.001 * arcsecond)
 
-def test_sun_geocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+def test_sun_geocentric_date2(de405, ts):
+    jd = ts.tt(2451545.0)
     e = de405['earth'].at(jd)
     p = de405['sun']
 
@@ -1410,8 +1410,8 @@ def test_sun_geocentric_date2(de405):
     compare(ra.hours, 18.75183797477899, 0.001 * ra_arcsecond)
     compare(dec.degrees, -23.032488638722818, 0.001 * arcsecond)
 
-def test_sun_geocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+def test_sun_geocentric_date3(de405, ts):
+    jd = ts.tt(2456164.5)
     e = de405['earth'].at(jd)
     p = de405['sun']
 
@@ -1432,8 +1432,8 @@ def test_sun_geocentric_date3(de405):
     compare(ra.hours, 10.279264504672037, 0.001 * ra_arcsecond)
     compare(dec.degrees, 10.68850786534133, 0.001 * arcsecond)
 
-def test_sun_geocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+def test_sun_geocentric_date4(de405, ts):
+    jd = ts.tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     e = de405['earth'].at(jd)
     p = de405['sun']
 
@@ -1454,8 +1454,8 @@ def test_sun_geocentric_date4(de405):
     compare(ra.hours, (8.000108116572395, 3.7666292045824337, 18.75183797477899, 10.279264504672037), 0.001 * ra_arcsecond)
     compare(dec.degrees, (20.584930935996038, 19.87917377230974, -23.032488638722818, 10.68850786534133), 0.001 * arcsecond)
 
-def test_moon_geocentric_date0(de405):
-    jd = JulianDate(tt=2440423.345833333)
+def test_moon_geocentric_date0(de405, ts):
+    jd = ts.tt(2440423.345833333)
     e = de405['earth'].at(jd)
     p = de405['moon']
 
@@ -1476,8 +1476,8 @@ def test_moon_geocentric_date0(de405):
     compare(ra.hours, 12.446262111681095, 0.001 * ra_arcsecond)
     compare(dec.degrees, -4.378227942513377, 0.001 * arcsecond)
 
-def test_moon_geocentric_date1(de405):
-    jd = JulianDate(tt=2448031.5)
+def test_moon_geocentric_date1(de405, ts):
+    jd = ts.tt(2448031.5)
     e = de405['earth'].at(jd)
     p = de405['moon']
 
@@ -1498,8 +1498,8 @@ def test_moon_geocentric_date1(de405):
     compare(ra.hours, 23.668278096873856, 0.001 * ra_arcsecond)
     compare(dec.degrees, 1.805189185726724, 0.001 * arcsecond)
 
-def test_moon_geocentric_date2(de405):
-    jd = JulianDate(tt=2451545.0)
+def test_moon_geocentric_date2(de405, ts):
+    jd = ts.tt(2451545.0)
     e = de405['earth'].at(jd)
     p = de405['moon']
 
@@ -1520,8 +1520,8 @@ def test_moon_geocentric_date2(de405):
     compare(ra.hours, 14.82957327176072, 0.001 * ra_arcsecond)
     compare(dec.degrees, -10.897905576905867, 0.001 * arcsecond)
 
-def test_moon_geocentric_date3(de405):
-    jd = JulianDate(tt=2456164.5)
+def test_moon_geocentric_date3(de405, ts):
+    jd = ts.tt(2456164.5)
     e = de405['earth'].at(jd)
     p = de405['moon']
 
@@ -1542,8 +1542,8 @@ def test_moon_geocentric_date3(de405):
     compare(ra.hours, 16.403831131432188, 0.001 * ra_arcsecond)
     compare(dec.degrees, -20.96508913558473, 0.001 * arcsecond)
 
-def test_moon_geocentric_date4(de405):
-    jd = JulianDate(tt=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+def test_moon_geocentric_date4(de405, ts):
+    jd = ts.tt([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     e = de405['earth'].at(jd)
     p = de405['moon']
 
