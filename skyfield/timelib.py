@@ -174,14 +174,11 @@ class JulianDate(object):
         JulianDate(tdb=(year, month, day, hour, minute, second))
 
     """
-    def __init__(self, tt=None, ts=None):
+    def __init__(self, tt, ts=None):
 
         self.ts = Timescale() if (ts is None) else ts
 
-        if tt is None:
-            raise ValueError('You must supply either utc, tai, tt, or tdb'
-                             ' when building a JulianDate')
-        elif isinstance(tt, tuple):
+        if isinstance(tt, tuple):
             tt = julian_date(*tt)
 
         self.tt = tt = _to_array(tt)
