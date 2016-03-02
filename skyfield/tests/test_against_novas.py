@@ -3,7 +3,7 @@
 from numpy import abs, array, einsum, max
 from skyfield import (earthlib, framelib, nutationlib, positionlib,
                       precessionlib, starlib, timelib)
-from skyfield.api import JulianDate, Timescale, load
+from skyfield.api import Timescale, load
 from skyfield.constants import AU_KM, AU_M
 from skyfield.data import hipparcos
 from skyfield.functions import length_of

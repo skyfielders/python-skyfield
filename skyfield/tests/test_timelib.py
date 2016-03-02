@@ -2,7 +2,7 @@ import numpy as np
 from assay import assert_raises
 from pytz import timezone
 from skyfield.constants import DAY_S
-from skyfield.timelib import Timescale, JulianDate, utc
+from skyfield.timelib import Timescale, utc
 from datetime import datetime
 
 one_second = 1.0 / DAY_S
