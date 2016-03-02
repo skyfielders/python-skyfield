@@ -120,12 +120,17 @@ class Timescale(object):
             tai = array([
                 _utc_datetime_to_tai(leap_dates, leap_offsets, dt)
                 for dt in utc])
-        jd = JulianDate(tai=tai, ts=self)
+        jd = JulianDate(tt=tai + tt_minus_tai, ts=self)
+        jd.tai = tai
         return jd
 
     def tai(self, tai):
         """Return the JulianDate corresponding to a specific moment in TAI."""
-        return JulianDate(tai=tai, ts=self)
+        if isinstance(tai, tuple):
+            tai = julian_date(*tai)
+        jd = JulianDate(tt=tai + tt_minus_tai, ts=self)
+        jd.tai = tai
+        return jd
 
     def tt(self, tt):
         """Return the JulianDate corresponding to a specific moment in TT."""
@@ -169,16 +174,9 @@ class JulianDate(object):
         JulianDate(tdb=(year, month, day, hour, minute, second))
 
     """
-    def __init__(self, tai=None, tt=None, ts=None):
+    def __init__(self, tt=None, ts=None):
 
         self.ts = Timescale() if (ts is None) else ts
-
-        if tai is not None:
-            if isinstance(tai, tuple):
-                tai = julian_date(*tai)
-            self.tai = _to_array(tai)
-            if tt is None:
-                tt = tai + tt_minus_tai
 
         if tt is None:
             raise ValueError('You must supply either utc, tai, tt, or tdb'

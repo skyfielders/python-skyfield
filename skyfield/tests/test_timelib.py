@@ -207,9 +207,9 @@ def test_leap_second(ts):
 
     # And all these dates can be converted back to UTC.
 
-    assert JulianDate(tai=t0).utc_iso() == '1973-12-31T23:59:48Z'
-    assert JulianDate(tai=t1).utc_iso() == '1973-12-31T23:59:58Z'
-    assert JulianDate(tai=t2).utc_iso() == '1973-12-31T23:59:59Z'
-    assert JulianDate(tai=t3).utc_iso() == '1973-12-31T23:59:60Z'
-    assert JulianDate(tai=t4).utc_iso() == '1974-01-01T00:00:00Z'
-    assert JulianDate(tai=t5).utc_iso() == '1974-01-01T00:00:01Z'
+    assert ts.tai(t0).utc_iso() == '1973-12-31T23:59:48Z'
+    assert ts.tai(t1).utc_iso() == '1973-12-31T23:59:58Z'
+    assert ts.tai(t2).utc_iso() == '1973-12-31T23:59:59Z'
+    assert ts.tai(t3).utc_iso() == '1973-12-31T23:59:60Z'
+    assert ts.tai(t4).utc_iso() == '1974-01-01T00:00:00Z'
+    assert ts.tai(t5).utc_iso() == '1974-01-01T00:00:01Z'
