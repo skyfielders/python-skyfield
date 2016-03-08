@@ -128,12 +128,16 @@ class Timescale(object):
         """Return the JulianDate corresponding to a specific moment in TAI."""
         if isinstance(tai, tuple):
             tai = julian_date(*tai)
+        tai = _to_array(tai)
         jd = JulianDate(self, tai + tt_minus_tai)
         jd.tai = tai
         return jd
 
     def tt(self, tt):
         """Return the JulianDate corresponding to a specific moment in TT."""
+        if isinstance(tt, tuple):
+            tt = julian_date(*tt)
+        tt = _to_array(tt)
         return JulianDate(self, tt)
 
     def tdb(self, tdb):
@@ -175,10 +179,6 @@ class JulianDate(object):
 
     """
     def __init__(self, ts, tt):
-        if isinstance(tt, tuple):
-            tt = julian_date(*tt)
-        else:
-            tt = _to_array(tt)
         self.tt = tt
         self.ts = ts
         self.shape = getattr(tt, 'shape', ())
