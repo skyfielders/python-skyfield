@@ -159,7 +159,7 @@ dry-run:
 	rsync --dry-run -crlv _build/html/ ~/Dropbox/rhodesmill.org/skyfield
 
 sync:
-	rsync -crlv _build/html/ ~/Dropbox/rhodesmill.org/skyfield
+	rsync -crlv _build/html/ wf-rhodesmill:~/Dropbox/rhodesmill.org/skyfield
 
 serve:
 	python -m webbrowser -t http://localhost:8123/_build/html/ && \
