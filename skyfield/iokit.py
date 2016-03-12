@@ -19,11 +19,16 @@ except:
     from StringIO import StringIO as BytesIO
 
 try:
+    from urllib.parse import urlparse
     from urllib.request import urlopen
 except:
+    from urlparse import urlparse
     from urllib2 import urlopen
 
 _missing = object()
+_urls = dict((urlparse(url).path.split('/')[-1], url) for url in (
+    'http://maia.usno.navy.mil/ser7/leapsec.dat',
+    ))
 
 
 def load_bundled_npy(filename):
