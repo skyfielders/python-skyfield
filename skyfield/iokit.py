@@ -77,14 +77,14 @@ class Loader(object):
         return Timescale()
 
 
-def parse_deltat(text):
+def parse_deltat_data(text):
     """Parse the United States Naval Observatory ``deltat.data`` file.
 
-    Each line of the file has the date and the value of Delta T::
+    Each line file gives the date and the value of Delta T::
 
     2016  2  1  68.1577
 
-    The return value is a 2xN array of raw Julian dates and matching
+    This function returns a 2xN array of raw Julian dates and matching
     Delta T values.
 
     """
@@ -93,6 +93,25 @@ def parse_deltat(text):
     expiration_date = date(year + 1, month, day)
     year, month, day, delta_t = array.T
     data = np.array((julian_date(year, month, day), delta_t))
+    return expiration_date, data
+
+def parse_deltat_preds(text):
+    """Parse the United States Naval Observatory ``deltat.preds`` file.
+
+    Each line gives a floating point year, the value of Delta T, and one
+    or two other fields::
+
+    2015.75      67.97               0.210         0.02
+
+    This function returns a 2xN array of raw Julian dates and matching
+    Delta T values.
+
+    """
+    year_float, delta_t = np.loadtxt(text, skiprows=3, usecols=[0, 1]).T
+    year = year_float.astype(int)
+    month = 1 + (year_float * 12.0).astype(int) % 12
+    expiration_date = date(year[0] + 1, month[0], 1)
+    data = np.array((julian_date(year, month, 1), delta_t))
     return expiration_date, data
 
 
@@ -231,6 +250,9 @@ def is_days_old(filename, days_old):
 
 
 FILE_URLS = dict((_filename_of(url), (url, parser)) for url, parser in (
-    ('http://maia.usno.navy.mil/ser7/deltat.data', parse_deltat),
+    ('http://maia.usno.navy.mil/ser7/deltat.data', parse_deltat_data),
+    ('http://maia.usno.navy.mil/ser7/deltat.preds', parse_deltat_preds),
     ('http://maia.usno.navy.mil/ser7/leapsec.dat', None),
     ))
+
+Loader('.')('deltat.preds')
