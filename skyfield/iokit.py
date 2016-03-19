@@ -29,24 +29,42 @@ except:
     from urlparse import urlparse
     from urllib2 import urlopen
 
-_missing = object()
+def _filename_of(url):
+    """Return the last path component of a url."""
+    return urlparse(url).path.split('/')[-1]
 
+class Loader(object):
+    """Downloads files and load their data into Skyfield.
 
-class Cache(object):
+    A default `Loader` that saves data files in the current working
+    directory can be imported directly from the Skyfield API::
+
+    from skyfield.api import load
+
+    But users can also create a `Loader` of their own, if there is
+    another directory they want data files saved to::
+
+    from skyfield.api import Loader
+    load = Loader('~/Skyfield-data')
+
+    """
     def __init__(self, directory):
         self.directory = directory
+        self.urls = FILE_URLS
+        if not os.path.exists(self.directory):
+            os.makedirs(directory)
 
     def path_of(self, filename):
         return os.path.join(self.directory, filename)
 
     def load(self, filename):
-        url, parser = _urls.get(filename, (None, None))
+        url, parser = self.urls.get(filename, (None, None))
         if url is not None:
             expiration_date, data = parser(load(url, self.directory))
             if expiration_date < today():
                 for n in itertools.count(1):
                     prefix, suffix = filename.rsplit('.', 1)
-                    backup_name = '{}.old.{}'.format(prefix, n, suffix)
+                    backup_name = '{}.old{}.{}'.format(prefix, n, suffix)
                     if not os.path.exists(backup_name):
                         break
                 os.rename(self.path_of(filename), self.path_of(backup_name))
@@ -62,15 +80,6 @@ def parse_deltat(text):
     year, month, day, delta_t = array.T
     data = np.array((julian_date(year, month, day), delta_t))
     return expiration_date, data
-
-
-def _filename_of(url):
-    return urlparse(url).path.split('/')[-1]
-
-_urls = dict((_filename_of(url), (url, parser)) for url, parser in (
-    ('http://maia.usno.navy.mil/ser7/deltat.data', parse_deltat),
-    ('http://maia.usno.navy.mil/ser7/leapsec.dat', None),
-    ))
 
 
 def load_bundled_npy(filename):
@@ -205,3 +214,9 @@ def is_days_old(filename, days_old):
     min_old = datetime.now()-timedelta(days=days_old)
     modified = datetime.fromtimestamp(os.path.getmtime(filename))
     return modified < min_old
+
+
+FILE_URLS = dict((_filename_of(url), (url, parser)) for url, parser in (
+    ('http://maia.usno.navy.mil/ser7/deltat.data', parse_deltat),
+    ('http://maia.usno.navy.mil/ser7/leapsec.dat', None),
+    ))

@@ -9,14 +9,15 @@ from datetime import datetime
 from math import pi
 from .constants import tau
 from .errors import DeprecationError
-from .iokit import Cache, load
+from .iokit import Loader, load
 from .starlib import Star
 from .timelib import JulianDate, T0, Timescale, utc
 from .toposlib import Topos
 from .units import Angle
 from .named_stars import NamedStar
 
-__all__ = ['Angle', 'JulianDate', 'NamedStar', 'Star', 'Timescale', 'Topos',
+__all__ = ['Angle', 'Loader', 'JulianDate',
+           'NamedStar', 'Star', 'Timescale', 'Topos',
            'datetime', 'load', 'utc', 'T0', 'pi', 'tau']
 
 # An attempt at friendliest-possible deprecations:

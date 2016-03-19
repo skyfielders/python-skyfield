@@ -30,7 +30,7 @@ new_content = (old_content +
 def cache():
     path = tempfile.mkdtemp()
     try:
-        yield api.Cache(path)
+        yield api.Loader(path)
     finally:
         shutil.rmtree(path)
 
