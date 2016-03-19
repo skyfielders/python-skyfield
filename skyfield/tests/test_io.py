@@ -27,47 +27,47 @@ old_content = (b' 2015 10  1  67.9546\n'
 new_content = (old_content +
                b' 2016  2  1  68.1577\n')
 
-def cache():
+def load():
     path = tempfile.mkdtemp()
     try:
         yield api.Loader(path)
     finally:
         shutil.rmtree(path)
 
-def save_file(cache, content=old_content):
-    with open(cache.path_of('deltat.data'), 'wb') as f:
+def save_file(load, content=old_content):
+    with open(load.path_of('deltat.data'), 'wb') as f:
         f.write(content)
 
-def file_contents(cache):
-    with open(cache.path_of('deltat.data'), 'rb') as f:
+def file_contents(load):
+    with open(load.path_of('deltat.data'), 'rb') as f:
         return f.read()
 
 @contextmanager
-def on(cache, year, month, day):
+def on(load, year, month, day):
     fake_date = date(year, month, day)
-    download = lambda *args, **kw: save_file(cache, new_content)
+    download = lambda *args, **kw: save_file(load, new_content)
     with patch('skyfield.iokit.download', download), \
          patch('skyfield.iokit.today', lambda *args: fake_date):
         yield
 
 # The tests.
 
-def test_missing_file_gets_downloaded(cache):
-    with on(cache, 2016, 1, 15):
-        data = cache.load('deltat.data')
-        assert file_contents(cache).endswith(' 68.1577\n')
+def test_missing_file_gets_downloaded(load):
+    with on(load, 2016, 1, 15):
+        data = load('deltat.data')
+        assert file_contents(load).endswith(' 68.1577\n')
     assert data[1][-1] == 68.1577
 
-def test_11_month_old_file_gets_reused(cache):
-    save_file(cache)
-    with on(cache, 2016, 12, 15):
-        data = cache.load('deltat.data')
-        assert file_contents(cache).endswith(' 68.1024\n')
+def test_11_month_old_file_gets_reused(load):
+    save_file(load)
+    with on(load, 2016, 12, 15):
+        data = load('deltat.data')
+        assert file_contents(load).endswith(' 68.1024\n')
     assert data[1][-1] == 68.1024
 
-def test_12_month_old_file_gets_redownloaded(cache):
-    save_file(cache)
-    with on(cache, 2017, 1, 15):
-        data = cache.load('deltat.data')
-        assert file_contents(cache).endswith(' 68.1577\n')
+def test_12_month_old_file_gets_redownloaded(load):
+    save_file(load)
+    with on(load, 2017, 1, 15):
+        data = load('deltat.data')
+        assert file_contents(load).endswith(' 68.1577\n')
     assert data[1][-1] == 68.1577

@@ -8,7 +8,7 @@ from pkgutil import get_data
 from time import time
 
 from .jpllib import SpiceKernel
-from .timelib import julian_date
+from .timelib import Timescale, julian_date
 
 today = date.today
 
@@ -57,7 +57,8 @@ class Loader(object):
     def path_of(self, filename):
         return os.path.join(self.directory, filename)
 
-    def load(self, filename):
+    def __call__(self, filename):
+        """Open the given file, downloading it first if necessary."""
         url, parser = self.urls.get(filename, (None, None))
         if url is not None:
             expiration_date, data = parser(load(url, self.directory))
@@ -72,8 +73,21 @@ class Loader(object):
             return data
         return load(filename, self.directory)
 
+    def timescale(self):
+        return Timescale()
+
 
 def parse_deltat(text):
+    """Parse the United States Naval Observatory ``deltat.data`` file.
+
+    Each line of the file has the date and the value of Delta T::
+
+    2016  2  1  68.1577
+
+    The return value is a 2xN array of raw Julian dates and matching
+    Delta T values.
+
+    """
     array = np.loadtxt(text)
     year, month, day = array[-1,:3].astype(int)
     expiration_date = date(year + 1, month, day)
