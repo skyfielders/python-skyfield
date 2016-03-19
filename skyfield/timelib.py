@@ -1,10 +1,11 @@
 from datetime import date, datetime, timedelta, tzinfo
-from numpy import (array, einsum, float_, interp, isnan, nan, rollaxis,
-                   searchsorted, sin, where, zeros_like)
+from numpy import (array, concatenate, einsum, float_, interp, isnan, nan,
+                   rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime
 from .constants import T0, DAY_S
 from .earthlib import sidereal_time
 from .framelib import ICRS_to_J2000 as B
+from .functions import load_bundled_npy
 from .nutationlib import compute_nutation, earth_tilt
 from .precessionlib import compute_precession
 
@@ -71,7 +72,6 @@ class Timescale(object):
     utcnow = datetime.utcnow
 
     def __init__(self, delta_t=None):
-        from skyfield.iokit import load_bundled_npy
         self.leap_dates, self.leap_offsets = load_bundled_npy(
             'usno_leapseconds')
         if delta_t is None:
@@ -628,9 +628,63 @@ def interpolate_delta_t(ts, tt):
     return delta_t
 
 def delta_t_formula_morrison_and_stephenson_2004(tt):
-    """Delta T formula from Morrison and Stephenson, 2004."""
+    """Delta T formula from Morrison and Stephenson, 2004.
+
+    This parabola can be used to estimate the value of Delta T for dates
+    in the far past or future, for which more specific estimates are not
+    available.
+
+    """
     t = (tt - 2385800.5) / 36525.0  # centuries before or after 1820
     return 32.0 * t * t - 20.0
+
+def build_delta_t_table(deltat_data, deltat_preds):
+    """Build a table for interpolating Delta T.
+
+    This routine combines four data tables to create an array for
+    interpolating Delta T.  Two of the sources never change and are
+    included in Skyfield as pre-built arrays:
+
+    * The historical values from Morrison and Stephenson (2004) which
+      the http://eclipse.gsfc.nasa.gov/SEcat5/deltat.html NASA web page
+      presents in an HTML table.
+
+    * The United States Naval Observatory ``historic_deltat.data``
+      values for Delta T over the years 1657 through 1984.
+
+    And two of the sources need to be downloaded to make sure they are
+    up to date, both from the United States Naval Observatory:
+
+    * ``deltat.data`` gives observed Delta T since 1973.
+    * ``deltat.preds`` predicts Delta T out to 10 years in the future.
+
+    """
+    a1 = load_bundled_npy('morrison_stephenson_deltat')
+    a2 = load_bundled_npy('historic_deltat')
+    a3 = deltat_data
+    a4 = deltat_preds
+
+    # Prefer USNO over Morrison and Stephenson where they overlap.
+    a2_start = a2[0,0]
+    a1 = a1[:, a1[0] < a2_start]
+
+    # Prefer monthly "data" over biannual "historic" where they overlap.
+    a3_start = a3[0,0]
+    a2 = a2[:, a2[0] < a3_start]
+
+    # Prefer "data" over "preds" where data is avaiable.
+    a3_end = a3[0,-1]
+    a4 = a4[:, a4[0] > a3_end]
+
+    return concatenate((a1, a2, a3, a4), axis=1)
+
+# if __name__ == '__main__':
+#     from skyfield.api import Loader
+#     load = Loader('.')
+#     x = load('deltat.data')
+#     y = load('deltat.preds')
+#     import numpy as np
+#     np.savetxt('foo', build_delta_t_table(x,y).T, delimiter=",")
 
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
     try:

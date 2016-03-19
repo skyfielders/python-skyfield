@@ -4,7 +4,6 @@ import os
 import numpy as np
 import sys
 from datetime import date, datetime, timedelta
-from pkgutil import get_data
 from time import time
 
 from .jpllib import SpiceKernel
@@ -16,11 +15,6 @@ try:
     from fcntl import LOCK_EX, LOCK_UN, lockf
 except:
     lockf = None
-
-try:
-    from io import BytesIO
-except:
-    from StringIO import StringIO as BytesIO
 
 try:
     from urllib.parse import urlparse
@@ -113,11 +107,6 @@ def parse_deltat_preds(text):
     expiration_date = date(year[0] + 1, month[0], 1)
     data = np.array((julian_date(year, month, 1), delta_t))
     return expiration_date, data
-
-
-def load_bundled_npy(filename):
-    data = get_data('skyfield', 'data/{}.npy'.format(filename))
-    return np.load(BytesIO(data))
 
 
 def load(filename, directory='.', autodownload=True, verbose=True):

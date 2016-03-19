@@ -1,4 +1,7 @@
-from numpy import arcsin, arctan2, array, cos, sin, sqrt
+"""Basic operations that are needed repeatedly throughout Skyfield."""
+
+from numpy import arcsin, arctan2, array, cos, load, sin, sqrt
+from pkgutil import get_data
 from skyfield.constants import tau
 
 def dots(v, u):
@@ -65,3 +68,13 @@ def rot_z(theta):
     zero = theta * 0.0
     one = zero + 1.0
     return array(((c, -s, zero), (s, c, zero), (zero, zero, one)))
+
+try:
+    from io import BytesIO
+except:
+    from StringIO import StringIO as BytesIO
+
+def load_bundled_npy(filename):
+    """Load a binary NumPy array file that is bundled with Skyfield."""
+    data = get_data('skyfield', 'data/{}.npy'.format(filename))
+    return load(BytesIO(data))
