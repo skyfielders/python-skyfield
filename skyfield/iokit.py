@@ -1,12 +1,16 @@
 from __future__ import print_function
+import itertools
 import os
 import numpy as np
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pkgutil import get_data
 from time import time
 
 from .jpllib import SpiceKernel
+from .timelib import julian_date
+
+today = date.today
 
 try:
     from fcntl import LOCK_EX, LOCK_UN, lockf
@@ -26,8 +30,46 @@ except:
     from urllib2 import urlopen
 
 _missing = object()
-_urls = dict((urlparse(url).path.split('/')[-1], url) for url in (
-    'http://maia.usno.navy.mil/ser7/leapsec.dat',
+
+
+class Cache(object):
+    def __init__(self, directory):
+        self.directory = directory
+
+    def path_of(self, filename):
+        return os.path.join(self.directory, filename)
+
+    def load(self, filename):
+        url, parser = _urls.get(filename, (None, None))
+        if url is not None:
+            expiration_date, data = parser(load(url, self.directory))
+            if expiration_date < today():
+                for n in itertools.count(1):
+                    prefix, suffix = filename.rsplit('.', 1)
+                    backup_name = '{}.old.{}'.format(prefix, n, suffix)
+                    if not os.path.exists(backup_name):
+                        break
+                os.rename(self.path_of(filename), self.path_of(backup_name))
+                expiration_date, data = parser(load(url, self.directory))
+            return data
+        return load(filename, self.directory)
+
+
+def parse_deltat(text):
+    array = np.loadtxt(text)
+    year, month, day = array[-1,:3].astype(int)
+    expiration_date = date(year + 1, month, day)
+    year, month, day, delta_t = array.T
+    data = np.array((julian_date(year, month, day), delta_t))
+    return expiration_date, data
+
+
+def _filename_of(url):
+    return urlparse(url).path.split('/')[-1]
+
+_urls = dict((_filename_of(url), (url, parser)) for url, parser in (
+    ('http://maia.usno.navy.mil/ser7/deltat.data', parse_deltat),
+    ('http://maia.usno.navy.mil/ser7/leapsec.dat', None),
     ))
 
 
