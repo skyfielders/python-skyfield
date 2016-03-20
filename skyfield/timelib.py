@@ -676,7 +676,14 @@ def build_delta_t_table(deltat_data, deltat_preds):
     a3_end = a3[0,-1]
     a4 = a4[:, a4[0] > a3_end]
 
-    return concatenate((a1, a2, a3, a4), axis=1)
+    # Add initial and final point to provide continuity with formula.
+    century = 36524.0
+    t0 = a1[0,0] - century
+    t5 = a4[0,-1] + century
+    a0 = ((t0,), (delta_t_formula_morrison_and_stephenson_2004(t0),))
+    a5 = ((t5,), (delta_t_formula_morrison_and_stephenson_2004(t5),))
+
+    return concatenate((a0, a1, a2, a3, a4, a5), axis=1)
 
 # if __name__ == '__main__':
 #     from skyfield.api import Loader
