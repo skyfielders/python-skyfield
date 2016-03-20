@@ -8,7 +8,6 @@ from sgp4.propagation import sgp4
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
-from .timelib import Timescale
 
 # important ones:
 # jdsatepoch
@@ -31,7 +30,8 @@ class EarthSatellite(object):
         self._earth = earth
         # TODO: Drat. Where should this Timescale come from?
         # Should they have to pass it in?
-        self.epoch = Timescale().utc((sat.epochyr, 1, sat.epochdays))
+        from skyfield import api
+        self.epoch = api.load.timescale().utc((sat.epochyr, 1, sat.epochdays))
 
     def __repr__(self):
         sat = self._sgp4_satellite

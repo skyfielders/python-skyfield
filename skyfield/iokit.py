@@ -28,7 +28,7 @@ def _filename_of(url):
     return urlparse(url).path.split('/')[-1]
 
 class Loader(object):
-    """Downloads files and load their data into Skyfield.
+    """Download files and load their data into Skyfield.
 
     A default `Loader` that saves data files in the current working
     directory can be imported directly from the Skyfield API::
@@ -39,7 +39,7 @@ class Loader(object):
     another directory they want data files saved to::
 
     from skyfield.api import Loader
-    load = Loader('~/Skyfield-data')
+    load = Loader('~/skyfield-data')
 
     """
     def __init__(self, directory):
@@ -67,8 +67,17 @@ class Loader(object):
             return data
         return load(filename, self.directory)
 
-    def timescale(self):
-        return Timescale()
+    def timescale(self, delta_t=None):
+        if delta_t is not None:
+            # TODO: Can this use inf and -inf instead?
+            table = np.array(((-1e99, 1e99), (delta_t, delta_t)))
+        else:
+            data = self('deltat.data')
+            preds = self('deltat.preds')
+            data_end_time = data[0, -1]
+            i = np.searchsorted(preds[0], data_end_time, side='right')
+            table = np.concatenate([data, preds[:,i:]], axis=1)
+        return Timescale(table)
 
 
 def parse_deltat_data(text):

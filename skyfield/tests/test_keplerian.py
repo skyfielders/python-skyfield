@@ -1,9 +1,9 @@
 """Compare the output of Skyfield with the routines from NOVAS for keplerian orbiting bodies"""
 
 import skyfield.keplerianlib
+from skyfield import api
 from skyfield.keplerianlib import KeplerianOrbit, ICRCoordinates
 
-from ..timelib import Timescale
 
 DISTANCE_EPSILON = 0.026
 
@@ -26,7 +26,7 @@ def test_convergeEccentricAnomaly():
     assert test == hoyle_8077['eccentric_anomaly']
 
 def test_instantiate_8077_hoyle():
-    ts = Timescale()
+    ts = api.load.timescale()
     hoyle = KeplerianOrbit( hoyle_8077['semimajor_axis'],
                             hoyle_8077['eccentricity'],
                             hoyle_8077['inclination'],
@@ -84,7 +84,7 @@ hoyle_8077 = {
 
 
 def test_get_8077_hoyle_ecliptic_on_dev_sprint_day_2():
-    ts = Timescale()
+    ts = api.load.timescale()
     hoyle = KeplerianOrbit( hoyle_8077['semimajor_axis'],
                             hoyle_8077['eccentricity'],
                             hoyle_8077['inclination'],

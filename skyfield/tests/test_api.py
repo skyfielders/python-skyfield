@@ -5,7 +5,7 @@ from skyfield import api
 from skyfield import positionlib
 
 def ts():
-    yield api.Timescale()
+    yield api.load.timescale()
 
 def test_whether_planets_have_radii():
     return # TODO: how will we support this again?

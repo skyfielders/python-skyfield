@@ -15,7 +15,7 @@ de431_url = base + '/planets/de431.bsp'
 jup310_url = base + '/satellites/jup310.bsp'
 
 def ts():
-    yield api.Timescale()
+    yield api.load.timescale()
 
 def compare(value, expected_value, epsilon):
     if hasattr(value, 'shape') or hasattr(expected_value, 'shape'):
@@ -67,7 +67,7 @@ def test_callisto_astrometric(ts):
 
 def test_boston_geometry():
     e = api.load('jup310.bsp')
-    jd = api.Timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
+    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
     a = boston.geometry_of('earth').at(jd)
@@ -77,7 +77,7 @@ def test_boston_geometry():
 
 def test_moon_from_boston_geometry():
     e = api.load('de430.bsp')
-    jd = api.Timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
+    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
     a = boston.geometry_of('moon').at(jd)
@@ -87,7 +87,7 @@ def test_moon_from_boston_geometry():
 
 def test_moon_from_boston_astrometric():
     e = api.load('de430.bsp')
-    jd = api.Timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
+    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
     a = boston.at(jd).observe(e['moon'])

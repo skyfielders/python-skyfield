@@ -1,8 +1,9 @@
 import numpy as np
 from assay import assert_raises
 from pytz import timezone
+from skyfield import api
 from skyfield.constants import DAY_S
-from skyfield.timelib import Timescale, utc
+from skyfield.timelib import utc
 from datetime import datetime
 
 one_second = 1.0 / DAY_S
@@ -12,10 +13,10 @@ time_parameter = ['tai', 'tt', 'tdb']
 time_value = [(1973, 1, 18, 1, 35, 37.5), 2441700.56640625]
 
 def ts():
-    yield Timescale()
+    yield api.load.timescale()
 
 def test_JulianDate_init(time_parameter, time_value):
-    method = getattr(Timescale(), time_parameter)
+    method = getattr(api.load.timescale(), time_parameter)
     jd = method(time_value)
     assert getattr(jd, time_parameter) == 2441700.56640625
 

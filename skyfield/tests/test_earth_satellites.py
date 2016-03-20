@@ -28,7 +28,7 @@ if sys.version_info < (3,):
     heavens_above_transits = heavens_above_transits.decode('utf-8')
 
 def ts():
-    yield Timescale()
+    yield api.load.timescale()
 
 def iss_transit():
     for line in heavens_above_transits.splitlines():
@@ -43,7 +43,7 @@ def test_iss_altitude_computed_with_bcrs(iss_transit):
 
     cst = timedelta(hours=-6) #, minutes=1)
     dt = dt - cst
-    jd = Timescale(delta_t=67.2091).utc(dt)
+    jd = api.load.timescale(delta_t=67.2091).utc(dt)
 
     lines = iss_tle.splitlines()
     s = EarthSatellite(lines, None)
@@ -61,7 +61,7 @@ def test_iss_altitude_computed_with_gcrs(iss_transit):
 
     cst = timedelta(hours=-6) #, minutes=1)
     dt = dt - cst
-    jd = Timescale(delta_t=67.2091).utc(dt)
+    jd = api.load.timescale(delta_t=67.2091).utc(dt)
 
     lines = iss_tle.splitlines()
     s = EarthSatellite(lines, None)
@@ -91,7 +91,7 @@ def test_appendix_c_conversion_from_TEME_to_ITRF():
     vTEME = array([-4.746131487, 0.785818041, 5.531931288])
     vTEME = vTEME * 24.0 * 60.0 * 60.0  # km/s to km/day
 
-    ts = Timescale()
+    ts = api.load.timescale()
     jd_ut1 = ts.tt((2004, 4, 6, 7, 51, 28.386 - 0.439961)).tt
 
     xp = -0.140682 * arcsecond
@@ -115,7 +115,7 @@ def test_appendix_c_satellite():
     lines = appendix_c_example.splitlines()
     sat = EarthSatellite(lines, None)
 
-    ts = Timescale()
+    ts = api.load.timescale()
     jd_epoch = sat._sgp4_satellite.jdsatepoch
     three_days_later = jd_epoch + 3.0
     offset = ts.tt(three_days_later)._utc_float() - three_days_later

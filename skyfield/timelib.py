@@ -71,14 +71,10 @@ class Timescale(object):
     """
     utcnow = datetime.utcnow
 
-    def __init__(self, delta_t=None):
+    def __init__(self, recent_delta_t):
         self.leap_dates, self.leap_offsets = load_bundled_npy(
             'usno_leapseconds')
-        if delta_t is None:
-            self.delta_t_table = load_bundled_npy('delta_t')
-        else:
-            # TODO: make this pretty.  Can this use inf and -inf instead?
-            self.delta_t_table = array([[-1e99, 1e99], [delta_t, delta_t]])
+        self.delta_t_table = build_delta_t_table(recent_delta_t)
 
     def now(self):
         """Return a `JulianDate` for the current date and time.
@@ -498,7 +494,8 @@ class JulianDate(object):
             return ut1
 
         if name == 'delta_t':
-            self.delta_t = delta_t = interpolate_delta_t(self.ts, self.tt)
+            table = self.ts.delta_t_table
+            self.delta_t = delta_t = interpolate_delta_t(table, self.tt)
             return delta_t
 
         if name == 'gmst':
@@ -617,9 +614,15 @@ def usno_leapseconds(cache):
 
     return array([dates, offsets])
 
-def interpolate_delta_t(ts, tt):
-    """Given TT, return interpolated Delta T, falling back to a formula."""
-    x, y = ts.delta_t_table
+def interpolate_delta_t(delta_t_table, tt):
+    """Return interpolated Delta T values for the times in `tt`.
+
+    The 2xN table should provide TT values as element 0 and
+    corresponding Delta T values for element 1.  For times outside the
+    range of the table, a long-term formula is used instead.
+
+    """
+    x, y = delta_t_table
     delta_t = interp(tt, x, y, nan, nan)
     missing = isnan(delta_t)
     if missing.any():
@@ -638,12 +641,13 @@ def delta_t_formula_morrison_and_stephenson_2004(tt):
     t = (tt - 2385800.5) / 36525.0  # centuries before or after 1820
     return 32.0 * t * t - 20.0
 
-def build_delta_t_table(deltat_data, deltat_preds):
+def build_delta_t_table(recent_delta_t):
     """Build a table for interpolating Delta T.
 
-    This routine combines four data tables to create an array for
-    interpolating Delta T.  Two of the sources never change and are
-    included in Skyfield as pre-built arrays:
+    Given a 2xN array of recent Delta T values, whose element 0 is a
+    sorted array of TT Julian dates and element 1 is Delta T values,
+    this routine returns a more complete table by prepending two
+    built-in data sources that ship with Skyfield as pre-built arrays:
 
     * The historical values from Morrison and Stephenson (2004) which
       the http://eclipse.gsfc.nasa.gov/SEcat5/deltat.html NASA web page
@@ -652,38 +656,28 @@ def build_delta_t_table(deltat_data, deltat_preds):
     * The United States Naval Observatory ``historic_deltat.data``
       values for Delta T over the years 1657 through 1984.
 
-    And two of the sources need to be downloaded to make sure they are
-    up to date, both from the United States Naval Observatory:
-
-    * ``deltat.data`` gives observed Delta T since 1973.
-    * ``deltat.preds`` predicts Delta T out to 10 years in the future.
-
     """
-    a1 = load_bundled_npy('morrison_stephenson_deltat')
-    a2 = load_bundled_npy('historic_deltat')
-    a3 = deltat_data
-    a4 = deltat_preds
+    ancient = load_bundled_npy('morrison_stephenson_deltat')
+    historic = load_bundled_npy('historic_deltat')
 
     # Prefer USNO over Morrison and Stephenson where they overlap.
-    a2_start = a2[0,0]
-    a1 = a1[:, a1[0] < a2_start]
+    historic_start_time = historic[0,0]
+    i = searchsorted(ancient[0], historic_start_time)
+    bundled = concatenate([ancient[:,:i], historic], axis=1)
 
-    # Prefer monthly "data" over biannual "historic" where they overlap.
-    a3_start = a3[0,0]
-    a2 = a2[:, a2[0] < a3_start]
+    # Let recent data replace everything else.
+    recent_start_time = recent_delta_t[0,0]
+    i = searchsorted(bundled[0], recent_start_time)
+    row = ((0,),(0,))
+    table = concatenate([row, bundled[:,:i], recent_delta_t, row], axis=1)
 
-    # Prefer "data" over "preds" where data is avaiable.
-    a3_end = a3[0,-1]
-    a4 = a4[:, a4[0] > a3_end]
-
-    # Add initial and final point to provide continuity with formula.
+    # Create initial and final point to provide continuity with formula.
     century = 36524.0
-    t0 = a1[0,0] - century
-    t5 = a4[0,-1] + century
-    a0 = ((t0,), (delta_t_formula_morrison_and_stephenson_2004(t0),))
-    a5 = ((t5,), (delta_t_formula_morrison_and_stephenson_2004(t5),))
-
-    return concatenate((a0, a1, a2, a3, a4, a5), axis=1)
+    start = table[0,1] - century
+    table[:,0] = start, delta_t_formula_morrison_and_stephenson_2004(start)
+    end = table[0,-2] + century
+    table[:,-1] = end, delta_t_formula_morrison_and_stephenson_2004(end)
+    return table
 
 # if __name__ == '__main__':
 #     from skyfield.api import Loader
