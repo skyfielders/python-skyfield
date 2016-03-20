@@ -67,10 +67,9 @@ class Timescale(object):
     """
     utcnow = datetime.utcnow
 
-    def __init__(self, recent_delta_t):
-        self.leap_dates, self.leap_offsets = load_bundled_npy(
-            'usno_leapseconds')
-        self.delta_t_table = build_delta_t_table(recent_delta_t)
+    def __init__(self, delta_t_recent, leap_dates, leap_offsets):
+        self.delta_t_table = build_delta_t_table(delta_t_recent)
+        self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
 
     def now(self):
         """Return a `JulianDate` for the current date and time.
@@ -561,38 +560,6 @@ def tdb_minus_tt(jd_tdb):
           + 0.000002 * sin (  21.3299 * t + 5.5431)
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
 
-def usno_leapseconds(cache):
-    """Download the USNO table of leap seconds as a ``(2, N+1)`` NumPy array.
-
-    The array has two rows ``[leap_dates leap_offsets]``.  The first row
-    is used to find where a given date ``jd`` falls in the table::
-
-        index = np.searchsorted(leap_dates, jd, 'right')
-
-    This can return a value from ``0`` to ``N``, allowing the
-    corresponding UTC offset to be fetched with::
-
-        offset = leap_offsets[index]
-
-    The offset is the number of seconds that must be added to a UTC time
-    to build the corresponding TAI time.
-
-    """
-    with cache.open_url('http://maia.usno.navy.mil/ser7/leapsec.dat') as f:
-        lines = f.readlines()
-
-    linefields = [line.split() for line in lines]
-    dates = [float(fields[4]) for fields in linefields]
-    offsets = [float(fields[6]) for fields in linefields]
-
-    dates.insert(0, float('-inf'))
-    dates.append(float('inf'))
-
-    offsets.insert(0, offsets[0])
-    offsets.insert(1, offsets[0])
-
-    return array([dates, offsets])
-
 def interpolate_delta_t(delta_t_table, tt):
     """Return interpolated Delta T values for the times in `tt`.
 
@@ -601,8 +568,8 @@ def interpolate_delta_t(delta_t_table, tt):
     range of the table, a long-term formula is used instead.
 
     """
-    x, y = delta_t_table
-    delta_t = interp(tt, x, y, nan, nan)
+    tt_array, delta_t_array = delta_t_table
+    delta_t = interp(tt, tt_array, delta_t_array, nan, nan)
     missing = isnan(delta_t)
     if missing.any():
         tt = tt[missing]
@@ -620,7 +587,7 @@ def delta_t_formula_morrison_and_stephenson_2004(tt):
     t = (tt - 2385800.5) / 36525.0  # centuries before or after 1820
     return 32.0 * t * t - 20.0
 
-def build_delta_t_table(recent_delta_t):
+def build_delta_t_table(delta_t_recent):
     """Build a table for interpolating Delta T.
 
     Given a 2xN array of recent Delta T values, whose element 0 is a
@@ -645,10 +612,10 @@ def build_delta_t_table(recent_delta_t):
     bundled = concatenate([ancient[:,:i], historic], axis=1)
 
     # Let recent data replace everything else.
-    recent_start_time = recent_delta_t[0,0]
+    recent_start_time = delta_t_recent[0,0]
     i = searchsorted(bundled[0], recent_start_time)
     row = ((0,),(0,))
-    table = concatenate([row, bundled[:,:i], recent_delta_t, row], axis=1)
+    table = concatenate([row, bundled[:,:i], delta_t_recent, row], axis=1)
 
     # Create initial and final point to provide continuity with formula.
     century = 36524.0

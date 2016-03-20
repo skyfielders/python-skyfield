@@ -34,6 +34,9 @@ Sprint Possibilities
 * Make JD give a sensible error if the first argument is a number or
   something.
 
+* Load and use the various offsets between UTC and TAI that were in
+  effect before 1972.
+
 * When I wrote `add_deflection()` and needed to know whether Jupiter
   itself is available in an ephemeris, or whether the Jupiter Barycenter
   should be used in its place, I tried writing the test `if name not in

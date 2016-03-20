@@ -28,7 +28,7 @@ def _filename_of(url):
     return urlparse(url).path.split('/')[-1]
 
 class Loader(object):
-    """Download files and load their data into Skyfield.
+    """Download files to a directory where Skyfield can use them.
 
     A default `Loader` that saves data files in the current working
     directory can be imported directly from the Skyfield API::
@@ -70,14 +70,15 @@ class Loader(object):
     def timescale(self, delta_t=None):
         if delta_t is not None:
             # TODO: Can this use inf and -inf instead?
-            table = np.array(((-1e99, 1e99), (delta_t, delta_t)))
+            delta_t_recent = np.array(((-1e99, 1e99), (delta_t, delta_t)))
         else:
             data = self('deltat.data')
             preds = self('deltat.preds')
             data_end_time = data[0, -1]
             i = np.searchsorted(preds[0], data_end_time, side='right')
-            table = np.concatenate([data, preds[:,i:]], axis=1)
-        return Timescale(table)
+            delta_t_recent = np.concatenate([data, preds[:,i:]], axis=1)
+        leap_dates, leap_offsets = self('Leap_Second.dat')
+        return Timescale(delta_t_recent, leap_dates, leap_offsets)
 
 
 def parse_deltat_data(text):
@@ -117,6 +118,35 @@ def parse_deltat_preds(text):
     data = np.array((julian_date(year, month, 1), delta_t))
     return expiration_date, data
 
+def parse_leap_seconds(text):
+    """Parse the IERS file ``Leap_Second.dat``.
+
+    The leap dates array can be searched with::
+
+        index = np.searchsorted(leap_dates, jd, 'right')
+
+    The resulting index allows (TAI - UTC) to be fetched with::
+
+        offset = leap_offsets[index]
+
+    """
+    lines = iter(text)
+    for line in lines:
+        if line.startswith('#  File expires on'):
+            break
+    else:
+        raise ValueError('Leap_Second.dat is missing its expiration date')
+    dt = datetime.strptime(line, '#  File expires on %d %B %Y\n')
+    expiration_date = dt.date()
+    mjd, day, month, year, offsets = np.loadtxt(lines).T
+    leap_dates = np.ndarray(len(mjd) + 2)
+    leap_dates[0] = '-inf'
+    leap_dates[1:-1] = mjd + 2400000.5
+    leap_dates[-1] = 'inf'
+    leap_offsets = np.ndarray(len(mjd) + 2)
+    leap_offsets[0] = leap_offsets[1] = offsets[0]
+    leap_offsets[2:] = offsets
+    return expiration_date, (leap_dates, leap_offsets)
 
 def load(filename, directory='.', autodownload=True, verbose=True):
     """Load the given file, possibly downloading it if it is not present."""
@@ -250,5 +280,6 @@ def is_days_old(filename, days_old):
 FILE_URLS = dict((_filename_of(url), (url, parser)) for url, parser in (
     ('http://maia.usno.navy.mil/ser7/deltat.data', parse_deltat_data),
     ('http://maia.usno.navy.mil/ser7/deltat.preds', parse_deltat_preds),
-    ('http://maia.usno.navy.mil/ser7/leapsec.dat', None),
+    ('https://hpiers.obspm.fr/iers/bul/bulc/Leap_Second.dat',
+     parse_leap_seconds),
     ))
