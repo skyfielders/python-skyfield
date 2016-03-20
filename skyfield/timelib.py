@@ -48,25 +48,21 @@ class Timescale(object):
     """The data necessary to express dates in different timescales.
 
     Whenever you want to express a date in Skyfield, you need a
-    `Timescale` object.  You will usually create a `Timescale` at the
-    beginning of your program, and use it every time you want to
+    `Timescale` that can translate between several different systems for
+    expressing time.  You will usually create a single `Timescale` at
+    the beginning of your program, and use it every time you want to
     generate a specific `JulianDate`:
 
-    >>> from skyfield.api import Timescale
-    >>> ts = Timescale()
+    >>> from skyfield.api import load
+    >>> ts = load.timescale()
     >>> t = ts.utc((1980, 3, 1, 9, 30))
     >>> t
     <JulianDate tt=2444299.89643>
 
-    A `Timescale` uses two tables from the United States Naval
-    Observatory.  A recent version of each table comes bundled with each
-    version of Skyfield, but a Timescale will need to download new
-    tables when the bundled versions get too old:
-
-    * A new leap seconds table is needed about every 6 months.
-
-    * New delta-T determinations and predictions will need to be
-      downloaded once the data becomes more than one year old.
+    Loading a timescale downloads tables from the United States Naval
+    Observatory and the International Earth Rotation Service.  These
+    files go out of date, and Skyfield will fetch updated copies once
+    your copy of the files are old enough.
 
     """
     utcnow = datetime.utcnow
@@ -92,10 +88,10 @@ class Timescale(object):
 
         Provide the Coordinated Univeral Time (UTC) as a proleptic
         Gregorian date, expressed as a Python datetime or a tuple.
-        These two lines are equivalent::
+        These two method calls are equivalent::
 
-            utc=(1973, 12, 29, 23, 59, 48.0)
-            utc=datetime(1973, 12, 29, 23, 59, 48.0)
+            timescale.utc((1973, 12, 29, 23, 59, 48.0))
+            timescale.utc(datetime(1973, 12, 29, 23, 59, 48.0))
 
         Note that only a tuple can express a leap second, because a
         Python datetime will not allow the value 60 in its seconds
@@ -123,10 +119,10 @@ class Timescale(object):
 
         The International Atomic Time (TAI) can be expressed as either a
         floating point Julian Date, or a tuple supplying the proleptic
-        Gregorian date.  The following two lines are equivalent::
+        Gregorian date.  The following two method calls are equivalent::
 
-            tai=2442046.5
-            tai=(1973, 12, 29, 23, 59, 48.0)
+            timescale.tai(2442046.5)
+            timescale.tai((1973, 12, 29, 23, 59, 48.0))
 
         """
         if isinstance(tai, tuple):
@@ -143,8 +139,8 @@ class Timescale(object):
         point Julian Date, or a tuple supplying the proleptic Gregorian
         date.  The following two lines are equivalent::
 
-            tt=2442046.5
-            tt=(1973, 12, 29, 23, 59, 48.0)
+            timescale.tt(2442046.5)
+            timescale.tt((1973, 12, 29, 23, 59, 48.0))
 
         """
         if isinstance(tt, tuple):
@@ -159,8 +155,8 @@ class Timescale(object):
         floating point Julian Date, or a tuple supplying the proleptic
         Gregorian date.  The following two lines are equivalent::
 
-            tdb=2442046.5
-            tdb=(1973, 12, 29, 23, 59, 48.0)
+            timescale.tdb(2442046.5)
+            timescale.tdb((1973, 12, 29, 23, 59, 48.0))
 
         """
         if isinstance(tdb, tuple):
@@ -174,29 +170,12 @@ class Timescale(object):
 class JulianDate(object):
     """A single date and time, or an array, stored as a Julian date.
 
-    You can import this class from ``skyfield.api``.  For the Julian
-    date of the current date and time, use the separate function
-    ``skyfield.api.now()``.
+    You will typically not instantiate this class yourself, but will
+    rely on a ``Timescale`` object to build dates for you::
 
-    Every Julian date object understands four different time scales,
-    which can be used during instantiation::
-
-        # Coordinated Universal Time
-        JulianDate(utc=(year, month, day, hour, minute, second))
-        JulianDate(utc=datetime(year, month, day, hour, minute, second))
-        JulianDate(utc=date(year, month, day))
-
-        # International Atomic Time
-        JulianDate(tai=2442046.5)  <- Julian day represented by a float
-        JulianDate(tai=(year, month, day, hour, minute, second))
-
-        # Terrestrial Time
-        JulianDate(tt=2442046.5)  <- Julian day represented by a float
-        JulianDate(tt=(year, month, day, hour, minute, second))
-
-        # Barycentric Dynamical Time
-        JulianDate(tdb=2442046.5)  <- Julian day represented by a float
-        JulianDate(tdb=(year, month, day, hour, minute, second))
+        from skyfield.api import load
+        ts = load.timescale()
+        print(ts.utc((1980, 1, 1)))
 
     """
     def __init__(self, ts, tt):

@@ -252,5 +252,3 @@ FILE_URLS = dict((_filename_of(url), (url, parser)) for url, parser in (
     ('http://maia.usno.navy.mil/ser7/deltat.preds', parse_deltat_preds),
     ('http://maia.usno.navy.mil/ser7/leapsec.dat', None),
     ))
-
-Loader('.')('deltat.preds')
