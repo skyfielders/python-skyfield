@@ -15,3 +15,7 @@ tmp*.py
 *.egg-info
 *.ipynb_checkpoints
 Untitled*.ipynb
+/Leap_Second.dat
+/deltat.data
+/deltat.preds
+/leapsec.dat
