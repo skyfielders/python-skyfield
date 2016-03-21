@@ -10,12 +10,12 @@ positions for planets and Earth satellites.
 
 ::
 
-   from skyfield.api import load, Timescale
+   from skyfield.api import load
 
    planets = load('de421.bsp')
    earth, mars = planets['earth'], planets['mars']
 
-   ts = Timescale()
+   ts = load.timescale()
    jd = ts.now()
    position = earth.at(jd).observe(mars)
    ra, dec, distance = position.radec()

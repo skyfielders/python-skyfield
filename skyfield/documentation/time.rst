@@ -39,8 +39,8 @@ as a keyword argument to specify the moment you want to represent.
 
     # Building a date object
 
-    from skyfield.api import Timescale
-    ts = Timescale()
+    from skyfield.api import load
+    ts = load.timescale()
     ts.utc((2014, 1, 18))
 
 The possibilities that will be explored in the course of this page
@@ -73,9 +73,9 @@ come out exactly the same:
 
 .. testcode::
 
-    from skyfield.api import Timescale, load
+    from skyfield.api import load
 
-    ts = Timescale()
+    ts = load.timescale()
     planets = load('de421.bsp')
     earth = planets['earth']
 
@@ -150,11 +150,11 @@ and configured with the correct time zone):
 
 .. testcode::
 
-    from skyfield.api import Timescale
+    from skyfield.api import load
 
     # Asking the current date and time
 
-    ts = Timescale()
+    ts = load.timescale()
     jd = ts.now()
     print(jd.utc_jpl())
 
@@ -638,7 +638,7 @@ and provide it to your Julian date manually:
 
 .. testcode::
 
-    Timescale(delta_t=67.2810).utc((2014, 1, 1))
+    load.timescale(delta_t=67.2810).utc((2014, 1, 1))
 
 .. _date-cache:
 

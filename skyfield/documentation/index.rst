@@ -16,9 +16,9 @@
 
 .. testcode::
 
-    from skyfield.api import load, Timescale
+    from skyfield.api import load
 
-    ts = Timescale()
+    ts = load.timescale()
     planets = load('de421.bsp')
     earth, mars = planets['earth'], planets['mars']
 
@@ -55,8 +55,8 @@ on the Earth’s surface:
 
 .. testoutput::
 
-    25deg 27' 53.8"
-    101deg 33' 43.9"
+    25deg 27' 54.0"
+    101deg 33' 44.0"
 
 The official documentation is available through the links
 in the Table of Contents below.

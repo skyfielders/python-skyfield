@@ -42,9 +42,10 @@ class Loader(object):
     load = Loader('~/skyfield-data')
 
     """
-    def __init__(self, directory):
+    def __init__(self, directory, verbose=True):
         self.directory = directory
         self.urls = FILE_URLS
+        self.verbose = verbose
         if not os.path.exists(self.directory):
             os.makedirs(directory)
 
@@ -55,7 +56,8 @@ class Loader(object):
         """Open the given file, downloading it first if necessary."""
         url, parser = self.urls.get(filename, (None, None))
         if url is not None:
-            expiration_date, data = parser(load(url, self.directory))
+            expiration_date, data = parser(load(url, self.directory,
+                                                verbose=self.verbose))
             if expiration_date < today():
                 for n in itertools.count(1):
                     prefix, suffix = filename.rsplit('.', 1)
@@ -63,9 +65,10 @@ class Loader(object):
                     if not os.path.exists(backup_name):
                         break
                 os.rename(self.path_of(filename), self.path_of(backup_name))
-                expiration_date, data = parser(load(url, self.directory))
+                expiration_date, data = parser(load(url, self.directory,
+                                                    verbose=self.verbose))
             return data
-        return load(filename, self.directory)
+        return load(filename, self.directory, verbose=self.verbose)
 
     def timescale(self, delta_t=None):
         if delta_t is not None:
