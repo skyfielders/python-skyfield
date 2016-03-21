@@ -135,11 +135,11 @@ def parse_leap_seconds(text):
     """
     lines = iter(text)
     for line in lines:
-        if line.startswith('#  File expires on'):
+        if line.startswith(b'#  File expires on'):
             break
     else:
         raise ValueError('Leap_Second.dat is missing its expiration date')
-    dt = datetime.strptime(line, '#  File expires on %d %B %Y\n')
+    dt = datetime.strptime(line, b'#  File expires on %d %B %Y\n')
     expiration_date = dt.date()
     mjd, day, month, year, offsets = np.loadtxt(lines).T
     leap_dates = np.ndarray(len(mjd) + 2)
