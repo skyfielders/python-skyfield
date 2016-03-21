@@ -58,7 +58,7 @@ class Timescale(object):
     >>> ts = load.timescale()
     >>> t = ts.utc((1980, 3, 1, 9, 30))
     >>> t
-    <JulianDate tt=2444299.89643>
+    <JulianDate tt=2444299.896426>
 
     Loading a timescale downloads tables from the United States Naval
     Observatory and the International Earth Rotation Service.  These
@@ -190,7 +190,7 @@ class JulianDate(object):
         return self.shape[0]
 
     def __repr__(self):
-        return '<JulianDate tt={0}>'.format(self.tt)
+        return '<JulianDate tt={0:.6f}>'.format(self.tt)
 
     def __getitem__(self, index):
         # TODO: also copy cached matrices?
