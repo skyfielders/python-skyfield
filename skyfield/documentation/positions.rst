@@ -95,6 +95,7 @@ as its argument and return a corresponding number of positions.
 
     ts = load.timescale()
     jd = ts.now()
+
     planets = load('de421.bsp')
     earth = planets['earth']
     mars = planets['mars']
@@ -127,6 +128,7 @@ as its argument and return a corresponding number of positions.
 
     ts = load.timescale()
     jd = ts.now()
+
     boston = earth.topos('42.3583 N', '71.0603 W')
     barnard = Star(ra_hours=(17, 57, 48.49803),
                    dec_degrees=(4, 41, 36.2072))
@@ -162,6 +164,7 @@ as its argument and return a corresponding number of positions.
 
     ts = load.timescale()
     jd = ts.now()
+
     boston = earth.topos('42.3583 N', '71.0603 W')
     #satellite = earth.satellite(tle_text) # TODO
 
@@ -209,6 +212,10 @@ by asking Skyfield for their :attr:`~Position.position` attribute:
     planets = load('de421.bsp')
     earth = planets['earth']
     mars = planets['mars']
+
+    jd = ts.utc(1980, 1, 1)
+    jd = ts.utc(jd=2444299.89643)
+    jd = ts.utc(n=2444299.89643)
 
     jd = ts.utc((1980, 1, 1))
     print(earth.at(jd).position.au)

@@ -50,7 +50,7 @@ def add_deflection(position, observer, ephemeris, jd,
 
         # Get position of gravitating body wrt ss barycenter at time 'jd_tdb'.
 
-        bposition = deflector.at(ts.tdb(jd_tdb)).position.au  # TODO
+        bposition = deflector.at(ts.tdb(n=jd_tdb)).position.au  # TODO
 
         # Get position of gravitating body wrt observer at time 'jd_tdb'.
 
@@ -75,14 +75,14 @@ def add_deflection(position, observer, ephemeris, jd,
         # if tlt < dlt:
         #     tclose = jd - tlt
 
-        bposition = deflector.at(ts.tdb(tclose)).position.au  # TODO
+        bposition = deflector.at(ts.tdb(n=tclose)).position.au  # TODO
         rmass = rmasses[name]
         _add_deflection(position, observer, bposition, rmass)
 
     # If observer is not at geocenter, add in deflection due to Earth.
 
     if include_earth_deflection.any():
-        bposition = deflector.at(ts.tdb(tclose)).position.au  # TODO
+        bposition = deflector.at(ts.tdb(n=tclose)).position.au  # TODO
         rmass = rmasses['earth']
         _add_deflection(position, observer, bposition, rmass)
 

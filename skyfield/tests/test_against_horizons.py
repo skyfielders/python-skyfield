@@ -26,14 +26,14 @@ def compare(value, expected_value, epsilon):
 def test_ecliptic_frame(ts):
     e = api.load('de421.bsp')
     jup = e['jupiter barycenter']
-    astrometric = e['sun'].at(ts.utc((1980, 1, 1, 0, 0))).observe(jup)
+    astrometric = e['sun'].at(ts.utc(1980, 1, 1, 0, 0)).observe(jup)
     hlat, hlon, d = astrometric.ecliptic_latlon()
     compare(hlat.degrees, 1.013, 0.001)
     compare(hlon.degrees, 151.3229, 0.001)
 
 def test_fk4_frame(ts):
     e = api.load('de421.bsp')
-    astrometric = e['earth'].at(ts.utc((1980, 1, 1, 0, 0))).observe(e['moon'])
+    astrometric = e['earth'].at(ts.utc(1980, 1, 1, 0, 0)).observe(e['moon'])
     ra, dec, d = astrometric.to_spice_frame('B1950')
     print(ra._degrees, dec.degrees)
     compare(ra._degrees, 82.36186, 0.00006) # TODO: why is this not 0.00001?
@@ -41,7 +41,7 @@ def test_fk4_frame(ts):
 
 def test_galactic_frame(ts):
     e = api.load('de421.bsp')
-    astrometric = e['earth'].at(ts.utc((1980, 1, 1, 0, 0))).observe(e['moon'])
+    astrometric = e['earth'].at(ts.utc(1980, 1, 1, 0, 0)).observe(e['moon'])
     glat, glon, d = astrometric.galactic_latlon()
     print(glat, glat.degrees, glon, glon.degrees)
     compare(glat.degrees, -8.047315, 0.005)  # TODO: awful! Track this down.
@@ -49,7 +49,7 @@ def test_galactic_frame(ts):
 
 def test_callisto_geometry(ts):
     e = api.load('jup310.bsp')
-    a = e['earth'].geometry_of('callisto').at(ts.tdb(2471184.5))
+    a = e['earth'].geometry_of('callisto').at(ts.tdb(n=2471184.5))
     compare(a.position.au,
       [-4.884815926454119E+00, -3.705745549073268E+00, -1.493487818022234E+00],
       0.001 * meter)
@@ -59,7 +59,7 @@ def test_callisto_geometry(ts):
 
 def test_callisto_astrometric(ts):
     e = api.load('jup310.bsp')
-    a = e['earth'].at(ts.utc((2053, 10, 8, 23, 59, 59))).observe(e['callisto'])
+    a = e['earth'].at(ts.utc(2053, 10, 8, 23, 59, 59)).observe(e['callisto'])
     ra, dec, distance = a.radec()
     compare(ra._degrees, 217.1839292, 0.001 * arcsecond)
     compare(dec.degrees, -13.6892791, 0.001 * arcsecond)
@@ -67,7 +67,7 @@ def test_callisto_astrometric(ts):
 
 def test_boston_geometry():
     e = api.load('jup310.bsp')
-    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
+    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
     a = boston.geometry_of('earth').at(jd)
@@ -77,7 +77,7 @@ def test_boston_geometry():
 
 def test_moon_from_boston_geometry():
     e = api.load('de430t.bsp')
-    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
+    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
     a = boston.geometry_of('moon').at(jd)
@@ -87,7 +87,7 @@ def test_moon_from_boston_geometry():
 
 def test_moon_from_boston_astrometric():
     e = api.load('de430t.bsp')
-    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb((2015, 3, 2))
+    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
     a = boston.at(jd).observe(e['moon'])

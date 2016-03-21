@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from numpy import array
 from skyfield import api
 from skyfield.sgp4lib import EarthSatellite, TEME_to_ITRF
-from skyfield.timelib import Timescale, utc
+from skyfield.timelib import utc
 
 iss_tle = ("""\
 ISS (ZARYA)             \n\
@@ -92,7 +92,7 @@ def test_appendix_c_conversion_from_TEME_to_ITRF():
     vTEME = vTEME * 24.0 * 60.0 * 60.0  # km/s to km/day
 
     ts = api.load.timescale()
-    jd_ut1 = ts.tt((2004, 4, 6, 7, 51, 28.386 - 0.439961)).tt
+    jd_ut1 = ts.tt(2004, 4, 6, 7, 51, 28.386 - 0.439961).tt
 
     xp = -0.140682 * arcsecond
     yp = 0.333309 * arcsecond
@@ -118,8 +118,8 @@ def test_appendix_c_satellite():
     ts = api.load.timescale()
     jd_epoch = sat._sgp4_satellite.jdsatepoch
     three_days_later = jd_epoch + 3.0
-    offset = ts.tt(three_days_later)._utc_float() - three_days_later
-    jd = ts.tt(three_days_later - offset)
+    offset = ts.tt(n=three_days_later)._utc_float() - three_days_later
+    jd = ts.tt(n=three_days_later - offset)
 
     # First, a crucial sanity check (which is, technically, a test of
     # the `sgp4` package and not of Skyfield): are the right coordinates

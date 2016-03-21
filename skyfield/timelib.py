@@ -56,7 +56,7 @@ class Timescale(object):
 
     >>> from skyfield.api import load
     >>> ts = load.timescale()
-    >>> t = ts.utc((1980, 3, 1, 9, 30))
+    >>> t = ts.utc(1980, 3, 1, 9, 30)
     >>> t
     <JulianDate tt=2444299.896426>
 
@@ -83,84 +83,99 @@ class Timescale(object):
         """
         return self.utc(self.utcnow().replace(tzinfo=utc))
 
-    def utc(self, utc):
+    def utc(self, year, month=1, day=1, hour=0, minute=0, second=0.0):
         """Return the JulianDate corresponding to a specific moment in UTC.
 
-        Provide the Coordinated Univeral Time (UTC) as a proleptic
-        Gregorian date, expressed as a Python datetime or a tuple.
-        These two method calls are equivalent::
+        You can either specify the date as separate components, or
+        provide a time zone aware Python datetime.  The following two
+        calls are equivalent (the ``utc`` zone can be imported from the
+        ``skyfield.api`` module, or from ``pytz`` if you have it)::
 
-            timescale.utc((1973, 12, 29, 23, 59, 48.0))
-            timescale.utc(datetime(1973, 12, 29, 23, 59, 48.0))
+            ts.utc(2014, 1, 18, 1, 35, 37.5)
+            ts.utc(datetime(2014, 1, 18, 1, 35, 37, 500000, tzinfo=utc))
 
-        Note that only a tuple can express a leap second, because a
-        Python datetime will not allow the value 60 in its seconds
-        field.
+        Note that only by passing the components separately can you
+        specify a leap second, because a Python datetime will not allow
+        the value 60 in its seconds field.
 
         """
-        leap_dates, leap_offsets = self.leap_dates, self.leap_offsets
-        if isinstance(utc, datetime):
-            tai = _utc_datetime_to_tai(leap_dates, leap_offsets, utc)
-        elif isinstance(utc, date):
-            tai = _utc_date_to_tai(leap_dates, leap_offsets, utc)
-        elif isinstance(utc, tuple):
-            values = [_to_array(value) for value in utc]
-            tai = _utc_to_tai(leap_dates, leap_offsets, *values)
-        else:
+        if isinstance(year, datetime):
+            dt = year
+            tai = _utc_datetime_to_tai(self.leap_dates, self.leap_offsets, dt)
+        elif isinstance(year, date):
+            d = year
+            tai = _utc_date_to_tai(self.leap_dates, self.leap_offsets, d)
+        elif hasattr(year, '__len__') and isinstance(year[0], datetime):
+            # TODO: clean this up and better document the possibilities.
+            list_of_datetimes = year
             tai = array([
-                _utc_datetime_to_tai(leap_dates, leap_offsets, dt)
-                for dt in utc])
+                _utc_datetime_to_tai(self.leap_dates, self.leap_offsets, dt)
+                for dt in list_of_datetimes])
+        else:
+            tai = _utc_to_tai(self.leap_dates, self.leap_offsets,
+                              _to_array(year), _to_array(month),
+                              _to_array(day), _to_array(hour),
+                              _to_array(minute), _to_array(second))
         jd = JulianDate(self, tai + tt_minus_tai)
         jd.tai = tai
         return jd
 
-    def tai(self, tai):
+    def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
+            n=None):
         """Return the JulianDate corresponding to a specific moment in TAI.
 
-        The International Atomic Time (TAI) can be expressed as either a
-        floating point Julian Date, or a tuple supplying the proleptic
-        Gregorian date.  The following two method calls are equivalent::
+        You can specify International Atomic Time (TAI) by providing
+        either a proleptic Gregorian calendar date, or a raw Julian Date
+        float.  The following two method calls are equivalent::
 
-            timescale.tai(2442046.5)
-            timescale.tai((1973, 12, 29, 23, 59, 48.0))
+            timescale.tai(2014, 1, 18, 1, 35, 37.5)
+            timescale.tai(n=2456675.56640625)
 
         """
-        if isinstance(tai, tuple):
-            tai = julian_date(*tai)
+        if n is not None:
+            tai = n
+        else:
+            tai = julian_date(year, month, day, hour, minute, second)
         tai = _to_array(tai)
         jd = JulianDate(self, tai + tt_minus_tai)
         jd.tai = tai
         return jd
 
-    def tt(self, tt):
+    def tt(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
+           n=None):
         """Return the JulianDate corresponding to a specific moment in TT.
 
-        You can supply the Terrestrial Time (TAI) as either a floating
-        point Julian Date, or a tuple supplying the proleptic Gregorian
-        date.  The following two lines are equivalent::
+        You can supply the Terrestrial Time (TT) by providing either a
+        proleptic Gregorian calendar date, or a raw Julian Date float.
+        The following two method calls are equivalent::
 
-            timescale.tt(2442046.5)
-            timescale.tt((1973, 12, 29, 23, 59, 48.0))
+            timescale.tt(2014, 1, 18, 1, 35, 37.5)
+            timescale.tt(n=2456675.56640625)
 
         """
-        if isinstance(tt, tuple):
-            tt = julian_date(*tt)
+        if n is not None:
+            tt = n
+        else:
+            tt = julian_date(year, month, day, hour, minute, second)
         tt = _to_array(tt)
         return JulianDate(self, tt)
 
-    def tdb(self, tdb):
+    def tdb(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
+            n=None):
         """Return the JulianDate corresponding to a specific moment in TDB.
 
-        You can supply the Barycentric Dynamical Time (TDB) as either a
-        floating point Julian Date, or a tuple supplying the proleptic
-        Gregorian date.  The following two lines are equivalent::
+        You can supply the Barycentric Dynamical Time (TDB) by providing
+        either a proleptic Gregorian calendar date, or a raw Julian Date
+        float.  The following two method calls are equivalent::
 
-            timescale.tdb(2442046.5)
-            timescale.tdb((1973, 12, 29, 23, 59, 48.0))
+            timescale.tdb(2014, 1, 18, 1, 35, 37.5)
+            timescale.tdb(n=2456675.56640625)
 
         """
-        if isinstance(tdb, tuple):
-            tdb = julian_date(*tdb)
+        if n is not None:
+            tdb = n
+        else:
+            tdb = julian_date(year, month, day, hour, minute, second)
         tdb = _to_array(tdb)
         tt = tdb - tdb_minus_tt(tdb) / DAY_S
         jd = JulianDate(self, tt)
@@ -175,7 +190,7 @@ class JulianDate(object):
 
         from skyfield.api import load
         ts = load.timescale()
-        print(ts.utc((1980, 1, 1)))
+        print(ts.utc(1980, 1, 1))
 
     """
     def __init__(self, *args, **kw):

@@ -33,7 +33,7 @@ def test_instantiate_8077_hoyle():
                             hoyle_8077['longitude_ascending'],
                             hoyle_8077['argument_perihelion'],
                             hoyle_8077['mean_anomaly'],
-                            ts.tt(hoyle_8077['epoch_tt']))
+                            ts.tt(n=hoyle_8077['epoch_tt']))
 
     assert hoyle is not None
 
@@ -91,9 +91,9 @@ def test_get_8077_hoyle_ecliptic_on_dev_sprint_day_2():
                             hoyle_8077['longitude_ascending'],
                             hoyle_8077['argument_perihelion'],
                             hoyle_8077['mean_anomaly'],
-                            ts.tt(hoyle_8077['epoch_tt']))
+                            ts.tt(*hoyle_8077['epoch_tt']))
 
-    date = ts.tt((2013, 8, 13))
+    date = ts.tt(2013, 8, 13)
     # print date.tt
 
     test = hoyle.getECLCoordinatesOnJulianDate(date)

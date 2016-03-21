@@ -21,23 +21,23 @@ def test_sending_jd_that_is_not_a_julian_date():
 
 def test_apparent_position_class(ts):
     e = api.load('de421.bsp')
-    p = e['earth'].at(ts.utc((2014, 2, 9, 14, 50))).observe(e['mars']).apparent()
+    p = e['earth'].at(ts.utc(2014, 2, 9, 14, 50)).observe(e['mars']).apparent()
     assert isinstance(p, positionlib.Apparent)
 
 def test_astrometric_position_class(ts):
     e = api.load('de421.bsp')
-    p = e['earth'].at(ts.utc((2014, 2, 9, 14, 50))).observe(e['mars'])
+    p = e['earth'].at(ts.utc(2014, 2, 9, 14, 50)).observe(e['mars'])
     assert isinstance(p, positionlib.Astrometric)
 
 def test_planet_position_class(ts):
     e = api.load('de421.bsp')
-    p = e['mars'].at(ts.utc((2014, 2, 9, 14, 50)))
+    p = e['mars'].at(ts.utc(2014, 2, 9, 14, 50))
     assert isinstance(p, positionlib.Barycentric)
 
 def test_star_position_class(ts):
     e = api.load('de421.bsp')
     star = api.Star(ra_hours=0, dec_degrees=0)
-    p = e['earth'].at(ts.utc((2014, 2, 9, 15, 1))).observe(star)
+    p = e['earth'].at(ts.utc(2014, 2, 9, 15, 1)).observe(star)
     assert isinstance(p, positionlib.Astrometric)
 
 def test_from_altaz_needs_topos():
@@ -48,7 +48,7 @@ def test_from_altaz_needs_topos():
 def test_from_altaz_parameters(ts):
     e = api.load('de421.bsp')
     usno = e['earth'].topos('38.9215 N', '77.0669 W', elevation_m=92.0)
-    jd = ts.tt(api.T0)
+    jd = ts.tt(n=api.T0)
     p = usno.at(jd)
     a = api.Angle(degrees=10.0)
     with assert_raises(ValueError, 'the alt= parameter with an Angle'):

@@ -32,7 +32,7 @@ class EarthSatellite(object):
         # TODO: Drat. Where should this Timescale come from?
         # Should they have to pass it in?
         from skyfield import api
-        self.epoch = api.load.timescale().utc((sat.epochyr, 1, sat.epochdays))
+        self.epoch = api.load.timescale().utc(sat.epochyr, 1, sat.epochdays)
 
     def __repr__(self):
         sat = self._sgp4_satellite
