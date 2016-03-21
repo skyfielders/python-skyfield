@@ -7,9 +7,9 @@
 
 Skyfield is careful to distinguish the *position* of an object
 from the several choices of *coordinate*
-that can be used to designate that position with numbers.
+that you can use to designate that position with numbers.
 There are only three basic kinds of position that Skyfield recognizes,
-but several different ways in which a position
+but several different ways in which each position
 can be turned into coordinates.
 
 Here is a quick reference to the three basic kinds of position,
@@ -210,8 +210,9 @@ by asking Skyfield for their :attr:`~Position.position` attribute:
     earth = planets['earth']
     mars = planets['mars']
 
-    print(earth.at(ts.utc((1980, 1, 1))).position.au)
-    print(mars.at(ts.utc((1980, 1, 1))).position.au)
+    jd = ts.utc((1980, 1, 1))
+    print(earth.at(jd).position.au)
+    print(mars.at(jd).position.au)
 
 .. testoutput::
 

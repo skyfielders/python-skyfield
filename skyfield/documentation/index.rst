@@ -12,7 +12,7 @@
    __import__('skyfield.tests.fixes').tests.fixes.setup()
 
    import os
-   os.chdir('../..')  # same directory as de430.bsp, hopefully
+   os.chdir('../..')  # same directory as de430t.bsp, hopefully
 
 .. testcode::
 
@@ -62,12 +62,11 @@ The official documentation is available through the links
 in the Table of Contents below.
 You can also visit:
 
-* Official `Python Package Index <https://pypi.python.org/pypi/skyfield>`_
-  entry
+* `Skyfield on the Python Package Index <https://pypi.python.org/pypi/skyfield>`_
 
-* GitHub `project page <https://github.com/brandon-rhodes/python-skyfield/>`_
+* `GitHub project page <https://github.com/brandon-rhodes/python-skyfield/>`_
 
-* GitHub `issue tracker <https://github.com/brandon-rhodes/python-skyfield/issues>`_
+* `GitHub issue tracker <https://github.com/brandon-rhodes/python-skyfield/issues>`_
 
 Table of Contents
 =================

@@ -36,14 +36,13 @@ there are several other ways to get NumPy installed:
   to give ``pip`` the superpower of being able to build and install
   binary Python dependencies like NumPy.
 
-Note that Skyfield has not reached version 1.0 yet,
-so tweaks to the API are still possible.
-Read the :ref:`changelog` below to learn about recent adjustments.
+Read the :ref:`changelog` below to learn about recent fixes, changes,
+and improvements to Skyfield.
 You can protect your project from any abrupt API changes
 by pinning a specific version of Skyfield
 in your ``requirements.txt`` or ``setup.py`` or install instructions::
 
-    skyfield==0.6.1
+    skyfield==0.7
 
 By preventing Skyfield from being upgraded
 until you are ready to advance the version number yourself,
@@ -60,6 +59,25 @@ Good luck!
 
 Change Log
 ==========
+
+0.7
+---
+
+* Introduced ``Timescale`` object and the ``load.timescale()`` method,
+  which download Delta T and leap second data from official data sources
+  and make sure the files are kept up to date.  This replaces all former
+  techniques for building and specifying dates and times.
+
+* Deprecated timescale keyword arguments like ``utc=(…)`` for both the
+  ``JulianDate`` constructor and also for all methods that take time as
+  an argument, including ``Body.at()`` and ``Topos.at()``.
+
+* Users who want to specify a target directory when downloading a file
+  will now create their own loader object, instead of having to specify
+  a special keyword argument for every download::
+
+    load = api.Loader('~/ephemeris-files')
+    load('de421.bsp')
 
 0.6.1
 -----
