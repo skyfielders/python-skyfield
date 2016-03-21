@@ -680,8 +680,7 @@ arguments to JulianDate:
 
         from skyfield.api import load
         ts = load.timescale()
-        jd = ts.utc(1980, 4, 20)             # the new way
-"""
+        jd = ts.utc(1980, 4, 20)             # the new way"""
 
 _naive_complaint = """cannot interpret a datetime that lacks a timezone
 

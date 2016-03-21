@@ -287,7 +287,7 @@ def output_subroutine_tests(dates):
 def output_geocentric_tests(dates):
     for (planet, code), (i, jd) in product(planets, enumerate(dates)):
         slug = slugify(planet)
-        obj = novas.make_object(0, code, 'planet{}'.format(code), None)
+        obj = novas.make_object(0, code, 'planet{0}'.format(code), None)
 
         ra1, dec1, distance1 = call(novas.astro_planet, jd, obj)
         ra2, dec2, distance2 = call(novas.virtual_planet, jd, obj)
@@ -365,7 +365,7 @@ def output_topocentric_tests(dates):
 
     for (planet, code), (i, jd) in product(planets, enumerate(dates)):
         slug = slugify(planet)
-        obj = novas.make_object(0, code, 'planet{}'.format(code), None)
+        obj = novas.make_object(0, code, 'planet{0}'.format(code), None)
 
         ra1, dec1, distance1 = call(novas.local_planet, jd, 0.0, obj, usno)
         ra2, dec2, distance2 = call(novas.topo_planet, jd, 0.0, obj, usno)

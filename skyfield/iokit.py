@@ -61,7 +61,7 @@ class Loader(object):
             if expiration_date < today():
                 for n in itertools.count(1):
                     prefix, suffix = filename.rsplit('.', 1)
-                    backup_name = '{}.old{}.{}'.format(prefix, n, suffix)
+                    backup_name = '{0}.old{1}.{2}'.format(prefix, n, suffix)
                     if not os.path.exists(backup_name):
                         break
                 os.rename(self.path_of(filename), self.path_of(backup_name))
@@ -171,7 +171,7 @@ def load(filename, directory='.', autodownload=True, verbose=True):
     if not os.path.exists(path):
         if not autodownload:
             raise IOError('you specified autodownload=False but the file'
-                          ' does not exist: {}'.format(path))
+                          ' does not exist: {0}'.format(path))
         download(url, path, verbose=verbose)
     return open(path, 'rb') if (cls is None) else cls(path)
 
