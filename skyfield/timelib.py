@@ -4,6 +4,7 @@ from numpy import (array, concatenate, einsum, float_, interp, isnan, nan,
 from time import strftime
 from .constants import T0, DAY_S
 from .earthlib import sidereal_time
+from .errors import DeprecationError
 from .framelib import ICRS_to_J2000 as B
 from .functions import load_bundled_npy
 from .nutationlib import compute_nutation, earth_tilt
@@ -177,7 +178,10 @@ class JulianDate(object):
         print(ts.utc((1980, 1, 1)))
 
     """
-    def __init__(self, ts, tt):
+    def __init__(self, *args, **kw):
+        if len(args) != 2 or kw:
+            raise DeprecationError(_keyword_deprecation_message)
+        ts, tt = args
         self.tt = tt
         self.ts = ts
         self.shape = getattr(tt, 'shape', ())
@@ -654,6 +658,30 @@ def _utc_to_tai(leap_dates, leap_offsets, year, month=1, day=1,
                 + minute * 60.0
                 + hour * 3600.0) / DAY_S
 
+_keyword_deprecation_message = """Skyfield no longer supports direct\
+ instantiation of JulianDate objects
+
+If you need to quickly get an old Skyfield script working again, simply
+downgrade to Skyfield version 0.6.1 using a command like:
+
+        pip install skyfield==0.6.1
+
+Skyfield used to let you build JulianDate objects directly:
+
+        jd = JulianDate(utc=(1980, 4, 20))   # the old way
+
+But this forced Skyfield to maintain secret global copies of several
+time scale data files, that need to be downloaded and kept up to date
+for JulianDate objects to work.  Skyfield now makes this collection of
+data files explicit, and calls the bundle of files a "Timescale" object.
+You can create one with the "load.timescale()" method and then build
+times using its methods, which have the same names as the old keyword
+arguments to JulianDate:
+
+        from skyfield.api import load
+        ts = load.timescale()
+        jd = ts.utc(1980, 4, 20)             # the new way
+"""
 
 _naive_complaint = """cannot interpret a datetime that lacks a timezone
 
@@ -667,5 +695,4 @@ Or install the third-party `pytz` library and use any of its timezones:
 
     from pytz import timezone
     eastern = timezone('US/Eastern')
-    d = eastern.localize(datetime(2014, 1, 16, 1, 32, 9))
-"""
+    d = eastern.localize(datetime(2014, 1, 16, 1, 32, 9))"""

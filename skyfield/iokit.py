@@ -3,7 +3,7 @@ import itertools
 import os
 import numpy as np
 import sys
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from time import time
 
 from .jpllib import SpiceKernel
@@ -148,6 +148,7 @@ def parse_leap_seconds(text):
     leap_offsets[2:] = offsets
     return expiration_date, (leap_dates, leap_offsets)
 
+
 def load(filename, directory='.', autodownload=True, verbose=True):
     """Load the given file, possibly downloading it if it is not present."""
     if '/' in filename:
@@ -252,6 +253,7 @@ def download(url, path, verbose=None, blocksize=128*1024):
             raise IOError('error renaming {0} to {1} - {2}'.format(
                 tempname, path, e))
 
+
 class ProgressBar(object):
     def __init__(self, path):
         self.filename = os.path.basename(path)
@@ -268,13 +270,6 @@ class ProgressBar(object):
         print('\r[{0:33}] {1:3}% {2}'.format(bar, percent, self.filename),
               end='\n' if (percent == 100) else '', file=sys.stderr)
         sys.stderr.flush()
-
-
-def is_days_old(filename, days_old):
-    """Early experiment in being sensitive to file dates."""
-    min_old = datetime.now()-timedelta(days=days_old)
-    modified = datetime.fromtimestamp(os.path.getmtime(filename))
-    return modified < min_old
 
 
 FILE_URLS = dict((_filename_of(url), (url, parser)) for url, parser in (

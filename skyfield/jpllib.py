@@ -7,7 +7,7 @@ from jplephem.spk import SPK
 from jplephem.names import target_names as _names
 
 from .constants import AU_KM, C_AUDAY, DAY_S
-from .errors import DeprecationError
+from .errors import DeprecationError, raise_error_for_deprecated_time_arguments
 from .functions import length_of
 from .positionlib import Astrometric, Barycentric, ICRS
 from .timelib import calendar_date
@@ -88,6 +88,7 @@ class Body(object):
         self.segments = ephemeris.segments
         self.code = code
 
+    @raise_error_for_deprecated_time_arguments
     def at(self, jd):
         """Compute the Solar System position of this body at a given time."""
         segments = self.segments
@@ -218,6 +219,7 @@ class Geometry(object):
             ' {0}'.format(c)
             for c in self.center_chain + self.target_chain))
 
+    @raise_error_for_deprecated_time_arguments
     def at(self, jd):
         """Return the geometric Cartesian position and velocity."""
         pos, vel = _tally(self.center_chain, self.target_chain, jd)

@@ -6,6 +6,7 @@ from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
 
 from .constants import AU_KM, DAY_S, T0, tau
+from .errors import raise_error_for_deprecated_time_arguments
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
 
@@ -77,6 +78,7 @@ class EarthSatellite(object):
 
         return rGCRS, vGCRS, error
 
+    @raise_error_for_deprecated_time_arguments
     def gcrs(self, jd):
         """Return a GCRS position for this Earth satellite.
 

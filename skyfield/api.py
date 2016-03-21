@@ -89,3 +89,25 @@ saturn = DeprecatedPlanet('saturn')
 uranus = DeprecatedPlanet('uranus')
 neptune = DeprecatedPlanet('neptune')
 pluto = DeprecatedPlanet('pluto')
+
+def now():
+    raise DeprecationError("""Skyfield no longer supports a standalone now() function
+
+If you need to quickly get an old Skyfield script working again, simply
+downgrade to Skyfield version 0.6.1 using a command like:
+
+        pip install skyfield==0.6.1
+
+Skyfield used to provide a now() method returning the current time:
+
+        jd = now()                      # the old way
+
+But this forced Skyfield to maintain secret global copies of several
+time scale data files, that need to be downloaded and kept up to date.
+Skyfield now makes the collection of data files explicit, and calls the
+bundle of files a "Timescale" object.  You can create one with the
+"load.timescale()" method and then call its now() method:
+
+        from skyfield.api import load
+        ts = load.timescale()
+        jd = ts.now()                   # the new way""")

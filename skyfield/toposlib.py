@@ -2,6 +2,7 @@ from numpy import einsum
 
 from .constants import ASEC2RAD, tau
 from .earthlib import terra
+from .errors import raise_error_for_deprecated_time_arguments
 from .functions import rot_x, rot_y, rot_z
 from .jpllib import Body, Segment
 from .positionlib import Barycentric, Geocentric
@@ -50,6 +51,7 @@ class Topos(Body):
         position, velocity = self._position_and_velocity(jd)
         return position, velocity
 
+    @raise_error_for_deprecated_time_arguments
     def at(self, jd):
         """Compute where this Earth location was in space on a given date."""
         tpos_au, tvel_au_per_d = self._position_and_velocity(jd)

@@ -4,6 +4,7 @@ from numpy import array, einsum, exp
 
 from .constants import RAD2DEG, TAU
 from .data.spice import inertial_frames
+from .errors import raise_error_for_deprecated_time_arguments
 #from .framelib import ICRS_to_J2000
 from .functions import from_polar, length_of, to_polar, rot_y, rot_z
 from .earthlib import compute_limb_angle, refract, terra
@@ -195,6 +196,7 @@ class Topos(object):
         t.altaz_rotation = self._altaz_rotation(jd)
         return t
 
+    @raise_error_for_deprecated_time_arguments
     def gcrs(self, jd):
         """Compute where this location was in the GCRS on a given date."""
         tpos_au, tvel_au_per_d = self._position_and_velocity(jd)

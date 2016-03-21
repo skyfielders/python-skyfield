@@ -19,6 +19,14 @@ def main():
         eph = load('de421.bsp')
         earth = eph['earth']
         earth(100)
+    elif arg == 'd':
+        from skyfield.api import JulianDate
+        JulianDate(utc=(1980, 1, 1))
+    elif arg == 'e':
+        from skyfield.api import load
+        eph = load('de421.bsp')
+        earth = eph['earth']
+        earth.at(utc=(1980, 1, 1))
 
 if __name__ == '__main__':
     main()
