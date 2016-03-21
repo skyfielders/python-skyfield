@@ -55,19 +55,19 @@ def on(load, year, month, day):
 def test_missing_file_gets_downloaded(load):
     with on(load, 2016, 1, 15):
         data = load('deltat.data')
-        assert file_contents(load).endswith(' 68.1577\n')
+        assert file_contents(load).endswith(b' 68.1577\n')
     assert data[1][-1] == 68.1577
 
 def test_11_month_old_file_gets_reused(load):
     save_file(load)
     with on(load, 2016, 12, 15):
         data = load('deltat.data')
-        assert file_contents(load).endswith(' 68.1024\n')
+        assert file_contents(load).endswith(b' 68.1024\n')
     assert data[1][-1] == 68.1024
 
 def test_12_month_old_file_gets_redownloaded(load):
     save_file(load)
     with on(load, 2017, 1, 15):
         data = load('deltat.data')
-        assert file_contents(load).endswith(' 68.1577\n')
+        assert file_contents(load).endswith(b' 68.1577\n')
     assert data[1][-1] == 68.1577
