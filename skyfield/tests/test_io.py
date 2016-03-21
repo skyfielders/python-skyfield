@@ -46,9 +46,10 @@ def file_contents(load):
 def on(load, year, month, day):
     fake_date = date(year, month, day)
     download = lambda *args, **kw: save_file(load, new_content)
-    with patch('skyfield.iokit.download', download), \
-         patch('skyfield.iokit.today', lambda *args: fake_date):
-        yield
+    with patch('skyfield.iokit.download', download):
+        # Python 2.6 does not support the comma "with" statement, so:
+        with patch('skyfield.iokit.today', lambda *args: fake_date):
+            yield
 
 # The tests.
 
