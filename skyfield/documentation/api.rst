@@ -30,5 +30,5 @@ Time
 
 .. autoclass:: skyfield.api.Timescale
 
-.. autoclass:: skyfield.api.JulianDate
+.. autoclass:: skyfield.api.Time
    :members:

@@ -106,7 +106,7 @@ Propagation Errors
 After building a satellite object,
 you can examine the *epoch* date and time
 when the TLE element set’s predictions are most accurate.
-The ``epoch`` attribute is a :class:`JulianDate`,
+The ``epoch`` attribute is a :class:`Time`,
 so it supports all of the standard Skyfield date methods:
 
 .. testcode::

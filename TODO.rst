@@ -10,18 +10,13 @@ forget.
 Sprint Possibilities
 ====================
 
-* This should not raise an exception, it should interpret the tuple as a
-  calendar date:
-
-    dates = JulianDate(tt=(1980, 1, range(1000)))
-
-* And if we are going to allow times like TT to be submitted using
+* If we are going to allow times like TT to be submitted using
   calendar dates, then we should probably provide methods that would
   fetch them back as calendar dates.
 
 * After running a line like:
 
-    dates = JulianDate(utc=(1980, 1, range(1000)))
+    dates = Time(utc=(1980, 1, range(1000)))
 
   displaying ``dates`` on the screen shows way too much output.  The
   ``repr()`` should be re-crafted so that the length of the array is

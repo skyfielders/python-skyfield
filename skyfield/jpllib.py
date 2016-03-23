@@ -172,7 +172,7 @@ def observe(observer, target):
         delta = light_time - light_time0
         if -1e-12 < min(delta) and max(delta) < 1e-12:
             break
-        jd2 = ts.tdb(n=jd_tdb - light_time)
+        jd2 = ts.tdb(jd=jd_tdb - light_time)
         tjd = target.at(jd2)
         tposition = tjd.position.au
         distance = length_of(tposition - cposition)

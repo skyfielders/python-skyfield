@@ -52,13 +52,13 @@ class Timescale(object):
     `Timescale` that can translate between several different systems for
     expressing time.  You will usually create a single `Timescale` at
     the beginning of your program, and use it every time you want to
-    generate a specific `JulianDate`:
+    generate a specific `Time`:
 
     >>> from skyfield.api import load
     >>> ts = load.timescale()
     >>> t = ts.utc(1980, 3, 1, 9, 30)
     >>> t
-    <JulianDate tt=2444299.896426>
+    <Time tt=2444299.896426>
 
     Loading a timescale downloads tables from the United States Naval
     Observatory and the International Earth Rotation Service.  These
@@ -73,7 +73,7 @@ class Timescale(object):
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
 
     def now(self):
-        """Return a `JulianDate` for the current date and time.
+        """Return the current date and time as a `Time` object.
 
         For the return value to be correct, your operating system time
         and timezone settings must be set so that the Python Standard
@@ -84,7 +84,7 @@ class Timescale(object):
         return self.utc(self.utcnow().replace(tzinfo=utc))
 
     def utc(self, year, month=1, day=1, hour=0, minute=0, second=0.0):
-        """Return the JulianDate corresponding to a specific moment in UTC.
+        """Return the Time corresponding to a specific moment in UTC.
 
         You can either specify the date as separate components, or
         provide a time zone aware Python datetime.  The following two
@@ -116,74 +116,74 @@ class Timescale(object):
                               _to_array(year), _to_array(month),
                               _to_array(day), _to_array(hour),
                               _to_array(minute), _to_array(second))
-        jd = JulianDate(self, tai + tt_minus_tai)
-        jd.tai = tai
-        return jd
+        t = Time(self, tai + tt_minus_tai)
+        t.tai = tai
+        return t
 
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
-            n=None):
-        """Return the JulianDate corresponding to a specific moment in TAI.
+            jd=None):
+        """Return the Time corresponding to a specific moment in TAI.
 
         You can specify International Atomic Time (TAI) by providing
         either a proleptic Gregorian calendar date, or a raw Julian Date
         float.  The following two method calls are equivalent::
 
             timescale.tai(2014, 1, 18, 1, 35, 37.5)
-            timescale.tai(n=2456675.56640625)
+            timescale.tai(jd=2456675.56640625)
 
         """
-        if n is not None:
-            tai = n
+        if jd is not None:
+            tai = jd
         else:
             tai = julian_date(year, month, day, hour, minute, second)
         tai = _to_array(tai)
-        jd = JulianDate(self, tai + tt_minus_tai)
-        jd.tai = tai
-        return jd
+        t = Time(self, tai + tt_minus_tai)
+        t.tai = tai
+        return t
 
     def tt(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
-           n=None):
-        """Return the JulianDate corresponding to a specific moment in TT.
+           jd=None):
+        """Return the Time corresponding to a specific moment in TT.
 
         You can supply the Terrestrial Time (TT) by providing either a
         proleptic Gregorian calendar date, or a raw Julian Date float.
         The following two method calls are equivalent::
 
             timescale.tt(2014, 1, 18, 1, 35, 37.5)
-            timescale.tt(n=2456675.56640625)
+            timescale.tt(jd=2456675.56640625)
 
         """
-        if n is not None:
-            tt = n
+        if jd is not None:
+            tt = jd
         else:
             tt = julian_date(year, month, day, hour, minute, second)
         tt = _to_array(tt)
-        return JulianDate(self, tt)
+        return Time(self, tt)
 
     def tdb(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
-            n=None):
-        """Return the JulianDate corresponding to a specific moment in TDB.
+            jd=None):
+        """Return the Time corresponding to a specific moment in TDB.
 
         You can supply the Barycentric Dynamical Time (TDB) by providing
         either a proleptic Gregorian calendar date, or a raw Julian Date
         float.  The following two method calls are equivalent::
 
             timescale.tdb(2014, 1, 18, 1, 35, 37.5)
-            timescale.tdb(n=2456675.56640625)
+            timescale.tdb(jd=2456675.56640625)
 
         """
-        if n is not None:
-            tdb = n
+        if jd is not None:
+            tdb = jd
         else:
             tdb = julian_date(year, month, day, hour, minute, second)
         tdb = _to_array(tdb)
         tt = tdb - tdb_minus_tt(tdb) / DAY_S
-        jd = JulianDate(self, tt)
-        jd.tdb = tdb
-        return jd
+        t = Time(self, tt)
+        t.tdb = tdb
+        return t
 
-class JulianDate(object):
-    """A single date and time, or an array, stored as a Julian date.
+class Time(object):
+    """A single moment in history, or an array of several moments.
 
     You will typically not instantiate this class yourself, but will
     rely on a ``Timescale`` object to build dates for you::
@@ -205,11 +205,11 @@ class JulianDate(object):
         return self.shape[0]
 
     def __repr__(self):
-        return '<JulianDate tt={0:.6f}>'.format(self.tt)
+        return '<Time tt={0:.6f}>'.format(self.tt)
 
     def __getitem__(self, index):
         # TODO: also copy cached matrices?
-        jd = JulianDate(self.ts, self.tt[index])
+        jd = Time(self.ts, self.tt[index])
         for name in 'tai', 'tdb', 'ut1', 'delta_t':
             value = getattr(self, name, None)
             if value is not None:
@@ -269,9 +269,9 @@ class JulianDate(object):
     def toordinal(self):
         """Return the proleptic Gregorian ordinal of the TAI date.
 
-        This method makes Skyfield `JulianDate` objects compatible with
+        This method makes Skyfield `Time` objects compatible with
         Python `datetime` objects, which also provide a ``toordinal()``
-        method.  Thanks to this method, a `JulianDate` can often be used
+        method.  Thanks to this method, a `Time` can often be used
         directly as a coordinate for a plot.
 
         """
@@ -674,24 +674,24 @@ def _utc_to_tai(leap_dates, leap_offsets, year, month=1, day=1,
                 + hour * 3600.0) / DAY_S
 
 _keyword_deprecation_message = """Skyfield no longer supports direct\
- instantiation of JulianDate objects
+ instantiation of Time objects
 
 If you need to quickly get an old Skyfield script working again, simply
 downgrade to Skyfield version 0.6.1 using a command like:
 
         pip install skyfield==0.6.1
 
-Skyfield used to let you build JulianDate objects directly:
+Skyfield used to let you build Time objects directly:
 
-        jd = JulianDate(utc=(1980, 4, 20))   # the old way
+        jd = Time(utc=(1980, 4, 20))   # the old way
 
 But this forced Skyfield to maintain secret global copies of several
 time scale data files, that need to be downloaded and kept up to date
-for JulianDate objects to work.  Skyfield now makes this collection of
+for Time objects to work.  Skyfield now makes this collection of
 data files explicit, and calls the bundle of files a "Timescale" object.
 You can create one with the "load.timescale()" method and then build
 times using its methods, which have the same names as the old keyword
-arguments to JulianDate:
+arguments to Time:
 
         from skyfield.api import load
         ts = load.timescale()

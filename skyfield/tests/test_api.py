@@ -48,7 +48,7 @@ def test_from_altaz_needs_topos():
 def test_from_altaz_parameters(ts):
     e = api.load('de421.bsp')
     usno = e['earth'].topos('38.9215 N', '77.0669 W', elevation_m=92.0)
-    jd = ts.tt(n=api.T0)
+    jd = ts.tt(jd=api.T0)
     p = usno.at(jd)
     a = api.Angle(degrees=10.0)
     with assert_raises(ValueError, 'the alt= parameter with an Angle'):

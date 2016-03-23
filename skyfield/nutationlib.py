@@ -3,7 +3,7 @@ from numpy import array, cos, fmod, sin, outer, tensordot, zeros
 from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, PSI_COR, EPS_COR, T0
 
 def compute_nutation(jd):
-    """Generate the nutation rotations for JulianDate `jd`.
+    """Generate the nutation rotations for Time `jd`.
 
     If the Julian date is scalar, a simple ``(3, 3)`` matrix is
     returned; if the date is an array of length ``n``, then an array of
@@ -32,7 +32,7 @@ def compute_nutation(jd):
 def earth_tilt(jd):
     """Return a tuple of information about the earth's axis and position.
 
-    `jd` - A JulianDate object.
+    `jd` - A Time object.
 
     The returned tuple contains five items:
 

@@ -6,7 +6,7 @@ from numpy import array, mean, std, zeros
 from skyfield import earthlib, nutationlib, api, starlib
 
 from skyfield.constants import T0
-from skyfield.timelib import julian_date, JulianDate
+from skyfield.timelib import julian_date, Time
 from timeit import default_timer
 
 TA = julian_date(1969, 7, 20, 20., 18.)
@@ -101,35 +101,35 @@ def bm_coordinate_horizontal(times, t):
 BENCHMARKS = (
     BM(times=100, bm_fn=bm_earth_rotation_angle, t=array([T0, TA, TB])),
 
-    BM(times=100, bm_fn=bm_star_observe_from, t=JulianDate(tt=T0)),
-    BM(times=100, bm_fn=bm_star_observe_from, t=JulianDate(tt=TA)),
-    BM(times=100, bm_fn=bm_star_observe_from, t=JulianDate(tt=TB)),
+    BM(times=100, bm_fn=bm_star_observe_from, t=Time(tt=T0)),
+    BM(times=100, bm_fn=bm_star_observe_from, t=Time(tt=TA)),
+    BM(times=100, bm_fn=bm_star_observe_from, t=Time(tt=TB)),
 
-    BM(times=100, bm_fn=bm_planet_observe_from, t=JulianDate(tt=T0)),
-    BM(times=100, bm_fn=bm_planet_observe_from, t=JulianDate(tt=TA)),
-    BM(times=100, bm_fn=bm_planet_observe_from, t=JulianDate(tt=TB)),
+    BM(times=100, bm_fn=bm_planet_observe_from, t=Time(tt=T0)),
+    BM(times=100, bm_fn=bm_planet_observe_from, t=Time(tt=TA)),
+    BM(times=100, bm_fn=bm_planet_observe_from, t=Time(tt=TB)),
 
-    BM(times=100, bm_fn=bm_topo_planet_observe, t=JulianDate(tt=T0)),
-    BM(times=100, bm_fn=bm_topo_planet_observe, t=JulianDate(tt=TA)),
-    BM(times=100, bm_fn=bm_topo_planet_observe, t=JulianDate(tt=TB)),
+    BM(times=100, bm_fn=bm_topo_planet_observe, t=Time(tt=T0)),
+    BM(times=100, bm_fn=bm_topo_planet_observe, t=Time(tt=TA)),
+    BM(times=100, bm_fn=bm_topo_planet_observe, t=Time(tt=TB)),
 
-    BM(times=100, bm_fn=bm_earth_tilt, t=JulianDate(tt=T0)),
-    BM(times=100, bm_fn=bm_earth_tilt, t=JulianDate(tt=TA)),
-    BM(times=100, bm_fn=bm_earth_tilt, t=JulianDate(tt=TB)),
+    BM(times=100, bm_fn=bm_earth_tilt, t=Time(tt=T0)),
+    BM(times=100, bm_fn=bm_earth_tilt, t=Time(tt=TA)),
+    BM(times=100, bm_fn=bm_earth_tilt, t=Time(tt=TB)),
 
     BM(times=100, bm_fn=bm_equation_of_the_equinoxes, t=array([T0, TA, TB])),
 
     BM(times=100, bm_fn=bm_fundamental_arguments, t=array([T0, TA, TB])),
 
-    BM(times=100, bm_fn=bm_coordinate_to_astrometric, t=JulianDate(tt=T0)),
-    BM(times=100, bm_fn=bm_coordinate_to_astrometric, t=JulianDate(tt=TA)),
-    BM(times=100, bm_fn=bm_coordinate_to_astrometric, t=JulianDate(tt=TB)),
+    BM(times=100, bm_fn=bm_coordinate_to_astrometric, t=Time(tt=T0)),
+    BM(times=100, bm_fn=bm_coordinate_to_astrometric, t=Time(tt=TA)),
+    BM(times=100, bm_fn=bm_coordinate_to_astrometric, t=Time(tt=TB)),
 
-    BM(times=100, bm_fn=bm_coordinate_to_apparent, t=JulianDate(tt=T0)),
-    BM(times=100, bm_fn=bm_coordinate_to_apparent, t=JulianDate(tt=TA)),
-    BM(times=100, bm_fn=bm_coordinate_to_apparent, t=JulianDate(tt=TB)),
+    BM(times=100, bm_fn=bm_coordinate_to_apparent, t=Time(tt=T0)),
+    BM(times=100, bm_fn=bm_coordinate_to_apparent, t=Time(tt=TA)),
+    BM(times=100, bm_fn=bm_coordinate_to_apparent, t=Time(tt=TB)),
 
-    BM(times=100, bm_fn=bm_coordinate_horizontal, t=JulianDate(tt=TB)),
+    BM(times=100, bm_fn=bm_coordinate_horizontal, t=Time(tt=TB)),
 )
 
 if __name__ == "__main__":

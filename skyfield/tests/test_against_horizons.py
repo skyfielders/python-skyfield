@@ -49,7 +49,7 @@ def test_galactic_frame(ts):
 
 def test_callisto_geometry(ts):
     e = api.load('jup310.bsp')
-    a = e['earth'].geometry_of('callisto').at(ts.tdb(n=2471184.5))
+    a = e['earth'].geometry_of('callisto').at(ts.tdb(jd=2471184.5))
     compare(a.position.au,
       [-4.884815926454119E+00, -3.705745549073268E+00, -1.493487818022234E+00],
       0.001 * meter)

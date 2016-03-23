@@ -20,7 +20,7 @@ def test_JulianDate_init(time_parameter, time_value):
     if isinstance(time_value, tuple):
         jd = method(*time_value)
     else:
-        jd = method(n=time_value)
+        jd = method(jd=time_value)
     assert getattr(jd, time_parameter) == 2441700.56640625
 
 def test_building_JulianDate_from_utc_tuple_with_array_inside(ts):
@@ -211,9 +211,9 @@ def test_leap_second(ts):
 
     # And all these dates can be converted back to UTC.
 
-    assert ts.tai(n=t0).utc_iso() == '1973-12-31T23:59:48Z'
-    assert ts.tai(n=t1).utc_iso() == '1973-12-31T23:59:58Z'
-    assert ts.tai(n=t2).utc_iso() == '1973-12-31T23:59:59Z'
-    assert ts.tai(n=t3).utc_iso() == '1973-12-31T23:59:60Z'
-    assert ts.tai(n=t4).utc_iso() == '1974-01-01T00:00:00Z'
-    assert ts.tai(n=t5).utc_iso() == '1974-01-01T00:00:01Z'
+    assert ts.tai(jd=t0).utc_iso() == '1973-12-31T23:59:48Z'
+    assert ts.tai(jd=t1).utc_iso() == '1973-12-31T23:59:58Z'
+    assert ts.tai(jd=t2).utc_iso() == '1973-12-31T23:59:59Z'
+    assert ts.tai(jd=t3).utc_iso() == '1973-12-31T23:59:60Z'
+    assert ts.tai(jd=t4).utc_iso() == '1974-01-01T00:00:00Z'
+    assert ts.tai(jd=t5).utc_iso() == '1974-01-01T00:00:01Z'

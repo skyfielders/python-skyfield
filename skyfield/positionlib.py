@@ -8,7 +8,7 @@ from .data.spice import inertial_frames
 from .functions import from_polar, length_of, to_polar, rot_z
 from .earthlib import compute_limb_angle, refract
 from .relativity import add_aberration, add_deflection
-from .timelib import JulianDate
+from .timelib import Time
 from .units import Distance, Velocity, Angle, _interpret_angle
 
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
@@ -73,10 +73,10 @@ class ICRS(object):
         """
         position_au = self.position.au
         if epoch is not None:
-            if isinstance(epoch, JulianDate):
+            if isinstance(epoch, Time):
                 pass
             elif isinstance(epoch, float):
-                epoch = JulianDate(tt=epoch)
+                epoch = Time(tt=epoch)
             elif epoch == 'date':
                 epoch = self.jd
             else:

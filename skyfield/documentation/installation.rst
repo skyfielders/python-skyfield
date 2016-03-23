@@ -69,7 +69,7 @@ Change Log
   techniques for building and specifying dates and times.
 
 * Deprecated timescale keyword arguments like ``utc=(…)`` for both the
-  ``JulianDate`` constructor and also for all methods that take time as
+  ``Time`` constructor and also for all methods that take time as
   an argument, including ``Body.at()`` and ``Topos.at()``.
 
 * Users who want to specify a target directory when downloading a file
@@ -128,12 +128,12 @@ Change Log
 0.4
 ---
 
-* To prevent confusion, the Julian date :meth:`~JulianDate.astimezone()`
-  and :meth:`~JulianDate.utc_datetime()` methods
+* To prevent confusion, the Julian date :meth:`~Time.astimezone()`
+  and :meth:`~Time.utc_datetime()` methods
   have been changed to return only a ``datetime`` object.
   If you also need a leap second flag returned,
-  call the new methods :meth:`~JulianDate.astimezone_and_leap_second()`
-  and :meth:`~JulianDate.utc_datetime_and_leap_second()`.
+  call the new methods :meth:`~Time.astimezone_and_leap_second()`
+  and :meth:`~Time.utc_datetime_and_leap_second()`.
 
 0.3
 ---

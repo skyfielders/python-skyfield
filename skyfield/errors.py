@@ -16,7 +16,7 @@ downgrade to Skyfield version 0.6.1 using a command like:
 
         pip install skyfield==0.6.1
 
-Skyfield used to let you skip building a JulianDate object.  You were
+Skyfield used to let you skip building a Time object.  You were
 allowed to provide a keyword argument like "utc", "tai", "tt", or "tdb"
 to any method needing a date and time:
 
@@ -24,7 +24,7 @@ to any method needing a date and time:
 
 But this forced Skyfield to maintain secret global copies of several
 time scale data files, that need to be downloaded and kept up to date
-for constructing JulianDate objects to and from UTC.  Skyfield now makes
+for constructing Time objects to and from UTC.  Skyfield now makes
 this collection of "Timescale" data files explicit.  You can create one
 with "load.timescale()" and then build times using its methods, which
 have the same names as the old keyword arguments:

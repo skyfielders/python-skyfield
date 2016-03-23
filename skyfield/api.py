@@ -11,16 +11,16 @@ from .constants import tau
 from .errors import DeprecationError
 from .iokit import Loader
 from .starlib import Star
-from .timelib import JulianDate, T0, Timescale, utc
+from .timelib import T0, Time, Timescale, utc
 from .toposlib import Topos
 from .units import Angle
 from .named_stars import NamedStar
 
 load = Loader('.')
 
-__all__ = ['Angle', 'Loader', 'JulianDate',
-           'NamedStar', 'Star', 'Timescale', 'Topos',
-           'datetime', 'load', 'utc', 'T0', 'pi', 'tau']
+__all__ = ['Angle', 'Loader', 'NamedStar', 'Star',
+           'T0', 'Time', 'Timescale', 'Topos', 'datetime',
+           'load', 'utc', 'pi', 'tau']
 
 # An attempt at friendliest-possible deprecations:
 

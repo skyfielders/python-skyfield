@@ -8,13 +8,13 @@
 Astronomers use several different numerical scales for measuring time.
 Since Skyfield often has to reference several such scales
 over the course of a single calculation,
-the :class:`JulianDate` class
+the :class:`Time` class
 is designed to cache each new time scale
 when a calculation first demands it.
 Further demands for the same time scale
 can then be satisfied without recomputing the value again.
 
-Each time scale supported by :class:`JulianDate`
+Each time scale supported by :class:`Time`
 is described in detail in one of the sections below.
 The supported time scales are:
 
@@ -46,7 +46,7 @@ as a keyword argument to specify the moment you want to represent.
 The possibilities that will be explored in the course of this page
 are::
 
-    Parameter to the JulianDate constructor
+    Parameter to the Time constructor
     │
     ├── utc = Calendar tuple or Python `datetime` or `date`
     ├── tai = Calendar tuple or Julian date float
@@ -63,7 +63,7 @@ are::
 
 There are two ways to provide a date argument
 to a Skyfield routine that needs one.
-You can either supply a :class:`JulianDate`
+You can either supply a :class:`Time`
 that you have gone ahead and built yourself,
 or you can simply call the routine with the same keyword argument
 that you would have used to build the Julian date
@@ -216,13 +216,13 @@ As we would expect,
 is 6:32 AM local time in Greenwich, England,
 five hours to the east across the Atlantic.
 
-Note that Skyfield’s :meth:`~JulianDate.astimezone()` method
+Note that Skyfield’s :meth:`~Time.astimezone()` method
 will detect that you are using a ``pytz`` timezone
 and automatically call its ``normalize()`` method for you —
 which makes sure that daylight savings time is handled correctly —
 to spare you from having to make the call yourself.
 
-If you want a :class:`JulianDate` to hold an entire array of dates,
+If you want a :class:`Time` to hold an entire array of dates,
 as discussed below in :ref:`date-arrays`,
 then you can provide a list of ``datetime`` objects
 when building a Julian date.
@@ -285,7 +285,7 @@ an Earth satellite’s velocity will seem higher
 when you reach the minute that includes 61 seconds;
 and so forth.
 Problems like these are the reason
-that the :class:`JulianDate` only uses UTC for input and output,
+that the :class:`Time` only uses UTC for input and output,
 and insists on keeping time internally
 using the uniform time scales discussed below in :ref:`tai-tt-tdb`.
 
@@ -345,9 +345,9 @@ Date arrays
 ===========
 
 Skyfield works most efficiently
-when you build a single :class:`JulianDate` object
+when you build a single :class:`Time` object
 that holds an entire array of dates,
-instead of building many separate :class:`JulianDate` objects.
+instead of building many separate :class:`Time` objects.
 There are three techniques for building arrays.
 
 * Make ``utc=`` a list of ``datetime`` objects.
@@ -374,7 +374,7 @@ Here are some examples::
     # The ten seconds crossing the 1974 leap second
     utc=(1975, 1, 1, 0, 0, range(-5, 5))
 
-When you provide an array :class:`JulianDate` to a Skyfield calculation,
+When you provide an array :class:`Time` to a Skyfield calculation,
 the resulting array will have an extra dimension
 expanding what would normally be a single result
 into as many results as you provided dates.
@@ -645,7 +645,7 @@ and provide it to your Julian date manually:
 The Julian date object as cache
 ===============================
 
-When you create a :class:`JulianDate`
+When you create a :class:`Time`
 it goes ahead and computes its ``tt`` Terrestrial Time attribute
 starting from whatever time argument you provide.
 If you provide the ``utc`` parameter, for example,

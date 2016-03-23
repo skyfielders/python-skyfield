@@ -118,8 +118,8 @@ def test_appendix_c_satellite():
     ts = api.load.timescale()
     jd_epoch = sat._sgp4_satellite.jdsatepoch
     three_days_later = jd_epoch + 3.0
-    offset = ts.tt(n=three_days_later)._utc_float() - three_days_later
-    jd = ts.tt(n=three_days_later - offset)
+    offset = ts.tt(jd=three_days_later)._utc_float() - three_days_later
+    jd = ts.tt(jd=three_days_later - offset)
 
     # First, a crucial sanity check (which is, technically, a test of
     # the `sgp4` package and not of Skyfield): are the right coordinates
