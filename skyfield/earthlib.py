@@ -99,19 +99,18 @@ def compute_limb_angle(position_au, observer_au):
     return limb_angle, nadir_angle
 
 
-def sidereal_time(jd):
-    """Compute Greenwich sidereal time at Julian date `jd`."""
-
-    t = (jd.tdb - T0) / 36525.0
+def sidereal_time(t):
+    """Compute Greenwich sidereal time at the given ``Time``."""
 
     # Compute the Earth Rotation Angle.  Time argument is UT1.
 
-    theta = earth_rotation_angle(jd.ut1)
+    theta = earth_rotation_angle(t.ut1)
 
     # The equinox method.  See Circular 179, Section 2.6.2.
     # Precession-in-RA terms in mean sidereal time taken from third
     # reference, eq. (42), with coefficients in arcseconds.
 
+    t = (t.tdb - T0) / 36525.0
     st =        ( 0.014506 +
         (((( -    0.0000000368   * t
              -    0.000029956  ) * t

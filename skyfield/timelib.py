@@ -4,7 +4,6 @@ from numpy import (array, concatenate, einsum, float_, interp, isnan, nan,
 from time import strftime
 from .constants import T0, DAY_S
 from .earthlib import sidereal_time
-from .errors import DeprecationError
 from .framelib import ICRS_to_J2000 as B
 from .functions import load_bundled_npy
 from .nutationlib import compute_nutation, earth_tilt
@@ -125,7 +124,7 @@ class Timescale(object):
         """Return the Time corresponding to a specific moment in TAI.
 
         You can specify International Atomic Time (TAI) by providing
-        either a proleptic Gregorian calendar date, or a raw Julian Date
+        either a proleptic Gregorian calendar date or a raw Julian Date
         float.  The following two method calls are equivalent::
 
             timescale.tai(2014, 1, 18, 1, 35, 37.5)
@@ -146,7 +145,7 @@ class Timescale(object):
         """Return the Time corresponding to a specific moment in TT.
 
         You can supply the Terrestrial Time (TT) by providing either a
-        proleptic Gregorian calendar date, or a raw Julian Date float.
+        proleptic Gregorian calendar date or a raw Julian Date float.
         The following two method calls are equivalent::
 
             timescale.tt(2014, 1, 18, 1, 35, 37.5)
@@ -165,7 +164,7 @@ class Timescale(object):
         """Return the Time corresponding to a specific moment in TDB.
 
         You can supply the Barycentric Dynamical Time (TDB) by providing
-        either a proleptic Gregorian calendar date, or a raw Julian Date
+        either a proleptic Gregorian calendar date or a raw Julian Date
         float.  The following two method calls are equivalent::
 
             timescale.tdb(2014, 1, 18, 1, 35, 37.5)
@@ -193,10 +192,7 @@ class Time(object):
         print(ts.utc(1980, 1, 1))
 
     """
-    def __init__(self, *args, **kw):
-        if len(args) != 2 or kw:
-            raise DeprecationError(_keyword_deprecation_message)
-        ts, tt = args
+    def __init__(self, ts, tt):
         self.tt = tt
         self.ts = ts
         self.shape = getattr(tt, 'shape', ())
@@ -221,10 +217,10 @@ class Time(object):
     def astimezone(self, tz):
         """Return as a Python ``datetime`` in a ``pytz`` provided timezone.
 
-        Convert this Julian date to a ``datetime`` in the timezone `tz`,
-        which should be one of the timezones provided by the third-party
-        ``pytz`` package.  If this Julian date is an array, then an
-        array of datetimes is returned instead of a single value.
+        Convert this time to a ``datetime`` in the timezone `tz`, which
+        should be one of the timezones provided by the third-party
+        ``pytz`` package.  If this time is an array, then an array of
+        datetimes is returned instead of a single value.
 
         """
         dt, leap_second = self.astimezone_and_leap_second(tz)
@@ -233,7 +229,7 @@ class Time(object):
     def astimezone_and_leap_second(self, tz):
         """Return as a ``datetime`` plus leap second in a ``pytz`` timezone.
 
-        Convert this Julian date to a ``datetime`` and a leap second::
+        Convert this time to a Python ``datetime`` and a leap second::
 
             dt, leap_second = jd.astimezone_and_leap_second(tz)
 
@@ -249,9 +245,9 @@ class Time(object):
         to the ``second`` field of the ``datetime`` to learn the real
         name of the second.
 
-        If this Julian date is an array, then an array of ``datetime``
-        objects and an array of leap second integers is returned,
-        instead of a single value each.
+        If this time is an array, then an array of ``datetime`` objects
+        and an array of leap second integers is returned, instead of a
+        single value each.
 
         """
         dt, leap_second = self.utc_datetime_and_leap_second()
@@ -278,13 +274,13 @@ class Time(object):
         return self._utc_float() - 1721424.5
 
     def utc_datetime(self):
-        """Return a Python ``datetime`` for this Julian, expressed as UTC.
+        """Return a Python ``datetime`` for this time, expressed as UTC.
 
         If the third-party ``pytz`` package is available, then its
         ``utc`` timezone will be used as the timezone of the return
         value.  Otherwise, an equivalent Skyfield ``utc`` timezone
-        object is used.  If this Julian date is an array, then a
-        sequence of datetimes is returned instead of a single value.
+        object is used.  If this time is an array, then a sequence of
+        datetimes is returned instead of a single value.
 
         """
         dt, leap_second = self.utc_datetime_and_leap_second()
@@ -293,9 +289,9 @@ class Time(object):
     def utc_datetime_and_leap_second(self):
         """Return a ``datetime`` in UTC, plus a leap second value.
 
-        Convert this Julian date to a ``datetime`` and a leap second::
+        Convert this time to a ``datetime`` and a leap second::
 
-            dt, leap_second = jd.utc_datetime_and_leap_second()
+            dt, leap_second = t.utc_datetime_and_leap_second()
 
         If the third-party ``pytz`` package is available, then its
         ``utc`` timezone will be used as the timezone of the return
@@ -309,9 +305,9 @@ class Time(object):
         to the ``second`` field of the ``datetime`` to learn the real
         name of the second.
 
-        If this Julian date is an array, then an array of ``datetime``
-        objects and an array of leap second integers is returned,
-        instead of a single value each.
+        If this time is an array, then an array of ``datetime`` objects
+        and an array of leap second integers is returned, instead of a
+        single value each.
 
         """
         year, month, day, hour, minute, second = self._utc_tuple(
@@ -332,8 +328,8 @@ class Time(object):
     def utc_iso(self, places=0):
         """Return an ISO 8601 string like ``2014-01-18T01:35:38Z`` in UTC.
 
-        If this Julian date is an array of dates, then a sequence of
-        strings is returned instead of a single string.
+        If this time is an array of dates, then a sequence of strings is
+        returned instead of a single string.
 
         """
         if places:
@@ -357,9 +353,9 @@ class Time(object):
         """Convert to a string like ``A.D. 2014-Jan-18 01:35:37.5000 UT``.
 
         Returns a string for this date and time in UTC, in the format
-        used by the JPL HORIZONS system.  If this Julian date is an
-        array of dates, then a sequence of strings is returned instead
-        of a single string.
+        used by the JPL HORIZONS system.  If this time is an array of
+        dates, then a sequence of strings is returned instead of a
+        single string.
 
         """
         offset = _half_second / 1e4
@@ -382,9 +378,9 @@ class Time(object):
 
         This internally calls the Python ``strftime()`` routine from the
         Standard Library ``time()`` module, for which you can find a
-        quick reference at ``http://strftime.org/``.  If this Julian
-        date is an array of dates, then a sequence of strings is
-        returned instead of a single string.
+        quick reference at ``http://strftime.org/``.  If this object is
+        an array of times, then a sequence of strings is returned
+        instead of a single string.
 
         """
         tup = self._utc_tuple(_half_second)
@@ -505,8 +501,8 @@ class Time(object):
 
         raise AttributeError('no such attribute %r' % name)
 
-    def __eq__(self, other_jd):
-        return self.tt == other_jd.tt
+    def __eq__(self, other_time):
+        return self.tt == other_time.tt
 
 
 def julian_day(year, month=1, day=1):
@@ -673,29 +669,34 @@ def _utc_to_tai(leap_dates, leap_offsets, year, month=1, day=1,
                 + minute * 60.0
                 + hour * 3600.0) / DAY_S
 
-_keyword_deprecation_message = """Skyfield no longer supports direct\
- instantiation of Time objects
+_JulianDate_deprecation_message = """Skyfield no longer supports direct\
+ instantiation of JulianDate objects (which are now called Time objects)
 
 If you need to quickly get an old Skyfield script working again, simply
 downgrade to Skyfield version 0.6.1 using a command like:
 
         pip install skyfield==0.6.1
 
-Skyfield used to let you build Time objects directly:
+Skyfield used to let you build JulianDate objects directly:
 
-        jd = Time(utc=(1980, 4, 20))   # the old way
+        t = JulianDate(utc=(1980, 4, 20))   # the old way
 
 But this forced Skyfield to maintain secret global copies of several
 time scale data files, that need to be downloaded and kept up to date
-for Time objects to work.  Skyfield now makes this collection of
-data files explicit, and calls the bundle of files a "Timescale" object.
-You can create one with the "load.timescale()" method and then build
-times using its methods, which have the same names as the old keyword
-arguments to Time:
+for Time objects to work.  Skyfield now makes this collection of data
+files explicit, and calls the bundle of files a "Timescale" object.  You
+can create one with the "load.timescale()" method and then build times
+using its methods, which let you either specify a calendar date or else
+supply a raw Julian date value with the "jd" keyword:
 
         from skyfield.api import load
         ts = load.timescale()
-        jd = ts.utc(1980, 4, 20)             # the new way"""
+        t = ts.utc(1980, 4, 20)       # the new way
+
+        t = ts.tt(jd=2444349.500592)  # jd is also supported for tai, tt, tdb
+
+See http://rhodesmill.org/skyfield/time.html for more details."""
+
 
 _naive_complaint = """cannot interpret a datetime that lacks a timezone
 

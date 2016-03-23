@@ -80,7 +80,7 @@ class ICRS(object):
             elif epoch == 'date':
                 epoch = self.jd
             else:
-                raise ValueError('the epoch= must be a Julian date,'
+                raise ValueError('the epoch= must be a Time object,'
                                  ' a floating point Terrestrial Time (TT),'
                                  ' or the string "date" for epoch-of-date')
             position_au = einsum('ij...,j...->i...', epoch.M, position_au)

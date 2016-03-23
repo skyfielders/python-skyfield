@@ -111,3 +111,8 @@ bundle of files a "Timescale" object.  You can create one with the
         from skyfield.api import load
         ts = load.timescale()
         jd = ts.now()                   # the new way""")
+
+class JulianDate(object):
+    def __init__(self, *args, **kw):
+        from skyfield.timelib import _JulianDate_deprecation_message
+        raise DeprecationError(_JulianDate_deprecation_message)
