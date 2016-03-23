@@ -63,10 +63,15 @@ Change Log
 0.7
 ---
 
-* Introduced ``Timescale`` object and the ``load.timescale()`` method,
-  which download Delta T and leap second data from official data sources
-  and make sure the files are kept up to date.  This replaces all former
-  techniques for building and specifying dates and times.
+* Introduced the ``Timescale`` object with methods ``utc()``, ``tai()``,
+  ``tt()``, and ``tdb()`` for building time objects, along with a
+  ``load.timescale()`` method for building a new ``Timescale``.  The
+  load method downloads ΔT and leap second data from official data
+  sources and makes sure the files are kept up to date.  This replaces
+  all former techniques for building and specifying dates and times.
+
+* Renamed ``JulianDate`` to ``Time`` and switched from ``jd`` to ``t``
+  as the typical variable used for time in the documentation.
 
 * Deprecated timescale keyword arguments like ``utc=(…)`` for both the
   ``Time`` constructor and also for all methods that take time as
@@ -115,7 +120,7 @@ Change Log
   ``planets.mars`` you should now type ``planets['mars']``.  You can run
   ``print(planets)`` to learn which bodies an ephemeris supports.
 
-* | Ask for planet positions with ``body.at(jd)`` instead of ``body(jd)``.
+* | Ask for planet positions with ``body.at(t)`` instead of ``body(t)``.
 
 * Per IAU 2012 Resolution B2, Skyfield now uses lowercase *au* for the
   astronomical unit, and defines it as exactly 149 597 870 700 meters.
@@ -128,7 +133,7 @@ Change Log
 0.4
 ---
 
-* To prevent confusion, the Julian date :meth:`~Time.astimezone()`
+* To prevent confusion, the :meth:`~Time.astimezone()`
   and :meth:`~Time.utc_datetime()` methods
   have been changed to return only a ``datetime`` object.
   If you also need a leap second flag returned,

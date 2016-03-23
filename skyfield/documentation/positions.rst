@@ -33,7 +33,7 @@ together with all of the attributes and methods that they support:
      ├── `velocity <api.html#skyfield.positionlib.ICRS.velocity>`_.km_per_s   →   xdot, ydot, zdot
      ├── `velocity.to(unit) <api.html#Distance.to>`_   →   xdot, ydot, zdot
      │
-     ├── `radec(epoch=jd) <api.html#skyfield.positionlib.ICRS.radec>`_     →   ra, dec, distance
+     ├── `radec(epoch=t) <api.html#skyfield.positionlib.ICRS.radec>`_      →   ra, dec, distance
      ├── `radec() <api.html#skyfield.positionlib.ICRS.radec>`_             →   ra, dec, distance
      ├── `distance() <api.html#skyfield.positionlib.ICRS.distance>`_          →   distance
      │
@@ -72,12 +72,13 @@ Quick reference to generating positions
 =======================================
 
 Skyfield already supports three kinds of object
-that can compute their position,
-and will soon be supporting more.
+that can compute their position.
 Each object offers an ``at()`` method
-that can take either a :doc:`Julian date <time>`
-or a :ref:`whole Julian date array <date-arrays>`
-as its argument and return a corresponding number of positions.
+whose argument can be a :doc:`Time <time>` object
+that either holds a single time
+or a whole array of different time values.
+Objects respond by returning either a single scalar position
+or else by generating a whole series of positions.
 
 .. testsetup::
 
@@ -94,7 +95,7 @@ as its argument and return a corresponding number of positions.
     from skyfield.api import load
 
     ts = load.timescale()
-    jd = ts.now()
+    t = ts.now()
 
     planets = load('de421.bsp')
     earth = planets['earth']
@@ -102,18 +103,18 @@ as its argument and return a corresponding number of positions.
 
     # From the center of the Solar System (Barycentric)
 
-    barycentric = mars.at(jd)
+    barycentric = mars.at(t)
 
     # From the center of the Earth (Geocentric)
 
-    astrometric = earth.at(jd).observe(mars)
-    apparent = earth.at(jd).observe(mars).apparent()
+    astrometric = earth.at(t).observe(mars)
+    apparent = earth.at(t).observe(mars).apparent()
 
     # From a place on Earth (Topocentric)
 
     boston = earth.topos('42.3583 N', '71.0603 W')
-    astrometric = boston.at(jd).observe(mars)
-    apparent = boston.at(jd).observe(mars).apparent()
+    astrometric = boston.at(t).observe(mars)
+    apparent = boston.at(t).observe(mars).apparent()
 
 **The stars**
   Stars and other fixed objects with catalog coordinates
@@ -127,7 +128,7 @@ as its argument and return a corresponding number of positions.
     from skyfield.api import Star, load
 
     ts = load.timescale()
-    jd = ts.now()
+    t = ts.now()
 
     boston = earth.topos('42.3583 N', '71.0603 W')
     barnard = Star(ra_hours=(17, 57, 48.49803),
@@ -135,13 +136,13 @@ as its argument and return a corresponding number of positions.
 
     # From the center of the Earth (Geocentric)
 
-    astrometric = earth(jd).observe(barnard)
-    apparent = earth(jd).observe(barnard).apparent()
+    astrometric = earth(t).observe(barnard)
+    apparent = earth(t).observe(barnard).apparent()
 
     # From a place on Earth (Topocentric)
 
-    astrometric = boston(jd).observe(barnard)
-    apparent = boston(jd).observe(barnard).apparent()
+    astrometric = boston(t).observe(barnard)
+    apparent = boston(t).observe(barnard).apparent()
 
 **Earth satellites**
   Earth satellite positions can be generated
@@ -163,18 +164,18 @@ as its argument and return a corresponding number of positions.
     from skyfield.api import load
 
     ts = load.timescale()
-    jd = ts.now()
+    t = ts.now()
 
     boston = earth.topos('42.3583 N', '71.0603 W')
     #satellite = earth.satellite(tle_text) # TODO
 
     # Geocentric
 
-    #apparent = satellite.gcrs(jd)
+    #apparent = satellite.gcrs(t)
 
     # Topocentric
 
-    #apparent = boston.gcrs(jd).observe(satellite)
+    #apparent = boston.gcrs(t).observe(satellite)
 
 Read :doc:`time` for more information
 about how to build dates and pass them to planets and satellites
@@ -213,13 +214,9 @@ by asking Skyfield for their :attr:`~Position.position` attribute:
     earth = planets['earth']
     mars = planets['mars']
 
-    jd = ts.utc(1980, 1, 1)
-    jd = ts.utc(jd=2444299.89643)
-    jd = ts.utc(n=2444299.89643)
-
-    jd = ts.utc((1980, 1, 1))
-    print(earth.at(jd).position.au)
-    print(mars.at(jd).position.au)
+    t = ts.utc(1980, 1, 1)
+    print(earth.at(t).position.au)
+    print(mars.at(t).position.au)
 
 .. testoutput::
 
@@ -270,7 +267,7 @@ that we see in our sky:
 
     # Observing Mars from the Earth's position
 
-    astrometric = earth.at(ts.utc((1980, 1, 1))).observe(mars)
+    astrometric = earth.at(ts.utc(1980, 1, 1)).observe(mars)
     print(astrometric.position.au)
 
 .. testoutput::
@@ -454,7 +451,7 @@ of an Earth object:
     # specific geographic location
 
     boston = earth.topos('42.3583 N', '71.0603 W')
-    astro = boston.at(ts.utc((1980, 3, 1))).observe(mars)
+    astro = boston.at(ts.utc(1980, 3, 1)).observe(mars)
     app = astro.apparent()
 
     alt, az, distance = app.altaz()

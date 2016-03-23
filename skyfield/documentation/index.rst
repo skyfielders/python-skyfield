@@ -22,8 +22,8 @@
     earth, mars = planets['earth'], planets['mars']
 
     ts = load.timescale()
-    jd = ts.now()
-    position = earth.at(jd).observe(mars)
+    t = ts.now()
+    position = earth.at(t).observe(mars)
     ra, dec, distance = position.radec()
 
     print(ra)
@@ -47,7 +47,7 @@ on the Earth’s surface:
 .. testcode::
 
     boston = earth.topos('42.3583 N', '71.0636 W')
-    position = boston.at(jd).observe(mars)
+    position = boston.at(t).observe(mars)
     alt, az, d = position.apparent().altaz()
 
     print(alt)

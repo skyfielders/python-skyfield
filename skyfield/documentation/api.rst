@@ -29,6 +29,7 @@ Time
 ====
 
 .. autoclass:: skyfield.api.Timescale
+   :members:
 
 .. autoclass:: skyfield.api.Time
    :members:

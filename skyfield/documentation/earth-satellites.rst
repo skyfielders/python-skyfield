@@ -37,10 +37,10 @@ to compute its apparent position relative to a location on Earth:
     earth = eph['earth']
 
     bluffton = earth.topos('40.8939 N', '83.8917 W')
-    jd = ts.utc(2014, 1, 21, 11, 18, 7)
+    t = ts.utc(2014, 1, 21, 11, 18, 7)
 
     sat = earth.satellite(text)
-    position = bluffton.at(ts.utc(jd)).observe(sat)
+    position = bluffton.at(t).observe(sat)
 
 To find out whether the satellite is above your local horizon,
 you will want to ask for its altitude and azimuth.
@@ -152,12 +152,12 @@ that are limiting this TLE set’s predictions:
 
 .. testcode::
 
-    geocentric = sat.gcrs(ts.utc((2013, 11, 9)))
+    geocentric = sat.gcrs(ts.utc(2013, 11, 9))
     print('Before:')
     print(geocentric.position.km)
     print(geocentric.sgp4_error)
 
-    geocentric = sat.gcrs(ts.utc((2013, 11, 13)))
+    geocentric = sat.gcrs(ts.utc(2013, 11, 13))
     print('\nAfter:')
     print(geocentric.position.km)
     print(geocentric.sgp4_error)
@@ -172,7 +172,7 @@ that are limiting this TLE set’s predictions:
     [ nan  nan  nan]
     mrt 0.997178 is less than 1.0 indicating the satellite has decayed
 
-If you use a Julian date array to ask about an entire range of dates,
+If you use a ``Time`` array to ask about an entire range of dates,
 then ``sgp4_error`` will be a sequence filled in with ``None``
 whenever the SGP4 propagator was successful
 and otherwise recording the propagator error:
@@ -181,7 +181,7 @@ and otherwise recording the propagator error:
 
     from pprint import pprint
 
-    geocentric = sat.gcrs(ts.utc((2013, 11, [9, 10, 11, 12, 13])))
+    geocentric = sat.gcrs(ts.utc(2013, 11, [9, 10, 11, 12, 13]))
     pprint(geocentric.sgp4_error)
 
 .. testoutput::

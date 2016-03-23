@@ -15,7 +15,7 @@ time_value = [(1973, 1, 18, 1, 35, 37.5), 2441700.56640625]
 def ts():
     yield api.load.timescale()
 
-def test_JulianDate_init(time_parameter, time_value):
+def test_time_creation_methods(time_parameter, time_value):
     method = getattr(api.load.timescale(), time_parameter)
     if isinstance(time_value, tuple):
         jd = method(*time_value)
@@ -23,23 +23,23 @@ def test_JulianDate_init(time_parameter, time_value):
         jd = method(jd=time_value)
     assert getattr(jd, time_parameter) == 2441700.56640625
 
-def test_building_JulianDate_from_utc_tuple_with_array_inside(ts):
+def test_timescale_utc_method_with_array_inside(ts):
     seconds = np.arange(48.0, 58.0, 1.0)
     jd = ts.utc(1973, 12, 29, 23, 59, seconds)
     assert seconds.shape == jd.shape
     for i, second in enumerate(seconds):
         assert jd.tai[i] == ts.utc(1973, 12, 29, 23, 59, second).tai
 
-def test_building_JulianDate_from_naive_datetime_raises_exception(ts):
+def test_that_building_time_from_naive_datetime_raises_exception(ts):
     with assert_raises(ValueError) as info:
         ts.utc(datetime(1973, 12, 29, 23, 59, 48))
     assert 'import timezone' in str(info.exception)
 
-def test_building_JulianDate_from_single_utc_datetime(ts):
+def test_building_time_from_single_utc_datetime(ts):
     jd = ts.utc(datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc))
     assert jd.tai == 2442046.5
 
-def test_building_JulianDate_from_list_of_utc_datetimes(ts):
+def test_building_time_from_list_of_utc_datetimes(ts):
     jd = ts.utc([
         datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc),
         datetime(1973, 12, 30, 23, 59, 48, tzinfo=utc),
@@ -52,7 +52,7 @@ def test_building_JulianDate_from_list_of_utc_datetimes(ts):
         2442046.5, 2442047.5, 2442048.5, 2442049.5, 2442050.5, 2442051.5,
         ]).all()
 
-def test_indexing_julian_date(ts):
+def test_indexing_time(ts):
     jd = ts.utc(1974, 10, range(1, 6))
     assert jd.shape == (5,)
     jd0 = jd[0]
@@ -62,7 +62,7 @@ def test_indexing_julian_date(ts):
     assert jd.ut1[0] == jd0.ut1
     assert jd.delta_t[0] == jd0.delta_t
 
-def test_slicing_julian_date(ts):
+def test_slicing_time(ts):
     jd = ts.utc(1974, 10, range(1, 6))
     assert jd.shape == (5,)
     jd24 = jd[2:4]
