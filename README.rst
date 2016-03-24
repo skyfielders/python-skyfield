@@ -16,13 +16,15 @@ positions for planets and Earth satellites.
    earth, mars = planets['earth'], planets['mars']
 
    ts = load.timescale()
-   jd = ts.now()
-   position = earth.at(jd).observe(mars)
+   t = ts.now()
+   position = earth.at(t).observe(mars)
    ra, dec, distance = position.radec()
 
    print(ra)
    print(dec)
    print(distance)
+
+The result:
 
 ::
 
@@ -30,8 +32,8 @@ positions for planets and Earth satellites.
    +09deg 03' 23.1"
    2.33251 au
 
-Its only binary dependency is NumPy.
-Skyfield can usually be installed with::
+Skyfield’s only binary dependency is NumPy.
+Once that is available, Skyfield can usually be installed with::
 
     pip install skyfield
 
