@@ -68,6 +68,22 @@ You can also visit:
 
 * `GitHub issue tracker <https://github.com/brandon-rhodes/python-skyfield/issues>`_
 
+News
+====
+
+**2016 March 24**
+  With the release of Skyfield 0.7,
+  the final API upheavals of the pre-1.0 era are now complete.
+  The introduction of the new timescale object
+  has now eliminated all hidden state from the library,
+  and has cleared the way for rapid development going forward.
+
+  Unless users encounter significant problems,
+  version 1.0 should follow as soon as the documentation —
+  and in particular the API Reference —
+  has received a bit more polish.
+  The project is almost there!
+
 Table of Contents
 =================
 
