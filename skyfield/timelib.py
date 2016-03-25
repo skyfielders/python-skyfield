@@ -209,14 +209,14 @@ class Time(object):
 
     def __getitem__(self, index):
         # TODO: also copy cached matrices?
-        jd = Time(self.ts, self.tt[index])
+        t = Time(self.ts, self.tt[index])
         for name in 'tai', 'tdb', 'ut1', 'delta_t':
             value = getattr(self, name, None)
             if value is not None:
                 if getattr(value, 'shape', None):
                     value = value[index]
-                setattr(jd, name, value)
-        return jd
+                setattr(t, name, value)
+        return t
 
     def astimezone(self, tz):
         """Return as a Python ``datetime`` in a ``pytz`` provided timezone.
@@ -235,7 +235,7 @@ class Time(object):
 
         Convert this time to a Python ``datetime`` and a leap second::
 
-            dt, leap_second = jd.astimezone_and_leap_second(tz)
+            dt, leap_second = t.astimezone_and_leap_second(tz)
 
         The argument `tz` should be a timezone from the third-party
         ``pytz`` package, which must be installed separately.  The date

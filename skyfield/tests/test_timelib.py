@@ -18,17 +18,17 @@ def ts():
 def test_time_creation_methods(time_parameter, time_value):
     method = getattr(api.load.timescale(), time_parameter)
     if isinstance(time_value, tuple):
-        jd = method(*time_value)
+        t = method(*time_value)
     else:
-        jd = method(jd=time_value)
-    assert getattr(jd, time_parameter) == 2441700.56640625
+        t = method(jd=time_value)
+    assert getattr(t, time_parameter) == 2441700.56640625
 
 def test_timescale_utc_method_with_array_inside(ts):
     seconds = np.arange(48.0, 58.0, 1.0)
-    jd = ts.utc(1973, 12, 29, 23, 59, seconds)
-    assert seconds.shape == jd.shape
+    t = ts.utc(1973, 12, 29, 23, 59, seconds)
+    assert seconds.shape == t.shape
     for i, second in enumerate(seconds):
-        assert jd.tai[i] == ts.utc(1973, 12, 29, 23, 59, second).tai
+        assert t.tai[i] == ts.utc(1973, 12, 29, 23, 59, second).tai
 
 def test_that_building_time_from_naive_datetime_raises_exception(ts):
     with assert_raises(ValueError) as info:
@@ -36,11 +36,11 @@ def test_that_building_time_from_naive_datetime_raises_exception(ts):
     assert 'import timezone' in str(info.exception)
 
 def test_building_time_from_single_utc_datetime(ts):
-    jd = ts.utc(datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc))
-    assert jd.tai == 2442046.5
+    t = ts.utc(datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc))
+    assert t.tai == 2442046.5
 
 def test_building_time_from_list_of_utc_datetimes(ts):
-    jd = ts.utc([
+    t = ts.utc([
         datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc),
         datetime(1973, 12, 30, 23, 59, 48, tzinfo=utc),
         datetime(1973, 12, 31, 23, 59, 48, tzinfo=utc),
@@ -48,87 +48,87 @@ def test_building_time_from_list_of_utc_datetimes(ts):
         datetime(1974, 1, 2, 23, 59, 47, tzinfo=utc),
         datetime(1974, 1, 3, 23, 59, 47, tzinfo=utc),
         ])
-    assert (jd.tai == [
+    assert (t.tai == [
         2442046.5, 2442047.5, 2442048.5, 2442049.5, 2442050.5, 2442051.5,
         ]).all()
 
 def test_indexing_time(ts):
-    jd = ts.utc(1974, 10, range(1, 6))
-    assert jd.shape == (5,)
-    jd0 = jd[0]
-    assert jd.tai[0] == jd0.tai
-    assert jd.tt[0] == jd0.tt
-    assert jd.tdb[0] == jd0.tdb
-    assert jd.ut1[0] == jd0.ut1
-    assert jd.delta_t[0] == jd0.delta_t
+    t = ts.utc(1974, 10, range(1, 6))
+    assert t.shape == (5,)
+    t0 = t[0]
+    assert t.tai[0] == t0.tai
+    assert t.tt[0] == t0.tt
+    assert t.tdb[0] == t0.tdb
+    assert t.ut1[0] == t0.ut1
+    assert t.delta_t[0] == t0.delta_t
 
 def test_slicing_time(ts):
-    jd = ts.utc(1974, 10, range(1, 6))
-    assert jd.shape == (5,)
-    jd24 = jd[2:4]
-    assert jd24.shape == (2,)
-    assert (jd.tai[2:4] == jd24.tai).all()
-    assert (jd.tt[2:4] == jd24.tt).all()
-    assert (jd.tdb[2:4] == jd24.tdb).all()
-    assert (jd.ut1[2:4] == jd24.ut1).all()
-    assert (jd.delta_t[2:4] == jd24.delta_t).all()
+    t = ts.utc(1974, 10, range(1, 6))
+    assert t.shape == (5,)
+    t24 = t[2:4]
+    assert t24.shape == (2,)
+    assert (t.tai[2:4] == t24.tai).all()
+    assert (t.tt[2:4] == t24.tt).all()
+    assert (t.tdb[2:4] == t24.tdb).all()
+    assert (t.ut1[2:4] == t24.ut1).all()
+    assert (t.delta_t[2:4] == t24.delta_t).all()
 
 def test_early_utc(ts):
-    jd = ts.utc(1915, 12, 2, 3, 4, 5.6786786)
-    assert abs(jd.tt - 2420833.6283317441) < epsilon
-    assert jd.utc_iso() == '1915-12-02T03:04:06Z'
+    t = ts.utc(1915, 12, 2, 3, 4, 5.6786786)
+    assert abs(t.tt - 2420833.6283317441) < epsilon
+    assert t.utc_iso() == '1915-12-02T03:04:06Z'
 
 def test_astimezone(ts):
-    jd = ts.utc(1969, 7, 20, 20, 18)
+    t = ts.utc(1969, 7, 20, 20, 18)
     tz = timezone('US/Eastern')
-    dt = jd.astimezone(tz)
+    dt = t.astimezone(tz)
     assert dt == tz.localize(datetime(1969, 7, 20, 16, 18, 0, 0))
 
 def test_astimezone_and_leap_second(ts):
-    jd = ts.utc(1969, 7, 20, 20, 18)
+    t = ts.utc(1969, 7, 20, 20, 18)
     tz = timezone('US/Eastern')
-    dt, leap_second = jd.astimezone_and_leap_second(tz)
+    dt, leap_second = t.astimezone_and_leap_second(tz)
     assert dt == tz.localize(datetime(1969, 7, 20, 16, 18, 0, 0))
     assert leap_second == 0
 
 def test_utc_datetime(ts):
-    jd = ts.utc(1969, 7, 20, 20, 18)
-    dt = jd.utc_datetime()
+    t = ts.utc(1969, 7, 20, 20, 18)
+    dt = t.utc_datetime()
     assert dt == datetime(1969, 7, 20, 20, 18, 0, 0, utc)
 
 def test_utc_datetime_and_leap_second(ts):
-    jd = ts.utc(1969, 7, 20, 20, 18)
-    dt, leap_second = jd.utc_datetime_and_leap_second()
+    t = ts.utc(1969, 7, 20, 20, 18)
+    dt, leap_second = t.utc_datetime_and_leap_second()
     assert dt == datetime(1969, 7, 20, 20, 18, 0, 0, utc)
     assert leap_second == 0
 
 def test_iso_of_decimal_that_rounds_up(ts):
-    jd = ts.utc(1915, 12, 2, 3, 4, 5.6786786)
-    assert jd.utc_iso(places=0) == '1915-12-02T03:04:06Z'
-    assert jd.utc_iso(places=1) == '1915-12-02T03:04:05.7Z'
-    assert jd.utc_iso(places=2) == '1915-12-02T03:04:05.68Z'
-    assert jd.utc_iso(places=3) == '1915-12-02T03:04:05.679Z'
-    assert jd.utc_iso(places=4) == '1915-12-02T03:04:05.6787Z'
+    t = ts.utc(1915, 12, 2, 3, 4, 5.6786786)
+    assert t.utc_iso(places=0) == '1915-12-02T03:04:06Z'
+    assert t.utc_iso(places=1) == '1915-12-02T03:04:05.7Z'
+    assert t.utc_iso(places=2) == '1915-12-02T03:04:05.68Z'
+    assert t.utc_iso(places=3) == '1915-12-02T03:04:05.679Z'
+    assert t.utc_iso(places=4) == '1915-12-02T03:04:05.6787Z'
 
 def test_iso_of_decimal_that_rounds_down(ts):
-    jd = ts.utc(2014, 12, 21, 6, 3, 1.234234)
-    assert jd.utc_iso(places=0) == '2014-12-21T06:03:01Z'
-    assert jd.utc_iso(places=1) == '2014-12-21T06:03:01.2Z'
-    assert jd.utc_iso(places=2) == '2014-12-21T06:03:01.23Z'
-    assert jd.utc_iso(places=3) == '2014-12-21T06:03:01.234Z'
-    assert jd.utc_iso(places=4) == '2014-12-21T06:03:01.2342Z'
+    t = ts.utc(2014, 12, 21, 6, 3, 1.234234)
+    assert t.utc_iso(places=0) == '2014-12-21T06:03:01Z'
+    assert t.utc_iso(places=1) == '2014-12-21T06:03:01.2Z'
+    assert t.utc_iso(places=2) == '2014-12-21T06:03:01.23Z'
+    assert t.utc_iso(places=3) == '2014-12-21T06:03:01.234Z'
+    assert t.utc_iso(places=4) == '2014-12-21T06:03:01.2342Z'
 
 def test_iso_of_leap_second_with_fraction(ts):
-    jd = ts.utc(1973, 12, 31, 23, 59, 60.12349)
-    assert jd.utc_iso(places=0) == '1973-12-31T23:59:60Z'
-    assert jd.utc_iso(places=1) == '1973-12-31T23:59:60.1Z'
-    assert jd.utc_iso(places=2) == '1973-12-31T23:59:60.12Z'
-    assert jd.utc_iso(places=3) == '1973-12-31T23:59:60.123Z'
-    assert jd.utc_iso(places=4) == '1973-12-31T23:59:60.1235Z'
+    t = ts.utc(1973, 12, 31, 23, 59, 60.12349)
+    assert t.utc_iso(places=0) == '1973-12-31T23:59:60Z'
+    assert t.utc_iso(places=1) == '1973-12-31T23:59:60.1Z'
+    assert t.utc_iso(places=2) == '1973-12-31T23:59:60.12Z'
+    assert t.utc_iso(places=3) == '1973-12-31T23:59:60.123Z'
+    assert t.utc_iso(places=4) == '1973-12-31T23:59:60.1235Z'
 
 def test_iso_of_array_showing_whole_seconds(ts):
-    jd = ts.utc(1973, 12, 31, 23, 59, np.arange(58.75, 63.1, 0.5))
-    assert jd.utc_iso(places=0) == [
+    t = ts.utc(1973, 12, 31, 23, 59, np.arange(58.75, 63.1, 0.5))
+    assert t.utc_iso(places=0) == [
         '1973-12-31T23:59:59Z',
         '1973-12-31T23:59:59Z',
         '1973-12-31T23:59:60Z',
@@ -141,8 +141,8 @@ def test_iso_of_array_showing_whole_seconds(ts):
         ]
 
 def test_iso_of_array_showing_fractions(ts):
-    jd = ts.utc(1973, 12, 31, 23, 59, np.arange(58.75, 63.1, 0.5))
-    assert jd.utc_iso(places=2) == [
+    t = ts.utc(1973, 12, 31, 23, 59, np.arange(58.75, 63.1, 0.5))
+    assert t.utc_iso(places=2) == [
         '1973-12-31T23:59:58.75Z',
         '1973-12-31T23:59:59.25Z',
         '1973-12-31T23:59:59.75Z',
@@ -155,8 +155,8 @@ def test_iso_of_array_showing_fractions(ts):
         ]
 
 def test_jpl_format(ts):
-    jd = ts.utc(range(-300, 301, 100), 7, 1)
-    assert jd.utc_jpl() == [
+    t = ts.utc(range(-300, 301, 100), 7, 1)
+    assert t.utc_jpl() == [
         'B.C. 0301-Jul-01 00:00:00.0000 UT',
         'B.C. 0201-Jul-01 00:00:00.0000 UT',
         'B.C. 0101-Jul-01 00:00:00.0000 UT',
@@ -167,12 +167,12 @@ def test_jpl_format(ts):
         ]
 
 def test_stftime_of_single_date(ts):
-    jd = ts.utc(1973, 12, 31, 23, 59, 60)
-    assert jd.utc_strftime('%Y %m %d %H %M %S') == '1973 12 31 23 59 60'
+    t = ts.utc(1973, 12, 31, 23, 59, 60)
+    assert t.utc_strftime('%Y %m %d %H %M %S') == '1973 12 31 23 59 60'
 
 def test_stftime_of_date_array(ts):
-    jd = ts.utc(1973, 12, 31, 23, 59, np.arange(59.0, 61.1, 1.0))
-    assert jd.utc_strftime('%Y %m %d %H %M %S') == [
+    t = ts.utc(1973, 12, 31, 23, 59, np.arange(59.0, 61.1, 1.0))
+    assert t.utc_strftime('%Y %m %d %H %M %S') == [
         '1973 12 31 23 59 59',
         '1973 12 31 23 59 60',
         '1974 01 01 00 00 00',

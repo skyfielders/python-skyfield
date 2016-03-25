@@ -298,11 +298,11 @@ def output_geocentric_tests(dates):
         output(locals(), """\
 
         def test_{slug}_geocentric_date{i}(de405, ts):
-            jd = ts.tt(jd={jd!r})
-            e = de405['earth'].at(jd)
+            t = ts.tt(jd={jd!r})
+            e = de405['earth'].at(t)
             p = de405[{planet!r}]
 
-            distance = length_of((e - p.at(jd)).position.au)
+            distance = length_of((e - p.at(t)).position.au)
             compare(distance * OLD_AU, {distance1!r}, 0.5 * meter)
 
             astrometric = e.observe(p)
@@ -376,11 +376,11 @@ def output_topocentric_tests(dates):
         output(locals(), """\
 
         def test_{slug}_topocentric_date{i}(de405):
-            jd = load.timescale(delta_t=0.0).tt(jd={jd!r})
+            t = load.timescale(delta_t=0.0).tt(jd={jd!r})
             earth = de405['earth']
             usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
-            apparent = usno.at(jd).observe(de405[{planet!r}]).apparent()
+            apparent = usno.at(t).observe(de405[{planet!r}]).apparent()
             ra, dec, distance = apparent.radec()
             compare(ra.hours, {ra1!r}, 0.001 * ra_arcsecond)
             compare(dec.degrees, {dec1!r}, 0.001 * arcsecond)

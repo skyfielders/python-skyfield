@@ -15,7 +15,7 @@ _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GALACTIC = inertial_frames['GALACTIC']
 
 class ICRS(object):
-    """An x,y,z position whose axes are oriented to the ICRS system.
+    """An *x,y,z* position oriented to the ICRS axes.
 
     The ICRS is a permanent coordinate system that has superseded the
     old series of equinox-based systems like B1900, B1950, and J2000.
@@ -24,8 +24,8 @@ class ICRS(object):
     geocentric = True
     altaz_rotation = None
 
-    def __init__(self, position_au, velocity_au_per_d=None, jd=None):
-        self.jd = jd
+    def __init__(self, position_au, velocity_au_per_d=None, t=None):
+        self.t = t
         self.position = Distance(position_au)
         if velocity_au_per_d is None:
             self.velocity = None
@@ -37,7 +37,7 @@ class ICRS(object):
             self.__class__.__name__,
             '' if (self.velocity is None) else
             ' and velocity xdot,ydot,zdot au/day',
-            '' if self.jd is None else ' at date jd',
+            '' if self.t is None else ' at date t',
             )
 
     def __sub__(self, body):
@@ -47,7 +47,7 @@ class ICRS(object):
             v = None
         else:
             v = body.velocity.au_per_d - self.velocity.au_per_d
-        return ICRS(p, v, self.jd)
+        return ICRS(p, v, self.t)
 
     def distance(self):
         """Return the length of this vector.
@@ -78,7 +78,7 @@ class ICRS(object):
             elif isinstance(epoch, float):
                 epoch = Time(tt=epoch)
             elif epoch == 'date':
-                epoch = self.jd
+                epoch = self.t
             else:
                 raise ValueError('the epoch= must be a Time object,'
                                  ' a floating point Terrestrial Time (TT),'
@@ -150,7 +150,7 @@ class ICRS(object):
 
 
 class Barycentric(ICRS):
-    """BCRS: an ICRS x,y,z position measured from the Solar System barycenter.
+    """An *x,y,z* position measured from the Solar System barycenter.
 
     """
     def observe(self, body):
@@ -187,7 +187,7 @@ class Astrometric(ICRS):
         output reference frame is the GCRS.
 
         """
-        jd = self.jd
+        t = self.t
         position_au = self.position.au.copy()
         observer = self.observer
 
@@ -199,10 +199,10 @@ class Astrometric(ICRS):
             include_earth_deflection = limb_angle >= 0.8
 
         add_deflection(position_au, observer.position.au, observer.ephemeris,
-                       jd, include_earth_deflection)
+                       t, include_earth_deflection)
         add_aberration(position_au, observer.velocity.au_per_d, self.light_time)
 
-        a = Apparent(position_au, jd=jd)
+        a = Apparent(position_au, t=t)
         a.observer = self.observer
         return a
 
@@ -270,19 +270,19 @@ class Geocentric(ICRS):
             raise ValueError('currently a Geocentric location can only'
                              ' observe an object that can generate a'
                              ' GCRS position through a .gcrs() method')
-        g = gcrs_method(self.jd)
+        g = gcrs_method(self.t)
         # TODO: light-travel-time backdating, if distant enough?
         p = g.position.au - self.position.au
         v = g.velocity.au_per_d - self.velocity.au_per_d
-        a = Apparent(p, v, self.jd)
+        a = Apparent(p, v, self.t)
         a.observer = self
         return a
 
 
-def ITRF_to_GCRS(jd, rITRF):  # todo: velocity
+def ITRF_to_GCRS(t, rITRF):  # todo: velocity
 
     # Todo: wobble
 
-    spin = rot_z(jd.gast * TAU / 24.0)
+    spin = rot_z(t.gast * TAU / 24.0)
     position = einsum('ij...,j...->i...', spin, array(rITRF))
-    return einsum('ij...,j...->i...', jd.MT, position)
+    return einsum('ij...,j...->i...', t.MT, position)

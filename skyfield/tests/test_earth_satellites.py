@@ -43,7 +43,7 @@ def test_iss_altitude_computed_with_bcrs(iss_transit):
 
     cst = timedelta(hours=-6) #, minutes=1)
     dt = dt - cst
-    jd = api.load.timescale(delta_t=67.2091).utc(dt)
+    t = api.load.timescale(delta_t=67.2091).utc(dt)
 
     lines = iss_tle.splitlines()
     s = EarthSatellite(lines, None)
@@ -52,7 +52,7 @@ def test_iss_altitude_computed_with_bcrs(iss_transit):
 
     # Compute using Solar System coordinates:
 
-    alt, az, d = lake_zurich.at(jd).observe(s).altaz()
+    alt, az, d = lake_zurich.at(t).observe(s).altaz()
     print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
     assert abs(alt.degrees - their_altitude) < 2.5  # TODO: tighten this up?
 
@@ -61,13 +61,13 @@ def test_iss_altitude_computed_with_gcrs(iss_transit):
 
     cst = timedelta(hours=-6) #, minutes=1)
     dt = dt - cst
-    jd = api.load.timescale(delta_t=67.2091).utc(dt)
+    t = api.load.timescale(delta_t=67.2091).utc(dt)
 
     lines = iss_tle.splitlines()
     s = EarthSatellite(lines, None)
     lake_zurich = api.Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
 
-    alt, az, d = lake_zurich.at(jd).observe(s).altaz()
+    alt, az, d = lake_zurich.at(t).observe(s).altaz()
     print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
     assert abs(alt.degrees - their_altitude) < 2.5  # TODO: tighten this up?
 
@@ -119,13 +119,13 @@ def test_appendix_c_satellite():
     jd_epoch = sat._sgp4_satellite.jdsatepoch
     three_days_later = jd_epoch + 3.0
     offset = ts.tt(jd=three_days_later)._utc_float() - three_days_later
-    jd = ts.tt(jd=three_days_later - offset)
+    t = ts.tt(jd=three_days_later - offset)
 
     # First, a crucial sanity check (which is, technically, a test of
     # the `sgp4` package and not of Skyfield): are the right coordinates
     # being produced by our Python SGP4 propagator for this satellite?
 
-    rTEME, vTEME, error = sat._position_and_velocity_TEME_km(jd)
+    rTEME, vTEME, error = sat._position_and_velocity_TEME_km(t)
 
     assert abs(-9060.47373569 - rTEME[0]) < 1e-8
     assert abs(4658.70952502 - rTEME[1]) < 1e-8

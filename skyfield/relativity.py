@@ -20,14 +20,14 @@ rmasses = {
     'moon': 27068700.387534,
     }
 
-def add_deflection(position, observer, ephemeris, jd,
+def add_deflection(position, observer, ephemeris, t,
                    include_earth_deflection, count=3):
     """Update `position` for how solar system masses will deflect its light.
 
     Given the ICRS `position` [x,y,z] of an object (au) that is being
     viewed from the `observer` also expressed as [x,y,z], and given an
     ephemeris that can be used to determine solar system body positions,
-    and given the time `jd` and Boolean `apply_earth` indicating whether
+    and given the time `t` and Boolean `apply_earth` indicating whether
     to worry about the effect of Earth's mass, and a `count` of how many
     major solar system bodies to worry about, this function updates
     `position` in-place to show how the masses in the solar system will
@@ -40,15 +40,15 @@ def add_deflection(position, observer, ephemeris, jd,
 
     # Cycle through gravitating bodies.
 
-    jd_tdb = jd.tdb
-    ts = jd.ts
+    jd_tdb = t.tdb
+    ts = t.ts
     for name in deflectors[:count]:
         try:
             deflector = ephemeris[name]
         except KeyError:
             deflector = ephemeris[name + ' barycenter']
 
-        # Get position of gravitating body wrt ss barycenter at time 'jd_tdb'.
+        # Get position of gravitating body wrt ss barycenter at time 't_tdb'.
 
         bposition = deflector.at(ts.tdb(jd=jd_tdb)).position.au  # TODO
 

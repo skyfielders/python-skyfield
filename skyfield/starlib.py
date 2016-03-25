@@ -51,17 +51,17 @@ class Star(object):
 
     def _observe_from_bcrs(self, observer):
         position, velocity = self._position_au, self._velocity_au_per_d
-        jd = observer.jd
+        t = observer.t
         dt = light_time_difference(position, observer.position.au)
-        if jd.shape:
-            position = (outer(velocity, jd.tdb + dt - T0).T + position).T
+        if t.shape:
+            position = (outer(velocity, t.tdb + dt - T0).T + position).T
         else:
-            position = position + velocity * (jd.tdb + dt - T0)
+            position = position + velocity * (t.tdb + dt - T0)
         vector = position - observer.position.au
         distance = length_of(vector)
         light_time = distance / C_AUDAY
 
-        g = Astrometric(vector, (observer.velocity.au_per_d.T - velocity).T, jd)
+        g = Astrometric(vector, (observer.velocity.au_per_d.T - velocity).T, t)
         g.observer = observer
         g.distance = distance
         g.light_time = light_time

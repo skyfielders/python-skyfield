@@ -40,7 +40,7 @@ To upgrade your script to a modern version of Skyfield, find each place
 that you loaded a body from the skyfield.api module and called it:
 
         from skyfield.api import {body}
-        position = {body}(jd)
+        position = {body}(t)
 
 Instead, load the ephemeris like DE421 explicitly, look up the body in
 the ephemeris, and use the method at() to generate a position:
@@ -48,7 +48,7 @@ the ephemeris, and use the method at() to generate a position:
         from skyfield.api import load
         planets = load('de421.bsp')
         {body} = planets['{body}']
-        position = {body}.at(jd)
+        position = {body}.at(t)
 
 More documentation can be found at: http://rhodesmill.org/skyfield/"""
                                .format(body=self.name))
@@ -100,7 +100,7 @@ downgrade to Skyfield version 0.6.1 using a command like:
 
 Skyfield used to provide a now() method returning the current time:
 
-        jd = now()                      # the old way
+        t = now()                      # the old way
 
 But this forced Skyfield to maintain secret global copies of several
 time scale data files, that need to be downloaded and kept up to date.
@@ -110,7 +110,7 @@ bundle of files a "Timescale" object.  You can create one with the
 
         from skyfield.api import load
         ts = load.timescale()
-        jd = ts.now()                   # the new way""")
+        t = ts.now()                   # the new way""")
 
 class JulianDate(object):
     def __init__(self, *args, **kw):

@@ -67,30 +67,30 @@ def test_callisto_astrometric(ts):
 
 def test_boston_geometry():
     e = api.load('jup310.bsp')
-    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
+    t = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
-    a = boston.geometry_of('earth').at(jd)
+    a = boston.geometry_of('earth').at(t)
     compare(a.position.km,
       [-1.764697476371664E+02, -4.717131288041386E+03, -4.274926422016179E+03],
       0.0027)  # TODO: try to get this < 1 meter
 
 def test_moon_from_boston_geometry():
     e = api.load('de430t.bsp')
-    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
+    t = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
-    a = boston.geometry_of('moon').at(jd)
+    a = boston.geometry_of('moon').at(t)
     compare(a.position.au,
       [-1.341501206552443E-03, 2.190483327459023E-03, 6.839177007993498E-04],
       1.7 * meter)  # TODO: improve this
 
 def test_moon_from_boston_astrometric():
     e = api.load('de430t.bsp')
-    jd = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
+    t = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
     boston = e['earth'].topos((42, 21, 24.1), (-71, 3, 24.8),
                               x=0.003483, y=0.358609)
-    a = boston.at(jd).observe(e['moon'])
+    a = boston.at(t).observe(e['moon'])
     ra, dec, distance = a.radec()
     compare(ra._degrees, 121.4796470, 0.001 * arcsecond)
     compare(dec.degrees, 14.9108450, 0.001 * arcsecond)

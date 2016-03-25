@@ -67,13 +67,13 @@ def _build_compute(segment):
     """Build a Skyfield `compute` callback for the SPK `segment`."""
 
     if segment.data_type == 2:
-        def compute(jd):
-            position, velocity = segment.compute_and_differentiate(jd.tdb)
+        def compute(t):
+            position, velocity = segment.compute_and_differentiate(t.tdb)
             return position / AU_KM, velocity / AU_KM
 
     elif segment.data_type == 3:
-        def compute(jd):
-            six = segment.compute(jd.tdb)
+        def compute(t):
+            six = segment.compute(t.tdb)
             return six[:3] / AU_KM, six[3:] * DAY_S / AU_KM
 
     else:
@@ -89,13 +89,13 @@ class Body(object):
         self.code = code
 
     @raise_error_for_deprecated_time_arguments
-    def at(self, jd):
+    def at(self, t):
         """Compute the Solar System position of this body at a given time."""
         segments = self.segments
         segment_dict = dict((segment.target, segment) for segment in segments)
         chain = list(_center(self.code, segment_dict))[::-1]
-        pos, vel = _tally((), chain, jd)
-        barycentric = Barycentric(pos, vel, jd)
+        pos, vel = _tally((), chain, t)
+        barycentric = Barycentric(pos, vel, t)
         barycentric.ephemeris = self.ephemeris
         return barycentric
 
@@ -127,7 +127,7 @@ class Body(object):
 
     def __call__(self, jd):
         """Deprecated alternative to the new at() method."""
-        raise DeprecationError("""use method body.at(jd), not the call body(jd)
+        raise DeprecationError("""use method body.at(t), not the call body(t)
 
 If you simply want your old Skyfield script to start working again,
 downgrade to Skyfield version 0.4 using a command like:
@@ -137,12 +137,12 @@ downgrade to Skyfield version 0.4 using a command like:
 Otherwise, you can upgrade your script to modern Skyfield by finding
 each place you called a body like a function to generate a position:
 
-        position = body(jd)
+        position = body(t)
 
-Instead, Skyfield now offers a method named at(jd) to makes the
+Instead, Skyfield now offers a method named at(t) to makes the
 operation easier to read and more symmetrical with other method calls:
 
-        position = body.at(jd)
+        position = body.at(t)
 
 More documentation can be found at: http://rhodesmill.org/skyfield/""")
 
@@ -158,30 +158,30 @@ def observe(observer, target):
     """
     # cposition, cvelocity = _tally([], self.center_chain, jd)
     # tposition, tvelocity = _tally([], self.target_chain, jd)
-    jd = observer.jd
-    ts = jd.ts
+    t = observer.t
+    ts = t.ts
     cposition = observer.position.au
     cvelocity = observer.velocity.au_per_d
-    tjd = target.at(jd)
-    tposition = tjd.position.au
+    t_bary = target.at(t)
+    tposition = t_bary.position.au
     distance = length_of(tposition - cposition)
     light_time0 = 0.0
-    jd_tdb = jd.tdb
+    t_tdb = t.tdb
     for i in range(10):
         light_time = distance / C_AUDAY
         delta = light_time - light_time0
         if -1e-12 < min(delta) and max(delta) < 1e-12:
             break
-        jd2 = ts.tdb(jd=jd_tdb - light_time)
-        tjd = target.at(jd2)
-        tposition = tjd.position.au
+        t2 = ts.tdb(jd=t_tdb - light_time)
+        t_bary = target.at(t2)
+        tposition = t_bary.position.au
         distance = length_of(tposition - cposition)
         light_time0 = light_time
     else:
         raise ValueError('observe_from() light-travel time'
                          ' failed to converge')
-    tvelocity = tjd.velocity.au_per_d
-    pos = Astrometric(tposition - cposition, tvelocity - cvelocity, jd)
+    tvelocity = t_bary.velocity.au_per_d
+    pos = Astrometric(tposition - cposition, tvelocity - cvelocity, t)
     pos.light_time = light_time
     pos.observer = observer
     return pos
@@ -220,21 +220,21 @@ class Geometry(object):
             for c in self.center_chain + self.target_chain))
 
     @raise_error_for_deprecated_time_arguments
-    def at(self, jd):
+    def at(self, t):
         """Return the geometric Cartesian position and velocity."""
-        pos, vel = _tally(self.center_chain, self.target_chain, jd)
+        pos, vel = _tally(self.center_chain, self.target_chain, t)
         cls = Barycentric if self.center == 0 else ICRS
-        return cls(pos, vel, jd)
+        return cls(pos, vel, t)
 
 
-def _tally(minus_chain, plus_chain, jd):
+def _tally(minus_chain, plus_chain, t):
     position = velocity = 0.0
     for segment in minus_chain:
-        p, v = segment.compute(jd)
+        p, v = segment.compute(t)
         position -= p
         velocity -= v
     for segment in plus_chain:
-        p, v = segment.compute(jd)
+        p, v = segment.compute(t)
         position += p
         velocity += v
     return position, velocity

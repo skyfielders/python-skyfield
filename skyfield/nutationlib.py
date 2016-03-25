@@ -2,15 +2,15 @@
 from numpy import array, cos, fmod, sin, outer, tensordot, zeros
 from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, PSI_COR, EPS_COR, T0
 
-def compute_nutation(jd):
-    """Generate the nutation rotations for Time `jd`.
+def compute_nutation(t):
+    """Generate the nutation rotations for Time `t`.
 
     If the Julian date is scalar, a simple ``(3, 3)`` matrix is
     returned; if the date is an array of length ``n``, then an array of
     matrices is returned with dimensions ``(3, 3, n)``.
 
     """
-    oblm, oblt, eqeq, psi, eps = earth_tilt(jd)
+    oblm, oblt, eqeq, psi, eps = earth_tilt(t)
 
     cobm = cos(oblm * DEG2RAD)
     sobm = sin(oblm * DEG2RAD)
@@ -29,10 +29,10 @@ def compute_nutation(jd):
                    cpsi * cobm * sobt - sobm * cobt,
                    cpsi * sobm * sobt + cobm * cobt)))
 
-def earth_tilt(jd):
+def earth_tilt(t):
     """Return a tuple of information about the earth's axis and position.
 
-    `jd` - A Time object.
+    `t` - A Time object.
 
     The returned tuple contains five items:
 
@@ -43,13 +43,13 @@ def earth_tilt(jd):
     ``d_eps`` - Nutation in obliquity in arcseconds.
 
     """
-    dp, de = iau2000a(jd.tt)
-    c_terms = equation_of_the_equinoxes_complimentary_terms(jd.tt) / ASEC2RAD
+    dp, de = iau2000a(t.tt)
+    c_terms = equation_of_the_equinoxes_complimentary_terms(t.tt) / ASEC2RAD
 
     d_psi = dp * 1e-7 + PSI_COR
     d_eps = de * 1e-7 + EPS_COR
 
-    mean_ob = mean_obliquity(jd.tdb)
+    mean_ob = mean_obliquity(t.tdb)
     true_ob = mean_ob + d_eps
 
     mean_ob /= 3600.0
