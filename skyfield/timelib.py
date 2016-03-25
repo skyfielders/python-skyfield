@@ -181,6 +181,10 @@ class Timescale(object):
         t.tdb = tdb
         return t
 
+    def from_astropy(self, t):
+        """Return a Skyfield time corresponding to the AstroPy time `t`."""
+        return self.tt(jd=t.tt.jd)
+
 class Time(object):
     """A single moment in history, or an array of several moments.
 

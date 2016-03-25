@@ -35,8 +35,8 @@ to within 0.001 arcseconds.
 
     ts = load.timescale()
     t = ts.now()
-    position = earth.at(t).observe(mars)
-    ra, dec, distance = position.radec()
+    astrometric = earth.at(t).observe(mars)
+    ra, dec, distance = astrometric.radec()
 
     print(ra)
     print(dec)
@@ -56,8 +56,8 @@ on the Earth’s surface:
 .. testcode::
 
     boston = earth.topos('42.3583 N', '71.0636 W')
-    position = boston.at(t).observe(mars)
-    alt, az, d = position.apparent().altaz()
+    astrometric = boston.at(t).observe(mars)
+    alt, az, d = astrometric.apparent().altaz()
 
     print(alt)
     print(az)
@@ -66,6 +66,21 @@ on the Earth’s surface:
 
     25deg 27' 54.0"
     101deg 33' 44.0"
+
+Skyfield does not depend on the `AstroPy`_ project
+or its compiled libraries,
+but can return results in AstroPy units:
+
+.. testcode::
+
+    from astropy import units as u
+    print(astrometric.position.to(u.au))
+    print(alt.to(u.deg))
+
+.. testoutput::
+
+    [-2.19049548  0.71236701  0.36712443] AU
+    25.464989358252268 deg
 
 The official documentation is available through the links
 in the Table of Contents below.
@@ -105,9 +120,12 @@ Table of Contents
    planets
    stars
    earth-satellites
+   astropy
    api
    design
 
 .. testcleanup::
 
    __import__('skyfield.tests.fixes').tests.fixes.teardown()
+
+.. _astropy: http://docs.astropy.org/en/stable/

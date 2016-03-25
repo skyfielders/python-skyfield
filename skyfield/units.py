@@ -237,6 +237,16 @@ class Angle(object):
                 )
         return _dstr(degrees, places, signed)
 
+    def to(self, unit):
+        """Convert this angle to an AstroPy ``Angle`` in the given `unit`."""
+        from astropy.units import rad
+        return (self.radians * rad).to(unit)
+
+        # Or should this do:
+        from astropy.coordinates import Angle
+        from astropy.units import rad
+        return Angle(self.radians, rad).to(unit)
+
 class WrongUnitError(ValueError):
 
     def __init__(self, name):
