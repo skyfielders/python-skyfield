@@ -55,6 +55,13 @@ body, body > img {
 body {
     max-width: 36em;
 }
+body:after {
+    display: block;
+    padding-top: 0.4in;
+    padding-bottom: 0.6in;
+    text-align: center;
+    content: "· · • · ·";
+}
 img {
     max-width: 100%;
 }
