@@ -5,6 +5,11 @@
 
 .. currentmodule:: skyfield.units
 
+This document collects various notes
+about the API design of the Skyfield library,
+as well as the code samples that illustrate them
+and make sure that they keep working.
+
 Angle Classes
 -------------
 
@@ -24,8 +29,8 @@ no problem with the user accessing them as degrees:
 >>> a = Angle(degrees=-54.0)
 >>> a.degrees
 -54.0
->>> a.dstr()
-'-54deg 00\' 00.0"'
+>>> print(a.dstr())
+-54deg 00' 00.0"
 >>> a.dms()
 (-54.0, -0.0, -0.0)
 >>> a.signed_dms()
@@ -54,8 +59,8 @@ The remedies suggested by these exceptions indeed work:
 
 >>> print(a._hours)
 -3.6
->>> a.hstr(warn=False)
-'-03h 36m 00.00s'
+>>> print(a.hstr(warn=False))
+-03h 36m 00.00s
 >>> a.hms(warn=False)
 (-3.0, -36.0, -0.0)
 >>> a.signed_hms(warn=False)
@@ -68,8 +73,8 @@ becomes the easy operation:
 >>> a = Angle(degrees=-54.0, preference='hours')
 >>> print(a.hours)
 -3.6
->>> a.hstr()
-'-03h 36m 00.00s'
+>>> print(a.hstr())
+-03h 36m 00.00s
 >>> a.hms()
 (-3.0, -36.0, -0.0)
 >>> a.signed_hms()
@@ -96,8 +101,8 @@ WrongUnitError: this angle is usually expressed in hours, not degrees; if you wa
 
 >>> a._degrees
 -54.0
->>> a.dstr(warn=False)
-'-54deg 00\' 00.0"'
+>>> print(a.dstr(warn=False))
+-54deg 00' 00.0"
 >>> a.dms(warn=False)
 (-54.0, -0.0, -0.0)
 >>> a.signed_dms(warn=False)
