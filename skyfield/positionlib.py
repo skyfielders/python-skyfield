@@ -14,10 +14,10 @@ from .units import Distance, Velocity, Angle, _interpret_angle
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GALACTIC = inertial_frames['GALACTIC']
 
-class ICRS(object):
-    """An *x,y,z* position oriented to the ICRS axes.
+class ICRF(object):
+    """An *x,y,z* position oriented to the ICRF axes.
 
-    The ICRS is a permanent coordinate system that has superseded the
+    The ICRF is a permanent coordinate system that has superseded the
     old series of equinox-based systems like B1900, B1950, and J2000.
 
     """
@@ -41,18 +41,18 @@ class ICRS(object):
             )
 
     def __sub__(self, body):
-        """Subtract two ICRS vectors to produce a third."""
+        """Subtract two ICRF vectors to produce a third."""
         p = self.position.au - body.position.au
         if self.velocity is None or body.velocity is None:
             v = None
         else:
             v = body.velocity.au_per_d - self.velocity.au_per_d
-        return ICRS(p, v, self.t)
+        return ICRF(p, v, self.t)
 
     def distance(self):
         """Return the length of this vector.
 
-        >>> v = ICRS([1.0, 1.0, 0.0])
+        >>> v = ICRF([1.0, 1.0, 0.0])
         >>> print(v.distance())
         1.41421 au
 
@@ -62,7 +62,7 @@ class ICRS(object):
     def radec(self, epoch=None):
         """Return this position as a tuple (RA, declination, distance).
 
-        >>> ra, dec, distance = ICRS([1.0, 1.0, 1.0]).radec()
+        >>> ra, dec, distance = ICRF([1.0, 1.0, 1.0]).radec()
         >>> ra
         <Angle 03h 00m 00.00s>
         >>> dec
@@ -149,7 +149,12 @@ class ICRS(object):
         return Apparent(p)
 
 
-class Barycentric(ICRS):
+# For compatibility with my original name for the class.  Not an
+# important enough change to warrant a deprecation error for users, so:
+ICRS = ICRF
+
+
+class Barycentric(ICRF):
     """An *x,y,z* position measured from the Solar System barycenter.
 
     """
@@ -161,8 +166,8 @@ class Barycentric(ICRS):
         return astrometric
 
 
-class Astrometric(ICRS):
-    """An astrometric position as an x,y,z vector in the ICRS.
+class Astrometric(ICRF):
+    """An astrometric position as an x,y,z vector in the ICRF.
 
     The *astrometric position* of a body is its position relative to an
     observer, adjusted for light-time delay: the position of the body
@@ -207,7 +212,7 @@ class Astrometric(ICRS):
         return a
 
 
-class Apparent(ICRS):
+class Apparent(ICRF):
     """An apparent position as an x,y,z vector in the GCRS.
 
     The *apparent position* of a body is its position relative to an
@@ -261,7 +266,7 @@ class Apparent(ICRS):
         return alt, Angle(radians=az), Distance(r_au)
 
 
-class Geocentric(ICRS):
+class Geocentric(ICRF):
     """A position referred to the GCRS as measured from the geocenter."""
 
     def observe(self, other):

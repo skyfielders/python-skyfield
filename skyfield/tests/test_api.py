@@ -41,7 +41,7 @@ def test_star_position_class(ts):
     assert isinstance(p, positionlib.Astrometric)
 
 def test_from_altaz_needs_topos():
-    p = positionlib.ICRS([0.0, 0.0, 0.0])
+    p = positionlib.ICRF([0.0, 0.0, 0.0])
     with assert_raises(ValueError, 'the orientation of the horizon'):
         p.from_altaz(alt_degrees=0, az_degrees=0)
 

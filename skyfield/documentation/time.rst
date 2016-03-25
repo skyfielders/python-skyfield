@@ -17,11 +17,11 @@ Each time scale supported by :class:`Time`
 is described in detail in one of the sections below.
 The supported time scales are:
 
-* ``jd.utc`` — Coordinated Universal Time (“Greenwich Time”)
-* ``jd.tai`` — International Atomic Time
-* ``jd.tt`` — Terrestrial Time
-* ``jd.tdb`` — Barycentric Dynamical Time (the JPL’s “T\ :sub:`eph`”)
-* ``jd.ut1`` — Universal Time
+* ``t.utc`` — Coordinated Universal Time (“Greenwich Time”)
+* ``t.tai`` — International Atomic Time
+* ``t.tt`` — Terrestrial Time
+* ``t.tdb`` — Barycentric Dynamical Time (the JPL’s “T\ :sub:`eph`”)
+* ``t.ut1`` — Universal Time
 
 To specify a time,
 first build a :class:`Timescale` object
@@ -695,7 +695,7 @@ since they are often needed repeatedly during a calculation.
 
 ``M``
     The product **NPB** that performs the complete rotation
-    between a vector in the ICRS
+    between a vector in the ICRF
     and a vector in the dynamical reference system of this Julian date,
     where **B** is the frame tie between the two systems.
 
@@ -704,7 +704,7 @@ since they are often needed repeatedly during a calculation.
     and **P**\ :sup:`T`
     that are the transposes of the three previous matrices,
     and that rotate back the other direction
-    from the dynamical reference system back to the ICRS frame.
+    from the dynamical reference system back to the ICRF frame.
 
 You will typically never have to access these matrices yourself,
 as they are used automatically by the :meth:`Position.radec()`

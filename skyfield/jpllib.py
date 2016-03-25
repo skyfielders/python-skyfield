@@ -9,7 +9,7 @@ from jplephem.names import target_names as _names
 from .constants import AU_KM, C_AUDAY, DAY_S
 from .errors import DeprecationError, raise_error_for_deprecated_time_arguments
 from .functions import length_of
-from .positionlib import Astrometric, Barycentric, ICRS
+from .positionlib import Astrometric, Barycentric, ICRF
 from .timelib import calendar_date
 
 Segment = namedtuple('Segment', 'center target compute')
@@ -223,7 +223,7 @@ class Geometry(object):
     def at(self, t):
         """Return the geometric Cartesian position and velocity."""
         pos, vel = _tally(self.center_chain, self.target_chain, t)
-        cls = Barycentric if self.center == 0 else ICRS
+        cls = Barycentric if self.center == 0 else ICRF
         return cls(pos, vel, t)
 
 

@@ -25,22 +25,22 @@ together with all of the attributes and methods that they support:
 
     Barycentric, Astrometric, or Apparent position
      │
-     ├── `position <api.html#skyfield.positionlib.ICRS.position>`_.au         →   x, y, z
-     ├── `position <api.html#skyfield.positionlib.ICRS.position>`_.km         →   x, y, z
+     ├── `position <api.html#skyfield.positionlib.ICRF.position>`_.au         →   x, y, z
+     ├── `position <api.html#skyfield.positionlib.ICRF.position>`_.km         →   x, y, z
      ├── `position.to(unit) <api.html#Distance.to>`_   →   x, y, z
      │
-     ├── `velocity <api.html#skyfield.positionlib.ICRS.velocity>`_.au_per_d   →   xdot, ydot, zdot
-     ├── `velocity <api.html#skyfield.positionlib.ICRS.velocity>`_.km_per_s   →   xdot, ydot, zdot
+     ├── `velocity <api.html#skyfield.positionlib.ICRF.velocity>`_.au_per_d   →   xdot, ydot, zdot
+     ├── `velocity <api.html#skyfield.positionlib.ICRF.velocity>`_.km_per_s   →   xdot, ydot, zdot
      ├── `velocity.to(unit) <api.html#Distance.to>`_   →   xdot, ydot, zdot
      │
-     ├── `radec(epoch=t) <api.html#skyfield.positionlib.ICRS.radec>`_      →   ra, dec, distance
-     ├── `radec() <api.html#skyfield.positionlib.ICRS.radec>`_             →   ra, dec, distance
-     ├── `distance() <api.html#skyfield.positionlib.ICRS.distance>`_          →   distance
+     ├── `radec(epoch=t) <api.html#skyfield.positionlib.ICRF.radec>`_      →   ra, dec, distance
+     ├── `radec() <api.html#skyfield.positionlib.ICRF.radec>`_             →   ra, dec, distance
+     ├── `distance() <api.html#skyfield.positionlib.ICRF.distance>`_          →   distance
      │
-     ├── `ecliptic_position() <api.html#skyfield.positionlib.ICRS.ecliptic_position>`_ →   x, y, z
-     ├── `ecliptic_latlon() <api.html#skyfield.positionlib.ICRS.ecliptic_latlon>`_   →   lat, lon, distance
-     ├── `galactic_position() <api.html#skyfield.positionlib.ICRS.galactic_position>`_ →   x, y, z
-     └── `galactic_latlon() <api.html#skyfield.positionlib.ICRS.galactic_latlon>`_   →   lat, lon, distance
+     ├── `ecliptic_position() <api.html#skyfield.positionlib.ICRF.ecliptic_position>`_ →   x, y, z
+     ├── `ecliptic_latlon() <api.html#skyfield.positionlib.ICRF.ecliptic_latlon>`_   →   lat, lon, distance
+     ├── `galactic_position() <api.html#skyfield.positionlib.ICRF.galactic_position>`_ →   x, y, z
+     └── `galactic_latlon() <api.html#skyfield.positionlib.ICRF.galactic_latlon>`_   →   lat, lon, distance
 
     Apparent position only
      │
@@ -198,11 +198,39 @@ that is a high-precision replacement
 for the old J2000.0 system
 that was popular at the end of the 20th century.
 
-An ICRS coordinate centered on the solar system barycenter
-is called a *Barycentric Celestial Reference System* (BCRS) coordinate.
+The ICRS is one of three related concepts
+that you will often see mentioned together
+in technical publications,
+so here they are together:
 
-You can view these coordinates
-by asking Skyfield for their :attr:`~Position.position` attribute:
+* | *Barycentric Celestial Reference System* (BCRS) —
+    a coordinate origin whose relativistic frame of reference
+    is the one that was carefully defined in IAU 2000 Resolution B1.3
+    which puts the coordinate origin
+    at the gravitational center of the Solar System.
+    The direction in which the coordinate axes might point
+    is left unspecified.
+
+* *International Celestial Reference Frame* (ICRF) —
+  a precision reference frame
+  that radio astronomers have helped us define,
+  that will become forever more exact
+  as we measure better and better positions
+  for a list of very distant radio sources.
+  Wherever the origin of your coordinate system might lie,
+  you can use the ICRF to define
+  where your *x*-axis, *y*-axis, and *z*-axis should point.
+
+* *International Celestial Reference System* (ICRS) —
+  A coordinate system whose origin is defined by the BCRS
+  and whose axis directions are defined by the ICRF.
+  In essence, the ICRS = ICRF + BCRS.
+
+Instead of using an acronym,
+Skyfield uses a full word and gives the class name :class:`Barycentric`
+to coordinates expressed in the ICRS.
+You can view the raw *x*, *y*, and *z* coordinates
+by asking Skyfield for their :attr:`~Barycentric.position` attribute:
 
 .. testcode::
 
@@ -360,7 +388,7 @@ is typically expressed as the angles
     0.96678 au
 
 But it is actually unusual to print apparent coordinates
-in a permanent unchanging reference frame like the ICRS,
+in a permanent unchanging reference frame like the ICRF,
 so you are unlikely to find the two values above
 if you look up the position of Mars on 1980 January 1
 in an almanac or by using other astronomy software.
@@ -371,13 +399,13 @@ as its rolls and tumbles through space —
 which, after all,
 is how right ascension and declination were defined
 through most of human history,
-before the invention of the ICRS axes.
+before the invention of the ICRF axes.
 The Earth’s equator and poles move at least slightly every day,
 and move by larger amounts as years add up to centuries.
 
 To ask for right ascension and declination
 relative to the real equator and poles of Earth,
-and not the ideal permanent axes of the ICRS,
+and not the ideal permanent axes of the ICRF,
 simply add the keyword argument ``epoch='date'``
 when you ask the apparent position for coordinates:
 

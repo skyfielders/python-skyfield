@@ -138,7 +138,7 @@ class KeplerianOrbit:
         # get the ecliptic coords
         ecliptic = self.getECLCoordinatesonTime(date);
 
-        # calculate the equatorial (ICRS) coordinates
+        # calculate the equatorial (ICRF) coordinates
         x_eq = ecliptic.x;
         y_eq = cos(e) * ecliptic.y - sin(e) * ecliptic.z
         z_eq = sin(e) * ecliptic.y + cos(e) * ecliptic.z

@@ -86,6 +86,6 @@ class Topos(Body):
         return pos, vel
 
     def _altaz_rotation(self, t):
-        """Compute the rotation from the ICRS into the alt-az system."""
+        """Compute the rotation from the ICRF into the alt-az system."""
         R_lon = rot_z(- self.longitude.radians - t.gast * tau / 24.0)
         return einsum('ij...,jk...,kl...->il...', self.R_lat, R_lon, t.M)
