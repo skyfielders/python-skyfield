@@ -39,12 +39,13 @@ between the two libraries:
       2010-01-01T00:00:00.000
       A.D. 2010-Jan-01 00:00:00.0000 UT
 
-2. When Skyfield returns a
+2. A skyfield
    :class:`~skyfield.positionlib.Barycentric`,
    :class:`~skyfield.positionlib.Astrometric`, or
    :class:`~skyfield.positionlib.Apparent`
-   position and velocity,
-   you can ask for them to be expressed using AstroPy units.
+   position and velocity
+   can convert themselves into an AstroPy quantity
+   using any linear and velocity units you specify.
 
    .. testcode::
 
@@ -66,8 +67,8 @@ between the two libraries:
       [-0.16287311  0.88787399  0.38473904] AU
       [-0.01721258 -0.00279426 -0.0012121 ] AU / d
 
-3. Why Skyfield returns an angle,
-   you can ask for the angle expressed in a specific AstroPy unit.
+3. A Skyfield angle can express itself as an AstroPy quantity
+   in any requested unit of angular measure.
 
    .. testcode::
 

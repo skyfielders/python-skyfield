@@ -6,7 +6,8 @@
 .. currentmodule:: skyfield.api
 
 Astronomers use several different numerical scales for measuring time.
-Skyfield often has to use several even within a single computation.
+Skyfield often has to use several timescales
+even within a single computation.
 So the :class:`Time` class
 is designed to cache each new time scale
 when a calculation first demands it.
@@ -20,7 +21,7 @@ The supported time scales are:
 * ``t.utc`` — Coordinated Universal Time (“Greenwich Time”)
 * ``t.tai`` — International Atomic Time
 * ``t.tt`` — Terrestrial Time
-* ``t.tdb`` — Barycentric Dynamical Time (the JPL’s “T\ :sub:`eph`”)
+* ``t.tdb`` — Barycentric Dynamical Time (the JPL’s *T*\ :sub:`eph`)
 * ``t.ut1`` — Universal Time
 
 To specify a time,
@@ -567,7 +568,7 @@ varies the rate at which our atomic clocks
 seem to run to an outside observer,
 as predicted by Einstein’s theory of General Relativity.
 So physical simulations of the Solar System tend to use TDB,
-which is continuous with the T\ :sub:`eph` time scale
+which is continuous with the *T*\ :sub:`eph` time scale
 traditionally used for Solar System and spacecraft simulations
 at the Jet Propulsion Laboratory.
 

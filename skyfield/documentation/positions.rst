@@ -200,8 +200,7 @@ that was popular at the end of the 20th century.
 
 The ICRS is one of three related concepts
 that you will often see mentioned together
-in technical publications,
-so here they are together:
+in technical publications:
 
 * | *Barycentric Celestial Reference System* (BCRS) —
     a coordinate origin whose relativistic frame of reference
@@ -227,8 +226,8 @@ so here they are together:
   In essence, the ICRS = ICRF + BCRS.
 
 Instead of using an acronym,
-Skyfield uses a full word and gives the class name :class:`Barycentric`
-to coordinates expressed in the ICRS.
+Skyfield uses the class name :class:`Barycentric`
+for coordinates expressed in the ICRS.
 You can view the raw *x*, *y*, and *z* coordinates
 by asking Skyfield for their :attr:`~Barycentric.position` attribute:
 

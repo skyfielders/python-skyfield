@@ -15,7 +15,7 @@ _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GALACTIC = inertial_frames['GALACTIC']
 
 class ICRF(object):
-    """An *x,y,z* position oriented to the ICRF axes.
+    """An (x, y, z) position and velocity oriented to the ICRF axes.
 
     The ICRF is a permanent coordinate system that has superseded the
     old series of equinox-based systems like B1900, B1950, and J2000.
@@ -50,7 +50,7 @@ class ICRF(object):
         return ICRF(p, v, self.t)
 
     def distance(self):
-        """Return the length of this vector.
+        """Distance from the origin to the position.
 
         >>> v = ICRF([1.0, 1.0, 0.0])
         >>> print(v.distance())
@@ -60,7 +60,7 @@ class ICRF(object):
         return Distance(length_of(self.position.au))
 
     def radec(self, epoch=None):
-        """Return this position as a tuple (RA, declination, distance).
+        """Compute ICRF coordinates (RA, declination, distance)
 
         >>> ra, dec, distance = ICRF([1.0, 1.0, 1.0]).radec()
         >>> ra
@@ -90,12 +90,12 @@ class ICRF(object):
                 Distance(r_au))
 
     def ecliptic_position(self):
-        """Return an x,y,z position relative to the ecliptic plane."""
+        """Compute ecliptic coordinates (x, y, z)"""
         vector = _ECLIPJ2000.dot(self.position.au)
         return Distance(vector)
 
     def ecliptic_latlon(self):
-        """Return ecliptic latitude, longitude, and distance."""
+        """Compute ecliptic coordinates (lat, lon, distance)"""
         vector = _ECLIPJ2000.dot(self.position.au)
         d, lat, lon = to_polar(vector)
         return (Angle(radians=lat, signed=True),
@@ -103,19 +103,20 @@ class ICRF(object):
                 Distance(au=d))
 
     def galactic_position(self):
-        """Return an x,y,z position relative to the galactic plane."""
+        """Compute galactic coordinates (x, y, z)"""
         vector = _GALACTIC.dot(self.position.au)
         return Distance(vector)
 
     def galactic_latlon(self):
-        """Return galactic latitude, longitude, and distance."""
+        """Compute galactic coordinates (lat, lon, distance)"""
         vector = _GALACTIC.dot(self.position.au)
         d, lat, lon = to_polar(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
                 Distance(au=d))
 
-    def to_spice_frame(self, name):
+    def _to_spice_frame(self, name):
+        """Return (ra, dec, """
         vector = self.position.au
         vector = inertial_frames[name].dot(vector)
         d, dec, ra = to_polar(vector)
@@ -155,7 +156,7 @@ ICRS = ICRF
 
 
 class Barycentric(ICRF):
-    """An *x,y,z* position measured from the Solar System barycenter.
+    """An (x, y, z) position measured from the Solar System barycenter.
 
     """
     def observe(self, body):
@@ -167,7 +168,7 @@ class Barycentric(ICRF):
 
 
 class Astrometric(ICRF):
-    """An astrometric position as an x,y,z vector in the ICRF.
+    """An astrometric (x, y, z) position relative to a particular observer.
 
     The *astrometric position* of a body is its position relative to an
     observer, adjusted for light-time delay: the position of the body
@@ -213,7 +214,7 @@ class Astrometric(ICRF):
 
 
 class Apparent(ICRF):
-    """An apparent position as an x,y,z vector in the GCRS.
+    """An apparent (x, y, z) position relative to a particular observer.
 
     The *apparent position* of a body is its position relative to an
     observer, adjusted not only for the light-time delay between the

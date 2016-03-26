@@ -14,7 +14,7 @@ and their *Astronomical Almanac*
 to within 0.001 arcseconds.
 
 * Written in pure Python and installs without any compilation.
-* Supports Python 2.6 through Python 3.5.
+* Supports Python 2.6–2.7 and Python 3.3–3.5.
 * Depends only upon NumPy,
   the fundamental package for scientific computing with Python,
   whose vector operations make Skyfield efficient.
@@ -68,8 +68,9 @@ on the Earth’s surface:
     101deg 33' 44.0"
 
 Skyfield does not depend on the `AstroPy`_ project
-or its compiled libraries,
-but can return results in AstroPy units:
+or its compiled libraries.
+But it understands how to use AstroPy time objects.
+And it can convert results into native AstroPy units:
 
 .. testcode::
 

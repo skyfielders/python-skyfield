@@ -42,6 +42,7 @@ table{border-collapse:collapse;border-spacing:0}
 
 /* End of normalize.css */
 /* Skyfield custom styles */
+/* Colors darkened and lightened with http://gka.github.io/chroma.js/ */
 
 @font-face {
     font-family: "Dosis";
@@ -110,14 +111,26 @@ code, pre, tt {
 code, tt {
     border-radius: 3px;
     border: 1px solid #e3dcca;
-    padding: 1px 2px 0;
+    padding: 1px 2px 2px;
+}
+a code:hover, a tt:hover {
+    border-color: #827c6b;
+}
+code.py-obj {
+    border: none;
+    border-radius: 0;
+    background: none;
+    font-family: "Gentium Custom", sans-serif, serif;
+}
+code.py-obj:hover {
+    box-shadow: inset 0 -3px 0 white, inset 0 -4px 0 #ccc;
 }
 dd {
     margin-bottom: 1em;
 }
 dl.class em {
     color: #bc2400;
-    font-family: 'Gentium Basic', monospace, serif;
+    font-family: monospace, serif;
     font-style: normal;
 }
 dl.class big {
@@ -126,18 +139,19 @@ dl.class big {
 pre {
     border: 1px dashed #93A1A1;
     padding: 0.5em 0.8em;
-    line-height: 1.2;
-    font-size: 0.875em;
-    font-family: monospace, serif;
+    line-height: 1.25;
+    font-size: 1.125rem;
 }
 .highlight-none pre {
     border: none;
 }
 a {
     text-decoration: none;
+}
+a > span {
     box-shadow: inset 0 -3px 0 white, inset 0 -4px 0 #ccc;
 }
-a:hover {
+a:hover > span {
     box-shadow: inset 0 -3px 0 white, inset 0 -4px 0 black;
 }
 pre tt {
@@ -146,6 +160,18 @@ pre tt {
 }
 table[border="1"] {
     margin: 1em auto;
+    border: none;
+}
+tr.row-odd {
+    /* background-color: #f8f8ff; */
+}
+td {
+    border: none;
+    border-bottom: 1px solid #eee;
+    padding: 0.2em 0.5em 0.2em 0;
+}
+tr:last-child td {
+    border: none;
 }
 .viewcode-link {
     float: right;
