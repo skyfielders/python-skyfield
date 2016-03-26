@@ -1,3 +1,6 @@
+@import url(https://fonts.googleapis.com/css?family=Gentium+Basic);
+@import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono);
+
 /*! normalize.css v2.1.3 | MIT License | git.io/normalize */
 /* Compressed with: yui-compressor --line-break 1 normalize.css */
 
@@ -53,6 +56,8 @@ body, body > img {
     margin-right: auto;
 }
 body {
+    line-height: 1.3;
+    font-family: 'Gentium Basic', sans-serif;
     max-width: 36em;
 }
 body:after {
@@ -79,6 +84,11 @@ h1, h2 {
 .headerlink {
     color: #f8f8ff;
     text-decoration: none;
+    box-shadow: none;
+}
+.headerlink:hover {
+    color: #f0f0ff;
+    box-shadow: none;
 }
 .motto {
     text-align: center;
@@ -95,7 +105,7 @@ dd {
 }
 dl.class em {
     color: #bc2400;
-    font-family: monospace;
+    font-family: 'Gentium Basic', monospace, serif;
     font-style: normal;
 }
 dl.class big {
@@ -104,16 +114,19 @@ dl.class big {
 pre {
     border: 1px dashed #93A1A1;
     padding: 0.5em 0.8em;
+    line-height: 1.2;
     font-size: 0.875em;
+    font-family: monospace, serif;
 }
 .highlight-none pre {
     border: none;
 }
-pre a {
+a {
     text-decoration: none;
+    box-shadow: inset 0 -3px 0 white, inset 0 -4px 0 #ccc;
 }
-pre a:hover {
-    text-decoration: underline;
+a:hover {
+    box-shadow: inset 0 -3px 0 white, inset 0 -4px 0 black;
 }
 pre tt {
     padding: 0;
