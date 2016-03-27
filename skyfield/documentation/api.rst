@@ -8,7 +8,8 @@
 Ephemerides
 ===========
 
-You generally
+Skyfield users will usually download and open a `SpiceKernel` file
+in a single step by calling `load()`.
 
 .. autosummary::
 
@@ -16,7 +17,9 @@ You generally
    SpiceKernel.decode
    SpiceKernel.__getitem__
    Body.at
+   Body.geometry_of
    Body.topos
+   Geometry.at
 
 .. currentmodule:: skyfield.positionlib
 
@@ -35,8 +38,8 @@ which each share its axes but have more specific meanings:
    Apparent
    Geocentric
 
-Position methods, general
-=========================
+Position methods
+================
 
 .. autosummary::
 
@@ -49,8 +52,8 @@ Position methods, general
    ICRF.galactic_latlon
    ICRF.from_altaz
 
-Position methods, specific
-==========================
+Position methods specific to one class
+======================================
 
 .. autosummary::
 
@@ -65,45 +68,63 @@ Position methods, specific
     from skyfield.api import load
     ts = load.timescale()
 
-.. autoclass:: skyfield.jpllib.SpiceKernel
+.. currentmodule:: skyfield.jpllib
 
-.. autoclass:: skyfield.jpllib.Body
+.. testsetup::
+
+   from skyfield import api
+   de421 = api.load('de421.bsp')
+   earth = de421['Earth']
+   moon = de421['Moon']
+
+.. autoclass:: SpiceKernel
+   :members:
+
+.. autoclass:: Body
+   :members:
+
+.. autoclass:: Geometry
+   :members:
 
 Generic ICRF position
 =====================
 
-.. autoclass:: skyfield.positionlib.ICRF
+.. currentmodule:: skyfield.positionlib
+
+.. autoclass:: ICRF
    :members:
 
 Position centered on the Solar System barycenter
 ================================================
 
-.. autoclass:: skyfield.positionlib.Barycentric
+.. autoclass:: Barycentric
    :members:
 
 Astrometric position centered on an observer
 ============================================
 
-.. autoclass:: skyfield.positionlib.Astrometric
+.. autoclass:: Astrometric
    :members:
 
 Apparent position centered on an observer
 =========================================
 
-.. autoclass:: skyfield.positionlib.Apparent
+.. autoclass:: Apparent
    :members:
 
-.. autoclass:: skyfield.positionlib.Geocentric
+.. autoclass:: Geocentric
    :members:
 
 Timescale, for building and converting times
 ============================================
 
-.. autoclass:: skyfield.api.Timescale
+.. currentmodule:: skyfield.timelib
+
+.. autoclass:: Timescale
    :members:
 
 The Time object
 ===============
 
-.. autoclass:: skyfield.api.Time
+.. autoclass:: Time
    :members:

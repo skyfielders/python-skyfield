@@ -15,7 +15,6 @@ from .timelib import calendar_date
 Segment = namedtuple('Segment', 'center target compute')
 _targets = dict((name, target) for (target, name) in _names.items())
 
-
 class SpiceKernel(object):
     """Ephemeris file from NASA's SPICE system
 
@@ -73,10 +72,7 @@ class SpiceKernel(object):
                 ends = format_date(*calendar_date(int(end)))
                 lines.append('  JD {0:.2f} - JD {1:.2f}  ({2} through {3})'
                              .format(start, end, starts, ends))
-            cname = _names.get(s.center, 'unknown')
-            tname = _names.get(s.target, 'unknown')
-            lines.append('    {0:3} -> {1:<3}  {2} -> {3}'
-                         .format(s.center, s.target, cname, tname))
+            lines.append(_segment_line(s))
         return '\n'.join(lines)
 
     def __getitem__(self, name):
@@ -85,13 +81,22 @@ class SpiceKernel(object):
         return Body(self, code)
 
     def decode(self, name):
-        """Given a SPICE target name, return its integer"""
+        """Look up a SPICE target in this kernel file
+
+        Given a target's name like ``'MARS'`` or a target's integer like
+        ``499``, confirm that the object is present in this kernel and
+        return its target integer.  Raises ``ValueError`` if you supply
+        an unknown name, or ``KeyError`` if the target is missing from
+        this kernel.  Remember that you can ``print()`` a kernel file to
+        see the targets inside.
+
+        """
         if isinstance(name, int):
             return name
         name = name.upper()
         code = _targets.get(name)
         if code is None:
-            raise KeyError('unknown SPICE target name {0!r}'.format(name))
+            raise ValueError('unknown SPICE target name {0!r}'.format(name))
         if code not in self.codes:
             names = ', '.join(_names[c] for c in self.codes)
             raise KeyError('kernel {0!r} is missing {1!r} -'
@@ -141,6 +146,40 @@ class Body(object):
         return barycentric
 
     def geometry_of(self, body):
+        """Return a `Geometry` path to another body
+
+        Searches this kernel for a path to another `body` and returns a
+        `Geometry` object linking the two.  Computing the instantaneous
+        geometry can be faster than a normal astrometric observation,
+        because instead of referencing both bodies back to the Solar
+        System barycenter, the geometry only needs the segments that
+        link them.
+
+        For example, the more expensive ``earth.at(t).observe(moon)``
+        operation will first compute an Earth position using two kernel
+        segments::
+
+            0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
+            3 -> 399  EARTH BARYCENTER -> EARTH
+
+        Then it will repeatedly compute the Moon's position as it
+        narrows down the light travel time, using two segments::
+
+            0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
+            3 -> 301  EARTH BARYCENTER -> MOON
+
+        But a geometry, because it can ignore the real physics required
+        for light from one body to reach another, can take a shortcut
+        and avoid the Solar System barycenter as well as the iteration
+        required to find the light travel time.
+
+        >>> g = earth.geometry_of(moon)
+        >>> print(g)
+        Geometry from center 399 to target 301 using:
+              3 -> 399  EARTH BARYCENTER -> EARTH
+              3 -> 301  EARTH BARYCENTER -> MOON
+
+        """
         if not isinstance(body, Body):
             code = self.ephemeris.decode(body)
             body = Body(self.ephemeris, code)
@@ -152,6 +191,11 @@ class Body(object):
 
     def topos(self, latitude=None, longitude=None, latitude_degrees=None,
               longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
+        """Return a `Topos` representing a place on Earth
+
+        See the `Topos` class for a description of the parameters.
+
+        """
         assert self.code == 399
         from .toposlib import Topos
         t = Topos(latitude, longitude, latitude_degrees,
@@ -256,17 +300,24 @@ class Geometry(object):
         self.target_chain = target_chain
 
     def __str__(self):
-        return 'Geometry\n{0}'.format('\n'.join(
-            ' {0}'.format(c)
-            for c in self.center_chain + self.target_chain))
+        segments = self.center_chain + self.target_chain
+        lines = '\n'.join(_segment_line(s) for s in segments)
+        return 'Geometry from center {0} to target {1} using:\n{2}'.format(
+            self.center, self.target, lines)
 
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
-        """Return the geometric Cartesian position and velocity."""
+        """Compute the instantaneous displacement between two bodies"""
         pos, vel = _tally(self.center_chain, self.target_chain, t)
         cls = Barycentric if self.center == 0 else ICRF
         return cls(pos, vel, t)
 
+
+def _segment_line(segment):
+    cname = _names.get(segment.center, 'unknown')
+    tname = _names.get(segment.target, 'unknown')
+    return '    {0:3} -> {1:<3}  {2} -> {3}'.format(
+        segment.center, segment.target, cname, tname)
 
 def _tally(minus_chain, plus_chain, t):
     position = velocity = 0.0
