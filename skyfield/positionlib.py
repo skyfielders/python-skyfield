@@ -50,25 +50,45 @@ class ICRF(object):
         return ICRF(p, v, self.t)
 
     def distance(self):
-        """Distance from the origin to the position.
+        """Distance from the origin to the position
 
-        >>> v = ICRF([1.0, 1.0, 0.0])
+        >>> v = ICRF([1, 1, 0])
         >>> print(v.distance())
         1.41421 au
 
         """
         return Distance(length_of(self.position.au))
 
-    def radec(self, epoch=None):
-        """Compute ICRF coordinates (RA, declination, distance)
+    def speed(self):
+        """Magnitude of the velocity vector
 
-        >>> ra, dec, distance = ICRF([1.0, 1.0, 1.0]).radec()
-        >>> ra
-        <Angle 03h 00m 00.00s>
-        >>> dec
-        <Angle +35deg 15' 51.8">
-        >>> distance
-        <Distance 1.73205 au>
+        >>> v = ICRF([0, 0, 0], [1, 2, 3])
+        >>> print(v.speed())
+        3.74166 au/day
+
+        """
+        return Velocity(length_of(self.velocity.au_per_d))
+
+    def radec(self, epoch=None):
+        r"""Compute equatorial (RA, declination, distance)
+
+        When called without a parameter, this returns standard ICRF
+        right ascension and declination:
+
+        >>> ra, dec, distance = ICRF([1, 2, 3]).radec()
+        >>> print(ra, dec, distance, sep='\n')
+        04h 13m 44.39s
+        +53deg 18' 02.8"
+        3.74166 au
+
+        If you instead want the coordinates referenced to the dynamical
+        system defined by the Earth's mean equator and equinox, provide
+        an epoch time.  To get J2000.0 coordinates, for example:
+
+        >>> ra, dec, distance = ICRF([1, 2, 3]).radec(ts.J2000)
+        >>> print(ra, dec, sep='\n')
+        04h 13m 43.32s
+        +53deg 17' 55.1"
 
         """
         position_au = self.position.au
@@ -76,7 +96,7 @@ class ICRF(object):
             if isinstance(epoch, Time):
                 pass
             elif isinstance(epoch, float):
-                epoch = Time(tt=epoch)
+                epoch = Time(None, tt=epoch)
             elif epoch == 'date':
                 epoch = self.t
             else:

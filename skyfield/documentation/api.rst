@@ -5,6 +5,13 @@
 
 .. currentmodule:: skyfield.positionlib
 
+Positions
+=========
+
+There is a single base class `ICRF` for positions,
+along with several more specific classes
+that inherit its methods:
+
 .. autosummary::
    :nosignatures:
 
@@ -12,27 +19,36 @@
    Barycentric
    Astrometric
    Apparent
+   Geocentric
+
+The base methods shared by all position objects are:
 
 .. autosummary::
 
    ICRF.distance
-   ICRF.radec
+   ICRF.speed
    ICRF.radec
    ICRF.ecliptic_position
    ICRF.ecliptic_latlon
    ICRF.galactic_position
    ICRF.galactic_latlon
+   ICRF.from_altaz
+
+.. autosummary::
+
+   
 
 .. testsetup::
 
     from skyfield.positionlib import *
+    from skyfield.api import load
+    ts = load.timescale()
 
 Generic ICRF position
 =====================
 
 .. autoclass:: skyfield.positionlib.ICRF
-
-   .. automethod:: skyfield.positionlib.ICRF.distance()
+   :members:
 
 Position centered on the Solar System barycenter
 ================================================

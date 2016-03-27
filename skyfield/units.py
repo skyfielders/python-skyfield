@@ -8,7 +8,7 @@ import sys
 from numpy import abs, array, copysign, isnan
 from .constants import AU_KM, AU_M, DAY_S, tau
 
-def _auto_convert(value):
+def _to_array(value):
     """As a convenience, turn Python lists and tuples into NumPy arrays."""
     if isinstance(value, (tuple, list)):
         return array(value)
@@ -32,12 +32,12 @@ class Distance(object):
 
     def __init__(self, au=None, km=None, m=None):
         if au is not None:
-            self.au = _auto_convert(au)
+            self.au = _to_array(au)
         elif km is not None:
-            self.km = _auto_convert(km)
+            self.km = _to_array(km)
             self.au = km / AU_KM
         elif m is not None:
-            self.m = _auto_convert(m)
+            self.m = _to_array(m)
             self.au = m / AU_M
         else:
             raise ValueError('to construct a Distance provide au, km, or m')
@@ -85,7 +85,7 @@ class Velocity(object):
     _warned = False
 
     def __init__(self, au_per_d):
-        self.au_per_d = au_per_d
+        self.au_per_d = _to_array(au_per_d)
 
     def __getattr__(self, name):
         if name == 'km_per_s':
@@ -102,7 +102,12 @@ class Velocity(object):
         raise AttributeError('no attribute named %r' % (name,))
 
     def __str__(self):
-        return '%s au/day' % self.au_per_d
+        n = self.au_per_d
+        fmt = '{0} au/day' if getattr(n, 'shape', 0) else '{0:.6} au/day'
+        return fmt.format(n)
+
+    def __repr__(self):
+        return '<{0} {1}>'.format(type(self).__name__, self)
 
     def __iter__(self):
         raise UnpackingError(_iter_message % {

@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta, tzinfo
 from numpy import (array, concatenate, einsum, float_, interp, isnan, nan,
                    rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime
-from .constants import T0, DAY_S
+from .constants import B1950, DAY_S, T0
 from .earthlib import sidereal_time
 from .framelib import ICRS_to_J2000 as B
 from .functions import load_bundled_npy
@@ -70,6 +70,8 @@ class Timescale(object):
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
         self.delta_t_table = build_delta_t_table(delta_t_recent)
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
+        self.J2000 = Time(self, float_(T0))
+        self.B1950 = Time(self, float_(B1950))
 
     def now(self):
         """Return the current date and time as a `Time` object.

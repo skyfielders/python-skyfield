@@ -34,7 +34,7 @@ def test_ecliptic_frame(ts):
 def test_fk4_frame(ts):
     e = api.load('de421.bsp')
     astrometric = e['earth'].at(ts.utc(1980, 1, 1, 0, 0)).observe(e['moon'])
-    ra, dec, d = astrometric.to_spice_frame('B1950')
+    ra, dec, d = astrometric._to_spice_frame('B1950')
     print(ra._degrees, dec.degrees)
     compare(ra._degrees, 82.36186, 0.00006) # TODO: why is this not 0.00001?
     compare(dec.degrees, 18.53432, 0.00006)
