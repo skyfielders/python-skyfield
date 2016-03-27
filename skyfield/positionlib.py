@@ -180,7 +180,7 @@ class Barycentric(ICRF):
 
     """
     def observe(self, body):
-        """Return the astrometric position of `body` viewed from this position.
+        """Return the astrometric position of `body` when viewed from here
 
         """
         astrometric = body._observe_from_bcrs(self)
@@ -198,7 +198,7 @@ class Astrometric(ICRF):
 
     """
     def apparent(self):
-        """Return the apparent position where this will appear in the sky.
+        """Return the apparent position where this will appear in the sky
 
         This method determines how relativity affects an image, and
         returns the :class:`~skyfield.positionlib.Apparent` position
@@ -254,7 +254,7 @@ class Apparent(ICRF):
 
     """
     def altaz(self, temperature_C=None, pressure_mbar='standard'):
-        """Return the position as a tuple ``(alt, az, distance)``.
+        """Compute (alt, az, distance) relative to the observer's horizon
 
         `alt` - Altitude in degrees above the horizon.
         `az` - Azimuth angle east around the horizon from due-north.
@@ -288,7 +288,7 @@ class Apparent(ICRF):
 
 
 class Geocentric(ICRF):
-    """A position referred to the GCRS as measured from the geocenter."""
+    """An (x,y,z) position measured from the geocenter."""
 
     def observe(self, other):
         gcrs_method = getattr(other, 'gcrs')

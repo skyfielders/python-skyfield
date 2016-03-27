@@ -17,6 +17,41 @@ _targets = dict((name, target) for (target, name) in _names.items())
 
 
 class SpiceKernel(object):
+    """Ephemeris file from NASA's SPICE system
+
+    You can download a .bsp file yourself and use this class to open it,
+    or use the Skyfield `load()` function to find a popular ephemeris.
+    Once loaded, you can print a SPICE kernel to the screen to see the
+    Solar System bodies for which it can generate positions:
+
+    >>> planets = load('de421.bsp')
+    >>> print(planets)
+    SPICE kernel file 'de421.bsp' has 15 segments
+      JD 2414864.50 - JD 2471184.50  (1899-07-28 through 2053-10-08)
+          0 -> 1    SOLAR SYSTEM BARYCENTER -> MERCURY BARYCENTER
+          0 -> 2    SOLAR SYSTEM BARYCENTER -> VENUS BARYCENTER
+          0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
+          0 -> 4    SOLAR SYSTEM BARYCENTER -> MARS BARYCENTER
+          0 -> 5    SOLAR SYSTEM BARYCENTER -> JUPITER BARYCENTER
+          0 -> 6    SOLAR SYSTEM BARYCENTER -> SATURN BARYCENTER
+          0 -> 7    SOLAR SYSTEM BARYCENTER -> URANUS BARYCENTER
+          0 -> 8    SOLAR SYSTEM BARYCENTER -> NEPTUNE BARYCENTER
+          0 -> 9    SOLAR SYSTEM BARYCENTER -> PLUTO BARYCENTER
+          0 -> 10   SOLAR SYSTEM BARYCENTER -> SUN
+          3 -> 301  EARTH BARYCENTER -> MOON
+          3 -> 399  EARTH BARYCENTER -> EARTH
+          1 -> 199  MERCURY BARYCENTER -> MERCURY
+          2 -> 299  VENUS BARYCENTER -> VENUS
+          4 -> 499  MARS BARYCENTER -> MARS
+
+    You can look up objects by name or by their integer code:
+
+    >>> planets['earth']
+    <Body EARTH from kernel 'de421.bsp'>
+    >>> planets[499]
+    <Body MARS from kernel 'de421.bsp'>
+
+    """
     def __init__(self, filename):
         self.filename = filename
         self.spk = SPK.open(filename)
@@ -45,10 +80,12 @@ class SpiceKernel(object):
         return '\n'.join(lines)
 
     def __getitem__(self, name):
+        """Return a `Body` for a SPICE target name or integer"""
         code = self.decode(name)
         return Body(self, code)
 
     def decode(self, name):
+        """Given a SPICE target name, return its integer"""
         if isinstance(name, int):
             return name
         name = name.upper()
@@ -88,9 +125,13 @@ class Body(object):
         self.segments = ephemeris.segments
         self.code = code
 
+    def __repr__(self):
+        return '<Body {0} from kernel {1!r}>'.format(
+            _names.get(self.code, self.code), self.ephemeris.filename)
+
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
-        """Compute the Solar System position of this body at a given time."""
+        """Compute the `Barycentric` position at time `t`"""
         segments = self.segments
         segment_dict = dict((segment.target, segment) for segment in segments)
         chain = list(_center(self.code, segment_dict))[::-1]

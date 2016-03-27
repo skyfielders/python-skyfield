@@ -88,12 +88,15 @@ h1, h2 {
     text-indent:-9999px;  /* so screen reader will still read the title */
 }
 .headerlink {
-    color: #f8f8ff;
+    color: white;
+}
+:hover > .headerlink {
+    color: #eee;
     text-decoration: none;
     box-shadow: none;
 }
-.headerlink:hover {
-    color: #f0f0ff;
+:hover .headerlink:hover {
+    color: #ddd;
     box-shadow: none;
 }
 .motto {

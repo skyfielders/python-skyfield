@@ -3,14 +3,28 @@
  API Reference (work in progress)
 ==================================
 
+.. currentmodule:: skyfield.jpllib
+
+Ephemerides
+===========
+
+You generally
+
+.. autosummary::
+
+   SpiceKernel
+   SpiceKernel.decode
+   SpiceKernel.__getitem__
+   Body.at
+   Body.topos
+
 .. currentmodule:: skyfield.positionlib
 
 Positions
 =========
 
-There is a single base class `ICRF` for positions,
-along with several more specific classes
-that inherit its methods:
+The `ICRF` class serves as the base for all other positions classes,
+which each share its axes but have more specific meanings:
 
 .. autosummary::
    :nosignatures:
@@ -21,7 +35,8 @@ that inherit its methods:
    Apparent
    Geocentric
 
-The base methods shared by all position objects are:
+Position methods, general
+=========================
 
 .. autosummary::
 
@@ -34,15 +49,25 @@ The base methods shared by all position objects are:
    ICRF.galactic_latlon
    ICRF.from_altaz
 
+Position methods, specific
+==========================
+
 .. autosummary::
 
-   
+   Barycentric.observe
+   Astrometric.apparent
+   Apparent.altaz
+   Geocentric.observe
 
 .. testsetup::
 
     from skyfield.positionlib import *
     from skyfield.api import load
     ts = load.timescale()
+
+.. autoclass:: skyfield.jpllib.SpiceKernel
+
+.. autoclass:: skyfield.jpllib.Body
 
 Generic ICRF position
 =====================
