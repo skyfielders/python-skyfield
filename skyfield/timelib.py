@@ -62,7 +62,7 @@ class Timescale(object):
     Loading a timescale downloads tables from the United States Naval
     Observatory and the International Earth Rotation Service.  These
     files go out of date, and Skyfield will fetch updated copies once
-    your copy of the files are old enough.
+    your copy of the files are too old.
 
     """
     utcnow = datetime.utcnow

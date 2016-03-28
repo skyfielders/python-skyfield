@@ -14,6 +14,7 @@ in a single step by calling `load()`.
 .. autosummary::
 
    SpiceKernel
+   SpiceKernel.names
    SpiceKernel.decode
    SpiceKernel.__getitem__
    Body.at
@@ -64,6 +65,7 @@ Position methods specific to one class
 
 .. testsetup::
 
+    from pprint import pprint
     from skyfield.positionlib import *
     from skyfield.api import load
     ts = load.timescale()
@@ -83,8 +85,9 @@ Position methods specific to one class
 .. autoclass:: Body
    :members:
 
-.. autoclass:: Geometry
-   :members:
+.. autoclass:: Geometry()
+
+   .. automethod:: at
 
 Generic ICRF position
 =====================

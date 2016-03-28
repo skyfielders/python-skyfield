@@ -1,10 +1,11 @@
 """An interface between JPL ephemerides and Skyfield."""
 
-from collections import namedtuple
+import os
+from collections import defaultdict, namedtuple
 from numpy import max, min
 
 from jplephem.spk import SPK
-from jplephem.names import target_names as _names
+from jplephem.names import target_name_pairs, target_names as _names
 
 from .constants import AU_KM, C_AUDAY, DAY_S
 from .errors import DeprecationError, raise_error_for_deprecated_time_arguments
@@ -13,15 +14,15 @@ from .positionlib import Astrometric, Barycentric, ICRF
 from .timelib import calendar_date
 
 Segment = namedtuple('Segment', 'center target compute')
-_targets = dict((name, target) for (target, name) in _names.items())
+_targets = dict((name, target) for (target, name) in target_name_pairs)
 
 class SpiceKernel(object):
-    """Ephemeris file from NASA's SPICE system
+    """Ephemeris file for NASA's SPICE system.
 
     You can download a .bsp file yourself and use this class to open it,
-    or use the Skyfield `load()` function to find a popular ephemeris.
-    Once loaded, you can print a SPICE kernel to the screen to see the
-    Solar System bodies for which it can generate positions:
+    or use the Skyfield `load()` function to automatically download a
+    popular ephemeris.  Once loaded, you can print this object to the
+    screen to see a report on the segments that it includes:
 
     >>> planets = load('de421.bsp')
     >>> print(planets)
@@ -43,17 +44,20 @@ class SpiceKernel(object):
           2 -> 299  VENUS BARYCENTER -> VENUS
           4 -> 499  MARS BARYCENTER -> MARS
 
-    You can look up objects by name or by their integer code:
+    To create a `Body` object for any target you are interested in,
+    simply use square bracket item lookup and supply the target's name
+    or integer code:
 
     >>> planets['earth']
-    <Body EARTH from kernel 'de421.bsp'>
+    <Body 399 'EARTH' from kernel 'de421.bsp'>
     >>> planets[499]
-    <Body MARS from kernel 'de421.bsp'>
+    <Body 499 'MARS' from kernel 'de421.bsp'>
 
     """
-    def __init__(self, filename):
-        self.filename = filename
-        self.spk = SPK.open(filename)
+    def __init__(self, path):
+        self.path = path
+        self.filename = os.path.basename(path)
+        self.spk = SPK.open(path)
         self.segments = [Segment(s.center, s.target, _build_compute(s))
                          for s in self.spk.segments]
         self.codes = set(s.center for s in self.segments).union(
@@ -76,32 +80,56 @@ class SpiceKernel(object):
         return '\n'.join(lines)
 
     def __getitem__(self, name):
-        """Return a `Body` for a SPICE target name or integer"""
+        """Return a `Body` given a target name or integer."""
         code = self.decode(name)
         return Body(self, code)
 
-    def decode(self, name):
-        """Look up a SPICE target in this kernel file
+    def names(self):
+        """Return all target names that are valid with this kernel.
 
-        Given a target's name like ``'MARS'`` or a target's integer like
-        ``499``, confirm that the object is present in this kernel and
-        return its target integer.  Raises ``ValueError`` if you supply
-        an unknown name, or ``KeyError`` if the target is missing from
-        this kernel.  Remember that you can ``print()`` a kernel file to
-        see the targets inside.
+        >>> pprint(planets.names())
+        {0: ['SOLAR_SYSTEM_BARYCENTER', 'SSB', 'SOLAR SYSTEM BARYCENTER'],
+         1: ['MERCURY_BARYCENTER', 'MERCURY BARYCENTER'],
+         2: ['VENUS_BARYCENTER', 'VENUS BARYCENTER'],
+         3: ['EARTH_BARYCENTER',
+             'EMB',
+         ...
+
+        The result is a dictionary with target codes as keys and lists
+        of names as values.
+
+        """
+        d = defaultdict(list)
+        for code, name in target_name_pairs:
+            if code in self.codes:
+                d[code].append(name)
+        return dict(d)
+
+    def decode(self, name):
+        """Translate a target name into its integer code.
+
+        >>> planets.decode('Venus')
+        299
+
+        Raises ``ValueError`` if you supply an unknown name, or
+        ``KeyError`` if the target is missing from this kernel.  You can
+        supply an integer code if you already have one and just want to
+        check whether it is present in this kernel.  Remember that you
+        can ``print()`` a kernel file to see the targets inside.
 
         """
         if isinstance(name, int):
-            return name
-        name = name.upper()
-        code = _targets.get(name)
-        if code is None:
-            raise ValueError('unknown SPICE target name {0!r}'.format(name))
+            code = name
+        else:
+            name = name.upper()
+            code = _targets.get(name)
+            if code is None:
+                raise ValueError('unknown SPICE target {0!r}'.format(name))
         if code not in self.codes:
-            names = ', '.join(_names[c] for c in self.codes)
+            targets = ', '.join(_code_and_name(c) for c in self.codes)
             raise KeyError('kernel {0!r} is missing {1!r} -'
                            ' the targets it supports are: {2}'
-                           .format(self.filename, name, names))
+                           .format(self.filename, name, targets))
         return code
 
 
@@ -125,18 +153,36 @@ def _build_compute(segment):
 
 
 class Body(object):
+    """A target body from a SPICE .bsp kernel file.
+
+    Skyfield programmers usually ask a kernel object to look up and
+    return a body object for them, instead of trying to instantiate this
+    class directly:
+
+    >>> planets = load('de421.bsp')
+    >>> planets['ssb']
+    <Body 0 'SOLAR SYSTEM BARYCENTER' from kernel 'de421.bsp'>
+    >>> planets[299]
+    <Body 299 'VENUS' from kernel 'de421.bsp'>
+
+    """
     def __init__(self, ephemeris, code):
         self.ephemeris = ephemeris
         self.segments = ephemeris.segments
         self.code = code
 
     def __repr__(self):
-        return '<Body {0} from kernel {1!r}>'.format(
-            _names.get(self.code, self.code), self.ephemeris.filename)
+        return '<Body {0} from kernel {1!r}>'.format(_code_and_name(self.code),
+                                                     self.ephemeris.filename)
 
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
-        """Compute the `Barycentric` position at time `t`"""
+        """Compute a `Barycentric` position for time `t`.
+
+        The time `t` should be a `Time` object.  The returned position
+        will also offer a velocity, if the kernel supports it.
+
+        """
         segments = self.segments
         segment_dict = dict((segment.target, segment) for segment in segments)
         chain = list(_center(self.code, segment_dict))[::-1]
@@ -146,32 +192,12 @@ class Body(object):
         return barycentric
 
     def geometry_of(self, body):
-        """Return a `Geometry` path to another body
+        """Return a `Geometry` path to another body.
 
-        Searches this kernel for a path to another `body` and returns a
-        `Geometry` object linking the two.  Computing the instantaneous
-        geometry can be faster than a normal astrometric observation,
-        because instead of referencing both bodies back to the Solar
-        System barycenter, the geometry only needs the segments that
-        link them.
-
-        For example, the more expensive ``earth.at(t).observe(moon)``
-        operation will first compute an Earth position using two kernel
-        segments::
-
-            0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
-            3 -> 399  EARTH BARYCENTER -> EARTH
-
-        Then it will repeatedly compute the Moon's position as it
-        narrows down the light travel time, using two segments::
-
-            0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
-            3 -> 301  EARTH BARYCENTER -> MOON
-
-        But a geometry, because it can ignore the real physics required
-        for light from one body to reach another, can take a shortcut
-        and avoid the Solar System barycenter as well as the iteration
-        required to find the light travel time.
+        Given either a `Body` object, or else the name or integer code
+        identifying a body in the same ephemeris as this one, compute
+        the minimum number of segments necessary to determine their
+        relative position and return a `Geometry` object.
 
         >>> g = earth.geometry_of(moon)
         >>> print(g)
@@ -191,7 +217,7 @@ class Body(object):
 
     def topos(self, latitude=None, longitude=None, latitude_degrees=None,
               longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
-        """Return a `Topos` representing a place on Earth
+        """Return a `Topos` representing a place on Earth.
 
         See the `Topos` class for a description of the parameters.
 
@@ -293,6 +319,42 @@ def _center(code, segment_dict):
 
 
 class Geometry(object):
+    """The kernel segments for predicting two bodies' relative position.
+
+    Computing an instantaneous geometry can be faster than computing a
+    normal astrometric observation because, instead of referencing both
+    bodies back to the Solar System barycenter, the geometry only needs
+    the segments that link them.
+
+    For example, the more expensive ``earth.at(t).observe(moon)``
+    operation will first compute an Earth position using two kernel
+    segments::
+
+        0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
+        3 -> 399  EARTH BARYCENTER -> EARTH
+
+    Then it will repeatedly compute the Moon's position as it
+    narrows down the light travel time, using two segments::
+
+        0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
+        3 -> 301  EARTH BARYCENTER -> MOON
+
+    But a geometry, because it can ignore the real physics required for
+    light from one body to reach another, can take a shortcut and avoid
+    the Solar System barycenter.  It can also skip the iteration
+    required to find the light travel time.
+
+    >>> g = earth.geometry_of(moon)
+    >>> print(g)
+    Geometry from center 399 to target 301 using:
+          3 -> 399  EARTH BARYCENTER -> EARTH
+          3 -> 301  EARTH BARYCENTER -> MOON
+
+    Instantaneous geometry positions can be appropriate when plotting a
+    diagram of the solar system or of a particular planetary system from
+    the point of view of a distant observer.
+
+    """
     def __init__(self, center, target, center_chain, target_chain):
         self.center = center
         self.target = target
@@ -307,11 +369,25 @@ class Geometry(object):
 
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
-        """Compute the instantaneous displacement between two bodies"""
+        """Compute instantaneous position and velocity between two bodies.
+
+        The argument ``t`` should be a `Time`, and the return value will
+        be the relative position of the the target body relative to the
+        center body.  If the center is 0 "Solar System Barycenter" then
+        the result will be `Barycentric`.  Otherwise, it will be a plain
+        `ICRF` position.
+
+        """
         pos, vel = _tally(self.center_chain, self.target_chain, t)
         cls = Barycentric if self.center == 0 else ICRF
         return cls(pos, vel, t)
 
+
+def _code_and_name(code):
+    name = _names.get(code, None)
+    if name is None:
+        return str(code)
+    return '{0} {1!r}'.format(code, name)
 
 def _segment_line(segment):
     cname = _names.get(segment.center, 'unknown')
@@ -330,3 +406,7 @@ def _tally(minus_chain, plus_chain, t):
         position += p
         velocity += v
     return position, velocity
+
+
+setattr(SpiceKernel, '[]', SpiceKernel.__getitem__)
+setattr(__import__('skyfield.jpllib'), 'SpiceKernel[]', SpiceKernel.__getitem__)
