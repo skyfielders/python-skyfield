@@ -89,8 +89,9 @@ class Timescale(object):
 
         You can either specify the date as separate components, or
         provide a time zone aware Python datetime.  The following two
-        calls are equivalent (the ``utc`` zone can be imported from the
-        ``skyfield.api`` module, or from ``pytz`` if you have it)::
+        calls are equivalent (the ``utc`` time zone object can be
+        imported from the ``skyfield.api`` module, or from ``pytz`` if
+        you have it)::
 
             ts.utc(2014, 1, 18, 1, 35, 37.5)
             ts.utc(datetime(2014, 1, 18, 1, 35, 37, 500000, tzinfo=utc))
@@ -191,11 +192,15 @@ class Time(object):
     """A single moment in history, or an array of several moments.
 
     You will typically not instantiate this class yourself, but will
-    rely on a ``Timescale`` object to build dates for you::
+    rely on a Skyfield ``Timescale`` object to build dates for you:
 
-        from skyfield.api import load
-        ts = load.timescale()
-        print(ts.utc(1980, 1, 1))
+    >>> ts = load.timescale()
+    >>> print(ts.utc(1980, 1, 1))
+    <Time tt=2444239.500592>
+
+    Times are represented internally by floating point Julian dates, but
+    can be converted to other formats by using the many methods that
+    time objects make available.
 
     """
     def __init__(self, ts, tt):
@@ -221,7 +226,7 @@ class Time(object):
         return t
 
     def astimezone(self, tz):
-        """Return as a Python ``datetime`` in a ``pytz`` provided timezone.
+        """Convert to a Python ``datetime`` in a ``pytz`` provided timezone.
 
         Convert this time to a ``datetime`` in the timezone `tz`, which
         should be one of the timezones provided by the third-party
@@ -233,7 +238,7 @@ class Time(object):
         return dt
 
     def astimezone_and_leap_second(self, tz):
-        """Return as a ``datetime`` plus leap second in a ``pytz`` timezone.
+        """Convert to a Python ``datetime`` and leap second in a timezone.
 
         Convert this time to a Python ``datetime`` and a leap second::
 
@@ -269,7 +274,7 @@ class Time(object):
         return dt, leap_second
 
     def toordinal(self):
-        """Return the proleptic Gregorian ordinal of the TAI date.
+        """Return the proleptic Gregorian ordinal of the UTC date.
 
         This method makes Skyfield `Time` objects compatible with
         Python `datetime` objects, which also provide a ``toordinal()``
@@ -280,7 +285,7 @@ class Time(object):
         return self._utc_float() - 1721424.5
 
     def utc_datetime(self):
-        """Return a Python ``datetime`` for this time, expressed as UTC.
+        """Convert to a Python `datetime` in UTC.
 
         If the third-party ``pytz`` package is available, then its
         ``utc`` timezone will be used as the timezone of the return
@@ -293,7 +298,7 @@ class Time(object):
         return dt
 
     def utc_datetime_and_leap_second(self):
-        """Return a ``datetime`` in UTC, plus a leap second value.
+        """Convert to a Python `datetime` in UTC, plus a leap second value.
 
         Convert this time to a ``datetime`` and a leap second::
 
@@ -332,7 +337,7 @@ class Time(object):
         return dt, leap_second
 
     def utc_iso(self, places=0):
-        """Return an ISO 8601 string like ``2014-01-18T01:35:38Z`` in UTC.
+        """Convert to an ISO 8601 string like ``2014-01-18T01:35:38Z`` in UTC.
 
         If this time is an array of dates, then a sequence of strings is
         returned instead of a single string.
@@ -356,7 +361,7 @@ class Time(object):
             return format % args
 
     def utc_jpl(self):
-        """Convert to a string like ``A.D. 2014-Jan-18 01:35:37.5000 UT``.
+        """Convert to an ``A.D. 2014-Jan-18 01:35:37.5000 UT`` string.
 
         Returns a string for this date and time in UTC, in the format
         used by the JPL HORIZONS system.  If this time is an array of
@@ -380,7 +385,7 @@ class Time(object):
             return format % args
 
     def utc_strftime(self, format):
-        """Format this UTC time according to a Python date-formatting string.
+        """Format the UTC time using a Python date formatting string.
 
         This internally calls the Python ``strftime()`` routine from the
         Standard Library ``time()`` module, for which you can find a
@@ -435,11 +440,11 @@ class Time(object):
         i = searchsorted(leap_reverse_dates, tai, 'right')
         return tai - leap_offsets[i] / DAY_S
 
-    def tai_tuple(self):
+    def tai_calendar(self):
         """Return TAI as a tuple (year, month, day, hour, minute, second)."""
         return calendar_tuple(self.tai)
 
-    def tt_tuple(self):
+    def tt_calendar(self):
         """Return TT as a tuple (year, month, day, hour, minute, second)."""
         return calendar_tuple(self.tt)
 
