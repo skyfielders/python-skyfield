@@ -17,11 +17,15 @@ Segment = namedtuple('Segment', 'center target compute')
 _targets = dict((name, target) for (target, name) in target_name_pairs)
 
 class SpiceKernel(object):
-    """Ephemeris file for NASA's SPICE system.
+    """Ephemeris file in NASA .bsp format.
+
+    A "Spacecraft and Planet Kernel" (SPK) file from NASA provides
+    (x,y,z) coordinates for bodies in the Solar System like the Sun,
+    planets, moons, and spacecraft.
 
     You can download a .bsp file yourself and use this class to open it,
-    or use the Skyfield `load()` function to automatically download a
-    popular ephemeris.  Once loaded, you can print this object to the
+    or use the Skyfield `api.load()` function to automatically download
+    a popular ephemeris.  Once loaded, you can print this object to the
     screen to see a report on the segments that it includes:
 
     >>> planets = load('de421.bsp')
@@ -44,9 +48,8 @@ class SpiceKernel(object):
           2 -> 299  VENUS BARYCENTER -> VENUS
           4 -> 499  MARS BARYCENTER -> MARS
 
-    To create a `Body` object for any target you are interested in,
-    simply use square bracket item lookup and supply the target's name
-    or integer code:
+    To create a `Body` object for a target you are interested in, use
+    square brackets and supply the target's name or integer code:
 
     >>> planets['earth']
     <Body 399 'EARTH' from kernel 'de421.bsp'>
@@ -84,6 +87,24 @@ class SpiceKernel(object):
         code = self.decode(name)
         return Body(self, code)
 
+    def comments(self):
+        """Return the comments string of this kernel.
+
+        The resulting string often contains embedded newlines, and is
+        formatted for a human reader.
+
+        >>> print(planets.comments())
+        ; de421.bsp LOG FILE
+        ;
+        ; Created 2008-02-12/11:33:34.00.
+        ...
+        LEAPSECONDS_FILE    = naif0007.tls
+        SPK_FILE            = de421.bsp
+        ...
+
+        """
+        return self.spk.comments()
+
     def names(self):
         """Return all target names that are valid with this kernel.
 
@@ -95,8 +116,9 @@ class SpiceKernel(object):
              'EMB',
          ...
 
-        The result is a dictionary with target codes as keys and lists
-        of names as values.
+        The result is a dictionary with target code keys and name lists
+        as values.  The last name in each list is the one that Skyfield
+        uses when printing information about a body.
 
         """
         d = defaultdict(list)
@@ -114,8 +136,7 @@ class SpiceKernel(object):
         Raises ``ValueError`` if you supply an unknown name, or
         ``KeyError`` if the target is missing from this kernel.  You can
         supply an integer code if you already have one and just want to
-        check whether it is present in this kernel.  Remember that you
-        can ``print()`` a kernel file to see the targets inside.
+        check whether it is present in this kernel.
 
         """
         if isinstance(name, int):

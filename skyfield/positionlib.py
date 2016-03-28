@@ -33,12 +33,10 @@ class ICRF(object):
             self.velocity = Velocity(velocity_au_per_d)
 
     def __repr__(self):
-        return '<%s position x,y,z au%s%s>' % (
+        return '<%s position%s%s>' % (
             self.__class__.__name__,
-            '' if (self.velocity is None) else
-            ' and velocity xdot,ydot,zdot au/day',
-            '' if self.t is None else ' at date t',
-            )
+            '' if (self.velocity is None) else ' and velocity',
+            '' if self.t is None else ' at date t')
 
     def __sub__(self, body):
         """Subtract two ICRF vectors to produce a third."""
@@ -50,7 +48,7 @@ class ICRF(object):
         return ICRF(p, v, self.t)
 
     def distance(self):
-        """Distance from the origin to the position
+        """Compute the distance from the origin to this position.
 
         >>> v = ICRF([1, 1, 0])
         >>> print(v.distance())
@@ -60,7 +58,7 @@ class ICRF(object):
         return Distance(length_of(self.position.au))
 
     def speed(self):
-        """Magnitude of the velocity vector
+        """Compute the magnitude of the velocity vector.
 
         >>> v = ICRF([0, 0, 0], [1, 2, 3])
         >>> print(v.speed())
@@ -178,9 +176,32 @@ ICRS = ICRF
 class Barycentric(ICRF):
     """An (x, y, z) position measured from the Solar System barycenter.
 
+    Each barycentric position is an ICRS position vector, meaning that
+    the coordinate axes are defined by the high-precision ICRF that has
+    replaced the old J2000.0 reference frame, and the coordinate origin
+    is the BCRS gravitational center of the Solar System.
+
+    Skyfield generates a `Barycentric` position whenever you ask a Solar
+    System body for its location at a particular time:
+
+    >>> t = ts.utc(2003, 8, 29)
+    >>> mars.at(t)
+    <Barycentric position and velocity at date t>
+
     """
     def observe(self, body):
-        """Return the astrometric position of `body` when viewed from here
+        """Compute the `Astrometric` position of a body from this location.
+
+        To compute the body's astrometric position, it is first asked
+        for its position at the time `t` of this position itself.  The
+        distance to the body is then divided by the speed of light to
+        find how long it takes its light to arrive.  Finally, the light
+        travel time is subtracted from `t` and the body is asked for a
+        series of increasingly exact positions to learn where it was
+        when it emitted the light that is now reaching this position.
+
+        >>> earth.at(t).observe(mars)
+        <Astrometric position and velocity at date t>
 
         """
         astrometric = body._observe_from_bcrs(self)
@@ -193,19 +214,24 @@ class Astrometric(ICRF):
     The *astrometric position* of a body is its position relative to an
     observer, adjusted for light-time delay: the position of the body
     back when it emitted (or reflected) the light that is now reaching
-    the observer's eyes or telescope.  This is always a difference
-    between two BCRS vectors.
+    the observer's eyes or telescope.
+
+    Astrometric positions are usually generated in Skyfield by calling
+    the `Barycentric` method `observe()` to determine where a body will
+    appear in the sky relative to a specific observer.
 
     """
     def apparent(self):
-        """Return the apparent position where this will appear in the sky
+        """Compute an :class:`Apparent` position for this body.
 
-        This method determines how relativity affects an image, and
-        returns the :class:`~skyfield.positionlib.Apparent` position
-        where the body will actually appear in the sky.  The effects
-        modeled are the deflection that the image will experience if its
+        This applies two effects to the position that arise from
+        relativity and shift slightly where the other body will appear
+        in the sky: the deflection that the image will experience if its
         light passes close to large masses in the Solar System, and the
-        aberration caused by the observer's own velocity.
+        aberration of light caused by the observer's own velocity.
+
+        >>> earth.at(t).observe(mars).apparent()
+        <Apparent position at date t>
 
         These transforms convert the position from the BCRS reference
         frame of the Solar System barycenter and to the reference frame
@@ -237,28 +263,23 @@ class Apparent(ICRF):
     """An apparent (x, y, z) position relative to a particular observer.
 
     The *apparent position* of a body is its position relative to an
-    observer, adjusted not only for the light-time delay between the
-    body and an observer (which was already accounted for in the
-    object's astrometric position), but also adjusted for deflection
-    (light rays bending as they pass large masses like the Sun or
-    Jupiter) and aberration (light slanting because of the observer's
-    motion through space).
+    observer adjusted for light-time delay, deflection (light rays
+    bending as they pass large masses like the Sun or Jupiter), and
+    aberration (light slanting because of the observer's motion through
+    space).
 
     Included in aberration is the relativistic transformation that takes
     the position out of the BCRS centered on the solar system barycenter
-    and into the GCRS centered on the Earth.
-
-    If the observer was a planet or satellite with its own orbit around
-    the Sun, then this apparent position is not really a GCRS position,
-    but belongs to a GCRS-like system centered on that observer instead.
+    and into the reference frame of the observer.  In the case of an
+    Earth observer, the transform takes the coordinate into the GCRS.
 
     """
     def altaz(self, temperature_C=None, pressure_mbar='standard'):
         """Compute (alt, az, distance) relative to the observer's horizon
 
-        `alt` - Altitude in degrees above the horizon.
-        `az` - Azimuth angle east around the horizon from due-north.
-        `distance` - Distance to the object.
+        The altitude returned is an `Angle` in degrees above the
+        horizon, while the azimuth is the compass direction in degrees
+        with north being 0 degrees and east being 90 degrees.
 
         """
         try:

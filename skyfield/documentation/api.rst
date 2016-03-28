@@ -14,6 +14,7 @@ in a single step by calling `load()`.
 .. autosummary::
 
    SpiceKernel
+   SpiceKernel.comments
    SpiceKernel.names
    SpiceKernel.decode
    SpiceKernel.__getitem__
@@ -39,11 +40,14 @@ which each share its axes but have more specific meanings:
    Apparent
    Geocentric
 
-Position methods
-================
+Position methods and attributes
+===============================
 
 .. autosummary::
 
+   ICRF.t
+   ICRF.position
+   ICRF.velocity
    ICRF.distance
    ICRF.speed
    ICRF.radec
@@ -78,6 +82,7 @@ Position methods specific to one class
    de421 = api.load('de421.bsp')
    earth = de421['Earth']
    moon = de421['Moon']
+   mars = de421['Mars']
 
 .. autoclass:: SpiceKernel
    :members:
@@ -97,23 +102,41 @@ Generic ICRF position
 .. autoclass:: ICRF
    :members:
 
-Position centered on the Solar System barycenter
-================================================
+   .. attribute:: t
+
+      The `Time` coordinate of this position.
+
+   .. attribute:: position
+
+      The `Distance` coordinate as an (x, y, z) array.
+
+   .. attribute:: velocity
+
+      The `Velocity` coordinate as an (x, y, z) array.
+
+      This attribute will have the value `None` if no velocity was
+      specified for this position.
+
+Position measured from the Solar System barycenter
+==================================================
 
 .. autoclass:: Barycentric
    :members:
 
-Astrometric position centered on an observer
+Astrometric position relative to an observer
 ============================================
 
 .. autoclass:: Astrometric
    :members:
 
-Apparent position centered on an observer
+Apparent position relative to an observer
 =========================================
 
 .. autoclass:: Apparent
    :members:
+
+Geocentric position relative to the Earth
+=========================================
 
 .. autoclass:: Geocentric
    :members:

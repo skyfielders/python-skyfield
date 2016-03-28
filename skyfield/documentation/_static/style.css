@@ -62,6 +62,7 @@ body, body > img {
     margin-right: auto;
 }
 body {
+    padding: 0 1em;
     line-height: 1.3;
     font-family: "Gentium Custom", sans-serif, serif;
     max-width: 36em;
@@ -110,10 +111,10 @@ h1, h2 {
 code, pre, tt, dt {
     font-family: "Ubuntu Mono Custom", monospace, serif;
 }
-code, pre, tt, dt {
+code, pre, tt {
     background-color: #FDF6E3;
 }
-code, tt, dt {
+code, tt {
     border-radius: 3px;
     border: 1px solid #e3dcca;
     padding: 1px 2px 2px;
@@ -132,7 +133,7 @@ code.py-obj:hover {
 }
 dt {
     display: inline-block;
-    padding-left: 4.25em;
+    padding-left: 4em;
     text-indent: -4em;
     color: #790000
 }

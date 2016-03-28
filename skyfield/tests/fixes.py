@@ -6,8 +6,8 @@ import skyfield.timelib
 
 def setup(utc=(2015, 10, 11, 10)):
     skyfield.api.load = skyfield.iokit.Loader('.', verbose=False)
-    skyfield.timelib.Timescale.utcnow = lambda self: datetime.datetime(*utc)
+    skyfield.timelib.Timescale._utcnow = lambda self: datetime.datetime(*utc)
 
 def teardown():
     skyfield.api.load = skyfield.iokit.Loader('.')
-    skyfield.timelib.Timescale.utcnow = datetime.datetime.utcnow
+    skyfield.timelib.Timescale._utcnow = datetime.datetime.utcnow

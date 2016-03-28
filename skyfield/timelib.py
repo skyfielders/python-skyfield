@@ -65,7 +65,7 @@ class Timescale(object):
     your copy of the files are too old.
 
     """
-    utcnow = datetime.utcnow
+    _utcnow = datetime.utcnow
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
         self.delta_t_table = build_delta_t_table(delta_t_recent)
@@ -82,7 +82,7 @@ class Timescale(object):
         correct UTC date and time.
 
         """
-        return self.utc(self.utcnow().replace(tzinfo=utc))
+        return self.utc(self._utcnow().replace(tzinfo=utc))
 
     def utc(self, year, month=1, day=1, hour=0, minute=0, second=0.0):
         """Return the Time corresponding to a specific moment in UTC.
