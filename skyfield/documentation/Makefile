@@ -161,9 +161,9 @@ dry-run:
 sync:
 	rsync -crlv _build/html/ wf-rhodesmill:~/Dropbox/rhodesmill.org/skyfield
 
+# Runs web server outside _build, for when I need to "rm -r" clean-slate it:
 serve:
-	python -m webbrowser -t http://localhost:8123/ && \
-	cd _build/html && \
+	python -m webbrowser -t http://localhost:8123/_build/html && \
 	python -m SimpleHTTPServer 8123 || python -m http.server 8123
 
 loop:
