@@ -109,21 +109,14 @@ News
   has received a bit more polish.
   The project is almost there!
 
-Table of Contents
-=================
+Documenation
+============
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   installation
-   positions
-   time
-   planets
-   stars
-   earth-satellites
-   astropy
+   toc
    api
-   design
 
 .. testcleanup::
 

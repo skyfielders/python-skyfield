@@ -1,7 +1,7 @@
 
-==================================
- API Reference (work in progress)
-==================================
+===============
+ API Reference
+===============
 
 .. currentmodule:: skyfield.jpllib
 
@@ -164,107 +164,3 @@ Other time scales and conversions are available through its methods.
    Time.toordinal
    Time.tai_calendar
    Time.tt_calendar
-
-
-
-
-.. testsetup::
-
-    from pprint import pprint
-    from skyfield.positionlib import *
-    from skyfield.api import load
-    ts = load.timescale()
-
-.. currentmodule:: skyfield.jpllib
-
-.. testsetup::
-
-   from skyfield import api
-   de421 = api.load('de421.bsp')
-   earth = de421['Earth']
-   moon = de421['Moon']
-   mars = de421['Mars']
-
-.. autoclass:: SpiceKernel
-   :members:
-
-.. autoclass:: Body
-   :members:
-
-.. autoclass:: Geometry()
-
-   .. automethod:: at
-
-Generic ICRF position
-=====================
-
-.. currentmodule:: skyfield.positionlib
-
-.. autoclass:: ICRF
-   :members:
-
-   .. attribute:: t
-
-      The `Time` coordinate of this position.
-
-   .. attribute:: position
-
-      The `Distance` coordinate as an (x, y, z) array.
-
-   .. attribute:: velocity
-
-      The `Velocity` coordinate as an (x, y, z) array.
-
-      This attribute will have the value `None` if no velocity was
-      specified for this position.
-
-Position measured from the Solar System barycenter
-==================================================
-
-.. autoclass:: Barycentric
-   :members:
-
-Astrometric position relative to an observer
-============================================
-
-.. autoclass:: Astrometric
-   :members:
-
-Apparent position relative to an observer
-=========================================
-
-.. autoclass:: Apparent
-   :members:
-
-Geocentric position relative to the Earth
-=========================================
-
-.. autoclass:: Geocentric
-   :members:
-
-Timescale, for building and converting times
-============================================
-
-.. currentmodule:: skyfield.timelib
-
-.. autoclass:: Timescale
-   :members:
-
-The Time object
-===============
-
-.. autoclass:: Time
-   :members:
-
-
-   .. attribute:: tt
-
-      Terrestrial Time (TT) as a Julian date.
-
-   .. attribute:: tdb
-
-      Barycentric Dynamical Time (TDB) as a Julian date.
-
-   .. attribute:: ut1
-
-      Universal Time (UT1) as a Julian date.
