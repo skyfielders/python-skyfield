@@ -209,7 +209,7 @@ class Angle(object):
     def signed_hms(self, warn=True):
         """Convert to a tuple (sign, hours, minutes, seconds).
 
-        The ``sign`` will be either +1 or −1, and the other quantities
+        The ``sign`` will be either +1 or -1, and the other quantities
         will all be positive.
 
         """
@@ -244,7 +244,7 @@ class Angle(object):
     def signed_dms(self, warn=True):
         """Convert to a tuple (degrees, hours, minutes, seconds).
 
-        The ``sign`` will be either +1 or −1, and the other quantities
+        The ``sign`` will be either +1 or -1, and the other quantities
         will all be positive.
 
         """
