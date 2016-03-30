@@ -75,13 +75,16 @@ And it can convert results into native AstroPy units:
 .. testcode::
 
     from astropy import units as u
-    print(astrometric.position.to(u.au))
-    print(alt.to(u.deg))
+    xyz = astrometric.position.to(u.au)
+    altitude = alt.to(u.deg)
+
+    print(xyz)
+    print('{0:0.03f}'.format(altitude))
 
 .. testoutput::
 
     [-2.19049548  0.71236701  0.36712443] AU
-    25.464989358252268 deg
+    25.465 deg
 
 The official documentation is available through the links
 in the Table of Contents below.

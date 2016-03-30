@@ -10,6 +10,7 @@ that can be used to express them.
 
 .. testsetup::
 
+   from __future__ import print_function
    from skyfield.api import load
    from skyfield.positionlib import ICRF
    ts = load.timescale()

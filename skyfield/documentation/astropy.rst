@@ -73,11 +73,12 @@ between the two libraries:
    .. testcode::
 
       ra, dec, distance = barycentric.radec()
-      print(dec.to(u.deg))
+      declination = dec.to(u.deg)
+      print('{0:0.03f}'.format(declination))
 
    .. testoutput::
 
-      23.084394605293788 deg
+      23.084 deg
 
 .. _Astropy Project: http://docs.astropy.org/en/stable/
 
