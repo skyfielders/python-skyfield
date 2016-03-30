@@ -427,7 +427,3 @@ def _tally(minus_chain, plus_chain, t):
         position += p
         velocity += v
     return position, velocity
-
-
-setattr(SpiceKernel, '[]', SpiceKernel.__getitem__)
-setattr(__import__('skyfield.jpllib'), 'SpiceKernel[]', SpiceKernel.__getitem__)
