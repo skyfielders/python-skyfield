@@ -15,7 +15,7 @@ to within 0.001 arcseconds.
 
 * Written in pure Python and installs without any compilation.
 * Supports Python 2.6–2.7 and Python 3.3–3.5.
-* Depends only upon NumPy,
+* Only binary dependency is NumPy,
   the fundamental package for scientific computing with Python,
   whose vector operations make Skyfield efficient.
 
@@ -96,6 +96,15 @@ You can also visit:
 
 * `GitHub issue tracker <https://github.com/brandon-rhodes/python-skyfield/issues>`_
 
+Documenation
+============
+
+.. toctree::
+   :maxdepth: 1
+
+   toc
+   api
+
 News
 ====
 
@@ -118,15 +127,6 @@ News
   and in particular the API Reference —
   has received a bit more polish.
   The project is almost there!
-
-Documenation
-============
-
-.. toctree::
-   :maxdepth: 1
-
-   toc
-   api
 
 .. testcleanup::
 
