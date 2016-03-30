@@ -23,4 +23,4 @@ that is accelerated using NumPy vector math!
    api-position
    api-quantity
    design
-
+   bibliography
