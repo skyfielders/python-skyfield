@@ -163,4 +163,4 @@ sync:
 
 serve:
 	python -m webbrowser -t http://localhost:8123/_build/html/ && \
-	python -m SimpleHTTPServer 8123
+	python -m SimpleHTTPServer 8123 || python -m http.server 8123
