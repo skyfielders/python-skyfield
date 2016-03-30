@@ -513,8 +513,9 @@ class Time(object):
         raise AttributeError('no such attribute %r' % name)
 
     def __eq__(self, other_time):
+        if not isinstance(other_time, Time):
+            return NotImplemented
         return self.tt == other_time.tt
-
 
 def julian_day(year, month=1, day=1):
     """Given a proleptic Gregorian calendar date, return a Julian day int."""

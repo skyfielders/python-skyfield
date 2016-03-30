@@ -65,3 +65,8 @@ def test_named_star_throws_valueerror():
 def test_named_star_returns_star():
     s = api.NamedStar('Polaris')
     assert isinstance(s, api.Star)
+
+def test_github_81(ts):
+    t = ts.utc(1980, 1, 1)
+    assert t == t
+    assert (t == 61) is False  # used to die with AttributeError for "tt"
