@@ -3,10 +3,20 @@
  API Reference
 ===============
 
-.. currentmodule:: skyfield.jpllib
+Downloading files
+=================
+
+.. currentmodule:: skyfield.iokit
+
+.. autosummary::
+
+   load
+   Loader
 
 Ephemerides
 ===========
+
+.. currentmodule:: skyfield.jpllib
 
 Skyfield users will usually download and open a `SpiceKernel` file
 in a single step by calling `load()`.

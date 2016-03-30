@@ -228,8 +228,8 @@ class Time(object):
     def astimezone(self, tz):
         """Convert to a Python ``datetime`` in a ``pytz`` provided timezone.
 
-        Convert this time to a ``datetime`` in the timezone `tz`, which
-        should be one of the timezones provided by the third-party
+        Convert this time to a ``datetime`` in the timezone ``tz``,
+        which should be one of the timezones provided by the third-party
         ``pytz`` package.  If this time is an array, then an array of
         datetimes is returned instead of a single value.
 
@@ -244,7 +244,7 @@ class Time(object):
 
             dt, leap_second = t.astimezone_and_leap_second(tz)
 
-        The argument `tz` should be a timezone from the third-party
+        The argument ``tz`` should be a timezone from the third-party
         ``pytz`` package, which must be installed separately.  The date
         and time returned will be for that time zone.
 
@@ -276,8 +276,8 @@ class Time(object):
     def toordinal(self):
         """Return the proleptic Gregorian ordinal of the UTC date.
 
-        This method makes Skyfield `Time` objects compatible with
-        Python `datetime` objects, which also provide a ``toordinal()``
+        This method makes Skyfield `Time` objects compatible with Python
+        `datetime`_ objects, which also provide a ``toordinal()``
         method.  Thanks to this method, a `Time` can often be used
         directly as a coordinate for a plot.
 
@@ -285,11 +285,11 @@ class Time(object):
         return self._utc_float() - 1721424.5
 
     def utc_datetime(self):
-        """Convert to a Python `datetime` in UTC.
+        """Convert to a Python ``datetime`` in UTC.
 
-        If the third-party ``pytz`` package is available, then its
-        ``utc`` timezone will be used as the timezone of the return
-        value.  Otherwise, an equivalent Skyfield ``utc`` timezone
+        If the third-party `pytz`_ package is available, then its
+        ``utc`` timezone will be used as the timezone of the returned
+        `datetime`_.  Otherwise, an equivalent Skyfield ``utc`` timezone
         object is used.  If this time is an array, then a sequence of
         datetimes is returned instead of a single value.
 
@@ -298,13 +298,13 @@ class Time(object):
         return dt
 
     def utc_datetime_and_leap_second(self):
-        """Convert to a Python `datetime` in UTC, plus a leap second value.
+        """Convert to a Python ``datetime`` in UTC, plus a leap second value.
 
-        Convert this time to a ``datetime`` and a leap second::
+        Convert this time to a `datetime`_ object and a leap second::
 
             dt, leap_second = t.utc_datetime_and_leap_second()
 
-        If the third-party ``pytz`` package is available, then its
+        If the third-party `pytz`_ package is available, then its
         ``utc`` timezone will be used as the timezone of the return
         value.  Otherwise, Skyfield uses its own ``utc`` timezone.
 

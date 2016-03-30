@@ -24,8 +24,8 @@ class SpiceKernel(object):
     planets, moons, and spacecraft.
 
     You can download a .bsp file yourself and use this class to open it,
-    or use the Skyfield `api.load()` function to automatically download
-    a popular ephemeris.  Once loaded, you can print this object to the
+    or use the Skyfield `load` function to automatically download a
+    popular ephemeris.  Once loaded, you can print this object to the
     screen to see a report on the segments that it includes:
 
     >>> planets = load('de421.bsp')

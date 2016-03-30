@@ -45,3 +45,6 @@ The Time object
    and converting it to typical human systems
    like UTC and world time zones
    are offered through methods:
+
+.. _datetime: https://docs.python.org/3.5/library/datetime.html#datetime.datetime
+.. _pytz: http://pythonhosted.org/pytz/

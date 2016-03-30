@@ -38,7 +38,7 @@ Generic ICRF position
 
       The `Velocity` coordinate as an (x, y, z) array.
 
-      This attribute will have the value `None` if no velocity was
+      This attribute will have the value ``None`` if no velocity was
       specified for this position.
 
 Position measured from the Solar System barycenter

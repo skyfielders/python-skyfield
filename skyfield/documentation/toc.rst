@@ -18,6 +18,7 @@ that is accelerated using NumPy vector math!
    earth-satellites
    astropy
    api
+   api-load
    api-time
    api-ephemeris
    api-position

@@ -34,3 +34,11 @@ Instantaneous relative positions
 .. autoclass:: Geometry()
 
    .. automethod:: at
+
+Topocentric position on the Earth's surface
+===========================================
+
+.. currentmodule:: skyfield.toposlib
+
+.. autoclass:: Topos
+   :members:

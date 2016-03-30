@@ -33,13 +33,16 @@ class Loader(object):
     A default `Loader` that saves data files in the current working
     directory can be imported directly from the Skyfield API::
 
-    from skyfield.api import load
+        from skyfield.api import load
 
     But users can also create a `Loader` of their own, if there is
     another directory they want data files saved to::
 
-    from skyfield.api import Loader
-    load = Loader('~/skyfield-data')
+        from skyfield.api import Loader
+        load = Loader('~/skyfield-data')
+
+    If the ``verbose`` option is switched to ``False``, then no progress
+    bar is printed to the screen each time a file is downloaded.
 
     """
     def __init__(self, directory, verbose=True):
@@ -56,9 +59,12 @@ class Loader(object):
         """Open the given file, downloading it first if necessary."""
         url, parser = self.urls.get(filename, (None, None))
         if url is not None:
+            # TODO: they should be able to turn download off
             expiration_date, data = parser(load(url, self.directory,
                                                 verbose=self.verbose))
             if expiration_date < today():
+                # TODO: just fail if they turn download off
+                # TODO: unless they don't care about recency
                 for n in itertools.count(1):
                     prefix, suffix = filename.rsplit('.', 1)
                     backup_name = '{0}.old{1}.{2}'.format(prefix, n, suffix)
