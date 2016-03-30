@@ -162,5 +162,11 @@ sync:
 	rsync -crlv _build/html/ wf-rhodesmill:~/Dropbox/rhodesmill.org/skyfield
 
 serve:
-	python -m webbrowser -t http://localhost:8123/_build/html/ && \
+	python -m webbrowser -t http://localhost:8123/ && \
+	cd _build/html && \
 	python -m SimpleHTTPServer 8123 || python -m http.server 8123
+
+loop:
+	while inotifywait -e CLOSE_WRITE -e DELETE_SELF *.rst ../*.py ; \
+		do make html; \
+		done
