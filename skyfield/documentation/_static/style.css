@@ -90,13 +90,12 @@ h1, h2 {
 }
 .headerlink {
     color: white;
+    box-shadow: none;
 }
 :hover > .headerlink {
     color: #eee;
-    text-decoration: none;
-    box-shadow: none;
 }
-:hover .headerlink:hover {
+:hover > .headerlink:hover {
     color: #ddd;
     box-shadow: none;
 }
@@ -128,9 +127,6 @@ code.py-obj {
     background: none;
     font-family: "Gentium Custom", sans-serif, serif;
 }
-code.py-obj:hover {
-    box-shadow: inset 0 -3px 0 white, inset 0 -4px 0 #ccc;
-}
 dt {
     display: inline-block;
     padding-left: 4em;
@@ -156,12 +152,16 @@ pre {
 }
 a {
     text-decoration: none;
-}
-a > span {
     box-shadow: inset 0 -3px 0 white, inset 0 -4px 0 #ccc;
 }
-a:hover > span {
+a:hover {
     box-shadow: inset 0 -3px 0 white, inset 0 -4px 0 black;
+}
+#api-reference table a {
+    box-shadow: none;
+}
+#api-reference table a:hover {
+    box-shadow: inset 0 -3px 0 white, inset 0 -4px 0 #ccc;
 }
 pre tt {
     padding: 0;
