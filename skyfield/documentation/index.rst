@@ -96,7 +96,14 @@ You can also visit:
 News
 ====
 
+**2016 March 30**
+
+  Released Skyfield 0.8 with expanded documentation,
+  that now includes an `api` presenting the docstrings
+  from all stable and supported methods.
+
 **2016 March 24**
+
   With the release of Skyfield 0.7,
   the final API upheavals of the pre-1.0 era are now complete.
   The introduction of the new timescale object

@@ -60,6 +60,21 @@ Good luck!
 Change Log
 ==========
 
+.. currentmodule:: skyfield.positionlib
+
+0.8
+---
+
+* Added an `api` document to the project, in reverent imitation of the
+  `Pandas API Reference`_ that I keep open in a browser tab every time I
+  am using the Pandas library.
+
+* New method `ICRF.separation_from()` computes the angular separation
+  between two positions.
+
+* Fixed ``==`` between `Time` objects and other unrelated objects so
+  that it no longer raises an exception.
+
 0.7
 ---
 
@@ -146,3 +161,6 @@ Change Log
 * The floating-point values of an angle
   ``a.radians``, ``a.degrees``, and ``a.hours``
   are now attributes instead of method calls.
+
+
+.. _Pandas API Reference: http://pandas.pydata.org/pandas-docs/stable/api.html
