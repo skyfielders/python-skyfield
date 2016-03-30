@@ -1,11 +1,11 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, einsum, exp
+from numpy import array, arccos, clip, einsum, exp
 
 from .constants import RAD2DEG, TAU
 from .data.spice import inertial_frames
 #from .framelib import ICRS_to_J2000
-from .functions import from_polar, length_of, to_polar, rot_z
+from .functions import dots, from_polar, length_of, to_polar, rot_z
 from .earthlib import compute_limb_angle, refract
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
@@ -106,6 +106,31 @@ class ICRF(object):
         return (Angle(radians=ra, preference='hours'),
                 Angle(radians=dec, signed=True),
                 Distance(r_au))
+
+    def separation_from(self, another_icrf):
+        """Return the angle between this position and another.
+
+        >>> print(ICRF([1,0,0]).separation_from(ICRF([1,1,0])))
+        45deg 00' 00.0"
+
+        You can also compute separations across an array of positions.
+
+        >>> directions = ICRF([[1,0,-1,0], [0,1,0,-1], [0,0,0,0]])
+        >>> directions.separation_from(ICRF([0,1,0])).degrees
+        array([  90.,    0.,   90.,  180.])
+
+        """
+        p1 = self.position.au
+        p2 = another_icrf.position.au
+        u1 = p1 / length_of(p1)
+        u2 = p2 / length_of(p2)
+        if u2.ndim > 1:
+            if u1.ndim == 1:
+                u1 = u1[:,None]
+        elif u1.ndim > 1:
+            u2 = u2[:,None]
+        c = dots(u1, u2)
+        return Angle(radians=arccos(clip(c, -1.0, 1.0)))
 
     def ecliptic_position(self):
         """Compute ecliptic coordinates (x, y, z)"""
