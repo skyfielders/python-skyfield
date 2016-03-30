@@ -167,6 +167,7 @@ serve:
 	python -m SimpleHTTPServer 8123 || python -m http.server 8123
 
 loop:
+	make html
 	while inotifywait -e CLOSE_WRITE -e DELETE_SELF *.rst ../*.py ; \
-		do make html; \
-		done
+	do make html; \
+	done
