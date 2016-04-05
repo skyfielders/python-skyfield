@@ -28,7 +28,7 @@ class DeprecatedPlanet(object):
     def __init__(self, name):
         self.name = name
 
-    def __call__(self, jd):
+    def __call__(self, *args, **kw):
         raise DeprecationError("""Skyfield no longer auto-loads the planets.
 
 If you simply want your old Skyfield script to start working again,
