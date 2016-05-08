@@ -159,7 +159,7 @@ dry-run:
 	rsync --dry-run -crlv _build/html/ ~/Dropbox/rhodesmill.org/skyfield
 
 sync:
-	rsync -crlv _build/html/ wf-rhodesmill:~/Dropbox/rhodesmill.org/skyfield
+	rsync -crlv _build/html/ ~/Dropbox/rhodesmill.org/skyfield
 
 # Runs web server outside _build, for when I need to "rm -r" clean-slate it:
 serve:
