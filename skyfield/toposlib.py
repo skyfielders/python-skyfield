@@ -15,6 +15,7 @@ class Topos(Body):
 
 
     """
+    # TODO(1.0): document, and add to API doc.
     def __init__(self, latitude=None, longitude=None, latitude_degrees=None,
                  longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
 
@@ -65,7 +66,8 @@ class Topos(Body):
             c = Barycentric(e.position.au + tpos_au,
                             e.velocity.au_per_d + tvel_au_per_d,
                             t)
-            c.geocentric = False  # test, then get rid of this attribute
+            # TODO(1.0): test, then get rid of this attribute?
+            c.geocentric = False
         c.rGCRS = tpos_au
         c.vGCRS = tvel_au_per_d
         c.topos = self

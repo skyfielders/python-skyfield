@@ -337,6 +337,7 @@ class Geocentric(ICRF):
     """An (x,y,z) position measured from the geocenter."""
 
     def observe(self, other):
+        # TODO(1.0): clean up GCRS story
         gcrs_method = getattr(other, 'gcrs')
         if gcrs_method is None:
             raise ValueError('currently a Geocentric location can only'

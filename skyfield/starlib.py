@@ -1,4 +1,4 @@
-"""Python classes that represent various classes of star."""
+"""Python class for a distant object with, at most, proper motion."""
 
 from numpy import array, cos, outer, sin
 from .constants import AU_KM, ASEC2RAD, C, C_AUDAY, DAY_S, T0
@@ -8,6 +8,7 @@ from .relativity import light_time_difference
 from .units import Angle
 
 class Star(object):
+    # TODO(1.0): document, and add to API docs.
 
     au_km = AU_KM
 

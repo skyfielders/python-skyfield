@@ -658,14 +658,6 @@ def build_delta_t_table(delta_t_recent):
     table[:,-1] = end, delta_t_formula_morrison_and_stephenson_2004(end)
     return table
 
-# if __name__ == '__main__':
-#     from skyfield.api import Loader
-#     load = Loader('.')
-#     x = load('deltat.data')
-#     y = load('deltat.preds')
-#     import numpy as np
-#     np.savetxt('foo', build_delta_t_table(x,y).T, delimiter=",")
-
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
     try:
         utc_datetime = dt.astimezone(utc)

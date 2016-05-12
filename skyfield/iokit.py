@@ -28,6 +28,7 @@ def _filename_of(url):
     return urlparse(url).path.split('/')[-1]
 
 class Loader(object):
+    # TODO(1.0): test and document the offline / old-files story
     """Download files to a directory where Skyfield can use them.
 
     A default `Loader` that saves data files in the current working
