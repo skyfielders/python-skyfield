@@ -32,10 +32,10 @@ def convergeEccentricAnomaly(mean_anomaly, eccentricity, precision):
     delta = 10 ** -precision
 
     # normalize the mean anomaly
-    m = mean_anomaly % constants.TAU
+    m = mean_anomaly % constants.tau
 
     # set up the first guess
-    eccentric_anomaly = constants.TAU
+    eccentric_anomaly = constants.tau
     if eccentricity < 0.8:
         eccentric_anomaly = m
 
@@ -97,11 +97,11 @@ class KeplerianOrbit:
         M = self.mean_anomaly
         d = date.tdb - self.epoch.tdb
 
-        Om = Om / 360.0 * constants.TAU
-        w = w / 360.0 * constants.TAU
-        I = I / 360.0 * constants.TAU
-        M = M / 360.0 * constants.TAU
-        n = n / 360.0 * constants.TAU
+        Om = Om / 360.0 * constants.tau
+        w = w / 360.0 * constants.tau
+        I = I / 360.0 * constants.tau
+        M = M / 360.0 * constants.tau
+        n = n / 360.0 * constants.tau
 
         M += d * n
 

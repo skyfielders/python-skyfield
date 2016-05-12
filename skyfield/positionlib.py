@@ -2,7 +2,7 @@
 
 from numpy import array, arccos, clip, einsum, exp
 
-from .constants import RAD2DEG, TAU
+from .constants import RAD2DEG, tau
 from .data.spice import inertial_frames
 #from .framelib import ICRS_to_J2000
 from .functions import dots, from_polar, length_of, to_polar, rot_z
@@ -355,6 +355,6 @@ def ITRF_to_GCRS(t, rITRF):  # todo: velocity
 
     # Todo: wobble
 
-    spin = rot_z(t.gast * TAU / 24.0)
+    spin = rot_z(t.gast * tau / 24.0)
     position = einsum('ij...,j...->i...', spin, array(rITRF))
     return einsum('ij...,j...->i...', t.MT, position)

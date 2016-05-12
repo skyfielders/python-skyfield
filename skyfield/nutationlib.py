@@ -1,6 +1,6 @@
 """Routines that compute Earth nutation."""
 from numpy import array, cos, fmod, sin, outer, tensordot, zeros
-from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, T0
+from .constants import ASEC2RAD, ASEC360, DEG2RAD, tau, T0
 
 def compute_nutation(t):
     """Generate the nutation rotations for Time `t`.
@@ -107,7 +107,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (     0.051635 +
               (    -0.00024470)
               * t) * t) * t) * t) * ASEC2RAD
-              + (1325.0*t % 1.0) * TAU)
+              + (1325.0*t % 1.0) * tau)
 
     # Mean Anomaly of the Sun.
 
@@ -117,7 +117,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (     +0.000136 +
               (     -0.00001149)
               * t) * t) * t) * t) * ASEC2RAD
-              + (99.0*t % 1.0) * TAU)
+              + (99.0*t % 1.0) * tau)
 
     # Mean Longitude of the Moon minus Mean Longitude of the Ascending
     # Node of the Moon.
@@ -128,7 +128,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (     -0.001037 +
               (      0.00000417)
               * t) * t) * t) * t) * ASEC2RAD
-              + (1342.0*t % 1.0) * TAU)
+              + (1342.0*t % 1.0) * tau)
 
     # Mean Elongation of the Moon from the Sun.
 
@@ -138,7 +138,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (      0.006593 +
               (     -0.00003169)
               * t) * t) * t) * t) * ASEC2RAD
-              + (1236.0*t % 1.0) * TAU)
+              + (1236.0*t % 1.0) * tau)
 
     # Mean Longitude of the Ascending Node of the Moon.
 
@@ -148,7 +148,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (      0.007702 +
               (     -0.00005939)
               * t) * t) * t) * t) * ASEC2RAD
-              + (-5.0*t % 1.0) * TAU)
+              + (-5.0*t % 1.0) * tau)
 
     fa[ 5] = (4.402608842 + 2608.7903141574 * t)
     fa[ 6] = (3.176146697 + 1021.3285546211 * t)
@@ -160,7 +160,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
     fa[12] = (5.311886287 +    3.8133035638 * t)
     fa[13] = (0.024381750 +    0.00000538691 * t) * t
 
-    fa %= TAU
+    fa %= tau
 
     # Evaluate the complementary terms.
 
@@ -227,7 +227,7 @@ def iau2000a(jd_tt):
     # Summation of luni-solar nutation series (in reverse order).
 
     arg = nals_t.dot(a)
-    fmod(arg, TAU, out=arg)
+    fmod(arg, tau, out=arg)
 
     sarg = sin(arg)
     carg = cos(arg)
@@ -246,9 +246,9 @@ def iau2000a(jd_tt):
         a = (outer(anomaly_coefficient, t).T + anomaly_constant).T
     a[-1] *= t
 
-    fmod(a, TAU, out=a)
+    fmod(a, tau, out=a)
     arg = napl_t.dot(a)
-    fmod(arg, TAU, out=arg)
+    fmod(arg, tau, out=arg)
     sc = array((sin(arg), cos(arg))).T
 
     dpsi += tensordot(sc, nutation_coefficients_longitude)
