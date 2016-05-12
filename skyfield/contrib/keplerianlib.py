@@ -5,7 +5,7 @@ See https://github.com/brandon-rhodes/python-skyfield/issues/11
 """
 from math import sin, cos
 import math
-from . import constants
+from skyfield import constants
 
 # class to represent a point in the IC reference frame
 class ICRCoordinates:
