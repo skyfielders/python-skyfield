@@ -1,24 +1,24 @@
 """Compare the output of Skyfield with the routines from NOVAS for keplerian orbiting bodies"""
 
-import skyfield.keplerianlib
+import keplerianlib
 from skyfield import api
-from skyfield.keplerianlib import KeplerianOrbit, ICRCoordinates
+from keplerianlib import KeplerianOrbit, ICRCoordinates
 
 
 DISTANCE_EPSILON = 0.026
 
 def test_semimajorAxisToOrbitalPeriod():
-    assert skyfield.keplerianlib.semimajorAxisToOrbitalPeriod(1) == 1
-    assert skyfield.keplerianlib.semimajorAxisToOrbitalPeriod(1.523679) == 1.8807896358663763
-    assert skyfield.keplerianlib.semimajorAxisToOrbitalPeriod(4.27371348392) == 8.835031547398543
+    assert keplerianlib.semimajorAxisToOrbitalPeriod(1) == 1
+    assert keplerianlib.semimajorAxisToOrbitalPeriod(1.523679) == 1.8807896358663763
+    assert keplerianlib.semimajorAxisToOrbitalPeriod(4.27371348392) == 8.835031547398543
 
 def test_orbitalPeriodToSemimajorAxis():
-    assert skyfield.keplerianlib.orbitalPeriodToSemimajorAxis(1) == 1
-    assert skyfield.keplerianlib.orbitalPeriodToSemimajorAxis(1.8807896358663763) == 1.523679
-    assert skyfield.keplerianlib.orbitalPeriodToSemimajorAxis(8.835031547398543) == 4.27371348392
+    assert keplerianlib.orbitalPeriodToSemimajorAxis(1) == 1
+    assert keplerianlib.orbitalPeriodToSemimajorAxis(1.8807896358663763) == 1.523679
+    assert keplerianlib.orbitalPeriodToSemimajorAxis(8.835031547398543) == 4.27371348392
 
 def test_convergeEccentricAnomaly():
-    test = skyfield.keplerianlib.convergeEccentricAnomaly(
+    test = keplerianlib.convergeEccentricAnomaly(
         hoyle_8077['mean_anomaly'],
         hoyle_8077['eccentricity'],
         15
