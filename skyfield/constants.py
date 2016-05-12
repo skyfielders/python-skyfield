@@ -21,9 +21,6 @@ ANGVEL = 7.2921150e-5
 ERAD = 6378136.6
 IERS_2010_INVERSE_EARTH_FLATTENING = 298.25642
 
-PSI_COR = 0.0
-EPS_COR = 0.0
-
 # Heliocentric gravitational constant in meters^3 / second^2, from DE-405.
 GS = 1.32712440017987e+20
 

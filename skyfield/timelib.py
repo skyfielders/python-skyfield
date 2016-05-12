@@ -13,6 +13,9 @@ try:
     from pytz import utc
 except ImportError:
 
+    # Lacking a full suite of timezones from pytz, we need to at least a
+    # time zone object for UTC.
+
     class UTC(tzinfo):
         'UTC'
         zero = timedelta(0)
@@ -203,6 +206,9 @@ class Time(object):
     time objects make available.
 
     """
+    psi_correction = 0.0
+    eps_correction = 0.0
+
     def __init__(self, ts, tt):
         self.tt = tt
         self.ts = ts

@@ -1,6 +1,6 @@
 """Routines that compute Earth nutation."""
 from numpy import array, cos, fmod, sin, outer, tensordot, zeros
-from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, PSI_COR, EPS_COR, T0
+from .constants import ASEC2RAD, ASEC360, DEG2RAD, TAU, T0
 
 def compute_nutation(t):
     """Generate the nutation rotations for Time `t`.
@@ -46,8 +46,8 @@ def earth_tilt(t):
     dp, de = iau2000a(t.tt)
     c_terms = equation_of_the_equinoxes_complimentary_terms(t.tt) / ASEC2RAD
 
-    d_psi = dp * 1e-7 + PSI_COR
-    d_eps = de * 1e-7 + EPS_COR
+    d_psi = dp * 1e-7 + t.psi_correction
+    d_eps = de * 1e-7 + t.eps_correction
 
     mean_ob = mean_obliquity(t.tdb)
     true_ob = mean_ob + d_eps
