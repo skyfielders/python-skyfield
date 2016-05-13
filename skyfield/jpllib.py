@@ -108,7 +108,7 @@ class SpiceKernel(object):
     def names(self):
         """Return all target names that are valid with this kernel.
 
-        >>> pprint(planets.names())
+        >>> print(planets.names())
         {0: ['SOLAR_SYSTEM_BARYCENTER', 'SSB', 'SOLAR SYSTEM BARYCENTER'],
          1: ['MERCURY_BARYCENTER', 'MERCURY BARYCENTER'],
          2: ['VENUS_BARYCENTER', 'VENUS BARYCENTER'],
