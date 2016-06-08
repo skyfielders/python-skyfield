@@ -474,8 +474,8 @@ Uniform time scales: TAI, TT, and TDB
 
 Date arithmetic becomes very simple
 as we leave UTC behind and consider completely uniform time scales.
-Days are always twelve hours, hours always 60 minutes,
-and minutes always 60 seconds without any variation or dissent.
+Days are always 24 hours, hours always 60 minutes,
+and minutes always 60 seconds without any variation or exceptions.
 Such time scales are not appropriate for your morning alarm clock
 because they will never be delayed or adjusted
 to stay in sync with the slowing rotation of the earth.
@@ -560,8 +560,9 @@ plus exactly 32.184 seconds.
 So it is now more than a minute ahead of UTC.
 
 Barycentric Dynamical Time (TDB) runs at approximately the rate
-that we think an atomic clock would run at the Solar System barycenter,
-where it would be unaffected by the Earth’s motion.
+that an atomic clock would run
+if it were at rest with respect to the Solar System barycenter,
+and therefore unaffected by the Earth’s motion.
 The acceleration that Earth experiences in its orbit —
 sometimes speeding up, sometimes slowing down —
 varies the rate at which our atomic clocks
