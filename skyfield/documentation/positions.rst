@@ -23,7 +23,7 @@ together with all of the attributes and methods that they support:
      └─ observe(obj2)   →  Astrometric position (ΔBCRS)
          └─ apparent()  →  Apparent position (GCRS)
 
-    Barycentric, Astrometric, or Apparent position
+    ICRF, Barycentric, Astrometric, or Apparent position
      │
      ├── `position <api.html#skyfield.positionlib.ICRF.position>`_.au         →   x, y, z
      ├── `position <api.html#skyfield.positionlib.ICRF.position>`_.km         →   x, y, z
@@ -83,6 +83,25 @@ or else by generating a whole series of positions.
 .. testsetup::
 
    __import__('skyfield.tests.fixes').tests.fixes.setup()
+
+**Instantiating positions from numeric coordinates**
+  If you already possess *x*, *y*, and *z* coordinates
+  oriented along the ICRF axes,
+  then you can directly instantiate any of the position classes
+  by providing those coordinates as a vector of length 3.
+  Here, for example, is how to instantiate the `ICRF` class:
+
+  .. testcode::
+
+    x = 3141.0
+    y = 2718.0
+    z = 5820.0
+    vec = ICRF([x, y, z])
+
+  This also works with more specific position classes
+  like the `Barycentric` class.
+  The resulting position object will support
+  all of the main features described on this page.
 
 **The planets**
   The eight planets and Pluto are all supported,
