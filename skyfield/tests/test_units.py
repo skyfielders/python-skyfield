@@ -9,7 +9,9 @@ try:
 except ImportError:
     u = None
 
-# needs_astropy = pytest.mark.skipif(u is None, reason='cannot import AstroPy')
+def needs_astropy(test):
+    """Skip `test` if AstroPy is not available."""
+    return None if (u is None) else test
 
 def test_stringifying_vector_distance():
     a = array([1.23, 4.56])
@@ -33,7 +35,7 @@ def test_converting_from_m_to_km():
     distance = units.Distance(m=1234.0)
     assert abs(distance.km - 1.234) < 1e-15
 
-# @needs_astropy
+@needs_astropy
 def test_converting_distance_with_astropy():
     distance = units.Distance(au=1.234)
     value1 = distance.km
@@ -41,7 +43,7 @@ def test_converting_distance_with_astropy():
     epsilon = 0.02         # definitions of AU seem to disagree slightly
     assert abs(value1 - value2.value) < epsilon
 
-# @needs_astropy
+@needs_astropy
 def test_converting_velocity_with_astropy():
     velocity = units.Velocity(au_per_d=1.234)
     value1 = velocity.km_per_s
