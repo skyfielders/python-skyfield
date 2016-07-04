@@ -234,7 +234,7 @@ def output_subroutine_tests(dates):
         output(locals(), """\
             def test_refraction{i}():
                 r = earthlib.refraction({angle}, {temperature}, {pressure})
-                compare(r, {r!r}, 0.001 * arcsecond)
+                compare(r, {r!r}, 1e-9 * arcsecond)
             """)
 
     northpole = novas.make_on_surface(90.0, 0.0, 0.0, 10.0, 1010.0)
@@ -244,7 +244,7 @@ def output_subroutine_tests(dates):
         output(locals(), """\
             def test_refract{i}():
                 alt = earthlib.refract({angle!r}, 10.0, 1010.0)
-                compare(alt, {alt!r}, 0.000000001 * arcsecond)
+                compare(alt, {alt!r}, 1e-9 * arcsecond)
             """)
 
     usno = novas.make_on_surface(38.9215, -77.0669, 92.0, 10.0, 1010.0)
@@ -259,8 +259,8 @@ def output_subroutine_tests(dates):
                     '38.9215 N', '77.0669 W', elevation_m=92.0)
                 a = usno.at(jd).from_altaz(alt_degrees={alt!r}, az_degrees={az!r})
                 ra, dec, distance = a.radec(epoch=jd)
-                compare(ra.hours, {ra!r}, 0.000000001 * arcsecond)
-                compare(dec.degrees, {dec!r}, 0.000000001 * arcsecond)
+                compare(ra.hours, {ra!r}, 1e-9 * arcsecond)
+                compare(dec.degrees, {dec!r}, 1e-9 * arcsecond)
             """)
 
     for i, (tt, delta_t) in enumerate(zip(date_floats, delta_t_floats)):
@@ -303,21 +303,21 @@ def output_geocentric_tests(dates):
             p = de405[{planet!r}]
 
             distance = length_of((e - p.at(t)).position.au)
-            compare(distance * OLD_AU, {distance1!r}, 0.5 * meter)
+            compare(distance * OLD_AU, {distance1!r}, 0.01 * meter)
 
             astrometric = e.observe(p)
             ra, dec, distance = astrometric.radec()
-            compare(ra.hours, {ra1!r}, 0.001 * ra_arcsecond)
-            compare(dec.degrees, {dec1!r}, 0.001 * arcsecond)
+            compare(ra.hours, {ra1!r}, 0.0002 * ra_arcsecond)
+            compare(dec.degrees, {dec1!r}, 0.0001 * arcsecond)
 
             apparent = astrometric.apparent()
             ra, dec, distance = apparent.radec()
-            compare(ra.hours, {ra2!r}, 0.001 * ra_arcsecond)
-            compare(dec.degrees, {dec2!r}, 0.001 * arcsecond)
+            compare(ra.hours, {ra2!r}, 0.0002 * ra_arcsecond)
+            compare(dec.degrees, {dec2!r}, 0.0001 * arcsecond)
 
             ra, dec, distance = apparent.radec(epoch='date')
-            compare(ra.hours, {ra3!r}, 0.001 * ra_arcsecond)
-            compare(dec.degrees, {dec3!r}, 0.001 * arcsecond)
+            compare(ra.hours, {ra3!r}, 0.0002 * ra_arcsecond)
+            compare(dec.degrees, {dec3!r}, 0.0001 * arcsecond)
 
         """)
 
@@ -345,17 +345,17 @@ def output_geocentric_tests(dates):
 
             astrometric = e.observe(star)
             ra, dec, distance = astrometric.radec()
-            compare(ra.hours, {ra1!r}, 0.001 * ra_arcsecond)
-            compare(dec.degrees, {dec1!r}, 0.001 * arcsecond)
+            compare(ra.hours, {ra1!r}, 0.00001 * ra_arcsecond)
+            compare(dec.degrees, {dec1!r}, 0.00001 * arcsecond)
 
             apparent = astrometric.apparent()
             ra, dec, distance = apparent.radec()
-            compare(ra.hours, {ra2!r}, 0.001 * ra_arcsecond)
-            compare(dec.degrees, {dec2!r}, 0.001 * arcsecond)
+            compare(ra.hours, {ra2!r}, 0.00001 * ra_arcsecond)
+            compare(dec.degrees, {dec2!r}, 0.00001 * arcsecond)
 
             ra, dec, distance = apparent.radec(epoch='date')
-            compare(ra.hours, {ra3!r}, 0.001 * ra_arcsecond)
-            compare(dec.degrees, {dec3!r}, 0.001 * arcsecond)
+            compare(ra.hours, {ra3!r}, 0.00001 * ra_arcsecond)
+            compare(dec.degrees, {dec3!r}, 0.00001 * arcsecond)
 
         """)
 
@@ -382,24 +382,24 @@ def output_topocentric_tests(dates):
 
             apparent = usno.at(t).observe(de405[{planet!r}]).apparent()
             ra, dec, distance = apparent.radec()
-            compare(ra.hours, {ra1!r}, 0.001 * ra_arcsecond)
-            compare(dec.degrees, {dec1!r}, 0.001 * arcsecond)
+            compare(ra.hours, {ra1!r}, 0.0005 * ra_arcsecond)
+            compare(dec.degrees, {dec1!r}, 0.0005 * arcsecond)
 
             ra, dec, distance = apparent.radec(epoch='date')
-            compare(ra.hours, {ra2!r}, 0.001 * ra_arcsecond)
-            compare(dec.degrees, {dec2!r}, 0.001 * arcsecond)
+            compare(ra.hours, {ra2!r}, 0.0005 * ra_arcsecond)
+            compare(dec.degrees, {dec2!r}, 0.0005 * arcsecond)
 
             alt, az, distance = apparent.altaz()
-            compare(alt.degrees, {alt!r}, 0.001 * arcsecond)
-            compare(az.degrees, {az!r}, 0.001 * arcsecond)
+            compare(alt.degrees, {alt!r}, 0.0005 * arcsecond)
+            compare(az.degrees, {az!r}, 0.0005 * arcsecond)
 
             alt, az, distance = apparent.altaz('standard')
-            compare(alt.degrees, {alt2!r}, 0.001 * arcsecond)
-            compare(az.degrees, {az2!r}, 0.001 * arcsecond)
+            compare(alt.degrees, {alt2!r}, 0.0005 * arcsecond)
+            compare(az.degrees, {az2!r}, 0.0005 * arcsecond)
 
             alt, az, distance = apparent.altaz(10.0, 1010.0)
-            compare(alt.degrees, {alt3!r}, 0.001 * arcsecond)
-            compare(az.degrees, {az3!r}, 0.001 * arcsecond)
+            compare(alt.degrees, {alt3!r}, 0.0005 * arcsecond)
+            compare(az.degrees, {az3!r}, 0.0005 * arcsecond)
 
         """)
 
@@ -420,8 +420,8 @@ def output_catalog_tests(dates):
             compare(star.ra.hours, {polaris.ra!r}, 0.001 * ra_arcsecond)
             compare(star.dec.degrees, {polaris.dec!r}, 0.001 * arcsecond)
             ra, dec, distance = earth.at(load.timescale().tt(jd={jd})).observe(star).radec()
-            compare(ra.hours, {ra!r}, 0.001 * ra_arcsecond)
-            compare(dec.degrees, {dec!r}, 0.001 * arcsecond)
+            compare(ra.hours, {ra!r}, 0.00001 * ra_arcsecond)
+            compare(dec.degrees, {dec!r}, 0.00001 * arcsecond)
 
         """)
 
