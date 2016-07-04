@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if conda --version >/dev/null 2>&1
 then
     conda install astropy mock numpy sphinx pytz lxml html5lib beautifulsoup4
