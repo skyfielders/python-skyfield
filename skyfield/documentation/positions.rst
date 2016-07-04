@@ -93,6 +93,8 @@ or else by generating a whole series of positions.
 
   .. testcode::
 
+    from skyfield.positionlib import ICRF
+
     x = 3141.0
     y = 2718.0
     z = 5820.0
@@ -140,7 +142,7 @@ or else by generating a whole series of positions.
   are able to generate their current astrometric position
   when observed from a planet. :doc:`Read more <stars>`
 
-  .. TODO - turn the following back into test code
+  .. TODO(1.0) - turn the following back into test code
 
   ::
 
@@ -168,7 +170,7 @@ or else by generating a whole series of positions.
   from public TLE elements describing their current orbit,
   which you can download from Celestrak. :doc:`Read more <earth-satellites>`
 
-  .. TODO - update the following code with new approach
+  .. TODO(1.0) - update the following code with new approach
 
   .. testsetup::
 
