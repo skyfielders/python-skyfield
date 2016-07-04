@@ -51,6 +51,7 @@ class Topos(Body):
     def __repr__(self):
         return '<Topos {0} N, {1} E>'.format(self.latitude, self.longitude)
 
+    # TODO(1.0): is this method needed? If so, should this be its name?
     def compute(self, t):
         position, velocity = self._position_and_velocity(t)
         return position, velocity
@@ -66,8 +67,8 @@ class Topos(Body):
             c = Barycentric(e.position.au + tpos_au,
                             e.velocity.au_per_d + tvel_au_per_d,
                             t)
-            # TODO(1.0): test, then get rid of this attribute?
-            c.geocentric = False
+            c._gcrs_position = tpos_au
+            c._gcrs_velocity = tvel_au_per_d
         c.rGCRS = tpos_au
         c.vGCRS = tvel_au_per_d
         c.topos = self

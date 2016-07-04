@@ -21,7 +21,6 @@ class ICRF(object):
     old series of equinox-based systems like B1900, B1950, and J2000.
 
     """
-    geocentric = True
     altaz_rotation = None
 
     def __init__(self, position_au, velocity_au_per_d=None, t=None):
@@ -214,6 +213,12 @@ class Barycentric(ICRF):
     <Barycentric position and velocity at date t>
 
     """
+    # Positions on the Earth's surface or in low Earth orbit can set
+    # these GCRS vectors if they want apparent positions to include the
+    # effect of the Earth's gravitational deflection of light.
+    _gcrs_position = None
+    _gcrs_velocity = None
+
     def observe(self, body):
         """Compute the `Astrometric` position of a body from this location.
 
@@ -268,12 +273,12 @@ class Astrometric(ICRF):
         position_au = self.position.au.copy()
         observer = self.observer
 
-        if observer.geocentric:
+        if observer._gcrs_position is None:
             include_earth_deflection = array((False,))
         else:
             limb_angle, nadir_angle = compute_limb_angle(
-                position_au, observer.position.au)
-            include_earth_deflection = limb_angle >= 0.8
+                position_au, observer._gcrs_position)
+            include_earth_deflection = nadir_angle >= 0.8
 
         add_deflection(position_au, observer.position.au, observer.ephemeris,
                        t, include_earth_deflection)

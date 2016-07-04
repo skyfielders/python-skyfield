@@ -82,9 +82,19 @@ def add_deflection(position, observer, ephemeris, t,
     # If observer is not at geocenter, add in deflection due to Earth.
 
     if include_earth_deflection.any():
+        deflector = ephemeris['earth']
         bposition = deflector.at(ts.tdb(jd=tclose)).position.au  # TODO
         rmass = rmasses['earth']
-        _add_deflection(position, observer, bposition, rmass)
+        # TODO: Make the following code less messy, maybe by having
+        # _add_deflection() return a new vector instead of modifying the
+        # old one in-place.
+        deflected_position = position.copy()
+        _add_deflection(deflected_position, observer, bposition, rmass)
+        if include_earth_deflection.shape:
+            position[:,include_earth_deflection] = (
+                deflected_position[:,include_earth_deflection])
+        else:
+            position[:] = deflected_position[:]
 
 #
 
