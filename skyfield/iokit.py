@@ -3,7 +3,7 @@ import itertools
 import os
 import numpy as np
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from time import time
 
 from .jpllib import SpiceKernel
@@ -148,7 +148,11 @@ def parse_leap_seconds(text):
         raise ValueError('Leap_Second.dat is missing its expiration date')
     line = line.decode('ascii')
     dt = datetime.strptime(line, '#  File expires on %d %B %Y\n')
-    expiration_date = dt.date()
+    # The file went out of date at the beginning of July 2016, and kept
+    # downloading every time a user ran a Skyfield program.  So we now
+    # build in a grace period:
+    grace_period = timedelta(days=30)
+    expiration_date = dt.date() + grace_period
     mjd, day, month, year, offsets = np.loadtxt(lines).T
     leap_dates = np.ndarray(len(mjd) + 2)
     leap_dates[0] = '-inf'
