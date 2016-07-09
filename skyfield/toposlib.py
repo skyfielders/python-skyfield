@@ -4,7 +4,7 @@ from .constants import ASEC2RAD, tau
 from .earthlib import terra
 from .errors import raise_error_for_deprecated_time_arguments
 from .functions import rot_x, rot_y, rot_z
-from .jpllib import Body, Segment
+from .jpllib import Body
 from .positionlib import Barycentric, Geocentric
 from .units import Distance, Angle, _interpret_ltude
 
@@ -45,21 +45,17 @@ class Topos(Body):
 
         self.R_lat = rot_y(latitude.radians)[::-1]
         self.code = self
-        self.segments = [Segment(399, self, self.compute)]
+        self.segment = _Segment(self)
+        self.segments = [self.segment]
         self.ephemeris = None
 
     def __repr__(self):
         return '<Topos {0} N, {1} E>'.format(self.latitude, self.longitude)
 
-    # TODO(1.0): is this method needed? If so, should this be its name?
-    def compute(self, t):
-        position, velocity = self._position_and_velocity(t)
-        return position, velocity
-
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
         """Compute where this Earth location was in space on a given date."""
-        tpos_au, tvel_au_per_d = self._position_and_velocity(t)
+        tpos_au, tvel_au_per_d = self.segment.icrf_vector_at(t)
         if self.ephemeris is None:
             c = Geocentric(tpos_au, tvel_au_per_d, t)
         else:
@@ -76,22 +72,31 @@ class Topos(Body):
         c.altaz_rotation = self._altaz_rotation(t)
         return c
 
-    def _position_and_velocity(self, t):
-        """Return the GCRS position, velocity of this Topos at `t`."""
-        pos, vel = terra(self.latitude.radians, self.longitude.radians,
-                         self.elevation.au, t.gast)
-        pos = einsum('ij...,j...->i...', t.MT, pos)
-        vel = einsum('ij...,j...->i...', t.MT, vel)
-        if self.x:
-            R = rot_y(self.x * ASEC2RAD)
-            pos = einsum('ij...,j...->i...', R, pos)
-        if self.y:
-            R = rot_x(self.y * ASEC2RAD)
-            pos = einsum('ij...,j...->i...', R, pos)
-        # TODO: also rotate velocity
-        return pos, vel
-
     def _altaz_rotation(self, t):
         """Compute the rotation from the ICRF into the alt-az system."""
         R_lon = rot_z(- self.longitude.radians - t.gast * tau / 24.0)
         return einsum('ij...,jk...,kl...->il...', self.R_lat, R_lon, t.M)
+
+
+class _Segment(object):
+    """Generate GCRS positions for an Earth Satellite."""
+
+    def __init__(self, topos):
+        self.center = 399
+        self.target = topos
+
+    def icrf_vector_at(self, t):
+        """Return the GCRS position, velocity of this Topos at `t`."""
+        topos = self.target
+        pos, vel = terra(topos.latitude.radians, topos.longitude.radians,
+                         topos.elevation.au, t.gast)
+        pos = einsum('ij...,j...->i...', t.MT, pos)
+        vel = einsum('ij...,j...->i...', t.MT, vel)
+        if topos.x:
+            R = rot_y(topos.x * ASEC2RAD)
+            pos = einsum('ij...,j...->i...', R, pos)
+        if topos.y:
+            R = rot_x(topos.y * ASEC2RAD)
+            pos = einsum('ij...,j...->i...', R, pos)
+        # TODO: also rotate velocity
+        return pos, vel

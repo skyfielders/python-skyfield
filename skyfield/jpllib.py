@@ -1,7 +1,7 @@
 """An interface between JPL ephemerides and Skyfield."""
 
 import os
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from numpy import max, min
 
 from jplephem.spk import SPK
@@ -13,7 +13,6 @@ from .functions import length_of
 from .positionlib import Astrometric, Barycentric, ICRF
 from .timelib import calendar_date
 
-Segment = namedtuple('Segment', 'center target compute')
 _targets = dict((name, target) for (target, name) in target_name_pairs)
 
 class SpiceKernel(object):
@@ -61,8 +60,7 @@ class SpiceKernel(object):
         self.path = path
         self.filename = os.path.basename(path)
         self.spk = SPK.open(path)
-        self.segments = [Segment(s.center, s.target, _build_compute(s))
-                         for s in self.spk.segments]
+        self.segments = [_Segment(s) for s in self.spk.segments]
         self.codes = set(s.center for s in self.segments).union(
                          s.target for s in self.segments)
 
@@ -154,23 +152,31 @@ class SpiceKernel(object):
         return code
 
 
-def _build_compute(segment):
-    """Build a Skyfield `compute` callback for the SPK `segment`."""
+class _Segment(object):
+    __slots__ = ['center', 'target', 'spk_segment']
 
-    if segment.data_type == 2:
-        def compute(t):
-            position, velocity = segment.compute_and_differentiate(t.tdb)
-            return position / AU_KM, velocity / AU_KM
-
-    elif segment.data_type == 3:
-        def compute(t):
-            six = segment.compute(t.tdb)
-            return six[:3] / AU_KM, six[3:] * DAY_S / AU_KM
-
-    else:
+    def __new__(cls, spk_segment):
+        if spk_segment.data_type == 2:
+            return object.__new__(_Type2)
+        if spk_segment.data_type == 3:
+            return object.__new__(_Type3)
         raise ValueError('SPK data type {0} not yet supported segment'
-                         .format(segment.data_type))
-    return compute
+                         .format(spk_segment.data_type))
+
+    def __init__(self, spk_segment):
+        self.center = spk_segment.center
+        self.target = spk_segment.target
+        self.spk_segment = spk_segment
+
+class _Type2(_Segment):
+    def icrf_vector_at(self, t):
+        position, velocity = self.spk_segment.compute_and_differentiate(t.tdb)
+        return position / AU_KM, velocity / AU_KM
+
+class _Type3(_Segment):
+    def icrf_vector_at(self, t):
+        pv = self.spk_segment.compute(t.tdb)
+        return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM
 
 
 class Body(object):
@@ -419,11 +425,11 @@ def _segment_line(segment):
 def _tally(minus_chain, plus_chain, t):
     position = velocity = 0.0
     for segment in minus_chain:
-        p, v = segment.compute(t)
+        p, v = segment.icrf_vector_at(t)
         position -= p
         velocity -= v
     for segment in plus_chain:
-        p, v = segment.compute(t)
+        p, v = segment.icrf_vector_at(t)
         position += p
         velocity += v
     return position, velocity
