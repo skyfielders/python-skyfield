@@ -8,8 +8,32 @@ from .relativity import light_time_difference
 from .units import Angle
 
 class Star(object):
-    # TODO(1.0): document, and add to API docs.
+    """The position in the sky of a star or other fixed object.
 
+    Each `Star` object specifies the position of a distant object, which
+    should be provided as a right ascension and declination referenced
+    to the ICRS.  You can specify the coordinates using Skyfield
+    :class:`~skyfield.units.Angle` objects, or floating point numbers,
+    or tuples specifying fractions as minutes and seconds:
+
+    >>> barnard = Star(ra=Angle(hours=12.1), dec=Angle(degrees=45))
+    >>> barnard = Star(ra_hours=17.963471675, dec_degrees=4.69339088889)
+    >>> barnard = Star(ra_hours=(17, 57, 48.49), dec_degrees=(4, 41, 36.20))
+
+    For objects whose proper motion across the sky has been detected,
+    you can supply velocities in milliarcseconds (mas) per year, and
+    even a parallax and radial velocity if those are known:
+
+    >>> barnard = Star(ra_hours=(17, 57, 48.49803),
+    ...                dec_degrees=(4, 41, 36.2072),
+    ...                ra_mas_per_year=-798.71,
+    ...                dec_mas_per_year=+10337.77,
+    ...                parallax_mas=545.4,
+    ...                radial_km_per_s=-110.6)
+
+    See `stars` for a guide to using a `Star` once you have created it.
+
+    """
     au_km = AU_KM
 
     def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,

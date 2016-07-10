@@ -33,6 +33,16 @@ in a single step by calling `load()`.
    Body.topos
    Geometry.at
 
+Stars and other distant objects
+===============================
+
+.. currentmodule:: skyfield.starlib
+
+.. autosummary::
+   :nosignatures:
+
+   Star
+
 Positions
 =========
 

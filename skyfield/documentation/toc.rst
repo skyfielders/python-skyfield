@@ -21,6 +21,7 @@ that is accelerated using NumPy vector math!
    api-load
    api-time
    api-ephemeris
+   api-stars
    api-position
    api-quantity
    design
