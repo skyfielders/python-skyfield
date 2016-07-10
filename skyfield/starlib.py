@@ -10,15 +10,18 @@ from .units import Angle
 class Star(object):
     """The position in the sky of a star or other fixed object.
 
-    Each `Star` object specifies the position of a distant object, which
-    should be provided as a right ascension and declination referenced
-    to the ICRS.  You can specify the coordinates using Skyfield
-    :class:`~skyfield.units.Angle` objects, or floating point numbers,
-    or tuples specifying fractions as minutes and seconds:
+    Each `Star` object specifies the position of a distant object.  You
+    should provide as a right ascension and declination relative to the
+    ICRS (the recent improvement upon J2000).  You can specify the
+    coordinates using either floating point hours and degrees, or tuples
+    that specify hour and degree fractions as minutes and seconds, or
+    even full Skyfield :class:`~skyfield.units.Angle` objects (which can
+    themselves be initialized using hours, degrees, or radians):
 
-    >>> barnard = Star(ra=Angle(hours=12.1), dec=Angle(degrees=45))
     >>> barnard = Star(ra_hours=17.963471675, dec_degrees=4.69339088889)
     >>> barnard = Star(ra_hours=(17, 57, 48.49), dec_degrees=(4, 41, 36.20))
+    >>> barnard = Star(ra=Angle(hours=17.963471675),
+    ...                dec=Angle(degrees=4.69339088889))
 
     For objects whose proper motion across the sky has been detected,
     you can supply velocities in milliarcseconds (mas) per year, and
