@@ -34,7 +34,6 @@ _NAIF = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
 _USNO = 'http://maia.usno.navy.mil/ser7/'
 
 class Loader(object):
-    # TODO(1.0): test and document the offline / old-files story
     """A tool for downloading and opening astronomical data files.
 
     A default `Loader` that saves data files to the current working
@@ -215,6 +214,9 @@ class Loader(object):
         leap_dates, leap_offsets = self('Leap_Second.dat')
         return Timescale(delta_t_recent, leap_dates, leap_offsets)
 
+    @property
+    def log(self):
+        return '\n'.join(self.events) + '\n'
 
 def _search(mapping, filename):
     """Search a Loader data structure for a filename."""
