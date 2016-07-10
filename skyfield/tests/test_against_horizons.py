@@ -59,7 +59,9 @@ def test_callisto_geometry(ts):
 
 def test_callisto_astrometric(ts):
     e = api.load('jup310.bsp')
-    a = e['earth'].at(ts.utc(2053, 10, 8, 23, 59, 59)).observe(e['callisto'])
+    # This date was utc(2053, 10, 9), but new leap seconds keep breaking
+    # the test, so:
+    a = e['earth'].at(ts.tt(jd=2471184.5007775929)).observe(e['callisto'])
     ra, dec, distance = a.radec()
     compare(ra._degrees, 217.1839292, 0.001 * arcsecond)
     compare(dec.degrees, -13.6892791, 0.001 * arcsecond)
