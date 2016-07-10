@@ -142,8 +142,6 @@ or else by generating a whole series of positions.
   are able to generate their current astrometric position
   when observed from a planet. :doc:`Read more <stars>`
 
-  .. TODO(1.0) - turn the following back into test code
-
   ::
 
     from skyfield.api import Star, load
@@ -157,13 +155,13 @@ or else by generating a whole series of positions.
 
     # From the center of the Earth (Geocentric)
 
-    astrometric = earth(t).observe(barnard)
-    apparent = earth(t).observe(barnard).apparent()
+    astrometric = earth.at(t).observe(barnard)
+    apparent = earth.at(t).observe(barnard).apparent()
 
     # From a place on Earth (Topocentric)
 
-    astrometric = boston(t).observe(barnard)
-    apparent = boston(t).observe(barnard).apparent()
+    astrometric = boston.at(t).observe(barnard)
+    apparent = boston.at(t).observe(barnard).apparent()
 
 **Earth satellites**
   Earth satellite positions can be generated
