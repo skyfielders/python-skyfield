@@ -18,4 +18,5 @@ install:
 script:
   - "pip install unittest2"
   - "assay --batch skyfield.tests"
+  - "ln *.bsp skyfield/documentation"
   - "if [[ $TRAVIS_PYTHON_VERSION != 2.6 ]]; then make -C skyfield/documentation doctest; fi"
