@@ -86,24 +86,24 @@ And it can convert results into native AstroPy units:
     [-2.19049548  0.71236701  0.36712443] AU
     25.465 deg
 
-The official documentation is available through the links
-in the Table of Contents below.
-You can also visit:
-
-* `Skyfield on the Python Package Index <https://pypi.python.org/pypi/skyfield>`_
-
-* `GitHub project page <https://github.com/brandon-rhodes/python-skyfield/>`_
-
-* `GitHub issue tracker <https://github.com/brandon-rhodes/python-skyfield/issues>`_
-
 Documenation
 ============
+
+Skyfield’s documentation lives here at the main Skyfield web site:
 
 .. toctree::
    :maxdepth: 1
 
    toc
    api
+
+But the source code and issue tracker live on other web sites:
+
+* `Skyfield on the Python Package Index <https://pypi.python.org/pypi/skyfield>`_
+
+* `GitHub project page <https://github.com/brandon-rhodes/python-skyfield/>`_
+
+* `GitHub issue tracker <https://github.com/brandon-rhodes/python-skyfield/issues>`_
 
 News
 ====

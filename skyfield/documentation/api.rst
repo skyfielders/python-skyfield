@@ -8,10 +8,17 @@ Downloading files
 
 .. currentmodule:: skyfield.iokit
 
+::
+
+    from skyfield.api import load
+    ts = load.timescale()
+    planets = load('de405.bsp')
+
 .. autosummary::
 
-   load
    Loader
+   Loader.path_to
+   Loader.timescale
 
 Ephemerides
 ===========

@@ -4,6 +4,7 @@ import os
 import numpy as np
 import sys
 from datetime import date, datetime, timedelta
+from fnmatch import fnmatch
 from time import time
 
 from .jpllib import SpiceKernel
@@ -27,57 +28,180 @@ def _filename_of(url):
     """Return the last path component of a url."""
     return urlparse(url).path.split('/')[-1]
 
+_IERS = 'https://hpiers.obspm.fr/iers/bul/bulc/'
+_JPL = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/'
+_NAIF = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
+_USNO = 'http://maia.usno.navy.mil/ser7/'
+
 class Loader(object):
     # TODO(1.0): test and document the offline / old-files story
-    """Download files to a directory where Skyfield can use them.
+    """A tool for downloading and opening astronomical data files.
 
-    A default `Loader` that saves data files in the current working
+    A default `Loader` that saves data files to the current working
     directory can be imported directly from the Skyfield API::
 
         from skyfield.api import load
 
     But users can also create a `Loader` of their own, if there is
-    another directory they want data files saved to::
+    another directory they want data files saved to, or if they want to
+    specify different options.  The directory is created automatically
+    if it does not yet exist::
 
         from skyfield.api import Loader
         load = Loader('~/skyfield-data')
 
-    If the ``verbose`` option is switched to ``False``, then no progress
-    bar is printed to the screen each time a file is downloaded.
+    The options are:
+
+    * ``verbose`` — if set to ``False``, then the loader will not print
+      a progress bar to the screen each time it downloads a file.  (If
+      the standard output is not a TTY, then no progress bar is printed
+      in any case.)
+
+    * ``expire`` — if set to ``False``, then Skyfield will always use an
+      existing file on disk, instead of expiring files that are out of
+      date and replacing them with newly downloaded copies.
+
+    Once a `Loader` is created, it can be called like a function to
+    open, or else to download and open, a file whose name it recognizes::
+
+        planets = load('de405.bsp')
+
+    Each loader also supports an attribute and a few methods.
 
     """
-    def __init__(self, directory, verbose=True):
-        self.directory = directory
-        self.urls = FILE_URLS
+    def __init__(self, directory, verbose=True, expire=True):
+        self.directory = os.path.expanduser(directory)
         self.verbose = verbose
+        self.expire = expire
+        self.events = []
         if not os.path.exists(self.directory):
-            os.makedirs(directory)
+            os.makedirs(self.directory)
 
-    def path_of(self, filename):
+        # Each instance gets its own copy of these data structures,
+        # instead of sharing a single copy, so users can edit them
+        # without changing the behavior of other Loader objects:
+
+        self.urls = {
+            'deltat.data': _USNO,
+            'deltat.preds': _USNO,
+            'Leap_Second.dat': _IERS,
+            '.bsp': [
+                ('jup*.bsp', _NAIF),
+                ('*.bsp', _JPL),
+            ],
+        }
+        self.parsers = {
+            'deltat.data': parse_deltat_data,
+            'deltat.preds': parse_deltat_preds,
+            'Leap_Second.dat': parse_leap_seconds,
+        }
+        self.openers = {
+            '.bsp': [
+                ('*.bsp', SpiceKernel),
+            ],
+        }
+
+    def path_to(self, filename):
+        """Return the path to ``filename`` in this loader's directory."""
         return os.path.join(self.directory, filename)
 
     def __call__(self, filename):
         """Open the given file, downloading it first if necessary."""
-        url, parser = self.urls.get(filename, (None, None))
-        if url is not None:
-            # TODO: they should be able to turn download off
-            expiration_date, data = parser(load(url, self.directory,
-                                                verbose=self.verbose))
-            if expiration_date < today():
-                # TODO: just fail if they turn download off
-                # TODO: unless they don't care about recency
+        if '://' in filename:
+            url = filename
+            filename = urlparse(url).path.split('/')[-1]
+        # Should this API accept full path names? It might look like:
+        # elif os.sep in filename:
+        #     os.path.expanduser(directory)
+        #     path = filename
+        #     filename = os.path.basename(path)
+        #     url = _search(self.urls, filename)
+        #     directory =
+        else:
+            url = _search(self.urls, filename)
+            if url:
+                url += filename
+
+        path = self.path_to(filename)
+        parser = _search(self.parsers, filename)
+        opener = _search(self.openers, filename)
+        if (parser is None) and (opener is None):
+            raise ValueError('Skyfield does not know how to open a file'
+                             ' named {0!r}'.format(filename))
+
+        if os.path.exists(path):
+            self._log('Already exists: {0}', path)
+            if parser is not None:
+                self._log('  Parsing with: {0}()', parser.__name__)
+                with open(path, 'rb') as f:
+                    expiration_date, data = parser(f)
+                if not self.expire:
+                    self._log('  Ignoring expiration: {0}', expiration_date)
+                    return data
+                if today() <= expiration_date:
+                    self._log('  Does not expire til: {0}', expiration_date)
+                    return data
+                self._log('  Expired on: {0}', expiration_date)
                 for n in itertools.count(1):
                     prefix, suffix = filename.rsplit('.', 1)
                     backup_name = '{0}.old{1}.{2}'.format(prefix, n, suffix)
                     if not os.path.exists(backup_name):
                         break
-                os.rename(self.path_of(filename), self.path_of(backup_name))
-                expiration_date, data = parser(load(url, self.directory,
-                                                    verbose=self.verbose))
+                self._log('  Renaming to: {0}', backup_name)
+                os.rename(self.path_to(filename), self.path_to(backup_name))
+            else:
+                # Currently, openers have no concept of expiration.
+                self._log('  Opening with: {0}', opener.__name__)
+                return opener(path)
+
+        if url is None:
+            raise ValueError('Skyfield does not know where to download {!r}'
+                             .format(filename))
+
+        self._log('  Downloading: {0}', url)
+        download(url, path, self.verbose)
+
+        if parser is not None:
+            self._log('  Parsing with: {0}()', parser.__name__)
+            with open(path, 'rb') as f:
+                expiration_date, data = parser(f)
             return data
-        return load(filename, self.directory, verbose=self.verbose)
+        else:
+            self._log('  Opening with: {0}', opener.__name__)
+            return opener(path)
+
+    def _log(self, message, *args):
+        self.events.append(message.format(*args))
+
+    def open(self, url):
+        """Open a file, downloading it first if it does not yet exist.
+
+        Unlike when you call a loader directly like `load()`, this
+        `load.open()` method does not attempt to parse the resulting
+        file.  Instead, it returns an open file object without trying to
+        interpret the contents.
+
+        """
+        filename = urlparse(url).path.split('/')[-1]
+        path = self.path_to(filename)
+        if not os.path.exists(path):
+            download(url, path, self.verbose)
+        return open(path, 'rb')
 
     def timescale(self, delta_t=None):
+        """Open or download three time scale files, returning a `Timescale`.
+
+        This method is how most Skyfield users build a `Timescale`
+        object, which is necessary for building specific `Time` objects
+        that name specific moments.
+
+        This will open or download the three files that Skyfield needs
+        to measure time.  UT1 is tabulated by the United States Naval
+        Observatory files ``deltat.data`` and ``deltat.preds``, while
+        UTC is defined by ``Leap_Second.dat`` from the International
+        Earth Rotation Service.
+
+        """
         if delta_t is not None:
             # TODO: Can this use inf and -inf instead?
             delta_t_recent = np.array(((-1e99, 1e99), (delta_t, delta_t)))
@@ -91,7 +215,21 @@ class Loader(object):
         return Timescale(delta_t_recent, leap_dates, leap_offsets)
 
 
-def parse_deltat_data(text):
+def _search(mapping, filename):
+    """Search a Loader data structure for a filename."""
+    result = mapping.get(filename)
+    if result is not None:
+        return result
+    name, ext = os.path.splitext(filename)
+    result = mapping.get(ext)
+    if result is not None:
+        for pattern, result2 in result:
+            if fnmatch(filename, pattern):
+                return result2
+    return None
+
+
+def parse_deltat_data(fileobj):
     """Parse the United States Naval Observatory ``deltat.data`` file.
 
     Each line file gives the date and the value of Delta T::
@@ -102,14 +240,15 @@ def parse_deltat_data(text):
     Delta T values.
 
     """
-    array = np.loadtxt(text)
+    array = np.loadtxt(fileobj)
     year, month, day = array[-1,:3].astype(int)
     expiration_date = date(year + 1, month, day)
     year, month, day, delta_t = array.T
     data = np.array((julian_date(year, month, day), delta_t))
     return expiration_date, data
 
-def parse_deltat_preds(text):
+
+def parse_deltat_preds(fileobj):
     """Parse the United States Naval Observatory ``deltat.preds`` file.
 
     Each line gives a floating point year, the value of Delta T, and one
@@ -121,14 +260,15 @@ def parse_deltat_preds(text):
     Delta T values.
 
     """
-    year_float, delta_t = np.loadtxt(text, skiprows=3, usecols=[0, 1]).T
+    year_float, delta_t = np.loadtxt(fileobj, skiprows=3, usecols=[0, 1]).T
     year = year_float.astype(int)
     month = 1 + (year_float * 12.0).astype(int) % 12
     expiration_date = date(year[0] + 1, month[0], 1)
     data = np.array((julian_date(year, month, 1), delta_t))
     return expiration_date, data
 
-def parse_leap_seconds(text):
+
+def parse_leap_seconds(fileobj):
     """Parse the IERS file ``Leap_Second.dat``.
 
     The leap dates array can be searched with::
@@ -140,7 +280,7 @@ def parse_leap_seconds(text):
         offset = leap_offsets[index]
 
     """
-    lines = iter(text)
+    lines = iter(fileobj)
     for line in lines:
         if line.startswith(b'#  File expires on'):
             break
@@ -162,42 +302,6 @@ def parse_leap_seconds(text):
     leap_offsets[0] = leap_offsets[1] = offsets[0]
     leap_offsets[2:] = offsets
     return expiration_date, (leap_dates, leap_offsets)
-
-
-def load(filename, directory='.', autodownload=True, verbose=True):
-    """Load the given file, possibly downloading it if it is not present."""
-    if '/' in filename:
-        url = filename
-        filename = url.split('/')[-1]
-        cls = None
-    elif filename.endswith('.bsp'):
-        url = url_for(filename)
-        cls = SpiceKernel
-    else:
-        raise ValueError('Skyfield does not recognize that file extension')
-    if directory == '.':
-        path = filename
-    else:
-        directory = os.path.expanduser(directory)
-        path = os.path.join(directory, filename)
-    if not os.path.exists(path):
-        if not autodownload:
-            raise IOError('you specified autodownload=False but the file'
-                          ' does not exist: {0}'.format(path))
-        download(url, path, verbose=verbose)
-    return open(path, 'rb') if (cls is None) else cls(path)
-
-
-def url_for(filename):
-    """Given a recognized filename, return its URL."""
-    if filename.endswith('.bsp'):
-        if filename.startswith('de'):
-            return 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/' + filename
-        elif filename.startswith('jup'):
-            return ('http://naif.jpl.nasa.gov/pub/naif/generic_kernels'
-                    '/spk/satellites/' + filename)
-    raise ValueError('Skyfield does not know where to download {!r} from'
-                     .format(filename))
 
 
 def download(url, path, verbose=None, blocksize=128*1024):
@@ -285,11 +389,3 @@ class ProgressBar(object):
         print('\r[{0:33}] {1:3}% {2}'.format(bar, percent, self.filename),
               end='\n' if (percent == 100) else '', file=sys.stderr)
         sys.stderr.flush()
-
-
-FILE_URLS = dict((_filename_of(url), (url, parser)) for url, parser in (
-    ('http://maia.usno.navy.mil/ser7/deltat.data', parse_deltat_data),
-    ('http://maia.usno.navy.mil/ser7/deltat.preds', parse_deltat_preds),
-    ('https://hpiers.obspm.fr/iers/bul/bulc/Leap_Second.dat',
-     parse_leap_seconds),
-    ))

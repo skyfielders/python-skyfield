@@ -35,11 +35,11 @@ def load():
         shutil.rmtree(path)
 
 def save_file(load, content=old_content):
-    with open(load.path_of('deltat.data'), 'wb') as f:
+    with open(load.path_to('deltat.data'), 'wb') as f:
         f.write(content)
 
 def file_contents(load):
-    with open(load.path_of('deltat.data'), 'rb') as f:
+    with open(load.path_to('deltat.data'), 'rb') as f:
         return f.read()
 
 @contextmanager
