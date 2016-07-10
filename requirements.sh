@@ -6,7 +6,7 @@ if conda --version >/dev/null 2>&1
 then
     conda install astropy mock numpy sphinx pytz lxml html5lib beautifulsoup4
 else
-    if python --version 2>&1 | ! grep -q 2.6
+    if ! python --version 2>&1 | grep -q 2.6
     then pip install astropy
     fi
     pip install mock numpy sphinx pytz
