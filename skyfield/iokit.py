@@ -52,14 +52,15 @@ class Loader(object):
 
     The options are:
 
-    * ``verbose`` — if set to ``False``, then the loader will not print
-      a progress bar to the screen each time it downloads a file.  (If
-      the standard output is not a TTY, then no progress bar is printed
-      in any case.)
+    ``verbose``
+      If set to ``False``, then the loader will not print a progress bar
+      to the screen each time it downloads a file.  (If the standard
+      output is not a TTY, then no progress bar is printed in any case.)
 
-    * ``expire`` — if set to ``False``, then Skyfield will always use an
-      existing file on disk, instead of expiring files that are out of
-      date and replacing them with newly downloaded copies.
+    ``expire``
+      If set to ``False``, then Skyfield will always use an existing
+      file on disk, instead of expiring files that are out of date and
+      replacing them with newly downloaded copies.
 
     Once a `Loader` is created, it can be called like a function to
     open, or else to download and open, a file whose name it recognizes::
@@ -173,20 +174,20 @@ class Loader(object):
     def _log(self, message, *args):
         self.events.append(message.format(*args))
 
-    def open(self, url):
+    def open(self, url, mode='rb'):
         """Open a file, downloading it first if it does not yet exist.
 
-        Unlike when you call a loader directly like `load()`, this
-        `load.open()` method does not attempt to parse the resulting
-        file.  Instead, it returns an open file object without trying to
-        interpret the contents.
+        Unlike when you call a loader directly like ``my_loader()``,
+        this ``my_loader.open()`` method does not attempt to parse or
+        interpret the resulting file.  Instead, it simply returns an
+        open file object without trying to interpret the contents.
 
         """
         filename = urlparse(url).path.split('/')[-1]
         path = self.path_to(filename)
         if not os.path.exists(path):
             download(url, path, self.verbose)
-        return open(path, 'rb')
+        return open(path, mode)
 
     def timescale(self, delta_t=None):
         """Open or download three time scale files, returning a `Timescale`.
