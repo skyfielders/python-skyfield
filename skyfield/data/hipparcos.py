@@ -1,5 +1,4 @@
 import gzip
-from skyfield import api
 from skyfield.functions import to_polar
 from skyfield.starlib import Star
 from skyfield.timelib import T0
@@ -27,6 +26,8 @@ def parse(line):
 
 def load(match_function):
     """Yield the Hipparcos stars for which `match_function(line)` is true."""
+    from skyfield import api
+
     with api.load.open(url) as f:
         for line in gzip.GzipFile(fileobj=f):
             if match_function(line):
