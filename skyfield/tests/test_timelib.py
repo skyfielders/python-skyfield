@@ -217,3 +217,28 @@ def test_leap_second(ts):
     assert ts.tai(jd=t3).utc_iso() == '1973-12-31T23:59:60Z'
     assert ts.tai(jd=t4).utc_iso() == '1974-01-01T00:00:00Z'
     assert ts.tai(jd=t5).utc_iso() == '1974-01-01T00:00:01Z'
+
+def test_delta_t(ts):
+
+    # Check delta_t calculation around year 2000/1/1 (from IERS tables this is 63.8285)
+    t = ts.utc(2000, 1, 1, 0, 0, 0)
+    assert abs(t.delta_t - 63.8285) < 1e-5
+
+    # Check historic value. Compare to the table in Morrison and
+    # Stephenson 2004, the tolerance is 2 sigma
+    t = ts.utc(year=1000)
+    assert abs(t.delta_t - 1570.0) < 110.0
+
+    # Check future value. Should be calculated by Morrison and
+    # Stephenson formula. For 2320 (t=5 cy) should be: -20 + 32 * 5**2
+    t = ts.utc(year=2320)
+    assert t.delta_t == -20.0 + (32.0 * 5.0**2)
+ 
+def test_time_repr(ts):
+
+    # Check that repr return is a str (this is required on Python 2,
+    # unicode is not allowed)
+    assert isinstance(repr(ts.utc(year=2000)), str)
+
+    # Check array conversion
+    assert isinstance(repr(ts.utc(year=range(2000, 2010))), str)
