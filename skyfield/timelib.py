@@ -606,11 +606,16 @@ def interpolate_delta_t(delta_t_table, tt):
 
     """
     tt_array, delta_t_array = delta_t_table
-    delta_t = interp(tt, tt_array, delta_t_array, nan, nan)
+    delta_t = _to_array(interp(tt, tt_array, delta_t_array, nan, nan))
     missing = isnan(delta_t)
+
     if missing.any():
-        tt = tt[missing]
-        delta_t[missing] = delta_t_formula_morrison_and_stephenson_2004(tt)
+        # Test if we are dealing with an array and proceed appropriately
+        if missing.shape:
+            tt = tt[missing]
+            delta_t[missing] = delta_t_formula_morrison_and_stephenson_2004(tt)
+        else:
+            delta_t = delta_t_formula_morrison_and_stephenson_2004(tt)
     return delta_t
 
 def delta_t_formula_morrison_and_stephenson_2004(tt):

@@ -232,7 +232,7 @@ def test_delta_t(ts):
     # Check future value. Should be calculated by Morrison and
     # Stephenson formula. For 2320 (t=5 cy) should be: -20 + 32 * 5**2
     t = ts.utc(year=2320)
-    assert t.delta_t == -20.0 + (32.0 * 5.0**2)
+    assert abs(t.delta_t + 20.0 - (32.0 * 5.0**2)) < 1.0
  
 def test_time_repr(ts):
 
