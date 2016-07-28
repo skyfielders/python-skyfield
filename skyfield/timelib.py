@@ -218,6 +218,10 @@ class Time(object):
         return self.shape[0]
 
     def __repr__(self):
+
+        if getattr(self.tt, 'shape', ()):
+            rstr = '<Time {0} values from tt={1:.6f} to tt={2:.6f}>'
+            return rstr.format(self.tt.size, self.tt.min(), self.tt.max())
         return '<Time tt={0:.6f}>'.format(self.tt)
 
     def __getitem__(self, index):
