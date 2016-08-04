@@ -571,8 +571,9 @@ def calendar_tuple(jd_float, offset=0.0):
     throw away the seconds; and so forth.
 
     """
+    jd_float = _to_array(jd_float)
     whole, fraction = divmod(jd_float + 0.5, 1.0)
-    whole = whole.astype(whole)
+    whole = whole.astype(int)
     year, month, day = calendar_date(whole)
     hour, hfrac = divmod(fraction * 24.0, 1.0)
     minute, second = divmod(hfrac * 3600.0, 60.0)
