@@ -23,7 +23,15 @@ downloads several data files before it can perform useful operations.
 If the program’s output is a terminal window,
 then it will display progress bars as each file is downloaded:
 
-.. testcode::
+.. testsetup::
+
+   from skyfield.api import Loader
+
+   load = Loader('.')   # start with fresh history, for print() below
+   ts = load.timescale()
+   planets = load('de421.bsp')
+
+::
 
    from skyfield.api import load
 
@@ -77,7 +85,7 @@ which is how programs can name their current directory:
       Does not expire til: 2016-10-01
     Already exists: ./Leap_Second.dat
       Parsing with: parse_leap_seconds()
-      Does not expire til: 2016-07-30
+      Does not expire til: 2017-07-28
     Already exists: ./de421.bsp
       Opening with: SpiceKernel
 

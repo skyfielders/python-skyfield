@@ -216,7 +216,7 @@ class Loader(object):
 
     @property
     def log(self):
-        return '\n'.join(self.events) + '\n'
+        return '\n'.join(self.events)
 
 def _search(mapping, filename):
     """Search a Loader data structure for a filename."""
