@@ -246,6 +246,8 @@ def test_time_repr(ts):
 
 def test_jd_calendar():
 
+    import numbers
+
     # Check a specific instance (using UNIX epoch here, though that's
     # an arbitrary choice)
     jd_unix = 2440587.5
@@ -257,12 +259,12 @@ def test_jd_calendar():
     assert cal == cal_unix
 
     # Check that all the return types are correct
-    assert isinstance(cal[0], int)  # Year
-    assert isinstance(cal[1], int)  # Month
-    assert isinstance(cal[2], int)  # Day
-    assert isinstance(cal[3], int)  # Hour
-    assert isinstance(cal[4], int)  # Minute
-    assert isinstance(cal[5], float)  # Second
+    assert isinstance(cal[0], numbers.Integral)  # Year
+    assert isinstance(cal[1], numbers.Integral)  # Month
+    assert isinstance(cal[2], numbers.Integral)  # Day
+    assert isinstance(cal[3], numbers.Integral)  # Hour
+    assert isinstance(cal[4], numbers.Integral)  # Minute
+    assert isinstance(cal[5], numbers.Real)  # Second
 
     # Check backward conversion
     assert julian_date(*cal) == jd_unix
