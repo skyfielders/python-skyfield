@@ -132,12 +132,12 @@ class ICRF(object):
         return Angle(radians=arccos(clip(c, -1.0, 1.0)))
 
     def ecliptic_position(self):
-        """Compute ecliptic coordinates (x, y, z)"""
+        """Compute J2000 ecliptic coordinates (x, y, z)"""
         vector = _ECLIPJ2000.dot(self.position.au)
         return Distance(vector)
 
     def ecliptic_latlon(self):
-        """Compute ecliptic coordinates (lat, lon, distance)"""
+        """Compute J2000 ecliptic coordinates (lat, lon, distance)"""
         vector = _ECLIPJ2000.dot(self.position.au)
         d, lat, lon = to_polar(vector)
         return (Angle(radians=lat, signed=True),
