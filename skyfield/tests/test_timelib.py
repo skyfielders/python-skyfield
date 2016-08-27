@@ -3,7 +3,7 @@ from assay import assert_raises
 from pytz import timezone
 from skyfield import api
 from skyfield.constants import DAY_S
-from skyfield.timelib import utc
+from skyfield.timelib import utc, calendar_tuple, julian_date
 from datetime import datetime
 
 one_second = 1.0 / DAY_S
@@ -218,6 +218,7 @@ def test_leap_second(ts):
     assert ts.tai(jd=t4).utc_iso() == '1974-01-01T00:00:00Z'
     assert ts.tai(jd=t5).utc_iso() == '1974-01-01T00:00:01Z'
 
+
 def test_delta_t(ts):
 
     # Check delta_t calculation around year 2000/1/1 (from IERS tables this is 63.8285)
@@ -242,3 +243,42 @@ def test_time_repr(ts):
 
     # Check array conversion
     assert isinstance(repr(ts.utc(year=range(2000, 2010))), str)
+
+def test_jd_calendar():
+
+    import numbers
+
+    # Check a specific instance (using UNIX epoch here, though that's
+    # an arbitrary choice)
+    jd_unix = 2440587.5
+    cal_unix = (1970, 1, 1, 0, 0, 0.0)
+
+    cal = calendar_tuple(jd_unix)
+
+    # Check that the returned value is correct
+    assert cal == cal_unix
+
+    # Check that all the return types are correct
+    assert isinstance(cal[0], numbers.Integral)  # Year
+    assert isinstance(cal[1], numbers.Integral)  # Month
+    assert isinstance(cal[2], numbers.Integral)  # Day
+    assert isinstance(cal[3], numbers.Integral)  # Hour
+    assert isinstance(cal[4], numbers.Integral)  # Minute
+    assert isinstance(cal[5], numbers.Real)  # Second
+
+    # Check backward conversion
+    assert julian_date(*cal) == jd_unix
+
+    # Check array conversion components
+    jd_array = jd_unix + np.arange(5.0)
+    cal_array = calendar_tuple(jd_array)
+    
+    assert (cal_array[0] == 1970).all()
+    assert (cal_array[1] == 1).all()
+    assert (cal_array[2] == np.arange(1, 6)).all()
+    assert (cal_array[3] == 0).all()
+    assert (cal_array[4] == 0).all()
+    assert (cal_array[5] == 0.0).all()
+
+    # Check reversal of array
+    assert (julian_date(*cal_array) == jd_array).all()
