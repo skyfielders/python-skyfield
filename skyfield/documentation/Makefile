@@ -155,11 +155,14 @@ doctest:
 diff:
 	colordiff -ur ~/Dropbox/rhodesmill.org/skyfield _build/html/ | grep -v 'Only in' | less
 
+#DEST = $(HOME)/Dropbox/rhodesmill.org/skyfield
+DEST=wf-rhodesmill:Dropbox/rhodesmill.org/skyfield
+
 dry-run:
-	rsync --dry-run -crlv _build/html/ ~/Dropbox/rhodesmill.org/skyfield
+	rsync --dry-run -crlv _build/html/ $(DEST)
 
 sync:
-	rsync -crlv _build/html/ ~/Dropbox/rhodesmill.org/skyfield
+	rsync -crlv _build/html/ $(DEST)
 
 # Runs web server outside _build, for when I need to "rm -r" clean-slate it:
 serve:
