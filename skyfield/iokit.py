@@ -24,6 +24,10 @@ except:
     from urlparse import urlparse
     from urllib2 import urlopen
 
+# If we are running under the built-in IDLE development environment, we
+# cannot use '\r' to keep repainting the current line as a progress bar:
+_running_IDLE = (sys.stderr.__class__.__name__ == 'PseudoOutputFile')
+
 def _filename_of(url):
     """Return the last path component of a url."""
     return urlparse(url).path.split('/')[-1]
@@ -325,9 +329,15 @@ def download(url, path, verbose=None, blocksize=128*1024):
         raise IOError('cannot get {0} because {1}'.format(url, e))
     if verbose is None:
         verbose = sys.stderr.isatty()
+
+    bar = None
     if verbose:
-        bar = ProgressBar(path)
-        content_length = int(connection.headers.get('content-length', -1))
+        if _running_IDLE:
+            print('Downloading {0} ...'.format(os.path.basename(path)),
+                  file=sys.stderr)
+        else:
+            bar = ProgressBar(path)
+            content_length = int(connection.headers.get('content-length', -1))
 
     # Python open() provides no way to achieve O_CREAT without also
     # truncating the file, which would ruin the work of another process
@@ -352,7 +362,7 @@ def download(url, path, verbose=None, blocksize=128*1024):
                     break
                 w.write(data)
                 length += len(data)
-                if verbose:
+                if bar is not None:
                     bar.report(length, content_length)
             w.flush()
             if lockf is not None:
