@@ -25,9 +25,20 @@ then it will display progress bars as each file is downloaded:
 
 .. testsetup::
 
+   import os
    from skyfield.api import Loader
 
-   load = Loader('.')   # start with fresh history, for print() below
+   # Depending on the order that these .rst files run in, this might
+   # download the files afresh, or might find them already present:
+
+   load = Loader('.')
+   ts = load.timescale()
+   planets = load('de421.bsp')
+
+   # But this second invocation of the loader will definitely find them,
+   # making the "print(load.log)" below come out right:
+
+   load = Loader('.')
    ts = load.timescale()
    planets = load('de421.bsp')
 
