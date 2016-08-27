@@ -108,6 +108,13 @@ But the source code and issue tracker live on other web sites:
 News
 ====
 
+**2016 August 27**
+
+  Released Skyfield 0.9
+  which adds the ability of :ref:`turning-off-downloads`,
+  offers an expanded :doc:`bibliography`,
+  and provides several bugfixes.
+
 **2016 March 30**
 
   Released Skyfield 0.8 with expanded documentation,

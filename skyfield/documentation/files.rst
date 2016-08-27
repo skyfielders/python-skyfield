@@ -132,8 +132,10 @@ by building a `Loader` whose verbosity is set to false.
 
    load = Loader('~/skyfield-data', verbose=False)
 
-Ignoring expired files
-======================
+.. _turning-off-downloads:
+
+Turning off downloads for expired files
+=======================================
 
 Sometimes you want to build an application
 that does not need network access in order to operate.
