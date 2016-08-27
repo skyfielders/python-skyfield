@@ -5,7 +5,7 @@ setup(
     name='skyfield',
     version=skyfield.__version__,
     description=skyfield.__doc__.split('\n', 1)[0],
-    long_description=open('README.rst').read(),
+    long_description=open('README.rst', 'rb').read().decode('utf-8'),
     license='MIT',
     author='Brandon Rhodes',
     author_email='brandon@rhodesmill.org',
