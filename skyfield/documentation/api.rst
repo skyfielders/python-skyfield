@@ -26,7 +26,7 @@ Ephemerides
 .. currentmodule:: skyfield.jpllib
 
 Skyfield users will usually download and open a `SpiceKernel` file
-in a single step by calling `load()`.
+in a single step by calling ``load()``.
 
 .. autosummary::
 

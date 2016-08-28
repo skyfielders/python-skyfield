@@ -66,8 +66,8 @@ and can start up without needing to access the network:
 
    Ready
 
-Most programs will run just fine using the default `load()` object
-provided in the `skyfield.api` module.
+Most programs will run just fine using the default ``load()`` object
+provided in the :mod:`skyfield.api` module.
 But other programs may want to build their own loader
 so that they have the chance to specify non-default behavior.
 

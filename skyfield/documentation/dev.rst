@@ -62,8 +62,8 @@ The maneuver is only slightly complicated by the fact that, when working
 in a NumPy universe, there are two slightly different kinds of scalars
 that the user might submit.
 
-1. A normal Python `float` or `int` is a scalar, and lacks all of the
-   special attributes that NumPy arrays enjoy.
+1. A normal Python ``float`` or ``int`` is a scalar, and lacks all of
+   the special attributes that NumPy arrays enjoy.
 
    >>> n = 3.4
    >>> type(n).__name__
@@ -73,7 +73,8 @@ that the user might submit.
 
 2. But NumPy also offers its own form of scalar: objects that have the
    same attributes and methods as arrays, but that have the empty tuple
-   `()` as their `.shape` instead of specifying one or more dimensions.
+   ``()`` as their ``.shape`` instead of specifying one or more
+   dimensions.
 
    >>> import numpy as np
    >>> m = np.float64(3.4)
