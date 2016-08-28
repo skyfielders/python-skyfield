@@ -3,6 +3,10 @@
  Skyfield
 ==========
 
+.. raw:: html
+
+   <img class="logo" src="_static/logo.png">
+
 .. rst-class:: motto
 
    *Elegant Astronomy for Python*
