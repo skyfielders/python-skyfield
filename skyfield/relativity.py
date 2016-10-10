@@ -139,9 +139,9 @@ def _add_deflection(position, observer, deflector, rmass):
     qmag = length_of(pq)
     emag = length_of(pe)
 
-    phat = position / pmag
-    qhat = pq / qmag
-    ehat = pe / emag
+    phat = position / where(pmag, pmag, 1.0)  # where() avoids divide-by-zero
+    qhat = pq / where(qmag, qmag, 1.0)
+    ehat = pe / where(emag, emag, 1.0)
 
     # Compute dot products of vectors.
 
