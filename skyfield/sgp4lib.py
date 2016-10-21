@@ -24,15 +24,18 @@ _minutes_per_day = 1440.
 
 class EarthSatellite(object):
     """An Earth satellite loaded from a TLE file and propagated with SGP4."""
+    
+    # cache for timescale
+    timescale = None
 
     def __init__(self, lines, earth):
         sat = twoline2rv(*lines[-2:], whichconst=wgs72)
         self._sgp4_satellite = sat
         self._earth = earth
-        # TODO: Drat. Where should this Timescale come from?
-        # Should they have to pass it in?
-        from skyfield import api
-        self.epoch = api.load.timescale().utc(sat.epochyr, 1, sat.epochdays)
+        if EarthSatellite.timescale is None:
+            from skyfield import api
+            EarthSatellite.timescale = api.load.timescale()
+        self.epoch = EarthSatellite.timescale.utc(sat.epochyr, 1, sat.epochdays)
 
     def __repr__(self):
         sat = self._sgp4_satellite
