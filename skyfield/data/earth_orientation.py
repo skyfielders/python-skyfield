@@ -16,7 +16,7 @@ def morrison_and_stephenson_2004_table():
 def usno_historic_delta_t():
     import pandas as pd
     f = load.open('http://maia.usno.navy.mil/ser7/historic_deltat.data')
-    df = pd.read_table(f, sep=rb' +', engine='python', skiprows=[1])
+    df = pd.read_table(f, sep=b' +', engine='python', skiprows=[1])
     return pd.DataFrame({'year': df[b'Year'], 'delta_t': df[b'TDT-UT1']})
 
 def main():
