@@ -112,6 +112,14 @@ But the source code and issue tracker live on other web sites:
 News
 ====
 
+**2016 December 10**
+
+  Released Skyfield 0.9.1
+  which fixes an obscure module that,
+  while not documented or supported at this point,
+  would cause a ``SyntaxError`` when the Python package install tool
+  would try to compile all of Skyfield’s ``.py`` files to ``.pyc`` files.
+
 **2016 August 27**
 
   Released Skyfield 0.9
