@@ -148,7 +148,7 @@ class SpiceKernel(object):
             if code is None:
                 raise ValueError('unknown SPICE target {0!r}'.format(name))
         if code not in self.codes:
-            targets = ', '.join(_code_and_name(c) for c in self.codes)
+            targets = ', '.join(_format_code_and_name(c) for c in self.codes)
             raise KeyError('kernel {0!r} is missing {1!r} -'
                            ' the targets it supports are: {2}'
                            .format(self.filename, name, targets))
@@ -202,8 +202,10 @@ class Body(object):
         self.code = code
 
     def __repr__(self):
-        return '<Body {0} from kernel {1!r}>'.format(_code_and_name(self.code),
-                                                     self.ephemeris.filename)
+        return '<Body {0} from kernel {1!r}>'.format(
+            _format_code_and_name(self.code),
+            self.ephemeris.filename,
+        )
 
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
@@ -413,7 +415,7 @@ class Geometry(object):
         return cls(pos, vel, t)
 
 
-def _code_and_name(code):
+def _format_code_and_name(code):
     name = _names.get(code, None)
     if name is None:
         return str(code)
