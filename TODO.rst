@@ -88,6 +88,12 @@ Sprint Possibilities
   it in favor of keeping notebooks in the separate astronomy notebook
   repository.
 
+* The ``Timescale`` object does not currently know where its data comes
+  from, so its ``repr()`` is pretty uninformative.  Should it someday be
+  put in charge of loading its data from the data files specified, so
+  that its ``repr()`` can print out which leap second file and delta T
+  file it is using?  Should it also display how up to date the files
+  are, and what leap seconds it knows about?
 
 
 
