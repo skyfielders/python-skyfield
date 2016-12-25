@@ -93,7 +93,9 @@ Sprint Possibilities
   put in charge of loading its data from the data files specified, so
   that its ``repr()`` can print out which leap second file and delta T
   file it is using?  Should it also display how up to date the files
-  are, and what leap seconds it knows about?
+  are, and what leap seconds it knows about?  Also: it should be told
+  the expiration date of all of its data, so that it can print it out as
+  part of its ``repr()``.
 
 
 
