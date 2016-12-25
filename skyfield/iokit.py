@@ -325,6 +325,13 @@ def parse_celestrak_tle(fileobj):
         line2 = next(lines).decode('ascii')
         sat = EarthSatellite([line1, line2], None)
         satellites[name] = sat
+        if ' (' in name:
+            # Given `ISS (ZARYA)` or `HTV-6 (KOUNOTORI 6)`, also support
+            # lookup by the name inside or outside the parentheses.
+            short_name, secondary_name = name.split(' (')
+            secondary_name = secondary_name.rstrip(')')
+            satellites.setdefault(short_name, sat)
+            satellites.setdefault(secondary_name, sat)
     return None, satellites
 
 
