@@ -8,6 +8,7 @@ from fnmatch import fnmatch
 from time import time
 
 from .jpllib import SpiceKernel
+from .sgp4lib import EarthSatellite
 from .timelib import Timescale, julian_date
 
 today = date.today
@@ -98,6 +99,7 @@ class Loader(object):
             'deltat.data': parse_deltat_data,
             'deltat.preds': parse_deltat_preds,
             'Leap_Second.dat': parse_leap_seconds,
+            'stations.txt': parse_celestrak_tle,
         }
         self.openers = {
             '.bsp': [
@@ -141,6 +143,9 @@ class Loader(object):
                     expiration_date, data = parser(f)
                 if not self.expire:
                     self._log('  Ignoring expiration: {0}', expiration_date)
+                    return data
+                if expiration_date is None:
+                    self._log('  Does not specify an expiration date')
                     return data
                 if today() <= expiration_date:
                     self._log('  Does not expire til: {0}', expiration_date)
@@ -309,6 +314,18 @@ def parse_leap_seconds(fileobj):
     leap_offsets[0] = leap_offsets[1] = offsets[0]
     leap_offsets[2:] = offsets
     return expiration_date, (leap_dates, leap_offsets)
+
+
+def parse_celestrak_tle(fileobj):
+    satellites = {}
+    lines = iter(fileobj)
+    for line in lines:
+        name = line.decode('ascii').strip()
+        line1 = next(lines).decode('ascii')
+        line2 = next(lines).decode('ascii')
+        sat = EarthSatellite([line1, line2], None)
+        satellites[name] = sat
+    return None, satellites
 
 
 def download(url, path, verbose=None, blocksize=128*1024):
