@@ -64,6 +64,9 @@ class SpiceKernel(object):
         self.codes = set(s.center for s in self.segments).union(
                          s.target for s in self.segments)
 
+    def __repr__(self):
+        return '<{} {!r}>'.format(type(self).__name__, self.path)
+
     def __str__(self):
         segments = self.spk.segments
         lines = ['SPICE kernel file {0!r} has {1} segments'
