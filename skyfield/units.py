@@ -15,8 +15,6 @@ def _to_array(value):
     else:
         return value
 
-# Distance and velocity.
-
 class UnpackingError(Exception):
     """You cannot iterate directly over a Skyfield measurement object."""
 
@@ -24,8 +22,7 @@ class Distance(object):
     """A distance, stored internally as au and available in other units.
 
     You can initialize a ``Distance`` by providing a single float or a
-    float array as either an ``au=`` parameter or a ``km=`` parameter
-    when building a ``Distance`` object.
+    float array as either an ``au=`` parameter or a ``km=`` parameter.
 
     """
     _warned = False
@@ -78,8 +75,8 @@ class Distance(object):
 class Velocity(object):
     """A velocity, stored internally as au/day and available in other units.
 
-    You can initialize a ``Velocity`` by providing a single float or a
-    float array as either an ``au_per_d=`` parameter.
+    You can initialize a ``Velocity`` by providing a float or float
+    array to its ``au_per_d=`` parameter.
 
     """
     _warned = False
