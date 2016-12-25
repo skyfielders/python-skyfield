@@ -80,7 +80,7 @@ class SpiceKernel(object):
                 ends = format_date(*calendar_date(int(end)))
                 lines.append('  JD {0:.2f} - JD {1:.2f}  ({2} through {3})'
                              .format(start, end, starts, ends))
-            lines.append(_segment_line(s))
+            lines.append(_format_segment(s))
         return '\n'.join(lines)
 
     def __getitem__(self, name):
@@ -395,7 +395,7 @@ class Geometry(object):
 
     def __str__(self):
         segments = self.center_chain + self.target_chain
-        lines = '\n'.join(_segment_line(s) for s in segments)
+        lines = '\n'.join(_format_segment(s) for s in segments)
         return 'Geometry from center {0} to target {1} using:\n{2}'.format(
             self.center, self.target, lines)
 
@@ -421,7 +421,7 @@ def _format_code_and_name(code):
         return str(code)
     return '{0} {1!r}'.format(code, name)
 
-def _segment_line(segment):
+def _format_segment(segment):
     cname = _names.get(segment.center, 'unknown')
     tname = _names.get(segment.target, 'unknown')
     return '    {0:3} -> {1:<3}  {2} -> {3}'.format(
