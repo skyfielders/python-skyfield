@@ -321,8 +321,7 @@ def observe(observer, target):
         distance = length_of(tposition - cposition)
         light_time0 = light_time
     else:
-        raise ValueError('observe_from() light-travel time'
-                         ' failed to converge')
+        raise ValueError('observe() light-travel time failed to converge')
     tvelocity = t_bary.velocity.au_per_d
     pos = Astrometric(tposition - cposition, tvelocity - cvelocity, t)
     pos.light_time = light_time
