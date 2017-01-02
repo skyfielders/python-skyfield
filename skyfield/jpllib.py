@@ -10,7 +10,7 @@ from jplephem.names import target_name_pairs, target_names as _names
 from .constants import AU_KM, C_AUDAY, DAY_S
 from .errors import DeprecationError, raise_error_for_deprecated_time_arguments
 from .functions import length_of
-from .positionlib import Astrometric, Barycentric, ICRF
+from .positionlib import Astrometric, Barycentric, ICRF, build_position
 from .timelib import calendar_date
 
 _targets = dict((name, target) for (target, name) in target_name_pairs)
@@ -60,7 +60,7 @@ class SpiceKernel(object):
         self.path = path
         self.filename = os.path.basename(path)
         self.spk = SPK.open(path)
-        self.segments = [_Segment(s) for s in self.spk.segments]
+        self.segments = [_Segment(self.filename, s) for s in self.spk.segments]
         self.codes = set(s.center for s in self.segments).union(
                          s.target for s in self.segments)
 
@@ -154,11 +154,27 @@ class SpiceKernel(object):
                            .format(self.filename, name, targets))
         return code
 
+    def get(self, target):
+        # Work in progress: what would it be like if users were not
+        # returned Body objects, but general vector objects that they
+        # could add and subtract?  Returning raw segments to them is the
+        # first step.
+
+        # center=0
+        print(self)
+        #target = self.decode(target)
+        target = 3
+        segment = _Segment(self.filename, self.spk[0, target])
+        print(segment)
+        return segment
+        #code = self.decode(target)
+        #return Body(self, code)
+
 
 class _Segment(object):
     __slots__ = ['center', 'target', 'spk_segment']
 
-    def __new__(cls, spk_segment):
+    def __new__(cls, filename, spk_segment):
         if spk_segment.data_type == 2:
             return object.__new__(_Type2)
         if spk_segment.data_type == 3:
@@ -166,10 +182,21 @@ class _Segment(object):
         raise ValueError('SPK data type {0} not yet supported segment'
                          .format(spk_segment.data_type))
 
-    def __init__(self, spk_segment):
+    def __init__(self, filename, spk_segment):
+        self.filename = filename
         self.center = spk_segment.center
         self.target = spk_segment.target
         self.spk_segment = spk_segment
+
+    def __str__(self):
+        return '{!r} segment {}'.format(
+            self.filename,
+            ' '.join(_format_segment(self).split()),
+        )
+
+    def at(self, t):
+        p, v = self.icrf_vector_at(t)
+        return build_position(p, v, t, self.center, self.target)
 
 class _Type2(_Segment):
     def icrf_vector_at(self, t):

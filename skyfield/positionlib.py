@@ -14,6 +14,16 @@ from .units import Distance, Velocity, Angle, _interpret_angle
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GALACTIC = inertial_frames['GALACTIC']
 
+
+def build_position(position_au, velocity_au_per_d=None, t=None,
+                   center=None, target=None):
+    if center == 0:
+        return Barycentric(position_au, velocity_au_per_d, t, center, target)
+    if center == 399:
+        return Geocentric(position_au, velocity_au_per_d, t, center, target)
+    return ICRF(position_au, velocity_au_per_d, t, center, target)
+
+
 class ICRF(object):
     """An (x, y, z) position and velocity oriented to the ICRF axes.
 
@@ -23,19 +33,25 @@ class ICRF(object):
     """
     altaz_rotation = None
 
-    def __init__(self, position_au, velocity_au_per_d=None, t=None):
+    def __init__(self, position_au, velocity_au_per_d=None, t=None,
+                 center=None, target=None):
         self.t = t
         self.position = Distance(position_au)
         if velocity_au_per_d is None:
             self.velocity = None
         else:
             self.velocity = Velocity(velocity_au_per_d)
+        self.center = center
+        self.target = target
 
     def __repr__(self):
-        return '<%s position%s%s>' % (
+        return '<{} position{}{}{}{}>'.format(
             self.__class__.__name__,
             '' if (self.velocity is None) else ' and velocity',
-            '' if self.t is None else ' at date t')
+            '' if self.t is None else ' at date t',
+            '' if self.center is None else ' center={}'.format(self.center),
+            '' if self.target is None else ' target={}'.format(self.target),
+        )
 
     def __sub__(self, body):
         """Subtract two ICRF vectors to produce a third."""
