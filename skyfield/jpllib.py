@@ -162,16 +162,38 @@ class SpiceKernel(object):
 
         # center=0
         print(self)
-        #target = self.decode(target)
-        target = 3
-        segment = _Segment(self.filename, self.spk[0, target])
-        print(segment)
-        return segment
-        #code = self.decode(target)
-        #return Body(self, code)
+        target = self.decode(target)
+        segments = self.segments
+        segment_dict = dict((segment.target, segment) for segment in segments)
+        chain = tuple(_center(target, segment_dict))[::-1]
+        if len(chain) == 1:
+            return chain[0]
+        return sum(chain)
 
 
-class _Segment(object):
+class Thing(object):
+    segments = None
+
+    def __add__(self, other):
+        if other == 0:
+            return self
+        if self.target == other.center:
+            return Chain(
+                self.center, other.target,
+                (self.segments or (self,)) + (other.segments or (other,)),
+            )
+        elif other.target == self.center:
+            return Chain(
+                other.center, self.target
+                (other.segments or (other,)) + (self.segments or (self,)),
+            )
+        else:
+            raise ValueError()
+
+    __radd__ = __add__
+
+
+class _Segment(Thing):
     __slots__ = ['center', 'target', 'spk_segment']
 
     def __new__(cls, filename, spk_segment):
@@ -189,10 +211,13 @@ class _Segment(object):
         self.spk_segment = spk_segment
 
     def __str__(self):
-        return '{!r} segment {}'.format(
+        return 'Segment {!r} {}'.format(
             self.filename,
-            ' '.join(_format_segment(self).split()),
+            _format_segment_brief(self),
         )
+
+    def __repr__(self):
+        return '<{}>'.format(self)
 
     def at(self, t):
         p, v = self.icrf_vector_at(t)
@@ -207,6 +232,29 @@ class _Type3(_Segment):
     def icrf_vector_at(self, t):
         pv = self.spk_segment.compute(t.tdb)
         return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM
+
+
+class Chain(object):
+    def __init__(self, center, target, segments):
+        self.center = center
+        self.target = target
+        self.segments = segments
+
+    def __str__(self):
+        segments = self.segments
+        lines = '\n'.join('  ' + str(segment) for segment in segments)
+        return 'Chain of {} segments:\n{}'.format(len(segments), lines)
+
+    def __repr__(self):
+        return '<Chain {}>'.format(self.segments)
+
+    def at(self, t):
+        p, v = 0.0, 0.0
+        for segment in self.segments:
+            p2, v2 = segment.icrf_vector_at(t)
+            p += p2
+            v += v2
+        return build_position(p, v, t, self.center, self.target)
 
 
 class Body(object):
@@ -452,6 +500,18 @@ def _format_segment(segment):
     tname = _names.get(segment.target, 'unknown')
     return '    {0:3} -> {1:<3}  {2} -> {3}'.format(
         segment.center, segment.target, cname, tname)
+
+def _format_segment_brief(segment):
+    cname = _names.get(segment.center)
+    tname = _names.get(segment.target)
+    return '{}{}{} -> {}{}{}'.format(
+        segment.center,
+        ' ' if cname else '',
+        cname,
+        segment.target,
+        ' ' if tname else '',
+        tname,
+    )
 
 def _tally(minus_chain, plus_chain, t):
     position = velocity = 0.0
