@@ -60,7 +60,7 @@ class SpiceKernel(object):
         self.path = path
         self.filename = os.path.basename(path)
         self.spk = SPK.open(path)
-        self.segments = [_Segment(self.filename, s) for s in self.spk.segments]
+        self.segments = [Segment(self.filename, s) for s in self.spk.segments]
         self.codes = set(s.center for s in self.segments).union(
                          s.target for s in self.segments)
 
@@ -160,47 +160,42 @@ class SpiceKernel(object):
         # could add and subtract?  Returning raw segments to them is the
         # first step.
 
-        # center=0
-        print(self)
         target = self.decode(target)
         segments = self.segments
         segment_dict = dict((segment.target, segment) for segment in segments)
         chain = tuple(_center(target, segment_dict))[::-1]
         if len(chain) == 1:
             return chain[0]
-        return sum(chain)
+        return Sum(chain[0].center, chain[-1].target, chain)
 
 
-class Thing(object):
+class VectorFunction(object):
     segments = None
 
     def __add__(self, other):
-        if other == 0:
-            return self
-        if self.target == other.center:
-            return Chain(
-                self.center, other.target,
-                (self.segments or (self,)) + (other.segments or (other,)),
-            )
-        elif other.target == self.center:
-            return Chain(
-                other.center, self.target
-                (other.segments or (other,)) + (self.segments or (self,)),
-            )
-        else:
-            raise ValueError()
+        if self.target != other.center:
+            if other.target == self.center:
+                self, other = other, self
+            else:
+                raise ValueError()
+        return Sum(
+            self.center, other.target,
+            (self.segments or (self,)) + (other.segments or (other,)),
+        )
 
-    __radd__ = __add__
+    def at():
+        pass # this should be the only at(), right? and should choose
+    # once and for all the right class for the output, Earth etc?
 
 
-class _Segment(Thing):
+class Segment(VectorFunction):
     __slots__ = ['center', 'target', 'spk_segment']
 
     def __new__(cls, filename, spk_segment):
         if spk_segment.data_type == 2:
-            return object.__new__(_Type2)
+            return object.__new__(ChebyshevPosition)
         if spk_segment.data_type == 3:
-            return object.__new__(_Type3)
+            return object.__new__(ChebyshevPositionVelocity)
         raise ValueError('SPK data type {0} not yet supported segment'
                          .format(spk_segment.data_type))
 
@@ -223,34 +218,37 @@ class _Segment(Thing):
         p, v = self.icrf_vector_at(t)
         return build_position(p, v, t, self.center, self.target)
 
-class _Type2(_Segment):
+class ChebyshevPosition(Segment):
     def icrf_vector_at(self, t):
         position, velocity = self.spk_segment.compute_and_differentiate(t.tdb)
         return position / AU_KM, velocity / AU_KM
 
-class _Type3(_Segment):
+class ChebyshevPositionVelocity(Segment):
     def icrf_vector_at(self, t):
         pv = self.spk_segment.compute(t.tdb)
         return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM
 
 
-class Chain(object):
+class Sum(VectorFunction):
     def __init__(self, center, target, segments):
         self.center = center
         self.target = target
         self.segments = segments
+        self.first = segments[0]
+        self.rest = segments[1:]
 
     def __str__(self):
         segments = self.segments
         lines = '\n'.join('  ' + str(segment) for segment in segments)
-        return 'Chain of {} segments:\n{}'.format(len(segments), lines)
+        return 'Sum of {} segments:\n{}'.format(len(segments), lines)
 
     def __repr__(self):
-        return '<Chain {}>'.format(self.segments)
+        return '<Sum of {}>'.format(' '.join(repr(s) for s in self.segments))
 
+    @raise_error_for_deprecated_time_arguments
     def at(self, t):
-        p, v = 0.0, 0.0
-        for segment in self.segments:
+        p, v = self.first.icrf_vector_at(t)
+        for segment in self.rest:
             p2, v2 = segment.icrf_vector_at(t)
             p += p2
             v += v2

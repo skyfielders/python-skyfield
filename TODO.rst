@@ -10,6 +10,10 @@ forget.
 Sprint Possibilities
 ====================
 
+* Can this help us write a function to compute sub-lat/long?
+
+  https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/reclat_c.html
+
 * Why require the intermediate step of creating a ``Body`` before the
   user can ask for a ``Geometry``?  The intermediate step should be
   avoided and instead of having to say::
