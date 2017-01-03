@@ -183,9 +183,12 @@ class VectorFunction(object):
             (self.segments or (self,)) + (other.segments or (other,)),
         )
 
-    def at():
-        pass # this should be the only at(), right? and should choose
-    # once and for all the right class for the output, Earth etc?
+    @raise_error_for_deprecated_time_arguments
+    def at(self, t):
+        # this should be the only at(), right? and should choose
+        # once and for all the right class for the output, Earth etc?
+        p, v = self._at(t)
+        return build_position(p, v, t, self.center, self.target)
 
 
 class Segment(VectorFunction):
@@ -214,17 +217,18 @@ class Segment(VectorFunction):
     def __repr__(self):
         return '<{}>'.format(self)
 
-    def at(self, t):
-        p, v = self.icrf_vector_at(t)
-        return build_position(p, v, t, self.center, self.target)
+    def icrf_vector_at(self, t):   # temporary compatibility measure
+        return self._at(t)
+
 
 class ChebyshevPosition(Segment):
-    def icrf_vector_at(self, t):
+    def _at(self, t):
         position, velocity = self.spk_segment.compute_and_differentiate(t.tdb)
         return position / AU_KM, velocity / AU_KM
 
+
 class ChebyshevPositionVelocity(Segment):
-    def icrf_vector_at(self, t):
+    def _at(self, t):
         pv = self.spk_segment.compute(t.tdb)
         return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM
 
@@ -245,14 +249,13 @@ class Sum(VectorFunction):
     def __repr__(self):
         return '<Sum of {}>'.format(' '.join(repr(s) for s in self.segments))
 
-    @raise_error_for_deprecated_time_arguments
-    def at(self, t):
-        p, v = self.first.icrf_vector_at(t)
+    def _at(self, t):
+        p, v = self.first._at(t)
         for segment in self.rest:
-            p2, v2 = segment.icrf_vector_at(t)
+            p2, v2 = segment._at(t)
             p += p2
             v += v2
-        return build_position(p, v, t, self.center, self.target)
+        return p, v
 
 
 class Body(object):
