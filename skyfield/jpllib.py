@@ -189,6 +189,10 @@ class VectorFunction(object):
         p, v = self._at(t)
         return build_position(p, v, t, self.center, self.target)
 
+    def _observe_from_bcrs(self, observer):
+        assert self.center == 0
+        return observe(observer, self)
+
 
 class SPICESegment(VectorFunction):
     __slots__ = ['center', 'target', 'spk_segment']
