@@ -60,7 +60,8 @@ class SpiceKernel(object):
         self.path = path
         self.filename = os.path.basename(path)
         self.spk = SPK.open(path)
-        self.segments = [Segment(self.filename, s) for s in self.spk.segments]
+        self.segments = [SPICESegment(self.filename, s)
+                         for s in self.spk.segments]
         self.codes = set(s.center for s in self.segments).union(
                          s.target for s in self.segments)
 
@@ -166,7 +167,7 @@ class SpiceKernel(object):
         chain = tuple(_center(target, segment_dict))[::-1]
         if len(chain) == 1:
             return chain[0]
-        return Sum(chain[0].center, chain[-1].target, chain)
+        return Sum(chain[0].center, chain[-1].target, chain, ())
 
 
 class VectorFunction(object):
@@ -185,13 +186,11 @@ class VectorFunction(object):
 
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
-        # this should be the only at(), right? and should choose
-        # once and for all the right class for the output, Earth etc?
         p, v = self._at(t)
         return build_position(p, v, t, self.center, self.target)
 
 
-class Segment(VectorFunction):
+class SPICESegment(VectorFunction):
     __slots__ = ['center', 'target', 'spk_segment']
 
     def __new__(cls, filename, spk_segment):
@@ -221,30 +220,36 @@ class Segment(VectorFunction):
         return self._at(t)
 
 
-class ChebyshevPosition(Segment):
+class ChebyshevPosition(SPICESegment):
     def _at(self, t):
         position, velocity = self.spk_segment.compute_and_differentiate(t.tdb)
         return position / AU_KM, velocity / AU_KM
 
 
-class ChebyshevPositionVelocity(Segment):
+class ChebyshevPositionVelocity(SPICESegment):
     def _at(self, t):
         pv = self.spk_segment.compute(t.tdb)
         return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM
 
 
 class Sum(VectorFunction):
-    def __init__(self, center, target, segments):
+    def __init__(self, center, target, segments, negative_segments):
         self.center = center
         self.target = target
         self.segments = segments
+        self.negative_segments = negative_segments
         self.first = segments[0]
         self.rest = segments[1:]
 
     def __str__(self):
-        segments = self.segments
-        lines = '\n'.join('  ' + str(segment) for segment in segments)
-        return 'Sum of {} segments:\n{}'.format(len(segments), lines)
+        positives = self.segments
+        negatives = self.negative_segments
+        lines = [' + ' + str(segment) for segment in positives]
+        lines.extend(' - ' + str(segment) for segment in negatives)
+        return 'Sum of {} vectors:\n{}'.format(
+            len(positives) + len(negatives),
+            '\n'.join(lines),
+        )
 
     def __repr__(self):
         return '<Sum of {}>'.format(' '.join(repr(s) for s in self.segments))
@@ -255,6 +260,10 @@ class Sum(VectorFunction):
             p2, v2 = segment._at(t)
             p += p2
             v += v2
+        for segment in self.negative_segments:
+            p2, v2 = segment._at(t)
+            p -= p2
+            v -= v2
         return p, v
 
 
