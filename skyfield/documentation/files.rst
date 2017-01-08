@@ -90,10 +90,10 @@ which is how programs can name their current directory:
 
     Already exists: ./deltat.data
       Parsing with: parse_deltat_data()
-      Does not expire til: 2017-07-01
+      Does not expire til: 2018-01-01
     Already exists: ./deltat.preds
       Parsing with: parse_deltat_preds()
-      Does not expire til: 2017-10-01
+      Does not expire til: 2018-01-01
     Already exists: ./Leap_Second.dat
       Parsing with: parse_leap_seconds()
       Does not expire til: 2017-07-28
