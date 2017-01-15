@@ -14,20 +14,6 @@ Sprint Possibilities
 
   https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/reclat_c.html
 
-* Why require the intermediate step of creating a ``Body`` before the
-  user can ask for a ``Geometry``?  The intermediate step should be
-  avoided and instead of having to say::
-
-    kernel['earth'].geometry_to('mars')
-
-  users should be able to say::
-
-    kernel.geometry_between('earth', 'mars')
-
-  We could even deprecate ``geometry_to()`` once this is in place.  Or
-  would that be worth it?  Or is this even a good idea, and we should
-  just leave what we have in place?
-
 * If we are going to allow times like TT to be submitted using
   calendar dates, then we should probably provide methods that would
   fetch them back as calendar dates.
