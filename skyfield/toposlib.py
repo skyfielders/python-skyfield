@@ -48,15 +48,13 @@ class Topos(object):
 
         self.R_lat = rot_y(latitude.radians)[::-1]
         self.code = self
-        self.segment = _Segment(self)
-        self.segments = [self.segment]
         self.ephemeris = None
 
     def __repr__(self):
         return '<Topos {0} N, {1} E>'.format(self.latitude, self.longitude)
 
     def _at(self, t):
-        return self.segment.icrf_vector_at(t)
+        return self.icrf_vector_at(t)
 
     def _snag_observer_data(self, data, t):
         data.altaz_rotation = self._altaz_rotation(t)
@@ -65,7 +63,7 @@ class Topos(object):
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
         """Compute where this Earth location was in space on a given date."""
-        tpos_au, tvel_au_per_d = self.segment.icrf_vector_at(t)
+        tpos_au, tvel_au_per_d = self.icrf_vector_at(t)
         if self.ephemeris is None:
             c = Geocentric(tpos_au, tvel_au_per_d, t)
         else:
@@ -87,26 +85,17 @@ class Topos(object):
         R_lon = rot_z(- self.longitude.radians - t.gast * tau / 24.0)
         return einsum('ij...,jk...,kl...->il...', self.R_lat, R_lon, t.M)
 
-
-class _Segment(object):
-    """Generate GCRS positions for an Earth Satellite."""
-
-    def __init__(self, topos):
-        self.center = 399
-        self.target = topos
-
     def icrf_vector_at(self, t):
         """Return the GCRS position, velocity of this Topos at `t`."""
-        topos = self.target
-        pos, vel = terra(topos.latitude.radians, topos.longitude.radians,
-                         topos.elevation.au, t.gast)
+        pos, vel = terra(self.latitude.radians, self.longitude.radians,
+                         self.elevation.au, t.gast)
         pos = einsum('ij...,j...->i...', t.MT, pos)
         vel = einsum('ij...,j...->i...', t.MT, vel)
-        if topos.x:
-            R = rot_y(topos.x * ASEC2RAD)
+        if self.x:
+            R = rot_y(self.x * ASEC2RAD)
             pos = einsum('ij...,j...->i...', R, pos)
-        if topos.y:
-            R = rot_x(topos.y * ASEC2RAD)
+        if self.y:
+            R = rot_x(self.y * ASEC2RAD)
             pos = einsum('ij...,j...->i...', R, pos)
         # TODO: also rotate velocity
         return pos, vel
