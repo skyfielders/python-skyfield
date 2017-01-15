@@ -2,9 +2,7 @@ from numpy import einsum
 
 from .constants import ASEC2RAD, tau
 from .earthlib import terra
-from .errors import raise_error_for_deprecated_time_arguments
 from .functions import rot_x, rot_y, rot_z
-from .positionlib import Barycentric, Geocentric
 from .units import Distance, Angle, _interpret_ltude
 from .vectorlib import VectorFunction
 
@@ -62,26 +60,6 @@ class Topos(VectorFunction):
     def _snag_observer_data(self, data, t):
         data.altaz_rotation = self._altaz_rotation(t)
         data.elevation_m = self.elevation.m
-
-    @raise_error_for_deprecated_time_arguments
-    def at(self, t):
-        """Compute where this Earth location was in space on a given date."""
-        tpos_au, tvel_au_per_d = self._at(t)
-        if self.ephemeris is None:
-            c = Geocentric(tpos_au, tvel_au_per_d, t)
-        else:
-            e = self.ephemeris['earth'].at(t)
-            c = Barycentric(e.position.au + tpos_au,
-                            e.velocity.au_per_d + tvel_au_per_d,
-                            t)
-            c._gcrs_position = tpos_au
-            c._gcrs_velocity = tvel_au_per_d
-        c.rGCRS = tpos_au
-        c.vGCRS = tvel_au_per_d
-        c.topos = self
-        c.ephemeris = self.ephemeris
-        c.altaz_rotation = self._altaz_rotation(t)
-        return c
 
     def _altaz_rotation(self, t):
         """Compute the rotation from the ICRF into the alt-az system."""
