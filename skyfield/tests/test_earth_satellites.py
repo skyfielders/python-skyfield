@@ -38,10 +38,7 @@ def iss_transit():
         altitude = float(fields[7][:-1])
         yield dt, altitude
 
-def _OFF_test_iss_altitude_computed_with_bcrs(iss_transit):
-    # This test has been disabled because I no longer intend to support
-    # the complexity of implicit operations between BCRS positions and
-    # GCRS positions.
+def test_iss_altitude_with_gcrs_vector_subtraction(iss_transit):
     dt, their_altitude = iss_transit
 
     cst = timedelta(hours=-6) #, minutes=1)
@@ -49,26 +46,24 @@ def _OFF_test_iss_altitude_computed_with_bcrs(iss_transit):
     t = api.load.timescale(delta_t=67.2091).utc(dt)
 
     lines = iss_tle.splitlines()
-    s = EarthSatellite(lines, None)
-    earth = api.load('de421.bsp')['earth']
-    lake_zurich = earth.topos(latitude_degrees=42.2, longitude_degrees=-88.1)
+    s = EarthSatellite(lines)
+    lake_zurich = api.Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
 
-    # Compute using Solar System coordinates:
-
-    alt, az, d = lake_zurich.at(t).observe(s).altaz()
+    alt, az, d = (s - lake_zurich).at(t).altaz()
     print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
     assert abs(alt.degrees - their_altitude) < 2.5  # TODO: tighten this up?
 
-def test_iss_altitude_computed_with_gcrs(iss_transit):
+def test_iss_altitude_with_bcrs_vector_subtraction(iss_transit):
     dt, their_altitude = iss_transit
 
     cst = timedelta(hours=-6) #, minutes=1)
     dt = dt - cst
     t = api.load.timescale(delta_t=67.2091).utc(dt)
 
+    earth = api.load('de421.bsp')['earth']
     lines = iss_tle.splitlines()
-    s = EarthSatellite(lines, None)
-    lake_zurich = api.Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
+    s = earth.satellite('\n'.join(lines))
+    lake_zurich = earth.topos(latitude_degrees=42.2, longitude_degrees=-88.1)
 
     alt, az, d = (s - lake_zurich).at(t).altaz()
     print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
@@ -116,7 +111,7 @@ def test_appendix_c_conversion_from_TEME_to_ITRF():
 
 def test_appendix_c_satellite():
     lines = appendix_c_example.splitlines()
-    sat = EarthSatellite(lines, None)
+    sat = EarthSatellite(lines)
 
     ts = api.load.timescale()
     jd_epoch = sat._sgp4_satellite.jdsatepoch
@@ -141,5 +136,5 @@ def test_appendix_c_satellite():
 def test_epoch_date():
     # Example from https://celestrak.com/columns/v04n03/
     s = appendix_c_example.replace('00179.78495062', '98001.00000000')
-    sat = EarthSatellite(s.splitlines(), None)
+    sat = EarthSatellite(s.splitlines())
     assert sat.epoch.utc_jpl() == 'A.D. 1998-Jan-01 00:00:00.0000 UT'

@@ -31,11 +31,10 @@ class EarthSatellite(VectorFunction):
     # cache for timescale
     timescale = None
 
-    def __init__(self, lines, earth):
+    def __init__(self, lines):
         self.name = None if len(lines) < 3 else lines[0].strip()
         sat = twoline2rv(*lines[-2:], whichconst=wgs72)
         self._sgp4_satellite = sat
-        self._earth = earth
         if EarthSatellite.timescale is None:
             from skyfield import api
             EarthSatellite.timescale = api.load.timescale()

@@ -64,7 +64,7 @@ class SpiceKernel(object):
                          s.target for s in self.segments)
 
     def __repr__(self):
-        return '<{0} {!r}>'.format(type(self).__name__, self.path)
+        return '<{0} {1!r}>'.format(type(self).__name__, self.path)
 
     def __str__(self):
         segments = self.spk.segments

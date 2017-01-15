@@ -12,6 +12,7 @@ class VectorFunction(object):
             if other.target == self.center:
                 self, other = other, self
             else:
+                # TODO: put an explanation here
                 raise ValueError()
 
         selfp = getattr(self, 'positives', None) or (self,)
@@ -26,6 +27,7 @@ class VectorFunction(object):
 
     def __sub__(self, other):
         if self.center != other.center:
+            # TODO: put an explanation here
             raise ValueError()
 
         selfp = getattr(self, 'positives', None) or (self,)
@@ -62,21 +64,16 @@ class VectorFunction(object):
     def topos(self, latitude=None, longitude=None, latitude_degrees=None,
               longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
         # TODO: deprecate this
-        assert self.target == 399
         from .toposlib import Topos
         t = Topos(latitude, longitude, latitude_degrees,
                   longitude_degrees, elevation_m, x, y)
         return self + t
-        # t.ephemeris = self.ephemeris
-        # t.segments += self.segments
-        # return t
 
     def satellite(self, text):
         # TODO: deprecate this
-        assert self.target == 399
         from .sgp4lib import EarthSatellite
-        lines = text.splitlines()
-        return EarthSatellite(lines, self)
+        sat = EarthSatellite(text.splitlines())
+        return self + sat
 
 
 class VectorSum(VectorFunction):
