@@ -38,7 +38,10 @@ def iss_transit():
         altitude = float(fields[7][:-1])
         yield dt, altitude
 
-def test_iss_altitude_computed_with_bcrs(iss_transit):
+def _OFF_test_iss_altitude_computed_with_bcrs(iss_transit):
+    # This test has been disabled because I no longer intend to support
+    # the complexity of implicit operations between BCRS positions and
+    # GCRS positions.
     dt, their_altitude = iss_transit
 
     cst = timedelta(hours=-6) #, minutes=1)

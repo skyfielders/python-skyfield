@@ -50,12 +50,13 @@ def test_galactic_frame(ts):
 def test_callisto_geometry(ts):
     e = api.load('jup310.bsp')
     a = e['earth'].geometry_of('callisto').at(ts.tdb(jd=2471184.5))
+    print(a)
     compare(a.position.au,
       [-4.884815926454119E+00, -3.705745549073268E+00, -1.493487818022234E+00],
       0.001 * meter)
     compare(a.velocity.au_per_d,
       [9.604665478763035E-03, -1.552997751083403E-02, -6.678445860769302E-03],
-      0.000001 * meter)
+      0.00001 * meter)
 
 def test_callisto_astrometric(ts):
     e = api.load('jup310.bsp')

@@ -2,16 +2,15 @@
 
 import os
 from collections import defaultdict
-from numpy import max, min
 
 from jplephem.spk import SPK
 from jplephem.names import target_name_pairs, target_names as _names
 
-from .constants import AU_KM, C_AUDAY, DAY_S
+from .constants import AU_KM, DAY_S
 from .errors import DeprecationError, raise_error_for_deprecated_time_arguments
-from .functions import length_of
-from .positionlib import Astrometric, Barycentric, ICRF, build_position
+from .positionlib import Barycentric, ICRF
 from .timelib import calendar_date
+from .vectorlib import VectorFunction, Sum, observe
 
 _targets = dict((name, target) for (target, name) in target_name_pairs)
 
@@ -60,7 +59,7 @@ class SpiceKernel(object):
         self.path = path
         self.filename = os.path.basename(path)
         self.spk = SPK.open(path)
-        self.segments = [SPICESegment(self.filename, s)
+        self.segments = [SPICESegment(self.filename, self, s)
                          for s in self.spk.segments]
         self.codes = set(s.center for s in self.segments).union(
                          s.target for s in self.segments)
@@ -169,35 +168,14 @@ class SpiceKernel(object):
             return chain[0]
         return Sum(chain[0].center, chain[-1].target, chain, ())
 
-
-class VectorFunction(object):
-    segments = None
-
-    def __add__(self, other):
-        if self.target != other.center:
-            if other.target == self.center:
-                self, other = other, self
-            else:
-                raise ValueError()
-        return Sum(
-            self.center, other.target,
-            (self.segments or (self,)) + (other.segments or (other,)),
-        )
-
-    @raise_error_for_deprecated_time_arguments
-    def at(self, t):
-        p, v = self._at(t)
-        return build_position(p, v, t, self.center, self.target)
-
-    def _observe_from_bcrs(self, observer):
-        assert self.center == 0
-        return observe(observer, self)
+    # Can the new get() routine replace the old one?
+    __getitem__ = get
 
 
 class SPICESegment(VectorFunction):
     __slots__ = ['center', 'target', 'spk_segment']
 
-    def __new__(cls, filename, spk_segment):
+    def __new__(cls, filename, ephemeris, spk_segment):
         if spk_segment.data_type == 2:
             return object.__new__(ChebyshevPosition)
         if spk_segment.data_type == 3:
@@ -205,8 +183,9 @@ class SPICESegment(VectorFunction):
         raise ValueError('SPK data type {0} not yet supported segment'
                          .format(spk_segment.data_type))
 
-    def __init__(self, filename, spk_segment):
+    def __init__(self, filename, ephemeris, spk_segment):
         self.filename = filename
+        self.ephemeris = ephemeris
         self.center = spk_segment.center
         self.target = spk_segment.target
         self.spk_segment = spk_segment
@@ -219,6 +198,9 @@ class SPICESegment(VectorFunction):
 
     def __repr__(self):
         return '<{}>'.format(self)
+
+    def _snag_observer_data(self, data, t):
+        data.ephemeris = self.ephemeris
 
     def icrf_vector_at(self, t):   # temporary compatibility measure
         return self._at(t)
@@ -234,41 +216,6 @@ class ChebyshevPositionVelocity(SPICESegment):
     def _at(self, t):
         pv = self.spk_segment.compute(t.tdb)
         return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM
-
-
-class Sum(VectorFunction):
-    def __init__(self, center, target, segments, negative_segments):
-        self.center = center
-        self.target = target
-        self.segments = segments
-        self.negative_segments = negative_segments
-        self.first = segments[0]
-        self.rest = segments[1:]
-
-    def __str__(self):
-        positives = self.segments
-        negatives = self.negative_segments
-        lines = [' + ' + str(segment) for segment in positives]
-        lines.extend(' - ' + str(segment) for segment in negatives)
-        return 'Sum of {} vectors:\n{}'.format(
-            len(positives) + len(negatives),
-            '\n'.join(lines),
-        )
-
-    def __repr__(self):
-        return '<Sum of {}>'.format(' '.join(repr(s) for s in self.segments))
-
-    def _at(self, t):
-        p, v = self.first._at(t)
-        for segment in self.rest:
-            p2, v2 = segment._at(t)
-            p += p2
-            v += v2
-        for segment in self.negative_segments:
-            p2, v2 = segment._at(t)
-            p -= p2
-            v -= v2
-        return p, v
 
 
 class Body(object):
@@ -377,45 +324,6 @@ operation easier to read and more symmetrical with other method calls:
         position = body.at(t)
 
 More documentation can be found at: http://rhodesmill.org/skyfield/""")
-
-def observe(observer, target):
-    """Return a light-time corrected astrometric position and velocity.
-
-    Given an `observer` that is a `Barycentric` position somewhere in
-    the solar system, compute where in the sky they will see the body
-    `target`, by computing the light-time between them and figuring out
-    where `target` was back when the light was leaving it that is now
-    reaching the eyes or instruments of the `observer`.
-
-    """
-    # cposition, cvelocity = _tally([], self.center_chain, jd)
-    # tposition, tvelocity = _tally([], self.target_chain, jd)
-    t = observer.t
-    ts = t.ts
-    cposition = observer.position.au
-    cvelocity = observer.velocity.au_per_d
-    t_bary = target.at(t)
-    tposition = t_bary.position.au
-    distance = length_of(tposition - cposition)
-    light_time0 = 0.0
-    t_tdb = t.tdb
-    for i in range(10):
-        light_time = distance / C_AUDAY
-        delta = light_time - light_time0
-        if -1e-12 < min(delta) and max(delta) < 1e-12:
-            break
-        t2 = ts.tdb(jd=t_tdb - light_time)
-        t_bary = target.at(t2)
-        tposition = t_bary.position.au
-        distance = length_of(tposition - cposition)
-        light_time0 = light_time
-    else:
-        raise ValueError('observe() light-travel time failed to converge')
-    tvelocity = t_bary.velocity.au_per_d
-    pos = Astrometric(tposition - cposition, tvelocity - cvelocity, t)
-    pos.light_time = light_time
-    pos.observer = observer
-    return pos
 
 
 def _connect(body1, body2):

@@ -15,6 +15,8 @@ class Topos(Body):
 
 
     """
+    center = 399
+
     # TODO(1.0): document, and add to API doc.
     def __init__(self, latitude=None, longitude=None, latitude_degrees=None,
                  longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
@@ -37,6 +39,8 @@ class Topos(Body):
                             ' or longitude=<skyfield.units.Angle object>'
                             ' with east being positive')
 
+        self.target = object()  # TODO: make this more interesting
+
         self.latitude = latitude
         self.longitude = longitude
         self.elevation = Distance(m=elevation_m)
@@ -51,6 +55,14 @@ class Topos(Body):
 
     def __repr__(self):
         return '<Topos {0} N, {1} E>'.format(self.latitude, self.longitude)
+
+    def _at(self, t):
+        p, v = self.segment.icrf_vector_at(t)
+        return p, v
+
+    def _snag_observer_data(self, data, t):
+        data.altaz_rotation = self._altaz_rotation(t)
+        data.elevation_m = self.elevation.m
 
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
