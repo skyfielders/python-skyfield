@@ -58,9 +58,6 @@ class Topos(object):
     def __repr__(self):
         return '<{0}>'.format(self)
 
-    def _at(self, t):
-        return self.icrf_vector_at(t)
-
     def _snag_observer_data(self, data, t):
         data.altaz_rotation = self._altaz_rotation(t)
         data.elevation_m = self.elevation.m
@@ -68,7 +65,7 @@ class Topos(object):
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
         """Compute where this Earth location was in space on a given date."""
-        tpos_au, tvel_au_per_d = self.icrf_vector_at(t)
+        tpos_au, tvel_au_per_d = self._at(t)
         if self.ephemeris is None:
             c = Geocentric(tpos_au, tvel_au_per_d, t)
         else:
@@ -90,7 +87,7 @@ class Topos(object):
         R_lon = rot_z(- self.longitude.radians - t.gast * tau / 24.0)
         return einsum('ij...,jk...,kl...->il...', self.R_lat, R_lon, t.M)
 
-    def icrf_vector_at(self, t):
+    def _at(self, t):
         """Return the GCRS position, velocity of this Topos at `t`."""
         pos, vel = terra(self.latitude.radians, self.longitude.radians,
                          self.elevation.au, t.gast)
