@@ -37,10 +37,13 @@ class EarthSatellite(object):
             EarthSatellite.timescale = api.load.timescale()
         self.epoch = EarthSatellite.timescale.utc(sat.epochyr, 1, sat.epochdays)
 
-    def __repr__(self):
+    def __str__(self):
         sat = self._sgp4_satellite
-        return '<EarthSatellite number={1!r} epoch={0}>'.format(
+        return 'EarthSatellite number={1!r} epoch={0}'.format(
             self.epoch.utc_iso(), sat.satnum)
+
+    def __repr__(self):
+        return '<{}>'.format(self)
 
     def _position_and_velocity_TEME_km(self, t):
         """Return the raw true equator mean equinox (TEME) vectors from SGP4.

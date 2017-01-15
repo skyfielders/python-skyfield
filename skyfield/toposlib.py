@@ -15,6 +15,7 @@ class Topos(object):
 
     """
     center = 399
+    center_name = '399 EARTH'
 
     # TODO(1.0): document, and add to API doc.
     def __init__(self, latitude=None, longitude=None, latitude_degrees=None,
@@ -38,8 +39,6 @@ class Topos(object):
                             ' or longitude=<skyfield.units.Angle object>'
                             ' with east being positive')
 
-        self.target = object()  # TODO: make this more interesting
-
         self.latitude = latitude
         self.longitude = longitude
         self.elevation = Distance(m=elevation_m)
@@ -50,8 +49,14 @@ class Topos(object):
         self.code = self
         self.ephemeris = None
 
+        self.target = object()  # TODO: make this more interesting
+        self.target_name = '{0} N {1} E'.format(self.latitude, self.longitude)
+
+    def __str__(self):
+        return 'Topos {}'.format(self.target_name)
+
     def __repr__(self):
-        return '<Topos {0} N, {1} E>'.format(self.latitude, self.longitude)
+        return '<{}>'.format(self)
 
     def _at(self, t):
         return self.icrf_vector_at(t)

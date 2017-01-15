@@ -27,7 +27,7 @@ def test_satellite(eph):
     ]
     s = EarthSatellite(lines, None)
     expected = dedent("""\
-        <EarthSatellite number=25544 epoch=2013-11-26T13:57:03Z>
+        EarthSatellite number=25544 epoch=2013-11-26T13:57:03Z
     """)
     assert str(s) == expected
     expected = dedent("""\
@@ -38,11 +38,11 @@ def test_satellite(eph):
 def test_topos(eph):
     t = Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
     expected = dedent("""\
-        <Topos 42deg 12' 00.0" N, -88deg 06' 00.0" E>
+        Topos 42deg 12' 00.0" N -88deg 06' 00.0" E
     """)
     assert str(t) == expected
     expected = dedent("""\
-        <Topos 42deg 12' 00.0" N, -88deg 06' 00.0" E>
+        <Topos 42deg 12' 00.0" N -88deg 06' 00.0" E>
     """)
     assert repr(t) == expected
 
@@ -55,6 +55,6 @@ def test_vector_sum(eph):
     """)
     assert str(e) == expected
     expected = dedent("""\
-        <VectorSum of 2 vectors from center 0 to target 399>
+        <VectorSum of 2 vectors 0 SOLAR SYSTEM BARYCENTER -> 399 EARTH>
     """)
     assert repr(e) == expected

@@ -21,6 +21,7 @@ class VectorFunction(object):
         othern = getattr(other, 'negatives', ())
 
         return VectorSum(self.center, other.target,
+                         self.center_name, other.target_name,
                          selfp + otherp, selfn + othern)
 
     def __sub__(self, other):
@@ -34,6 +35,7 @@ class VectorFunction(object):
         othern = getattr(other, 'negatives', ())
 
         return VectorSum(self.target, other.target,
+                         self.target_name, other.target_name,
                          selfp + othern, selfn + otherp)
 
     @raise_error_for_deprecated_time_arguments
@@ -78,9 +80,12 @@ class VectorFunction(object):
 
 
 class VectorSum(VectorFunction):
-    def __init__(self, center, target, positives, negatives):
+    def __init__(self, center, target, center_name, target_name,
+                 positives, negatives):
         self.center = center
         self.target = target
+        self.center_name = center_name
+        self.target_name = target_name
         self.positives = positives
         self.negatives = negatives
         self.first = positives[0]
@@ -98,14 +103,11 @@ class VectorSum(VectorFunction):
         )
 
     def __repr__(self):
-        # TODO: have everyone who makes segments start adding the names
-        # of the centers and targets, so repr's and str's like this
-        # don't have to go look them up later.
-        return '<{} of {} vectors from center {} to target {}>'.format(
+        return '<{} of {} vectors {} -> {}>'.format(
             type(self).__name__,
             len(self.positives) + len(self.negatives),
-            self.center,
-            self.target,
+            self.center_name,
+            self.target_name,
         )
 
     def _at(self, t):

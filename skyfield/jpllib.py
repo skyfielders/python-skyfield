@@ -161,7 +161,11 @@ class SpiceKernel(object):
         chain = tuple(_center(target, segment_dict))[::-1]
         if len(chain) == 1:
             return chain[0]
-        return VectorSum(chain[0].center, chain[-1].target, chain, ())
+        center = chain[0].center
+        target = chain[-1].target
+        center_name = _format_code_and_name(center)
+        target_name = _format_code_and_name(target)
+        return VectorSum(center, target, center_name, target_name, chain, ())
 
 
 class SPICESegment(VectorFunction):
@@ -222,7 +226,7 @@ def _format_code_and_name(code):
     name = _names.get(code, None)
     if name is None:
         return str(code)
-    return '{0} {1!r}'.format(code, name)
+    return '{0} {1}'.format(code, name)
 
 def _format_segment(segment):
     cname = _names.get(segment.center, 'unknown')
