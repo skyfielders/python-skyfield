@@ -7,12 +7,11 @@ from jplephem.spk import SPK
 from jplephem.names import target_name_pairs, target_names as _names
 
 from .constants import AU_KM, DAY_S
-from .errors import DeprecationError, raise_error_for_deprecated_time_arguments
-from .positionlib import Barycentric, ICRF
 from .timelib import calendar_date
-from .vectorlib import VectorFunction, VectorSum, observe
+from .vectorlib import VectorFunction, VectorSum
 
 _targets = dict((name, target) for (target, name) in target_name_pairs)
+
 
 class SpiceKernel(object):
     """Ephemeris file in NASA .bsp format.
