@@ -67,6 +67,13 @@ class VectorFunction(object):
         # t.segments += self.segments
         # return t
 
+    def satellite(self, text):
+        # TODO: deprecate this
+        assert self.target == 399
+        from .sgp4lib import EarthSatellite
+        lines = text.splitlines()
+        return EarthSatellite(lines, self)
+
 
 class Sum(VectorFunction):
     def __init__(self, center, target, positives, negatives):
