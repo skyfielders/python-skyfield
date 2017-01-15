@@ -20,7 +20,8 @@ class VectorFunction(object):
         otherp = getattr(other, 'positives', None) or (other,)
         othern = getattr(other, 'negatives', ())
 
-        return Sum(self.center, other.target, selfp + otherp, selfn + othern)
+        return VectorSum(self.center, other.target,
+                         selfp + otherp, selfn + othern)
 
     def __sub__(self, other):
         if self.center != other.center:
@@ -32,7 +33,8 @@ class VectorFunction(object):
         otherp = getattr(other, 'positives', None) or (other,)
         othern = getattr(other, 'negatives', ())
 
-        return Sum(self.target, other.target, selfp + othern, selfn + otherp)
+        return VectorSum(self.target, other.target,
+                         selfp + othern, selfn + otherp)
 
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
@@ -75,7 +77,7 @@ class VectorFunction(object):
         return EarthSatellite(lines, self)
 
 
-class Sum(VectorFunction):
+class VectorSum(VectorFunction):
     def __init__(self, center, target, positives, negatives):
         self.center = center
         self.target = target
@@ -96,8 +98,15 @@ class Sum(VectorFunction):
         )
 
     def __repr__(self):
-        segments = self.positives + self.negatives
-        return '<Sum of {}>'.format(' '.join(repr(s) for s in segments))
+        # TODO: have everyone who makes segments start adding the names
+        # of the centers and targets, so repr's and str's like this
+        # don't have to go look them up later.
+        return '<{} of {} vectors from center {} to target {}>'.format(
+            type(self).__name__,
+            len(self.positives) + len(self.negatives),
+            self.center,
+            self.target,
+        )
 
     def _at(self, t):
         p, v = self.first._at(t)

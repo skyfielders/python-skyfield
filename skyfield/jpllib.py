@@ -10,7 +10,7 @@ from .constants import AU_KM, DAY_S
 from .errors import DeprecationError, raise_error_for_deprecated_time_arguments
 from .positionlib import Barycentric, ICRF
 from .timelib import calendar_date
-from .vectorlib import VectorFunction, Sum, observe
+from .vectorlib import VectorFunction, VectorSum, observe
 
 _targets = dict((name, target) for (target, name) in target_name_pairs)
 
@@ -161,7 +161,7 @@ class SpiceKernel(object):
         chain = tuple(_center(target, segment_dict))[::-1]
         if len(chain) == 1:
             return chain[0]
-        return Sum(chain[0].center, chain[-1].target, chain, ())
+        return VectorSum(chain[0].center, chain[-1].target, chain, ())
 
 
 class SPICESegment(VectorFunction):
