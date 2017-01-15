@@ -4,7 +4,7 @@ from numpy import max, min
 from .constants import C_AUDAY
 from .errors import raise_error_for_deprecated_time_arguments
 from .functions import length_of
-from .positionlib import Astrometric, build_position
+from .positionlib import build_position
 
 class VectorFunction(object):
     def __add__(self, other):
@@ -175,9 +175,7 @@ def _correct_for_light_travel_time(observer, target):
     else:
         raise ValueError('light-travel time failed to converge')
     tvelocity = t_bary.velocity.au_per_d
-    pos = Astrometric(tposition - cposition, tvelocity - cvelocity, t)
-    pos.light_time = light_time
-    return pos
+    return tposition - cposition, tvelocity - cvelocity, light_time
 
 
 class ObserverData(object):

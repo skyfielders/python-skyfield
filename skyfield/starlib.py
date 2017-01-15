@@ -3,7 +3,6 @@
 from numpy import array, cos, outer, sin
 from .constants import AU_KM, ASEC2RAD, C, C_AUDAY, DAY_S, T0
 from .functions import length_of
-from .positionlib import Astrometric
 from .relativity import light_time_difference
 from .units import Angle
 
@@ -88,10 +87,7 @@ class Star(object):
         vector = position - observer.position.au
         distance = length_of(vector)
         light_time = distance / C_AUDAY
-
-        g = Astrometric(vector, (observer.velocity.au_per_d.T - velocity).T, t)
-        g.light_time = light_time
-        return g
+        return vector, (observer.velocity.au_per_d.T - velocity).T, light_time
 
     def _compute_vectors(self):
         """Compute the star's position as an ICRS position and velocity."""

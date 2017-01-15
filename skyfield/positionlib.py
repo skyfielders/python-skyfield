@@ -249,9 +249,10 @@ class Barycentric(ICRF):
         <Astrometric position and velocity at date t>
 
         """
-        # TODO: can _observe_from_bcrs() just return some vectors?
-        astrometric = body._observe_from_bcrs(self)
-        astrometric.observer_data = self.observer_data
+        p, v, light_time = body._observe_from_bcrs(self)
+        t = self.t
+        astrometric = Astrometric(p, v, t, observer_data=self.observer_data)
+        astrometric.light_time = light_time
         return astrometric
 
 
