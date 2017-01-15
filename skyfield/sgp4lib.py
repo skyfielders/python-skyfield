@@ -9,6 +9,7 @@ from .constants import AU_KM, DAY_S, T0, tau
 from .errors import raise_error_for_deprecated_time_arguments
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
+from .vectorlib import VectorFunction
 
 # important ones:
 # jdsatepoch
@@ -22,8 +23,11 @@ from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
 
 _minutes_per_day = 1440.
 
-class EarthSatellite(object):
+class EarthSatellite(VectorFunction):
     """An Earth satellite loaded from a TLE file and propagated with SGP4."""
+
+    center = 399
+    center_name = '399 EARTH'
 
     # cache for timescale
     timescale = None
@@ -37,6 +41,12 @@ class EarthSatellite(object):
             from skyfield import api
             EarthSatellite.timescale = api.load.timescale()
         self.epoch = EarthSatellite.timescale.utc(sat.epochyr, 1, sat.epochdays)
+
+        self.target = object()  # TODO: make this more interesting
+        self.target_name = 'Satellite{0} {1}'.format(
+            self._sgp4_satellite.satnum,
+            ' ' + repr(self.name) if self.name else '',
+        )
 
     def __str__(self):
         sat = self._sgp4_satellite
@@ -87,6 +97,11 @@ class EarthSatellite(object):
         vGCRS = zeros_like(rGCRS)  # todo: someday also compute vGCRS?
 
         return rGCRS, vGCRS, error
+
+    def _at(self, t):
+        p, v, error = self._compute_GCRS(t)
+        # TODO: do something with the error code
+        return p, v
 
     @raise_error_for_deprecated_time_arguments
     def gcrs(self, t):

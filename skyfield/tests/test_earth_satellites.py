@@ -70,7 +70,7 @@ def test_iss_altitude_computed_with_gcrs(iss_transit):
     s = EarthSatellite(lines, None)
     lake_zurich = api.Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
 
-    alt, az, d = lake_zurich.at(t).observe(s).altaz()
+    alt, az, d = (s - lake_zurich).at(t).altaz()
     print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
     assert abs(alt.degrees - their_altitude) < 2.5  # TODO: tighten this up?
 

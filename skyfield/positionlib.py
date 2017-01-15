@@ -16,12 +16,19 @@ _GALACTIC = inertial_frames['GALACTIC']
 
 
 def build_position(position_au, velocity_au_per_d=None, t=None,
-                   center=None, target=None):
+                   center=None, target=None, observer_data=None):
     if center == 0:
-        return Barycentric(position_au, velocity_au_per_d, t, center, target)
-    if center == 399:
-        return Geocentric(position_au, velocity_au_per_d, t, center, target)
-    return ICRF(position_au, velocity_au_per_d, t, center, target)
+        cls = Barycentric
+    elif center == 399:
+        cls = Geocentric
+    elif observer_data is not None:
+        # TODO: is observer data enough to justify Apparent?  Or could
+        # that in some cases skip the important corrections that take
+        # place in the .apparent() method?
+        cls = Apparent
+    else:
+        cls = ICRF
+    return cls(position_au, velocity_au_per_d, t, center, target, observer_data)
 
 
 class ICRF(object):
@@ -34,7 +41,7 @@ class ICRF(object):
     altaz_rotation = None
 
     def __init__(self, position_au, velocity_au_per_d=None, t=None,
-                 center=None, target=None):
+                 center=None, target=None, observer_data=None):
         self.t = t
         self.position = Distance(position_au)
         if velocity_au_per_d is None:
@@ -43,7 +50,7 @@ class ICRF(object):
             self.velocity = Velocity(velocity_au_per_d)
         self.center = center
         self.target = target
-        self.observer_data = None
+        self.observer_data = observer_data
 
     def __repr__(self):
         return '<{0} position{1}{2}{3}{4}>'.format(
@@ -256,6 +263,7 @@ class Barycentric(ICRF):
         <Astrometric position and velocity at date t>
 
         """
+        # TODO: can _observe_from_bcrs() just return some vectors?
         astrometric = body._observe_from_bcrs(self)
         astrometric.observer_data = self.observer_data
         return astrometric
@@ -294,9 +302,9 @@ class Astrometric(ICRF):
         """
         t = self.t
         position_au = self.position.au.copy()
+        # TODO: get rid of self.observer
         observer = self.observer
 
-        # TODO: move _gcrs_position to observer data
         gcrs_position = (observer._gcrs_position
                          or self.observer_data.gcrs_position)
 
@@ -313,10 +321,10 @@ class Astrometric(ICRF):
 
         add_aberration(position_au, observer.velocity.au_per_d, self.light_time)
 
-        a = Apparent(position_au, t=t)
-        a.observer = self.observer
-        a.observer_data = self.observer_data
-        return a
+        apparent = Apparent(position_au, t=t)
+        apparent.observer = self.observer
+        apparent.observer_data = self.observer_data
+        return apparent
 
 
 class Apparent(ICRF):
@@ -377,7 +385,7 @@ class Apparent(ICRF):
 class Geocentric(ICRF):
     """An (x,y,z) position measured from the geocenter."""
 
-    def observe(self, other):
+    def asdf_observe(self, other):
         # TODO(1.0): clean up GCRS story
         gcrs_method = getattr(other, 'gcrs')
         if gcrs_method is None:

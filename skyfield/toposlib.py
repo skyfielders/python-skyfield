@@ -6,9 +6,10 @@ from .errors import raise_error_for_deprecated_time_arguments
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import Barycentric, Geocentric
 from .units import Distance, Angle, _interpret_ltude
+from .vectorlib import VectorFunction
 
 
-class Topos(object):
+class Topos(VectorFunction):
     """A specific location on the Earth's surface.
 
 

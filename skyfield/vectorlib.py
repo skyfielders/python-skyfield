@@ -41,9 +41,9 @@ class VectorFunction(object):
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
         p, v = self._at(t)
-        position = build_position(p, v, t, self.center, self.target)
-        position.observer_data = data = ObserverData()
+        data = ObserverData()
         self._snag_observer_data(data, t)
+        position = build_position(p, v, t, self.center, self.target, data)
         return position
 
     def _snag_observer_data(self, data, t):
@@ -51,7 +51,7 @@ class VectorFunction(object):
 
     def _observe_from_bcrs(self, observer):
         assert self.center == 0
-        return observe(observer, self)
+        return _correct_for_light_travel_time(observer, self)
 
     def geometry_of(self, other):
         # TODO: deprecate this
@@ -90,7 +90,7 @@ class VectorSum(VectorFunction):
         self.negatives = negatives
         self.first = positives[0]
         self.rest = positives[1:]
-        self.ephemeris = getattr(positives[0], 'ephemeris')
+        self.ephemeris = getattr(positives[0], 'ephemeris', None)
 
     def __str__(self):
         positives = self.positives
@@ -123,16 +123,26 @@ class VectorSum(VectorFunction):
         return p, v
 
     def _snag_observer_data(self, data, t):
+        # TODO: does it make sense to go through both all the positives
+        # and all the negatives?  This is trying to cover both the case
+        # my_topos.at(t) where the topos is the final positive segment,
+        # and also the case (satellite - my_topos).at(t) where the topos
+        # is the negative segment.
+        # TODO: fix this crazy gcrs business, which is computing again a
+        # quantity that we already computed while doing the sum or diff.
         for segment in self.positives:
             segment._snag_observer_data(data, t)
-        # TODO: fix the fact we are having to compute this twice. Ugh.
-        if segment.center == 399:
-            p, v = segment._at(t)
-            data.gcrs_position = p
+            if segment.center == 399:
+                p, v = segment._at(t)
+                data.gcrs_position = p
+        for segment in self.negatives:
+            segment._snag_observer_data(data, t)
+            if segment.center == 399:
+                p, v = segment._at(t)
+                data.gcrs_position = p
 
 
-
-def observe(observer, target):
+def _correct_for_light_travel_time(observer, target):
     """Return a light-time corrected astrometric position and velocity.
 
     Given an `observer` that is a `Barycentric` position somewhere in
@@ -146,6 +156,8 @@ def observe(observer, target):
     ts = t.ts
     cposition = observer.position.au
     cvelocity = observer.velocity.au_per_d
+    # TODO: .at() is a much more expensive operation than we really need
+    # here; pivot to using ._at() here and in the second call down in the loop.
     t_bary = target.at(t)
     tposition = t_bary.position.au
     distance = length_of(tposition - cposition)
@@ -162,7 +174,7 @@ def observe(observer, target):
         distance = length_of(tposition - cposition)
         light_time0 = light_time
     else:
-        raise ValueError('observe() light-travel time failed to converge')
+        raise ValueError('light-travel time failed to converge')
     tvelocity = t_bary.velocity.au_per_d
     pos = Astrometric(tposition - cposition, tvelocity - cvelocity, t)
     pos.light_time = light_time
