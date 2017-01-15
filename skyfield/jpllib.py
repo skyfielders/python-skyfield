@@ -198,9 +198,6 @@ class SPICESegment(VectorFunction):
     def _snag_observer_data(self, data, t):
         data.ephemeris = self.ephemeris
 
-    def icrf_vector_at(self, t):   # temporary compatibility measure
-        return self._at(t)
-
 
 class ChebyshevPosition(SPICESegment):
     def _at(self, t):
