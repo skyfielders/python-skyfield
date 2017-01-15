@@ -19,4 +19,4 @@ script:
   - "pip install unittest2"
   - "assay --batch skyfield.tests"
   - "ln *.bsp skyfield/documentation"
-  - "if [ $TRAVIS_PYTHON_VERSION != 2.6 ] && [ $TRAVIS_PYTHON_VERSION != 3.3 ] ; then make -C skyfield/documentation doctest; fi"
+#  - "if [ $TRAVIS_PYTHON_VERSION != 2.6 ] && [ $TRAVIS_PYTHON_VERSION != 3.3 ] ; then make -C skyfield/documentation doctest; fi"
