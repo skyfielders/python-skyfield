@@ -210,18 +210,6 @@ class ChebyshevPositionVelocity(SPICESegment):
         return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM
 
 
-def _connect(body1, body2):
-    """Return ``(sign, segment)`` tuple list leading from body1 to body2."""
-    every = body1.segments + body2.segments
-    segment_dict = dict((segment.target, segment) for segment in every)
-    segments1 = list(_center(body1.code, segment_dict))[::-1]
-    segments2 = list(_center(body2.code, segment_dict))[::-1]
-    if segments1[0].center != segments2[0].center:
-        raise ValueError('cannot trace these bodies back to a common center')
-    i = sum(1 for s1, s2 in zip(segments1, segments2) if s1.target == s2.target)
-    return segments1[i:], segments2[i:]
-
-
 def _center(code, segment_dict):
     """Starting with `code`, follow segments from target to center."""
     while code in segment_dict:
