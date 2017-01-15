@@ -87,7 +87,6 @@ class VectorSum(VectorFunction):
         self.negatives = negatives
         self.first = positives[0]
         self.rest = positives[1:]
-        self.ephemeris = getattr(positives[0], 'ephemeris', None)
 
     def __str__(self):
         positives = self.positives
