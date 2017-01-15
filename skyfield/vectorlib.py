@@ -46,6 +46,9 @@ class VectorFunction(object):
         data = ObserverData()
         self._snag_observer_data(data, t)
         position = build_position(p, v, t, self.center, self.target, data)
+        if position.center == 0:
+            data.bcrs_position = p
+            data.bcrs_velocity = v
         return position
 
     def _snag_observer_data(self, data, t):
@@ -174,7 +177,6 @@ def _correct_for_light_travel_time(observer, target):
     tvelocity = t_bary.velocity.au_per_d
     pos = Astrometric(tposition - cposition, tvelocity - cvelocity, t)
     pos.light_time = light_time
-    pos.observer = observer
     return pos
 
 
@@ -182,8 +184,13 @@ class ObserverData(object):
     """Extra information about an observer."""
     # TODO: expand the documentation for this class
 
+    __slots__ = ('altaz_rotation', 'elevation_m', 'ephemeris',
+                 'gcrs_position', 'bcrs_position', 'bcrs_velocity')
+
     def __init__(self):
         self.altaz_rotation = None
-        self.elevation = None
+        self.elevation_m = None
         self.ephemeris = None
         self.gcrs_position = None
+        self.bcrs_position = None
+        self.bcrs_velocity = None

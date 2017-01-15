@@ -90,8 +90,6 @@ class Star(object):
         light_time = distance / C_AUDAY
 
         g = Astrometric(vector, (observer.velocity.au_per_d.T - velocity).T, t)
-        g.observer = observer
-        g.distance = distance
         g.light_time = light_time
         return g
 
