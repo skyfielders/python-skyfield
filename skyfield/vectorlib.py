@@ -140,8 +140,6 @@ def observe(observer, target):
     reaching the eyes or instruments of the `observer`.
 
     """
-    # cposition, cvelocity = _tally([], self.center_chain, jd)
-    # tposition, tvelocity = _tally([], self.target_chain, jd)
     t = observer.t
     ts = t.ts
     cposition = observer.position.au

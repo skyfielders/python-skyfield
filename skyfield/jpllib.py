@@ -253,15 +253,3 @@ def _format_segment_brief(segment):
         ' ' if tname else '',
         tname,
     )
-
-def _tally(minus_chain, plus_chain, t):
-    position = velocity = 0.0
-    for segment in minus_chain:
-        p, v = segment.icrf_vector_at(t)
-        position -= p
-        velocity -= v
-    for segment in plus_chain:
-        p, v = segment.icrf_vector_at(t)
-        position += p
-        velocity += v
-    return position, velocity
