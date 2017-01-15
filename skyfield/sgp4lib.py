@@ -6,9 +6,8 @@ from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
 
 from .constants import AU_KM, DAY_S, T0, tau
-from .errors import raise_error_for_deprecated_time_arguments
 from .functions import rot_x, rot_y, rot_z
-from .positionlib import Apparent, Geocentric, ITRF_to_GCRS
+from .positionlib import ITRF_to_GCRS
 from .vectorlib import VectorFunction
 
 # important ones:
@@ -102,19 +101,6 @@ class EarthSatellite(VectorFunction):
         p, v, error = self._compute_GCRS(t)
         # TODO: do something with the error code
         return p, v
-
-    def _observe_from_bcrs(self, observer):
-        # TODO: what if someone on Mars tries to look at the ISS?
-
-        t = observer.t
-        rGCRS, vGCRS, error = self._compute_GCRS(t)
-        rGCRS - observer.rGCRS
-        vGCRS - observer.vGCRS
-        g = Apparent(rGCRS - observer.rGCRS, vGCRS - observer.vGCRS, t)
-        g.sgp4_error = error
-        g.observer = observer
-        # g.distance = euclidian_distance
-        return g
 
 
 _second = 1.0 / (24.0 * 60.0 * 60.0)
