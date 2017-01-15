@@ -4,7 +4,6 @@ from numpy import array, arccos, clip, einsum, exp
 
 from .constants import RAD2DEG, tau
 from .data.spice import inertial_frames
-#from .framelib import ICRS_to_J2000
 from .functions import dots, from_polar, length_of, to_polar, rot_z
 from .earthlib import compute_limb_angle, refract
 from .relativity import add_aberration, add_deflection
@@ -22,9 +21,9 @@ def build_position(position_au, velocity_au_per_d=None, t=None,
     elif center == 399:
         cls = Geocentric
     elif observer_data is not None:
-        # TODO: is observer data enough to justify Apparent?  Or could
-        # that in some cases skip the important corrections that take
-        # place in the .apparent() method?
+        # TODO: is the presence of observer_data enough to justify
+        # Apparent?  Or could that in some cases skip the important
+        # corrections that take place in the .apparent() method?
         cls = Apparent
     else:
         cls = ICRF

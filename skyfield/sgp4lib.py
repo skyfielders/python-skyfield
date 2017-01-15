@@ -67,7 +67,7 @@ class EarthSatellite(VectorFunction):
         """
         sat = self._sgp4_satellite
         epoch = sat.jdsatepoch
-        minutes_past_epoch = (t._utc_float() - epoch) * 1440.
+        minutes_past_epoch = (t._utc_float() - epoch) * 1440.0
         if getattr(minutes_past_epoch, 'shape', None):
             position = []
             velocity = []
@@ -82,9 +82,8 @@ class EarthSatellite(VectorFunction):
             position, velocity = sgp4(sat, minutes_past_epoch)
             return array(position), array(velocity), sat.error_message
 
-    def _compute_GCRS(self, t):
-        """Compute where satellite is in space on a given date."""
-
+    def _at(self, t):
+        """Compute this satellite's GCRS position and velocity at time `t`."""
         rTEME, vTEME, error = self._position_and_velocity_TEME_km(t)
         rTEME /= AU_KM
         vTEME /= AU_KM
@@ -94,12 +93,8 @@ class EarthSatellite(VectorFunction):
         rGCRS = ITRF_to_GCRS(t, rITRF)
         vGCRS = zeros_like(rGCRS)  # todo: someday also compute vGCRS?
 
-        return rGCRS, vGCRS, error
-
-    def _at(self, t):
-        p, v, error = self._compute_GCRS(t)
         # TODO: do something with the error code
-        return p, v
+        return rGCRS, vGCRS
 
 
 _second = 1.0 / (24.0 * 60.0 * 60.0)

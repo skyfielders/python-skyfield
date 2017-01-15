@@ -45,8 +45,6 @@ class Topos(VectorFunction):
         self.y = y
 
         self.R_lat = rot_y(latitude.radians)[::-1]
-        self.code = self
-        self.ephemeris = None
 
         self.target = object()  # TODO: make this more interesting
         self.target_name = '{0} N {1} E'.format(self.latitude, self.longitude)
@@ -67,7 +65,7 @@ class Topos(VectorFunction):
         return einsum('ij...,jk...,kl...->il...', self.R_lat, R_lon, t.M)
 
     def _at(self, t):
-        """Return the GCRS position, velocity of this Topos at `t`."""
+        """Compute the GCRS position and velocity of this Topos at time `t`."""
         pos, vel = terra(self.latitude.radians, self.longitude.radians,
                          self.elevation.au, t.gast)
         pos = einsum('ij...,j...->i...', t.MT, pos)
