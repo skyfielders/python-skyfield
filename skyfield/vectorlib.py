@@ -52,7 +52,7 @@ class VectorFunction(object):
     def geometry_of(self, other):
         # TODO: deprecate this
         if isinstance(other, str):
-            other = self.first.ephemeris.get(other)
+            other = self.first.ephemeris[other]
         return other - self
 
     def topos(self, latitude=None, longitude=None, latitude_degrees=None,

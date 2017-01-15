@@ -56,8 +56,7 @@ class Topos(object):
         return '<Topos {0} N, {1} E>'.format(self.latitude, self.longitude)
 
     def _at(self, t):
-        p, v = self.segment.icrf_vector_at(t)
-        return p, v
+        return self.segment.icrf_vector_at(t)
 
     def _snag_observer_data(self, data, t):
         data.altaz_rotation = self._altaz_rotation(t)

@@ -83,11 +83,6 @@ class SpiceKernel(object):
             lines.append(_format_segment(s))
         return '\n'.join(lines)
 
-    def __getitem__(self, name):
-        """Return a `Body` given a target name or integer."""
-        code = self.decode(name)
-        return Body(self, code)
-
     def comments(self):
         """Return the comments string of this kernel.
 
@@ -154,7 +149,7 @@ class SpiceKernel(object):
                            .format(self.filename, name, targets))
         return code
 
-    def get(self, target):
+    def __getitem__(self, target):
         # Work in progress: what would it be like if users were not
         # returned Body objects, but general vector objects that they
         # could add and subtract?  Returning raw segments to them is the
@@ -167,9 +162,6 @@ class SpiceKernel(object):
         if len(chain) == 1:
             return chain[0]
         return Sum(chain[0].center, chain[-1].target, chain, ())
-
-    # Can the new get() routine replace the old one?
-    __getitem__ = get
 
 
 class SPICESegment(VectorFunction):
