@@ -4,12 +4,11 @@ from .constants import ASEC2RAD, tau
 from .earthlib import terra
 from .errors import raise_error_for_deprecated_time_arguments
 from .functions import rot_x, rot_y, rot_z
-from .jpllib import Body
 from .positionlib import Barycentric, Geocentric
 from .units import Distance, Angle, _interpret_ltude
 
 
-class Topos(Body):
+class Topos(object):
     """A specific location on the Earth's surface.
 
 
