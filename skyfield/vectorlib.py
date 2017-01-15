@@ -97,13 +97,13 @@ class VectorSum(VectorFunction):
         negatives = self.negatives
         lines = [' + ' + str(segment) for segment in positives]
         lines.extend(' - ' + str(segment) for segment in negatives)
-        return 'Sum of {} vectors:\n{}'.format(
+        return 'Sum of {0} vectors:\n{1}'.format(
             len(positives) + len(negatives),
             '\n'.join(lines),
         )
 
     def __repr__(self):
-        return '<{} of {} vectors {} -> {}>'.format(
+        return '<{0} of {1} vectors {2} -> {3}>'.format(
             type(self).__name__,
             len(self.positives) + len(self.negatives),
             self.center_name,

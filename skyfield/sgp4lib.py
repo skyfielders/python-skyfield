@@ -47,7 +47,7 @@ class EarthSatellite(object):
         )
 
     def __repr__(self):
-        return '<{}>'.format(self)
+        return '<{0}>'.format(self)
 
     def _position_and_velocity_TEME_km(self, t):
         """Return the raw true equator mean equinox (TEME) vectors from SGP4.

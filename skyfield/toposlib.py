@@ -53,10 +53,10 @@ class Topos(object):
         self.target_name = '{0} N {1} E'.format(self.latitude, self.longitude)
 
     def __str__(self):
-        return 'Topos {}'.format(self.target_name)
+        return 'Topos {0}'.format(self.target_name)
 
     def __repr__(self):
-        return '<{}>'.format(self)
+        return '<{0}>'.format(self)
 
     def _at(self, t):
         return self.icrf_vector_at(t)

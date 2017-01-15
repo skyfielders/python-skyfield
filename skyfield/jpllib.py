@@ -65,7 +65,7 @@ class SpiceKernel(object):
                          s.target for s in self.segments)
 
     def __repr__(self):
-        return '<{} {!r}>'.format(type(self).__name__, self.path)
+        return '<{0} {!r}>'.format(type(self).__name__, self.path)
 
     def __str__(self):
         segments = self.spk.segments
@@ -187,13 +187,13 @@ class SPICESegment(VectorFunction):
         self.spk_segment = spk_segment
 
     def __str__(self):
-        return 'Segment {!r} {}'.format(
+        return 'Segment {0!r} {1}'.format(
             self.filename,
             _format_segment_brief(self),
         )
 
     def __repr__(self):
-        return '<{}>'.format(self)
+        return '<{0}>'.format(self)
 
     def _snag_observer_data(self, data, t):
         data.ephemeris = self.ephemeris
@@ -234,7 +234,7 @@ def _format_segment(segment):
 def _format_segment_brief(segment):
     cname = _names.get(segment.center)
     tname = _names.get(segment.target)
-    return '{}{}{} -> {}{}{}'.format(
+    return '{0}{1}{2} -> {3}{4}{5}'.format(
         segment.center,
         ' ' if cname else '',
         cname,

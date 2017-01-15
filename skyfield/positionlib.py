@@ -46,12 +46,12 @@ class ICRF(object):
         self.observer_data = None
 
     def __repr__(self):
-        return '<{} position{}{}{}{}>'.format(
+        return '<{0} position{1}{2}{3}{4}>'.format(
             self.__class__.__name__,
             '' if (self.velocity is None) else ' and velocity',
             '' if self.t is None else ' at date t',
-            '' if self.center is None else ' center={}'.format(self.center),
-            '' if self.target is None else ' target={}'.format(self.target),
+            '' if self.center is None else ' center={0}'.format(self.center),
+            '' if self.target is None else ' target={0}'.format(self.target),
         )
 
     def __sub__(self, body):
