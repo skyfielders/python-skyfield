@@ -19,7 +19,7 @@ def test_jpl_segment(eph):
     """)
     assert repr(e) == expected
 
-def test_satellite(eph):
+def test_satellite_with_name(eph):
     lines = [
         'ISS (ZARYA)             ',
         '1 25544U 98067A   13330.58127943  .00000814  00000-0  21834-4 0  1064',
@@ -32,6 +32,21 @@ def test_satellite(eph):
     assert str(s) == expected
     expected = dedent("""\
         <EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2013-11-26T13:57:03Z>
+    """)
+    assert repr(s) == expected
+
+def test_satellite_without_name(eph):
+    lines = [
+        '1 25544U 98067A   13330.58127943  .00000814  00000-0  21834-4 0  1064',
+        '2 25544  51.6484  23.7537 0001246  74.1647  18.7420 15.50540527859894',
+    ]
+    s = EarthSatellite(lines, None)
+    expected = dedent("""\
+        EarthSatellite number=25544 epoch=2013-11-26T13:57:03Z
+    """)
+    assert str(s) == expected
+    expected = dedent("""\
+        <EarthSatellite number=25544 epoch=2013-11-26T13:57:03Z>
     """)
     assert repr(s) == expected
 
