@@ -103,18 +103,6 @@ class EarthSatellite(VectorFunction):
         # TODO: do something with the error code
         return p, v
 
-    @raise_error_for_deprecated_time_arguments
-    def gcrs(self, t):
-        """Return a GCRS position for this Earth satellite.
-
-        Uses standard SGP4 theory to predict the satellite location.
-
-        """
-        position_au, velociy_au_per_d, error = self._compute_GCRS(t)
-        g = Geocentric(position_au, velociy_au_per_d, t)
-        g.sgp4_error = error
-        return g
-
     def _observe_from_bcrs(self, observer):
         # TODO: what if someone on Mars tries to look at the ISS?
 

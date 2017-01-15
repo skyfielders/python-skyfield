@@ -385,21 +385,6 @@ class Apparent(ICRF):
 class Geocentric(ICRF):
     """An (x,y,z) position measured from the geocenter."""
 
-    def asdf_observe(self, other):
-        # TODO(1.0): clean up GCRS story
-        gcrs_method = getattr(other, 'gcrs')
-        if gcrs_method is None:
-            raise ValueError('currently a Geocentric location can only'
-                             ' observe an object that can generate a'
-                             ' GCRS position through a .gcrs() method')
-        g = gcrs_method(self.t)
-        # TODO: light-travel-time backdating, if distant enough?
-        p = g.position.au - self.position.au
-        v = g.velocity.au_per_d - self.velocity.au_per_d
-        a = Apparent(p, v, self.t)
-        a.observer = self
-        return a
-
 
 def ITRF_to_GCRS(t, rITRF):  # todo: velocity
 
