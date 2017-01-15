@@ -45,6 +45,8 @@ class ICRF(object):
             self.velocity = None
         else:
             self.velocity = Velocity(velocity_au_per_d)
+        # TODO: are center and target useful? Then why are they not
+        # propagated down to Astrometric and Apparent positions?
         self.center = center
         self.target = target
         self.observer_data = observer_data
@@ -254,6 +256,10 @@ class Barycentric(ICRF):
         astrometric = Astrometric(p, v, t, observer_data=self.observer_data)
         astrometric.light_time = light_time
         return astrometric
+
+
+# TODO: pre-create a Barycentric object representing the SSB, and make
+# it possible for it to observe() a planet.
 
 
 class Astrometric(ICRF):

@@ -149,17 +149,14 @@ class SpiceKernel(object):
         return code
 
     def __getitem__(self, target):
-        # Work in progress: what would it be like if users were not
-        # returned Body objects, but general vector objects that they
-        # could add and subtract?  Returning raw segments to them is the
-        # first step.
-
+        """Return a vector function for computing the location of `target`."""
         target = self.decode(target)
         segments = self.segments
         segment_dict = dict((segment.target, segment) for segment in segments)
-        chain = tuple(_center(target, segment_dict))[::-1]
+        chain = tuple(_center(target, segment_dict))
         if len(chain) == 1:
             return chain[0]
+        chain = chain[::-1]
         center = chain[0].center
         target = chain[-1].target
         center_name = _format_code_and_name(center)
