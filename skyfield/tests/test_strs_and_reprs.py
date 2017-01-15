@@ -27,11 +27,11 @@ def test_satellite(eph):
     ]
     s = EarthSatellite(lines, None)
     expected = dedent("""\
-        EarthSatellite number=25544 epoch=2013-11-26T13:57:03Z
+        EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2013-11-26T13:57:03Z
     """)
     assert str(s) == expected
     expected = dedent("""\
-        <EarthSatellite number=25544 epoch=2013-11-26T13:57:03Z>
+        <EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2013-11-26T13:57:03Z>
     """)
     assert repr(s) == expected
 

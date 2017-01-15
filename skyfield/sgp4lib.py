@@ -24,11 +24,12 @@ _minutes_per_day = 1440.
 
 class EarthSatellite(object):
     """An Earth satellite loaded from a TLE file and propagated with SGP4."""
-    
+
     # cache for timescale
     timescale = None
 
     def __init__(self, lines, earth):
+        self.name = None if len(lines) < 3 else lines[0].strip()
         sat = twoline2rv(*lines[-2:], whichconst=wgs72)
         self._sgp4_satellite = sat
         self._earth = earth
@@ -39,8 +40,11 @@ class EarthSatellite(object):
 
     def __str__(self):
         sat = self._sgp4_satellite
-        return 'EarthSatellite number={1!r} epoch={0}'.format(
-            self.epoch.utc_iso(), sat.satnum)
+        return 'EarthSatellite{0} number={1!r} epoch={2}'.format(
+            ' ' + repr(self.name) if self.name else '',
+            sat.satnum,
+            self.epoch.utc_iso(),
+        )
 
     def __repr__(self):
         return '<{}>'.format(self)
