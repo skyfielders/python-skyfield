@@ -136,14 +136,11 @@ class VectorSum(VectorFunction):
         # quantity that we already computed while doing the sum or diff.
         for segment in self.positives:
             segment._snag_observer_data(observer_data, t)
-            if segment.center == 399:
-                p, v = segment._at(t)
-                observer_data.gcrs_position = p
         for segment in self.negatives:
             segment._snag_observer_data(observer_data, t)
-            if segment.center == 399:
-                p, v = segment._at(t)
-                observer_data.gcrs_position = p
+        if segment.center == 399:
+            p, v = segment._at(t)
+            observer_data.gcrs_position = p
 
 
 def _correct_for_light_travel_time(observer, target):
