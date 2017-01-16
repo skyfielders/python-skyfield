@@ -160,10 +160,7 @@ def _correct_for_light_travel_time(observer, target):
     ts = t.ts
     cposition = observer.position.au
     cvelocity = observer.velocity.au_per_d
-    # TODO: .at() is a much more expensive operation than we really need
-    # here; pivot to using ._at() here and in the second call down in the loop.
-    t_bary = target.at(t)
-    tposition = t_bary.position.au
+    tposition, tvelocity = target._at(t)
     distance = length_of(tposition - cposition)
     light_time0 = 0.0
     t_tdb = t.tdb
@@ -173,13 +170,11 @@ def _correct_for_light_travel_time(observer, target):
         if -1e-12 < min(delta) and max(delta) < 1e-12:
             break
         t2 = ts.tdb(jd=t_tdb - light_time)
-        t_bary = target.at(t2)
-        tposition = t_bary.position.au
+        tposition, tvelocity = target._at(t2)
         distance = length_of(tposition - cposition)
         light_time0 = light_time
     else:
         raise ValueError('light-travel time failed to converge')
-    tvelocity = t_bary.velocity.au_per_d
     return tposition - cposition, tvelocity - cvelocity, light_time
 
 
