@@ -178,9 +178,6 @@ class ObserverData(object):
         self.altaz_rotation = None  #go ahead and precompute in case needed N
         self.elevation_m = None  #just keep segment then just keep observer?
         self.ephemeris = None  #keep this on observer instead?
-        self.gcrs_position = None  #have to snag from final segment;
-        # can an observer save then when its at() / _at() is called to sum?
-        self.bcrs_position = None  #just keep observer?
-        self.bcrs_velocity = None  #just keep observer?
-        # What if I build the coordinate and then hand it to each routine?
-        # And let them mark it up?
+        self.gcrs_position = None
+        self.bcrs_position = None
+        self.bcrs_velocity = None
