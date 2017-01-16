@@ -198,13 +198,13 @@ class SPICESegment(VectorFunction):
 class ChebyshevPosition(SPICESegment):
     def _at(self, t):
         position, velocity = self.spk_segment.compute_and_differentiate(t.tdb)
-        return position / AU_KM, velocity / AU_KM
+        return position / AU_KM, velocity / AU_KM, None
 
 
 class ChebyshevPositionVelocity(SPICESegment):
     def _at(self, t):
         pv = self.spk_segment.compute(t.tdb)
-        return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM
+        return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM, None
 
 
 def _center(code, segment_dict):

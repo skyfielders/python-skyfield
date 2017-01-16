@@ -78,4 +78,4 @@ class Topos(VectorFunction):
             pos = einsum('ij...,j...->i...', R, pos)
         # TODO: also rotate velocity
 
-        return pos, vel
+        return pos, vel, pos

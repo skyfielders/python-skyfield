@@ -94,7 +94,7 @@ class EarthSatellite(VectorFunction):
         vGCRS = zeros_like(rGCRS)  # todo: someday also compute vGCRS?
 
         # TODO: do something with the error code
-        return rGCRS, vGCRS
+        return rGCRS, vGCRS, rGCRS
 
 
 _second = 1.0 / (24.0 * 60.0 * 60.0)

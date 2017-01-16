@@ -47,8 +47,8 @@ class VectorFunction(object):
             raise ValueError('please provide the at() method with a Time'
                              ' instance as its argument, instead of the'
                              ' value {0!r}'.format(t))
-        p, v = self._at(t)
         observer_data = ObserverData()
+        p, v, observer_data.gcrs_position = self._at(t)
         self._snag_observer_data(observer_data, t)
         center = self.center
         if center == 0:
@@ -117,30 +117,22 @@ class VectorSum(VectorFunction):
     def _at(self, t):
         p, v = 0.0, 0.0
         for segment in self.positives:
-            p2, v2 = segment._at(t)
+            p2, v2, gcrs_position = segment._at(t)
             p += p2
             v += v2
         for segment in self.negatives:
-            p2, v2 = segment._at(t)
+            p2, v2, gcrs_position = segment._at(t)
             p -= p2
             v -= v2
-        return p, v
+        return p, v, gcrs_position
 
     def _snag_observer_data(self, observer_data, t):
         # TODO: does it make sense to go through both all the positives
-        # and all the negatives?  This is trying to cover both the case
-        # my_topos.at(t) where the topos is the final positive segment,
-        # and also the case (satellite - my_topos).at(t) where the topos
-        # is the negative segment.
-        # TODO: fix this crazy gcrs business, which is computing again a
-        # quantity that we already computed while doing the sum or diff.
+        # and all the negatives?
         for segment in self.positives:
             segment._snag_observer_data(observer_data, t)
         for segment in self.negatives:
             segment._snag_observer_data(observer_data, t)
-        if segment.center == 399:
-            p, v = segment._at(t)
-            observer_data.gcrs_position = p
 
 
 def _correct_for_light_travel_time(observer, target):
@@ -157,7 +149,7 @@ def _correct_for_light_travel_time(observer, target):
     ts = t.ts
     cposition = observer.position.au
     cvelocity = observer.velocity.au_per_d
-    tposition, tvelocity = target._at(t)
+    tposition, tvelocity, gcrs_position = target._at(t)
     distance = length_of(tposition - cposition)
     light_time0 = 0.0
     t_tdb = t.tdb
@@ -167,7 +159,7 @@ def _correct_for_light_travel_time(observer, target):
         if -1e-12 < min(delta) and max(delta) < 1e-12:
             break
         t2 = ts.tdb(jd=t_tdb - light_time)
-        tposition, tvelocity = target._at(t2)
+        tposition, tvelocity, gcrs_position = target._at(t2)
         distance = length_of(tposition - cposition)
         light_time0 = light_time
     else:
@@ -183,9 +175,12 @@ class ObserverData(object):
                  'gcrs_position', 'bcrs_position', 'bcrs_velocity')
 
     def __init__(self):
-        self.altaz_rotation = None
-        self.elevation_m = None
-        self.ephemeris = None
-        self.gcrs_position = None
-        self.bcrs_position = None
-        self.bcrs_velocity = None
+        self.altaz_rotation = None  #go ahead and precompute in case needed N
+        self.elevation_m = None  #just keep segment then just keep observer?
+        self.ephemeris = None  #keep this on observer instead?
+        self.gcrs_position = None  #have to snag from final segment;
+        # can an observer save then when its at() / _at() is called to sum?
+        self.bcrs_position = None  #just keep observer?
+        self.bcrs_velocity = None  #just keep observer?
+        # What if I build the coordinate and then hand it to each routine?
+        # And let them mark it up?
