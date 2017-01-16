@@ -14,9 +14,10 @@ def test_whether_planets_have_radii():
         assert planet.radius.km > 0.0
 
 def test_sending_jd_that_is_not_a_julian_date():
-    return # TODO: turn this back on, using one of the new ts method calls
     earth = api.load('de421.bsp')['earth']
-    with assert_raises(ValueError, 'your "jd" argument is not a JulianDate: '):
+    with assert_raises(ValueError, r"please provide the at\(\) method"
+                       " with a Time instance as its argument,"
+                       " instead of the value 'blah'"):
         earth.at('blah')
 
 def test_apparent_position_class(ts):

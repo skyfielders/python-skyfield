@@ -5,6 +5,7 @@ from .constants import C_AUDAY
 from .errors import raise_error_for_deprecated_time_arguments
 from .functions import length_of
 from .positionlib import build_position
+from .timelib import Time
 
 class VectorFunction(object):
     def __add__(self, other):
@@ -42,6 +43,10 @@ class VectorFunction(object):
 
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
+        if not isinstance(t, Time):
+            raise ValueError('please provide the at() method with a Time'
+                             ' instance as its argument, instead of the'
+                             ' value {!r}'.format(t))
         p, v = self._at(t)
         data = ObserverData()
         self._snag_observer_data(data, t)
