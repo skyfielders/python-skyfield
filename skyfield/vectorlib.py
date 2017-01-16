@@ -67,7 +67,8 @@ class VectorFunction(object):
     def geometry_of(self, other):
         # TODO: deprecate this
         if isinstance(other, str):
-            other = self.first.ephemeris[other]
+            # TODO: is this always the right ephemeris to use?
+            other = self.positives[0].ephemeris[other]
         return other - self
 
     def topos(self, latitude=None, longitude=None, latitude_degrees=None,
@@ -94,8 +95,6 @@ class VectorSum(VectorFunction):
         self.target_name = target_name
         self.positives = positives
         self.negatives = negatives
-        self.first = positives[0]
-        self.rest = positives[1:]
 
     def __str__(self):
         positives = self.positives
@@ -116,8 +115,8 @@ class VectorSum(VectorFunction):
         )
 
     def _at(self, t):
-        p, v = self.first._at(t)
-        for segment in self.rest:
+        p, v = 0.0, 0.0
+        for segment in self.positives:
             p2, v2 = segment._at(t)
             p += p2
             v += v2
