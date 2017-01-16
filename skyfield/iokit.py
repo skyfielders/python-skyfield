@@ -212,7 +212,6 @@ class Loader(object):
 
         """
         if delta_t is not None:
-            # TODO: Can this use inf and -inf instead?
             delta_t_recent = np.array(((-1e99, 1e99), (delta_t, delta_t)))
         else:
             data = self('deltat.data')
