@@ -46,7 +46,7 @@ class VectorFunction(object):
         if not isinstance(t, Time):
             raise ValueError('please provide the at() method with a Time'
                              ' instance as its argument, instead of the'
-                             ' value {!r}'.format(t))
+                             ' value {0!r}'.format(t))
         p, v = self._at(t)
         observer_data = ObserverData()
         self._snag_observer_data(observer_data, t)
