@@ -48,12 +48,13 @@ class VectorFunction(object):
                              ' instance as its argument, instead of the'
                              ' value {!r}'.format(t))
         p, v = self._at(t)
-        data = ObserverData()
-        self._snag_observer_data(data, t)
-        position = build_position(p, v, t, self.center, self.target, data)
-        if position.center == 0:
-            data.bcrs_position = p
-            data.bcrs_velocity = v
+        observer_data = ObserverData()
+        self._snag_observer_data(observer_data, t)
+        center = self.center
+        if center == 0:
+            observer_data.bcrs_position = p
+            observer_data.bcrs_velocity = v
+        position = build_position(p, v, t, center, self.target, observer_data)
         return position
 
     def _snag_observer_data(self, data, t):
@@ -126,7 +127,7 @@ class VectorSum(VectorFunction):
             v -= v2
         return p, v
 
-    def _snag_observer_data(self, data, t):
+    def _snag_observer_data(self, observer_data, t):
         # TODO: does it make sense to go through both all the positives
         # and all the negatives?  This is trying to cover both the case
         # my_topos.at(t) where the topos is the final positive segment,
@@ -135,15 +136,15 @@ class VectorSum(VectorFunction):
         # TODO: fix this crazy gcrs business, which is computing again a
         # quantity that we already computed while doing the sum or diff.
         for segment in self.positives:
-            segment._snag_observer_data(data, t)
+            segment._snag_observer_data(observer_data, t)
             if segment.center == 399:
                 p, v = segment._at(t)
-                data.gcrs_position = p
+                observer_data.gcrs_position = p
         for segment in self.negatives:
-            segment._snag_observer_data(data, t)
+            segment._snag_observer_data(observer_data, t)
             if segment.center == 399:
                 p, v = segment._at(t)
-                data.gcrs_position = p
+                observer_data.gcrs_position = p
 
 
 def _correct_for_light_travel_time(observer, target):

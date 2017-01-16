@@ -191,8 +191,8 @@ class SPICESegment(VectorFunction):
     def __repr__(self):
         return '<{0}>'.format(self)
 
-    def _snag_observer_data(self, data, t):
-        data.ephemeris = self.ephemeris
+    def _snag_observer_data(self, observer_data, t):
+        observer_data.ephemeris = self.ephemeris
 
 
 class ChebyshevPosition(SPICESegment):

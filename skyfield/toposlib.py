@@ -55,9 +55,9 @@ class Topos(VectorFunction):
     def __repr__(self):
         return '<{0}>'.format(self)
 
-    def _snag_observer_data(self, data, t):
-        data.altaz_rotation = self._altaz_rotation(t)
-        data.elevation_m = self.elevation.m
+    def _snag_observer_data(self, observer_data, t):
+        observer_data.altaz_rotation = self._altaz_rotation(t)
+        observer_data.elevation_m = self.elevation.m
 
     def _altaz_rotation(self, t):
         """Compute the rotation from the ICRF into the alt-az system."""
@@ -77,4 +77,5 @@ class Topos(VectorFunction):
             R = rot_x(self.y * ASEC2RAD)
             pos = einsum('ij...,j...->i...', R, pos)
         # TODO: also rotate velocity
+
         return pos, vel
