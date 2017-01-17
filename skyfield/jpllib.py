@@ -58,8 +58,7 @@ class SpiceKernel(object):
         self.path = path
         self.filename = os.path.basename(path)
         self.spk = SPK.open(path)
-        self.segments = [SPICESegment(self.filename, self, s)
-                         for s in self.spk.segments]
+        self.segments = [SPICESegment(self, s) for s in self.spk.segments]
         self.codes = set(s.center for s in self.segments).union(
                          s.target for s in self.segments)
 
@@ -167,7 +166,7 @@ class SpiceKernel(object):
 class SPICESegment(VectorFunction):
     __slots__ = ['center', 'target', 'spk_segment']
 
-    def __new__(cls, filename, ephemeris, spk_segment):
+    def __new__(cls, ephemeris, spk_segment):
         if spk_segment.data_type == 2:
             return object.__new__(ChebyshevPosition)
         if spk_segment.data_type == 3:
@@ -175,8 +174,7 @@ class SPICESegment(VectorFunction):
         raise ValueError('SPK data type {0} not yet supported segment'
                          .format(spk_segment.data_type))
 
-    def __init__(self, filename, ephemeris, spk_segment):
-        self.filename = filename
+    def __init__(self, ephemeris, spk_segment):
         self.ephemeris = ephemeris
         self.center = spk_segment.center
         self.target = spk_segment.target
@@ -184,7 +182,7 @@ class SPICESegment(VectorFunction):
 
     def __str__(self):
         return 'Segment {0!r} {1}'.format(
-            self.filename,
+            self.ephemeris.filename,
             _format_segment_brief(self),
         )
 
