@@ -8,6 +8,8 @@ from .positionlib import build_position
 from .timelib import Time
 
 class VectorFunction(object):
+    ephemeris = None
+
     def __add__(self, other):
         if self.target != other.center:
             if other.target == self.center:
@@ -48,6 +50,7 @@ class VectorFunction(object):
                              ' instance as its argument, instead of the'
                              ' value {0!r}'.format(t))
         observer_data = ObserverData()
+        observer_data.ephemeris = self.ephemeris
         p, v, observer_data.gcrs_position = self._at(t)
         self._snag_observer_data(observer_data, t)
         center = self.center
@@ -95,6 +98,11 @@ class VectorSum(VectorFunction):
         self.target_name = target_name
         self.positives = positives
         self.negatives = negatives
+
+        # For now, just grab the first ephemeris we can find.
+        ephemerides = (segment.ephemeris for segments in (positives, negatives)
+                       for segment in segments if segment.ephemeris)
+        self.ephemeris = next(ephemerides, None)
 
     def __str__(self):
         positives = self.positives
@@ -168,7 +176,7 @@ def _correct_for_light_travel_time(observer, target):
 
 
 class ObserverData(object):
-    """Extra information about an observer."""
+    """Essential facts about an observer, that may be needed later."""
     # TODO: expand the documentation for this class
 
     __slots__ = ('altaz_rotation', 'elevation_m', 'ephemeris',

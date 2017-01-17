@@ -145,6 +145,23 @@ Sprint Possibilities
 
 * Should a simple "print position.radec()" print something prettier?
 
+Adding more smarts to ephemeris handling
+========================================
+
+* When we add or subtract vectors, the new `VectorSum` needs to inherit
+  an `ephemeris` from one of the segments being combined.  Right now it
+  just grabs the first one.  What if, of the choices of ephemeris among
+  the segments, grabbing the first one gives us an ephemeris that is
+  missing several key large bodies, and so we run into an exception when
+  `.apparent()` tries to compute gravitational deflection?  Should we be
+  more intelligent in our choice?  Or should we even combine the various
+  ephemerides our segments might offer?  Or should we specifically go
+  ahead and look for the deflectors we need and try to find a segment
+  for them each?
+
+* And additionally: the error when not enough bodies are available for
+  deflection maybe someday needs to be more helpful.
+
 Longer-term goals
 =================
 
