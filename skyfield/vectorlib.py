@@ -44,7 +44,7 @@ class VectorFunction(object):
         otherp = getattr(other, 'positives', None) or (other,)
         othern = getattr(other, 'negatives', ())
 
-        return VectorSum(self.target, other.target,
+        return VectorSum(other.target, self.target,
                          self.target_name, other.target_name,
                          selfp + othern, selfn + otherp)
 
