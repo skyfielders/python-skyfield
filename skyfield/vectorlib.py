@@ -52,11 +52,11 @@ class VectorFunction(object):
         observer_data = ObserverData()
         observer_data.ephemeris = self.ephemeris
         p, v, observer_data.gcrs_position = self._at(t)
-        self._snag_observer_data(observer_data, t)
         center = self.center
         if center == 0:
             observer_data.bcrs_position = p
             observer_data.bcrs_velocity = v
+        self._snag_observer_data(observer_data, t)
         position = build_position(p, v, t, center, self.target, observer_data)
         return position
 
@@ -135,12 +135,11 @@ class VectorSum(VectorFunction):
         return p, v, gcrs_position
 
     def _snag_observer_data(self, observer_data, t):
-        # TODO: does it make sense to go through both all the positives
-        # and all the negatives?
-        for segment in self.positives:
-            segment._snag_observer_data(observer_data, t)
-        for segment in self.negatives:
-            segment._snag_observer_data(observer_data, t)
+        if self.negatives:
+            final_segment = self.negatives[-1]
+        elif self.positives:
+            final_segment = self.positives[-1]
+        final_segment._snag_observer_data(observer_data, t)
 
 
 def _correct_for_light_travel_time(observer, target):
@@ -183,9 +182,9 @@ class ObserverData(object):
                  'gcrs_position', 'bcrs_position', 'bcrs_velocity')
 
     def __init__(self):
-        self.altaz_rotation = None  #go ahead and precompute in case needed N
-        self.elevation_m = None  #just keep segment then just keep observer?
-        self.ephemeris = None  #keep this on observer instead?
+        self.altaz_rotation = None
+        self.elevation_m = None
+        self.ephemeris = None
         self.gcrs_position = None
         self.bcrs_position = None
         self.bcrs_velocity = None
