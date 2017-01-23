@@ -40,10 +40,10 @@ Sum of 2 vectors:
 
     assert str(v) == """\
 Sum of 4 vectors:
- + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
- + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH
+ - Segment 'de421.bsp' 4 MARS BARYCENTER -> 499 MARS
  - Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 4 MARS BARYCENTER
- - Segment 'de421.bsp' 4 MARS BARYCENTER -> 499 MARS"""
+ + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+ + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH"""
 
     assert str(v.at(t)) == "\
 <Geocentric position and velocity at date t center=399 target=499>"

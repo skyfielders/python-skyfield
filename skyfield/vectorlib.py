@@ -112,8 +112,8 @@ class VectorSum(VectorFunction):
     def __str__(self):
         positives = self.positives
         negatives = self.negatives
-        lines = [' + ' + str(segment) for segment in positives]
-        lines.extend(' - ' + str(segment) for segment in negatives)
+        lines = [' - ' + str(segment) for segment in reversed(negatives)]
+        lines.extend(' + ' + str(segment) for segment in positives)
         return 'Sum of {0} vectors:\n{1}'.format(
             len(positives) + len(negatives),
             '\n'.join(lines),
