@@ -15,8 +15,11 @@ class VectorFunction(object):
             if other.target == self.center:
                 self, other = other, self
             else:
-                # TODO: put an explanation here
-                raise ValueError()
+                raise ValueError(
+                    "you can only add two vectors"
+                    " if the target where one of the vectors ends"
+                    " is the center where the other vector starts"
+                )
 
         selfp = getattr(self, 'positives', None) or (self,)
         selfn = getattr(self, 'negatives', ())
@@ -30,8 +33,10 @@ class VectorFunction(object):
 
     def __sub__(self, other):
         if self.center != other.center:
-            # TODO: put an explanation here
-            raise ValueError()
+            raise ValueError(
+                "you can only subtract two vectors"
+                " if they both start at the same center"
+            )
 
         selfp = getattr(self, 'positives', None) or (self,)
         selfn = getattr(self, 'negatives', ())
