@@ -145,6 +145,11 @@ Sprint Possibilities
 
 * Should a simple "print position.radec()" print something prettier?
 
+* We should maybe support light seconds or minutes (or both?) as ways to
+  express and to set a distance.  As we keep adding them, should we
+  really keep adding more named parameters to the constructor?  Maybe we
+  should instead start using class method constructors instead?
+
 Adding more smarts to ephemeris handling
 ========================================
 
