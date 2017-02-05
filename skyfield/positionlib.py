@@ -21,10 +21,7 @@ def build_position(position_au, velocity_au_per_d=None, t=None,
     elif center == 399:
         cls = Geocentric
     elif observer_data is not None:
-        # TODO: is the presence of observer_data enough to justify
-        # Apparent?  Or could that in some cases skip the important
-        # corrections that take place in the .apparent() method?
-        cls = Apparent
+        cls = Geometric
     else:
         cls = ICRF
     return cls(position_au, velocity_au_per_d, t, center, target, observer_data)
@@ -220,6 +217,27 @@ class ICRF(object):
 ICRS = ICRF
 
 
+class Geometric(ICRF):
+    """An (x,y,z) vector between two instantaneous position.
+
+    A geometric position is the difference between the Solar System
+    positions of two bodies at exactly the same instant.  It is *not*
+    corrected for the fact that, in real physics, it will take time for
+    light to travel from one position to the other.
+
+    """
+    def altaz(self, temperature_C=None, pressure_mbar='standard'):
+        """Compute (alt, az, distance) relative to the observer's horizon
+
+        The altitude returned is an `Angle` in degrees above the
+        horizon, while the azimuth is the compass direction in degrees
+        with north being 0 degrees and east being 90 degrees.
+
+        """
+        return _to_altaz(self.position.au, self.observer_data,
+                         temperature_C, pressure_mbar)
+
+
 class Barycentric(ICRF):
     """An (x, y, z) position measured from the Solar System barycenter.
 
@@ -337,34 +355,42 @@ class Apparent(ICRF):
         with north being 0 degrees and east being 90 degrees.
 
         """
-        try:
-            elevation_m = self.observer_data.elevation_m
-            R = self.observer_data.altaz_rotation
-        except AttributeError:
-            raise ValueError('to compute an apparent position, you must'
-                             ' observe from a specific Earth location that'
-                             ' you specify using a Topos instance')
-
-        # TODO: wobble
-
-        position_au = einsum('ij...,j...->i...', R, self.position.au)
-        r_au, alt, az = to_polar(position_au)
-
-        if temperature_C is None:
-            alt = Angle(radians=alt)
-        else:
-            if temperature_C == 'standard':
-                temperature_C = 10.0
-            if pressure_mbar == 'standard':
-                pressure_mbar = 1010.0 * exp(-elevation_m / 9.1e3)
-            alt = refract(alt * RAD2DEG, temperature_C, pressure_mbar)
-            alt = Angle(degrees=alt)
-
-        return alt, Angle(radians=az), Distance(r_au)
+        return _to_altaz(self.position.au, self.observer_data,
+                         temperature_C, pressure_mbar)
 
 
 class Geocentric(ICRF):
     """An (x,y,z) position measured from the geocenter."""
+
+
+def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):
+    """Compute (alt, az, distance) relative to the observer's horizon.
+
+    """
+    try:
+        elevation_m = observer_data.elevation_m
+        R = observer_data.altaz_rotation
+    except AttributeError:
+        raise ValueError('to compute an altazimuth position, you must'
+                         ' observe from a specific Earth location that'
+                         ' you specify using a Topos instance')
+
+    # TODO: wobble
+
+    position_au = einsum('ij...,j...->i...', R, position_au)
+    r_au, alt, az = to_polar(position_au)
+
+    if temperature_C is None:
+        alt = Angle(radians=alt)
+    else:
+        if temperature_C == 'standard':
+            temperature_C = 10.0
+        if pressure_mbar == 'standard':
+            pressure_mbar = 1010.0 * exp(-elevation_m / 9.1e3)
+        alt = refract(alt * RAD2DEG, temperature_C, pressure_mbar)
+        alt = Angle(degrees=alt)
+
+    return alt, Angle(radians=az), Distance(r_au)
 
 
 def ITRF_to_GCRS(t, rITRF):  # todo: velocity

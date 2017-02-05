@@ -46,4 +46,4 @@ Sum of 4 vectors:
  + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH"""
 
     assert str(v.at(t)) == "\
-<Apparent position and velocity at date t center=499 target=399>"
+<Geometric position and velocity at date t center=499 target=399>"
