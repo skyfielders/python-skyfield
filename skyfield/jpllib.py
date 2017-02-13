@@ -49,9 +49,9 @@ class SpiceKernel(object):
     square brackets and supply the target's name or integer code:
 
     >>> planets['earth']
-    <Body 399 'EARTH' from kernel 'de421.bsp'>
+    <VectorSum of 2 vectors 0 SOLAR SYSTEM BARYCENTER -> 399 EARTH>
     >>> planets[499]
-    <Body 499 'MARS' from kernel 'de421.bsp'>
+    <VectorSum of 2 vectors 0 SOLAR SYSTEM BARYCENTER -> 499 MARS>
 
     """
     def __init__(self, path):

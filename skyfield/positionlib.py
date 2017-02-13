@@ -251,7 +251,7 @@ class Barycentric(ICRF):
 
     >>> t = ts.utc(2003, 8, 29)
     >>> mars.at(t)
-    <Barycentric position and velocity at date t>
+    <Barycentric position and velocity at date t center=0 target=499>
 
     """
     def observe(self, body):
