@@ -21,7 +21,7 @@ class SpiceKernel(object):
     planets, moons, and spacecraft.
 
     You can download a .bsp file yourself and use this class to open it,
-    or use the Skyfield `load` function to automatically download a
+    or use the Skyfield ``load()`` function to automatically download a
     popular ephemeris.  Once loaded, you can print this object to the
     screen to see a report on the segments that it includes:
 
@@ -45,13 +45,17 @@ class SpiceKernel(object):
           2 -> 299  VENUS BARYCENTER -> VENUS
           4 -> 499  MARS BARYCENTER -> MARS
 
-    To create a `Body` object for a target you are interested in, use
-    square brackets and supply the target's name or integer code:
+    To retrieve the one or more vectors necessary to compute the
+    position of a body relative to the Solar System barycenter, look up
+    the body by its name or official SPICE identifying integer:
 
     >>> planets['earth']
     <VectorSum of 2 vectors 0 SOLAR SYSTEM BARYCENTER -> 399 EARTH>
     >>> planets[499]
     <VectorSum of 2 vectors 0 SOLAR SYSTEM BARYCENTER -> 499 MARS>
+
+    The result will be a :class:`~skyfield.vectorlib.VectorFunction`
+    instance that you can ask for a position at a given input time.
 
     """
     def __init__(self, path):
@@ -193,13 +197,13 @@ class SPICESegment(VectorFunction):
 class ChebyshevPosition(SPICESegment):
     def _at(self, t):
         position, velocity = self.spk_segment.compute_and_differentiate(t.tdb)
-        return position / AU_KM, velocity / AU_KM, None
+        return position / AU_KM, velocity / AU_KM, None, None
 
 
 class ChebyshevPositionVelocity(SPICESegment):
     def _at(self, t):
         pv = self.spk_segment.compute(t.tdb)
-        return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM, None
+        return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM, None, None
 
 
 def _center(code, segment_dict):

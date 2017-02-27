@@ -56,13 +56,14 @@ class VectorFunction(object):
                              ' value {0!r}'.format(t))
         observer_data = ObserverData()
         observer_data.ephemeris = self.ephemeris
-        p, v, observer_data.gcrs_position = self._at(t)
+        p, v, observer_data.gcrs_position, message = self._at(t)
         center = self.center
         if center == 0:
             observer_data.bcrs_position = p
             observer_data.bcrs_velocity = v
         self._snag_observer_data(observer_data, t)
         position = build_position(p, v, t, center, self.target, observer_data)
+        position.message = message
         return position
 
     def _snag_observer_data(self, data, t):
@@ -130,14 +131,14 @@ class VectorSum(VectorFunction):
     def _at(self, t):
         p, v = 0.0, 0.0
         for segment in self.positives:
-            p2, v2, gcrs_position = segment._at(t)
+            p2, v2, gcrs_position, message = segment._at(t)
             p += p2
             v += v2
         for segment in self.negatives:
-            p2, v2, gcrs_position = segment._at(t)
+            p2, v2, gcrs_position, ignored_message = segment._at(t)
             p -= p2
             v -= v2
-        return p, v, gcrs_position
+        return p, v, gcrs_position, message
 
     def _snag_observer_data(self, observer_data, t):
         if self.negatives:
@@ -161,7 +162,7 @@ def _correct_for_light_travel_time(observer, target):
     ts = t.ts
     cposition = observer.position.au
     cvelocity = observer.velocity.au_per_d
-    tposition, tvelocity, gcrs_position = target._at(t)
+    tposition, tvelocity, gcrs_position, message = target._at(t)
     distance = length_of(tposition - cposition)
     light_time0 = 0.0
     t_tdb = t.tdb
@@ -171,7 +172,7 @@ def _correct_for_light_travel_time(observer, target):
         if -1e-12 < min(delta) and max(delta) < 1e-12:
             break
         t2 = ts.tdb(jd=t_tdb - light_time)
-        tposition, tvelocity, gcrs_position = target._at(t2)
+        tposition, tvelocity, gcrs_position, message = target._at(t2)
         distance = length_of(tposition - cposition)
         light_time0 = light_time
     else:

@@ -168,8 +168,6 @@ or else by generating a whole series of positions.
   from public TLE elements describing their current orbit,
   which you can download from Celestrak. :doc:`Read more <earth-satellites>`
 
-  .. TODO(1.0) - update the following code with new approach
-
   .. testsetup::
 
     tle_text = """
@@ -186,15 +184,17 @@ or else by generating a whole series of positions.
     t = ts.now()
 
     boston = earth.topos('42.3583 N', '71.0603 W')
-    #satellite = earth.satellite(tle_text) # TODO
+    satellite = earth.satellite(tle_text)
 
     # Geocentric
 
-    #apparent = satellite.gcrs(t)
+    difference = satellite - earth
+    geometry = difference.at(t)
 
     # Topocentric
 
-    #apparent = boston.gcrs(t).observe(satellite)
+    difference = satellite - boston
+    geometry = difference.at(t)
 
 Read :doc:`time` for more information
 about how to build dates and pass them to planets and satellites

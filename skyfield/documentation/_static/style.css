@@ -119,6 +119,7 @@ code, tt {
     border-radius: 3px;
     border: 1px solid #e3dcca;
     padding: 1px 2px 2px;
+    font-size: 0.83333333em;
 }
 a code:hover, a tt:hover {
     border-color: #827c6b;

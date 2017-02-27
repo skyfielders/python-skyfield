@@ -1,10 +1,8 @@
 
-====================================
- API Reference — Using an Ephemeris
-====================================
+============================================================
+ API Reference — Generating Positions From Vector Functions
+============================================================
 
-See `planets` for a guide to using the ephemeris objects below
-to compute the positions of planets, moons, and the Sun.
 
 .. testsetup::
 

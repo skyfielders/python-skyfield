@@ -12,6 +12,7 @@ from .constants import tau
 from .errors import DeprecationError
 from .iokit import Loader
 from .starlib import Star
+from .sgp4lib import EarthSatellite
 from .timelib import T0, Time, Timescale, utc
 from .toposlib import Topos
 from .units import Angle
@@ -19,7 +20,7 @@ from .named_stars import NamedStar
 
 load = Loader('.')
 
-__all__ = ['Angle', 'Loader', 'NamedStar', 'Star',
+__all__ = ['Angle', 'Loader', 'NamedStar', 'Star', 'EarthSatellite',
            'T0', 'Time', 'Timescale', 'Topos', 'datetime',
            'load', 'utc', 'pi', 'tau']
 

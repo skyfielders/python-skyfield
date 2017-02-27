@@ -31,26 +31,18 @@ to compute its apparent position relative to a location on Earth:
     2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
     """
 
-    from skyfield.api import load
-    ts = load.timescale()
-    eph = load('de421.bsp')
-    earth = eph['earth']
+    from skyfield.api import EarthSatellite, Topos, load
 
-    bluffton = earth.topos('40.8939 N', '83.8917 W')
+    ts = load.timescale()
     t = ts.utc(2014, 1, 21, 11, 18, 7)
 
-    sat = earth.satellite(text)
-    position = bluffton.at(t).observe(sat)
+    satellite = EarthSatellite(text)
+    bluffton = Topos('40.8939 N', '83.8917 W')
 
-To find out whether the satellite is above your local horizon,
-you will want to ask for its altitude and azimuth.
-Negative altitudes lie below your horizon,
-while positive altitude places the satellite above the horizon:
-
-.. testcode::
+    difference = satellite - bluffton
+    position = difference.at(t)
 
     alt, az, distance = position.altaz()
-
     print(alt)
     print(az)
     print(distance.km)
@@ -60,6 +52,34 @@ while positive altitude places the satellite above the horizon:
     13deg 50' 46.6"
     358deg 48' 55.9"
     1280.53654286
+
+.. testcode::
+
+    # BAD APPROACH: Compute the satellite's position
+    # relative to the Solar System barycenter, then call
+    # observe() to compensate for light-travel time.
+
+    de421 = load('de421.bsp')
+    earth = de421['earth']
+    ssb_bluffton = earth + bluffton
+    ssb_satellite = earth + satellite
+    position2 = ssb_bluffton.at(t).observe(ssb_satellite).apparent()
+
+    # After all that work, how big is the difference, really?
+
+    error_km = (position2 - position).distance().km
+    print('Error: {:.3f} km'.format(error_km))
+
+.. testoutput::
+
+    Error: 0.091 km
+
+
+To find out whether the satellite is above your local horizon,
+you will want to ask for its altitude and azimuth.
+Negative altitudes lie below your horizon,
+while positive altitude places the satellite above the horizon:
+
 
 You can also ask for the position
 to be expressed as right ascension and declination
@@ -116,7 +136,7 @@ so it supports all of the standard Skyfield date methods:
     1 34602U 09013A   13314.96046236  .14220718  20669-5  50412-4 0   930
     2 34602 096.5717 344.5256 0009826 296.2811 064.0942 16.58673376272979
     """
-    sat = earth.satellite(text)
+    sat = EarthSatellite(text)
     print(sat.epoch.utc_jpl())
 
 .. testoutput::
@@ -152,15 +172,15 @@ that are limiting this TLE set’s predictions:
 
 .. testcode::
 
-    geocentric = sat.gcrs(ts.utc(2013, 11, 9))
+    geocentric = sat.at(ts.utc(2013, 11, 9))
     print('Before:')
     print(geocentric.position.km)
-    print(geocentric.sgp4_error)
+    print(geocentric.message)
 
-    geocentric = sat.gcrs(ts.utc(2013, 11, 13))
+    geocentric = sat.at(ts.utc(2013, 11, 13))
     print('\nAfter:')
     print(geocentric.position.km)
-    print(geocentric.sgp4_error)
+    print(geocentric.message)
 
 .. testoutput::
 
@@ -181,8 +201,8 @@ and otherwise recording the propagator error:
 
     from pprint import pprint
 
-    geocentric = sat.gcrs(ts.utc(2013, 11, [9, 10, 11, 12, 13]))
-    pprint(geocentric.sgp4_error)
+    geocentric = sat.at(ts.utc(2013, 11, [9, 10, 11, 12, 13]))
+    pprint(geocentric.message)
 
 .. testoutput::
 
@@ -191,5 +211,3 @@ and otherwise recording the propagator error:
      None,
      None,
      'mrt 0.997178 is less than 1.0 indicating the satellite has decayed']
-
-

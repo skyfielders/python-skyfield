@@ -32,6 +32,8 @@ class EarthSatellite(VectorFunction):
     timescale = None
 
     def __init__(self, lines):
+        if isinstance(lines, str):
+            lines = lines.splitlines()
         self.name = None if len(lines) < 3 else lines[0].strip()
         sat = twoline2rv(*lines[-2:], whichconst=wgs72)
         self._sgp4_satellite = sat
@@ -93,8 +95,7 @@ class EarthSatellite(VectorFunction):
         rGCRS = ITRF_to_GCRS(t, rITRF)
         vGCRS = zeros_like(rGCRS)  # todo: someday also compute vGCRS?
 
-        # TODO: do something with the error code
-        return rGCRS, vGCRS, rGCRS
+        return rGCRS, vGCRS, rGCRS, error
 
 
 _second = 1.0 / (24.0 * 60.0 * 60.0)
