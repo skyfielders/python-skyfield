@@ -669,10 +669,9 @@ def build_delta_t_table(delta_t_recent):
     return table
 
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
-    try:
-        utc_datetime = dt.astimezone(utc)
-    except ValueError:
+    if dt.tzinfo is None:
         raise ValueError(_naive_complaint)
+    utc_datetime = dt.astimezone(utc)
     tup = utc_datetime.utctimetuple()
     year, month, day, hour, minute, second, wday, yday, dst = tup
     return _utc_to_tai(leap_dates, leap_offsets, year, month, day,
