@@ -147,7 +147,7 @@ pre {
     border: 1px dashed #93A1A1;
     padding: 0.5em 0.8em;
     line-height: 1.25;
-    font-size: 1.125rem;
+    font-size: 0.83333333em;
 }
 .highlight-none pre {
     border: none;
@@ -187,7 +187,7 @@ tr:last-child td {
     color: #888;
 }
 @media screen and (min-width: 480px) {body {font-size: 1.125em;}}
-@media screen and (min-width: 640px) {body {font-size: 1.25em;}}
+@media screen and (min-width: 640px) {body {max-width: 42em;}}
 
 /* To regenerate the following Pygments palette, run:
    pip install pygments-style-solarized
