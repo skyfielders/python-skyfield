@@ -29,9 +29,6 @@ Computing the position of Mars in the sky is as easy as:
 
    __import__('skyfield.tests.fixes').tests.fixes.setup()
 
-   import os
-   os.chdir('../..')  # same directory as de430t.bsp, hopefully
-
 .. testcode::
 
     from skyfield.api import load
