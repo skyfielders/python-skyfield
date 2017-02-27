@@ -68,7 +68,7 @@ to compute its apparent position relative to a location on Earth:
     # After all that work, how big is the difference, really?
 
     error_km = (position2 - position).distance().km
-    print('Error: {:.3f} km'.format(error_km))
+    print('Error: {0:.3f} km'.format(error_km))
 
 .. testoutput::
 
