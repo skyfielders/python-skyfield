@@ -1,7 +1,7 @@
 
-==============
- Installation
-==============
+=====================
+ Installing Skyfield
+=====================
 
 .. currentmodule:: skyfield.api
 
@@ -44,7 +44,7 @@ in your ``requirements.txt`` or ``setup.py`` or install instructions::
 
     skyfield==0.7
 
-By preventing Skyfield from being upgraded
+By preventing Skyfield from getting accidentally upgraded
 until you are ready to advance the version number yourself,
 you can avoid being blindsided by improvements that take place
 between now and the eventual 1.0 version.
@@ -57,10 +57,38 @@ Good luck!
 
 .. _changelog:
 
-Change Log
-==========
+Changelog
+=========
 
 .. currentmodule:: skyfield.positionlib
+
+0.9.1
+-----
+
+* Attempted to speed up Earth satellite calculations by caching a single
+  time scale object instead of creating a new one each time.
+
+* Fixed a possible divide-by-zero error when applying deflection to an
+  apparent position.
+
+0.9
+---
+
+* The ``observe()`` method of an observer on the Earth’s surface now
+  correctly accounts for the way that the Earth’s gravity will deflect
+  the apparent position of objects that are not exactly overhead,
+  bringing Skyfield’s agreement with the Naval Observatory’s NOVAS
+  library to within half a milliarcsecond.
+
+* The time method ``tt_calendar()`` method no longer raises a
+  ``TypeError`` when its value is an array.
+
+* Running ``repr()`` on a ``Time`` array now produces a more compact
+  string that only mentions the start and end of the time period.
+
+* The ``api.load()`` call no longer attempts to animate a progress bar
+  if the user is running it under IDLE, which would try to accumulate
+  the updates as a single long line that eventually hangs the window.
 
 0.8
 ---
