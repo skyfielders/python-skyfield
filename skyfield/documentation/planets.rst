@@ -5,9 +5,9 @@
 .. currentmodule:: skyfield.api
 
 If you are interested in observing the planets,
-the Jet Propulsion Laboratory (JPL) has prepared long tables
-recording where the planets were positioned in the past
-and where they are predicted to be in the future.
+the Jet Propulsion Laboratory (JPL)
+has prepared long tables that predict the positions of the planets
+both in the the distant past and out into the future.
 A table of positions is called an *ephemeris*
 and those supplied by the JPL are of very high accuracy.
 
@@ -86,9 +86,9 @@ while ``jup310.bsp`` focuses on Jupiter and its major moons:
 Ephemeris    Size      Years        Issued
 ==========  ====== ============= ==============
 de405.bsp    63 MB  1600 to 2200 May 1997
-de406.bsp   287 MB -3000 to 3000 May 1997
+de406.bsp   287 MB −3000 to 3000 May 1997
 de421.bsp    17 MB  1900 to 2050 February 2008
-de422.bsp   623 MB -3000 to 3000 September 2009
+de422.bsp   623 MB −3000 to 3000 September 2009
 de430.bsp   128 MB  1550 to 2650 February 2010
 jup310.bsp  932 MB  1900 to 2100 December 2013
 ==========  ====== ============= ==============
@@ -102,9 +102,8 @@ But astronomers count backwards AD 2, AD 1, 0, −1, −2, and so forth.
 So if you are curious about the positions of the planets back in 44 BC,
 when Julius Caesar was assassinated,
 be careful to ask an astronomer about the year −43 instead.
-“The fault, dear Brutus, is not in our stars, but in ourselves.”
 
-Once you have loaded an ephemeris and used a statement like
+Once you have loaded an ephemeris and have used a statement like
 
 .. testcode::
 

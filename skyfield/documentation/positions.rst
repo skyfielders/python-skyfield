@@ -519,7 +519,7 @@ is the ideal position
 that you would observe if the Earth had no atmosphere.
 You can also ask Skyfield to estimate
 where an object might actually appear in the sky
-after the Earth’s atmosphere has *refracted* their image higher.
+after the Earth’s atmosphere has *refracted* its image higher.
 If you know the weather conditions, you can specify them.
 
 .. testcode::
@@ -544,10 +544,11 @@ when generating its rough simulation of the effects of refraction.
 
     24deg 32' 37.0"
 
-Keep in mind that these are simply guesses.
-The effects of the atmosphere,
+Keep in mind
+that the computed effect of refraction is simply an estimate.
+The effects of your local atmosphere,
 with its many layers of heat and cold and wind and weather,
-cannot be accurately modeled or predicted.
+cannot be predicted to high precision.
 And note that refraction is only applied to objects above the horizon.
 Objects below −1.0° altitude are not adjusted for refraction.
 

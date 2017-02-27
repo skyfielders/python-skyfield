@@ -79,8 +79,7 @@ to your current working directory —
 usually the folder from which you launched your Skyfield program.
 If we ask the load object that we used above
 for the sequence of actions that it took,
-we will see that it looked for files in ``.``
-which is how programs can name their current directory:
+we will see that it looked for files in the current directory:
 
 .. testcode::
 
@@ -101,8 +100,8 @@ which is how programs can name their current directory:
       Opening with: SpiceKernel
 
 But you can instead create your own loader
-that uses a different directory instead:
-simply instantiate a `Loader` with the path to the directory
+that uses a different directory instead.
+Simply instantiate a `Loader` with the path to the directory
 where you would prefer for data files to be kept.
 
 .. testcode::

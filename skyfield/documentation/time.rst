@@ -26,7 +26,7 @@ The supported time scales are:
 
 To specify a time,
 first build a :class:`Timescale` object
-using Skyfield’s :meth:`load.timescale()` routine.
+by calling Skyfield’s :meth:`load.timescale()` routine.
 This downloads several data files from international authorities —
 the United States Naval Observatory
 and the International Earth Rotation Service —
@@ -57,8 +57,8 @@ specified using any of the time scales listed above:
 The possibilities that will be explored in the course of this page
 are::
 
-    # Summary of the techniques for specifying the time
-    # in any of the timescales listed above.
+    # All the ways you can create a Time object
+    # using a timescale:
 
     ts.utc(year, month, day, hour, minute, second)
     ts.utc(dt)      # Python datetime.datetime object
@@ -99,10 +99,10 @@ If you will need to use the same time value several times
 then it is best to create the object once,
 through a single method call to your timescale object,
 and then use that single time repeatedly in your calculations.
-Not only will Skyfield get to avoid having to repeatedly translate
+Not only will you avoid asking Skyfield to repeatedly translate
 the same time value between the different time scales,
-but other expensive calculations that involves time
-are automatically cached on the date object.
+but other expensive values that depend upon time
+are also automatically cached on the date object.
 (See the section on :ref:`date-cache` for more details.)
 
 .. _building-dates:
@@ -121,6 +121,7 @@ You can provide its constructor with just the year, month, and day,
 or be more specific and give an hour, minute, and second.
 And not only can you attach a fraction to the seconds,
 but you can also freely use fractional days, hours, and minutes.
+For example:
 
 .. testcode::
 
@@ -254,7 +255,7 @@ to the last minute of June or the last minute of December.
 When a leap second is inserted,
 its minute counts 61 seconds numbered 00–60
 instead of staying within the usual range 00–59.
-The most recent leap second was in June 2012:
+One recent leap second was in June 2012:
 
 .. testcode::
 
@@ -277,8 +278,8 @@ The most recent leap second was in June 2012:
 Note that Skyfield has no problem with a calendar tuple
 that has hours, minutes, or — as in this case —
 seconds that are out of range.
-When we provides a range of numbers 58 through 62 as seconds,
-Skyfield smoothly added as many seconds as we specified
+When we provided a range of numbers 58 through 62 as seconds,
+Skyfield added exactly the number of seconds we specified
 to the end of June
 and let the value overflow cleanly into the beginning of July.
 
@@ -293,7 +294,7 @@ An Earth satellite’s velocity will seem higher
 when you reach the minute that includes 61 seconds.
 And so forth.
 Problems like these are the reason
-that the :class:`Time` only uses UTC for input and output,
+that the :class:`Time` class only uses UTC for input and output,
 and insists on keeping time internally
 using the uniform time scales discussed below in :ref:`tai-tt-tdb`.
 
@@ -352,8 +353,10 @@ or to somehow output the leap second information.
 Date arrays
 ===========
 
-Skyfield works most efficiently
-when you build a single :class:`Time` object
+If you want to ask where a planet or satellite was
+at a whole list of different times and dates,
+then Skyfield will work most efficiently
+if you build a single :class:`Time` object
 that holds an entire array of dates,
 instead of building many separate :class:`Time` objects.
 There are three techniques for building arrays.
@@ -477,7 +480,7 @@ as we leave UTC behind and consider completely uniform time scales.
 Days are always 24 hours, hours always 60 minutes,
 and minutes always 60 seconds without any variation or exceptions.
 Such time scales are not appropriate for your morning alarm clock
-because they will never be delayed or adjusted
+because they are never delayed or adjusted
 to stay in sync with the slowing rotation of the earth.
 But that is what makes them useful for astronomical calculation —
 because physics keeps up its dance,
@@ -488,11 +491,11 @@ Because they make every day the same length,
 uniform time scales can express dates
 as a simple floating-point count of days elapsed.
 To make all historical dates come out as positive numbers,
-astronomers traditionally use Julian days
-that start counting at B.C. 4713 January 1 in the old Julian calendar —
+astronomers traditionally assign each date a “Julian day” number
+that starts counting at B.C. 4713 January 1 in the old Julian calendar —
 the same date as B.C. 4714 November 24 in our Gregorian calendar.
-The count starts at noon
-following a tradition going back to the Greeks and Ptolemy,
+Following a tradition going back to the Greeks and Ptolemy,
+the count starts at noon,
 since the sun’s transit is an observable event
 but the moment of midnight is not.
 
@@ -518,10 +521,10 @@ So his scheme has 1 BC followed immediately by 1 AD without a break.
 To avoid an off-by-one error,
 astronomers usually ignore BC and count backwards through a year zero
 and on into negative years.
-So negative year *-n* is what might otherwise be called
-either “*n+1* BC” or perhaps “*n+1* BCE” in a history textbook.
+So negative year *−n* is what might otherwise be called
+either “*n+1* BC” or “*n+1* BCE” in a history textbook.
 
-More than two million days have passed since 4714 BC
+More than two million days have passed since 4714 BC,
 so modern dates tend to be rather large numbers:
 
 .. testcode::
@@ -593,8 +596,8 @@ where the planets will be in their orbits
 thousands of years from now.
 But to predict the fluid dynamics of an elastic rotating ellipsoid
 is, at the moment, beyond us.
-We cannot run a simulation or formula
-to declare leap seconds and keep UTC close to UT1.
+We cannot, for example, run a simulation or formula
+to predict leap seconds more than a few months ahead of time!
 Instead, we simply have to watch with sensitive instruments
 to see what the Earth will do next.
 
@@ -613,7 +616,7 @@ and now stands at more than +67.2 seconds.
 
 The task of governing leap seconds can be stated, then,
 as the task of keeping the difference between TT and UTC
-close to the wild natural value ΔT.
+close to the natural value ΔT out in the wild.
 The standards bodies promise, in fact,
 that the difference between these two artificial time scales
 will always be within 0.9 seconds of the observed ΔT value.
@@ -653,6 +656,13 @@ Skyfield will run off the end of its tables
 and will instead use the formula of Morrison and Stephenson (2004)
 to estimate when day and night might have occurred in that era.
 
+Setting a Custom Value For ΔT
+=============================
+
+If you ever want to specify your own value for ΔT,
+then provide a ``delta_t`` keyword argument
+when creating your timescale:
+
 .. testcode::
 
     load.timescale(delta_t=67.2810).utc((2014, 1, 1))
@@ -666,7 +676,8 @@ When you create a :class:`Time`
 it goes ahead and computes its ``tt`` Terrestrial Time attribute
 starting from whatever time argument you provide.
 If you provide the ``utc`` parameter, for example,
-then the date first computes and sets ``tai`` followed by ``tt``.
+then the date first computes and sets ``tai``
+and then computes and sets ``tt``.
 Each of the other time attributes only gets computed once,
 the first time you access it.
 
@@ -680,6 +691,7 @@ In addition to time scales,
 there are several more functions of time
 that live on Julian date objects
 since they are often needed repeatedly during a calculation.
+In case you are curious what they are, here is a list:
 
 ``gmst``
     Greenwich Mean Sidereal Time.
@@ -708,7 +720,7 @@ since they are often needed repeatedly during a calculation.
     and that rotate back the other direction
     from the dynamical reference system back to the ICRF frame.
 
-You will typically never have to access these matrices yourself,
+You will typically never need to access these matrices yourself,
 as they are used automatically by the :meth:`Position.radec()`
 method when you use its  ``epoch=`` parameter
 to ask for a right ascension and declination
