@@ -46,7 +46,7 @@ def test_iss_altitude_with_gcrs_vector_subtraction(iss_transit):
     t = api.load.timescale(delta_t=67.2091).utc(dt)
 
     lines = iss_tle.splitlines()
-    s = EarthSatellite(lines)
+    s = EarthSatellite(lines[1], lines[2], lines[0])
     lake_zurich = api.Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
 
     alt, az, d = (s - lake_zurich).at(t).altaz()
@@ -111,7 +111,7 @@ def test_appendix_c_conversion_from_TEME_to_ITRF():
 
 def test_appendix_c_satellite():
     lines = appendix_c_example.splitlines()
-    sat = EarthSatellite(lines)
+    sat = EarthSatellite(lines[1], lines[2], lines[0])
 
     ts = api.load.timescale()
     jd_epoch = sat._sgp4_satellite.jdsatepoch
@@ -136,5 +136,6 @@ def test_appendix_c_satellite():
 def test_epoch_date():
     # Example from https://celestrak.com/columns/v04n03/
     s = appendix_c_example.replace('00179.78495062', '98001.00000000')
-    sat = EarthSatellite(s.splitlines())
+    lines = s.splitlines()
+    sat = EarthSatellite(lines[1], lines[2], lines[0])
     assert sat.epoch.utc_jpl() == 'A.D. 1998-Jan-01 00:00:00.0000 UT'

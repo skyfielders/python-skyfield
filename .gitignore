@@ -20,4 +20,5 @@ deltat.data
 deltat.preds
 hip_main.dat.gz
 htmlcov/
+stations.txt
 tmp*.py

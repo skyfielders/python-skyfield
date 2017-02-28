@@ -91,7 +91,7 @@ class VectorFunction(object):
     def satellite(self, text):
         # TODO: deprecate this
         from .sgp4lib import EarthSatellite
-        sat = EarthSatellite(text.splitlines())
+        sat = EarthSatellite(*text.splitlines()[-2:])
         return self + sat
 
 

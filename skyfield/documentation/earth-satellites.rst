@@ -23,20 +23,34 @@ Once you have acquired the two-line orbital elements,
 simply read them from a file or paste them directly into your script
 to compute its apparent position relative to a location on Earth:
 
-.. testcode::
+.. testsetup::
 
-    text = """
+    open('stations.txt', 'w').write("""\
     ISS (ZARYA)             
     1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082
     2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
-    """
+    """)
 
-    from skyfield.api import EarthSatellite, Topos, load
+.. testcode::
+
+    from skyfield.api import Topos, load
+
+    sats = load.tle('http://celestrak.com/NORAD/elements/stations.txt')
+    satellite = sats['ISS (ZARYA)']
+
+.. testcode::
+
+    print(satellite)
+
+.. testoutput::
+
+    EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
+
+.. testcode::
 
     ts = load.timescale()
     t = ts.utc(2014, 1, 21, 11, 18, 7)
 
-    satellite = EarthSatellite(text)
     bluffton = Topos('40.8939 N', '83.8917 W')
 
     difference = satellite - bluffton
@@ -55,9 +69,10 @@ to compute its apparent position relative to a location on Earth:
 
 .. testcode::
 
-    # BAD APPROACH: Compute the satellite's position
-    # relative to the Solar System barycenter, then call
-    # observe() to compensate for light-travel time.
+    # A POOR APPROACH - Compute both the satellite
+    # and observer positions relative to the Solar
+    # System barycenter ("ssb"), then call observe()
+    # to compensate for light-travel time.
 
     de421 = load('de421.bsp')
     earth = de421['earth']
@@ -67,12 +82,12 @@ to compute its apparent position relative to a location on Earth:
 
     # After all that work, how big is the difference, really?
 
-    error_km = (position2 - position).distance().km
-    print('Error: {0:.3f} km'.format(error_km))
+    difference_km = (position2 - position).distance().km
+    print('Difference: {0:.3f} km'.format(difference_km))
 
 .. testoutput::
 
-    Error: 0.091 km
+    Difference: 0.091 km
 
 
 To find out whether the satellite is above your local horizon,
@@ -131,12 +146,16 @@ so it supports all of the standard Skyfield date methods:
 
 .. testcode::
 
+    from skyfield.api import EarthSatellite
+
     text = """
     GOCE                    
     1 34602U 09013A   13314.96046236  .14220718  20669-5  50412-4 0   930
     2 34602 096.5717 344.5256 0009826 296.2811 064.0942 16.58673376272979
     """
-    sat = EarthSatellite(text)
+    lines = text.strip().splitlines()
+
+    sat = EarthSatellite(lines[1], lines[2], lines[0])
     print(sat.epoch.utc_jpl())
 
 .. testoutput::

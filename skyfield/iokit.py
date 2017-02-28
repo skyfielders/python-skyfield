@@ -99,7 +99,7 @@ class Loader(object):
             'deltat.data': parse_deltat_data,
             'deltat.preds': parse_deltat_preds,
             'Leap_Second.dat': parse_leap_seconds,
-            'stations.txt': parse_celestrak_tle,
+            #'stations.txt': parse_celestrak_tle,
         }
         self.openers = {
             '.bsp': [
@@ -181,6 +181,11 @@ class Loader(object):
 
     def _log(self, message, *args):
         self.events.append(message.format(*args))
+
+    def tle(self, url):
+        """Parse a satellite TLE file."""
+        with self.open(url) as f:
+            return parse_celestrak_tle(f)
 
     def open(self, url, mode='rb'):
         """Open a file, downloading it first if it does not yet exist.
@@ -322,7 +327,7 @@ def parse_celestrak_tle(fileobj):
         name = line.decode('ascii').strip()
         line1 = next(lines).decode('ascii')
         line2 = next(lines).decode('ascii')
-        sat = EarthSatellite([line1, line2], None)
+        sat = EarthSatellite(line1, line2, name)
         satellites[name] = sat
         if ' (' in name:
             # Given `ISS (ZARYA)` or `HTV-6 (KOUNOTORI 6)`, also support
@@ -331,7 +336,7 @@ def parse_celestrak_tle(fileobj):
             secondary_name = secondary_name.rstrip(')')
             satellites.setdefault(short_name, sat)
             satellites.setdefault(secondary_name, sat)
-    return None, satellites
+    return satellites
 
 
 def download(url, path, verbose=None, blocksize=128*1024):

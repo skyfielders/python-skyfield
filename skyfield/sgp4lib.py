@@ -31,11 +31,9 @@ class EarthSatellite(VectorFunction):
     # cache for timescale
     timescale = None
 
-    def __init__(self, lines):
-        if isinstance(lines, str):
-            lines = lines.splitlines()
-        self.name = None if len(lines) < 3 else lines[0].strip()
-        sat = twoline2rv(*lines[-2:], whichconst=wgs72)
+    def __init__(self, line1, line2, name=None):
+        self.name = None if name is None else name.strip()
+        sat = twoline2rv(line1, line2, whichconst=wgs72)
         self._sgp4_satellite = sat
         if EarthSatellite.timescale is None:
             from skyfield import api
