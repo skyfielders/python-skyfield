@@ -5,23 +5,64 @@
 
 .. currentmodule:: skyfield
 
-The orbital elements for human-launched Earth satellites
-can go out of date in only a few days,
-so it is best to start a programming or analysis session
-by downloading fresh orbital elements for your object of interest
-from the
-`NORAD Two-Line Element Sets <http://celestrak.com/NORAD/elements/>`_
-(TLE) page of the Celestrak web site.
+Skyfield is able to predict the positions of Earth satellites
+from the Two-Line Element (TLE) files published
+by organizations like `CelesTrak`_.
+But there several limitations to be aware of
+when using Skyfield to generate positions
+for artificial satellites in Earth orbit:
 
-Beware — the two-line element (TLE) format is very rigid.
+.. _Celestrak: https://celestrak.com/
+
+1. Do not expect perfect agreement between
+   any two pieces of software that are trying to predict
+   satellite positions from TLE data files.
+   As Vallado, Crawford, and Hujsak observe in Appendix B of their
+   crucial paper `Revisiting Spacetrack Report #3`_:
+
+      “The maximum accuracy for a TLE is
+      limited by the number of decimal places in each field.
+      In general, TLE data is accurate to about a kilometer or so
+      at epoch and it quickly degrades.”
+
+.. _Revisiting Spacetrack Report #3:
+    https://celestrak.com/publications/AIAA/2006-6753/
+
+2. Satellite elements go rapidly out of date.
+   You will want to pay attention to the “epoch” —
+   the date on which an element set is most accurate —
+   of every TLE element set you use.
+   Elements are only useful for a week or two
+   on either side of the epoch date,
+   and for dates outside of that range
+   you will want to download a fresh set of elements.
+
+3. Given the low accuracy of TLE elements,
+   there is no point in calling the usual Skyfield
+   :meth:`~skyfield.positionlib.Barycentric.observe()` method
+   that repeatedly re-computes an object’s position
+   to account for the light-travel time to the observer.
+   As we will see below,
+   the difference is irrelevant for Earth satellites
+   and not worth the added expense of re-computing the position
+   several times in a row.
+
+You can find satellite element sets at the
+`NORAD Two-Line Element Sets <http://celestrak.com/NORAD/elements/>`_
+page of the Celestrak web site.
+
+Beware that the two-line element (TLE) format is very rigid.
 The meaning of each character
 is based on its exact offset from the beginning of the line.
 You must download and use the element set’s text
 without making any change to its whitespace.
 
-Once you have acquired the two-line orbital elements,
-simply read them from a file or paste them directly into your script
-to compute its apparent position relative to a location on Earth:
+Skyfield loader objects offer a :meth:`~skyfield.iokit.Loader.tle()`
+method that can download and cache a file full of satellite elements
+from a site like Celestrak.
+A popular observing target for satellite observers
+is the International Space Station,
+which is listed in their ``stations.txt`` file:
 
 .. testsetup::
 
@@ -35,27 +76,67 @@ to compute its apparent position relative to a location on Earth:
 
     from skyfield.api import Topos, load
 
-    sats = load.tle('http://celestrak.com/NORAD/elements/stations.txt')
+    stations_url = 'http://celestrak.com/NORAD/elements/stations.txt'
+    sats = load.tle(stations_url)
     satellite = sats['ISS (ZARYA)']
-
-.. testcode::
-
     print(satellite)
 
 .. testoutput::
 
     EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
 
+The value shown for the “epoch” is the all-important date
+on which this set of elements is most accurate,
+and before or after which they go rapidly out of date.
+You can access this value as an attribute of the object
+in case your program wants to check how old the elements are:
+
 .. testcode::
 
-    ts = load.timescale()
-    t = ts.utc(2014, 1, 21, 11, 18, 7)
+    print(satellite.epoch)
+    print(satellite.epoch.utc_jpl())
+
+.. testoutput::
+
+    <Time tt=2456678.433463>
+    A.D. 2014-Jan-20 22:23:04.0004 UT
+
+If the epoch is too far in the past,
+you can provide :meth:`~skyfield.iokit.Loader.tle()`
+with the ``reload`` option to force it to download new elements
+even if the file is already on disk.
+
+.. testcode::
+
+   ts = load.timescale()
+   now = ts.utc(2014, 1, 21, 11, 18, 7)
+
+   days = now - satellite.epoch
+   print('Difference: {:.3f} days'.format(days))
+   if abs(days) > 14:
+       sats = load.tle(stations_url, reload=True)
+       satellite = sats['ISS (ZARYA)']
+
+.. testoutput::
+
+    Difference: 0.538 days
+
+
+
+.. testcode::
 
     bluffton = Topos('40.8939 N', '83.8917 W')
 
     difference = satellite - bluffton
     position = difference.at(t)
 
+    alt, az, distance = position.altaz()
+    print(alt)
+    print(az)
+    print(distance.km)
+
+    from skyfield.constants import AU_KM
+    position.position.au[1] += 1/AU_KM
     alt, az, distance = position.altaz()
     print(alt)
     print(az)
@@ -69,10 +150,10 @@ to compute its apparent position relative to a location on Earth:
 
 .. testcode::
 
-    # A POOR APPROACH - Compute both the satellite
-    # and observer positions relative to the Solar
-    # System barycenter ("ssb"), then call observe()
-    # to compensate for light-travel time.
+    # OVERLY EXPENSIVE APPROACH - Compute both the satellite
+    # and observer positions relative to the Solar System
+    # barycenter ("ssb"), then call observe() to compensate
+    # for light-travel time.
 
     de421 = load('de421.bsp')
     earth = de421['earth']
@@ -83,12 +164,19 @@ to compute its apparent position relative to a location on Earth:
     # After all that work, how big is the difference, really?
 
     difference_km = (position2 - position).distance().km
-    print('Difference: {0:.3f} km'.format(difference_km))
+    print('Difference between the two positions:')
+    print('{0:.3f} km'.format(difference_km))
+
+    difference_angle = position.separation_from(position2)
+    print('Angle between the two positions in the sky:')
+    print('{}'.format(difference_angle))
 
 .. testoutput::
 
-    Difference: 0.091 km
-
+    Difference between the two positions:
+    0.091 km
+    Angle between the two positions in the sky:
+    00deg 00' 05.0"
 
 To find out whether the satellite is above your local horizon,
 you will want to ask for its altitude and azimuth.
@@ -135,8 +223,8 @@ to within an accuracy of a few kilometers.
 This error grows larger as a TLE element set becomes several weeks old,
 until its predictions are no longer meaningful.
 
-Propagation Errors
-==================
+Detecting Propagation Errors
+============================
 
 After building a satellite object,
 you can examine the *epoch* date and time

@@ -181,12 +181,12 @@ class Loader(object):
     def _log(self, message, *args):
         self.events.append(message.format(*args))
 
-    def tle(self, url):
+    def tle(self, url, reload=False):
         """Parse a satellite TLE file."""
-        with self.open(url) as f:
+        with self.open(url, reload=reload) as f:
             return dict(parse_celestrak_tle(f))
 
-    def open(self, url, mode='rb'):
+    def open(self, url, mode='rb', reload=False):
         """Open a file, downloading it first if it does not yet exist.
 
         Unlike when you call a loader directly like ``my_loader()``,
@@ -197,7 +197,7 @@ class Loader(object):
         """
         filename = urlparse(url).path.split('/')[-1]
         path = self.path_to(filename)
-        if not os.path.exists(path):
+        if reload or not os.path.exists(path):
             download(url, path, self.verbose)
         return open(path, mode)
 
