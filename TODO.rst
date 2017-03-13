@@ -167,6 +167,11 @@ Adding more smarts to ephemeris handling
 * And additionally: the error when not enough bodies are available for
   deflection maybe someday needs to be more helpful.
 
+Reading List for Brandon
+========================
+
+* https://naif.jpl.nasa.gov/pub/naif/FIDO/misc/njb/src/geom.c
+
 Longer-term goals
 =================
 
