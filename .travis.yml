@@ -17,7 +17,7 @@ install:
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
   - "curl -O ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de405.bsp"
   - "curl -O ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de421.bsp"
-  - "curl -O https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup310.bsp"
+  - "curl -O ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup310.bsp"
 
 script:
   - "pip install unittest2"
