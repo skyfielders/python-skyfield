@@ -17,18 +17,24 @@ for artificial satellites in Earth orbit:
 1. Do not expect perfect agreement between
    any two pieces of software that are trying to predict
    satellite positions from TLE data files.
-   As Vallado, Crawford, and Hujsak observe in Appendix B of their
-   crucial paper `Revisiting Spacetrack Report #3`_:
+   As Vallado, Crawford, and Hujsak document
+   in their crucial paper `Revisiting Spacetrack Report #3`_,
+   there are many slightly different versions
+   of the basic satellite prediction algorithm circulating in the wild.
+   (Happily, Skyfield does use
+   the corrected and updated version of the algorithm
+   that they created as part of writing that report!)
+
+2. The accuracy of the satellite positions is not perfect.
+   To quote directly from `Revisiting Spacetrack Report #3`_
+   Appendix B:
 
       “The maximum accuracy for a TLE is
       limited by the number of decimal places in each field.
       In general, TLE data is accurate to about a kilometer or so
       at epoch and it quickly degrades.”
 
-.. _Revisiting Spacetrack Report #3:
-    https://celestrak.com/publications/AIAA/2006-6753/
-
-2. Satellite elements go rapidly out of date.
+3. Satellite elements go rapidly out of date.
    You will want to pay attention to the “epoch” —
    the date on which an element set is most accurate —
    of every TLE element set you use.
@@ -37,7 +43,7 @@ for artificial satellites in Earth orbit:
    and for dates outside of that range
    you will want to download a fresh set of elements.
 
-3. Given the low accuracy of TLE elements,
+4. Given the low accuracy of TLE elements,
    there is no point in calling the usual Skyfield
    :meth:`~skyfield.positionlib.Barycentric.observe()` method
    that repeatedly re-computes an object’s position
@@ -46,6 +52,12 @@ for artificial satellites in Earth orbit:
    the difference is irrelevant for Earth satellites
    and not worth the added expense of re-computing the position
    several times in a row.
+
+.. _Revisiting Spacetrack Report #3:
+    https://celestrak.com/publications/AIAA/2006-6753/
+
+Finding and loading satellite elements
+--------------------------------------
 
 You can find satellite element sets at the
 `NORAD Two-Line Element Sets <http://celestrak.com/NORAD/elements/>`_
@@ -77,15 +89,15 @@ which is listed in their ``stations.txt`` file:
     from skyfield.api import Topos, load
 
     stations_url = 'http://celestrak.com/NORAD/elements/stations.txt'
-    sats = load.tle(stations_url)
-    satellite = sats['ISS (ZARYA)']
+    satellites = load.tle(stations_url)
+    satellite = satellites['ISS (ZARYA)']
     print(satellite)
 
 .. testoutput::
 
     EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
 
-The value shown for the “epoch” is the all-important date
+The value shown for the “epoch” is the all-important date and time
 on which this set of elements is most accurate,
 and before or after which they go rapidly out of date.
 You can access this value as an attribute of the object
@@ -109,83 +121,105 @@ even if the file is already on disk.
 .. testcode::
 
    ts = load.timescale()
-   now = ts.utc(2014, 1, 21, 11, 18, 7)
+   t = ts.utc(2014, 1, 23, 11, 18, 7)
 
-   days = now - satellite.epoch
-   print('Difference: {:.3f} days'.format(days))
+   days = t - satellite.epoch
+   print('{:.3f} days away from epoch'.format(days))
+
    if abs(days) > 14:
-       sats = load.tle(stations_url, reload=True)
-       satellite = sats['ISS (ZARYA)']
+       satellites = load.tle(stations_url, reload=True)
+       satellite = satellites['ISS (ZARYA)']
 
 .. testoutput::
 
-    Difference: 0.538 days
+    2.538 days away from epoch
 
+Generating a satellite position
+-------------------------------
 
+The simplest form in which you can generate a satellite position
+is to call its :meth:`~skyfield.sgp4lib.EarthSatellite.at()` method,
+which will return a position relative to the Earth’s center.
+
+.. testcode::
+
+   geocentric = satellite.at(t)
+   print(geocentric.position.km)
+
+.. testoutput::
+
+   [-3918.87650111 -1887.64840113  5209.08801278]
+
+.. would love to be able to do this someday - see the SPICE source file
+   nearpt.f
+
+   But instead of printing the position as a GCRS vector like this,
+   you will probably want to answer the question
+   “where is the satellite at time *t*?”
+   with geographic coordinates instead:
+
+   lat, lon, altitude = geocentric.geographic_latlon()
+   print(lat)
+   print(lon)
+   print(altitude)
+
+   But most observers are less interested
+   in the satellite’s position relative to the Earth’s center
+   and instead want to know ...
+
+But you are probably more interested
+in whether the satellite is above or below the horizon
+from your own position as an observer!
+The most sensible and efficient solution
+is to build a Topos object representing your location,
+and then use vector subtraction
+to ask “where will the satellite be relative to my location?”
 
 .. testcode::
 
     bluffton = Topos('40.8939 N', '83.8917 W')
-
     difference = satellite - bluffton
-    position = difference.at(t)
-
-    alt, az, distance = position.altaz()
-    print(alt)
-    print(az)
-    print(distance.km)
-
-    from skyfield.constants import AU_KM
-    position.position.au[1] += 1/AU_KM
-    alt, az, distance = position.altaz()
-    print(alt)
-    print(az)
-    print(distance.km)
+    print(difference)
 
 .. testoutput::
 
-    13deg 50' 46.6"
-    358deg 48' 55.9"
-    1280.53654286
+    Sum of 2 vectors:
+     - Topos 40deg 53' 38.0" N -83deg 53' 30.1" E
+     + EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
+
+Every time you call this object’s `at()` method,
+it will compute the position of the satellite,
+then compute the position of your geographic location,
+and finish by subtracting them.
+The result will be the position of the satellite relative
+to you as an observer.
+By asking the position for its altitude and azimuth,
+you will learn whether the satellite is above or below the horizon:
 
 .. testcode::
 
-    # OVERLY EXPENSIVE APPROACH - Compute both the satellite
-    # and observer positions relative to the Solar System
-    # barycenter ("ssb"), then call observe() to compensate
-    # for light-travel time.
+    position = difference.at(t)
+    alt, az, distance = position.altaz()
 
-    de421 = load('de421.bsp')
-    earth = de421['earth']
-    ssb_bluffton = earth + bluffton
-    ssb_satellite = earth + satellite
-    position2 = ssb_bluffton.at(t).observe(ssb_satellite).apparent()
+    if alt.degrees > 0:
+        print('The ISS is above the horizon')
 
-    # After all that work, how big is the difference, really?
+    print(alt)
+    print(az)
+    print(distance.km)
 
-    difference_km = (position2 - position).distance().km
-    print('Difference between the two positions:')
-    print('{0:.3f} km'.format(difference_km))
-
-    difference_angle = position.separation_from(position2)
-    print('Angle between the two positions in the sky:')
-    print('{}'.format(difference_angle))
 
 .. testoutput::
 
-    Difference between the two positions:
-    0.091 km
-    Angle between the two positions in the sky:
-    00deg 00' 05.0"
+    The ISS is above the horizon
+    16deg 16' 32.6"
+    350deg 15' 20.4"
+    1168.66423844
 
-To find out whether the satellite is above your local horizon,
-you will want to ask for its altitude and azimuth.
-Negative altitudes lie below your horizon,
-while positive altitude places the satellite above the horizon:
-
-
-You can also ask for the position
-to be expressed as right ascension and declination
+If you are interested
+in where among the stars the satellite will be positioned,
+then — as usual — you can also ask the Skyfield position object
+for a right ascension and declination.
 relative to the fixed axes of the ICRS,
 or else in dynamical coordinates
 that are relative to the actual position
@@ -222,6 +256,39 @@ that it can only predict a satellite position
 to within an accuracy of a few kilometers.
 This error grows larger as a TLE element set becomes several weeks old,
 until its predictions are no longer meaningful.
+
+Avoid calling the compute method
+--------------------------------
+
+.. testcode::
+
+    # OVERLY EXPENSIVE APPROACH - Compute both the satellite
+    # and observer positions relative to the Solar System
+    # barycenter ("ssb"), then call observe() to compensate
+    # for light-travel time.
+
+    de421 = load('de421.bsp')
+    earth = de421['earth']
+    ssb_bluffton = earth + bluffton
+    ssb_satellite = earth + satellite
+    position2 = ssb_bluffton.at(t).observe(ssb_satellite).apparent()
+
+    # After all that work, how big is the difference, really?
+
+    difference_km = (position2 - position).distance().km
+    print('Difference between the two positions:')
+    print('{0:.3f} km'.format(difference_km))
+
+    difference_angle = position.separation_from(position2)
+    print('Angle between the two positions in the sky:')
+    print('{}'.format(difference_angle))
+
+.. testoutput::
+
+    Difference between the two positions:
+    0.091 km
+    Angle between the two positions in the sky:
+    00deg 00' 05.0"
 
 Detecting Propagation Errors
 ============================
