@@ -139,7 +139,10 @@ Generating a satellite position
 
 The simplest form in which you can generate a satellite position
 is to call its :meth:`~skyfield.sgp4lib.EarthSatellite.at()` method,
-which will return a position relative to the Earth’s center.
+which will return an *x, y, z* position relative to the Earth’s center
+in the Geocentric Celestial Reference System.
+(GCRS coordinates are based on even more precise axes
+than those of the old J2000 system.)
 
 .. testcode::
 
@@ -169,11 +172,10 @@ which will return a position relative to the Earth’s center.
 
 But you are probably more interested
 in whether the satellite is above or below the horizon
-from your own position as an observer!
-The most sensible and efficient solution
-is to build a Topos object representing your location,
-and then use vector subtraction
-to ask “where will the satellite be relative to my location?”
+from your own position as an observer.
+If you build a Topos object to represent your location,
+you can use vector subtraction
+to ask “where will the satellite be *relative to* my location?”
 
 .. testcode::
 
@@ -187,19 +189,32 @@ to ask “where will the satellite be relative to my location?”
      - Topos 40deg 53' 38.0" N -83deg 53' 30.1" E
      + EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
 
-Every time you call this object’s `at()` method,
-it will compute the position of the satellite,
-then compute the position of your geographic location,
+Every time you call this vector sum’s `at()` method,
+it will first compute the satellite’s position,
+then your own position,
 and finish by subtracting them.
 The result will be the position of the satellite relative
 to you as an observer.
-By asking the position for its altitude and azimuth,
-you will learn whether the satellite is above or below the horizon:
+If you are interested you can access this relative position
+as *x, y, z* coordinates,
+just as you did for the position measured from the Earth’s center:
 
 .. testcode::
 
-    position = difference.at(t)
-    alt, az, distance = position.altaz()
+   topocentric = difference.at(t)
+   print(topocentric.position.km)
+
+.. testoutput::
+
+    [  331.61885573   392.1846109   1049.76010007]
+
+But the most popular approach is to ask the topocentric position
+for its altitude and azimuth coordinates,
+which tell you whether the satellite is above or below the horizon:
+
+.. testcode::
+
+    alt, az, distance = topocentric.altaz()
 
     if alt.degrees > 0:
         print('The ISS is above the horizon')
@@ -207,7 +222,6 @@ you will learn whether the satellite is above or below the horizon:
     print(alt)
     print(az)
     print(distance.km)
-
 
 .. testoutput::
 
@@ -218,47 +232,71 @@ you will learn whether the satellite is above or below the horizon:
 
 If you are interested
 in where among the stars the satellite will be positioned,
-then — as usual — you can also ask the Skyfield position object
-for a right ascension and declination.
-relative to the fixed axes of the ICRS,
-or else in dynamical coordinates
-that are relative to the actual position
-of the celestial equator and equinox on the date in question.
-See :doc:`positions` to learn more about these possibilities:
+then — as with any other Skyfield position object —
+you can also ask for a right ascension and declination,
+either relative to the fixed axes of the ICRF
+or else in dynamical coordinates of the date you specify.
 
 .. testcode::
 
-    ra, dec, distance = position.radec()  # ICRS/J2000
+    ra, dec, distance = topocentric.radec()  # ICRF ("J2000")
 
     print(ra)
     print(dec)
 
 .. testoutput::
 
-    01h 54m 36.45s
-    +62deg 51' 50.6"
+    03h 19m 07.97s
+    +63deg 55' 47.3"
 
 .. testcode::
 
-    ra, dec, distance = position.radec(epoch='date')
+    ra, dec, distance = topocentric.radec(epoch='date')
 
     print(ra)
     print(dec)
 
 .. testoutput::
 
-    01h 55m 39.18s
-    +62deg 55' 57.4"
+    03h 20m 22.42s
+    +63deg 58' 45.3"
 
-The standard SGP4 theory of satellite motion that Skyfield uses
-is a rough enough model of the near-Earth environment
-that it can only predict a satellite position
-to within an accuracy of a few kilometers.
-This error grows larger as a TLE element set becomes several weeks old,
-until its predictions are no longer meaningful.
+See :doc:`positions` to learn more about these possibilities.
 
 Avoid calling the compute method
 --------------------------------
+
+When computing positions for the Sun, Moon, planets, and stars,
+Skyfield encourages a far more fussy approach
+than directly subtracting two vectors.
+In those cases, the user is encouraged
+to compute their current location with `at()`
+and then call the `compute()` method on the result
+so that Skyfield can correctly adjust the object’s position
+for the time it takes light to travel.
+
+1. This turns out to be expensive for Earth satellites,
+   however, because the routines
+   with which Skyfield computes satellite positions
+   are not currently very fast.
+
+2. And it turns out to be useless,
+   because satellites are too close and move far too slowly
+   (at least compared to something like a planet)
+   for the light travel time to make any difference.
+
+How far off will your observations be
+if you simply subtract your position vector
+from the satellite’s vector, as encouraged above?
+Let’s try the alternative and measure the difference.
+
+To use the `observe()` method,
+you need a position measured all the way
+from the Solar System Barycenter (SSB).
+To anchor both our observer location
+and that of the satellite to the SSB,
+we can use vector addition with an ephemeris
+that predicts the Solar System position of the Earth:
 
 .. testcode::
 
@@ -271,24 +309,41 @@ Avoid calling the compute method
     earth = de421['earth']
     ssb_bluffton = earth + bluffton
     ssb_satellite = earth + satellite
-    position2 = ssb_bluffton.at(t).observe(ssb_satellite).apparent()
+    topocentric2 = ssb_bluffton.at(t).observe(ssb_satellite).apparent()
+
+What difference has all of that work made?
+We can subtract the resulting positions
+to find out the distance between them:
+
+.. testcode::
 
     # After all that work, how big is the difference, really?
 
-    difference_km = (position2 - position).distance().km
+    difference_km = (topocentric2 - topocentric).distance().km
     print('Difference between the two positions:')
     print('{0:.3f} km'.format(difference_km))
 
-    difference_angle = position.separation_from(position2)
+    difference_angle = topocentric2.separation_from(topocentric)
     print('Angle between the two positions in the sky:')
     print('{}'.format(difference_angle))
 
 .. testoutput::
 
     Difference between the two positions:
-    0.091 km
+    0.087 km
     Angle between the two positions in the sky:
-    00deg 00' 05.0"
+    00deg 00' 04.6"
+
+And there you have it!
+
+While satellite positions are only accurate to about a kilometer anyway,
+accounting for light travel time only affected the position
+in this case by less than an additional tenth of a kilometer.
+This difference is not meaningful
+when compared to the uncertainty
+that is inherent in satellite positions to begin with,
+so you should neglect it and simply subtract
+GCRS-centered vectors instead as detailed above.
 
 Detecting Propagation Errors
 ============================

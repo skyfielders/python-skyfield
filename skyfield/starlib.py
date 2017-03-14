@@ -90,7 +90,7 @@ class Star(object):
         return vector, (observer.velocity.au_per_d.T - velocity).T, light_time
 
     def _compute_vectors(self):
-        """Compute the star's position as an ICRS position and velocity."""
+        """Compute the star's position as an ICRF position and velocity."""
 
         # Use 1 gigaparsec for stars whose parallax is zero.
 
