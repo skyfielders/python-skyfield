@@ -1,6 +1,8 @@
 # Makefile for Sphinx documentation
 #
 
+SHELL := /bin/bash
+
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
@@ -173,4 +175,9 @@ loop:
 	make html
 	while inotifywait -e CLOSE_WRITE -e DELETE_SELF *.rst ../*.py ; \
 	do make html; \
+	done
+
+testloop:
+	while true; \
+	do make doctest |& less; \
 	done
