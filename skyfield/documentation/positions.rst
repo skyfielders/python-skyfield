@@ -113,7 +113,7 @@ or else by generating a whole series of positions.
 
   .. testcode::
 
-    from skyfield.api import load
+    from skyfield.api import Topos, load
 
     ts = load.timescale()
     t = ts.now()
@@ -133,7 +133,7 @@ or else by generating a whole series of positions.
 
     # From a place on Earth (Topocentric)
 
-    boston = earth.topos('42.3583 N', '71.0603 W')
+    boston = earth + Topos('42.3583 N', '71.0603 W')
     astrometric = boston.at(t).observe(mars)
     apparent = boston.at(t).observe(mars).apparent()
 
@@ -168,28 +168,22 @@ or else by generating a whole series of positions.
   from public TLE elements describing their current orbit,
   which you can download from Celestrak. :doc:`Read more <earth-satellites>`
 
-  .. testsetup::
-
-    tle_text = """
-    ISS (ZARYA)             
-    1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082
-    2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
-    """
-
   .. testcode::
 
-    from skyfield.api import load
+    from skyfield.api import EarthSatellite, Topos, load
 
     ts = load.timescale()
     t = ts.now()
 
-    boston = earth.topos('42.3583 N', '71.0603 W')
-    satellite = earth.satellite(tle_text)
+    line1 = '1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082'
+    line2 = '2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473'
+
+    boston = Topos('42.3583 N', '71.0603 W')
+    satellite = EarthSatellite(line1, line2, name='ISS (ZARYA)')
 
     # Geocentric
 
-    difference = satellite - earth
-    geometry = difference.at(t)
+    geometry = satellite.at(t)
 
     # Topocentric
 
@@ -488,15 +482,15 @@ Instead, you have to give Skyfield your geographic location.
 Astronomers use the term *topocentric*
 for a position measured relative to a specific location on Earth,
 so Skyfield represents Earth locations using :class:`Topos` objects
-that you can generate by using the :meth:`Earth.topos` method
-of an Earth object:
+that you can add to an Earth object
+to generate a position relative to the center of the Solar System:
 
 .. testcode::
 
     # Altitude and azimuth in the sky of a
     # specific geographic location
 
-    boston = earth.topos('42.3583 N', '71.0603 W')
+    boston = earth + Topos('42.3583 N', '71.0603 W')
     astro = boston.at(ts.utc(1980, 3, 1)).observe(mars)
     app = astro.apparent()
 

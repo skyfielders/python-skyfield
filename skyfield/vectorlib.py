@@ -2,7 +2,7 @@
 
 from numpy import max, min
 from .constants import C_AUDAY
-from .errors import raise_error_for_deprecated_time_arguments
+from .errors import DeprecationError, raise_error_for_deprecated_time_arguments
 from .functions import length_of
 from .positionlib import build_position
 from .timelib import Time
@@ -89,25 +89,59 @@ class VectorFunction(object):
         return _correct_for_light_travel_time(observer, self)
 
     def geometry_of(self, other):
-        # TODO: deprecate this
-        if isinstance(other, str):
-            # TODO: is this always the right ephemeris to use?
-            other = self.positives[0].ephemeris[other]
-        return other - self
+        raise DeprecationError(
+"""the geometry_of() method has, alas, been deprecated
+
+This old method has been replaced by an improved interface.  If you just
+need your software working again, install Skyfield 0.9.1 for a quick fix:
+
+    pip install skyfield==0.9.1
+
+Or, to update your old code, replace each operation that looks like:
+
+    position = boston.geometry_of(satellite).at(t)
+
+with the vector math that was previously hiding inside the old method:
+
+    position = (satellite - boston).at(t)""")
 
     def topos(self, latitude=None, longitude=None, latitude_degrees=None,
               longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
-        # TODO: deprecate this
-        from .toposlib import Topos
-        t = Topos(latitude, longitude, latitude_degrees,
-                  longitude_degrees, elevation_m, x, y)
-        return self + t
+        raise DeprecationError(
+"""the topos() method has, alas, been deprecated
+
+This old method has been replaced by an improved interface.  If you just
+need your software working again, install Skyfield 0.9.1 for a quick fix:
+
+    pip install skyfield==0.9.1
+
+Or, to update your old code, replace each operation that looks like:
+
+    boston = earth.topos(...)
+
+with the vector math that was previously hiding inside the old method:
+
+    from skyfield.api import Topos
+    boston = earth + Topos(...)""")
 
     def satellite(self, text):
-        # TODO: deprecate this
-        from .sgp4lib import EarthSatellite
-        sat = EarthSatellite(*text.splitlines()[-2:])
-        return self + sat
+        raise DeprecationError(
+"""the satellite() method has, alas, been deprecated
+
+This old method has been replaced by an improved interface.  If you just
+need your software working again, install Skyfield 0.9.1 for a quick fix:
+
+    pip install skyfield==0.9.1
+
+Or, to update your old code, replace each operation that looks like:
+
+    sat = earth.satellite(tle_text)
+
+with the vector math (and the little bit of text manipulation) that was
+previously hiding inside the old method:
+
+    line1, line2 = tle_text.splitlines()[-2:]
+    sat = earth + EarthSatellite(line1, line2)""")
 
 
 class VectorSum(VectorFunction):
