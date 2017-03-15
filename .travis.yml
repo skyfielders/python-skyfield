@@ -13,7 +13,7 @@ python:
 
 install:
   - "python setup.py sdist"
-  - "pip install dist/skyfield-*.tar.gz[tests]"
+  - "pip install $(echo dist/skyfield-*.tar.gz)'[tests]'"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
   - "pip install unittest2"
   - "mkdir tmp"
