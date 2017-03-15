@@ -173,7 +173,7 @@ serve:
 
 loop:
 	make html
-	while inotifywait -e CLOSE_WRITE -e DELETE_SELF *.rst ../*.py ; \
+	while inotifywait -e CLOSE_WRITE -e DELETE_SELF *.rst ../*.py ../../*.rst; \
 	do make html; \
 	done
 

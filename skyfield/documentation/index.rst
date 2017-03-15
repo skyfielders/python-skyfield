@@ -96,11 +96,9 @@ Documenation
 
 Skyfield’s documentation lives here at the main Skyfield web site:
 
-.. toctree::
-   :maxdepth: 1
-
-   toc
-   api
+* :doc:`toc`
+* :doc:`api`
+* :ref:`changelog`
 
 But the source code and issue tracker live on other web sites:
 
