@@ -71,12 +71,12 @@ you loaded the Earth from skyfield.api and called its topos() method:
         place = earth.topos(...)
 
 Instead, load the ephemeris like DE421 explicitly, look up Earth in the
-ephemeris, and use the method at() to generate a position:
+ephemeris, and add it to a Topos object:
 
-        from skyfield.api import load
+        from skyfield.api import Topos, load
         planets = load('de421.bsp')
         earth = planets['earth']
-        place = earth.topos(...)
+        place = earth + Topos(...)
 
 More documentation can be found at: http://rhodesmill.org/skyfield/""")
 

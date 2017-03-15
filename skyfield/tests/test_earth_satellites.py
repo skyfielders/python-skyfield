@@ -4,7 +4,8 @@ import sys
 from datetime import datetime, timedelta
 from numpy import array
 from skyfield import api
-from skyfield.sgp4lib import EarthSatellite, TEME_to_ITRF
+from skyfield.api import EarthSatellite, Topos
+from skyfield.sgp4lib import TEME_to_ITRF
 from skyfield.timelib import utc
 
 iss_tle = ("""\
@@ -62,8 +63,8 @@ def test_iss_altitude_with_bcrs_vector_subtraction(iss_transit):
 
     earth = api.load('de421.bsp')['earth']
     lines = iss_tle.splitlines()
-    s = earth.satellite('\n'.join(lines))
-    lake_zurich = earth.topos(latitude_degrees=42.2, longitude_degrees=-88.1)
+    s = earth + EarthSatellite(lines[-2], lines[-1])
+    lake_zurich = earth + Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
 
     alt, az, d = (s - lake_zurich).at(t).altaz()
     print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)

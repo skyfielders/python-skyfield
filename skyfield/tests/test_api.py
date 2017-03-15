@@ -1,8 +1,8 @@
 """Basic tests of the Skyfield API module and its contents."""
 
 from assay import assert_raises
-from skyfield import api
-from skyfield import positionlib
+from skyfield import api, positionlib
+from skyfield.api import Topos
 
 def ts():
     yield api.load.timescale()
@@ -48,7 +48,7 @@ def test_from_altaz_needs_topos():
 
 def test_from_altaz_parameters(ts):
     e = api.load('de421.bsp')
-    usno = e['earth'].topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = e['earth'] + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
     t = ts.tt(jd=api.T0)
     p = usno.at(t)
     a = api.Angle(degrees=10.0)

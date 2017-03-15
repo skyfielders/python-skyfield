@@ -7,7 +7,7 @@ we want to make sure we get correct.
 
 """
 from numpy import arange, diff
-from skyfield.api import load
+from skyfield.api import Topos, load
 
 def test_earth_deflection():
     # The NOVAS library includes the Earth's gravitational deflection of
@@ -25,7 +25,7 @@ def test_earth_deflection():
     planets = load('de405.bsp')
     earth = planets['earth']
     mars = planets['mars']
-    lowell = earth.topos(latitude_degrees=35.2029, longitude_degrees=-111.6646)
+    lowell = earth + Topos(latitude_degrees=35.2029, longitude_degrees=-111.6646)
     ra, dec, distance = lowell.at(t).observe(mars).apparent().radec()
     h = ra.hours
     hprime = diff(h)

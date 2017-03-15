@@ -37,7 +37,7 @@ def main():
         from numpy import abs, array, einsum, max
         from skyfield import (earthlib, framelib, nutationlib, positionlib,
                               precessionlib, starlib, timelib)
-        from skyfield.api import load
+        from skyfield.api import Topos, load
         from skyfield.constants import AU_KM, AU_M
         from skyfield.data import hipparcos
         from skyfield.functions import length_of
@@ -255,7 +255,7 @@ def output_subroutine_tests(dates):
         output(locals(), """\
             def test_from_altaz_{i}(earth):
                 jd = load.timescale(delta_t=0.0).tt(jd={tt!r})
-                usno = earth.topos(
+                usno = earth + Topos(
                     '38.9215 N', '77.0669 W', elevation_m=92.0)
                 a = usno.at(jd).from_altaz(alt_degrees={alt!r}, az_degrees={az!r})
                 ra, dec, distance = a.radec(epoch=jd)
@@ -378,7 +378,7 @@ def output_topocentric_tests(dates):
         def test_{slug}_topocentric_date{i}(de405):
             t = load.timescale(delta_t=0.0).tt(jd={jd!r})
             earth = de405['earth']
-            usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+            usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
             apparent = usno.at(t).observe(de405[{planet!r}]).apparent()
             ra, dec, distance = apparent.radec()

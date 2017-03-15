@@ -142,14 +142,14 @@ or else by generating a whole series of positions.
   are able to generate their current astrometric position
   when observed from a planet. :doc:`Read more <stars>`
 
-  ::
+  .. testcode::
 
-    from skyfield.api import Star, load
+    from skyfield.api import Star, Topos, load
 
     ts = load.timescale()
     t = ts.now()
 
-    boston = earth.topos('42.3583 N', '71.0603 W')
+    boston = earth + Topos('42.3583 N', '71.0603 W')
     barnard = Star(ra_hours=(17, 57, 48.49803),
                    dec_degrees=(4, 41, 36.2072))
 

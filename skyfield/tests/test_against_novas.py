@@ -3,7 +3,7 @@
 from numpy import abs, array, einsum, max
 from skyfield import (earthlib, framelib, nutationlib, positionlib,
                       precessionlib, starlib, timelib)
-from skyfield.api import load
+from skyfield.api import Topos, load
 from skyfield.constants import AU_KM, AU_M
 from skyfield.data import hipparcos
 from skyfield.functions import length_of
@@ -358,7 +358,7 @@ def test_refract7():
 
 def test_from_altaz_0(earth):
     jd = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
-    usno = earth.topos(
+    usno = earth + Topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=68.12871390985244, az_degrees=28.979244220884173)
     ra, dec, distance = a.radec(epoch=jd)
@@ -367,7 +367,7 @@ def test_from_altaz_0(earth):
 
 def test_from_altaz_1(earth):
     jd = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
-    usno = earth.topos(
+    usno = earth + Topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=-17.792497521318964, az_degrees=172.51742180816711)
     ra, dec, distance = a.radec(epoch=jd)
@@ -376,7 +376,7 @@ def test_from_altaz_1(earth):
 
 def test_from_altaz_2(earth):
     jd = load.timescale(delta_t=0.0).tt(jd=2448031.5)
-    usno = earth.topos(
+    usno = earth + Topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=65.8650913573598, az_degrees=34.158756360615946)
     ra, dec, distance = a.radec(epoch=jd)
@@ -385,7 +385,7 @@ def test_from_altaz_2(earth):
 
 def test_from_altaz_3(earth):
     jd = load.timescale(delta_t=0.0).tt(jd=2448031.5)
-    usno = earth.topos(
+    usno = earth + Topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=-18.43186389552551, az_degrees=170.42969631720953)
     ra, dec, distance = a.radec(epoch=jd)
@@ -394,7 +394,7 @@ def test_from_altaz_3(earth):
 
 def test_from_altaz_4(earth):
     jd = load.timescale(delta_t=0.0).tt(jd=2451545.0)
-    usno = earth.topos(
+    usno = earth + Topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=68.47898348962792, az_degrees=332.05109419434154)
     ra, dec, distance = a.radec(epoch=jd)
@@ -403,7 +403,7 @@ def test_from_altaz_4(earth):
 
 def test_from_altaz_5(earth):
     jd = load.timescale(delta_t=0.0).tt(jd=2451545.0)
-    usno = earth.topos(
+    usno = earth + Topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=-17.699091955922242, az_degrees=187.12243108963492)
     ra, dec, distance = a.radec(epoch=jd)
@@ -412,7 +412,7 @@ def test_from_altaz_5(earth):
 
 def test_from_altaz_6(earth):
     jd = load.timescale(delta_t=0.0).tt(jd=2456164.5)
-    usno = earth.topos(
+    usno = earth + Topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=41.36529829114181, az_degrees=316.19259712235026)
     ra, dec, distance = a.radec(epoch=jd)
@@ -421,7 +421,7 @@ def test_from_altaz_6(earth):
 
 def test_from_altaz_7(earth):
     jd = load.timescale(delta_t=0.0).tt(jd=2456164.5)
-    usno = earth.topos(
+    usno = earth + Topos(
         '38.9215 N', '77.0669 W', elevation_m=92.0)
     a = usno.at(jd).from_altaz(alt_degrees=-29.282626410822033, az_degrees=204.1557062303077)
     ra, dec, distance = a.radec(epoch=jd)
@@ -1667,7 +1667,7 @@ def test_polaris_geocentric_date4(earth):
 def test_mercury_topocentric_date0(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['mercury']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1693,7 +1693,7 @@ def test_mercury_topocentric_date0(de405):
 def test_mercury_topocentric_date1(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2448031.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['mercury']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1719,7 +1719,7 @@ def test_mercury_topocentric_date1(de405):
 def test_mercury_topocentric_date2(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2451545.0)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['mercury']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1745,7 +1745,7 @@ def test_mercury_topocentric_date2(de405):
 def test_mercury_topocentric_date3(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2456164.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['mercury']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1771,7 +1771,7 @@ def test_mercury_topocentric_date3(de405):
 def test_mercury_topocentric_date4(de405):
     t = load.timescale(delta_t=0.0).tt(jd=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['mercury']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1797,7 +1797,7 @@ def test_mercury_topocentric_date4(de405):
 def test_venus_topocentric_date0(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['venus']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1823,7 +1823,7 @@ def test_venus_topocentric_date0(de405):
 def test_venus_topocentric_date1(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2448031.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['venus']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1849,7 +1849,7 @@ def test_venus_topocentric_date1(de405):
 def test_venus_topocentric_date2(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2451545.0)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['venus']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1875,7 +1875,7 @@ def test_venus_topocentric_date2(de405):
 def test_venus_topocentric_date3(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2456164.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['venus']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1901,7 +1901,7 @@ def test_venus_topocentric_date3(de405):
 def test_venus_topocentric_date4(de405):
     t = load.timescale(delta_t=0.0).tt(jd=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['venus']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1927,7 +1927,7 @@ def test_venus_topocentric_date4(de405):
 def test_mars_topocentric_date0(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['mars']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1953,7 +1953,7 @@ def test_mars_topocentric_date0(de405):
 def test_mars_topocentric_date1(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2448031.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['mars']).apparent()
     ra, dec, distance = apparent.radec()
@@ -1979,7 +1979,7 @@ def test_mars_topocentric_date1(de405):
 def test_mars_topocentric_date2(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2451545.0)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['mars']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2005,7 +2005,7 @@ def test_mars_topocentric_date2(de405):
 def test_mars_topocentric_date3(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2456164.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['mars']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2031,7 +2031,7 @@ def test_mars_topocentric_date3(de405):
 def test_mars_topocentric_date4(de405):
     t = load.timescale(delta_t=0.0).tt(jd=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['mars']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2057,7 +2057,7 @@ def test_mars_topocentric_date4(de405):
 def test_jupiter_barycenter_topocentric_date0(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['jupiter barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2083,7 +2083,7 @@ def test_jupiter_barycenter_topocentric_date0(de405):
 def test_jupiter_barycenter_topocentric_date1(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2448031.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['jupiter barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2109,7 +2109,7 @@ def test_jupiter_barycenter_topocentric_date1(de405):
 def test_jupiter_barycenter_topocentric_date2(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2451545.0)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['jupiter barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2135,7 +2135,7 @@ def test_jupiter_barycenter_topocentric_date2(de405):
 def test_jupiter_barycenter_topocentric_date3(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2456164.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['jupiter barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2161,7 +2161,7 @@ def test_jupiter_barycenter_topocentric_date3(de405):
 def test_jupiter_barycenter_topocentric_date4(de405):
     t = load.timescale(delta_t=0.0).tt(jd=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['jupiter barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2187,7 +2187,7 @@ def test_jupiter_barycenter_topocentric_date4(de405):
 def test_saturn_barycenter_topocentric_date0(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['saturn barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2213,7 +2213,7 @@ def test_saturn_barycenter_topocentric_date0(de405):
 def test_saturn_barycenter_topocentric_date1(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2448031.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['saturn barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2239,7 +2239,7 @@ def test_saturn_barycenter_topocentric_date1(de405):
 def test_saturn_barycenter_topocentric_date2(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2451545.0)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['saturn barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2265,7 +2265,7 @@ def test_saturn_barycenter_topocentric_date2(de405):
 def test_saturn_barycenter_topocentric_date3(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2456164.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['saturn barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2291,7 +2291,7 @@ def test_saturn_barycenter_topocentric_date3(de405):
 def test_saturn_barycenter_topocentric_date4(de405):
     t = load.timescale(delta_t=0.0).tt(jd=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['saturn barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2317,7 +2317,7 @@ def test_saturn_barycenter_topocentric_date4(de405):
 def test_uranus_barycenter_topocentric_date0(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['uranus barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2343,7 +2343,7 @@ def test_uranus_barycenter_topocentric_date0(de405):
 def test_uranus_barycenter_topocentric_date1(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2448031.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['uranus barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2369,7 +2369,7 @@ def test_uranus_barycenter_topocentric_date1(de405):
 def test_uranus_barycenter_topocentric_date2(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2451545.0)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['uranus barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2395,7 +2395,7 @@ def test_uranus_barycenter_topocentric_date2(de405):
 def test_uranus_barycenter_topocentric_date3(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2456164.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['uranus barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2421,7 +2421,7 @@ def test_uranus_barycenter_topocentric_date3(de405):
 def test_uranus_barycenter_topocentric_date4(de405):
     t = load.timescale(delta_t=0.0).tt(jd=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['uranus barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2447,7 +2447,7 @@ def test_uranus_barycenter_topocentric_date4(de405):
 def test_neptune_barycenter_topocentric_date0(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['neptune barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2473,7 +2473,7 @@ def test_neptune_barycenter_topocentric_date0(de405):
 def test_neptune_barycenter_topocentric_date1(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2448031.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['neptune barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2499,7 +2499,7 @@ def test_neptune_barycenter_topocentric_date1(de405):
 def test_neptune_barycenter_topocentric_date2(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2451545.0)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['neptune barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2525,7 +2525,7 @@ def test_neptune_barycenter_topocentric_date2(de405):
 def test_neptune_barycenter_topocentric_date3(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2456164.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['neptune barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2551,7 +2551,7 @@ def test_neptune_barycenter_topocentric_date3(de405):
 def test_neptune_barycenter_topocentric_date4(de405):
     t = load.timescale(delta_t=0.0).tt(jd=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['neptune barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2577,7 +2577,7 @@ def test_neptune_barycenter_topocentric_date4(de405):
 def test_pluto_barycenter_topocentric_date0(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['pluto barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2603,7 +2603,7 @@ def test_pluto_barycenter_topocentric_date0(de405):
 def test_pluto_barycenter_topocentric_date1(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2448031.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['pluto barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2629,7 +2629,7 @@ def test_pluto_barycenter_topocentric_date1(de405):
 def test_pluto_barycenter_topocentric_date2(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2451545.0)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['pluto barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2655,7 +2655,7 @@ def test_pluto_barycenter_topocentric_date2(de405):
 def test_pluto_barycenter_topocentric_date3(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2456164.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['pluto barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2681,7 +2681,7 @@ def test_pluto_barycenter_topocentric_date3(de405):
 def test_pluto_barycenter_topocentric_date4(de405):
     t = load.timescale(delta_t=0.0).tt(jd=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['pluto barycenter']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2707,7 +2707,7 @@ def test_pluto_barycenter_topocentric_date4(de405):
 def test_sun_topocentric_date0(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['sun']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2733,7 +2733,7 @@ def test_sun_topocentric_date0(de405):
 def test_sun_topocentric_date1(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2448031.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['sun']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2759,7 +2759,7 @@ def test_sun_topocentric_date1(de405):
 def test_sun_topocentric_date2(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2451545.0)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['sun']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2785,7 +2785,7 @@ def test_sun_topocentric_date2(de405):
 def test_sun_topocentric_date3(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2456164.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['sun']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2811,7 +2811,7 @@ def test_sun_topocentric_date3(de405):
 def test_sun_topocentric_date4(de405):
     t = load.timescale(delta_t=0.0).tt(jd=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['sun']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2837,7 +2837,7 @@ def test_sun_topocentric_date4(de405):
 def test_moon_topocentric_date0(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2440423.345833333)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['moon']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2863,7 +2863,7 @@ def test_moon_topocentric_date0(de405):
 def test_moon_topocentric_date1(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2448031.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['moon']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2889,7 +2889,7 @@ def test_moon_topocentric_date1(de405):
 def test_moon_topocentric_date2(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2451545.0)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['moon']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2915,7 +2915,7 @@ def test_moon_topocentric_date2(de405):
 def test_moon_topocentric_date3(de405):
     t = load.timescale(delta_t=0.0).tt(jd=2456164.5)
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['moon']).apparent()
     ra, dec, distance = apparent.radec()
@@ -2941,7 +2941,7 @@ def test_moon_topocentric_date3(de405):
 def test_moon_topocentric_date4(de405):
     t = load.timescale(delta_t=0.0).tt(jd=[2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
     earth = de405['earth']
-    usno = earth.topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
     apparent = usno.at(t).observe(de405['moon']).apparent()
     ra, dec, distance = apparent.radec()
