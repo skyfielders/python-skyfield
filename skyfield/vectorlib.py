@@ -140,6 +140,7 @@ Or, to update your old code, replace each operation that looks like:
 with the vector math (and the little bit of text manipulation) that was
 previously hiding inside the old method:
 
+    from skyfield.api import EarthSatellite
     line1, line2 = tle_text.splitlines()[-2:]
     sat = earth + EarthSatellite(line1, line2)""")
 

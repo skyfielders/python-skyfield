@@ -27,6 +27,21 @@ def main():
         eph = load('de421.bsp')
         earth = eph['earth']
         earth.at(utc=(1980, 1, 1))
+    elif arg == 'f':
+        from skyfield.api import load
+        eph = load('de421.bsp')
+        earth = eph['earth']
+        earth.geometry_of(None)
+    elif arg == 'g':
+        from skyfield.api import load
+        eph = load('de421.bsp')
+        earth = eph['earth']
+        earth.topos()
+    elif arg == 'h':
+        from skyfield.api import load
+        eph = load('de421.bsp')
+        earth = eph['earth']
+        earth.satellite('text')
 
 if __name__ == '__main__':
     main()
