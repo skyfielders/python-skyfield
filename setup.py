@@ -37,7 +37,7 @@ setup(
         ],
     package_data = {
         'skyfield': ['documentation/*.rst'],
-        'skyfield.data': ['*.npy', '*.txt'],
+        'skyfield.data': ['*.npy'],
         },
     install_requires=[
         'jplephem>=2.3',
