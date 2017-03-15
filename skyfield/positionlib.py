@@ -59,7 +59,7 @@ class ICRF(object):
 
     def __sub__(self, body):
         """Subtract two ICRF vectors to produce a third."""
-        # TODO: remove this in favor of subtracting before calling .at()
+        # TODO: set center and target of result
         p = self.position.au - body.position.au
         if self.velocity is None or body.velocity is None:
             v = None
