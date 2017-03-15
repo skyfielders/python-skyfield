@@ -3,6 +3,7 @@ import skyfield  # safe, because __init__.py contains no import statements
 
 extras = {
     'tests': [
+        'https://github.com/brandon-rhodes/assay/archive/master.zip',
         'pytz',
     ],
 }

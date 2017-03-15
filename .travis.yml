@@ -15,12 +15,12 @@ install:
   - "python setup.py sdist"
   - "pip install --upgrade pip"
   - "pip install $(echo dist/skyfield-*.tar.gz)'[tests]'"
-  - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
   - "pip install unittest2"
   - "mkdir tmp"
-  - "cd tmp && curl -O ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de405.bsp"
-  - "cd tmp && curl -O ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de421.bsp"
-  - "cd tmp && curl -O ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup310.bsp"
+  - "cd tmp"
+  - "curl -O ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de405.bsp"
+  - "curl -O ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de421.bsp"
+  - "curl -O ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup310.bsp"
 
 script:
-  - "cd tmp && assay --batch skyfield.tests"
+  - "assay --batch skyfield.tests"
