@@ -1,6 +1,6 @@
 
 ===================================
- API Reference — Downloading files
+ API Reference — Downloading Files
 ===================================
 
 .. currentmodule:: skyfield.iokit

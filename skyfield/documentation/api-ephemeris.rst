@@ -1,7 +1,7 @@
 
-====================================
- API Reference — Using an Ephemeris
-====================================
+=======================================
+ API Reference — Planetary Ephemerides
+=======================================
 
 See `planets` for a guide to using the ephemeris objects below
 to compute the positions of planets, moons, and the Sun.
