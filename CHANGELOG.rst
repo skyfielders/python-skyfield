@@ -3,8 +3,26 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-0.9.1
------
+1.0 — 2017 March 15
+-------------------
+
+* Brought the core API to maturity: replaced the narrow concept of
+  building a “body” from several ephemeris segments with the general
+  concept of a vector function that is the sum of several simpler vector
+  functions.
+
+* Added support for adding and subtracting vector functions.
+
+* Deprecated the Earth ``topos()`` method in favor of vector addition.
+
+* Deprecated the Earth ``satellite()`` method in favor of vector addition.
+
+* Deprecated the body ``geometry_of()`` method in favor of vector subtraction.
+
+* Celestrak satellite files can now be opened with ``load.tle(url_or_filename)``.
+
+0.9.1 — 2016 December 10
+------------------------
 
 * Attempted to speed up Earth satellite calculations by caching a single
   time scale object instead of creating a new one each time.
