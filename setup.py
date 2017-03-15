@@ -36,4 +36,8 @@ setup(
         'jplephem>=2.3',
         'numpy',
         'sgp4>=1.4',
-        ])
+        ],
+    test_requires=[
+        'pytz',
+        ],
+)
