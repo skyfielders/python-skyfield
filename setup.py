@@ -1,6 +1,12 @@
 from distutils.core import setup
 import skyfield  # safe, because __init__.py contains no import statements
 
+extras = {
+    'tests': [
+        'pytz',
+    ],
+}
+
 setup(
     name='skyfield',
     version=skyfield.__version__,
@@ -37,7 +43,5 @@ setup(
         'numpy',
         'sgp4>=1.4',
         ],
-    test_requires=[
-        'pytz',
-        ],
+    extras_require=extras,          # support "pip install skyfield[tests]"
 )
