@@ -64,3 +64,9 @@ Geocentric position relative to the Earth
 
 .. autoclass:: Geocentric
    :members:
+
+Geometric instantaneous position between two objects
+====================================================
+
+.. autoclass:: Geometric
+   :members:

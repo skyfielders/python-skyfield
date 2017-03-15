@@ -182,7 +182,17 @@ class Loader(object):
         self.events.append(message.format(*args))
 
     def tle(self, url, reload=False):
-        """Parse a satellite TLE file."""
+        """Load and parse a satellite TLE file.
+
+        Given a URL or a local path, this loads a file of three-line
+        records in the common Celestrak file format, where each first
+        line gives the name of a satellite and the following two lines
+        are the TLE orbital elements.
+
+        Returns a Python dictionary whose keys are satellite names and
+        values are :class:`~skyfield.sgp4lib.EarthSatellite` objects.
+
+        """
         with self.open(url, reload=reload) as f:
             return dict(parse_celestrak_tle(f))
 

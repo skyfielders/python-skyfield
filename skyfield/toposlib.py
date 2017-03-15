@@ -8,15 +8,23 @@ from .vectorlib import VectorFunction
 
 
 class Topos(VectorFunction):
-    """A specific location on the Earth's surface.
+    """A vector function that knows the position of a place on Earth.
 
+    You can specify latitude and longitude by either either building
+    Skyfield :class:`~skyfield.units.Angle` objects yourself and
+    supplying them to the constructor as its first two arguments, or by
+    providing floating point numbers to the alternate keyword arguments
+    ``latitude_degrees`` and ``longitude_degrees``.
 
+    The ``center`` of a topos object is always ``399``, the center of
+    gravity of the Earth, so every call to the ``at(t)`` method of a
+    topos object returns a :class:`~skyfield.positionlib.Geocentric`
+    position.
 
     """
     center = 399
     center_name = '399 EARTH'
 
-    # TODO(1.0): document, and add to API doc.
     def __init__(self, latitude=None, longitude=None, latitude_degrees=None,
                  longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
 

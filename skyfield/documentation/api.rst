@@ -19,14 +19,30 @@ Downloading files
    Loader
    Loader.path_to
    Loader.timescale
+   Loader.tle
 
-Ephemerides
-===========
+Vector Functions
+================
+
+.. currentmodule:: skyfield.vectorlib
+
+The common API shared by planets, Earth locations, and Earth satellites.
+
+.. autosummary::
+
+   VectorFunction
+   VectorFunction.__add__
+   VectorFunction.__sub__
+   VectorFunction.at
+
+Planetary Ephemerides
+=====================
 
 .. currentmodule:: skyfield.jpllib
 
-Skyfield users will usually download and open a `SpiceKernel` file
-in a single step by calling ``load()``.
+By downloading a `SpiceKernel` file,
+Skyfield users can build vector functions
+predicting the positions of the Moon, Sun, and planets.
 
 .. autosummary::
 
@@ -35,10 +51,31 @@ in a single step by calling ``load()``.
    SpiceKernel.names
    SpiceKernel.decode
    SpiceKernel.__getitem__
-   Body.at
-   Body.geometry_of
-   Body.topos
-   Geometry.at
+
+Topocentric Locations
+=====================
+
+.. currentmodule:: skyfield.toposlib
+
+You can create a vector function
+that computes the location of any position on the Earth’s surface.
+
+.. autosummary::
+
+   Topos
+
+Earth Satellites
+================
+
+.. currentmodule:: skyfield.sgp4lib
+
+By downloading TLE satellite element sets,
+Skyfield users can build vector functions
+that predict their positions.
+
+.. autosummary::
+
+   EarthSatellite
 
 Stars and other distant objects
 ===============================
@@ -50,13 +87,15 @@ Stars and other distant objects
 
    Star
 
-Positions
-=========
+Position classes
+================
 
 .. currentmodule:: skyfield.positionlib
 
 The `ICRF` class serves as the base for all other positions classes,
-which each share its axes but have more specific meanings:
+which each share its axes but have more specific meanings.
+Positions are usually returned by calling ``at(t)`` on a vector function
+rather than being constructed manually.
 
 .. autosummary::
    :nosignatures:

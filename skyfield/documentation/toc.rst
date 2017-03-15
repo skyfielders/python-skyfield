@@ -21,9 +21,12 @@ that is accelerated using NumPy vector math!
    api
    api-iokit
    api-time
+   api-vectorlib
    api-ephemeris
    api-stars
+   api-satellites
    api-position
+   api-vectors
    api-quantity
    design
    bibliography

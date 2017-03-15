@@ -23,8 +23,14 @@ from .vectorlib import VectorFunction
 _minutes_per_day = 1440.
 
 class EarthSatellite(VectorFunction):
-    """An Earth satellite loaded from a TLE file and propagated with SGP4."""
+    """An Earth satellite loaded from a TLE file and propagated with SGP4.
 
+    An earth satellite object is a Skyfield vector function, so you will
+    call its :meth:`~skyfield.vectorlib.VectorSum.at()` method to have
+    it generate its position in the sky, or use addition and subtraction
+    to combine it with other vectors.
+
+    """
     center = 399
     center_name = '399 EARTH'
 

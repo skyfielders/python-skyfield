@@ -8,6 +8,8 @@ from .positionlib import build_position
 from .timelib import Time
 
 class VectorFunction(object):
+    """Given a time, computes a corresponding position."""
+
     ephemeris = None
 
     def __add__(self, other):
@@ -50,6 +52,19 @@ class VectorFunction(object):
 
     @raise_error_for_deprecated_time_arguments
     def at(self, t):
+        """At time ``t``, compute the target's position relative to the center.
+
+        If ``t`` is an array of times, then the returned position object
+        will specify as many positions as there were times.  The kind of
+        position returned depends on the value of the ``center``
+        attribute:
+
+        * Solar System Barycenter: :class:`~skyfield.positionlib.Barycentric`
+        * Center of the Earth: :class:`~skyfield.positionlib.Geocentric`
+        * Difference: :class:`~skyfield.positionlib.Geometric`
+        * Anything else: :class:`~skyfield.positionlib.ICRF`
+
+        """
         if not isinstance(t, Time):
             raise ValueError('please provide the at() method with a Time'
                              ' instance as its argument, instead of the'
