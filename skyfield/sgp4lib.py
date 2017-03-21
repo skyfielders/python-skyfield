@@ -37,14 +37,16 @@ class EarthSatellite(VectorFunction):
     # cache for timescale
     timescale = None
 
-    def __init__(self, line1, line2, name=None):
+    def __init__(self, line1, line2, name=None, ts=None):
         self.name = None if name is None else name.strip()
         sat = twoline2rv(line1, line2, whichconst=wgs72)
         self._sgp4_satellite = sat
-        if EarthSatellite.timescale is None:
-            from skyfield import api
-            EarthSatellite.timescale = api.load.timescale()
-        self.epoch = EarthSatellite.timescale.utc(sat.epochyr, 1, sat.epochdays)
+        if ts is None:
+            if EarthSatellite.timescale is None:
+                from skyfield.api import load
+                EarthSatellite.timescale = load.timescale()
+            ts = EarthSatellite.timescale
+        self.epoch = ts.utc(sat.epochyr, 1, sat.epochdays)
 
         self.target = object()  # TODO: make this more interesting
         self.target_name = 'Satellite{0} {1}'.format(
