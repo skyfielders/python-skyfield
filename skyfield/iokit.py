@@ -236,9 +236,66 @@ class Loader(object):
         leap_dates, leap_offsets = self('Leap_Second.dat')
         return Timescale(delta_t_recent, leap_dates, leap_offsets)
 
+    def list_bsp(self):
+        """Allow users to figure out what .bsp files are available.
+    
+            This method queries the FTP/HTTP locations given in 
+            self.urls['.bsp'] above and reutrns the available files
+            and their touch dates on the remote server.
+    
+        """
+
+        for url in self.urls['.bsp']:
+            bsp_url = urlopen(url[1])
+            print('Emepheris location for files like "{}"'.format(url[0]),
+                file = sys.stderr)
+            print(url[1], file=sys.stderr)
+            times, names, sizes = _parse_bsp_url(bsp_url)
+            for t, n, s in zip(times, names, sizes):
+                print(t, n, s, file=sys.stderr)
+            print(file=sys.stderr)
     @property
     def log(self):
         return '\n'.join(self.events)
+
+
+def _parse_bsp_url(url):
+    from bs4 import BeautifulSoup
+    bs = BeautifulSoup(url, 'lxml')
+    rows = bs.find_all("tr") 
+    
+    names = []
+    times = []
+    sizes = []
+    
+    # If len(rows) == 0 then this is the FTP table, not an HTML dump
+    if len(rows) == 0:
+        rows = bs.text.splitlines()
+        for row in rows:
+            if '.bsp' not in row:
+                continue
+            fields = row.split()
+            names.extend([fields[8]])
+            times.extend([fields[5]+' '+fields[6]+' '+fields[7]])
+            size = float(fields[4]) / 1048576
+            
+            sizes.extend(['{:.1f}M'.format(size)])
+        return times, names, sizes
+    
+    # Otherwise, you're an HTML table:
+    for row in rows:
+        cols = row.find_all('td')
+        cols = [ele.text.strip() for ele in cols]
+        if len(cols) < 1:
+            continue
+        if 'bsp' not in cols[1]:
+            continue
+        names.append(cols[1])
+        times.append(cols[2])
+        sizes.append(cols[3])
+        
+    return times, names, sizes
+
 
 def _search(mapping, filename):
     """Search a Loader data structure for a filename."""
