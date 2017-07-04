@@ -379,7 +379,7 @@ def download(url, path, verbose=None, blocksize=128*1024):
     # that is trying to download the same file at the same time.  So:
 
     flags = getattr(os, 'O_BINARY', 0) | os.O_CREAT | os.O_RDWR
-    fd = os.open(tempname, flags)
+    fd = os.open(tempname, flags, mode=0o666)
     with os.fdopen(fd, 'wb') as w:
         try:
             if lockf is not None:
