@@ -367,10 +367,10 @@ def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):
     """Compute (alt, az, distance) relative to the observer's horizon.
 
     """
-    try:
-        elevation_m = observer_data.elevation_m
-        R = observer_data.altaz_rotation
-    except AttributeError:
+    elevation_m = observer_data.elevation_m
+    R = observer_data.altaz_rotation
+
+    if (elevation_m is None) or (R is None):
         raise ValueError('to compute an altazimuth position, you must'
                          ' observe from a specific Earth location that'
                          ' you specify using a Topos instance')

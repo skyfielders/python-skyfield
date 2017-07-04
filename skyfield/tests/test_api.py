@@ -41,6 +41,13 @@ def test_star_position_class(ts):
     p = e['earth'].at(ts.utc(2014, 2, 9, 15, 1)).observe(star)
     assert isinstance(p, positionlib.Astrometric)
 
+def test_altaz_needs_topos(ts):
+    e = api.load('de421.bsp')
+    earth = e['earth']
+    moon = e['moon']
+    with assert_raises(ValueError, 'using a Topos instance'):
+        earth.at(ts.utc(2016)).observe(moon).apparent().altaz()
+
 def test_from_altaz_needs_topos():
     p = positionlib.ICRF([0.0, 0.0, 0.0])
     with assert_raises(ValueError, 'the orientation of the horizon'):
