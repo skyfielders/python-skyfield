@@ -85,6 +85,12 @@ arcminute = DEG2RAD / 60.0
 arcsecond = arcminute / 60.0
 second = 1.0 / (24.0 * 60.0 * 60.0)
 
+# Note that the following test is based specifically on Revision 2 of
+# "Revisiting Spacetrack Report #3" AIAA 2006-6753 (earlier versions of
+# the PDF use different numbers):
+#
+# http://ww.celestrak.com/publications/AIAA/2006-6753/AIAA-2006-6753-Rev2.pdf
+
 def test_appendix_c_conversion_from_TEME_to_ITRF():
     rTEME = array([5094.18016210, 6127.64465950, 6380.34453270])
     vTEME = array([-4.746131487, 0.785818041, 5.531931288])
