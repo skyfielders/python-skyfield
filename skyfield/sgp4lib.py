@@ -25,10 +25,49 @@ _minutes_per_day = 1440.
 class EarthSatellite(VectorFunction):
     """An Earth satellite loaded from a TLE file and propagated with SGP4.
 
-    An earth satellite object is a Skyfield vector function, so you will
-    call its :meth:`~skyfield.vectorlib.VectorSum.at()` method to have
-    it generate its position in the sky, or use addition and subtraction
-    to combine it with other vectors.
+    An earth satellite object is a Skyfield vector function, so call its
+    :meth:`~skyfield.vectorlib.VectorSum.at()` method to generate its
+    position in the sky, or use addition and subtraction to combine it
+    with other vectors.
+
+    Satellite parameters are generally only accurate for a week or two
+    around the *epoch* of the parameters, the date for which they were
+    generated, which is available as an attribute:
+
+    ``epoch``
+        A Skyfield :class:`~skyfield.timelib.Time` giving the exact
+        epoch moment for these satellite orbit parameters.
+
+    If you are interested in the catalog entry details, the SGP4 model
+    parameters for a particular satellite can be accessed through its
+    ``model`` attribute:
+
+    ``model.satnum``
+        The unique satellite NORAD catalog number given in the TLE file.
+    ``model.epochyr``
+        Full four-digit year of this element set's epoch moment.
+    ``model.epochdays``
+        Fractional days into the year of the epoch moment.
+    ``model.jdsatepoch``
+        Julian date of the epoch (computed from ``epochyr`` and ``epochdays``).
+    ``model.ndot``
+        First time derivative of the mean motion (ignored by SGP4).
+    ``model.nddot``
+        Second time derivative of the mean motion (ignored by SGP4).
+    ``model.bstar``
+        Ballistic drag coefficient B* in inverse earth radii.
+    ``model.inclo``
+        Inclination in radians.
+    ``model.nodeo``
+        Right ascension of ascending node in radians.
+    ``model.ecco``
+        Eccentricity.
+    ``model.argpo``
+        Argument of perigee in radians.
+    ``model.mo``
+        Mean anomaly in radians.
+    ``model.no``
+        Mean motion in radians per minute.
 
     """
     center = 399
@@ -40,7 +79,7 @@ class EarthSatellite(VectorFunction):
     def __init__(self, line1, line2, name=None, ts=None):
         self.name = None if name is None else name.strip()
         sat = twoline2rv(line1, line2, whichconst=wgs72)
-        self._sgp4_satellite = sat
+        self.model = sat
         if ts is None:
             if EarthSatellite.timescale is None:
                 from skyfield.api import load
@@ -50,12 +89,12 @@ class EarthSatellite(VectorFunction):
 
         self.target = object()  # TODO: make this more interesting
         self.target_name = 'Satellite{0} {1}'.format(
-            self._sgp4_satellite.satnum,
+            self.model.satnum,
             ' ' + repr(self.name) if self.name else '',
         )
 
     def __str__(self):
-        sat = self._sgp4_satellite
+        sat = self.model
         return 'EarthSatellite{0} number={1!r} epoch={2}'.format(
             ' ' + repr(self.name) if self.name else '',
             sat.satnum,
@@ -73,7 +112,7 @@ class EarthSatellite(VectorFunction):
         assume the TLE epoch to be a UTC date, per AIAA 2006-6753.
 
         """
-        sat = self._sgp4_satellite
+        sat = self.model
         epoch = sat.jdsatepoch
         minutes_past_epoch = (t._utc_float() - epoch) * 1440.0
         if getattr(minutes_past_epoch, 'shape', None):
