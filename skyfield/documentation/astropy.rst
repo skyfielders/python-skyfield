@@ -67,7 +67,21 @@ between the two libraries:
       [-0.16287311  0.88787399  0.38473904] AU
       [-0.01721258 -0.00279426 -0.0012121 ] AU / d
 
-3. A Skyfield angle can express itself as an AstroPy quantity
+3. A Skyfield position can also return a complete AstroPy ``SkyCoord``
+   object that couples the position vector with its reference frame.
+
+   .. testcode::
+
+      from astropy.coordinates import ICRS
+      sc = barycentric.to_skycoord()
+      print(sc)
+
+   .. testoutput::
+
+      <SkyCoord (ICRS): (x, y, z) in AU
+          (-0.16287311,  0.88787399,  0.38473904)>
+
+4. A Skyfield angle can express itself as an AstroPy quantity
    in any requested unit of angular measure.
 
    .. testcode::

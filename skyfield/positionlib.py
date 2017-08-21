@@ -178,6 +178,13 @@ class ICRF(object):
                 Angle(radians=lon),
                 Distance(au=d))
 
+    def to_skycoord(self, unit=None):
+        """Convert this distance to an AstroPy ``SkyCoord`` object."""
+        from astropy.coordinates import SkyCoord
+        from astropy.units import au
+        x, y, z = self.position.au
+        return SkyCoord(representation='cartesian', x=x, y=y, z=z, unit=au)
+
     def _to_spice_frame(self, name):
         vector = self.position.au
         vector = inertial_frames[name].dot(vector)
