@@ -42,6 +42,9 @@ Here are the essential project links:
 * `Home page and documentation
   <http://rhodesmill.org/skyfield>`_.
 
+* `Installing Skyfield
+  <http://rhodesmill.org/skyfield/installation.html>`_.
+
 * `Contributing to Skyfield
   <https://github.com/skyfielders/python-skyfield/blob/master/Contrib.rst>`_.
 

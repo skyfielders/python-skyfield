@@ -98,6 +98,7 @@ Documenation
 Skyfield’s documentation lives here at the main Skyfield web site:
 
 * :doc:`toc`
+* :doc:`installation`
 * :doc:`api`
 * :ref:`changelog`
 

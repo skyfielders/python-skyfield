@@ -12,6 +12,12 @@ of the standard Python package tool::
 
     pip install skyfield
 
+This should install Skyfield, NumPy,
+and the small collection of pure-Python astronomy libraries
+that Skyfield depends on.
+If you lack ``pip`` and need to install each dependency by hand,
+consult Skyfield’s ``setup.py`` file for the full list.
+
 If trying to install Skyfield gives you errors about NumPy,
 there are several other ways to get NumPy installed:
 
