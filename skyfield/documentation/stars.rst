@@ -54,6 +54,45 @@ system in which we provided it:
     17h 58m 30.80s
     +04deg 41' 41.9"
 
+Distances to stars
+==================
+
+The distance that Skyfield computes to a particular star
+might or might not be meaningful,
+depending both on which star catalog you are using
+and on which particular star you observe.
+
+Skyfield has no way to even guess the distance to a star
+if it has only been given its right ascension and declination,
+as is the case for Barnard’s Star as we defined it above.
+To represent this vector of unknown length,
+Skyfield generates a vector exactly one gigaparsec long:
+
+.. testcode::
+
+    print(distance)  # exactly 1 gigaparsec
+
+.. testoutput::
+
+    2.06265e+14 au
+
+This is so very far outside of our galaxy
+that such positions should be easy
+for you to tell apart from real distances to stars.
+Real distances will all be within a few hundred parsecs or less,
+because our telescopes cannot currently measure the parallax of stars
+that are any further away than that.
+
+In the next section,
+we will redefine Barnard’s Star
+and this time supply a real value for its parallax
+from a recent star catalog.
+You will see in that its ``distance``
+switches to a realistic estimate.
+
+Proper motion and parallax
+==========================
+
 There are other ways that a :class:`Star` object can generate a position
 different than the plain old ICRS right ascension and declination with
 which it is initialized.  First, Skyfield will recognize that an object
@@ -79,11 +118,13 @@ Here are all three effects applied to Barnard’s star:
     ra, dec, distance = astrometric.radec()
     print(ra)
     print(dec)
+    print(distance)
 
 .. testoutput::
 
     17h 57m 47.76s
     +04deg 44' 01.3"
+    3.77863e+05 au
 
 Note that the above position is different than the input right ascension
 and declination but not because we have asked for dynamic coordinates.
