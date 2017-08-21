@@ -694,10 +694,12 @@ since they are often needed repeatedly during a calculation.
 In case you are curious what they are, here is a list:
 
 ``gmst``
-    Greenwich Mean Sidereal Time.
+    Greenwich Mean Sidereal Time in hours,
+    in the range 0.0 ≤ `gast` < 24.0.
 
 ``gast``
-    Greenwich Apparent Sidereal Time.
+    Greenwich Apparent Sidereal Time in hours,
+    in the range 0.0 ≤ `gast` < 24.0.
 
 ``P``
     The precession matrix **P** for rotating an *x,y,z* vector
