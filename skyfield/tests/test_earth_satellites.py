@@ -121,7 +121,7 @@ def test_appendix_c_satellite():
     sat = EarthSatellite(lines[1], lines[2], lines[0])
 
     ts = api.load.timescale()
-    jd_epoch = sat._sgp4_satellite.jdsatepoch
+    jd_epoch = sat.model.jdsatepoch
     three_days_later = jd_epoch + 3.0
     offset = ts.tt(jd=three_days_later)._utc_float() - three_days_later
     t = ts.tt(jd=three_days_later - offset)
