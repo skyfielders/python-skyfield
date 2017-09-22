@@ -9,8 +9,8 @@ from .earthlib import compute_limb_angle, refract
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Distance, Velocity, Angle, _interpret_angle
+from .nutationlib import earth_tilt
 
-_ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GALACTIC = inertial_frames['GALACTIC']
 
 
@@ -152,14 +152,17 @@ class ICRF(object):
         c = dots(u1, u2)
         return Angle(radians=arccos(clip(c, -1.0, 1.0)))
 
-    def ecliptic_position(self):
-        """Compute J2000 ecliptic coordinates (x, y, z)"""
-        vector = _ECLIPJ2000.dot(self.position.au)
+    def ecliptic_xyz(self):
+        """Compute epoch of date ecliptic coordinates (x, y, z)"""
+        lat, lon, d = self.ecliptic_latlon()
+        vector = from_polar(d.au, lat.radians, lon.radians)
         return Distance(vector)
 
     def ecliptic_latlon(self):
-        """Compute J2000 ecliptic coordinates (lat, lon, distance)"""
-        vector = _ECLIPJ2000.dot(self.position.au)
+        """Compute epoch of date ecliptic coordinates (lat, lon, distance)"""
+        position = self.position.au
+        position = einsum('ij...,j...->i...', self.t.M, position)
+        vector = self.t.E.dot(position)
         d, lat, lon = to_polar(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),

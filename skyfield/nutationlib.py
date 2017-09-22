@@ -29,6 +29,20 @@ def compute_nutation(t):
                    cpsi * cobm * sobt - sobm * cobt,
                    cpsi * sobm * sobt + cobm * cobt)))
 
+def compute_ECLIP(t):
+    """Generate the ecliptic rotations for Time `t`.
+
+    If the Julian date is scalar, a simple ``(3, 3)`` matrix is
+    returned; if the date is an array of length ``n``, then an array of
+    matrices is returned with dimensions ``(3, 3, n)``.
+
+    """
+    oblm, oblt, eqeq, psi, eps = earth_tilt(t)
+    e = oblt*DEG2RAD
+    return array([[1.0, 0.0, 0.0],
+                  [0.0, cos(e), sin(e)],
+                  [0.0, -sin(e), cos(e)]])
+
 def earth_tilt(t):
     """Return a tuple of information about the earth's axis and position.
 

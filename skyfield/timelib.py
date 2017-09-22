@@ -7,6 +7,7 @@ from .earthlib import sidereal_time
 from .framelib import ICRS_to_J2000 as B
 from .functions import load_bundled_npy
 from .nutationlib import compute_nutation, earth_tilt
+from .nutationlib import compute_ECLIP
 from .precessionlib import compute_precession
 
 try:
@@ -461,6 +462,10 @@ class Time(object):
     def __getattr__(self, name):
 
         # Cache of several expensive functions of time.
+
+        if name == 'E':
+            self.E = E = compute_ECLIP(self)
+            return E
 
         if name == 'P':
             self.P = P = compute_precession(self.tdb)
