@@ -9,7 +9,6 @@ from .earthlib import compute_limb_angle, refract
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Distance, Velocity, Angle, _interpret_angle
-from .nutationlib import earth_tilt
 
 _GALACTIC = inertial_frames['GALACTIC']
 
