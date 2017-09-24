@@ -10,6 +10,7 @@ from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Distance, Velocity, Angle, _interpret_angle
 
+_ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GALACTIC = inertial_frames['GALACTIC']
 
 
@@ -152,17 +153,22 @@ class ICRF(object):
         return Angle(radians=arccos(clip(c, -1.0, 1.0)))
 
     def ecliptic_xyz(self, epoch=None):
-        """Compute epoch of date ecliptic coordinates (x, y, z)"""
+        """Compute J2000 ecliptic coordinates (x, y, z)
+
+        If you instead want the coordinates referenced to the dynamical
+        system defined by the Earth's mean equator and equinox, provide
+        an epoch time.
+        """
         lat, lon, d = self.ecliptic_latlon(epoch)
         vector = from_polar(d.au, lat.radians, lon.radians)
         return Distance(vector)
 
     def ecliptic_latlon(self, epoch=None):
-        """Compute ecliptic coordinates (lat, lon, distance)
+        """Compute J2000 ecliptic coordinates (lat, lon, distance)
 
         If you instead want the coordinates referenced to the dynamical
         system defined by the Earth's mean equator and equinox, provide
-        an epoch time.  To get J2000.0 coordinates, for example:
+        an epoch time.
         """
         position_au = self.position.au
         if epoch is not None:
@@ -177,7 +183,10 @@ class ICRF(object):
                                  ' a floating point Terrestrial Time (TT),'
                                  ' or the string "date" for epoch-of-date')
             position_au = einsum('ij...,j...->i...', epoch.M, position_au)
-        vector = self.t.E.dot(position_au)
+            vector = epoch.E.dot(position_au)
+        else:
+            vector = _ECLIPJ2000.dot(position_au)
+
         d, lat, lon = to_polar(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
