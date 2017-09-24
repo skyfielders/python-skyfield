@@ -88,7 +88,7 @@ class ICRF(object):
         return Velocity(length_of(self.velocity.au_per_d))
 
     def radec(self, epoch=None):
-        r"""Compute equatorial (RA, declination, distance)
+        """Compute equatorial (RA, declination, distance)
 
         When called without a parameter, this returns standard ICRF
         right ascension and declination:
@@ -152,17 +152,33 @@ class ICRF(object):
         c = dots(u1, u2)
         return Angle(radians=arccos(clip(c, -1.0, 1.0)))
 
-    def ecliptic_xyz(self):
+    def ecliptic_xyz(self, epoch=None):
         """Compute epoch of date ecliptic coordinates (x, y, z)"""
-        lat, lon, d = self.ecliptic_latlon()
+        lat, lon, d = self.ecliptic_latlon(epoch)
         vector = from_polar(d.au, lat.radians, lon.radians)
         return Distance(vector)
 
-    def ecliptic_latlon(self):
-        """Compute epoch of date ecliptic coordinates (lat, lon, distance)"""
-        position = self.position.au
-        position = einsum('ij...,j...->i...', self.t.M, position)
-        vector = self.t.E.dot(position)
+    def ecliptic_latlon(self, epoch=None):
+        """Compute ecliptic coordinates (lat, lon, distance)
+
+        If you instead want the coordinates referenced to the dynamical
+        system defined by the Earth's mean equator and equinox, provide
+        an epoch time.  To get J2000.0 coordinates, for example:
+        """
+        position_au = self.position.au
+        if epoch is not None:
+            if isinstance(epoch, Time):
+                pass
+            elif isinstance(epoch, float):
+                epoch = Time(None, tt=epoch)
+            elif epoch == 'date':
+                epoch = self.t
+            else:
+                raise ValueError('the epoch= must be a Time object,'
+                                 ' a floating point Terrestrial Time (TT),'
+                                 ' or the string "date" for epoch-of-date')
+            position_au = einsum('ij...,j...->i...', epoch.M, position_au)
+        vector = self.t.E.dot(position_au)
         d, lat, lon = to_polar(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
