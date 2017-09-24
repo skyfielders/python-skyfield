@@ -87,7 +87,7 @@ class ICRF(object):
         return Velocity(length_of(self.velocity.au_per_d))
 
     def radec(self, epoch=None):
-        """Compute equatorial (RA, declination, distance)
+        r"""Compute equatorial (RA, declination, distance)
 
         When called without a parameter, this returns standard ICRF
         right ascension and declination:
