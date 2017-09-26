@@ -160,7 +160,10 @@ class ICRF(object):
         """
         lat, lon, d = self.ecliptic_latlon(epoch)
         vector = from_polar(d.au, lat.radians, lon.radians)
-        return Distance(vector)
+        if len(vector.shape) is 1:
+            return Distance(vector)
+        else:
+            return Distance(vector.T)
 
     def ecliptic_latlon(self, epoch=None):
         """Compute J2000 ecliptic coordinates (lat, lon, distance)
