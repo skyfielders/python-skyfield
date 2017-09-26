@@ -1,7 +1,6 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, arccos, clip, einsum, exp
-
+from numpy import array, arccos, clip, einsum, exp, empty
 from .constants import RAD2DEG, tau
 from .data.spice import inertial_frames
 from .functions import dots, from_polar, length_of, to_polar, rot_z
@@ -183,14 +182,27 @@ class ICRF(object):
                                  ' a floating point Terrestrial Time (TT),'
                                  ' or the string "date" for epoch-of-date')
             position_au = einsum('ij...,j...->i...', epoch.M, position_au)
-            vector = epoch.E.dot(position_au)
+            if not epoch.shape:
+                vector = epoch.E.dot(position_au)
+                d, lat, lon = to_polar(vector)
+                return (Angle(radians=lat, signed=True),
+                        Angle(radians=lon),
+                        Distance(au=d))
+            else:
+                result_array = empty((epoch.E.T.shape[0], epoch.E.T.shape[1]))
+                for a in range(0, epoch.E.T.shape[0]):
+                    vector = epoch.E.T[a, 0:].dot(position_au.T[a, 0:])
+                    result_array[a, 0:] = vector
+                d, lat, lon = to_polar(result_array.T)
+                return (Angle(radians=lat, signed=True),
+                        Angle(radians=lon),
+                        Distance(au=d))
         else:
             vector = _ECLIPJ2000.dot(position_au)
-
-        d, lat, lon = to_polar(vector)
-        return (Angle(radians=lat, signed=True),
-                Angle(radians=lon),
-                Distance(au=d))
+            d, lat, lon = to_polar(vector)
+            return (Angle(radians=lat, signed=True),
+                    Angle(radians=lon),
+                    Distance(au=d))
 
     def galactic_position(self):
         """Compute galactic coordinates (x, y, z)"""
