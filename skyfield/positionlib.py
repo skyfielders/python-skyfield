@@ -155,7 +155,7 @@ class ICRF(object):
         """Compute J2000 ecliptic coordinates (x, y, z)
 
         If you instead want the coordinates referenced to the dynamical
-        system defined by the Earth's mean equator and equinox, provide
+        system defined by the Earth's true equator and equinox, provide
         an epoch time.
         """
         lat, lon, d = self.ecliptic_latlon(epoch)
@@ -169,7 +169,7 @@ class ICRF(object):
         """Compute J2000 ecliptic coordinates (lat, lon, distance)
 
         If you instead want the coordinates referenced to the dynamical
-        system defined by the Earth's mean equator and equinox, provide
+        system defined by the Earth's true equator and equinox, provide
         an epoch time.
         """
         position_au = self.position.au
