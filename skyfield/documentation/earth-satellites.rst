@@ -263,7 +263,7 @@ or else in dynamical coordinates of the date you specify.
 
 See :doc:`positions` to learn more about these possibilities.
 
-Avoid calling the compute method
+Avoid calling the observe method
 --------------------------------
 
 When computing positions for the Sun, Moon, planets, and stars,
@@ -271,7 +271,7 @@ Skyfield encourages a far more fussy approach
 than directly subtracting two vectors.
 In those cases, the user is encouraged
 to compute their current location with `at()`
-and then call the `compute()` method on the result
+and then call the `observe()` method on the result
 so that Skyfield can correctly adjust the object’s position
 for the time it takes light to travel.
 
