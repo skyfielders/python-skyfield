@@ -165,6 +165,12 @@ class SpiceKernel(object):
         center_name = _format_code_and_name(center)
         target_name = _format_code_and_name(target)
         return VectorSum(center, target, center_name, target_name, chain, ())
+    
+    def __contains__(self, item):
+        if isinstance(item, str):
+            return [item.upper()] in self.names().values()
+        elif isinstance(item, int):
+            return item in self.codes
 
 
 class SPICESegment(VectorFunction):
