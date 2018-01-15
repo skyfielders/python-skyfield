@@ -49,7 +49,7 @@ def terra(latitude, longitude, elevation, gast):
     # Compute velocity vector components in kilometers/sec.
 
     aac = ANGVEL * ach * cosphi
-    vel = array((-aac * sinst, aac * cosst, zero)) * DAY_S
+    vel = array((-aac * sinst, aac * cosst, aac * zero)) * DAY_S
 
     return pos, vel
 
