@@ -113,6 +113,13 @@ But the source code and issue tracker live on other web sites:
 News
 ====
 
+**2017 January 14**
+
+  Released Skyfield 1.1
+  which fixes a few issues users had reported
+  and introduces a :meth:`~skyfield.positionlib.ICRF.to_skycoord()` method
+  for converting a Skyfield position to AstroPy.
+
 **2017 March 15**
 
   Released Skyfield 1.0!
