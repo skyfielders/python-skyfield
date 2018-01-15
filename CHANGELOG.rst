@@ -6,12 +6,14 @@ Changelog
 1.1 — 2018 January 14
 ---------------------
 
-* Positions can now be converted to AstroPy with ``to_skycoord()``.
+* Positions can now be converted to AstroPy with
+  :meth:`~skyfield.positionlib.ICRF.to_skycoord()`.
+
+* You can now provide a timescale of your own to an
+  :meth:`~skyfield.sgp4lib.EarthSatellite`
+  instead of having it trying to load one itself.
 
 * Downloaded files are no longer marked as executable on Windows.
-
-* You can now provide a timescale of your own to an ``EarthSatellite``
-  instead of having it trying to load one itself.
 
 * A friendly error message, rather than an obscure traceback, is now
   returned if you try converting a position to alt/az coordinates but
