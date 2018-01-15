@@ -89,7 +89,7 @@ de405.bsp    63 MB  1600 to 2200 May 1997
 de406.bsp   287 MB −3000 to 3000 May 1997
 de421.bsp    17 MB  1900 to 2050 February 2008
 de422.bsp   623 MB −3000 to 3000 September 2009
-de430.bsp   128 MB  1550 to 2650 February 2010
+de430t.bsp  128 MB  1550 to 2650 February 2010
 jup310.bsp  932 MB  1900 to 2100 December 2013
 ==========  ====== ============= ==============
 
