@@ -7,6 +7,13 @@ are appropriate for sprints and collaboration, and longer-term goals
 that the code base is not quite ready for yet but that we do not want to
 forget.
 
+Promises for next version
+=========================
+
+* For #145, skip deflections of planets that can’t affect an observation.
+
+* For #145, create a good syntax for combining two ephemerides.
+
 Sprint Possibilities
 ====================
 
