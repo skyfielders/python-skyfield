@@ -30,6 +30,15 @@ def test_astrometric_position_class(ts):
     p = e['earth'].at(ts.utc(2014, 2, 9, 14, 50)).observe(e['mars'])
     assert isinstance(p, positionlib.Astrometric)
 
+def test_ephemeris_contains_method(ts):
+    e = api.load('de421.bsp')
+    assert (399 in e) is True
+    assert (398 in e) is False
+    assert ('earth' in e) is True
+    assert ('Earth' in e) is True
+    assert ('EARTH' in e) is True
+    assert ('ceres' in e) is False
+
 def test_planet_position_class(ts):
     e = api.load('de421.bsp')
     p = e['mars'].at(ts.utc(2014, 2, 9, 14, 50))
