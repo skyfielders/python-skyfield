@@ -172,7 +172,6 @@ class SpiceKernel(object):
         else:
             name = name.upper()
             code = _targets.get(name)
-            
         return code in self.codes
 
 
