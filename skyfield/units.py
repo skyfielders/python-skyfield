@@ -66,6 +66,9 @@ class Distance(object):
         raise UnpackingError(_iter_message % {
             'class': self.__class__.__name__, 'values': 'x, y, z',
             'attr1': 'au', 'attr2': 'km'})
+    
+    def __len__(self):
+        return len(self.au)
 
     def to(self, unit):
         """Convert this distance to the given AstroPy unit."""
@@ -110,6 +113,9 @@ class Velocity(object):
         raise UnpackingError(_iter_message % {
             'class': self.__class__.__name__, 'values': 'xdot, ydot, zdot',
             'attr1': 'au_per_d', 'attr2': 'km_per_s'})
+    
+    def __len__(self):
+        return len(self.au_per_d)
 
     def to(self, unit):
         """Convert this velocity to the given AstroPy unit."""
@@ -191,6 +197,9 @@ class Angle(object):
 
     def __repr__(self):
         return '<{0} {1}>'.format(type(self).__name__, self)
+    
+    def __len__(self):
+        return len(self.radians)
 
     def hms(self, warn=True):
         """Convert to a tuple (hours, minutes, seconds).
