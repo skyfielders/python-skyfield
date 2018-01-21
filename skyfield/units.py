@@ -142,7 +142,8 @@ Angle(radians=value)
 Angle(degrees=value)
 Angle(hours=value)
 
-where `value` can be either a Python float or a NumPy array of floats"""
+where `value` can be either a Python float, a list of Python floats, 
+or a NumPy array of floats"""
 
 class Angle(object):
 
@@ -154,12 +155,12 @@ class Angle(object):
                 raise ValueError(_instantiation_instructions)
             self.radians = angle.radians
         elif radians is not None:
-            self.radians = radians
+            self.radians = _to_array(radians)
         elif degrees is not None:
-            self._degrees = degrees = _unsexagesimalize(degrees)
+            self._degrees = degrees = _unsexagesimalize(_to_array(degrees))
             self.radians = degrees * _from_degrees
         elif hours is not None:
-            self._hours = hours = _unsexagesimalize(hours)
+            self._hours = hours = _unsexagesimalize(_to_array(hours))
             self.radians = hours * _from_hours
 
         self.preference = (preference if preference is not None
