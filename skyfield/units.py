@@ -188,6 +188,8 @@ class Angle(object):
         raise AttributeError('no attribute named %r' % (name,))
 
     def __str__(self):
+        if getattr(self.radians, 'shape', ()) and self.radians.shape == (0,):
+            return '[] radians'
         return self.dstr() if self.preference == 'degrees' else self.hstr()
 
     def __repr__(self):
@@ -219,10 +221,10 @@ class Angle(object):
         """Convert to a string like ``12h 07m 30.00s``."""
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
-        hours = self._hours
-        if len(self.radians)==0:
+        if getattr(self.radians, 'shape', ()) and self.radians.shape == (0,):
             return '0 values'
-        elif getattr(hours, 'shape', ()):
+        hours = self._hours
+        if getattr(hours, 'shape', ()):
             return "{0} values from {1} to {2}".format(
                 len(hours),
                 _hstr(min(hours), places),
@@ -256,11 +258,11 @@ class Angle(object):
         """Convert to a string like ``181deg 52\' 30.0"``."""
         if warn and self.preference != 'degrees':
             raise WrongUnitError('dstr')
+        if getattr(self.radians, 'shape', ()) and self.radians.shape == (0,):
+            return '0 values'
         degrees = self._degrees
         signed = self.signed
-        if len(self.radians)==0:
-            return '0 values'
-        elif getattr(degrees, 'shape', ()):
+        if getattr(degrees, 'shape', ()):
             return "{0} values from {1} to {2}".format(
                 len(degrees),
                 _dstr(min(degrees), places, signed),
