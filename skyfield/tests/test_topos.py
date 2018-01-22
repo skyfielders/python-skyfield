@@ -15,7 +15,7 @@ def test_beneath(ts):
         # than a very large elevation.
         top = Topos(latitude_degrees=deg, longitude_degrees=0, elevation_m=0)
         p = top.at(t)
-        b = Topos.subpoint_beneath(p)
+        b = Topos.subpoint(p)
         error_degrees = abs(b.latitude.degrees - deg)
         error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
         #print(b.latitude.degrees, deg, error_mas)

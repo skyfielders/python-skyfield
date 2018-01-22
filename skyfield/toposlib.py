@@ -58,10 +58,12 @@ class Topos(VectorFunction):
         self.target_name = '{0} N {1} E'.format(self.latitude, self.longitude)
 
     @classmethod
-    def subpoint_beneath(cls, gcrs):
-        # TODO: check that `position` is geocentric?
-        t = gcrs.t
-        xyz_au = einsum('ij...,j...->i...', t.M, gcrs.position.au)
+    def subpoint(cls, position):
+        if position.center != 399:
+            raise ValueError("you can only ask for the geographic subpoint"
+                             " of a position measured from Earth's center")
+        t = position.t
+        xyz_au = einsum('ij...,j...->i...', t.M, position.position.au)
         lat, lon, elevation_m = reverse_terra(xyz_au, t.gast)
         return cls(latitude=Angle(radians=lat),
                    longitude=Angle(radians=lon),
