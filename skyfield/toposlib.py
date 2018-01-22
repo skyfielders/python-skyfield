@@ -1,8 +1,8 @@
-from numpy import einsum
-from numpy import (arctan, arctan2, array, arccos, clip, einsum, exp,
-                   floor, pi, sqrt)
+from numpy import arctan2, einsum, sqrt, sin
 
-from .constants import ASEC2RAD, tau
+from .constants import (
+    ASEC2RAD, AU_M, ERAD, IERS_2010_INVERSE_EARTH_FLATTENING, DEG2RAD, tau,
+)
 from .earthlib import terra
 from .functions import rot_x, rot_y, rot_z
 from .units import Distance, Angle, _interpret_ltude
@@ -60,13 +60,12 @@ class Topos(VectorFunction):
         self.target_name = '{0} N {1} E'.format(self.latitude, self.longitude)
 
     @classmethod
-    def beneath(cls, gcrs, elevation_m=0.0):
-        # TODO: check that `position` is geocentric
-        lat, lon = gcrs_to_latlon(gcrs.position.au, gcrs.t)
+    def subpoint_beneath(cls, gcrs):
+        # TODO: check that `position` is geocentric?
+        lat, lon, elevation_m = gcrs_to_latlon(gcrs.position.au, gcrs.t)
         return cls(latitude=Angle(radians=lat),
                    longitude=Angle(radians=lon),
                    elevation_m=elevation_m)
-
 
     def __str__(self):
         return 'Topos {0}'.format(self.target_name)
@@ -100,22 +99,28 @@ class Topos(VectorFunction):
         return pos, vel, pos, None
 
 
-def gcrs_to_latlon(xyz, t):
-    dublin_julian_date = t.tt - 2415020
-    x, y, z = xyz
+def gcrs_to_latlon(xyz, t, iterations=3):
+    """Convert an (x,y,z) coordinate at time `t` to latitude and longitude.
 
-    # the following block is ported from GetSubSatPoint() in
-    # earthsat.c of libastro 3.7.6
-    sidereal_solar = 1.0027379093
-    sid_day = floor(dublin_julian_date)
-    t = (sid_day - 0.5) / 36525
-    sid_reference = (6.6460656 + (2400.051262 * t) +
-                     (0.00002581 * (t**2))) / 24
-    sid_reference -= floor(sid_reference)
-    lon = 2 * pi * ((dublin_julian_date - sid_day) *
-                    sidereal_solar + sid_reference) - arctan2(y, x)
-    lon = lon % (2 * pi)
-    lon -= pi
-    lat = arctan(z / sqrt(x**2 + y**2))
+    Returns a tuple of latitude, longitude, and elevation whose units
+    are radians and meters.  Based on Dr. T.S. Kelso's useful article
+    "Orbital Coordinate Systems, Part III":
+    https://www.celestrak.com/columns/v02n03/
 
-    return lat, -lon
+    """
+    x, y, z = einsum('ij...,j...->i...', t.M, xyz)
+    R = sqrt(x*x + y*y)
+
+    lon = (arctan2(y, x) - 15 * DEG2RAD * t.gast) % tau
+    lat = arctan2(z, R)
+
+    a = ERAD / AU_M
+    f = 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
+    e2 = 2.0*f - f*f
+    i = 0
+    while i < iterations:
+        i += 1
+        C = 1.0 / sqrt(1.0 - e2 * (sin(lat) ** 2.0))
+        lat = arctan2(z + a * C * e2 * sin(lat), R)
+    elevation_m = 0 # TODO
+    return lat, lon, elevation_m
