@@ -37,7 +37,7 @@ def terra(latitude, longitude, elevation, gast):
 
     # Compute local sidereal time factors at the observer's longitude.
 
-    stlocl = gast * 15.0 * DEG2RAD + longitude
+    stlocl = 15.0 * DEG2RAD * gast + longitude
     sinst = sin(stlocl)
     cosst = cos(stlocl)
 
