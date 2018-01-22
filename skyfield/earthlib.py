@@ -1,10 +1,10 @@
 """Formulae for specific earth behaviors and effects."""
 
-from numpy import (abs, arcsin, arccos, array, clip, cos,
+from numpy import (abs, arcsin, arccos, arctan2, array, clip, cos,
                    minimum, pi, sin, sqrt, tan, where, zeros_like)
 
 from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
-                        IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0)
+                        IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0, tau)
 from .functions import dots
 
 earth_radius_au = ERAD / AU_M
@@ -52,6 +52,33 @@ def terra(latitude, longitude, elevation, gast):
     vel = array((-aac * sinst, aac * cosst, aac * zero)) * DAY_S
 
     return pos, vel
+
+
+def reverse_terra(xyz_au, gast, iterations=3):
+    """Convert a geocentric (x,y,z) at time `t` to latitude and longitude.
+
+    Returns a tuple of latitude, longitude, and elevation whose units
+    are radians and meters.  Based on Dr. T.S. Kelso's quite helpful
+    article "Orbital Coordinate Systems, Part III":
+    https://www.celestrak.com/columns/v02n03/
+
+    """
+    x, y, z = xyz_au
+    R = sqrt(x*x + y*y)
+
+    lon = (arctan2(y, x) - 15 * DEG2RAD * gast) % tau
+    lat = arctan2(z, R)
+
+    a = ERAD / AU_M
+    f = 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
+    e2 = 2.0*f - f*f
+    i = 0
+    while i < iterations:
+        i += 1
+        C = 1.0 / sqrt(1.0 - e2 * (sin(lat) ** 2.0))
+        lat = arctan2(z + a * C * e2 * sin(lat), R)
+    elevation_m = 0 # TODO
+    return lat, lon, elevation_m
 
 
 def compute_limb_angle(position_au, observer_au):

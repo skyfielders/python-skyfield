@@ -1,9 +1,7 @@
-from numpy import arctan2, einsum, sqrt, sin
+from numpy import einsum
 
-from .constants import (
-    ASEC2RAD, AU_M, ERAD, IERS_2010_INVERSE_EARTH_FLATTENING, DEG2RAD, tau,
-)
-from .earthlib import terra
+from .constants import ASEC2RAD, tau
+from .earthlib import terra, reverse_terra
 from .functions import rot_x, rot_y, rot_z
 from .units import Distance, Angle, _interpret_ltude
 from .vectorlib import VectorFunction
@@ -62,7 +60,9 @@ class Topos(VectorFunction):
     @classmethod
     def subpoint_beneath(cls, gcrs):
         # TODO: check that `position` is geocentric?
-        lat, lon, elevation_m = gcrs_to_latlon(gcrs.position.au, gcrs.t)
+        t = gcrs.t
+        xyz_au = einsum('ij...,j...->i...', t.M, gcrs.position.au)
+        lat, lon, elevation_m = reverse_terra(xyz_au, t.gast)
         return cls(latitude=Angle(radians=lat),
                    longitude=Angle(radians=lon),
                    elevation_m=elevation_m)
@@ -97,30 +97,3 @@ class Topos(VectorFunction):
         # TODO: also rotate velocity
 
         return pos, vel, pos, None
-
-
-def gcrs_to_latlon(xyz, t, iterations=3):
-    """Convert an (x,y,z) coordinate at time `t` to latitude and longitude.
-
-    Returns a tuple of latitude, longitude, and elevation whose units
-    are radians and meters.  Based on Dr. T.S. Kelso's useful article
-    "Orbital Coordinate Systems, Part III":
-    https://www.celestrak.com/columns/v02n03/
-
-    """
-    x, y, z = einsum('ij...,j...->i...', t.M, xyz)
-    R = sqrt(x*x + y*y)
-
-    lon = (arctan2(y, x) - 15 * DEG2RAD * t.gast) % tau
-    lat = arctan2(z, R)
-
-    a = ERAD / AU_M
-    f = 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
-    e2 = 2.0*f - f*f
-    i = 0
-    while i < iterations:
-        i += 1
-        C = 1.0 / sqrt(1.0 - e2 * (sin(lat) ** 2.0))
-        lat = arctan2(z + a * C * e2 * sin(lat), R)
-    elevation_m = 0 # TODO
-    return lat, lon, elevation_m

@@ -5,9 +5,10 @@ accurately it can turn a Topos-generated position back into a latitude,
 longitude, and elevation.
 
 """
+from numpy import einsum
 from skyfield.api import Topos, load
 from skyfield.constants import AU_M, DEG2RAD
-from skyfield.toposlib import gcrs_to_latlon
+from skyfield.earthlib import reverse_terra
 
 def main():
     ts = load.timescale()
@@ -22,10 +23,12 @@ def main():
             for degrees in trial_angles:
                 top = Topos(latitude_degrees=degrees, longitude_degrees=123,
                             elevation_m=elevation_m)
-                lat, lon, elev = gcrs_to_latlon(top.at(t).position.au, t, n)
+                xyz_au = top.at(t).position.au
+                xyz_au = einsum('ij...,j...->i...', t.M, xyz_au)
+                lat, lon, elev = reverse_terra(xyz_au, t.gast, n)
                 lat = lat / DEG2RAD
                 error_mas = 60.0 * 60.0 * 1000.0 * abs(degrees - lat)
-                print('latitude {} degrees,  elevation {} m'
+                print('latitude {} degrees, elevation {} m'
                       ' -> error of {:.2f} mas'
                       .format(degrees, elevation_m, error_mas))
         print('')
