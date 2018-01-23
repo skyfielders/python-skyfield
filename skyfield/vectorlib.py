@@ -69,6 +69,9 @@ class VectorFunction(object):
             raise ValueError('please provide the at() method with a Time'
                              ' instance as its argument, instead of the'
                              ' value {0!r}'.format(t))
+        if getattr(t.tt, 'shape', ()) and t.tt.shape == (0,):
+            raise ValueError('the time object provided to the at() method is '
+                             'empty')
         observer_data = ObserverData()
         observer_data.ephemeris = self.ephemeris
         p, v, observer_data.gcrs_position, message = self._at(t)
