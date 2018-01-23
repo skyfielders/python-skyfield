@@ -1,8 +1,6 @@
 from numpy import abs
 
 from skyfield.api import load
-from skyfield.constants import AU_M, ERAD
-from skyfield.positionlib import Geocentric
 from skyfield.toposlib import Topos
 
 def ts():
