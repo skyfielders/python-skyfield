@@ -175,7 +175,6 @@ class SpiceKernel(object):
 
 
 class SPICESegment(VectorFunction):
-    __slots__ = ['center', 'target', 'spk_segment']
 
     def __new__(cls, ephemeris, spk_segment):
         if spk_segment.data_type == 2:
