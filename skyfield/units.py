@@ -12,6 +12,8 @@ def _to_array(value):
     """As a convenience, turn Python lists and tuples into NumPy arrays."""
     if isinstance(value, (tuple, list)):
         return array(value)
+    elif isinstance(value, (float, int)):
+        return np.float64(value)
     else:
         return value
 
@@ -188,8 +190,8 @@ class Angle(object):
         raise AttributeError('no attribute named %r' % (name,))
 
     def __str__(self):
-        if getattr(self.radians, 'shape', ()) and self.radians.shape == (0,):
-            return '[] radians'
+        if self.radians.size == 0:
+            return '0 values'
         return self.dstr() if self.preference == 'degrees' else self.hstr()
 
     def __repr__(self):
@@ -221,7 +223,7 @@ class Angle(object):
         """Convert to a string like ``12h 07m 30.00s``."""
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
-        if getattr(self.radians, 'shape', ()) and self.radians.shape == (0,):
+        if self.radians.size == 0:
             return '0 values'
         hours = self._hours
         if getattr(hours, 'shape', ()):
@@ -258,7 +260,7 @@ class Angle(object):
         """Convert to a string like ``181deg 52\' 30.0"``."""
         if warn and self.preference != 'degrees':
             raise WrongUnitError('dstr')
-        if getattr(self.radians, 'shape', ()) and self.radians.shape == (0,):
+        if self.radians.size == 0:
             return '0 values'
         degrees = self._degrees
         signed = self.signed
