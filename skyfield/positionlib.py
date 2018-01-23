@@ -31,7 +31,9 @@ class ICRF(object):
     """An (x, y, z) position and velocity oriented to the ICRF axes.
 
     The ICRF is a permanent coordinate system that has superseded the
-    old series of equinox-based systems like B1900, B1950, and J2000.
+    old series of equinox-based systems like B1900 and B1950.  Its axes
+    are aligned with the axes of J2000 to within 0.02 arcseconds, which
+    is tighter than the accuracy of J2000 itself.
 
     """
     def __init__(self, position_au, velocity_au_per_d=None, t=None,
