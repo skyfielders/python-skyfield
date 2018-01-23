@@ -1,9 +1,7 @@
 from numpy import einsum
-from numpy import (arctan, arctan2, array, arccos, clip, einsum, exp,
-                   floor, pi, sqrt)
 
 from .constants import ASEC2RAD, tau
-from .earthlib import terra
+from .earthlib import terra, reverse_terra
 from .functions import rot_x, rot_y, rot_z
 from .units import Distance, Angle, _interpret_ltude
 from .vectorlib import VectorFunction
@@ -60,13 +58,16 @@ class Topos(VectorFunction):
         self.target_name = '{0} N {1} E'.format(self.latitude, self.longitude)
 
     @classmethod
-    def beneath(cls, gcrs, elevation_m=0.0):
-        # TODO: check that `position` is geocentric
-        lat, lon = gcrs_to_latlon(gcrs.position.au, gcrs.t)
+    def subpoint(cls, position):
+        if position.center != 399:
+            raise ValueError("you can only ask for the geographic subpoint"
+                             " of a position measured from Earth's center")
+        t = position.t
+        xyz_au = einsum('ij...,j...->i...', t.M, position.position.au)
+        lat, lon, elevation_m = reverse_terra(xyz_au, t.gast)
         return cls(latitude=Angle(radians=lat),
                    longitude=Angle(radians=lon),
                    elevation_m=elevation_m)
-
 
     def __str__(self):
         return 'Topos {0}'.format(self.target_name)
@@ -98,24 +99,3 @@ class Topos(VectorFunction):
         # TODO: also rotate velocity
 
         return pos, vel, pos, None
-
-
-def gcrs_to_latlon(xyz, t):
-    dublin_julian_date = t.tt - 2415020
-    x, y, z = xyz
-
-    # the following block is ported from GetSubSatPoint() in
-    # earthsat.c of libastro 3.7.6
-    sidereal_solar = 1.0027379093
-    sid_day = floor(dublin_julian_date)
-    t = (sid_day - 0.5) / 36525
-    sid_reference = (6.6460656 + (2400.051262 * t) +
-                     (0.00002581 * (t**2))) / 24
-    sid_reference -= floor(sid_reference)
-    lon = 2 * pi * ((dublin_julian_date - sid_day) *
-                    sidereal_solar + sid_reference) - arctan2(y, x)
-    lon = lon % (2 * pi)
-    lon -= pi
-    lat = arctan(z / sqrt(x**2 + y**2))
-
-    return lat, -lon
