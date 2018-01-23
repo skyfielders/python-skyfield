@@ -113,7 +113,7 @@ But the source code and issue tracker live on other web sites:
 News
 ====
 
-**2017 January 14**
+**2018 January 14**
 
   Released Skyfield 1.1
   which fixes a few issues users had reported
