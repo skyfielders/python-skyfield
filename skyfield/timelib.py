@@ -218,7 +218,7 @@ class Time(object):
         return self.shape[0]
 
     def __repr__(self):
-        if len(self.tt)==0:
+        if getattr(self.tt, 'shape', ()) and self.tt.shape == (0,):
             return '<Time []>'
         elif getattr(self.tt, 'shape', ()):
             rstr = '<Time {0} values from tt={1:.6f} to tt={2:.6f}>'
