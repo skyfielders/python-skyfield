@@ -191,11 +191,14 @@ class Angle(object):
 
     def __str__(self):
         if self.radians.size == 0:
-            return '0 values'
+            return 'Angle []'
         return self.dstr() if self.preference == 'degrees' else self.hstr()
 
     def __repr__(self):
-        return '<{0} {1}>'.format(type(self).__name__, self)
+        if self.radians.size == 0:
+            return '<{0} []>'.format(type(self).__name__, self)
+        else:
+            return '<{0} {1}>'.format(type(self).__name__, self)
 
     def hms(self, warn=True):
         """Convert to a tuple (hours, minutes, seconds).
@@ -224,7 +227,7 @@ class Angle(object):
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
         if self.radians.size == 0:
-            return '0 values'
+            return '<Angle []>'
         hours = self._hours
         if getattr(hours, 'shape', ()):
             return "{0} values from {1} to {2}".format(
@@ -261,7 +264,7 @@ class Angle(object):
         if warn and self.preference != 'degrees':
             raise WrongUnitError('dstr')
         if self.radians.size == 0:
-            return '0 values'
+            return '<Angle []>'
         degrees = self._degrees
         signed = self.signed
         if getattr(degrees, 'shape', ()):

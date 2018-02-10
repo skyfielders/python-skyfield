@@ -210,7 +210,7 @@ class Time(object):
     eps_correction = 0.0
 
     def __init__(self, ts, tt):
-        self.tt = _to_array(tt)
+        self.tt = tt
         self.ts = ts
         self.shape = getattr(tt, 'shape', ())
 
@@ -218,11 +218,12 @@ class Time(object):
         return self.shape[0]
 
     def __repr__(self):
-        if self.tt.size == 0:
-            return '<Time 0 values>'
-        elif getattr(self.tt, 'shape', ()):
+        size = getattr(self.tt, 'size', -1)
+        if size > 1:
             rstr = '<Time {0} values from tt={1:.6f} to tt={2:.6f}>'
             return rstr.format(self.tt.size, self.tt.min(), self.tt.max())
+        elif size == 0:
+            return '<Time []>'
         else:
             return '<Time tt={0:.6f}>'.format(self.tt)
 
