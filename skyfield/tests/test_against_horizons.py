@@ -10,11 +10,6 @@ arcsecond = 1.0 / 60.0 / 60.0
 ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
 meter = 1.0 / AU_M
 
-base = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk'
-de430_url = base + '/planets/de430.bsp'
-de431_url = base + '/planets/de431.bsp'
-jup310_url = base + '/satellites/jup310.bsp'
-
 def ts():
     yield api.load.timescale()
 
