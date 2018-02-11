@@ -10,7 +10,7 @@ from datetime import datetime
 from math import pi
 from .constants import tau
 from .errors import DeprecationError
-from .iokit import Loader
+from .iokit import Loader, load_file
 from .starlib import Star
 from .sgp4lib import EarthSatellite
 from .timelib import T0, Time, Timescale, utc
@@ -22,7 +22,7 @@ load = Loader('.')
 
 __all__ = ['Angle', 'Loader', 'NamedStar', 'Star', 'EarthSatellite',
            'T0', 'Time', 'Timescale', 'Topos', 'datetime',
-           'load', 'utc', 'pi', 'tau']
+           'load', 'load_file', 'utc', 'pi', 'tau']
 
 # An attempt at friendliest-possible deprecations:
 

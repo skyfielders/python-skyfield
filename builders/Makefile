@@ -34,3 +34,15 @@ novas: ../skyfield/tests/test_against_novas.py
 
 ../skyfield/tests/test_against_novas.py: build_novas_tests.py
 	python $< > tmp.py && mv tmp.py $@
+
+JUP310 := https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup310.bsp
+
+excerpts: \
+ ../skyfield/tests/data/jup310-2015-03-02.bsp \
+ ../skyfield/tests/data/jup310-2053-10-08.bsp
+
+../skyfield/tests/data/jup310-2015-03-02.bsp:
+	python -m jplephem excerpt 2015/3/2 2015/3/3 $(JUP310) $@
+
+../skyfield/tests/data/jup310-2053-10-08.bsp:
+	python -m jplephem excerpt 2053/10/8 2053/10/9 $(JUP310) $@

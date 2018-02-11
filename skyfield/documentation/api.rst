@@ -3,12 +3,25 @@
  API Reference
 ===============
 
-Downloading files
-=================
+Opening files
+=============
 
 .. currentmodule:: skyfield.iokit
 
 ::
+
+    # File you already have.
+
+    from skyfield.api import load_file
+    planets = load_file('~/Downloads/de405.bsp')
+
+.. autosummary::
+
+   load_file
+
+::
+
+    # File you want Skyfield to download automatically.
 
     from skyfield.api import load
     ts = load.timescale()

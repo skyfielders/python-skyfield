@@ -240,6 +240,7 @@ class Loader(object):
     def log(self):
         return '\n'.join(self.events)
 
+
 def _search(mapping, filename):
     """Search a Loader data structure for a filename."""
     result = mapping.get(filename)
@@ -252,6 +253,18 @@ def _search(mapping, filename):
             if fnmatch(filename, pattern):
                 return result2
     return None
+
+
+def load_file(path):
+    """Open a file, using its extension to guess its file type.
+
+    (Only works on `.bsp` files so far, but future expansion is planned!)
+
+    """
+    base, ext = os.path.splitext(path)
+    if ext == '.bsp':
+        return SpiceKernel(path)
+    raise ValueError('unrecognized file extension: {}'.format(path))
 
 
 def parse_deltat_data(fileobj):
