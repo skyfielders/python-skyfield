@@ -261,6 +261,7 @@ def load_file(path):
     (Only works on `.bsp` files so far, but future expansion is planned!)
 
     """
+    path = os.path.expanduser(path)
     base, ext = os.path.splitext(path)
     if ext == '.bsp':
         return SpiceKernel(path)
