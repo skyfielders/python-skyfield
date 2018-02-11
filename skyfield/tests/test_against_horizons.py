@@ -79,7 +79,7 @@ def test_boston_geometry():
       0.0027)  # TODO: try to get this < 1 meter
 
 def test_moon_from_boston_geometry():
-    e = api.load('de430t.bsp')
+    e = api.load_file(_data_path('de430-2015-03-02.bsp'))
     t = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
     boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8),
                                 x=0.003483, y=0.358609)
@@ -89,7 +89,7 @@ def test_moon_from_boston_geometry():
       1.7 * meter)  # TODO: improve this
 
 def test_moon_from_boston_astrometric():
-    e = api.load('de430t.bsp')
+    e = api.load_file(_data_path('de430-2015-03-02.bsp'))
     t = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
     boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8),
                                 x=0.003483, y=0.358609)
