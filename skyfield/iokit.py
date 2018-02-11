@@ -35,7 +35,7 @@ def _filename_of(url):
 
 _IERS = 'https://hpiers.obspm.fr/iers/bul/bulc/'
 _JPL = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/'
-_NAIF = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
+_NAIF = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
 _USNO = 'http://maia.usno.navy.mil/ser7/'
 
 class Loader(object):
