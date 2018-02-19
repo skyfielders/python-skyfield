@@ -18,7 +18,7 @@ def test_stringifying_vector_distance():
     s = str(units.Distance(au=a))
     if '[1' in s:
         # Python 3.5, says Travis CI.  No idea.
-        assert s == '[1.23  4.56] au'
+        assert s == '[1.23 4.56] au'
     else:
         # Every other version of Python.
         assert s == '[ 1.23  4.56] au'
