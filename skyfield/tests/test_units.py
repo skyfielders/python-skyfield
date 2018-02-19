@@ -15,7 +15,13 @@ def needs_astropy(test):
 
 def test_stringifying_vector_distance():
     a = array([1.23, 4.56])
-    assert str(units.Distance(au=a)) == '[ 1.23  4.56] au'
+    s = str(units.Distance(au=a))
+    if '[1' in s:
+        # Python 3.5, says Travis CI.  No idea.
+        assert s == '[1.23  4.56] au'
+    else:
+        # Every other version of Python.
+        assert s == '[ 1.23  4.56] au'
 
 def test_iterating_over_raw_measurement():
     distance = units.Distance(au=1.234)
