@@ -11,11 +11,14 @@ both in the the distant past and out into the future.
 A table of positions is called an *ephemeris*
 and those supplied by the JPL are of very high accuracy.
 
-You can download an ephemeris by giving :func:`load()` a filename.
+You can ask Skyfield to download an ephemeris from the JPL
+by giving :func:`~skyfield.iokit.load()` a filename.
+Or you can load an ephemeris that you’ve already saved to disk
+with :func:`~skyfield.iokit.load_file()`.
 
 A popular choice of ephemeris is DE421.
 It is recent, has good precision,
-was designed for general purpose use,
+was designed for general-purpose use,
 and is only 17 MB in size:
 
 .. testsetup::
@@ -30,6 +33,92 @@ and is only 17 MB in size:
 Once an ephemeris file has been downloaded to your current directory,
 re-running your program will simply reuse the copy on disk
 instead of downloading it all over again.
+
+After you have loaded an ephemeris and have used a statement like:
+
+.. testcode::
+
+    mars = planets['Mars']
+
+— to retrieve a planet, consult the chapter :doc:`positions`
+to learn about all the positions that you can use it to generate.
+
+Making an excerpt of an ephemeris
+=================================
+
+Several of the ephemeris files listed below are very large.
+While most programmers will follow the example above and use DE421,
+if you wish to go beyond its 150-year period
+you will need a larger ephemeris.
+And programmers interested in the moons of Jupiter
+will need JUP310, which weighs in at nearly a gigabyte.
+
+What if you need data from a very large ephemeris,
+but don’t require its entire time span?
+
+When you installed Skyfield another library named ``jplephem``
+will have been installed.
+When invoked from the command line,
+it can build an excerpt of a larger ephemeris
+without needing to download the entire file,
+thanks to the fact that HTTP supports a ``Range:`` header
+that asks for only specific bytes of a file.
+For example,
+let’s pull two weeks of data for Jupiter’s moons
+(using a shell variable ``$u`` for the URL
+only to make the command less wide here on the screen
+and easier to read)::
+
+$ u=https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup310.bsp
+$ python -m jplephem excerpt 2018/1/1 2018/1/15 $u jup_excerpt.bsp
+
+The resulting file ``jup_excerpt.bsp`` weighs in
+at only 0.2 MB instead of 932 MB
+but supports all of the same objects as the original JUP310
+over the given two-week period::
+
+  $ python -m jplephem spk jup_excerpt.bsp
+  File type DAF/SPK and format LTL-IEEE with 13 segments:
+  2458119.75..2458210.50  Jupiter Barycenter (5) -> Io (501)
+  2458119.50..2458210.50  Jupiter Barycenter (5) -> Europa (502)
+  2458119.00..2458210.50  Jupiter Barycenter (5) -> Ganymede (503)
+  2458119.00..2458210.50  Jupiter Barycenter (5) -> Callisto (504)
+  ...
+
+You can load and use it directly off of disk
+with :func:`~skyfield.iokit.load_file()`.
+
+Popular ephemerides
+===================
+
+Here are several popular ephemerides that you can use with Skyfield.
+The filenames matching ``de*``
+predict the positions of many or all of the major planets,
+while ``jup310.bsp`` focuses on Jupiter and its major moons:
+
+==========  ====== ============= ==============
+Ephemeris    Size      Years        Issued
+==========  ====== ============= ==============
+de405.bsp    63 MB  1600 to 2200 May 1997
+de406.bsp   287 MB −3000 to 3000 May 1997
+de421.bsp    17 MB  1900 to 2050 February 2008
+de422.bsp   623 MB −3000 to 3000 September 2009
+de430t.bsp  128 MB  1550 to 2650 February 2010
+jup310.bsp  932 MB  1900 to 2100 December 2013
+==========  ====== ============= ==============
+
+You can think of negative years, as cited in the above table,
+as being almost like years BC except that they are off by one.
+Historians invented our calendar back before zero was a counting number,
+so AD 1 was immediately preceded by 1 BC without a year in between.
+But astronomers count backwards AD 2, AD 1, 0, −1, −2, and so forth.
+
+So if you are curious about the positions of the planets back in 44 BC,
+when Julius Caesar was assassinated,
+be careful to ask an astronomer about the year −43 instead.
+
+How segments are linked to predict positions
+============================================
 
 You can ``print()`` an ephemeris to learn which objects it supports.
 
@@ -62,8 +151,8 @@ but Skyfield translates them so that you do not have to remember
 that a code like 399 stands for the Earth and 499 for Mars.
 
 Each ephemeris segment predicts the position of one body
-with respect to another,
-so several segments sometimes have to be combined
+with respect to another.
+Sometimes several segments sometimes have to be combined
 to generate a complete position.
 The DE421 ephemeris shown above, for example,
 can produce the position of the Sun directly.
@@ -77,42 +166,21 @@ This happens automatically behind the scenes.
 All you have to say is ``planets[399]`` or ``planets['Earth']``
 and Skyfield will put together a solution using the segments provided.
 
-Here are several popular ephemerides that you can use with Skyfield.
-The filenames matching ``de*``
-predict the positions of many or all of the major planets,
-while ``jup310.bsp`` focuses on Jupiter and its major moons:
-
-==========  ====== ============= ==============
-Ephemeris    Size      Years        Issued
-==========  ====== ============= ==============
-de405.bsp    63 MB  1600 to 2200 May 1997
-de406.bsp   287 MB −3000 to 3000 May 1997
-de421.bsp    17 MB  1900 to 2050 February 2008
-de422.bsp   623 MB −3000 to 3000 September 2009
-de430t.bsp  128 MB  1550 to 2650 February 2010
-jup310.bsp  932 MB  1900 to 2100 December 2013
-==========  ====== ============= ==============
-
-You can think of negative years, as cited in the above table,
-as being almost like years BC except that they are off by one.
-Historians invented our calendar back before zero was a counting number,
-so AD 1 was immediately preceded by 1 BC without a year in between.
-But astronomers count backwards AD 2, AD 1, 0, −1, −2, and so forth.
-
-So if you are curious about the positions of the planets back in 44 BC,
-when Julius Caesar was assassinated,
-be careful to ask an astronomer about the year −43 instead.
-
-Once you have loaded an ephemeris and have used a statement like
-
 .. testcode::
 
-    mars = planets['Mars']
+    earth = planets['earth']
+    print(earth)
 
-to retrieve a planet, consult the chapter :doc:`positions`
-to learn about all the positions that you can use it to generate.
+.. testoutput::
+
+    Sum of 2 vectors:
+     + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+     + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH
+
+Each time you ask this `earth` object for its position at a given time,
+Skyfield will compute both of these underlying vectors
+and add them together to generate the position.
 
 .. testcleanup::
 
    __import__('skyfield.tests.fixes').tests.fixes.teardown()
-

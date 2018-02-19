@@ -256,9 +256,13 @@ def _search(mapping, filename):
 
 
 def load_file(path):
-    """Open a file, using its extension to guess its file type.
+    """Open a file on your local drive, using its extension to guess its type.
 
-    (Only works on `.bsp` files so far, but future expansion is planned!)
+    This routine only works on ``.bsp`` ephemeris files right now, but
+    will gain support for additional file types in the future. ::
+
+        from skyfield.api import load_file
+        planets = load_file('~/Downloads/de421.bsp')
 
     """
     path = os.path.expanduser(path)
