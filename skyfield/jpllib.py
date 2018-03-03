@@ -188,8 +188,8 @@ class SPICESegment(VectorFunction):
         self.ephemeris = ephemeris
         self.center = spk_segment.center
         self.target = spk_segment.target
-        # self.center_name = _format_code_and_name(self.center)
-        # self.target_name = _format_code_and_name(self.target)
+        self.center_name = _format_code_and_name(self.center)
+        self.target_name = _format_code_and_name(self.target)
         self.spk_segment = spk_segment
 
     def __str__(self):

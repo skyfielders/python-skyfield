@@ -17,6 +17,18 @@ def test_bad_subtraction():
     with assert_raises(ValueError, 'if they both start at the same center'):
         earth - usno
 
+def test_chebyshev_subtraction():
+    planets = load('de421.bsp')
+    v = planets['earth barycenter'] - planets['sun']
+
+    assert str(v) == """\
+Sum of 2 vectors:
+ - Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 10 SUN
+ + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER"""
+
+    assert repr(v) == "\
+<VectorSum of 2 vectors 10 SUN -> 3 EARTH BARYCENTER>"
+
 def test_vectors():
     ts = load.timescale()
     t = ts.tt(2017, 1, 23, 10, 44)
