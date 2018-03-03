@@ -3,6 +3,9 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+* Issues fixed:
+  `#161 <https://github.com/skyfielders/python-skyfield/issues/161>`_
+
 1.1 — 2018 January 14
 ---------------------
 
