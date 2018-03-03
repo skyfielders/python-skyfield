@@ -3,7 +3,11 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+* You can now initialize a velocity from kilometers per second
+  with ``Velocity(km_per_s=...)``.
+
 * Issues fixed:
+  `#160 <https://github.com/skyfielders/python-skyfield/issues/160>`_
   `#161 <https://github.com/skyfielders/python-skyfield/issues/161>`_
   `#162 <https://github.com/skyfielders/python-skyfield/issues/162>`_
 

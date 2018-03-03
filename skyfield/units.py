@@ -81,7 +81,9 @@ class Velocity(object):
     """
     _warned = False
 
-    def __init__(self, au_per_d):
+    def __init__(self, au_per_d=None, km_per_s=None):
+        if km_per_s is not None:
+            au_per_d = km_per_s * DAY_S / AU_KM
         self.au_per_d = _to_array(au_per_d)
 
     def __getattr__(self, name):
