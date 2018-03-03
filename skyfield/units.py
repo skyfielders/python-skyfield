@@ -15,9 +15,6 @@ def _to_array(value):
     else:
         return value
 
-class UnpackingError(Exception):
-    """You cannot iterate directly over a Skyfield measurement object."""
-
 class Distance(object):
     """A distance, stored internally as au and available in other units.
 
@@ -38,6 +35,7 @@ class Distance(object):
             self.au = m / AU_M
         else:
             raise ValueError('to construct a Distance provide au, km, or m')
+        self.shape = getattr(self.au, 'shape', ())
 
     def __getattr__(self, name):
         if name == 'km':
@@ -63,9 +61,21 @@ class Distance(object):
         return '<{0} {1}>'.format(type(self).__name__, self)
 
     def __iter__(self):
-        raise UnpackingError(_iter_message % {
-            'class': self.__class__.__name__, 'values': 'x, y, z',
-            'attr1': 'au', 'attr2': 'km'})
+        for d in self.au:
+            yield d
+    
+    def __getitem__(self, index):
+        d = Distance(au=self.au[index])
+        for name in 'km', 'm':
+            value = getattr(self, name, None)
+            if value is not None:
+                if getattr(value, 'shape', None):
+                    value = value[index]
+                setattr(d, name, value)
+        return d
+    
+    def __len__(self):
+        return len(self.au)
 
     def to(self, unit):
         """Convert this distance to the given AstroPy unit."""
@@ -85,6 +95,7 @@ class Velocity(object):
         if km_per_s is not None:
             au_per_d = km_per_s * DAY_S / AU_KM
         self.au_per_d = _to_array(au_per_d)
+        self.shape = getattr(self.au_per_d, 'shape', ())
 
     def __getattr__(self, name):
         if name == 'km_per_s':
@@ -109,25 +120,25 @@ class Velocity(object):
         return '<{0} {1}>'.format(type(self).__name__, self)
 
     def __iter__(self):
-        raise UnpackingError(_iter_message % {
-            'class': self.__class__.__name__, 'values': 'xdot, ydot, zdot',
-            'attr1': 'au_per_d', 'attr2': 'km_per_s'})
+        for v in self.au_per_d:
+            yield v
+    
+    def __getitem__(self, index):
+        v = Velocity(au_per_d=self.au_per_d[index])
+        value = getattr(self, 'km_per_s', None)
+        if value is not None:
+            if getattr(value, 'shape', None):
+                value = value[index]
+            setattr(v, 'km_per_s', value)
+        return v
+    
+    def __len__(self):
+        return len(self.au_per_d)
 
     def to(self, unit):
         """Convert this velocity to the given AstroPy unit."""
         from astropy.units import au, d
         return (self.au_per_d * au / d).to(unit)
-
-_iter_message = """\
-cannot directly unpack a %(class)s into several values
-
-To unpack a %(class)s into three components, you need to ask for its
-value in specific units through an attribute or method:
-
-    %(values)s = velocity.%(attr1)s
-    %(values)s = velocity.%(attr2)s
-    %(values)s = velocity.to(astropy_unit)
-"""
 
 # Angle units.
 
@@ -168,6 +179,7 @@ class Angle(object):
                            else 'hours' if hours is not None
                            else 'degrees')
         self.signed = signed
+        self.shape = getattr(self.radians, 'shape', ())
 
     def __getattr__(self, name):
         if name == '_hours':
@@ -193,6 +205,23 @@ class Angle(object):
 
     def __repr__(self):
         return '<{0} {1}>'.format(type(self).__name__, self)
+    
+    def __iter__(self):
+        for a in self.radians:
+            yield a
+    
+    def __getitem__(self, index):
+        a = Angle(radians=self.radians[index], preference=self.preference)
+        for name in '_hours', '_degrees':
+            value = getattr(self, name, None)
+            if value is not None:
+                if getattr(value, 'shape', None):
+                    value = value[index]
+                setattr(a, name, value)
+        return a
+    
+    def __len__(self):
+        return len(self.radians)
 
     def hms(self, warn=True):
         """Convert to a tuple (hours, minutes, seconds).

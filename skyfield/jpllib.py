@@ -172,6 +172,9 @@ class SpiceKernel(object):
         else:
             code = _targets.get(name_or_code.upper())
         return code in self.codes
+    
+    def __len__(self):
+        return len(self.codes)
 
 
 class SPICESegment(VectorFunction):
