@@ -210,7 +210,7 @@ class Time(object):
     eps_correction = 0.0
 
     def __init__(self, ts, tt):
-        self.tt = _to_array(tt)
+        self.tt = tt
         self.ts = ts
         self.shape = getattr(tt, 'shape', ())
 
