@@ -12,6 +12,8 @@ def _to_array(value):
     """As a convenience, turn Python lists and tuples into NumPy arrays."""
     if isinstance(value, (tuple, list)):
         return array(value)
+    elif isinstance(value, (float, int)):
+        return np.float64(value)
     else:
         return value
 
@@ -144,7 +146,8 @@ Angle(radians=value)
 Angle(degrees=value)
 Angle(hours=value)
 
-where `value` can be either a Python float or a NumPy array of floats"""
+where `value` can be either a Python float, a list of Python floats, 
+or a NumPy array of floats"""
 
 class Angle(object):
 
@@ -156,12 +159,12 @@ class Angle(object):
                 raise ValueError(_instantiation_instructions)
             self.radians = angle.radians
         elif radians is not None:
-            self.radians = radians
+            self.radians = _to_array(radians)
         elif degrees is not None:
-            self._degrees = degrees = _unsexagesimalize(degrees)
+            self._degrees = degrees = _unsexagesimalize(_to_array(degrees))
             self.radians = degrees * _from_degrees
         elif hours is not None:
-            self._hours = hours = _unsexagesimalize(hours)
+            self._hours = hours = _unsexagesimalize(_to_array(hours))
             self.radians = hours * _from_hours
 
         self.preference = (preference if preference is not None
@@ -189,10 +192,15 @@ class Angle(object):
         raise AttributeError('no attribute named %r' % (name,))
 
     def __str__(self):
+        if self.radians.size == 0:
+            return 'Angle []'
         return self.dstr() if self.preference == 'degrees' else self.hstr()
 
     def __repr__(self):
-        return '<{0} {1}>'.format(type(self).__name__, self)
+        if self.radians.size == 0:
+            return '<{0} []>'.format(type(self).__name__, self)
+        else:
+            return '<{0} {1}>'.format(type(self).__name__, self)
 
     def hms(self, warn=True):
         """Convert to a tuple (hours, minutes, seconds).
@@ -220,6 +228,8 @@ class Angle(object):
         """Convert to a string like ``12h 07m 30.00s``."""
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
+        if self.radians.size == 0:
+            return '<Angle []>'
         hours = self._hours
         if getattr(hours, 'shape', ()):
             return "{0} values from {1} to {2}".format(
@@ -255,6 +265,8 @@ class Angle(object):
         """Convert to a string like ``181deg 52\' 30.0"``."""
         if warn and self.preference != 'degrees':
             raise WrongUnitError('dstr')
+        if self.radians.size == 0:
+            return '<Angle []>'
         degrees = self._degrees
         signed = self.signed
         if getattr(degrees, 'shape', ()):

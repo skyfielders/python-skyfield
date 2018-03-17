@@ -218,11 +218,14 @@ class Time(object):
         return self.shape[0]
 
     def __repr__(self):
-
-        if getattr(self.tt, 'shape', ()):
+        size = getattr(self.tt, 'size', -1)
+        if size > 1:
             rstr = '<Time {0} values from tt={1:.6f} to tt={2:.6f}>'
             return rstr.format(self.tt.size, self.tt.min(), self.tt.max())
-        return '<Time tt={0:.6f}>'.format(self.tt)
+        elif size == 0:
+            return '<Time []>'
+        else:
+            return '<Time tt={0:.6f}>'.format(self.tt)
 
     def __getitem__(self, index):
         # TODO: also copy cached matrices?
