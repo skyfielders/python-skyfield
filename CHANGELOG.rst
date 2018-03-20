@@ -3,8 +3,22 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.2 — 2018 March 29
+-------------------
+
+* The documentation now describes
+  how to create an excerpt of a large JPL ephemeris
+  without downloading the entire file.
+  Several Skyfield tests now run much faster
+  because they use an ephemeris excerpt instead of waiting for a download.
+
+* For ``load_file()`` a leading ``~`` now means “your home directory”.
+
 * You can now initialize a velocity from kilometers per second
   with ``Velocity(km_per_s=...)``.
+
+* Empty time and angle objects no longer raise an exception when printed.
+  (Thanks, JoshPaterson!)
 
 * Issues fixed:
   `#160 <https://github.com/skyfielders/python-skyfield/issues/160>`_
