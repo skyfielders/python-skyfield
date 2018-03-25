@@ -23,6 +23,20 @@ def test_time_creation_methods(time_parameter, time_value):
         t = method(jd=time_value)
     assert getattr(t, time_parameter) == 2441700.56640625
 
+time_scale_name = ['utc', 'tai', 'tt', 'tdb']
+time_params_with_array = [
+    ((2018, 2019, 2020), 3, 25, 13, 1, 10),
+    (2018, (3, 4, 5), 25, 13, 1, 10),
+    (2018, 3, (25, 26, 27), 13, 1, 10),
+    (2018, 3, 25, (13, 14, 15), 1, 10),
+    (2018, 3, 25, 13, (1, 2, 3), 10),
+    (2018, 3, 25, 13, 1, (10, 11, 12)),
+]
+
+def test_time_creation_with_arrays(time_scale_name, time_params_with_array):
+    ts = api.load.timescale()
+    getattr(ts, time_scale_name)(*time_params_with_array)
+
 def test_timescale_utc_method_with_array_inside(ts):
     seconds = np.arange(48.0, 58.0, 1.0)
     t = ts.utc(1973, 12, 29, 23, 59, seconds)
