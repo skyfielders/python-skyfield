@@ -40,7 +40,7 @@ class Star(object):
 
     def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,
                  ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                 parallax_mas=0.0, radial_km_per_s=0.0, names=()):
+                 parallax_mas=0.0, radial_km_per_s=0.0, jd_of_position=T0, names=()):
 
         if ra_hours is not None:
             self.ra = Angle(hours=ra_hours)
@@ -62,6 +62,7 @@ class Star(object):
         self.dec_mas_per_year = dec_mas_per_year
         self.parallax_mas = parallax_mas
         self.radial_km_per_s = radial_km_per_s
+        self.jd_of_position = jd_of_position
         self.names = names
 
         self._compute_vectors()
@@ -69,7 +70,7 @@ class Star(object):
     def __repr__(self):
         opts = []
         for name in ['ra_mas_per_year', 'dec_mas_per_year',
-                     'parallax_mas', 'radial_km_per_s', 'names']:
+                     'parallax_mas', 'radial_km_per_s', 'jd_of_position', 'names']:
             value = getattr(self, name)
             if value:
                 opts.append(', {0}={1!r}'.format(name, value))
@@ -81,9 +82,9 @@ class Star(object):
         t = observer.t
         dt = light_time_difference(position, observer.position.au)
         if t.shape:
-            position = (outer(velocity, t.tdb + dt - T0).T + position).T
+            position = (outer(velocity, t.tdb + dt - self.jd_of_position).T + position).T
         else:
-            position = position + velocity * (t.tdb + dt - T0)
+            position = position + velocity * (t.tdb + dt - self.jd_of_position)
         vector = position - observer.position.au
         distance = length_of(vector)
         light_time = distance / C_AUDAY
