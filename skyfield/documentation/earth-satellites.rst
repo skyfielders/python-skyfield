@@ -206,7 +206,7 @@ just as you did for the position measured from the Earth’s center:
 
 .. testoutput::
 
-    [  331.61885573   392.1846109   1049.76010007]
+    [ 331.61885573  392.1846109  1049.76010007]
 
 But the most popular approach is to ask the topocentric position
 for its altitude and azimuth coordinates,
@@ -228,7 +228,7 @@ which tell you whether the satellite is above or below the horizon:
     The ISS is above the horizon
     16deg 16' 32.6"
     350deg 15' 20.4"
-    1168.66423844
+    1168.6642384388767
 
 If you are interested
 in where among the stars the satellite will be positioned,
@@ -414,11 +414,11 @@ that are limiting this TLE set’s predictions:
 .. testoutput::
 
     Before:
-    [ nan  nan  nan]
+    [nan nan nan]
     mean eccentricity -0.001416 not within range 0.0 <= e < 1.0
 
     After:
-    [ nan  nan  nan]
+    [nan nan nan]
     mrt 0.997178 is less than 1.0 indicating the satellite has decayed
 
 If you use a ``Time`` array to ask about an entire range of dates,

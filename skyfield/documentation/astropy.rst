@@ -79,7 +79,7 @@ between the two libraries:
    .. testoutput::
 
       <SkyCoord (ICRS): (x, y, z) in AU
-          (-0.16287311,  0.88787399,  0.38473904)>
+          (-0.16287311, 0.88787399, 0.38473904)>
 
 4. A Skyfield angle can express itself as an AstroPy quantity
    in any requested unit of angular measure.

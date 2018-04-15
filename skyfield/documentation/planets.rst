@@ -177,7 +177,7 @@ and Skyfield will put together a solution using the segments provided.
      + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
      + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH
 
-Each time you ask this `earth` object for its position at a given time,
+Each time you ask this ``earth`` object for its position at a given time,
 Skyfield will compute both of these underlying vectors
 and add them together to generate the position.
 

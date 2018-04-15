@@ -452,12 +452,12 @@ being as deep as the array itself:
 
 .. testoutput::
 
-    array([[ 2014.,  2014.,  2014.,  2014.],
-           [    1.,     1.,     1.,     1.],
-           [    1.,     2.,     3.,     4.],
-           [    0.,     0.,     0.,     0.],
-           [    0.,     0.,     0.,     0.],
-           [    0.,     0.,     0.,     0.]])
+    array([[2014., 2014., 2014., 2014.],
+           [   1.,    1.,    1.,    1.],
+           [   1.,    2.,    3.,    4.],
+           [   0.,    0.,    0.,    0.],
+           [   0.,    0.,    0.,    0.],
+           [   0.,    0.,    0.,    0.]])
 
 Again, simply slice across the second dimension of the array
 to pull a particular calendar tuple out of the larger result:
@@ -468,7 +468,7 @@ to pull a particular calendar tuple out of the larger result:
 
 .. testoutput::
 
-    [ 2014.     1.     3.     0.     0.     0.]
+    [2014.    1.    3.    0.    0.    0.]
 
 .. _tai-tt-tdb:
 
@@ -539,7 +539,7 @@ so modern dates tend to be rather large numbers:
 .. testoutput::
 
     TAI = 2456658.5004050927
-    TT  = 2456658.5007775929
+    TT  = 2456658.500777593
     TDB = 2456658.500777592
 
 What are these three different uniform time scales?

@@ -139,7 +139,7 @@ class ICRF(object):
 
         >>> directions = ICRF([[1,0,-1,0], [0,1,0,-1], [0,0,0,0]])
         >>> directions.separation_from(ICRF([0,1,0])).degrees
-        array([  90.,    0.,   90.,  180.])
+        array([ 90.,   0.,  90., 180.])
 
         """
         p1 = self.position.au
