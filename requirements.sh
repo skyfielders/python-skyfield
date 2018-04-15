@@ -6,13 +6,14 @@ if conda --version >/dev/null 2>&1
 then
     conda install \
           astropy=3.0.1 \
+          beautifulsoup4=4.6.0 \
+          html5lib=1.0.1 \
+          lxml=4.2.1 \
           mock=2.0.0 \
           numpy=1.14.2 \
-          sphinx=1.7.2 \
+          python=3.6 \
           pytz \
-          lxml=4.2.1 \
-          html5lib=1.0.1 \
-          beautifulsoup4=4.6.0 \
+          sphinx=1.7.2 \
 
 else
     if ! python --version 2>&1 | grep -q 2.6
