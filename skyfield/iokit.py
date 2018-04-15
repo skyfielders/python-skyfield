@@ -153,7 +153,7 @@ class Loader(object):
                 for n in itertools.count(1):
                     prefix, suffix = filename.rsplit('.', 1)
                     backup_name = '{0}.old{1}.{2}'.format(prefix, n, suffix)
-                    if not os.path.exists(backup_name):
+                    if not os.path.exists(self.path_to(backup_name)):
                         break
                 self._log('  Renaming to: {0}', backup_name)
                 os.rename(self.path_to(filename), self.path_to(backup_name))
