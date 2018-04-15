@@ -162,6 +162,13 @@ Reading List for Brandon
 
 * https://naif.jpl.nasa.gov/pub/naif/FIDO/misc/njb/src/geom.c
 
+For 2.0
+=======
+
+* Remove old deprecation warnings for pre-1.0 behaviors.
+
+* Remove support and tests for old ephemeris Python packages.
+
 Longer-term goals
 =================
 
