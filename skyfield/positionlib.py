@@ -5,7 +5,7 @@ from numpy import array, arccos, clip, einsum, exp
 from .constants import RAD2DEG, tau
 from .data.spice import inertial_frames
 from .functions import dots, from_polar, length_of, to_polar, rot_z
-from .earthlib import compute_limb_angle, refract
+from .earthlib import compute_limb_angle, refract, reverse_terra
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Distance, Velocity, Angle, _interpret_angle
@@ -370,6 +370,24 @@ class Apparent(ICRF):
 
 class Geocentric(ICRF):
     """An (x,y,z) position measured from the geocenter."""
+
+    def subpoint(self):
+        if self.center != 399:  # TODO: should an __init__() check this?
+            raise ValueError("you can only ask for the geographic subpoint"
+                             " of a position measured from Earth's center")
+        t = self.t
+        xyz_au = einsum('ij...,j...->i...', t.M, self.position.au)
+        lat, lon, elevation_m = reverse_terra(xyz_au, t.gast)
+
+        # TODO. Move VectorFunction and Topos into this file, since the
+        # three kinds of class work together: Topos is-a VF; VF.at() can
+        # return a Geocentric position; and Geocentric.subpoint() should
+        # return a Topos. I'm deferring the refactoring for now, to get
+        # this new feature to users more quickly.
+        from .toposlib import Topos
+        return Topos(latitude=Angle(radians=lat),
+                     longitude=Angle(radians=lon),
+                     elevation_m=elevation_m)
 
 
 def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):

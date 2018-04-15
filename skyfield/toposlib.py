@@ -1,7 +1,7 @@
 from numpy import einsum
 
 from .constants import ASEC2RAD, tau
-from .earthlib import terra, reverse_terra
+from .earthlib import terra
 from .functions import rot_x, rot_y, rot_z
 from .units import Distance, Angle, _interpret_ltude
 from .vectorlib import VectorFunction
@@ -56,18 +56,6 @@ class Topos(VectorFunction):
 
         self.target = object()  # TODO: make this more interesting
         self.target_name = '{0} N {1} E'.format(self.latitude, self.longitude)
-
-    @classmethod
-    def subpoint(cls, position):
-        if position.center != 399:
-            raise ValueError("you can only ask for the geographic subpoint"
-                             " of a position measured from Earth's center")
-        t = position.t
-        xyz_au = einsum('ij...,j...->i...', t.M, position.position.au)
-        lat, lon, elevation_m = reverse_terra(xyz_au, t.gast)
-        return cls(latitude=Angle(radians=lat),
-                   longitude=Angle(radians=lon),
-                   elevation_m=elevation_m)
 
     def __str__(self):
         return 'Topos {0}'.format(self.target_name)
