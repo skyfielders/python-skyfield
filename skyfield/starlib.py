@@ -41,7 +41,7 @@ class Star(object):
 
     def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,
                  ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                 parallax_mas=0.0, radial_km_per_s=0.0, epoch=T0, names=()):
+                 parallax_mas=0.0, radial_km_per_s=0.0, names=(), epoch=T0):
 
         if ra_hours is not None:
             self.ra = Angle(hours=ra_hours)
@@ -79,7 +79,7 @@ class Star(object):
     def __repr__(self):
         opts = []
         for name in ['ra_mas_per_year', 'dec_mas_per_year',
-                     'parallax_mas', 'radial_km_per_s', 'epoch', 'names']:
+                     'parallax_mas', 'radial_km_per_s', 'names', 'epoch']:
             value = getattr(self, name)
             if value:
                 opts.append(', {0}={1!r}'.format(name, value))
