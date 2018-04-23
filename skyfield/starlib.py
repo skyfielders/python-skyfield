@@ -4,6 +4,7 @@ from numpy import array, cos, outer, sin
 from .constants import AU_KM, ASEC2RAD, C, C_AUDAY, DAY_S, T0
 from .functions import length_of
 from .relativity import light_time_difference
+from .timelib import Time
 from .units import Angle
 
 class Star(object):
@@ -40,7 +41,7 @@ class Star(object):
 
     def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,
                  ra_mas_per_year=0.0, dec_mas_per_year=0.0,
-                 parallax_mas=0.0, radial_km_per_s=0.0, names=()):
+                 parallax_mas=0.0, radial_km_per_s=0.0, names=(), epoch=T0):
 
         if ra_hours is not None:
             self.ra = Angle(hours=ra_hours)
@@ -58,10 +59,19 @@ class Star(object):
             raise TypeError('please provide either dec_degrees=<float> or else'
                             ' dec=<skyfield.units.Angle object>')
 
+        if isinstance(epoch, Time):
+            epoch = epoch.tdb
+        elif isinstance(epoch, float):
+            pass
+        else:
+            raise ValueError('the epoch= must be a Time object, or'
+                             ' a floating point Barycentric Dynamical Time (TDB)')
+
         self.ra_mas_per_year = ra_mas_per_year
         self.dec_mas_per_year = dec_mas_per_year
         self.parallax_mas = parallax_mas
         self.radial_km_per_s = radial_km_per_s
+        self.epoch = epoch
         self.names = names
 
         self._compute_vectors()
@@ -69,7 +79,7 @@ class Star(object):
     def __repr__(self):
         opts = []
         for name in ['ra_mas_per_year', 'dec_mas_per_year',
-                     'parallax_mas', 'radial_km_per_s', 'names']:
+                     'parallax_mas', 'radial_km_per_s', 'names', 'epoch']:
             value = getattr(self, name)
             if value:
                 opts.append(', {0}={1!r}'.format(name, value))
@@ -81,9 +91,9 @@ class Star(object):
         t = observer.t
         dt = light_time_difference(position, observer.position.au)
         if t.shape:
-            position = (outer(velocity, t.tdb + dt - T0).T + position).T
+            position = (outer(velocity, t.tdb + dt - self.epoch).T + position).T
         else:
-            position = position + velocity * (t.tdb + dt - T0)
+            position = position + velocity * (t.tdb + dt - self.epoch)
         vector = position - observer.position.au
         distance = length_of(vector)
         light_time = distance / C_AUDAY
