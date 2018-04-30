@@ -14,11 +14,11 @@ of the conventions laid down in the existing code base.
 >>> arg1 = float64(2.0)
 >>> argn = array([2.0, 3.0])
 >>> arg1 * m.reshape(3,)
-array([  8.,  10.,  12.])
+array([ 8., 10., 12.])
 >>> argn * m.reshape(3, 1)
-array([[  8.,  12.],
-       [ 10.,  15.],
-       [ 12.,  18.]])
+array([[ 8., 12.],
+       [10., 15.],
+       [12., 18.]])
 
 Importing NumPy
 ===============

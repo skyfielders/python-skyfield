@@ -153,7 +153,7 @@ class Loader(object):
                 for n in itertools.count(1):
                     prefix, suffix = filename.rsplit('.', 1)
                     backup_name = '{0}.old{1}.{2}'.format(prefix, n, suffix)
-                    if not os.path.exists(backup_name):
+                    if not os.path.exists(self.path_to(backup_name)):
                         break
                 self._log('  Renaming to: {0}', backup_name)
                 os.rename(self.path_to(filename), self.path_to(backup_name))
@@ -306,7 +306,7 @@ def parse_deltat_preds(fileobj):
     year_float, delta_t = np.loadtxt(fileobj, skiprows=3, usecols=[0, 1]).T
     year = year_float.astype(int)
     month = 1 + (year_float * 12.0).astype(int) % 12
-    expiration_date = date(year[0] + 1, month[0], 1)
+    expiration_date = date(year[0] + 2, month[0], 1)
     data = np.array((julian_date(year, month, 1), delta_t))
     return expiration_date, data
 

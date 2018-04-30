@@ -107,12 +107,15 @@ Here are all three effects applied to Barnard’s star:
 
 .. testcode::
 
+    from skyfield.api import T0
+
     barnard = Star(ra_hours=(17, 57, 48.49803),
                    dec_degrees=(4, 41, 36.2072),
                    ra_mas_per_year=-798.71,
                    dec_mas_per_year=+10337.77,
                    parallax_mas=545.4,
-                   radial_km_per_s=-110.6)
+                   radial_km_per_s=-110.6,
+                   epoch=T0)
 
     astrometric = earth.at(t).observe(barnard)
     ra, dec, distance = astrometric.radec()
@@ -126,10 +129,11 @@ Here are all three effects applied to Barnard’s star:
     +04deg 44' 01.3"
     3.77863e+05 au
 
-Note that the above position is different than the input right ascension
-and declination but not because we have asked for dynamic coordinates.
-This position is in fixed ICRS coordinates and indicates real motion on
-the part of Barnard’s star across our sky.
+(The ``epoch`` parameter defaults to ``T0`` but it is used above to call
+attention to its existence.) Note that the above position is different than
+the input right ascension and declination but not because we have asked for
+dynamic coordinates. This position is in fixed ICRS coordinates and indicates
+real motion on the part of Barnard’s star across our sky.
 
 See the guide to :doc:`positions` to learn the operations that you can
 perform with these astrometric positions after using a :class:`Star`

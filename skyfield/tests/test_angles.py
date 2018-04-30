@@ -37,3 +37,13 @@ def test_angle_array_strs():
     assert str(Angle(hours=np.array([11, 12, 13]))) == (
         '''3 values from 11h 00m 00.00s to 13h 00m 00.00s'''
         )
+
+def test_angle_sexagesimal_args():
+    assert str(Angle(degrees=(90,))) == '''90deg 00' 00.0"'''
+    assert str(Angle(hours=(12,))) == '''12h 00m 00.00s'''
+
+    assert str(Angle(degrees=(90, 15))) == '''90deg 15' 00.0"'''
+    assert str(Angle(hours=(12, 30))) == '''12h 30m 00.00s'''
+
+    assert str(Angle(degrees=(90, 15, 30))) == '''90deg 15' 30.0"'''
+    assert str(Angle(hours=(12, 30, 15))) == '''12h 30m 15.00s'''

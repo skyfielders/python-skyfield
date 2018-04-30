@@ -140,7 +140,10 @@ class Timescale(object):
         if jd is not None:
             tai = jd
         else:
-            tai = julian_date(year, month, day, hour, minute, second)
+            tai = julian_date(
+                _to_array(year), _to_array(month), _to_array(day),
+                _to_array(hour), _to_array(minute), _to_array(second),
+            )
         tai = _to_array(tai)
         t = Time(self, tai + tt_minus_tai)
         t.tai = tai
@@ -161,7 +164,10 @@ class Timescale(object):
         if jd is not None:
             tt = jd
         else:
-            tt = julian_date(year, month, day, hour, minute, second)
+            tt = julian_date(
+                _to_array(year), _to_array(month), _to_array(day),
+                _to_array(hour), _to_array(minute), _to_array(second),
+            )
         tt = _to_array(tt)
         return Time(self, tt)
 
@@ -180,7 +186,10 @@ class Timescale(object):
         if jd is not None:
             tdb = jd
         else:
-            tdb = julian_date(year, month, day, hour, minute, second)
+            tdb = julian_date(
+                _to_array(year), _to_array(month), _to_array(day),
+                _to_array(hour), _to_array(minute), _to_array(second),
+            )
         tdb = _to_array(tdb)
         tt = tdb - tdb_minus_tt(tdb) / DAY_S
         t = Time(self, tt)

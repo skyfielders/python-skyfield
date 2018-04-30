@@ -161,10 +161,10 @@ class Angle(object):
         elif radians is not None:
             self.radians = _to_array(radians)
         elif degrees is not None:
-            self._degrees = degrees = _unsexagesimalize(_to_array(degrees))
+            self._degrees = degrees = _to_array(_unsexagesimalize(degrees))
             self.radians = degrees * _from_degrees
         elif hours is not None:
-            self._hours = hours = _unsexagesimalize(_to_array(hours))
+            self._hours = hours = _to_array(_unsexagesimalize(hours))
             self.radians = hours * _from_hours
 
         self.preference = (preference if preference is not None
@@ -231,7 +231,8 @@ class Angle(object):
         if self.radians.size == 0:
             return '<Angle []>'
         hours = self._hours
-        if getattr(hours, 'shape', ()):
+        shape = getattr(hours, 'shape', ())
+        if shape and shape != (1,):
             return "{0} values from {1} to {2}".format(
                 len(hours),
                 _hstr(min(hours), places),
@@ -269,7 +270,8 @@ class Angle(object):
             return '<Angle []>'
         degrees = self._degrees
         signed = self.signed
-        if getattr(degrees, 'shape', ()):
+        shape = getattr(degrees, 'shape', ())
+        if shape and shape != (1,):
             return "{0} values from {1} to {2}".format(
                 len(degrees),
                 _dstr(min(degrees), places, signed),
