@@ -92,8 +92,8 @@ and can return results in native AstroPy units:
     [-2.19049548  0.71236701  0.36712443] AU
     25.465 deg
 
-Documenation
-============
+Documentation
+=============
 
 Skyfield’s documentation lives here at the main Skyfield web site:
 
@@ -106,9 +106,9 @@ But the source code and issue tracker live on other web sites:
 
 * `Skyfield on the Python Package Index <https://pypi.python.org/pypi/skyfield>`_
 
-* `GitHub project page <https://github.com/brandon-rhodes/python-skyfield/>`_
+* `GitHub project page <https://github.com/skyfielders/python-skyfield/>`_
 
-* `GitHub issue tracker <https://github.com/brandon-rhodes/python-skyfield/issues>`_
+* `GitHub issue tracker <https://github.com/skyfielders/python-skyfield/issues>`_
 
 Most recent release: Version 1.3 on 2018 April 15
 =================================================
