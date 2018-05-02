@@ -4,7 +4,6 @@ from skyfield.constants import DAY_S
 from skyfield.elementslib import OsculatingElements
 from numpy import (array, sin, cos, pi, sqrt, ndarray, float64, repeat, 
                    seterr, inf, linspace, arccos)
-from collections import OrderedDict
 import os
 
 def ts():
@@ -45,12 +44,8 @@ def compare(value, expected_value, epsilon, mod=False):
         if hasattr(epsilon, '__len__'):
             assert (abs(diff) <= epsilon).all()
         else:
-            if not max(abs(diff)) <= epsilon:
-                print(value, expected_value)
             assert max(abs(diff)) <= epsilon
     else:
-        if not abs(diff) <= epsilon:
-            print(value, expected_value)
         assert abs(diff) <= epsilon
 
 
@@ -86,17 +81,15 @@ def check_types(elements, length):
         assert isinstance(elements.periapsis_time, Time)
         assert elements.periapsis_time.tt.size == length
         
-        
-# I originally had this as a method of the OsculatingElements object, but I'm 
-# not sure how useful it would be
-def horizons_format(elem, units='km_d'):
+
+def horizons_dict(elem, units='km_d', ):
     """ 
-    Outputs data in a format that matches Horizons.
+    Outputs dictionary with keys that match labels used by Horizons.
     
     The data from this method is exactly the same as the data in the 
-    elements object and differs from it only in units and labeling.
+    elements object and differs from it only in units.
     
-    Returns an OrderedDict whose keys match the labels from Horizons:
+    Returns an dictionary whose keys match the labels from Horizons:
         EC = eccentricity
         QR = periapsis distance
         IN = inclination
@@ -110,11 +103,6 @@ def horizons_format(elem, units='km_d'):
         AD = apoapsis distance
         PR = period
         
-    You can access data using the keys, or if you want data in the same 
-    order as provided by horizons you can turn the values into an array:
-        
-        array(list(elements.horizons_data().values))
-        
     Just like in Horizons, all angle values are in degrees, but the 
     distance and time units can be specified with the `units` keyword, 
     and must be one of the following:
@@ -122,7 +110,7 @@ def horizons_format(elem, units='km_d'):
         'km_d' for kilometers and days
         'au_d' for au and days
     """
-    data = OrderedDict()
+    data = {}
     data['EC'] = elem.eccentricity
     
     if units=='km_s' or units=='km_d':
@@ -156,6 +144,39 @@ def horizons_format(elem, units='km_d'):
         data['PR'] = elem.period_in_days*DAY_S
 
     return data
+
+
+def horizons_array(elem, units='km_d', ):
+    """ 
+    Outputs numpy array containing data in the same order as horizons.
+        
+    The data from this method is exactly the same as the data in the 
+    elements object and differs from it only in units.
+    
+    Just like in Horizons, all angle values are in degrees, but the 
+    distance and time units can be specified with the `units` keyword, 
+    and must be one of the following:
+        'km_s' for kilometers and seconds
+        'km_d' for kilometers and days
+        'au_d' for au and days
+        
+    The shape of the array is ``(12,)`` if the time used to construct the 
+    position is a float, and ``(12, n)`` if the time is an array of length n.
+    """
+    dict_ = horizons_dict(elem, units=units)
+    array_ = array([dict_['EC'],
+                 dict_['QR'],
+                 dict_['IN'],
+                 dict_['OM'],
+                 dict_['W'],
+                 dict_['Tp'],
+                 dict_['N'],
+                 dict_['MA'],
+                 dict_['TA'],
+                 dict_['A'],
+                 dict_['AD'],
+                 dict_['PR']])
+    return array_
     
 
 def test_elements_methods_exist(ts):
@@ -189,8 +210,7 @@ def test_equatorial_km_d(ts):
     """Tests against data from Horizons in km and days, with equatorial reference plane
     """
     geocentric_pos = (moon - earth).at(ts.tdb(2015, 3, 2, 2))
-    calc_data = horizons_format(geocentric_pos.elements()).values()
-    calc_data = array(list(calc_data))
+    calc_data = horizons_array(geocentric_pos.elements())
     horizons_data = array([5.569337304355707E-02,
                            3.628019705296879E+05,
                            1.832507608006020E+01,
@@ -211,8 +231,7 @@ def test_equatorial_km_s(ts):
     """Tests against data from Horizons in km and seconds, with equatorial reference plane
     """
     geocentric_pos = (moon - earth).at(ts.tdb(2015, 3, 2, 2))
-    calc_data = horizons_format(geocentric_pos.elements(), units='km_s').values()
-    calc_data = array(list(calc_data))
+    calc_data = horizons_array(geocentric_pos.elements(), units='km_s')
     horizons_data = array([5.569337304355707E-02,
                            3.628019705296879E+05,
                            1.832507608006020E+01,
@@ -233,8 +252,7 @@ def test_equatorial_au_d(ts):
     """Tests against data from Horizons in au and days, with equatorial reference plane
     """
     geocentric_pos = (moon - earth).at(ts.tdb(2015, 3, 2, 2))
-    calc_data = horizons_format(geocentric_pos.elements(), units='au_d').values()
-    calc_data = array(list(calc_data))
+    calc_data = horizons_array(geocentric_pos.elements(), units='au_d')
     horizons_data = array([5.569337304355707E-02,
                            2.425181380136368E-03,
                            1.832507608006020E+01,
@@ -255,8 +273,7 @@ def test_ecliptic_km_d(ts):
     """Tests against data from Horizons in km and days, with ecliptic reference plane
     """
     geocentric_pos = (moon - earth).at(ts.tdb(2015, 3, 2, 2))
-    calc_data = horizons_format(geocentric_pos.elements(ref_plane='ecliptic'), units='km_d').values()
-    calc_data = array(list(calc_data))
+    calc_data = horizons_array(geocentric_pos.elements(ref_plane='ecliptic'), units='km_d')
     horizons_data = array([5.569337304355707E-02,
                           3.628019705296879E+05,
                           5.216521657765558E+00,
@@ -277,8 +294,7 @@ def test_ecliptic_km_s(ts):
     """Tests against data from Horizons in km and seconds, with ecliptic reference plane
     """
     geocentric_pos = (moon - earth).at(ts.tdb(2015, 3, 2, 2))
-    calc_data = horizons_format(geocentric_pos.elements(ref_plane='ecliptic'), units='km_s').values()
-    calc_data = array(list(calc_data))
+    calc_data = horizons_array(geocentric_pos.elements(ref_plane='ecliptic'), units='km_s')
     horizons_data = array([5.569337304355707E-02,
                            3.628019705296879E+05,
                            5.216521657765558E+00,
@@ -299,8 +315,7 @@ def test_ecliptic_au_d(ts):
     """Tests against data from Horizons in au and days, with ecliptic reference plane
     """
     geocentric_pos = (moon - earth).at(ts.tdb(2015, 3, 2, 2))
-    calc_data = horizons_format(geocentric_pos.elements(ref_plane='ecliptic'), units='au_d').values()
-    calc_data = array(list(calc_data))
+    calc_data = horizons_array(geocentric_pos.elements(ref_plane='ecliptic'), units='au_d')
     horizons_data = array([5.569337304355707E-02,
                            2.425181380136368E-03,
                            5.216521657765558E+00,
@@ -321,8 +336,7 @@ def test_extreme_ellipse(ts):
     """Tests against data from Horizons for an orbit with eccentricity just less than 1
     """
     geocentric_pos = (io - sun).at(ts.tdb(2015, 3, 2, 17, 26))
-    calc_data = horizons_format(geocentric_pos.elements(), units='km_s').values()
-    calc_data = array(list(calc_data))
+    calc_data = horizons_array(geocentric_pos.elements(), units='km_s')
     horizons_data = array([9.993434925710607E-01,
                            1.163126430217223E+08,
                            2.164979337400508E+01,
@@ -343,8 +357,7 @@ def test_slightly_hyperbolic(ts):
     """Tests against data from Horizons for an orbit with eccentricity just over 1
     """
     geocentric_pos = (io - sun).at(ts.tdb(2015, 3, 2, 17, 27))
-    calc_data = horizons_format(geocentric_pos.elements(), units='km_s').values()
-    calc_data = array(list(calc_data))
+    calc_data = horizons_array(geocentric_pos.elements(), units='km_s')
     horizons_data = array([1.000249165282725E+00,
                            1.176022222580809E+08,
                            2.167088597088522E+01,
