@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .functions import dots, length_of, angle_between
 from .constants import DAY_S, tau
 from .units import Distance, Angle
@@ -253,18 +251,18 @@ def eccentric_anomaly(v, e, p):
         return E
 
 
-def eccentricity(h, a, μ):
-    condition = (h**2/(a*μ) <= 1)
+def eccentricity(h, a, mu):
+    condition = (h**2/(a*mu) <= 1)
     if h.size == 1:
-        return sqrt(1 - h**2/(a*μ)) if condition else float64(0)
+        return sqrt(1 - h**2/(a*mu)) if condition else float64(0)
     else:
-        return sqrt(1 - h**2/(a*μ), out=zeros_like(h), where=condition)
+        return sqrt(1 - h**2/(a*mu), out=zeros_like(h), where=condition)
 
 
-def eccentricity_vector(pos_vec, vel_vec, μ):
+def eccentricity_vector(pos_vec, vel_vec, mu):
     r = length_of(pos_vec)
     v = length_of(vel_vec)    
-    return ((v**2 - μ/r)*pos_vec - dots(pos_vec, vel_vec)*vel_vec)/μ
+    return ((v**2 - mu/r)*pos_vec - dots(pos_vec, vel_vec)*vel_vec)/mu
 
 
 def inclination(h_vec):
@@ -303,8 +301,8 @@ def mean_anomaly(E, e, shift=True):
         return M
 
 
-def mean_motion(a, μ):
-    return sqrt(μ/abs(a)**3)
+def mean_motion(a, mu):
+    return sqrt(mu/abs(a)**3)
     
 
 def node_vector(h_vec):
@@ -324,15 +322,15 @@ def periapsis_distance(p, e):
         return divide(p*(1-e), (1-e**2), out=p/2, where=e!=1)
 
 
-def period(a, μ):
+def period(a, mu):
     if a.size == 1:
-        return tau*sqrt(a**3/μ) if a>0 else float64(inf)
+        return tau*sqrt(a**3/mu) if a>0 else float64(inf)
     else:
-        return tau*sqrt(a**3/μ, out=repeat(inf, a.shape), where=a>0)
+        return tau*sqrt(a**3/mu, out=repeat(inf, a.shape), where=a>0)
 
 
-def semi_latus_rectum(h_vec, μ):
-    return length_of(h_vec)**2/μ
+def semi_latus_rectum(h_vec, mu):
+    return length_of(h_vec)**2/mu
 
 
 def semi_major_axis(p, e):
@@ -362,19 +360,19 @@ def semi_minor_axis(p, e):
         return b
 
 
-def time_since_periapsis(M, n, v, p, μ):
+def time_since_periapsis(M, n, v, p, mu):
     if p.size == 1:
         if n>1e-19: # non-parabolic
             return M/n
         else: # parabolic
             D = tan(v/2)
-            return sqrt(2*(p/2)**3/μ)*(D + D**3/3)
+            return sqrt(2*(p/2)**3/mu)*(D + D**3/3)
     else:
         parabolic = n<1e-19
         t = divide(M, n, out=zeros_like(p), where=~parabolic)
         
         D = tan(v[parabolic]/2)
-        t[parabolic] = sqrt(2*(p[parabolic]/2)**3/μ)*(D + D**3/3)
+        t[parabolic] = sqrt(2*(p[parabolic]/2)**3/mu)*(D + D**3/3)
         
         return t
 
