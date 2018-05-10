@@ -1,6 +1,7 @@
 from __future__ import print_function
 import itertools
 import os
+import errno
 import numpy as np
 import sys
 from datetime import date, datetime, timedelta
@@ -79,8 +80,11 @@ class Loader(object):
         self.verbose = verbose
         self.expire = expire
         self.events = []
-        if not os.path.exists(self.directory):
+        try:
             os.makedirs(self.directory)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
 
         # Each instance gets its own copy of these data structures,
         # instead of sharing a single copy, so users can edit them
