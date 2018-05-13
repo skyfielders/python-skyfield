@@ -5,7 +5,7 @@ from numpy import array, arccos, clip, einsum, exp
 from .constants import RAD2DEG, tau
 from .data.spice import inertial_frames
 from .data.gravitational_parameters import GM_dict
-from .functions import dots, from_polar, length_of, to_polar, rot_z
+from .functions import dots, from_polar, length_of, to_polar, rot_z, angle_between
 from .earthlib import compute_limb_angle, refract, reverse_terra
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
@@ -166,15 +166,7 @@ class ICRF(object):
         """
         p1 = self.position.au
         p2 = another_icrf.position.au
-        u1 = p1 / length_of(p1)
-        u2 = p2 / length_of(p2)
-        if u2.ndim > 1:
-            if u1.ndim == 1:
-                u1 = u1[:,None]
-        elif u1.ndim > 1:
-            u2 = u2[:,None]
-        c = dots(u1, u2)
-        return Angle(radians=arccos(clip(c, -1.0, 1.0)))
+        return Angle(radians=angle_between(p1, p2))
 
     def ecliptic_position(self):
         """Compute J2000 ecliptic position vector (x, y, z)"""

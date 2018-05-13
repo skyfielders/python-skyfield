@@ -197,6 +197,7 @@ All positions support a basic set of methods:
    ICRF.radec
    ICRF.separation_from
    ICRF.ecliptic_position
+   ICRF.ecliptic_velocity
    ICRF.ecliptic_latlon
    ICRF.galactic_position
    ICRF.galactic_latlon
