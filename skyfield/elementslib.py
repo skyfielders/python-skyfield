@@ -1,4 +1,4 @@
-from .functions import dots, length_of, angle_between
+from .functions import dots, length_of, angle_between2
 from .constants import DAY_S, tau
 from .units import Distance, Angle
 from .reify import reify
@@ -190,7 +190,7 @@ class OsculatingElements(object):
 # http://www.bogan.ca/orbits/kepler/orbteqtn.html
         
 
-def shift180(num):
+def normpi(num):
     return (num + pi)%tau - pi
 
 
@@ -211,7 +211,7 @@ def argument_of_periapsis(n_vec, e_vec, pos_vec, vel_vec):
             return angle if cross(pos_vec, vel_vec, 0, 0).T[2] >= 0 else -angle%tau
         
         else: # not circular and not equatorial
-            angle = angle_between(n_vec, e_vec)
+            angle = angle_between2(n_vec, e_vec)
             return angle if e_vec[2] > 0 else -angle%tau
     else:
         w = zeros_like(pos_vec[0]) # defaults to 0 for circular orbits
@@ -225,7 +225,7 @@ def argument_of_periapsis(n_vec, e_vec, pos_vec, vel_vec):
         w[inds] = where(condition, angle, -angle%tau)
         
         inds = ~circular*~equatorial
-        angle = angle_between(n_vec[:, inds], e_vec[:, inds])
+        angle = angle_between2(n_vec[:, inds], e_vec[:, inds])
         condition = e_vec[2][inds] > 0
         w[inds] = where(condition, angle, -angle%tau)
         return w
@@ -236,7 +236,7 @@ def eccentric_anomaly(v, e, p):
         if e < 1:
             return 2*arctan(sqrt((1-e)/(1+e)) * tan(v/2))
         elif e > 1:
-            return shift180(2*arctanh(tan(v/2)/sqrt((e+1)/(e-1))))
+            return normpi(2*arctanh(tan(v/2)/sqrt((e+1)/(e-1))))
         else:
             return 0
     else:
@@ -246,7 +246,7 @@ def eccentric_anomaly(v, e, p):
         E[inds] = 2*arctan(sqrt((1-e[inds])/(1+e[inds])) * tan(v[inds]/2))
         
         inds = (e>1) # hyperbolic
-        E[inds] = shift180(2*arctanh(tan(v[inds]/2)/sqrt((e[inds]+1)/(e[inds]-1))))
+        E[inds] = normpi(2*arctanh(tan(v[inds]/2)/sqrt((e[inds]+1)/(e[inds]-1))))
         
         return E
 
@@ -267,7 +267,7 @@ def eccentricity_vector(pos_vec, vel_vec, mu):
 
 def inclination(h_vec):
         k_vec = array([zeros_like(h_vec[0]), zeros_like(h_vec[0]), ones_like(h_vec[0])])
-        return angle_between(h_vec, k_vec)
+        return angle_between2(h_vec, k_vec)
 
 
 def longitude_of_ascending_node(i, h_vec):
@@ -283,7 +283,7 @@ def mean_anomaly(E, e, shift=True):
             return (E - e*sin(E))%tau
         elif e > 1:
             M = e*sinh(E) - E
-            return shift180(M) if shift else M
+            return normpi(M) if shift else M
         else:
             return float64(0)
     else:  
@@ -294,7 +294,7 @@ def mean_anomaly(E, e, shift=True):
 
         inds = (e>1) # hyperbolic
         if shift:
-            M[inds] = shift180(e[inds]*sinh(E[inds]) - E[inds])
+            M[inds] = normpi(e[inds]*sinh(E[inds]) - E[inds])
         else:
             M[inds] = e[inds]*sinh(E[inds]) - E[inds]
             
@@ -380,7 +380,7 @@ def time_since_periapsis(M, n, v, p, mu):
 def true_anomaly(e_vec, pos_vec, vel_vec, n_vec):
     if len(pos_vec.shape) == 1:
         if length_of(e_vec) > 1e-15: # not circular
-            angle = angle_between(e_vec, pos_vec)
+            angle = angle_between2(e_vec, pos_vec)
             v = angle if dots(pos_vec, vel_vec) > 0 else -angle%tau
         
         elif length_of(n_vec) < 1e-15: # circular and equatorial
@@ -388,17 +388,17 @@ def true_anomaly(e_vec, pos_vec, vel_vec, n_vec):
             v = angle if vel_vec[0] < 0 else -angle%tau
         
         else: # circular and not equatorial
-            angle = angle_between(n_vec, pos_vec)
+            angle = angle_between2(n_vec, pos_vec)
             v = angle if pos_vec[2] >= 0 else -angle%tau
         
-        return v if length_of(e_vec)<(1-1e-15) else shift180(v)
+        return v if length_of(e_vec)<(1-1e-15) else normpi(v)
     else:
         v = zeros_like(pos_vec[0])
         circular = (length_of(e_vec)<1e-15)
         equatorial = (length_of(n_vec)<1e-15)
         
         inds = ~circular
-        angle = angle_between(e_vec[:, inds], pos_vec[:, inds])
+        angle = angle_between2(e_vec[:, inds], pos_vec[:, inds])
         condition = (dots(pos_vec[:, inds], vel_vec[:, inds]) > 0)
         v[inds] = where(condition, angle, -angle%tau)
         
@@ -408,11 +408,11 @@ def true_anomaly(e_vec, pos_vec, vel_vec, n_vec):
         v[inds] = where(condition, angle, -angle%tau)
         
         inds = circular*~equatorial
-        angle = angle_between(n_vec[:, inds], pos_vec[:, inds])
+        angle = angle_between2(n_vec[:, inds], pos_vec[:, inds])
         condition = pos_vec[2][inds] >= 0
         v[inds] = where(condition, angle, -angle%tau)
 
         inds = length_of(e_vec)>(1-1e-15)
-        v[inds] = shift180(v[inds])
+        v[inds] = normpi(v[inds])
         
         return v

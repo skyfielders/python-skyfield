@@ -1,7 +1,7 @@
-from skyfield.api import load, Time, tau, load_file
+from skyfield.api import load, Time, load_file
 from skyfield.units import Distance, Angle, Velocity
 from skyfield.constants import DAY_S
-from skyfield.elementslib import OsculatingElements
+from skyfield.elementslib import OsculatingElements, normpi
 from numpy import (array, sin, cos, pi, sqrt, ndarray, float64, repeat, 
                    seterr, inf, linspace, arccos)
 import os
@@ -22,12 +22,6 @@ sun = ephem['sun']
 seterr(all='raise')
 
 
-def shift180(num):
-    """Shift radians to the range -pi to +pi
-    """
-    return (num + pi)%tau - pi
-
-
 def compare(value, expected_value, epsilon, mod=False):
     """Compares value to expected value, and works if one or both are arrays.
     
@@ -36,7 +30,7 @@ def compare(value, expected_value, epsilon, mod=False):
     If mod==True, then compare(0, tau, 0) is True.
     """
     if mod:
-        diff = shift180(value - expected_value)
+        diff = normpi(value - expected_value)
     else:
         diff = value - expected_value
     
