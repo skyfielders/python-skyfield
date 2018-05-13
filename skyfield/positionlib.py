@@ -47,6 +47,8 @@ def elements(self, ref_plane='equator'):
                                   self.ecliptic_velocity(), 
                                   self.t, 
                                   mu)
+    else:
+        raise ValueError("ref_plane must be either 'equator' or 'ecliptic'.")
         
 
 class ICRF(object):
