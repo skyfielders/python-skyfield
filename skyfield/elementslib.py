@@ -195,14 +195,14 @@ def normpi(num):
 
 
 def apoapsis_distance(p, e):
-    if p.size == 1:
+    if p.ndim == 0:
         return p*(1+e)/(1-e**2) if e < 1 else float64(inf)
     else:
         return divide(p*(1+e), 1-e**2, out=repeat(inf, p.shape), where=e<(1-1e-15))
 
 
 def argument_of_periapsis(n_vec, e_vec, pos_vec, vel_vec):
-    if len(n_vec.shape) == 1:
+    if n_vec.ndim == 1:
         if length_of(e_vec) < 1e-15: # circular
             return 0
         
@@ -232,7 +232,7 @@ def argument_of_periapsis(n_vec, e_vec, pos_vec, vel_vec):
     
 
 def eccentric_anomaly(v, e, p):
-    if e.size == 1:
+    if e.ndim == 0:
         if e < 1:
             return 2*arctan(sqrt((1-e)/(1+e)) * tan(v/2))
         elif e > 1:
@@ -253,7 +253,7 @@ def eccentric_anomaly(v, e, p):
 
 def eccentricity(h, a, mu):
     condition = (h**2/(a*mu) <= 1)
-    if h.size == 1:
+    if h.ndim == 0:
         return sqrt(1 - h**2/(a*mu)) if condition else float64(0)
     else:
         return sqrt(1 - h**2/(a*mu), out=zeros_like(h), where=condition)
@@ -271,14 +271,14 @@ def inclination(h_vec):
 
 
 def longitude_of_ascending_node(i, h_vec):
-    if i.size == 1:
+    if i.ndim == 0:
         return arctan2(h_vec[0], -h_vec[1])%tau if i != 0 else float64(0)
     else:
         return arctan2(h_vec[0], -h_vec[1], out=zeros_like(i), where=i!=0)%tau
 
 
 def mean_anomaly(E, e, shift=True):
-    if e.size == 1:
+    if e.ndim == 0:
         if e < 1:
             return (E - e*sin(E))%tau
         elif e > 1:
@@ -309,21 +309,21 @@ def node_vector(h_vec):
     n_vec = array([-h_vec[1], h_vec[0], zeros_like(h_vec[0])]) # h_vec cross [0, 0, 1]
     n = length_of(n_vec)
     
-    if h_vec[0].size == 1:
+    if h_vec.ndim == 1:
         return n_vec/n if n!=0 else n_vec
     else:
         return divide(n_vec, n, out=n_vec, where=n!=0)
 
 
 def periapsis_distance(p, e):
-    if p.size == 1:
+    if p.ndim == 0:
         return p*(1-e) / (1-e**2) if e!=1 else p/2
     else:
         return divide(p*(1-e), (1-e**2), out=p/2, where=e!=1)
 
 
 def period(a, mu):
-    if a.size == 1:
+    if a.ndim == 0:
         return tau*sqrt(a**3/mu) if a>0 else float64(inf)
     else:
         return tau*sqrt(a**3/mu, out=repeat(inf, a.shape), where=a>0)
@@ -334,14 +334,14 @@ def semi_latus_rectum(h_vec, mu):
 
 
 def semi_major_axis(p, e):
-    if p.size == 1:
+    if p.ndim == 0:
         return p/(1 - e**2) if e!=1 else float64(inf)
     else:
         return divide(p, 1 - e**2, out=repeat(inf, p.shape), where=e!=1)
         
 
 def semi_minor_axis(p, e):
-    if e.size == 1:
+    if e.ndim == 0:
         if e < 1:
             return p/sqrt(1 - e**2)
         elif e > 1:
@@ -361,7 +361,7 @@ def semi_minor_axis(p, e):
 
 
 def time_since_periapsis(M, n, v, p, mu):
-    if p.size == 1:
+    if p.ndim == 0:
         if n>1e-19: # non-parabolic
             return M/n
         else: # parabolic
