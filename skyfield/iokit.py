@@ -188,11 +188,11 @@ class Loader(object):
     def tle(self, url, reload=False):
         """Load and parse a satellite TLE file.
 
-        Given a URL or a local path, this loads a file of two- or three-line
-        records in the common Celestrak file format. For a three-line element
-        set, each first line gives the name of a satellite and the following
-        two lines are the TLE orbital elements. A two-line element set
-        comprises only these last two lines.
+        Given a URL or a local path, this loads a file of three-line records in
+        the common Celestrak file format, or two-line records like those from
+        space-track.org. For a three-line element set, each first line gives
+        the name of a satellite and the following two lines are the TLE orbital
+        elements. A two-line element set comprises only these last two lines.
 
         If two-line element sets are provided, the EarthSatellite 'name'
         attribute is set to the satellite ID number for the object.
