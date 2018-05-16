@@ -7,6 +7,7 @@ import numpy as np
 import sys
 from numpy import abs, array, copysign, isnan
 from .constants import AU_KM, AU_M, DAY_S, tau
+from .descriptorlib import reify
 
 def _to_array(value):
     """As a convenience, turn Python lists and tuples into NumPy arrays."""
@@ -41,21 +42,24 @@ class Distance(object):
         else:
             raise ValueError('to construct a Distance provide au, km, or m')
 
-    def __getattr__(self, name):
-        if name == 'km':
-            self.km = km = self.au * AU_KM
-            return km
-        if name == 'm':
-            self.m = m = self.au * AU_M
-            return m
-        if name == 'AU':
-            if not Distance._warned:
-                print('WARNING: the IAU has renamed the astronomical unit to'
-                      ' lowercase "au" so Skyfield will soon remove uppercase'
-                      ' "AU" from Distance objects', file=sys.stdout)
-                Distance._warned = True
-            return self.au
-        raise AttributeError('no attribute named %r' % (name,))
+    @reify
+    def km(self):
+        self.km = km = self.au * AU_KM
+        return km
+
+    @reify
+    def m(self):
+        self.m = m = self.au * AU_M
+        return m
+
+    @reify
+    def AU(self):
+        if not Distance._warned:
+            print('WARNING: the IAU has renamed the astronomical unit to'
+                  ' lowercase "au" so Skyfield will soon remove uppercase'
+                  ' "AU" from Distance objects', file=sys.stdout)
+            Distance._warned = True
+        return self.au
 
     def __str__(self):
         n = self.au
@@ -88,19 +92,20 @@ class Velocity(object):
             au_per_d = km_per_s * DAY_S / AU_KM
         self.au_per_d = _to_array(au_per_d)
 
-    def __getattr__(self, name):
-        if name == 'km_per_s':
-            self.km_per_s = self.au_per_d * AU_KM / DAY_S
-            return self.km_per_s
-        if name == 'AU_per_d':
-            if not Velocity._warned:
-                print('WARNING: the IAU has renamed the astronomical unit to'
-                      ' lowercase "au" so Skyfield will soon remove'
-                      ' "AU_per_day" in favor of "au_per_day"',
-                      file=sys.stdout)
-                Velocity._warned = True
+    @reify
+    def km_per_s(self):
+        self.km_per_s = self.au_per_d * AU_KM / DAY_S
+        return self.km_per_s
+
+    @reify
+    def AU_per_d(self):
+        if not Velocity._warned:
+            print('WARNING: the IAU has renamed the astronomical unit to'
+                  ' lowercase "au" so Skyfield will soon remove'
+                  ' "AU_per_day" in favor of "au_per_day"',
+                  file=sys.stdout)
+            Velocity._warned = True
             return self.au_per_d
-        raise AttributeError('no attribute named %r' % (name,))
 
     def __str__(self):
         n = self.au_per_d

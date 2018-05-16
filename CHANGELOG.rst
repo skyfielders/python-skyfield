@@ -3,6 +3,35 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.4 — 2018 ?
+------------
+
+* The dictionary of satellites returned when you read a TLE file
+  now supports lookup by integer satellite ID, not just by name.
+  `#167 <https://github.com/skyfielders/python-skyfield/issues/167>`_
+
+1.3 — 2018 April 15
+-------------------
+
+* Geocentric coordinates now have a
+  :meth:`~skyfield.positionlib.Geocentric.subpoint()`
+  method that computes the latitude and longitude
+  of the point beneath that body.
+
+* All of the ``Timescale`` time constructor methods now accept arrays.
+
+* Emergency fix to stop Skyfield
+  from endlessly downloading new copies of ``deltat.preds``,
+  since the file has gone out of date at the USNO site.
+
+* Fixed ability of a :class:`~skyfield.starlib.Star`
+  to be initialized with a tuple that breaks units into minutes and seconds
+  (broke in version 1.2).
+
+* Issues fixed:
+  `#170 <https://github.com/skyfielders/python-skyfield/issues/170>`_
+  `#172 <https://github.com/skyfielders/python-skyfield/issues/172>`_
+
 1.2 — 2018 March 29
 -------------------
 

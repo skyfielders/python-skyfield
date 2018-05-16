@@ -14,6 +14,9 @@ Promises for next version
 
 * For #145, create a good syntax for combining two ephemerides.
 
+* Expand a bit on the documentation for stars, now that they can have an
+  epoch for their position.
+
 Sprint Possibilities
 ====================
 
