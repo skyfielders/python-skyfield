@@ -354,6 +354,7 @@ def parse_celestrak_tle(fileobj):
         line1 = next(lines).decode('ascii')
         line2 = next(lines).decode('ascii')
         sat = EarthSatellite(line1, line2, name)
+        yield sat.model.satnum, sat
         yield name, sat
         if ' (' in name:
             # Given `ISS (ZARYA)` or `HTV-6 (KOUNOTORI 6)`, also support

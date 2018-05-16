@@ -15,6 +15,7 @@ FLOCK 2E-1              \n\
 def test_celestrak():
     f = BytesIO(sample_celestrak_text)
     d = dict(parse_celestrak_tle(f))
-    assert len(d) == 4
-    assert d['ISS'] == d['ISS (ZARYA)'] == d['ZARYA']
-    assert d['FLOCK 2E-1']
+    assert len(d) == 6
+    assert d[25544] is d['ISS'] is d['ISS (ZARYA)'] is d['ZARYA']
+    assert d[41483] is d['FLOCK 2E-1']
+    assert d[25544] is not d[41483]

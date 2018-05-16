@@ -3,6 +3,13 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.4 — 2018 ?
+------------
+
+* The dictionary of satellites returned when you read a TLE file
+  now supports lookup by integer satellite ID, not just by name.
+  `#167 <https://github.com/skyfielders/python-skyfield/issues/167>`_
+
 1.3 — 2018 April 15
 -------------------
 
