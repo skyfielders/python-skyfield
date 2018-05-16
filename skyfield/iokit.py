@@ -358,16 +358,17 @@ def parse_leap_seconds(fileobj):
 def parse_celestrak_tle(fileobj):
     lines = iter(fileobj)
     for line in lines:
-        if line.decode('ascii').strip()[0] == '0':
+        if line.decode('ascii').strip()[0] != '1':  # three-line elset
             name = line.decode('ascii').strip()
             line1 = next(lines).decode('ascii')
             line2 = next(lines).decode('ascii')
             sat = EarthSatellite(line1, line2, name)
-        else:  # two-line element set, no name provided!
+        else:  # two-line elset, no name provided!
             line1 = line.decode('ascii')
             line2 = next(lines).decode('ascii')
             sat = EarthSatellite(line1, line2, name=None)
-            sat.name = str(sat.model.satnum)  # set to satellite number
+            name = str(sat.model.satnum)  # set to satellite number
+            sat.name = name
         yield sat.model.satnum, sat
         yield name, sat
         if ' (' in name:

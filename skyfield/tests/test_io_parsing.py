@@ -30,5 +30,5 @@ def test_celestrak():
 def test_spacetrack():
     f = BytesIO(sample_spacetrack_text)
     d = dict(parse_celestrak_tle(f))
-    assert len(d) == 6
+    assert len(d) == 4
     assert d[29273] is not d[29274]
