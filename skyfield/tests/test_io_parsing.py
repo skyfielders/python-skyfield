@@ -31,4 +31,10 @@ def test_spacetrack():
     f = BytesIO(sample_spacetrack_text)
     d = dict(parse_celestrak_tle(f))
     assert len(d) == 4
+    assert d['29273'] is d[29273]
+    assert d['29274'] is d[29274]
     assert d[29273] is not d[29274]
+    assert d[29273].model.satnum == 29273
+    assert d[29273].name == '29273'
+    assert d[29274].model.satnum == 29274
+    assert d[29274].name == '29274'
