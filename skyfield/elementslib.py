@@ -1,7 +1,7 @@
 from .functions import dots, length_of, angle_between
 from .constants import DAY_S, tau
 from .units import Distance, Angle
-from .reify import reify
+from .descriptorlib import reify
 from numpy import (array, arctan2, sin, arctan, tan, inf, repeat, float64, 
                    sinh, sqrt, arccos, arctanh, zeros_like, ones_like, divide, 
                    where, pi, cross)
