@@ -1,6 +1,7 @@
 from __future__ import print_function
 import itertools
 import os
+import errno
 import numpy as np
 import sys
 from datetime import date, datetime, timedelta
@@ -79,8 +80,11 @@ class Loader(object):
         self.verbose = verbose
         self.expire = expire
         self.events = []
-        if not os.path.exists(self.directory):
+        try:
             os.makedirs(self.directory)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
 
         # Each instance gets its own copy of these data structures,
         # instead of sharing a single copy, so users can edit them
@@ -184,10 +188,14 @@ class Loader(object):
     def tle(self, url, reload=False):
         """Load and parse a satellite TLE file.
 
-        Given a URL or a local path, this loads a file of three-line
-        records in the common Celestrak file format, where each first
-        line gives the name of a satellite and the following two lines
-        are the TLE orbital elements.
+        Given a URL or a local path, this loads a file of three-line records in
+        the common Celestrak file format, or two-line records like those from
+        space-track.org. For a three-line element set, each first line gives
+        the name of a satellite and the following two lines are the TLE orbital
+        elements. A two-line element set comprises only these last two lines.
+
+        If two-line element sets are provided, the EarthSatellite 'name'
+        attribute is set to the satellite ID number for the object.
 
         Returns a Python dictionary whose keys are satellite names and
         values are :class:`~skyfield.sgp4lib.EarthSatellite` objects.
@@ -350,10 +358,17 @@ def parse_leap_seconds(fileobj):
 def parse_celestrak_tle(fileobj):
     lines = iter(fileobj)
     for line in lines:
-        name = line.decode('ascii').strip()
-        line1 = next(lines).decode('ascii')
-        line2 = next(lines).decode('ascii')
-        sat = EarthSatellite(line1, line2, name)
+        if line.decode('ascii').strip()[0] != '1':  # three-line elset
+            name = line.decode('ascii').strip()
+            line1 = next(lines).decode('ascii')
+            line2 = next(lines).decode('ascii')
+            sat = EarthSatellite(line1, line2, name)
+        else:  # two-line elset, no name provided!
+            line1 = line.decode('ascii')
+            line2 = next(lines).decode('ascii')
+            sat = EarthSatellite(line1, line2, name=None)
+            name = str(sat.model.satnum)  # set to satellite number
+            sat.name = name
         yield sat.model.satnum, sat
         yield name, sat
         if ' (' in name:

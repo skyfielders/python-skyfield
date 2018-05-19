@@ -12,6 +12,13 @@ FLOCK 2E-1              \n\
 2 41483  51.6270 103.3896 0004826  61.7810 298.3684 15.92672255114129
 """
 
+sample_spacetrack_text = b"""\
+1 29273U 06033B   18081.29838594 -.00000056 +00000-0 +00000-0 0  9993
+2 29273 000.0189 154.5198 0004980 202.4902 284.9321 01.00271755042548
+1 29274U 06033C   18081.39999693 +.00002637 +00000-0 +10299-2 0  9992
+2 29274 005.9144 244.7152 6177908 248.3941 037.5897 03.74556424124616
+"""
+
 def test_celestrak():
     f = BytesIO(sample_celestrak_text)
     d = dict(parse_celestrak_tle(f))
@@ -19,3 +26,15 @@ def test_celestrak():
     assert d[25544] is d['ISS'] is d['ISS (ZARYA)'] is d['ZARYA']
     assert d[41483] is d['FLOCK 2E-1']
     assert d[25544] is not d[41483]
+
+def test_spacetrack():
+    f = BytesIO(sample_spacetrack_text)
+    d = dict(parse_celestrak_tle(f))
+    assert len(d) == 4
+    assert d['29273'] is d[29273]
+    assert d['29274'] is d[29274]
+    assert d[29273] is not d[29274]
+    assert d[29273].model.satnum == 29273
+    assert d[29273].name == '29273'
+    assert d[29274].model.satnum == 29274
+    assert d[29274].name == '29274'
