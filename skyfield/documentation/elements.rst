@@ -43,15 +43,15 @@ Here is a list of the attributes of the Elements object and their types:
      
     Elements describing shape and direction the orbit within its plane: 
      ├── ``argument_of_periapsis``       → Angle object
-     ├── ``eccentricity``                → ndarray
+     ├── ``eccentricity``                → numpy.ndarray
      ├── ``longitude_of_periapsis``      → Angle object
      └── ``periapsis_time``              → Time object
      
     Elements describing the size of the orbit:
      ├── ``apoapsis_distance``           → Distance object
-     ├── ``mean_motion_per_day``         → ndarray
+     ├── ``mean_motion_per_day``         → Angle object
      ├── ``periapsis_distance``          → Distance object
-     ├── ``period_in_days``              → ndarray
+     ├── ``period_in_days``              → numpy.ndarray
      ├── ``semi_latus_rectum``           → Distance object
      ├── ``semi_major_axis``             → Distance object
      └── ``semi_minor_axis``             → Distance object

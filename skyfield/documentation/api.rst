@@ -226,7 +226,7 @@ returns an OsculatingElements object.
 ``OsculatingElements.argument_of_latitude``        Angle object
 ``OsculatingElements.argument_of_periapsis``       Angle object
 ``OsculatingElements.eccentric_anomaly``           Angle object
-``OsculatingElements.eccentricity``                ndarray
+``OsculatingElements.eccentricity``                numpy.ndarray
 ``OsculatingElements.inclination``                 Angle object
 ``OsculatingElements.longitude_of_ascending_node`` Angle object
 ``OsculatingElements.longitude_of_periapsis``      Angle object
@@ -235,7 +235,7 @@ returns an OsculatingElements object.
 ``OsculatingElements.mean_motion_per_day``         Angle object
 ``OsculatingElements.periapsis_distance``          Distance object
 ``OsculatingElements.periapsis_time``              Time object
-``OsculatingElements.period_in_days``              ndarray
+``OsculatingElements.period_in_days``              numpy.ndarray
 ``OsculatingElements.semi_latus_rectum``           Distance object
 ``OsculatingElements.semi_major_axis``             Distance object
 ``OsculatingElements.semi_minor_axis``             Distance object
