@@ -201,8 +201,13 @@ class Loader(object):
         values are :class:`~skyfield.sgp4lib.EarthSatellite` objects.
 
         """
+        d = {}
         with self.open(url, reload=reload) as f:
-            return dict(parse_celestrak_tle(f))
+            for names, sat in parse_tle(f):
+                d[sat.model.satnum] = sat
+                for name in names:
+                    d[name] = sat
+        return d
 
     def open(self, url, mode='rb', reload=False):
         """Open a file, downloading it first if it does not yet exist.
@@ -355,29 +360,49 @@ def parse_leap_seconds(fileobj):
     return expiration_date, (leap_dates, leap_offsets)
 
 
-def parse_celestrak_tle(fileobj):
-    lines = iter(fileobj)
-    for line in lines:
-        if line.decode('ascii').strip()[0] != '1':  # three-line elset
-            name = line.decode('ascii').strip()
-            line1 = next(lines).decode('ascii')
-            line2 = next(lines).decode('ascii')
+def parse_tle(fileobj):
+    """Parse a file of TLE satellite element sets.
+
+    Builds an Earth satellite from each pair of adjacent lines in the
+    file that start with "1 " and "2 " and have 69 or more characters
+    each.  If the preceding line is exactly 24 characters long, then it
+    is parsed as the satellite's name.  For each satellite found, yields
+    a tuple `(names, sat)` giving the name(s) on the preceding line (or
+    `None` if no name was found) and the satellite object itself.
+
+    An exception is raised if the attempt to parse a pair of candidate
+    lines as TLE elements fails.
+
+    """
+    b0 = b1 = b''
+    for b2 in fileobj:
+        if (b1.startswith(b'1 ') and len(b1) >= 69 and
+            b2.startswith(b'2 ') and len(b2) >= 69):
+
+            if len(b0) == 25:
+                name = b0.decode('ascii').rstrip()
+                names = [name]
+            else:
+                name = None
+                names = ()
+
+            line1 = b1.decode('ascii')
+            line2 = b2.decode('ascii')
             sat = EarthSatellite(line1, line2, name)
-        else:  # two-line elset, no name provided!
-            line1 = line.decode('ascii')
-            line2 = next(lines).decode('ascii')
-            sat = EarthSatellite(line1, line2, name=None)
-            name = str(sat.model.satnum)  # set to satellite number
-            sat.name = name
-        yield sat.model.satnum, sat
-        yield name, sat
-        if ' (' in name:
-            # Given `ISS (ZARYA)` or `HTV-6 (KOUNOTORI 6)`, also support
-            # lookup by the name inside or outside the parentheses.
-            short_name, secondary_name = name.split(' (')
-            secondary_name = secondary_name.rstrip(')')
-            yield short_name, sat
-            yield secondary_name, sat
+
+            if name and ' (' in name:
+                # Given a name like `ISS (ZARYA)` or `HTV-6 (KOUNOTORI
+                # 6)`, also support lookup by the name inside or outside
+                # the parentheses.
+                short_name, secondary_name = name.split(' (')
+                secondary_name = secondary_name.rstrip(')')
+                names.append(short_name)
+                names.append(secondary_name)
+
+            yield names, sat
+
+        b0 = b1
+        b1 = b2
 
 
 def download(url, path, verbose=None, blocksize=128*1024):

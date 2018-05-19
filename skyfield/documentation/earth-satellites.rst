@@ -78,8 +78,8 @@ which is listed in their ``stations.txt`` file:
 
 .. testsetup::
 
-    open('stations.txt', 'w').write("""\
-    ISS (ZARYA)             
+    open('stations.txt', 'wb').write(b"""\
+    ISS (ZARYA)             \n\
     1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082
     2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
     """)

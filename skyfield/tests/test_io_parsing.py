@@ -1,7 +1,7 @@
 """Tests of how well we parse various file formats."""
 
 from skyfield.functions import BytesIO
-from skyfield.iokit import parse_celestrak_tle
+from skyfield.iokit import parse_tle
 
 sample_celestrak_text = b"""\
 ISS (ZARYA)             \n\
@@ -21,20 +21,29 @@ sample_spacetrack_text = b"""\
 
 def test_celestrak():
     f = BytesIO(sample_celestrak_text)
-    d = dict(parse_celestrak_tle(f))
-    assert len(d) == 6
-    assert d[25544] is d['ISS'] is d['ISS (ZARYA)'] is d['ZARYA']
-    assert d[41483] is d['FLOCK 2E-1']
-    assert d[25544] is not d[41483]
+    s = list(parse_tle(f))
+    print(s)
+    assert len(s) == 2
+    assert s[0][0] == ['ISS (ZARYA)', 'ISS', 'ZARYA']
+    assert s[0][1].name == 'ISS (ZARYA)'
+    assert s[1][0] == ['FLOCK 2E-1']
+    assert s[1][1].name == 'FLOCK 2E-1'
 
 def test_spacetrack():
     f = BytesIO(sample_spacetrack_text)
-    d = dict(parse_celestrak_tle(f))
-    assert len(d) == 4
-    assert d['29273'] is d[29273]
-    assert d['29274'] is d[29274]
-    assert d[29273] is not d[29274]
-    assert d[29273].model.satnum == 29273
-    assert d[29273].name == '29273'
-    assert d[29274].model.satnum == 29274
-    assert d[29274].name == '29274'
+    s = list(parse_tle(f))
+    assert len(s) == 2
+    print(s)
+    assert s[0][0] == ()
+    assert s[0][1].name is None
+    assert s[1][0] == ()
+    assert s[1][1].name is None
+
+def test_extra_lines_in_tle_are_ignored():
+    f = BytesIO(b'Sample line\n' + sample_celestrak_text + b'Another line\n')
+    s = list(parse_tle(f))
+    assert len(s) == 2
+    assert s[0][0] == ['ISS (ZARYA)', 'ISS', 'ZARYA']
+    assert s[0][1].name == 'ISS (ZARYA)'
+    assert s[1][0] == ['FLOCK 2E-1']
+    assert s[1][1].name == 'FLOCK 2E-1'
