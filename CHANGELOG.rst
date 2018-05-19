@@ -7,8 +7,13 @@ Changelog
 ------------
 
 * The dictionary of satellites returned when you read a TLE file
-  now supports lookup by integer satellite ID, not just by name.
+  now supports lookup by integer satellite ID, not just by name,
+  and now knows how to parse TLE files from Space-Track.
+  `#163 <https://github.com/skyfielders/python-skyfield/issues/163>`_
   `#167 <https://github.com/skyfielders/python-skyfield/issues/167>`_
+
+* Star coordinates can now be offered for any epoch, not just J2000.
+  `#166 <https://github.com/skyfielders/python-skyfield/issues/166>`_
 
 1.3 — 2018 April 15
 -------------------
