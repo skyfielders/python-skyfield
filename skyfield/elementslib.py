@@ -1,4 +1,4 @@
-from .functions import dots, length_of, angle_between2
+from .functions import dots, length_of, angle_between
 from .constants import DAY_S, tau
 from .units import Distance, Angle
 from .reify import reify
@@ -211,7 +211,7 @@ def argument_of_periapsis(n_vec, e_vec, pos_vec, vel_vec):
             return angle if cross(pos_vec, vel_vec, 0, 0).T[2] >= 0 else -angle%tau
         
         else: # not circular and not equatorial
-            angle = angle_between2(n_vec, e_vec)
+            angle = angle_between(n_vec, e_vec)
             return angle if e_vec[2] > 0 else -angle%tau
     else:
         w = zeros_like(pos_vec[0]) # defaults to 0 for circular orbits
@@ -225,7 +225,7 @@ def argument_of_periapsis(n_vec, e_vec, pos_vec, vel_vec):
         w[inds] = where(condition, angle, -angle%tau)
         
         inds = ~circular*~equatorial
-        angle = angle_between2(n_vec[:, inds], e_vec[:, inds])
+        angle = angle_between(n_vec[:, inds], e_vec[:, inds])
         condition = e_vec[2][inds] > 0
         w[inds] = where(condition, angle, -angle%tau)
         return w
@@ -266,8 +266,8 @@ def eccentricity_vector(pos_vec, vel_vec, mu):
 
 
 def inclination(h_vec):
-        k_vec = array([zeros_like(h_vec[0]), zeros_like(h_vec[0]), ones_like(h_vec[0])])
-        return angle_between2(h_vec, k_vec)
+    k_vec = array([zeros_like(h_vec[0]), zeros_like(h_vec[0]), ones_like(h_vec[0])])
+    return angle_between(h_vec, k_vec)
 
 
 def longitude_of_ascending_node(i, h_vec):
@@ -378,9 +378,9 @@ def time_since_periapsis(M, n, v, p, mu):
 
 
 def true_anomaly(e_vec, pos_vec, vel_vec, n_vec):
-    if len(pos_vec.shape) == 1:
+    if pos_vec.ndim == 1:
         if length_of(e_vec) > 1e-15: # not circular
-            angle = angle_between2(e_vec, pos_vec)
+            angle = angle_between(e_vec, pos_vec)
             v = angle if dots(pos_vec, vel_vec) > 0 else -angle%tau
         
         elif length_of(n_vec) < 1e-15: # circular and equatorial
@@ -388,7 +388,7 @@ def true_anomaly(e_vec, pos_vec, vel_vec, n_vec):
             v = angle if vel_vec[0] < 0 else -angle%tau
         
         else: # circular and not equatorial
-            angle = angle_between2(n_vec, pos_vec)
+            angle = angle_between(n_vec, pos_vec)
             v = angle if pos_vec[2] >= 0 else -angle%tau
         
         return v if length_of(e_vec)<(1-1e-15) else normpi(v)
@@ -398,7 +398,7 @@ def true_anomaly(e_vec, pos_vec, vel_vec, n_vec):
         equatorial = (length_of(n_vec)<1e-15)
         
         inds = ~circular
-        angle = angle_between2(e_vec[:, inds], pos_vec[:, inds])
+        angle = angle_between(e_vec[:, inds], pos_vec[:, inds])
         condition = (dots(pos_vec[:, inds], vel_vec[:, inds]) > 0)
         v[inds] = where(condition, angle, -angle%tau)
         
@@ -408,7 +408,7 @@ def true_anomaly(e_vec, pos_vec, vel_vec, n_vec):
         v[inds] = where(condition, angle, -angle%tau)
         
         inds = circular*~equatorial
-        angle = angle_between2(n_vec[:, inds], pos_vec[:, inds])
+        angle = angle_between(n_vec[:, inds], pos_vec[:, inds])
         condition = pos_vec[2][inds] >= 0
         v[inds] = where(condition, angle, -angle%tau)
 

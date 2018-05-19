@@ -22,26 +22,8 @@ def length_of(xyz):
 
     """
     return sqrt((xyz * xyz).sum(axis=0))
-    
-def angle_between(p1, p2):
-    """Given 2 vectors in `v` and `u`, return the angle separating them.
 
-    This works whether `v` and `u` each have the shape ``(3,)``, or
-    whether they are each whole arrays of corresponding x, y, and z
-    coordinates and have shape ``(3, N)``. The returned angle will be between 
-    0 and 180 degrees.
-    """
-    u1 = p1 / length_of(p1)
-    u2 = p2 / length_of(p2)
-    if u2.ndim > 1:
-        if u1.ndim == 1:
-            u1 = u1[:,None]
-    elif u1.ndim > 1:
-        u2 = u2[:,None]
-    c = dots(u1, u2)
-    return arccos(clip(c, -1.0, 1.0))
-
-def angle_between2(u_vec, v_vec):
+def angle_between(u_vec, v_vec):
     """Given 2 vectors in `v` and `u`, return the angle separating them.
 
     This works whether `v` and `u` each have the shape ``(3,)``, or
