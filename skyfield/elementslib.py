@@ -26,10 +26,11 @@ class OsculatingElements(object):
         The times of the position and velocity vectors
     mu_km_s: float
         Gravitational parameter (G*M) in units of km^3/s^2
+    ref_frame : 3x3 array
+        Rotation matrix from ICRF to reference frame of the elements
         
     """
-    def __init__(self, position, velocity, time, mu_km_s):
-        
+    def __init__(self, position, velocity, time, mu_km_s, ref_frame=None):                
         self._pos_vec = position.km
         self._vel_vec = velocity.km_per_s
         self.time = time
@@ -41,6 +42,8 @@ class OsculatingElements(object):
         
         self.size = position.km[0].size
         self.shape = position.km[0].shape
+        
+        self._ref_frame = ref_frame
         
     @reify 
     def apoapsis_distance(self):

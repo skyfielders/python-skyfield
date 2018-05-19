@@ -46,7 +46,8 @@ def elements(self, ref_plane='equator'):
         return OsculatingElements(self.ecliptic_position(), 
                                   self.ecliptic_velocity(), 
                                   self.t, 
-                                  mu)
+                                  mu,
+                                  ref_frame=inertial_frames['ECLIPJ2000'])
     else:
         raise ValueError("ref_plane must be either 'equator' or 'ecliptic'.")
         
