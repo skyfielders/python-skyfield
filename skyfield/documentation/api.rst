@@ -210,7 +210,7 @@ Position methods specific to one class
    Barycentric.observe
    Astrometric.apparent
    Apparent.altaz
-   Geocentric.observe
+   Geocentric.subpoint
 
 Units
 =====

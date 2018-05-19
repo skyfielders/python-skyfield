@@ -372,6 +372,14 @@ class Geocentric(ICRF):
     """An (x,y,z) position measured from the geocenter."""
 
     def subpoint(self):
+        """Return the latitude and longitude directly beneath this position.
+
+        Returns a :class:`~skyfield.toposlib.Topos` whose ``longitude``
+        and ``latitude`` are those of the point on the Earth's surface
+        directly beneath this position, and whose ``elevation`` is the
+        height of this position above the Earth's surface.
+
+        """
         if self.center != 399:  # TODO: should an __init__() check this?
             raise ValueError("you can only ask for the geographic subpoint"
                              " of a position measured from Earth's center")
