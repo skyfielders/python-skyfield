@@ -195,7 +195,8 @@ class ICRF(object):
                 Angle(radians=dec),
                 Distance(au=d))
 
-    def from_altaz(self, alt=None, az=None, alt_degrees=None, az_degrees=None):
+    def from_altaz(self, alt=None, az=None, alt_degrees=None, az_degrees=None,
+                   distance=Distance(au=0.1)):
         """Generate an Apparent position from an altitude and azimuth.
 
         The altitude and azimuth can each be provided as an `Angle`
@@ -206,6 +207,9 @@ class ICRF(object):
             alt_degrees=23.2289, az_degrees=142.1161
             alt_degrees=(23, 13, 44.1), az_degrees=(142, 6, 58.1)
 
+        The distance should be a :class:`~skyfield.units.Distance`
+        object, if provided; otherwise a default of 0.1 au is used.
+
         """
         # TODO: should this method live on another class?
         R = self.observer_data.altaz_rotation if self.observer_data else None
@@ -215,7 +219,7 @@ class ICRF(object):
                              ' and can understand altitude and azimuth')
         alt = _interpret_angle('alt', alt, alt_degrees)
         az = _interpret_angle('az', az, az_degrees)
-        r = 0.1  # close enough to make gravitational refraction irrelevant
+        r = distance.au
         p = from_polar(r, alt, az)
         p = einsum('ji...,j...->i...', R, p)
         return Apparent(p)

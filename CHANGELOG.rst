@@ -3,8 +3,12 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-1.4 — 2018 ?
-------------
+1.4 — 2018 May 20
+-----------------
+
+* You can now specify the distance to an object when generating a
+  position from altitude and azimuth coordinates.
+  `#158 <https://github.com/skyfielders/python-skyfield/issues/158>`_
 
 * The dictionary of satellites returned when you read a TLE file
   now supports lookup by integer satellite ID, not just by name,
