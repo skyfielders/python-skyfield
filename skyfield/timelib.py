@@ -197,6 +197,45 @@ class Timescale(object):
         t.tdb = tdb
         return t
 
+    def ut1(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
+            jd=None):
+        """Return the Time corresponding to a specific moment in UT1.
+
+        You can supply the Universal Time (UT1) by providing either a
+        proleptic Gregorian calendar date or a raw Julian Date float.
+        The following two method calls are equivalent::
+
+            timescale.ut1(2014, 1, 18, 1, 35, 37.5)
+            timescale.ut1(jd=2456675.56640625)
+
+        """
+        if jd is not None:
+            ut1 = jd
+        else:
+            ut1 = julian_date(
+                _to_array(year), _to_array(month), _to_array(day),
+                _to_array(hour), _to_array(minute), _to_array(second),
+            )
+        ut1 = _to_array(ut1)
+
+        # Estimate TT = UT1, to get a rough Delta T estimate.
+        tt_approx = ut1
+        delta_t_approx = interpolate_delta_t(self.delta_t_table, tt_approx)
+
+        # Use the rough Delta T to make a much better estimate of TT,
+        # then generate an even better Delta T.
+        tt_approx = ut1 + delta_t_approx / DAY_S
+        delta_t_approx = interpolate_delta_t(self.delta_t_table, tt_approx)
+
+        # We can now estimate TT with an error of < 1e-9 seconds within
+        # 10 centuries of either side of the present; for details, see:
+        # https://github.com/skyfielders/astronomy-notebooks
+        # and look for the notebook "error-in-timescale-ut1.ipynb".
+        tt = ut1 + delta_t_approx / DAY_S
+        t = Time(self, tt)
+        t.ut1 = ut1
+        return t
+
     def from_astropy(self, t):
         """Return a Skyfield time corresponding to the AstroPy time `t`."""
         return self.tt(jd=t.tt.jd)

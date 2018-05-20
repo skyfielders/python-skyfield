@@ -19,6 +19,9 @@ Changelog
 * Star coordinates can now be offered for any epoch, not just J2000.
   `#166 <https://github.com/skyfielders/python-skyfield/issues/166>`_
 
+* You can now create a time object given the UT1 date.
+  `#91 <https://github.com/skyfielders/python-skyfield/issues/91>`_
+
 1.3 — 2018 April 15
 -------------------
 
