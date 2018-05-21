@@ -22,6 +22,9 @@ Changelog
 * You can now create a time object given the UT1 date.
   `#91 <https://github.com/skyfielders/python-skyfield/issues/91>`_
 
+* The parameter DUT1 is now available on ``Time`` objects as ``.dut1``.
+  `#176 <https://github.com/skyfielders/python-skyfield/issues/176>`_
+
 1.3 — 2018 April 15
 -------------------
 
