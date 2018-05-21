@@ -466,6 +466,25 @@ class Time(object):
         else:
             return strftime(format, tup)
 
+    def _utc_year(self):
+        """Return a fractional UTC year, for convenience when plotting.
+
+        An experiment, probably superseded by the ``J`` attribute below.
+
+        """
+        d = self._utc_float() - 1721059.5
+        #d += offset
+        C = 365 * 100 + 24
+        d -= 365
+        d += d // C - d // (4 * C)
+        d += 365
+        # Y = d / C * 100
+        # print(Y)
+        K = 365 * 3 + 366
+        d -= (d + K*7//8) // K
+        # d -= d // 1461.0
+        return d / 365.0 # d // 365, d % 365.0
+
     def _utc_tuple(self, offset=0.0):
         """Return UTC as (year, month, day, hour, minute, second.fraction).
 
@@ -543,6 +562,11 @@ class Time(object):
         return MT
 
     # Conversion between timescales.
+
+    @reify
+    def J(self):
+        """Decimal Julian years centered on J2000.0 = TT 2000 January 1 12h."""
+        return (self.tt - 1721045.0) / 365.25
 
     @reify
     def tai(self):
