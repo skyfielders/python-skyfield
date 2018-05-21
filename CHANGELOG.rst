@@ -22,6 +22,8 @@ Changelog
 * You can now create a time object given the UT1 date.
   `#91 <https://github.com/skyfielders/python-skyfield/issues/91>`_
 
+* Fractional Julian years are now available on ``Time`` objects as ``.J``.
+
 * The parameter DUT1 is now available on ``Time`` objects as ``.dut1``.
   `#176 <https://github.com/skyfielders/python-skyfield/issues/176>`_
 

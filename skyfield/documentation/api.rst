@@ -70,6 +70,7 @@ that present the time in several basic time scales.
 ========= ==================================================
 ``t.tai`` International Atomic Time (TAI) as a Julian date.
 ``t.tt``  Terrestrial Time (TT) as a Julian date.
+``t.J``   Terrestrial Time (TT) as decimal Julian years.
 ``t.tdb`` Barycentric Dynamical Time (TDB) as a Julian date.
 ``t.ut1`` Universal Time (UT1) as a Julian date.
 ========= ==================================================

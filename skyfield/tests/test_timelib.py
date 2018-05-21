@@ -247,9 +247,7 @@ def test_leap_second(ts):
     assert ts.tai(jd=t4).utc_iso() == '1974-01-01T00:00:00Z'
     assert ts.tai(jd=t5).utc_iso() == '1974-01-01T00:00:01Z'
 
-
 def test_delta_t(ts):
-
     # Check delta_t calculation around year 2000/1/1 (from IERS tables this is 63.8285)
     t = ts.utc(2000, 1, 1, 0, 0, 0)
     assert abs(t.delta_t - 63.8285) < 1e-5
@@ -263,7 +261,11 @@ def test_delta_t(ts):
     # Stephenson formula. For 2320 (t=5 cy) should be: -20 + 32 * 5**2
     t = ts.utc(year=2320)
     assert abs(t.delta_t + 20.0 - (32.0 * 5.0**2)) < 1.0
- 
+
+def test_J(ts):
+    assert ts.tt(2000, 1, 1.5).J == 2000.0
+    assert ts.tt(1900, 1, 0.5).J == 1900.0
+
 def test_time_repr(ts):
 
     # Check that repr return is a str (this is required on Python 2,

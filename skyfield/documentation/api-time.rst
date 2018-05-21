@@ -33,6 +33,10 @@ The Time object
 
       Terrestrial Time (TT) as a Julian date.
 
+   .. attribute:: J
+
+      Terrestrial Time (TT) as a decimal number of Julian years.
+
    .. attribute:: tdb
 
       Barycentric Dynamical Time (TDB) as a Julian date.
