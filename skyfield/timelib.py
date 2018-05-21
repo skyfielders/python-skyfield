@@ -573,6 +573,10 @@ class Time(object):
         return delta_t
 
     @reify
+    def dut1(self):
+        return (self.tt - self._utc_float()) * DAY_S - self.delta_t
+
+    @reify
     def gmst(self):
         self.gmst = gmst = sidereal_time(self)
         return gmst

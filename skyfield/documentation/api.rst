@@ -56,6 +56,7 @@ and the more stable time scales used by astronomers.
    Timescale.tai
    Timescale.tt
    Timescale.tdb
+   Timescale.ut1
    Timescale.from_astropy
 
 Time objects
@@ -72,6 +73,13 @@ that present the time in several basic time scales.
 ``t.tdb`` Barycentric Dynamical Time (TDB) as a Julian date.
 ``t.ut1`` Universal Time (UT1) as a Julian date.
 ========= ==================================================
+
+A couple of offsets between time scales are also available.
+
+============= ================================
+``t.delta_t`` Difference TT − UT1 in seconds.
+``t.dut1``    Difference UT1 − UTC in seconds.
+============= ================================
 
 Other time scales and conversions are available through its methods.
 
