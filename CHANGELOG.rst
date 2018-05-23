@@ -3,12 +3,29 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-1.4 — 2018 ?
-------------
+1.4 — 2018 May 20
+-----------------
+
+* You can now specify the distance to an object when generating a
+  position from altitude and azimuth coordinates.
+  `#158 <https://github.com/skyfielders/python-skyfield/issues/158>`_
 
 * The dictionary of satellites returned when you read a TLE file
-  now supports lookup by integer satellite ID, not just by name.
+  now supports lookup by integer satellite ID, not just by name,
+  and now knows how to parse TLE files from Space-Track.
+  `#163 <https://github.com/skyfielders/python-skyfield/issues/163>`_
   `#167 <https://github.com/skyfielders/python-skyfield/issues/167>`_
+
+* Star coordinates can now be offered for any epoch, not just J2000.
+  `#166 <https://github.com/skyfielders/python-skyfield/issues/166>`_
+
+* You can now create a time object given the UT1 date.
+  `#91 <https://github.com/skyfielders/python-skyfield/issues/91>`_
+
+* Fractional Julian years are now available on ``Time`` objects as ``.J``.
+
+* The parameter DUT1 is now available on ``Time`` objects as ``.dut1``.
+  `#176 <https://github.com/skyfielders/python-skyfield/issues/176>`_
 
 1.3 — 2018 April 15
 -------------------

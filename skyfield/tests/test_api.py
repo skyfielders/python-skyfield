@@ -63,17 +63,19 @@ def test_from_altaz_needs_topos():
         p.from_altaz(alt_degrees=0, az_degrees=0)
 
 def test_from_altaz_parameters(ts):
-    e = api.load('de421.bsp')
-    usno = e['earth'] + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
     t = ts.tt(jd=api.T0)
     p = usno.at(t)
     a = api.Angle(degrees=10.0)
+    d = api.Distance(au=0.234)
     with assert_raises(ValueError, 'the alt= parameter with an Angle'):
         p.from_altaz(alt='Bad value', alt_degrees=0, az_degrees=0)
     with assert_raises(ValueError, 'the az= parameter with an Angle'):
         p.from_altaz(az='Bad value', alt_degrees=0, az_degrees=0)
     p.from_altaz(alt=a, alt_degrees='bad', az_degrees=0)
     p.from_altaz(az=a, alt_degrees=0, az_degrees='bad')
+    assert str(p.from_altaz(alt=a, az=a).distance()) == '0.1 au'
+    assert str(p.from_altaz(alt=a, az=a, distance=d).distance()) == '0.234 au'
 
 def test_named_star_throws_valueerror():
     with assert_raises(ValueError, 'No star named foo known to skyfield'):

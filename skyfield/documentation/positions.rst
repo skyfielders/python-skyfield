@@ -345,6 +345,25 @@ against the background of stars in a
 `printed star atlas <http://www.amazon.com/s/?_encoding=UTF8&camp=1789&creative=390957&linkCode=ur2&pageMinusResults=1&suo=1389754954253&tag=letsdisthemat-20&url=search-alias%3Daps#/ref=nb_sb_noss_1?url=search-alias%3Daps&field-keywords=star%20atlas&sprefix=star+%2Caps&rh=i%3Aaps%2Ck%3Astar%20atlas&sepatfbtf=true&tc=1389754955568>`_,
 because star atlases use astrometric positions.
 
+If you have several bodies for which you want to generate positions,
+note that it’s more efficient to generate the observer’s position only once
+and then re-use that position for each object you want to observe.
+
+.. testcode::
+
+    # Observing Mars from the Earth's position
+
+    mercury, venus = planets['mercury'], planets['venus']
+
+    here = earth.at(ts.utc(2018, 5, 19))
+    print(here.observe(mercury).position.au)
+    print(here.observe(venus).position.au)
+
+.. testoutput::
+
+    [0.894231   0.67436002 0.24448674]
+    [0.02134722 1.22511631 0.57114432]
+
 .. _apparent:
 
 Apparent position

@@ -114,8 +114,7 @@ Here are all three effects applied to Barnard’s star:
                    ra_mas_per_year=-798.71,
                    dec_mas_per_year=+10337.77,
                    parallax_mas=545.4,
-                   radial_km_per_s=-110.6,
-                   epoch=T0)
+                   radial_km_per_s=-110.6)
 
     astrometric = earth.at(t).observe(barnard)
     ra, dec, distance = astrometric.radec()
@@ -129,15 +128,48 @@ Here are all three effects applied to Barnard’s star:
     +04deg 44' 01.3"
     3.77863e+05 au
 
-(The ``epoch`` parameter defaults to ``T0`` but it is used above to call
-attention to its existence.) Note that the above position is different than
-the input right ascension and declination but not because we have asked for
-dynamic coordinates. This position is in fixed ICRS coordinates and indicates
-real motion on the part of Barnard’s star across our sky.
+Note that the above position is different than the input right ascension
+and declination but not because we have asked for dynamic coordinates.
+This position is in fixed ICRS coordinates and indicates real motion on
+the part of Barnard’s star across our sky.
 
 See the guide to :doc:`positions` to learn the operations that you can
 perform with these astrometric positions after using a :class:`Star`
 object to generate them.
+
+Position at an epoch besides J2000
+==================================
+
+Some star catalogs provide positions at an epoch besides J2000.
+For example, the catalog of stars observed by the Hipparcos space telescope
+provides their positions as of J1991.25.
+
+The epoch can be provided as an argument ``epoch`` to :class:`Star`.
+Here are the right ascension and declination given for Barnard’s Star
+in the Hipparcos catalog:
+
+.. testcode::
+
+    hipparcos_epoch = ts.tt(1991.25)
+    barnard2 = Star(ra_hours=(17, 57, 48.97),
+                    dec_degrees=(4, 40, 5.8),
+                    ra_mas_per_year=-797.84,
+                    dec_mas_per_year=+10326.93,
+                    epoch=hipparcos_epoch)
+
+    ra, dec, distance = earth.at(t).observe(barnard2).radec()
+    print(ra)
+    print(dec)
+
+.. testoutput::
+
+    17h 57m 47.75s
+    +04deg 44' 01.3"
+
+As you can see, the position returned for the date ``t`` is the same,
+even though we initialized this :class:`Star` object
+with a position for Barnard’s Star more than 8 years earlier
+than the position we used in our first example.
 
 .. testcleanup::
 
