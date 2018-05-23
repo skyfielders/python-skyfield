@@ -192,20 +192,23 @@ class ICRF(object):
             coe = cos(e)
             sie = sin(e)
             if not epoch.shape:
-                E = array(((1, 0, 0),
-                       (0, coe, sie),
-                       (0, -sie, coe)))
+                # E = array(((1, 0, 0),
+                #        (0, coe, sie),
+                #        (0, -sie, coe)))
+                E = rot_x(e)
                 vector = E.dot(position_au)
                 d, lat, lon = to_polar(vector)
             else:
-                x1 = repeat(1.0, epoch.shape[0])
-                y1 = repeat(0.0, epoch.shape[0])
-                z1 = repeat(0.0, epoch.shape[0])
-                x2 = repeat(0.0, epoch.shape[0])
-                x3 = repeat(0.0, epoch.shape[0])
-                E = array(((x1, x2, x3),
-                         (y1, coe, -sie),
-                         (z1, sie, coe)))
+                # x1 = repeat(1.0, epoch.shape[0])
+                # y1 = repeat(0.0, epoch.shape[0])
+                # z1 = repeat(0.0, epoch.shape[0])
+                # x2 = repeat(0.0, epoch.shape[0])
+                # x3 = repeat(0.0, epoch.shape[0])
+                E = rot_x(e)
+                print ("pretty please",E)
+                # E = array(((x1, x2, x3),
+                #          (y1, coe, -sie),
+                #          (z1, sie, coe)))
                 result_array = empty((E.T.shape[0], E.T.shape[1]))
                 for a in range(0, E.T.shape[0]):
                     vector = E.T[a, 0:].dot(position_au.T[a, 0:])
