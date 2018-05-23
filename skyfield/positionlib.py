@@ -1,13 +1,14 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, arccos, clip, einsum, exp, empty
-from .constants import RAD2DEG, tau
+from numpy import array, arccos, clip, einsum, exp, empty, cos, sin, repeat
+from .constants import RAD2DEG, tau, DEG2RAD
 from .data.spice import inertial_frames
-from .functions import dots, from_polar, length_of, to_polar, rot_z
+from .functions import dots, from_polar, length_of, to_polar, rot_z, rot_x
 from .earthlib import compute_limb_angle, refract
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Distance, Velocity, Angle, _interpret_angle
+from .nutationlib import earth_tilt
 
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GALACTIC = inertial_frames['GALACTIC']
@@ -164,6 +165,7 @@ class ICRF(object):
             return Distance(vector)
         else:
             return Distance(vector.T)
+    ecliptic_position = ecliptic_xyz
 
     def ecliptic_latlon(self, epoch=None):
         """Compute J2000 ecliptic coordinates (lat, lon, distance)
@@ -185,27 +187,36 @@ class ICRF(object):
                                  ' a floating point Terrestrial Time (TT),'
                                  ' or the string "date" for epoch-of-date')
             position_au = einsum('ij...,j...->i...', epoch.M, position_au)
+            oblm, oblt, eqeq, psi, eps = earth_tilt(epoch)
+            e = oblt*DEG2RAD
+            coe = cos(e)
+            sie = sin(e)
             if not epoch.shape:
-                vector = epoch.E.dot(position_au)
+                E = array(((1, 0, 0),
+                       (0, coe, sie),
+                       (0, -sie, coe)))
+                vector = E.dot(position_au)
                 d, lat, lon = to_polar(vector)
-                return (Angle(radians=lat, signed=True),
-                        Angle(radians=lon),
-                        Distance(au=d))
             else:
-                result_array = empty((epoch.E.T.shape[0], epoch.E.T.shape[1]))
-                for a in range(0, epoch.E.T.shape[0]):
-                    vector = epoch.E.T[a, 0:].dot(position_au.T[a, 0:])
+                x1 = repeat(1.0, epoch.shape[0])
+                y1 = repeat(0.0, epoch.shape[0])
+                z1 = repeat(0.0, epoch.shape[0])
+                x2 = repeat(0.0, epoch.shape[0])
+                x3 = repeat(0.0, epoch.shape[0])
+                E = array(((x1, x2, x3),
+                         (y1, coe, -sie),
+                         (z1, sie, coe)))
+                result_array = empty((E.T.shape[0], E.T.shape[1]))
+                for a in range(0, E.T.shape[0]):
+                    vector = E.T[a, 0:].dot(position_au.T[a, 0:])
                     result_array[a, 0:] = vector
                 d, lat, lon = to_polar(result_array.T)
-                return (Angle(radians=lat, signed=True),
-                        Angle(radians=lon),
-                        Distance(au=d))
         else:
             vector = _ECLIPJ2000.dot(position_au)
             d, lat, lon = to_polar(vector)
-            return (Angle(radians=lat, signed=True),
-                    Angle(radians=lon),
-                    Distance(au=d))
+        return (Angle(radians=lat, signed=True),
+                Angle(radians=lon),
+                Distance(au=d))
 
     def galactic_position(self):
         """Compute galactic coordinates (x, y, z)"""
