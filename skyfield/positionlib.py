@@ -159,21 +159,6 @@ class ICRF(object):
         system defined by the Earth's true equator and equinox, provide
         an epoch time.
         """
-        lat, lon, d = self.ecliptic_latlon(epoch)
-        vector = from_polar(d.au, lat.radians, lon.radians)
-        if len(vector.shape) is 1:
-            return Distance(vector)
-        else:
-            return Distance(vector.T)
-    ecliptic_position = ecliptic_xyz
-
-    def ecliptic_latlon(self, epoch=None):
-        """Compute J2000 ecliptic coordinates (lat, lon, distance)
-
-        If you instead want the coordinates referenced to the dynamical
-        system defined by the Earth's true equator and equinox, provide
-        an epoch time.
-        """
         position_au = self.position.au
         if epoch is not None:
             if isinstance(epoch, Time):
@@ -193,10 +178,9 @@ class ICRF(object):
             sie = sin(e)
             if not epoch.shape:
                 E = array(((1, 0, 0),
-                        (0, coe, sie),
-                        (0, -sie, coe)))
+                          (0, coe, sie),
+                          (0, -sie, coe)))
                 vector = E.dot(position_au)
-                d, lat, lon = to_polar(vector)
             else:
                 x1 = repeat(1.0, epoch.shape[0])
                 y1 = repeat(0.0, epoch.shape[0])
@@ -210,10 +194,24 @@ class ICRF(object):
                 for a in range(0, E.T.shape[0]):
                     vector = E.T[a, 0:].dot(position_au.T[a, 0:])
                     result_array[a, 0:] = vector
-                d, lat, lon = to_polar(result_array.T)
+                vector = result_array.T
         else:
             vector = _ECLIPJ2000.dot(position_au)
-            d, lat, lon = to_polar(vector)
+        if len(vector.shape) is 1:
+            return Distance(vector)
+        else:
+            return Distance(vector.T)
+    ecliptic_position = ecliptic_xyz
+
+    def ecliptic_latlon(self, epoch=None):
+        """Compute J2000 ecliptic coordinates (lat, lon, distance)
+
+        If you instead want the coordinates referenced to the dynamical
+        system defined by the Earth's true equator and equinox, provide
+        an epoch time.
+        """
+        vector = self.ecliptic_xyz(epoch)
+        d, lat, lon = to_polar(vector.au)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
                 Distance(au=d))
