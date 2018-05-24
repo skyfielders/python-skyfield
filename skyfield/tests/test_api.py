@@ -30,6 +30,15 @@ def test_astrometric_position_class(ts):
     p = e['earth'].at(ts.utc(2014, 2, 9, 14, 50)).observe(e['mars'])
     assert isinstance(p, positionlib.Astrometric)
 
+def test_ephemeris_contains_method(ts):
+    e = api.load('de421.bsp')
+    assert (399 in e) is True
+    assert (398 in e) is False
+    assert ('earth' in e) is True
+    assert ('Earth' in e) is True
+    assert ('EARTH' in e) is True
+    assert ('ceres' in e) is False
+
 def test_planet_position_class(ts):
     e = api.load('de421.bsp')
     p = e['mars'].at(ts.utc(2014, 2, 9, 14, 50))
@@ -54,17 +63,19 @@ def test_from_altaz_needs_topos():
         p.from_altaz(alt_degrees=0, az_degrees=0)
 
 def test_from_altaz_parameters(ts):
-    e = api.load('de421.bsp')
-    usno = e['earth'] + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    usno = Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
     t = ts.tt(jd=api.T0)
     p = usno.at(t)
     a = api.Angle(degrees=10.0)
+    d = api.Distance(au=0.234)
     with assert_raises(ValueError, 'the alt= parameter with an Angle'):
         p.from_altaz(alt='Bad value', alt_degrees=0, az_degrees=0)
     with assert_raises(ValueError, 'the az= parameter with an Angle'):
         p.from_altaz(az='Bad value', alt_degrees=0, az_degrees=0)
     p.from_altaz(alt=a, alt_degrees='bad', az_degrees=0)
     p.from_altaz(az=a, alt_degrees=0, az_degrees='bad')
+    assert str(p.from_altaz(alt=a, az=a).distance()) == '0.1 au'
+    assert str(p.from_altaz(alt=a, az=a, distance=d).distance()) == '0.234 au'
 
 def test_named_star_throws_valueerror():
     with assert_raises(ValueError, 'No star named foo known to skyfield'):

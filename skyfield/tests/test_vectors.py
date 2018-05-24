@@ -17,13 +17,24 @@ def test_bad_subtraction():
     with assert_raises(ValueError, 'if they both start at the same center'):
         earth - usno
 
+def test_chebyshev_subtraction():
+    planets = load('de421.bsp')
+    v = planets['earth barycenter'] - planets['sun']
+
+    assert str(v) == """\
+Sum of 2 vectors:
+ - Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 10 SUN
+ + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER"""
+
+    assert repr(v) == "\
+<VectorSum of 2 vectors 10 SUN -> 3 EARTH BARYCENTER>"
+
 def test_vectors():
     ts = load.timescale()
     t = ts.tt(2017, 1, 23, 10, 44)
 
     planets = load('de421.bsp')
     earth = planets['earth']
-    moon = planets['moon']
     mars = planets['mars']
 
     v = earth
@@ -32,6 +43,9 @@ def test_vectors():
 Sum of 2 vectors:
  + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
  + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH"""
+
+    assert repr(v) == "\
+<VectorSum of 2 vectors 0 SOLAR SYSTEM BARYCENTER -> 399 EARTH>"
 
     assert str(v.at(t)) == "\
 <Barycentric position and velocity at date t center=0 target=399>"
@@ -44,6 +58,9 @@ Sum of 4 vectors:
  - Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 4 MARS BARYCENTER
  + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
  + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH"""
+
+    assert repr(v) == "\
+<VectorSum of 4 vectors 499 MARS -> 399 EARTH>"
 
     assert str(v.at(t)) == "\
 <Geometric position and velocity at date t center=499 target=399>"

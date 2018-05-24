@@ -47,7 +47,7 @@ class VectorFunction(object):
         othern = getattr(other, 'negatives', ())
 
         return VectorSum(other.target, self.target,
-                         self.target_name, other.target_name,
+                         other.target_name, self.target_name,
                          selfp + othern, selfn + otherp)
 
     @raise_error_for_deprecated_time_arguments

@@ -18,7 +18,7 @@ setup(
     author_email='brandon@rhodesmill.org',
     url='http://github.com/brandon-rhodes/python-skyfield/',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',
@@ -28,6 +28,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Scientific/Engineering :: Astronomy',
         ],
     packages=[
@@ -38,6 +39,7 @@ setup(
     package_data = {
         'skyfield': ['documentation/*.rst'],
         'skyfield.data': ['*.npy'],
+        'skyfield.tests': ['data/*'],
         },
     install_requires=[
         'jplephem>=2.3',

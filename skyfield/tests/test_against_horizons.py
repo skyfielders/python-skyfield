@@ -1,19 +1,18 @@
 """Accuracy tests against data pulled from HORIZONS."""
 
+import os
 from numpy import max
 from skyfield import api
 from skyfield.api import Topos
 from skyfield.constants import AU_M
 
+def _data_path(filename):
+    return os.path.join(os.path.dirname(__file__), 'data', filename)
+
 one_second = 1.0 / 24.0 / 60.0 / 60.0
 arcsecond = 1.0 / 60.0 / 60.0
 ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
 meter = 1.0 / AU_M
-
-base = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk'
-de430_url = base + '/planets/de430.bsp'
-de431_url = base + '/planets/de431.bsp'
-jup310_url = base + '/satellites/jup310.bsp'
 
 def ts():
     yield api.load.timescale()
@@ -49,7 +48,7 @@ def test_galactic_frame(ts):
     compare(glon.degrees, 187.221794, 0.005)
 
 def test_callisto_geometry(ts):
-    e = api.load('jup310.bsp')
+    e = api.load_file(_data_path('jup310-2053-10-08.bsp'))
     a = (e['callisto'] - e['earth']).at(ts.tdb(jd=2471184.5))
     print(a)
     compare(a.position.au,
@@ -60,7 +59,7 @@ def test_callisto_geometry(ts):
       0.00001 * meter)
 
 def test_callisto_astrometric(ts):
-    e = api.load('jup310.bsp')
+    e = api.load_file(_data_path('jup310-2053-10-08.bsp'))
     # This date was utc(2053, 10, 9), but new leap seconds keep breaking
     # the test, so:
     a = e['earth'].at(ts.tt(jd=2471184.5007775929)).observe(e['callisto'])
@@ -70,7 +69,7 @@ def test_callisto_astrometric(ts):
     compare(distance.au, 6.31079291776184, 0.1 * meter)
 
 def test_boston_geometry():
-    e = api.load('jup310.bsp')
+    e = api.load_file(_data_path('jup310-2015-03-02.bsp'))
     t = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
     boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8),
                                 x=0.003483, y=0.358609)
@@ -80,7 +79,7 @@ def test_boston_geometry():
       0.0027)  # TODO: try to get this < 1 meter
 
 def test_moon_from_boston_geometry():
-    e = api.load('de430t.bsp')
+    e = api.load_file(_data_path('de430-2015-03-02.bsp'))
     t = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
     boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8),
                                 x=0.003483, y=0.358609)
@@ -90,7 +89,7 @@ def test_moon_from_boston_geometry():
       1.7 * meter)  # TODO: improve this
 
 def test_moon_from_boston_astrometric():
-    e = api.load('de430t.bsp')
+    e = api.load_file(_data_path('de430-2015-03-02.bsp'))
     t = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
     boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8),
                                 x=0.003483, y=0.358609)

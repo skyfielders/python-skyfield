@@ -1,13 +1,15 @@
 
-===================================
- API Reference — Downloading Files
-===================================
+===============================
+ API Reference — Opening Files
+===============================
 
 .. currentmodule:: skyfield.iokit
 
 See :doc:`files` for an explanation of how Skyfield programs
 use an instance of the `Loader` class described below
 to download and open the data files they need in order to operate.
+
+.. autofunction:: load_file
 
 .. autoclass:: Loader
    :members:

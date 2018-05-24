@@ -18,6 +18,8 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
 .PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
 
+default: html
+
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  html       to make standalone HTML files"
@@ -157,14 +159,11 @@ doctest:
 diff:
 	colordiff -ur ~/Dropbox/rhodesmill.org/skyfield _build/html/ | grep -v 'Only in' | less
 
-#DEST = $(HOME)/Dropbox/rhodesmill.org/skyfield
 DEST=wf-rhodesmill:Dropbox/rhodesmill.org/skyfield
 
-dry-run:
-	rsync --dry-run -crlv _build/html/ $(DEST)
-
-sync:
-	rsync -crlv _build/html/ $(DEST)
+sync: html
+	rsync -r _build/html/ ~/src/rhodesmill.org/skyfield
+	,push
 
 # Runs web server outside _build, for when I need to "rm -r" clean-slate it:
 serve:

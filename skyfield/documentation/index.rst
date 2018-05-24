@@ -110,53 +110,29 @@ But the source code and issue tracker live on other web sites:
 
 * `GitHub issue tracker <https://github.com/brandon-rhodes/python-skyfield/issues>`_
 
-News
-====
+Most recent release: Version 1.3 on 2018 April 15
+=================================================
 
-**2017 March 15**
+* Geocentric coordinates now have a
+  :meth:`~skyfield.positionlib.Geocentric.subpoint()`
+  method that computes the latitude and longitude
+  of the point beneath that body.
 
-  Released Skyfield 1.0!
-  The API is now stable:
-  a collection of awkward special cases in the code
-  have now all been replaced with the overarching concept
-  of letting the developer freely add and subtract vector functions —
-  such as the position of a planet, a geographic location,
-  or an Earth satellite.
+* All of the ``Timescale`` time constructor methods now accept arrays.
 
-**2016 December 10**
+* Emergency fix to stop Skyfield
+  from endlessly downloading new copies of ``deltat.preds``,
+  since the file has gone out of date at the USNO site.
 
-  Released Skyfield 0.9.1
-  which fixes an obscure module that,
-  while not documented or supported at this point,
-  would cause a ``SyntaxError`` when the Python package install tool
-  would try to compile all of Skyfield’s ``.py`` files to ``.pyc`` files.
+* Fixed ability of a :class:`~skyfield.starlib.Star`
+  to be initialized with a tuple that breaks units into minutes and seconds
+  (broke in version 1.2).
 
-**2016 August 27**
+* Issues fixed:
+  `#170 <https://github.com/skyfielders/python-skyfield/issues/170>`_
+  `#172 <https://github.com/skyfielders/python-skyfield/issues/172>`_
 
-  Released Skyfield 0.9
-  which adds the ability of :ref:`turning-off-downloads`,
-  offers an expanded :doc:`bibliography`,
-  and provides several bugfixes.
-
-**2016 March 30**
-
-  Released Skyfield 0.8 with expanded documentation,
-  that now includes an `api` presenting the docstrings
-  from all stable and supported methods.
-
-**2016 March 24**
-
-  With the release of Skyfield 0.7,
-  the final API upheavals of the pre-1.0 era are now complete.
-  The introduction of the new timescale object
-  has now eliminated all hidden state from the library,
-  and has cleared the way for rapid development going forward.
-
-  Unless users encounter significant problems,
-  version 1.0 should follow as soon as the documentation —
-  and in particular the API Reference —
-  has received a bit more polish.
-  The project is almost there!
+See the :ref:`changelog` for all previous versions!
 
 .. testcleanup::
 

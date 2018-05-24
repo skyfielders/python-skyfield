@@ -3,6 +3,7 @@ from numpy import (array, concatenate, einsum, float_, interp, isnan, nan,
                    rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime
 from .constants import B1950, DAY_S, T0
+from .descriptorlib import reify
 from .earthlib import sidereal_time
 from .framelib import ICRS_to_J2000 as B
 from .functions import load_bundled_npy
@@ -140,7 +141,10 @@ class Timescale(object):
         if jd is not None:
             tai = jd
         else:
-            tai = julian_date(year, month, day, hour, minute, second)
+            tai = julian_date(
+                _to_array(year), _to_array(month), _to_array(day),
+                _to_array(hour), _to_array(minute), _to_array(second),
+            )
         tai = _to_array(tai)
         t = Time(self, tai + tt_minus_tai)
         t.tai = tai
@@ -161,7 +165,10 @@ class Timescale(object):
         if jd is not None:
             tt = jd
         else:
-            tt = julian_date(year, month, day, hour, minute, second)
+            tt = julian_date(
+                _to_array(year), _to_array(month), _to_array(day),
+                _to_array(hour), _to_array(minute), _to_array(second),
+            )
         tt = _to_array(tt)
         return Time(self, tt)
 
@@ -180,11 +187,53 @@ class Timescale(object):
         if jd is not None:
             tdb = jd
         else:
-            tdb = julian_date(year, month, day, hour, minute, second)
+            tdb = julian_date(
+                _to_array(year), _to_array(month), _to_array(day),
+                _to_array(hour), _to_array(minute), _to_array(second),
+            )
         tdb = _to_array(tdb)
         tt = tdb - tdb_minus_tt(tdb) / DAY_S
         t = Time(self, tt)
         t.tdb = tdb
+        return t
+
+    def ut1(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
+            jd=None):
+        """Return the Time corresponding to a specific moment in UT1.
+
+        You can supply the Universal Time (UT1) by providing either a
+        proleptic Gregorian calendar date or a raw Julian Date float.
+        The following two method calls are equivalent::
+
+            timescale.ut1(2014, 1, 18, 1, 35, 37.5)
+            timescale.ut1(jd=2456675.56640625)
+
+        """
+        if jd is not None:
+            ut1 = jd
+        else:
+            ut1 = julian_date(
+                _to_array(year), _to_array(month), _to_array(day),
+                _to_array(hour), _to_array(minute), _to_array(second),
+            )
+        ut1 = _to_array(ut1)
+
+        # Estimate TT = UT1, to get a rough Delta T estimate.
+        tt_approx = ut1
+        delta_t_approx = interpolate_delta_t(self.delta_t_table, tt_approx)
+
+        # Use the rough Delta T to make a much better estimate of TT,
+        # then generate an even better Delta T.
+        tt_approx = ut1 + delta_t_approx / DAY_S
+        delta_t_approx = interpolate_delta_t(self.delta_t_table, tt_approx)
+
+        # We can now estimate TT with an error of < 1e-9 seconds within
+        # 10 centuries of either side of the present; for details, see:
+        # https://github.com/skyfielders/astronomy-notebooks
+        # and look for the notebook "error-in-timescale-ut1.ipynb".
+        tt = ut1 + delta_t_approx / DAY_S
+        t = Time(self, tt)
+        t.ut1 = ut1
         return t
 
     def from_astropy(self, t):
@@ -218,11 +267,14 @@ class Time(object):
         return self.shape[0]
 
     def __repr__(self):
-
-        if getattr(self.tt, 'shape', ()):
+        size = getattr(self.tt, 'size', -1)
+        if size > 1:
             rstr = '<Time {0} values from tt={1:.6f} to tt={2:.6f}>'
             return rstr.format(self.tt.size, self.tt.min(), self.tt.max())
-        return '<Time tt={0:.6f}>'.format(self.tt)
+        elif size == 0:
+            return '<Time []>'
+        else:
+            return '<Time tt={0:.6f}>'.format(self.tt)
 
     def __getitem__(self, index):
         # TODO: also copy cached matrices?
@@ -414,6 +466,25 @@ class Time(object):
         else:
             return strftime(format, tup)
 
+    def _utc_year(self):
+        """Return a fractional UTC year, for convenience when plotting.
+
+        An experiment, probably superseded by the ``J`` attribute below.
+
+        """
+        d = self._utc_float() - 1721059.5
+        #d += offset
+        C = 365 * 100 + 24
+        d -= 365
+        d += d // C - d // (4 * C)
+        d += 365
+        # Y = d / C * 100
+        # print(Y)
+        K = 365 * 3 + 366
+        d -= (d + K*7//8) // K
+        # d -= d // 1461.0
+        return d / 365.0 # d // 365, d % 365.0
+
     def _utc_tuple(self, offset=0.0):
         """Return UTC as (year, month, day, hour, minute, second.fraction).
 
@@ -458,69 +529,86 @@ class Time(object):
         """Return TT as a tuple (year, month, day, hour, minute, second)."""
         return calendar_tuple(self.tt)
 
-    def __getattr__(self, name):
+    # Convenient caching of several expensive functions of time.
 
-        # Cache of several expensive functions of time.
+    @reify
+    def P(self):
+        self.P = P = compute_precession(self.tdb)
+        return P
 
-        if name == 'P':
-            self.P = P = compute_precession(self.tdb)
-            return P
+    @reify
+    def PT(self):
+        self.PT = PT = rollaxis(self.P, 1)
+        return PT
 
-        if name == 'PT':
-            self.PT = PT = rollaxis(self.P, 1)
-            return PT
+    @reify
+    def N(self):
+        self.N = N = compute_nutation(self)
+        return N
 
-        if name == 'N':
-            self.N = N = compute_nutation(self)
-            return N
+    @reify
+    def NT(self):
+        self.NT = NT = rollaxis(self.N, 1)
+        return NT
 
-        if name == 'NT':
-            self.NT = NT = rollaxis(self.N, 1)
-            return NT
+    @reify
+    def M(self):
+        self.M = M = einsum('ij...,jk...,kl...->il...', self.N, self.P, B)
+        return M
 
-        if name == 'M':
-            self.M = M = einsum('ij...,jk...,kl...->il...', self.N, self.P, B)
-            return M
+    @reify
+    def MT(self):
+        self.MT = MT = rollaxis(self.M, 1)
+        return MT
 
-        if name == 'MT':
-            self.MT = MT = rollaxis(self.M, 1)
-            return MT
+    # Conversion between timescales.
 
-        # Conversion between timescales.
+    @reify
+    def J(self):
+        """Decimal Julian years centered on J2000.0 = TT 2000 January 1 12h."""
+        return (self.tt - 1721045.0) / 365.25
 
-        if name == 'tai':
-            self.tai = tai = self.tt - tt_minus_tai
-            return tai
+    @reify
+    def tai(self):
+        self.tai = tai = self.tt - tt_minus_tai
+        return tai
 
-        if name == 'utc':
-            utc = self._utc_tuple()
-            utc = array(utc) if self.shape else utc
-            self.utc = utc = utc
-            return utc
+    @reify
+    def utc(self):
+        utc = self._utc_tuple()
+        utc = array(utc) if self.shape else utc
+        self.utc = utc = utc
+        return utc
 
-        if name == 'tdb':
-            tt = self.tt
-            self.tdb = tdb = tt + tdb_minus_tt(tt) / DAY_S
-            return tdb
+    @reify
+    def tdb(self):
+        tt = self.tt
+        return tt + tdb_minus_tt(tt) / DAY_S
 
-        if name == 'ut1':
-            self.ut1 = ut1 = self.tt - self.delta_t / DAY_S
-            return ut1
+    @reify
+    def ut1(self):
+        self.ut1 = ut1 = self.tt - self.delta_t / DAY_S
+        return ut1
 
-        if name == 'delta_t':
-            table = self.ts.delta_t_table
-            self.delta_t = delta_t = interpolate_delta_t(table, self.tt)
-            return delta_t
+    @reify
+    def delta_t(self):
+        table = self.ts.delta_t_table
+        self.delta_t = delta_t = interpolate_delta_t(table, self.tt)
+        return delta_t
 
-        if name == 'gmst':
-            self.gmst = gmst = sidereal_time(self)
-            return gmst
+    @reify
+    def dut1(self):
+        return (self.tt - self._utc_float()) * DAY_S - self.delta_t
 
-        if name == 'gast':
-            self.gast = gast = self.gmst + earth_tilt(self)[2] / 3600.0
-            return gast
+    @reify
+    def gmst(self):
+        self.gmst = gmst = sidereal_time(self)
+        return gmst
 
-        raise AttributeError('no such attribute %r' % name)
+    @reify
+    def gast(self):
+        self.gast = gast = self.gmst + earth_tilt(self)[2] / 3600.0
+        return gast
 
     def __eq__(self, other_time):
         if not isinstance(other_time, Time):

@@ -33,6 +33,10 @@ The Time object
 
       Terrestrial Time (TT) as a Julian date.
 
+   .. attribute:: J
+
+      Terrestrial Time (TT) as a decimal number of Julian years.
+
    .. attribute:: tdb
 
       Barycentric Dynamical Time (TDB) as a Julian date.
@@ -40,6 +44,17 @@ The Time object
    .. attribute:: ut1
 
       Universal Time (UT1) as a Julian date.
+
+   Two standard differences between time scales
+   are also available as attributes:
+
+   .. attribute:: delta_t
+
+      The difference TT − UT1 measured in seconds.
+
+   .. attribute:: dut1
+
+      The difference UT1 − UTC measured in seconds.
 
    All of the other ways of expressing the time
    and converting it to typical human systems

@@ -3,6 +3,90 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.4 — 2018 May 20
+-----------------
+
+* You can now specify the distance to an object when generating a
+  position from altitude and azimuth coordinates.
+  `#158 <https://github.com/skyfielders/python-skyfield/issues/158>`_
+
+* The dictionary of satellites returned when you read a TLE file
+  now supports lookup by integer satellite ID, not just by name,
+  and now knows how to parse TLE files from Space-Track.
+  `#163 <https://github.com/skyfielders/python-skyfield/issues/163>`_
+  `#167 <https://github.com/skyfielders/python-skyfield/issues/167>`_
+
+* Star coordinates can now be offered for any epoch, not just J2000.
+  `#166 <https://github.com/skyfielders/python-skyfield/issues/166>`_
+
+* You can now create a time object given the UT1 date.
+  `#91 <https://github.com/skyfielders/python-skyfield/issues/91>`_
+
+* Fractional Julian years are now available on ``Time`` objects as ``.J``.
+
+* The parameter DUT1 is now available on ``Time`` objects as ``.dut1``.
+  `#176 <https://github.com/skyfielders/python-skyfield/issues/176>`_
+
+1.3 — 2018 April 15
+-------------------
+
+* Geocentric coordinates now have a
+  :meth:`~skyfield.positionlib.Geocentric.subpoint()`
+  method that computes the latitude and longitude
+  of the point beneath that body.
+
+* All of the ``Timescale`` time constructor methods now accept arrays.
+
+* Emergency fix to stop Skyfield
+  from endlessly downloading new copies of ``deltat.preds``,
+  since the file has gone out of date at the USNO site.
+
+* Fixed ability of a :class:`~skyfield.starlib.Star`
+  to be initialized with a tuple that breaks units into minutes and seconds
+  (broke in version 1.2).
+
+* Issues fixed:
+  `#170 <https://github.com/skyfielders/python-skyfield/issues/170>`_
+  `#172 <https://github.com/skyfielders/python-skyfield/issues/172>`_
+
+1.2 — 2018 March 29
+-------------------
+
+* The documentation now describes
+  how to create an excerpt of a large JPL ephemeris
+  without downloading the entire file.
+  Several Skyfield tests now run much faster
+  because they use an ephemeris excerpt instead of waiting for a download.
+
+* For ``load_file()`` a leading ``~`` now means “your home directory”.
+
+* You can now initialize a velocity from kilometers per second
+  with ``Velocity(km_per_s=...)``.
+
+* Empty time and angle objects no longer raise an exception when printed.
+  (Thanks, JoshPaterson!)
+
+* Issues fixed:
+  `#160 <https://github.com/skyfielders/python-skyfield/issues/160>`_
+  `#161 <https://github.com/skyfielders/python-skyfield/issues/161>`_
+  `#162 <https://github.com/skyfielders/python-skyfield/issues/162>`_
+
+1.1 — 2018 January 14
+---------------------
+
+* Positions can now be converted to AstroPy with
+  :meth:`~skyfield.positionlib.ICRF.to_skycoord()`.
+
+* You can now provide a timescale of your own to an
+  :meth:`~skyfield.sgp4lib.EarthSatellite`
+  instead of having it trying to load one itself.
+
+* Downloaded files are no longer marked as executable on Windows.
+
+* A friendly error message, rather than an obscure traceback, is now
+  returned if you try converting a position to alt/az coordinates but
+  the position was not measured from a position on the Earth’s surface.
+
 1.0 — 2017 March 15
 -------------------
 

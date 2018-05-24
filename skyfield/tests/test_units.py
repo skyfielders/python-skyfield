@@ -13,9 +13,20 @@ def needs_astropy(test):
     """Skip `test` if AstroPy is not available."""
     return None if (u is None) else test
 
+def test_velocity_input_units():
+    v1 = units.Velocity(au_per_d=2.0)
+    v2 = units.Velocity(km_per_s=3462.9137)
+    assert abs(v1.au_per_d - v2.au_per_d) < 1e-7
+
 def test_stringifying_vector_distance():
     a = array([1.23, 4.56])
-    assert str(units.Distance(au=a)) == '[ 1.23  4.56] au'
+    s = str(units.Distance(au=a))
+    if '[1' in s:
+        # Python 3.5, says Travis CI.  No idea.
+        assert s == '[1.23 4.56] au'
+    else:
+        # Every other version of Python.
+        assert s == '[ 1.23  4.56] au'
 
 def test_iterating_over_raw_measurement():
     distance = units.Distance(au=1.234)

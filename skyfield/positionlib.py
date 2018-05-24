@@ -4,7 +4,7 @@ from numpy import array, arccos, clip, einsum, exp, empty
 from .constants import RAD2DEG, tau, DEG2RAD
 from .data.spice import inertial_frames
 from .functions import dots, from_polar, length_of, to_polar, rot_z, rot_x
-from .earthlib import compute_limb_angle, refract
+from .earthlib import compute_limb_angle, refract, reverse_terra
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Distance, Velocity, Angle, _interpret_angle
@@ -31,7 +31,9 @@ class ICRF(object):
     """An (x, y, z) position and velocity oriented to the ICRF axes.
 
     The ICRF is a permanent coordinate system that has superseded the
-    old series of equinox-based systems like B1900, B1950, and J2000.
+    old series of equinox-based systems like B1900 and B1950.  Its axes
+    are aligned with the axes of J2000 to within 0.02 arcseconds, which
+    is tighter than the accuracy of J2000 itself.
 
     """
     def __init__(self, position_au, velocity_au_per_d=None, t=None,
@@ -137,7 +139,7 @@ class ICRF(object):
 
         >>> directions = ICRF([[1,0,-1,0], [0,1,0,-1], [0,0,0,0]])
         >>> directions.separation_from(ICRF([0,1,0])).degrees
-        array([  90.,    0.,   90.,  180.])
+        array([ 90.,   0.,  90., 180.])
 
         """
         p1 = self.position.au
@@ -232,7 +234,8 @@ class ICRF(object):
                 Angle(radians=dec),
                 Distance(au=d))
 
-    def from_altaz(self, alt=None, az=None, alt_degrees=None, az_degrees=None):
+    def from_altaz(self, alt=None, az=None, alt_degrees=None, az_degrees=None,
+                   distance=Distance(au=0.1)):
         """Generate an Apparent position from an altitude and azimuth.
 
         The altitude and azimuth can each be provided as an `Angle`
@@ -243,6 +246,9 @@ class ICRF(object):
             alt_degrees=23.2289, az_degrees=142.1161
             alt_degrees=(23, 13, 44.1), az_degrees=(142, 6, 58.1)
 
+        The distance should be a :class:`~skyfield.units.Distance`
+        object, if provided; otherwise a default of 0.1 au is used.
+
         """
         # TODO: should this method live on another class?
         R = self.observer_data.altaz_rotation if self.observer_data else None
@@ -252,7 +258,7 @@ class ICRF(object):
                              ' and can understand altitude and azimuth')
         alt = _interpret_angle('alt', alt, alt_degrees)
         az = _interpret_angle('az', az, az_degrees)
-        r = 0.1  # close enough to make gravitational refraction irrelevant
+        r = distance.au
         p = from_polar(r, alt, az)
         p = einsum('ji...,j...->i...', R, p)
         return Apparent(p)
@@ -407,6 +413,32 @@ class Apparent(ICRF):
 
 class Geocentric(ICRF):
     """An (x,y,z) position measured from the geocenter."""
+
+    def subpoint(self):
+        """Return the latitude and longitude directly beneath this position.
+
+        Returns a :class:`~skyfield.toposlib.Topos` whose ``longitude``
+        and ``latitude`` are those of the point on the Earth's surface
+        directly beneath this position, and whose ``elevation`` is the
+        height of this position above the Earth's surface.
+
+        """
+        if self.center != 399:  # TODO: should an __init__() check this?
+            raise ValueError("you can only ask for the geographic subpoint"
+                             " of a position measured from Earth's center")
+        t = self.t
+        xyz_au = einsum('ij...,j...->i...', t.M, self.position.au)
+        lat, lon, elevation_m = reverse_terra(xyz_au, t.gast)
+
+        # TODO. Move VectorFunction and Topos into this file, since the
+        # three kinds of class work together: Topos is-a VF; VF.at() can
+        # return a Geocentric position; and Geocentric.subpoint() should
+        # return a Topos. I'm deferring the refactoring for now, to get
+        # this new feature to users more quickly.
+        from .toposlib import Topos
+        return Topos(latitude=Angle(radians=lat),
+                     longitude=Angle(radians=lon),
+                     elevation_m=elevation_m)
 
 
 def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):

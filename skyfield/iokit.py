@@ -1,6 +1,7 @@
 from __future__ import print_function
 import itertools
 import os
+import errno
 import numpy as np
 import sys
 from datetime import date, datetime, timedelta
@@ -35,7 +36,7 @@ def _filename_of(url):
 
 _IERS = 'https://hpiers.obspm.fr/iers/bul/bulc/'
 _JPL = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/'
-_NAIF = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
+_NAIF = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
 _USNO = 'http://maia.usno.navy.mil/ser7/'
 
 class Loader(object):
@@ -79,8 +80,11 @@ class Loader(object):
         self.verbose = verbose
         self.expire = expire
         self.events = []
-        if not os.path.exists(self.directory):
+        try:
             os.makedirs(self.directory)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
 
         # Each instance gets its own copy of these data structures,
         # instead of sharing a single copy, so users can edit them
@@ -153,7 +157,7 @@ class Loader(object):
                 for n in itertools.count(1):
                     prefix, suffix = filename.rsplit('.', 1)
                     backup_name = '{0}.old{1}.{2}'.format(prefix, n, suffix)
-                    if not os.path.exists(backup_name):
+                    if not os.path.exists(self.path_to(backup_name)):
                         break
                 self._log('  Renaming to: {0}', backup_name)
                 os.rename(self.path_to(filename), self.path_to(backup_name))
@@ -184,17 +188,26 @@ class Loader(object):
     def tle(self, url, reload=False):
         """Load and parse a satellite TLE file.
 
-        Given a URL or a local path, this loads a file of three-line
-        records in the common Celestrak file format, where each first
-        line gives the name of a satellite and the following two lines
-        are the TLE orbital elements.
+        Given a URL or a local path, this loads a file of three-line records in
+        the common Celestrak file format, or two-line records like those from
+        space-track.org. For a three-line element set, each first line gives
+        the name of a satellite and the following two lines are the TLE orbital
+        elements. A two-line element set comprises only these last two lines.
+
+        If two-line element sets are provided, the EarthSatellite 'name'
+        attribute is set to the satellite ID number for the object.
 
         Returns a Python dictionary whose keys are satellite names and
         values are :class:`~skyfield.sgp4lib.EarthSatellite` objects.
 
         """
+        d = {}
         with self.open(url, reload=reload) as f:
-            return dict(parse_celestrak_tle(f))
+            for names, sat in parse_tle(f):
+                d[sat.model.satnum] = sat
+                for name in names:
+                    d[name] = sat
+        return d
 
     def open(self, url, mode='rb', reload=False):
         """Open a file, downloading it first if it does not yet exist.
@@ -240,6 +253,7 @@ class Loader(object):
     def log(self):
         return '\n'.join(self.events)
 
+
 def _search(mapping, filename):
     """Search a Loader data structure for a filename."""
     result = mapping.get(filename)
@@ -252,6 +266,23 @@ def _search(mapping, filename):
             if fnmatch(filename, pattern):
                 return result2
     return None
+
+
+def load_file(path):
+    """Open a file on your local drive, using its extension to guess its type.
+
+    This routine only works on ``.bsp`` ephemeris files right now, but
+    will gain support for additional file types in the future. ::
+
+        from skyfield.api import load_file
+        planets = load_file('~/Downloads/de421.bsp')
+
+    """
+    path = os.path.expanduser(path)
+    base, ext = os.path.splitext(path)
+    if ext == '.bsp':
+        return SpiceKernel(path)
+    raise ValueError('unrecognized file extension: {}'.format(path))
 
 
 def parse_deltat_data(fileobj):
@@ -288,7 +319,7 @@ def parse_deltat_preds(fileobj):
     year_float, delta_t = np.loadtxt(fileobj, skiprows=3, usecols=[0, 1]).T
     year = year_float.astype(int)
     month = 1 + (year_float * 12.0).astype(int) % 12
-    expiration_date = date(year[0] + 1, month[0], 1)
+    expiration_date = date(year[0] + 2, month[0], 1)
     data = np.array((julian_date(year, month, 1), delta_t))
     return expiration_date, data
 
@@ -329,21 +360,50 @@ def parse_leap_seconds(fileobj):
     return expiration_date, (leap_dates, leap_offsets)
 
 
-def parse_celestrak_tle(fileobj):
-    lines = iter(fileobj)
-    for line in lines:
-        name = line.decode('ascii').strip()
-        line1 = next(lines).decode('ascii')
-        line2 = next(lines).decode('ascii')
-        sat = EarthSatellite(line1, line2, name)
-        yield name, sat
-        if ' (' in name:
-            # Given `ISS (ZARYA)` or `HTV-6 (KOUNOTORI 6)`, also support
-            # lookup by the name inside or outside the parentheses.
-            short_name, secondary_name = name.split(' (')
-            secondary_name = secondary_name.rstrip(')')
-            yield short_name, sat
-            yield secondary_name, sat
+def parse_tle(fileobj):
+    """Parse a file of TLE satellite element sets.
+
+    Builds an Earth satellite from each pair of adjacent lines in the
+    file that start with "1 " and "2 " and have 69 or more characters
+    each.  If the preceding line is exactly 24 characters long, then it
+    is parsed as the satellite's name.  For each satellite found, yields
+    a tuple `(names, sat)` giving the name(s) on the preceding line (or
+    `None` if no name was found) and the satellite object itself.
+
+    An exception is raised if the attempt to parse a pair of candidate
+    lines as TLE elements fails.
+
+    """
+    b0 = b1 = b''
+    for b2 in fileobj:
+        if (b1.startswith(b'1 ') and len(b1) >= 69 and
+            b2.startswith(b'2 ') and len(b2) >= 69):
+
+            b0 = b0.rstrip(b'\n\r')
+            if len(b0) == 24:
+                name = b0.decode('ascii').rstrip()
+                names = [name]
+            else:
+                name = None
+                names = ()
+
+            line1 = b1.decode('ascii')
+            line2 = b2.decode('ascii')
+            sat = EarthSatellite(line1, line2, name)
+
+            if name and ' (' in name:
+                # Given a name like `ISS (ZARYA)` or `HTV-6 (KOUNOTORI
+                # 6)`, also support lookup by the name inside or outside
+                # the parentheses.
+                short_name, secondary_name = name.split(' (')
+                secondary_name = secondary_name.rstrip(')')
+                names.append(short_name)
+                names.append(secondary_name)
+
+            yield names, sat
+
+        b0 = b1
+        b1 = b2
 
 
 def download(url, path, verbose=None, blocksize=128*1024):

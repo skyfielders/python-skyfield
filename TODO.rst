@@ -7,12 +7,18 @@ are appropriate for sprints and collaboration, and longer-term goals
 that the code base is not quite ready for yet but that we do not want to
 forget.
 
+Promises for next version
+=========================
+
+* For #145, skip deflections of planets that can’t affect an observation.
+
+* For #145, create a good syntax for combining two ephemerides.
+
+* Expand a bit on the documentation for stars, now that they can have an
+  epoch for their position.
+
 Sprint Possibilities
 ====================
-
-* Can this help us write a function to compute sub-lat/long?
-
-  https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/reclat_c.html
 
 * If we are going to allow times like TT to be submitted using
   calendar dates, then we should probably provide methods that would
@@ -50,10 +56,6 @@ Sprint Possibilities
   ephemeris for a raw position in au, without having to spin up a body
   object and have it spin up a `Distance` object.
 
-* A `Body` should go ahead and try building its segment list at the
-  moment it is created, instead of doing it over again every time its
-  `at()` method is called.
-
 * We currently download most SPICE kernels from NAIF, but have to use
   FTP for fetching DE422.  Are the files from the two sites equivalent
   and do they have the same data?  Should we prefer one or the other?
@@ -62,14 +64,7 @@ Sprint Possibilities
   surface, plotted against a blue atmosphere fading out into the black
   of space as the plot goes upwards towards the top.
 
-* Ephemeris objects should have more interesting repr's, that maybe give
-  the name of the ephemeris.  And maybe the objects inside?  Maybe the
-  start and end date?
-
 * Iterating across an ephemeris should probably give you object names.
-
-* The repr() of a Body object should name the body and the filename of
-  the ephemeris it is pulled from.
 
 * See about switching ``requirements.sh`` to be a conda environment
   file.
@@ -115,8 +110,6 @@ Sprint Possibilities
 * We should implement comets and asteroids using the standard formulae
   (can we find a good vector version, that will match the rest of our
   approach?) for a Keplerian orbit.
-
-* We should add formulae for the moons of the other planets.
 
 * There should be routines for downloading current astronomical data.
   Each routine should take an optional filename but should also have a
@@ -172,6 +165,13 @@ Reading List for Brandon
 
 * https://naif.jpl.nasa.gov/pub/naif/FIDO/misc/njb/src/geom.c
 
+For 2.0
+=======
+
+* Remove old deprecation warnings for pre-1.0 behaviors.
+
+* Remove support and tests for old ephemeris Python packages.
+
 Longer-term goals
 =================
 
@@ -189,10 +189,7 @@ Longer-term goals
   https://github.com/brandon-rhodes/pyephem/issues/15
 
 
-.. testing
-     we need tests that handle both use_earth True and False.
-       Similarly for other variables.
-   documentation
+.. documentation
      writing up SkyField solutions to PyEphem questions on Stack Overflow
      section on accuracy of each algorithm involved
      logo?
@@ -206,5 +203,3 @@ Longer-term goals
        Could Star() become a whole catalog of stars processed in parallel?
      What routines are taking the most time when the tests are run?
      Try to take advantage of jplephem's ability to use bundles
-
-   Whether SGP4 passes the original library's test suite. [huh?]

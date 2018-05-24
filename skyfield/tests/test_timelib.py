@@ -9,7 +9,7 @@ from datetime import datetime
 one_second = 1.0 / DAY_S
 epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
 
-time_parameter = ['tai', 'tt', 'tdb']
+time_parameter = ['tai', 'tt', 'tdb', 'ut1']
 time_value = [(1973, 1, 18, 1, 35, 37.5), 2441700.56640625]
 
 def ts():
@@ -22,6 +22,20 @@ def test_time_creation_methods(time_parameter, time_value):
     else:
         t = method(jd=time_value)
     assert getattr(t, time_parameter) == 2441700.56640625
+
+time_scale_name = ['utc', 'tai', 'tt', 'tdb']
+time_params_with_array = [
+    ((2018, 2019, 2020), 3, 25, 13, 1, 10),
+    (2018, (3, 4, 5), 25, 13, 1, 10),
+    (2018, 3, (25, 26, 27), 13, 1, 10),
+    (2018, 3, 25, (13, 14, 15), 1, 10),
+    (2018, 3, 25, 13, (1, 2, 3), 10),
+    (2018, 3, 25, 13, 1, (10, 11, 12)),
+]
+
+def test_time_creation_with_arrays(time_scale_name, time_params_with_array):
+    ts = api.load.timescale()
+    getattr(ts, time_scale_name)(*time_params_with_array)
 
 def test_timescale_utc_method_with_array_inside(ts):
     seconds = np.arange(48.0, 58.0, 1.0)
@@ -51,6 +65,21 @@ def test_building_time_from_list_of_utc_datetimes(ts):
     assert (t.tai == [
         2442046.5, 2442047.5, 2442048.5, 2442049.5, 2442050.5, 2442051.5,
         ]).all()
+
+def test_converting_ut1_to_tt(ts):
+    ten_thousand_years = 365 * 10000
+
+    jd = api.T0 - ten_thousand_years
+    t = ts.ut1(jd=jd)
+    del t.ut1                   # force re-computation of UT1
+    print(jd - t.ut1)
+    assert abs(jd - t.ut1) < 1e-10
+
+    jd = api.T0 + ten_thousand_years
+    t = ts.ut1(jd=jd)
+    del t.ut1                   # force re-computation of UT1
+    print(jd - t.ut1)
+    assert abs(jd - t.ut1) < 1e-10
 
 def test_indexing_time(ts):
     t = ts.utc(1974, 10, range(1, 6))
@@ -218,9 +247,7 @@ def test_leap_second(ts):
     assert ts.tai(jd=t4).utc_iso() == '1974-01-01T00:00:00Z'
     assert ts.tai(jd=t5).utc_iso() == '1974-01-01T00:00:01Z'
 
-
 def test_delta_t(ts):
-
     # Check delta_t calculation around year 2000/1/1 (from IERS tables this is 63.8285)
     t = ts.utc(2000, 1, 1, 0, 0, 0)
     assert abs(t.delta_t - 63.8285) < 1e-5
@@ -234,7 +261,11 @@ def test_delta_t(ts):
     # Stephenson formula. For 2320 (t=5 cy) should be: -20 + 32 * 5**2
     t = ts.utc(year=2320)
     assert abs(t.delta_t + 20.0 - (32.0 * 5.0**2)) < 1.0
- 
+
+def test_J(ts):
+    assert ts.tt(2000, 1, 1.5).J == 2000.0
+    assert ts.tt(1900, 1, 0.5).J == 1900.0
+
 def test_time_repr(ts):
 
     # Check that repr return is a str (this is required on Python 2,

@@ -452,12 +452,12 @@ being as deep as the array itself:
 
 .. testoutput::
 
-    array([[ 2014.,  2014.,  2014.,  2014.],
-           [    1.,     1.,     1.,     1.],
-           [    1.,     2.,     3.,     4.],
-           [    0.,     0.,     0.,     0.],
-           [    0.,     0.,     0.,     0.],
-           [    0.,     0.,     0.,     0.]])
+    array([[2014., 2014., 2014., 2014.],
+           [   1.,    1.,    1.,    1.],
+           [   1.,    2.,    3.,    4.],
+           [   0.,    0.,    0.,    0.],
+           [   0.,    0.,    0.,    0.],
+           [   0.,    0.,    0.,    0.]])
 
 Again, simply slice across the second dimension of the array
 to pull a particular calendar tuple out of the larger result:
@@ -468,7 +468,7 @@ to pull a particular calendar tuple out of the larger result:
 
 .. testoutput::
 
-    [ 2014.     1.     3.     0.     0.     0.]
+    [2014.    1.    3.    0.    0.    0.]
 
 .. _tai-tt-tdb:
 
@@ -539,7 +539,7 @@ so modern dates tend to be rather large numbers:
 .. testoutput::
 
     TAI = 2456658.5004050927
-    TT  = 2456658.5007775929
+    TT  = 2456658.500777593
     TDB = 2456658.500777592
 
 What are these three different uniform time scales?
@@ -666,6 +666,57 @@ when creating your timescale:
 .. testcode::
 
     load.timescale(delta_t=67.2810).utc((2014, 1, 1))
+
+.. _time-precision:
+
+Time precision is around ~20.1 µs
+=================================
+
+Skyfield stores time vectors internally
+as NumPy 64-bit floating point arrays of Julian times.
+As explained in the United States Naval Observatory’s
+`AA Technical Note 2011-02,
+“The Error in the Double Precision Representation of Julian Dates,”
+<http://aa.usno.navy.mil/software/novas/USNOAA-TN2011-02.pdf>`_
+this provides fairly high precision:
+
+    “An evaluation of the error associated with representing Julian
+    dates in IEEE 754 double precision floating-point numbers
+    demonstrates that Julian dates near the current epoch can be
+    represented to a precision not worse than 20.1 microseconds.”
+
+Skyfield’s own routines for turning time into strings
+do careful enough rounding that you should never see effects that small.
+For example, Skyfield renders the seconds of this time
+attractively all the way down to 4 decimal places:
+
+.. testcode::
+
+    t = ts.utc(2014, 1, 18, 1, 35, 37)
+    print(t.utc_jpl())
+
+.. testoutput::
+
+    A.D. 2014-Jan-18 01:35:37.0000 UT
+
+It’s only if you accidentally let Python print out a raw floating point value
+that you’ll see the limit of the precision:
+
+.. testcode::
+
+    print(t.utc)
+
+.. testoutput::
+
+    (2014, 1, 18, 1, 35, 36.999982595443726)
+
+To avoid ugly output like this,
+you should use Skyfield’s own time display methods
+like :meth:`~skyfield.timelib.Time.utc_iso()`
+and :meth:`~skyfield.timelib.Time.utc_jpl()`
+or those of the ``datetime`` that Skyfield returns
+from :meth:`~skyfield.timelib.Time.utc_datetime()`
+when printing dates to the screen.
 
 .. _date-cache:
 
