@@ -55,7 +55,9 @@ def from_polar(r, theta, phi):
 def rot_x(theta):
     c = cos(theta)
     s = sin(theta)
-    return array([(1.0, 0.0, 0.0), (0.0, c, -s), (0.0, s, c)])
+    zero = theta * 0.0
+    one = zero + 1.0
+    return array(((one, zero, zero), (zero, c, -s), (zero, s, c)))
 
 def rot_y(theta):
     c = cos(theta)

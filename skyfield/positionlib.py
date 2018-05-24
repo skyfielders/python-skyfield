@@ -174,22 +174,10 @@ class ICRF(object):
             position_au = einsum('ij...,j...->i...', epoch.M, position_au)
             oblm, oblt, eqeq, psi, eps = earth_tilt(epoch)
             e = oblt*DEG2RAD
-            coe = cos(e)
-            sie = sin(e)
+            E = rot_x(e)
             if not epoch.shape:
-                E = array(((1, 0, 0),
-                          (0, coe, sie),
-                          (0, -sie, coe)))
                 vector = E.dot(position_au)
             else:
-                x1 = repeat(1.0, epoch.shape[0])
-                y1 = repeat(0.0, epoch.shape[0])
-                z1 = repeat(0.0, epoch.shape[0])
-                x2 = repeat(0.0, epoch.shape[0])
-                x3 = repeat(0.0, epoch.shape[0])
-                E = array(((x1, x2, x3),
-                          (y1, coe, -sie),
-                          (z1, sie, coe)))
                 result_array = empty((E.T.shape[0], E.T.shape[1]))
                 for a in range(0, E.T.shape[0]):
                     vector = E.T[a, 0:].dot(position_au.T[a, 0:])
