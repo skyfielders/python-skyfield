@@ -29,15 +29,16 @@ together with all of the attributes and methods that they support:
      ├── `position <api.html#skyfield.positionlib.ICRF.position>`_.km         →   x, y, z
      ├── `position.to(unit) <api.html#Distance.to>`_   →   x, y, z
      │
-     ├── `velocity <api.html#skyfield.positionlib.ICRF.velocity>`_.au_per_d   →   xdot, ydot, zdot
-     ├── `velocity <api.html#skyfield.positionlib.ICRF.velocity>`_.km_per_s   →   xdot, ydot, zdot
-     ├── `velocity.to(unit) <api.html#Distance.to>`_   →   xdot, ydot, zdot
+     ├── `velocity <api.html#skyfield.positionlib.ICRF.velocity>`_.au_per_d   →   ẋ, ẏ, ż
+     ├── `velocity <api.html#skyfield.positionlib.ICRF.velocity>`_.km_per_s   →   ẋ, ẏ, ż
+     ├── `velocity.to(unit) <api.html#Distance.to>`_   →   ẋ, ẏ, ż
      │
      ├── `radec(epoch=t) <api.html#skyfield.positionlib.ICRF.radec>`_      →   ra, dec, distance
      ├── `radec() <api.html#skyfield.positionlib.ICRF.radec>`_             →   ra, dec, distance
      ├── `distance() <api.html#skyfield.positionlib.ICRF.distance>`_          →   distance
      │
      ├── `ecliptic_position() <api.html#skyfield.positionlib.ICRF.ecliptic_position>`_ →   x, y, z
+     ├── `ecliptic_velocity() <api.html#skyfield.positionlib.ICRF.ecliptic_velocity>`_ →   ẋ, ẏ, ż
      ├── `ecliptic_latlon() <api.html#skyfield.positionlib.ICRF.ecliptic_latlon>`_   →   lat, lon, distance
      ├── `galactic_position() <api.html#skyfield.positionlib.ICRF.galactic_position>`_ →   x, y, z
      └── `galactic_latlon() <api.html#skyfield.positionlib.ICRF.galactic_latlon>`_   →   lat, lon, distance

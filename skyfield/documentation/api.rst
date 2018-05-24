@@ -206,6 +206,7 @@ All positions support a basic set of methods:
    ICRF.radec
    ICRF.separation_from
    ICRF.ecliptic_position
+   ICRF.ecliptic_velocity
    ICRF.ecliptic_latlon
    ICRF.galactic_position
    ICRF.galactic_latlon
@@ -220,6 +221,38 @@ Position methods specific to one class
    Astrometric.apparent
    Apparent.altaz
    Geocentric.subpoint
+   Geocentric.observe
+   
+Osculating Orbital Elements
+===========================
+
+The ``elements()`` method of geometric, barycentric, or geocentric positions 
+returns an OsculatingElements object.
+
+.. currentmodule:: skyfield.elementslib
+
+================================================== ============================
+``OsculatingElements.apoapsis_distance``           Distance object
+``OsculatingElements.argument_of_latitude``        Angle object
+``OsculatingElements.argument_of_periapsis``       Angle object
+``OsculatingElements.eccentric_anomaly``           Angle object
+``OsculatingElements.eccentricity``                numpy.ndarray
+``OsculatingElements.inclination``                 Angle object
+``OsculatingElements.longitude_of_ascending_node`` Angle object
+``OsculatingElements.longitude_of_periapsis``      Angle object
+``OsculatingElements.mean_anomaly``                Angle object
+``OsculatingElements.mean_longitude``              Angle object
+``OsculatingElements.mean_motion_per_day``         Angle object
+``OsculatingElements.periapsis_distance``          Distance object
+``OsculatingElements.periapsis_time``              Time object
+``OsculatingElements.period_in_days``              numpy.ndarray
+``OsculatingElements.semi_latus_rectum``           Distance object
+``OsculatingElements.semi_major_axis``             Distance object
+``OsculatingElements.semi_minor_axis``             Distance object
+``OsculatingElements.time``                        Time object
+``OsculatingElements.true_anomaly``                Angle object
+``OsculatingElements.true_longitude``              Angle object
+================================================== ============================
 
 Units
 =====

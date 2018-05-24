@@ -1,14 +1,16 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, arccos, clip, einsum, exp
+from numpy import array, einsum, exp
 
 from .constants import RAD2DEG, tau
 from .data.spice import inertial_frames
-from .functions import dots, from_polar, length_of, to_polar, rot_z
+from .data.gravitational_parameters import GM_dict
+from .functions import from_polar, length_of, to_polar, rot_z, angle_between
 from .earthlib import compute_limb_angle, refract, reverse_terra
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Distance, Velocity, Angle, _interpret_angle
+from .elementslib import OsculatingElements
 
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GALACTIC = inertial_frames['GALACTIC']
@@ -26,6 +28,29 @@ def build_position(position_au, velocity_au_per_d=None, t=None,
         cls = ICRF
     return cls(position_au, velocity_au_per_d, t, center, target, observer_data)
 
+
+def elements(self, ref_plane='equator'):
+    """ Create Elements object
+    
+    When called without a parameter, creates an Elements object using the ICRF 
+    reference plane. If you instead want to use the J2000.0 ecliptic plane as 
+    the reference plane, set the keyword argument ``ref_plane`` to 'ecliptic'.
+    """
+    mu = GM_dict.get(self.center, 0) + GM_dict.get(self.target, 0)
+    if ref_plane == 'equator':
+        return OsculatingElements(self.position, 
+                                  self.velocity,
+                                  self.t,
+                                  mu)
+    elif ref_plane == 'ecliptic':
+        return OsculatingElements(self.ecliptic_position(), 
+                                  self.ecliptic_velocity(), 
+                                  self.t, 
+                                  mu,
+                                  ref_frame=inertial_frames['ECLIPJ2000'])
+    else:
+        raise ValueError("ref_plane must be either 'equator' or 'ecliptic'.")
+        
 
 class ICRF(object):
     """An (x, y, z) position and velocity oriented to the ICRF axes.
@@ -144,20 +169,17 @@ class ICRF(object):
         """
         p1 = self.position.au
         p2 = another_icrf.position.au
-        u1 = p1 / length_of(p1)
-        u2 = p2 / length_of(p2)
-        if u2.ndim > 1:
-            if u1.ndim == 1:
-                u1 = u1[:,None]
-        elif u1.ndim > 1:
-            u2 = u2[:,None]
-        c = dots(u1, u2)
-        return Angle(radians=arccos(clip(c, -1.0, 1.0)))
+        return Angle(radians=angle_between(p1, p2))
 
     def ecliptic_position(self):
-        """Compute J2000 ecliptic coordinates (x, y, z)"""
+        """Compute J2000 ecliptic position vector (x, y, z)"""
         vector = _ECLIPJ2000.dot(self.position.au)
         return Distance(vector)
+    
+    def ecliptic_velocity(self):
+        """Compute J2000 ecliptic velocity vector (x_dot, y_dot, z_dot)"""
+        vector = _ECLIPJ2000.dot(self.velocity.au_per_d)
+        return Velocity(vector)
 
     def ecliptic_latlon(self):
         """Compute J2000 ecliptic coordinates (lat, lon, distance)"""
@@ -249,6 +271,8 @@ class Geometric(ICRF):
         """
         return _to_altaz(self.position.au, self.observer_data,
                          temperature_C, pressure_mbar)
+        
+    elements = elements
 
 
 class Barycentric(ICRF):
@@ -287,6 +311,8 @@ class Barycentric(ICRF):
         astrometric = Astrometric(p, v, t, observer_data=self.observer_data)
         astrometric.light_time = light_time
         return astrometric
+    
+    elements = elements
 
 
 # TODO: pre-create a Barycentric object representing the SSB, and make
@@ -374,6 +400,8 @@ class Apparent(ICRF):
 
 class Geocentric(ICRF):
     """An (x,y,z) position measured from the geocenter."""
+    
+    elements = elements
 
     def subpoint(self):
         """Return the latitude and longitude directly beneath this position.

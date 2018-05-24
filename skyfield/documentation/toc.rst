@@ -17,6 +17,7 @@ that is accelerated using NumPy vector math!
    planets
    stars
    earth-satellites
+   elements
    astropy
    api
    api-iokit

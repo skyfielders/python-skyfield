@@ -1,6 +1,6 @@
 """Basic operations that are needed repeatedly throughout Skyfield."""
 
-from numpy import arcsin, arctan2, array, cos, load, sin, sqrt
+from numpy import arcsin, arctan2, array, cos, load, sin, sqrt, arccos, clip
 from pkgutil import get_data
 from skyfield.constants import tau
 
@@ -22,6 +22,23 @@ def length_of(xyz):
 
     """
     return sqrt((xyz * xyz).sum(axis=0))
+
+def angle_between(u_vec, v_vec):
+    """Given 2 vectors in `v` and `u`, return the angle separating them.
+
+    This works whether `v` and `u` each have the shape ``(3,)``, or
+    whether they are each whole arrays of corresponding x, y, and z
+    coordinates and have shape ``(3, N)``. The returned angle will be between 
+    0 and 180 degrees.
+    
+    Source of this formula:
+    https://people.eecs.berkeley.edu/~wkahan/Mindless.pdf, Section 12
+    """
+    u = length_of(u_vec)
+    v = length_of(v_vec)
+    num = v*u_vec - u*v_vec
+    denom = v*u_vec + u*v_vec
+    return 2*arctan2(length_of(num), length_of(denom))
 
 def to_polar(xyz):
     """Convert ``[x y z]`` into spherical coordinates ``(r, theta, phi)``.
