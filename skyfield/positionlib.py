@@ -176,13 +176,13 @@ class ICRF(object):
             e = oblt*DEG2RAD
             E = rot_x(e)
             if not epoch.shape:
-                vector = E.dot(position_au)
+                vector = E.T.dot(position_au)
             else:
                 result_array = empty((E.T.shape[0], E.T.shape[1]))
                 for a in range(0, E.T.shape[0]):
                     vector = E.T[a, 0:].dot(position_au.T[a, 0:])
                     result_array[a, 0:] = vector
-                vector = result_array.T
+                vector = result_array
         else:
             vector = _ECLIPJ2000.dot(position_au)
         if len(vector.shape) is 1:
