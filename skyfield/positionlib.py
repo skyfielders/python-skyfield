@@ -1,6 +1,6 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, arccos, clip, einsum, exp, empty, cos, sin, repeat
+from numpy import array, arccos, clip, einsum, exp, empty 
 from .constants import RAD2DEG, tau, DEG2RAD
 from .data.spice import inertial_frames
 from .functions import dots, from_polar, length_of, to_polar, rot_z, rot_x
