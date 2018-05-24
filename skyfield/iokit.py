@@ -379,7 +379,8 @@ def parse_tle(fileobj):
         if (b1.startswith(b'1 ') and len(b1) >= 69 and
             b2.startswith(b'2 ') and len(b2) >= 69):
 
-            if len(b0) == 25:
+            b0 = b0.rstrip(b'\n\r')
+            if len(b0) == 24:
                 name = b0.decode('ascii').rstrip()
                 names = [name]
             else:
