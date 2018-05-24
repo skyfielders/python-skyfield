@@ -1,5 +1,5 @@
 """Routines that compute Earth nutation."""
-from numpy import array, cos, fmod, sin, outer, tensordot, zeros 
+from numpy import array, cos, fmod, sin, outer, tensordot, zeros
 from .constants import ASEC2RAD, ASEC360, DEG2RAD, tau, T0
 
 def compute_nutation(t):
