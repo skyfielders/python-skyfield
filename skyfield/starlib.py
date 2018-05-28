@@ -94,10 +94,19 @@ class Star(object):
             position = (outer(velocity, t.tdb + dt - self.epoch).T + position).T
         else:
             position = position + velocity * (t.tdb + dt - self.epoch)
-        vector = position - observer.position.au
+        if len(position.shape) > 1:
+            if len(observer.position.au.shape) > 1:
+                vector = position - observer.position.au
+                vel = (observer.velocity.au_per_d.T - velocity).T
+            else:
+                vector = position.T - observer.position.au
+                vel = observer.velocity.au_per_d - velocity.T
+        else:
+            vector = position - observer.position.au
+            vel = (observer.velocity.au_per_d.T - velocity).T
         distance = length_of(vector)
         light_time = distance / C_AUDAY
-        return vector, (observer.velocity.au_per_d.T - velocity).T, light_time
+        return vector, vel, light_time
 
     def _compute_vectors(self):
         """Compute the star's position as an ICRF position and velocity."""

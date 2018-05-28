@@ -50,6 +50,14 @@ def test_star_position_class(ts):
     p = e['earth'].at(ts.utc(2014, 2, 9, 15, 1)).observe(star)
     assert isinstance(p, positionlib.Astrometric)
 
+def test_star_vector(ts):
+    t = ts.tt(api.T0)
+    s = api.Star(ra_hours=[1.0, 2.0], dec_degrees=[+3.0, +4.0])
+    o = positionlib.Barycentric([0.0, 0.0, 0.0], t=t)
+    p = o.observe(s)
+    assert p.position.au.shape == (2, 3)
+    assert p.velocity.au_per_d.shape == (2, 3)
+
 def test_altaz_needs_topos(ts):
     e = api.load('de421.bsp')
     earth = e['earth']
