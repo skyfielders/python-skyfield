@@ -55,8 +55,8 @@ def test_star_vector(ts):
     s = api.Star(ra_hours=[1.0, 2.0], dec_degrees=[+3.0, +4.0])
     o = positionlib.Barycentric([0.0, 0.0, 0.0], t=t)
     p = o.observe(s)
-    assert p.position.au.shape == (2, 3)
-    assert p.velocity.au_per_d.shape == (2, 3)
+    assert p.position.au.shape == (3, 2)
+    assert p.velocity.au_per_d.shape == (3, 2)
 
 def test_altaz_needs_topos(ts):
     e = api.load('de421.bsp')

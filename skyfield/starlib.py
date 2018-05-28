@@ -99,8 +99,8 @@ class Star(object):
                 vector = position - observer.position.au
                 vel = (observer.velocity.au_per_d.T - velocity).T
             else:
-                vector = position.T - observer.position.au
-                vel = observer.velocity.au_per_d - velocity.T
+                vector = (position.T - observer.position.au).T
+                vel = (observer.velocity.au_per_d - velocity.T).T
         else:
             vector = position - observer.position.au
             vel = (observer.velocity.au_per_d.T - velocity).T
