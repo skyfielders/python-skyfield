@@ -31,6 +31,24 @@ def test_ecliptic_frame(ts):
     compare(hlat.degrees, 1.013, 0.001)
     compare(hlon.degrees, 151.3229, 0.001)
 
+def test_ecliptic_for_epoch_of_date(ts):
+    e = api.load('de421.bsp')
+    mars = e['mars barycenter']
+    astrometric = e['earth'].at(ts.utc(1956, 1, 14, 6, 0, 0)).observe(mars)
+    apparent = astrometric.apparent()
+    hlat, hlon, d = apparent.ecliptic_latlon(epoch='date')
+    compare(hlat.degrees, 0.4753402, 0.00001)
+    compare(hlon.degrees, 240.0965633, 0.0001)
+
+def test_ecliptic_for_epoch_of_date_array(ts):
+    e = api.load('de421.bsp')
+    sun = e['sun']
+    astrometric = e['earth'].at(ts.utc(2005, 10, 1, [6, 7], 0, 0)).observe(sun)
+    apparent = astrometric.apparent()
+    hlat, hlon, d = apparent.ecliptic_latlon(epoch='date')
+    compare(hlat.degrees, [0.0000488, 0.0000474], 0.00001)
+    compare(hlon.degrees, [188.2011122, 188.2420983], 0.0001)
+
 def test_fk4_frame(ts):
     e = api.load('de421.bsp')
     astrometric = e['earth'].at(ts.utc(1980, 1, 1, 0, 0)).observe(e['moon'])
