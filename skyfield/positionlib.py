@@ -1,6 +1,6 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, arccos, clip, einsum, exp, empty 
+from numpy import array, arccos, clip, full, einsum, exp, nan, empty 
 from .constants import RAD2DEG, tau, DEG2RAD
 from .data.spice import inertial_frames
 from .functions import dots, from_polar, length_of, to_polar, rot_z, rot_x
@@ -12,7 +12,6 @@ from .nutationlib import earth_tilt
 
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GALACTIC = inertial_frames['GALACTIC']
-
 
 def build_position(position_au, velocity_au_per_d=None, t=None,
                    center=None, target=None, observer_data=None):
@@ -41,9 +40,8 @@ class ICRF(object):
         self.t = t
         self.position = Distance(position_au)
         if velocity_au_per_d is None:
-            self.velocity = None
-        else:
-            self.velocity = Velocity(velocity_au_per_d)
+            velocity_au_per_d = full(self.position.au.shape, nan)
+        self.velocity = Velocity(velocity_au_per_d)
         # TODO: are center and target useful? Then why are they not
         # propagated down to Astrometric and Apparent positions?
         self.center = center
