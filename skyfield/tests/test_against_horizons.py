@@ -46,8 +46,10 @@ def test_ecliptic_for_epoch_of_date_array(ts):
     astrometric = e['earth'].at(ts.utc(2005, 10, 1, [6, 7], 0, 0)).observe(sun)
     apparent = astrometric.apparent()
     hlat, hlon, d = apparent.ecliptic_latlon(epoch='date')
-    compare(hlat.degrees, [0.0000488, 0.0000474], 0.00001)
-    compare(hlon.degrees, [188.2011122, 188.2420983], 0.0001)
+    compare(hlat.degrees[0], 0.0000488, 0.00001)
+    compare(hlat.degrees[1], 0.0000474, 0.00001)
+    compare(hlon.degrees[0], 188.2011122, 0.0001)
+    compare(hlon.degrees[1], 188.2420983, 0.0001)
 
 def test_fk4_frame(ts):
     e = api.load('de421.bsp')
