@@ -67,6 +67,10 @@ class ICRF(object):
             v = body.velocity.au_per_d - self.velocity.au_per_d
         return ICRF(p, v, self.t)
 
+    def __getitem__(self, i):
+        # TODO: grab other data too
+        return type(self)(self.position.au[:,i], t=self.t[i])
+
     def distance(self):
         """Compute the distance from the origin to this position.
 

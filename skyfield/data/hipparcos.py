@@ -54,7 +54,7 @@ def load_dataframe(path):
     names, colspecs = zip(
         ('hip', (2, 14)),
         ('magnitude', (41, 46)),
-        ('ra_hours', (51, 63)),
+        ('ra_degrees', (51, 63)),
         ('dec_degrees', (64, 76)),
     )
 
@@ -69,6 +69,7 @@ def load_dataframe(path):
     #print(df.head(1))
     print(time() - t0)
     df = df.set_index('hip')
+    df['ra_hours'] = df['ra_degrees'] / 15.0
     # print(df.head())
     # print(df.info())
     # print(df.magnitude.isnull().sum())
