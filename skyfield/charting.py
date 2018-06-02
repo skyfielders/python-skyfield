@@ -1,8 +1,27 @@
 """Routines to help draw star charts."""
 
+#import numpy as np
 from .starlib import Star
 
 def plot_stars(catalog, observer, project, mag1, mag2, ax):
+
+
+    # from astropy import wcs
+    # w = wcs.WCS(naxis=2)
+    # w.wcs.crpix = [-234.75, 8.3393]
+    # w.wcs.cdelt = np.array([-0.066667, 0.066667])
+    # w.wcs.crval = [0, -90]
+    # w.wcs.ctype = ["RA---AIR", "DEC--AIR"]
+    # w.wcs.set_pv([(2, 1, 45.0)])
+
+    # import matplotlib.pyplot as plt
+
+    # plt.subplot(projection=wcs)
+    # #plt.imshow(hdu.data, vmin=-2.e-5, vmax=2.e-4, origin='lower')
+    # plt.grid(color='white', ls='solid')
+    # plt.xlabel('Galactic Longitude')
+    # plt.ylabel('Galactic Latitude')
+
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_xlim()
     lim = max(abs(xmin), abs(xmax), abs(ymin), abs(ymax)) * 1.25
