@@ -66,7 +66,7 @@ def reverse_terra(xyz_au, gast, iterations=3):
     x, y, z = xyz_au
     R = sqrt(x*x + y*y)
 
-    lon = (arctan2(y, x) - 15 * DEG2RAD * gast) % tau
+    lon = (((arctan2(y, x) - 15 * DEG2RAD * gast) + tau / 2.0) % tau) - tau / 2.0
     lat = arctan2(z, R)
 
     a = ERAD / AU_M
