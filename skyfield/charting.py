@@ -120,7 +120,11 @@ def _animate(h, e, project, p):
     x, y = project(p)
 
     fig, ax = plt.subplots()
-    print([name for name in dir(fig) if 'size' in name])
+    #plt.axis('off')
+    plt.tick_params(axis='both', which='both',
+                    bottom=False, labelbottom=False,
+                    left=False, labelleft=False)
+
     fig.set_size_inches(9, 9)
     #(artist,) = ax.plot(x, sin(x))
 
@@ -177,7 +181,7 @@ def _animate(h, e, project, p):
 
     anim = _Animation(fig, update, frames=len(x),
                       blit=True, init_func=init,
-                      interval=50)
+                      interval=16)
     plt.close()
     #anim.AX = ax
     html = anim.to_html5_video()
