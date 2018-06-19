@@ -1,6 +1,6 @@
 """Routines to help draw star charts."""
 
-#import numpy as np
+import numpy as np
 from IPython.display import HTML
 from matplotlib.animation import FuncAnimation
 from .starlib import Star
@@ -36,20 +36,13 @@ def _plot_stars(catalog, observer, project, ax, mag1, mag2, margin=1.25):
 
     o = observer[0]
 
-    c = catalog
-    c = c[c['magnitude'] <= mag1]
-    print('First star group:', len(c))
-    s = Star(ra_hours=c.ra_hours, dec_degrees=c.dec_degrees)
-    spos = o.observe(s)
-    x, y = project(spos)
-    scale = 2.0
-    size = ((mag1 - c['magnitude']) * scale) ** 2.0
-    art.append(ax.scatter(x, y, s=size, c='k'))
+    # Dim stars: points of with varying gray levels.
 
     c = catalog
     c = c[c['magnitude'] > mag1]
     c = c[c['magnitude'] <= mag2]
     print('Second star group:', len(c))
+    c = c.sort_values('magnitude', ascending=False)
     s = Star(ra_hours=c.ra_hours, dec_degrees=c.dec_degrees)
     spos = o.observe(s)
     x, y = project(spos)
@@ -59,6 +52,29 @@ def _plot_stars(catalog, observer, project, ax, mag1, mag2, margin=1.25):
         x, y, s=1.0,
         c=0.1 + 0.8 * m, cmap='gray_r', vmin=0.0, vmax=1.0,
     ))
+
+    # Bright stars: black circles of varying radius, surrounded by a
+    # white gap in case stars are touching.  Draw the brightest stars
+    # first to stop them from completely occluding smaller companions.
+
+    c = catalog
+    c = c[c['magnitude'] <= mag1]
+    c = c.sort_values('magnitude', ascending=True)
+    print('First star group:', len(c))
+    s = Star(ra_hours=c.ra_hours, dec_degrees=c.dec_degrees)
+    spos = o.observe(s)
+    x, y = project(spos)
+    scale = 2.0
+    radius = (mag1 - c['magnitude']) * scale
+
+    x2 = np.repeat(x, 2)
+    y2 = np.repeat(y, 2)
+    radius2 = (radius[:,None] + (3.0,0.0)).flatten()
+    #print(size2[:20])
+    c2 = ('w', 'k')
+
+    art.append(ax.scatter(x2, y2, s=radius2 ** 2.0, c=c2))
+
     return art
 
 X = []
