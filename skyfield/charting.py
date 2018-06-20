@@ -113,9 +113,15 @@ def draw(self):
 
 from unittest.mock import patch
 
-def _animate(h, e, project, p):
+def _animate(project, t, stars, observer, planet):
     #from numpy import sin
     import matplotlib.pyplot as plt
+
+    o = observer.at(t)
+    p = o.observe(planet)
+
+    p0 = planet.at(t)
+    mag = -8.88 + 5.0 * np.log10(p.distance().au * p0.distance().au)
 
     x, y = project(p)
 
@@ -133,17 +139,21 @@ def _animate(h, e, project, p):
     # print('blue_art:', id(blue_art))
     # print('planet art:', id(planet))
 
-    _plot_stars(h, e, project, ax, 6.0, 8.0, 0.8)
+    _plot_stars(stars, o, project, ax, 6.0, 8.0, 0.8)
 
-    planet = None
+    # http://aa.usno.navy.mil/software/mica/USNO-AA-TN-2003-04.pdf
+    # m - M = 5 (log10 d - 1)
+    # m = 5 (log10 d - 1) + M
+
+    planet_art = None
 
     def init():
-        nonlocal planet
-        planet, = ax.plot(x[100], y[100], 'ro')
+        nonlocal planet_art
+        planet_art, = ax.plot(x[100], y[100], 'ro')
         #return ()
         #return a + [blue_art]
         #return a
-        return (planet,)
+        return (planet_art,)
 
     from time import time
 
@@ -162,17 +172,23 @@ def _animate(h, e, project, p):
         # print('Frame', i, end=" ")
         #imshow(copy)
         #fig.canvas.restore_region(copy)
-        planet.set_xdata(x[i])
-        planet.set_ydata(y[i])
+        planet_art.set_xdata(x[i])
+        planet_art.set_ydata(y[i])
+
+        scale = 2.0
+        radius = (6.0 - mag[i]) * scale
+
+        planet_art.set_ms(radius)
+
         #fig.canvas.blit(ax.bbox)
         #return ()
-        return (planet,)
+        return (planet_art,)
 
     #fig.canvas.draw()
     #fig.draw()
     #artist.axes.draw_artist(artist)
 
-    # print(planet.figure is fig)
+    # print(planet_art.figure is fig)
 
     #copy = artist.figure.canvas.copy_from_bbox(artist.axes.bbox)
 
