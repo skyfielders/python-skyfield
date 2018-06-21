@@ -2,7 +2,8 @@
 
 import numpy as np
 from IPython.display import HTML
-from matplotlib.animation import FuncAnimation
+from matplotlib import rc_context, rcParams
+from matplotlib.animation import FuncAnimation, FFMpegWriter, writers
 from .starlib import Star
 
 def _plot_stars(catalog, observer, project, ax, mag1, mag2, margin=1.25):
@@ -77,6 +78,15 @@ def _plot_stars(catalog, observer, project, ax, mag1, mag2, margin=1.25):
 
     return art
 
+@writers.register('ffmpeg_small')
+class _FFMpegWriter(FFMpegWriter):
+    def _args(self):
+        args = super(_FFMpegWriter, self)._args()
+        i = args.index('h264') + 1
+        args[i:i] = ['-x264-params', 'keyint=99999999:scenecut=0']
+        #args.append('keyint=123:min-keyint=20')
+        return args
+
 X = []
 
 class _Animation(FuncAnimation):
@@ -113,7 +123,7 @@ def draw(self):
 
 from unittest.mock import patch
 
-def _animate(project, t, stars, observer, planet):
+def _animate(projection, t, stars, observer, planet):
     #from numpy import sin
     import matplotlib.pyplot as plt
 
@@ -123,6 +133,7 @@ def _animate(project, t, stars, observer, planet):
     p0 = planet.at(t)
     mag = -8.88 + 5.0 * np.log10(p.distance().au * p0.distance().au)
 
+    project = projection(p)
     x, y = project(p)
 
     fig, ax = plt.subplots()
@@ -200,7 +211,10 @@ def _animate(project, t, stars, observer, planet):
                       interval=16)
     plt.close()
     #anim.AX = ax
-    html = anim.to_html5_video()
+    #print(rcParams.validate['animation.writer'].__dict__)
+    rcParams.validate['animation.writer'].valid['ffmpeg_small'] = 'ffmpeg_small'
+    with rc_context({'animation.writer': 'ffmpeg_small'}):
+        html = anim.to_html5_video()
 
     anim.patcher.__exit__()
     return HTML(html)
