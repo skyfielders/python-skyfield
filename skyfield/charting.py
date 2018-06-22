@@ -51,7 +51,7 @@ def _plot_stars(catalog, observer, project, ax, mag1, mag2, margin=1.25):
     # Note that "gray_r" is white for 0.0 and black for 1.0
     art.append(ax.scatter(
         x, y, s=1.0,
-        c=0.1 + 0.8 * m, cmap='gray_r', vmin=0.0, vmax=1.0,
+        c=0.8 * m, cmap='gray_r', vmin=0.0, vmax=1.0,
     ))
 
     # Bright stars: black circles of varying radius, surrounded by a
@@ -65,8 +65,8 @@ def _plot_stars(catalog, observer, project, ax, mag1, mag2, margin=1.25):
     s = Star(ra_hours=c.ra_hours, dec_degrees=c.dec_degrees)
     spos = o.observe(s)
     x, y = project(spos)
-    scale = 2.0
-    radius = (mag1 - c['magnitude']) * scale
+    scale = 1.5
+    radius = (mag1 - c['magnitude']) * scale + 1.0
 
     x2 = np.repeat(x, 2)
     y2 = np.repeat(y, 2)
@@ -109,6 +109,9 @@ from unittest.mock import patch
 def _animate(projection, t, stars, observer, planet):
     import matplotlib.pyplot as plt
 
+    # print(t)
+    # print(t[0].utc_strftime('%Y %B'))
+
     o = observer.at(t)
     p = o.observe(planet)
 
@@ -128,19 +131,38 @@ def _animate(projection, t, stars, observer, planet):
 
     ax.scatter(x, y, color='b', alpha=0.0)
 
-    _plot_stars(stars, o, project, ax, 6.0, 8.0, 0.8)
+    _plot_stars(stars, o, project, ax, 6.0, 8.5, 0.8)
 
     # http://aa.usno.navy.mil/software/mica/USNO-AA-TN-2003-04.pdf
     # m - M = 5 (log10 d - 1)
     # m = 5 (log10 d - 1) + M
 
+    x_left, x_right = ax.get_xlim()
+    y_bottom, y_top = ax.get_ylim()
+    text_x = x_left
+    text_y = y_bottom - (y_top - y_bottom) * 0.01
+
+    # date_text.set_clip_on(False)
+    # date_text = fig.text(0.1, 0.1, 'date',
+    #                  ha='center',
+    #                  va='center',
+    #                  transform = ax.transAxes)
+    # date_text.set_clip_on(False)
+    # date_text = fig.text(0.2, 0.2, 'date',
+    #                  ha='center',
+    #                  va='center',
+    #                  transform = ax.transAxes)
+
+    saturn_color = '#a69276'  # chroma('#d8c2a5').darken().hex()
+
     planet_art = None
+    date_text = None
 
     def init():
-        nonlocal planet_art
-        color = '#a69276'  # chroma('#d8c2a5').darken().hex()
-        planet_art, = ax.plot(x[100], y[100], color=color, marker='o')
-        return (planet_art,)
+        nonlocal planet_art, date_text
+        planet_art, = ax.plot(x[100], y[100], color=saturn_color, marker='o')
+        date_text = ax.text(text_x, text_y, '', ha='left', va='top')
+        return planet_art, #date_text
 
     def update(i):
         planet_art.set_xdata(x[i])
@@ -151,7 +173,12 @@ def _animate(projection, t, stars, observer, planet):
 
         planet_art.set_ms(radius)
 
-        return (planet_art,)
+        #date_text = ax.text(text_x, text_y, 'date', ha='left', va='top')
+        date_text.set_text(t[i].utc_strftime('%Y %B'))
+
+        if i == 0:
+            return planet_art,
+        return planet_art, date_text
 
     frames = len(x)
     frames = 30
