@@ -199,12 +199,25 @@ def _animate(projection, t, stars, observer, planet):
                       blit=True, init_func=init,
                       interval=16)
     plt.close()
+    return anim
     rcParams.validate['animation.writer'].valid['ffmpeg_small'] = 'ffmpeg_small'
     with rc_context({'animation.writer': 'ffmpeg_small'}):
         html = anim.to_html5_video()
 
     anim.patcher.__exit__()
     return HTML(html)
+
+def _save_and_display(anim, path):
+    Writer = _FFMpegWriter
+    writer = Writer(codec='h264',
+                    bitrate=rcParams['animation.bitrate'],
+                    fps=1000. / anim._interval)
+    anim.save(path, writer=writer)
+    anim.patcher.__exit__()
+    return HTML(r'''<video autoplay loop>
+  <source type="video/mp4" src="{}">
+  Alas! Your browser does not support the video tag.
+</video>'''.format(path)) #'file://' + path))
 
 class T(object):
     from time import time
