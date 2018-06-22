@@ -93,25 +93,8 @@ class _Animation(FuncAnimation):
     patcher = None
 
     def _draw_next_frame(self, framedata, blit):
-        #patcher.__exit__()
-
-        #print('------------ _draw_next_frame()')
-        #print('====>', self.AX.artists)
-        #print('====>', self.AX.axes)
-        #print('====>', self.AX.axes.lines)
-        #print('====>', self.AX.axes.axes)  just itself
-        #print('====>', self.AX.axes.get_children())
-        #printout(self._fig)
-        # if X:
-        #     self.AX.artists[:] = X
-        #     del X[:]
-
         blit = True    # override matplotlib's refusal to blit in save()
         super(_Animation, self)._draw_next_frame(framedata, blit)
-
-        # X[:] = self.AX.artists
-        # self.AX.artists[:] = []
-        #print('------------ DONE')
 
         if self.patcher is None:
             self.patcher = patch('matplotlib.backends.backend_agg'
@@ -124,7 +107,6 @@ def draw(self):
 from unittest.mock import patch
 
 def _animate(projection, t, stars, observer, planet):
-    #from numpy import sin
     import matplotlib.pyplot as plt
 
     o = observer.at(t)
@@ -137,18 +119,14 @@ def _animate(projection, t, stars, observer, planet):
     x, y = project(p)
 
     fig, ax = plt.subplots()
-    #plt.axis('off')
+
     plt.tick_params(axis='both', which='both',
                     bottom=False, labelbottom=False,
                     left=False, labelleft=False)
 
     fig.set_size_inches(9, 9)
-    #(artist,) = ax.plot(x, sin(x))
 
-    blue_art, = ax.plot(x, y, color='b', alpha=0.0)
-
-    # print('blue_art:', id(blue_art))
-    # print('planet art:', id(planet))
+    ax.scatter(x, y, color='b', alpha=0.0)
 
     _plot_stars(stars, o, project, ax, 6.0, 8.0, 0.8)
 
@@ -160,29 +138,11 @@ def _animate(projection, t, stars, observer, planet):
 
     def init():
         nonlocal planet_art
-        planet_art, = ax.plot(x[100], y[100], 'ro')
-        #return ()
-        #return a + [blue_art]
-        #return a
+        color = '#a69276'  # chroma('#d8c2a5').darken().hex()
+        planet_art, = ax.plot(x[100], y[100], color=color, marker='o')
         return (planet_art,)
 
-    from time import time
-
     def update(i):
-        # print(a)
-        # print(fig.artists)
-
-        # for artist in a:
-        #     if a in fig.artists:
-        #         print('=================== REMOVING')
-        #         fig.artists.remove(a)
-
-        # if t0[0] is not None:
-        #     print(' {} seconds'.format(time() - t0[0]))
-        t0[0] = time()
-        # print('Frame', i, end=" ")
-        #imshow(copy)
-        #fig.canvas.restore_region(copy)
         planet_art.set_xdata(x[i])
         planet_art.set_ydata(y[i])
 
@@ -191,27 +151,15 @@ def _animate(projection, t, stars, observer, planet):
 
         planet_art.set_ms(radius)
 
-        #fig.canvas.blit(ax.bbox)
-        #return ()
         return (planet_art,)
 
-    #fig.canvas.draw()
-    #fig.draw()
-    #artist.axes.draw_artist(artist)
+    frames = len(x)
+    frames = 30
 
-    # print(planet_art.figure is fig)
-
-    #copy = artist.figure.canvas.copy_from_bbox(artist.axes.bbox)
-
-    #anim = FuncAnimation(fig, update_frame, frames=10)
-    t0 = [time()]
-
-    anim = _Animation(fig, update, frames=len(x),
+    anim = _Animation(fig, update, frames=frames,
                       blit=True, init_func=init,
                       interval=16)
     plt.close()
-    #anim.AX = ax
-    #print(rcParams.validate['animation.writer'].__dict__)
     rcParams.validate['animation.writer'].valid['ffmpeg_small'] = 'ffmpeg_small'
     with rc_context({'animation.writer': 'ffmpeg_small'}):
         html = anim.to_html5_video()
