@@ -28,5 +28,6 @@ that is accelerated using NumPy vector math!
    api-stars
    api-position
    api-units
+   toc
    design
    bibliography
