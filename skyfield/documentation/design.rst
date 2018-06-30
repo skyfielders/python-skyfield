@@ -188,6 +188,7 @@ Cross products
 How can we compute a cross product while remaining agnostic about
 whether the two vectors we have been handed have a second dimension?
 
+>>> from numpy import array, cross
 >>> a = array([1, 2, 3])
 >>> b = array([6, 4, 5])
 

@@ -318,7 +318,7 @@ class Astrometric(ICRF):
         aberration of light caused by the observer's own velocity.
 
         >>> earth.at(t).observe(mars).apparent()
-        <Apparent position at date t>
+        <Apparent position and velocity at date t>
 
         These transforms convert the position from the BCRS reference
         frame of the Solar System barycenter and to the reference frame
