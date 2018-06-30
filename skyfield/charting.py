@@ -51,7 +51,7 @@ def _plot_stars(catalog, observer, project, ax, mag1, mag2, margin=1.25):
     # Note that "gray_r" is white for 0.0 and black for 1.0
     art.append(ax.scatter(
         x, y, s=1.0,
-        c=0.8 * m, cmap='gray_r', vmin=0.0, vmax=1.0,
+        c=1 - 0.8 * m, cmap='gray_r', vmin=0.0, vmax=1.0,
     ))
 
     # Bright stars: black circles of varying radius, surrounded by a
@@ -75,6 +75,7 @@ def _plot_stars(catalog, observer, project, ax, mag1, mag2, margin=1.25):
     y2 = np.repeat(y, 2)
     radius2 = (radius[:,None] + (3.0,0.0)).flatten()
     c2 = ('w', 'k')
+    c2 = ('k', 'w')
 
     art.append(ax.scatter(x2, y2, s=radius2 ** 2.0, c=c2))
 
@@ -140,8 +141,6 @@ def _animate(projection, t, stars, observer, planet):
                     bottom=False, labelbottom=False,
                     left=False, labelleft=False)
 
-    fig.set_size_inches(9, 9)
-
     # Draw invisibly the entire path, so that the bounding boxes are
     # known ahead of time.
     ax.scatter(x, y, color='b', alpha=0.0)
@@ -157,7 +156,8 @@ def _animate(projection, t, stars, observer, planet):
     text_x = x_left
     text_y = y_bottom - (y_top - y_bottom) * 0.01
 
-    saturn_color = '#a69276'  # chroma('#d8c2a5').darken().hex()
+    saturn_color = '#f7dfae'
+    #'#a69276'  # chroma('#d8c2a5').darken().hex()
 
     planet_art = None
     date_text = None
@@ -190,10 +190,13 @@ def _animate(projection, t, stars, observer, planet):
 
         date_text.set_text(t[i].utc_strftime('%Y %B'))
 
+        ax.set_facecolor('black')
         return planet_art, r, date_text
 
     frames = len(x)
     #frames = 90
+
+    ax.set_facecolor('black')
 
     anim = _Animation(fig, update, frames=frames,
                       blit=True, init_func=init,
