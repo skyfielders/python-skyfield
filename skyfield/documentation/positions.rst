@@ -119,15 +119,20 @@ or else by generating a whole series of positions.
     t = ts.now()
 
     planets = load('de421.bsp')
-    earth = planets['earth']
     mars = planets['mars']
 
     # From the center of the Solar System (Barycentric)
 
     barycentric = mars.at(t)
 
+    # From the center of the Sun (Heliocentric)
+
+    sun = planets['sun']
+    heliocentric = sun.at(t).observe(mars)
+
     # From the center of the Earth (Geocentric)
 
+    earth = planets['earth']
     astrometric = earth.at(t).observe(mars)
     apparent = earth.at(t).observe(mars).apparent()
 
