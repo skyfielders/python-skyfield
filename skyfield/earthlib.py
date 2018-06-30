@@ -77,7 +77,7 @@ def reverse_terra(xyz_au, gast, iterations=3):
         i += 1
         C = 1.0 / sqrt(1.0 - e2 * (sin(lat) ** 2.0))
         lat = arctan2(z + a * C * e2 * sin(lat), R)
-    elevation_m = 0 # TODO
+    elevation_m = ((R / cos(lat)) - a * C) * AU_M
     return lat, lon, elevation_m
 
 
