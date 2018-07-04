@@ -1,6 +1,6 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, arccos, clip, full, einsum, exp, nan
+from numpy import array, arccos, clip, full, einsum, exp, nan, zeros_like
 
 from .constants import ANGVEL, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
@@ -452,6 +452,7 @@ def ITRF_to_GCRS2(t, rITRF, vITRF):
 
     velocity = einsum('ij...,j...->i...', spin, array(vITRF))
     velocity = einsum('ij...,j...->i...', t.MT, velocity)
-    velocity += DAY_S * ANGVEL * array((-position[1], position[0], 0))
+    velocity[0] += DAY_S * ANGVEL * - position[1]
+    velocity[1] += DAY_S * ANGVEL * position[0]
 
     return position, velocity

@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import sys
-from datetime import datetime, timedelta
 from numpy import array
 from skyfield import api
-from skyfield.api import EarthSatellite, Topos
+from skyfield.api import EarthSatellite
 from skyfield.constants import AU_KM, AU_M
 from skyfield.sgp4lib import TEME_to_ITRF
-from skyfield.timelib import utc
 
 iss_tle0 = """\
 1 25544U 98067A   18184.80969102  .00001614  00000-0  31745-4 0  9993
@@ -29,16 +26,28 @@ iss_tle0 = """\
 
 def test_iss_against_horizons():
     ts = api.load.timescale()
-    t = ts.tdb(2018, 7, 4)
     s = EarthSatellite(*iss_tle0.splitlines())
 
-    p = s.at(t)
-    hp = [2.633404251158200E-05, 1.015087620439817E-05, 3.544778677556393E-05]
-    two_meters = 2.0 / AU_M
-    assert (abs(p.position.au - hp) < two_meters).all()
+    hp = array([
+        [2.633404251158200E-5, 1.015087620439817E-5, 3.544778677556393E-5],
+        [-2.136440257814821E-5, -2.084170814514480E-5, -3.415494123796893E-5],
+    ]).T
+    hv = array([
+        [-1.751248694205384E-3, 4.065407557020968E-3, 1.363540232307603E-4],
+        [2.143876266215405E-3, -3.752167957502106E-3, 9.484159290242074E-4],
+    ]).T
 
+    two_meters = 2.0 / AU_M
     three_km_per_hour = 3.0 * 24.0 / AU_KM
-    hv = [-1.751248694205384E-03, 4.065407557020968E-03, 1.363540232307603E-04]
+
+    t = ts.tdb(2018, 7, 4)
+    p = s.at(t)
+    assert (abs(p.position.au - hp[:,0]) < two_meters).all()
+    assert (abs(p.velocity.au_per_d - hv[:,0]) < three_km_per_hour).all()
+
+    t = ts.tdb(2018, 7, [4, 5])
+    p = s.at(t)
+    assert (abs(p.position.au - hp) < two_meters).all()
     assert (abs(p.velocity.au_per_d - hv) < three_km_per_hour).all()
 
 # The following tests are based on the text of
