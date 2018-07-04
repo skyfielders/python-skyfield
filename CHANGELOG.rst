@@ -6,9 +6,20 @@ Changelog
 1.5 — 2018 July 4
 -----------------
 
+* The :meth:`~skyfield.positionlib.Geocentric.subpoint()` method
+  now normalizes the longitude values it returns
+  into the range −180° to 180°
+  `#182 <https://github.com/skyfielders/python-skyfield/issues/182>`_
+  and returns an actual elevation instead of zero.
+  `#185 <https://github.com/skyfielders/python-skyfield/issues/185>`_
+
+* Earth satellites now return a real velocity vector instead of zero.
+  `#187 <https://github.com/skyfielders/python-skyfield/issues/187>`_
+
 * Earth satellites now offer an
   :meth:`~skyfield.sgp4lib.EarthSatellite.ITRF_position_velocity_error()`
   method that returns raw ITRF coordinates for users interested in them.
+  `#85 <https://github.com/skyfielders/python-skyfield/issues/85>`_
 
 1.4 — 2018 May 20
 -----------------

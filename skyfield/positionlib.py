@@ -156,7 +156,7 @@ class ICRF(object):
         c = dots(u1, u2)
         return Angle(radians=arccos(clip(c, -1.0, 1.0)))
 
-    def ecliptic_position(self):
+    def ecliptic_xyz(self):
         """Compute J2000 ecliptic coordinates (x, y, z)"""
         vector = _ECLIPJ2000.dot(self.position.au)
         return Distance(vector)
@@ -169,7 +169,7 @@ class ICRF(object):
                 Angle(radians=lon),
                 Distance(au=d))
 
-    def galactic_position(self):
+    def galactic_xyz(self):
         """Compute galactic coordinates (x, y, z)"""
         vector = _GALACTIC.dot(self.position.au)
         return Distance(vector)
@@ -181,6 +181,10 @@ class ICRF(object):
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
                 Distance(au=d))
+
+    # Aliases; maybe someday turn into deprecations with warnings?
+    ecliptic_position = ecliptic_xyz
+    galactic_position = galactic_xyz
 
     def to_skycoord(self, unit=None):
         """Convert this distance to an AstroPy ``SkyCoord`` object."""

@@ -162,7 +162,7 @@ diff:
 DEST=wf-rhodesmill:Dropbox/rhodesmill.org/skyfield
 
 sync: html
-	rsync -r _build/html/ ~/src/rhodesmill.org/skyfield
+	rsync -r _build/html/ ~/rhodesmill.org/skyfield
 	,push
 
 # Runs web server outside _build, for when I need to "rm -r" clean-slate it:

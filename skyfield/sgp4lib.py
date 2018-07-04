@@ -1,6 +1,6 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
-from numpy import array, cross, einsum, zeros_like
+from numpy import array, cross, einsum
 from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4

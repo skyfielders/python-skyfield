@@ -25,6 +25,7 @@ Generic ICRF position
 
 .. autoclass:: ICRF
    :members:
+   :exclude-members: ecliptic_position, galactic_position
 
    .. attribute:: t
 
