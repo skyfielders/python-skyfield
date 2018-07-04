@@ -5,70 +5,41 @@ from datetime import datetime, timedelta
 from numpy import array
 from skyfield import api
 from skyfield.api import EarthSatellite, Topos
+from skyfield.constants import AU_KM, AU_M
 from skyfield.sgp4lib import TEME_to_ITRF
 from skyfield.timelib import utc
 
-iss_tle = ("""\
-ISS (ZARYA)             \n\
-1 25544U 98067A   13330.58127943  .00000814  00000-0  21834-4 0  1064\n\
-2 25544  51.6484  23.7537 0001246  74.1647  18.7420 15.50540527859894\n\
-""")
-
-heavens_above_transits = """\
-26 Nov	-1.7	04:55:55	29°	NNE	04:55:55	29°	NNE	04:58:45	10°	E	visible
-27 Nov	0.1	04:09:07	12°	ENE	04:09:07	12°	ENE	04:09:25	10°	ENE	visible
-27 Nov	-3.4	05:42:00	26°	WNW	05:43:45	86°	SW	05:47:05	10°	SE	visible
-28 Nov	-2.6	04:55:15	52°	ENE	04:55:15	52°	ENE	04:58:07	10°	ESE	visible
-29 Nov	0.1	04:08:35	13°	E	04:08:35	13°	E	04:08:58	10°	E	visible
-29 Nov	-2.2	05:41:28	25°	WSW	05:42:30	31°	SW	05:45:28	10°	SSE	visible
-30 Nov	-1.9	04:54:52	33°	SSE	04:54:52	33°	SSE	04:56:55	10°	SE	visible
-01 Dec	-0.9	05:41:13	12°	SW	05:41:13	12°	SW	05:42:15	10°	SSW	visible
-02 Dec	-0.4	04:54:46	10°	S	04:54:46	10°	S	04:54:49	10°	S	visible
+iss_tle0 = """\
+1 25544U 98067A   18184.80969102  .00001614  00000-0  31745-4 0  9993
+2 25544  51.6414 295.8524 0003435 262.6267 204.2868 15.54005638121106
 """
-if sys.version_info < (3,):
-    heavens_above_transits = heavens_above_transits.decode('utf-8')
 
-def ts():
-    yield api.load.timescale()
+# Here are numbers from HORIZONS, which I copied into the test below:
+#
+#Ephemeris / WWW_USER Wed Jul  4 19:16:45 2018 Pasadena, USA      / Horizons
+#...
+#2458303.500000000 = A.D. 2018-Jul-04 00:00:00.0000 TDB
+# X = 2.633404251158200E-05 Y = 1.015087620439817E-05 Z = 3.544778677556393E-05
+# VX=-1.751248694205384E-03 VY= 4.065407557020968E-03 VZ= 1.363540232307603E-04
+#2458304.500000000 = A.D. 2018-Jul-05 00:00:00.0000 TDB
+# X =-2.136440257814821E-05 Y =-2.084170814514480E-05 Z =-3.415494123796893E-05
+# VX= 2.143876266215405E-03 VY=-3.752167957502106E-03 VZ= 9.484159290242074E-04
 
-def iss_transit():
-    for line in heavens_above_transits.splitlines():
-        fields = line.split()
-        dt = datetime.strptime('2013 {0} {1} {6}'.format(*fields),
-                               '%Y %d %b %H:%M:%S').replace(tzinfo=utc)
-        altitude = float(fields[7][:-1])
-        yield dt, altitude
+# TODO: try with array of dates
 
-def test_iss_altitude_with_gcrs_vector_subtraction(iss_transit):
-    dt, their_altitude = iss_transit
+def test_iss_against_horizons():
+    ts = api.load.timescale()
+    t = ts.tdb(2018, 7, 4)
+    s = EarthSatellite(*iss_tle0.splitlines())
 
-    cst = timedelta(hours=-6) #, minutes=1)
-    dt = dt - cst
-    t = api.load.timescale(delta_t=67.2091).utc(dt)
+    p = s.at(t)
+    hp = [2.633404251158200E-05, 1.015087620439817E-05, 3.544778677556393E-05]
+    two_meters = 2.0 / AU_M
+    assert (abs(p.position.au - hp) < two_meters).all()
 
-    lines = iss_tle.splitlines()
-    s = EarthSatellite(lines[1], lines[2], lines[0])
-    lake_zurich = api.Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
-
-    alt, az, d = (s - lake_zurich).at(t).altaz()
-    print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
-    assert abs(alt.degrees - their_altitude) < 2.5  # TODO: tighten this up?
-
-def test_iss_altitude_with_bcrs_vector_subtraction(iss_transit):
-    dt, their_altitude = iss_transit
-
-    cst = timedelta(hours=-6) #, minutes=1)
-    dt = dt - cst
-    t = api.load.timescale(delta_t=67.2091).utc(dt)
-
-    earth = api.load('de421.bsp')['earth']
-    lines = iss_tle.splitlines()
-    s = earth + EarthSatellite(lines[-2], lines[-1])
-    lake_zurich = earth + Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
-
-    alt, az, d = (s - lake_zurich).at(t).altaz()
-    print(dt, their_altitude, alt.degrees, their_altitude - alt.degrees)
-    assert abs(alt.degrees - their_altitude) < 2.5  # TODO: tighten this up?
+    three_km_per_hour = 3.0 * 24.0 / AU_KM
+    hv = [-1.751248694205384E-03, 4.065407557020968E-03, 1.363540232307603E-04]
+    assert (abs(p.velocity.au_per_d - hv) < three_km_per_hour).all()
 
 # The following tests are based on the text of
 # http://www.celestrak.com/publications/AIAA/2006-6753/AIAA-2006-6753-Rev2.pdf

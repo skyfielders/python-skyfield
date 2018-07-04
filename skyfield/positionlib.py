@@ -2,7 +2,7 @@
 
 from numpy import array, arccos, clip, full, einsum, exp, nan
 
-from .constants import RAD2DEG, tau
+from .constants import ANGVEL, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .functions import dots, from_polar, length_of, to_polar, rot_z
 from .earthlib import compute_limb_angle, refract, reverse_terra
@@ -433,11 +433,25 @@ def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):
 
     return alt, Angle(radians=az), Distance(r_au)
 
-
-def ITRF_to_GCRS(t, rITRF):  # todo: velocity
+def ITRF_to_GCRS(t, rITRF):
 
     # Todo: wobble
 
     spin = rot_z(t.gast * tau / 24.0)
     position = einsum('ij...,j...->i...', spin, array(rITRF))
     return einsum('ij...,j...->i...', t.MT, position)
+
+def ITRF_to_GCRS2(t, rITRF, vITRF):
+
+    # Todo: wobble
+
+    spin = rot_z(t.gast * tau / 24.0)
+
+    position = einsum('ij...,j...->i...', spin, array(rITRF))
+    position = einsum('ij...,j...->i...', t.MT, position)
+
+    velocity = einsum('ij...,j...->i...', spin, array(vITRF))
+    velocity = einsum('ij...,j...->i...', t.MT, velocity)
+    velocity += DAY_S * ANGVEL * array((-position[1], position[0], 0))
+
+    return position, velocity

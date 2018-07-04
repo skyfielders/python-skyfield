@@ -44,12 +44,13 @@ def terra(latitude, longitude, elevation, gast):
     # Compute position vector components in kilometers.
 
     ac = ach * cosphi
-    pos = array((ac * cosst, ac * sinst, zero + ash * sinphi))
+    acsst = ac * sinst
+    accst = ac * cosst
+    pos = array((accst, acsst, zero + ash * sinphi))
 
     # Compute velocity vector components in kilometers/sec.
 
-    aac = ANGVEL * ach * cosphi
-    vel = array((-aac * sinst, aac * cosst, aac * zero)) * DAY_S
+    vel = ANGVEL * DAY_S * array((-acsst, accst, zero))
 
     return pos, vel
 

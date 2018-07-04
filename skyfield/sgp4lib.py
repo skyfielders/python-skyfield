@@ -7,7 +7,7 @@ from sgp4.propagation import sgp4
 
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
-from .positionlib import ITRF_to_GCRS
+from .positionlib import ITRF_to_GCRS2
 from .vectorlib import VectorFunction
 
 # important ones:
@@ -137,8 +137,7 @@ class EarthSatellite(VectorFunction):
         vTEME *= DAY_S
 
         rITRF, vITRF = TEME_to_ITRF(t.ut1, rTEME, vTEME)
-        rGCRS = ITRF_to_GCRS(t, rITRF)
-        vGCRS = zeros_like(rGCRS)  # todo: someday also compute vGCRS?
+        rGCRS, vGCRS = ITRF_to_GCRS2(t, rITRF, vITRF)
 
         return rGCRS, vGCRS, rGCRS, error
 
