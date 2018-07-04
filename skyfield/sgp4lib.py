@@ -129,16 +129,25 @@ class EarthSatellite(VectorFunction):
             position, velocity = sgp4(sat, minutes_past_epoch)
             return array(position), array(velocity), sat.error_message
 
-    def _at(self, t):
-        """Compute this satellite's GCRS position and velocity at time `t`."""
+    def ITRF_position_velocity_error(self, t):
+        """Return the ITRF position, velocity, and error at time `t`.
+
+        The position is an x,y,z vector measured in au, the velocity is
+        an x,y,z vector measured in au/day, and the error is a vector of
+        possible error messages for the time or vector of times `t`.
+
+        """
         rTEME, vTEME, error = self._position_and_velocity_TEME_km(t)
         rTEME /= AU_KM
         vTEME /= AU_KM
         vTEME *= DAY_S
-
         rITRF, vITRF = TEME_to_ITRF(t.ut1, rTEME, vTEME)
-        rGCRS, vGCRS = ITRF_to_GCRS2(t, rITRF, vITRF)
+        return rITRF, vITRF, error
 
+    def _at(self, t):
+        """Compute this satellite's GCRS position and velocity at time `t`."""
+        rITRF, vITRF, error = self.ITRF_position_velocity_error(t)
+        rGCRS, vGCRS = ITRF_to_GCRS2(t, rITRF, vITRF)
         return rGCRS, vGCRS, rGCRS, error
 
 

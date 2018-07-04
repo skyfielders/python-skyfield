@@ -3,6 +3,13 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.5 — 2018 July 4
+-----------------
+
+* Earth satellites now offer an
+  :meth:`~skyfield.sgp4lib.EarthSatellite.ITRF_position_velocity_error()`
+  method that returns raw ITRF coordinates for users interested in them.
+
 1.4 — 2018 May 20
 -----------------
 
