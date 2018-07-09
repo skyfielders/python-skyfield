@@ -533,33 +533,27 @@ class Time(object):
 
     @reify
     def P(self):
-        self.P = P = compute_precession(self.tdb)
-        return P
+        return compute_precession(self.tdb)
 
     @reify
     def PT(self):
-        self.PT = PT = rollaxis(self.P, 1)
-        return PT
+        return rollaxis(self.P, 1)
 
     @reify
     def N(self):
-        self.N = N = compute_nutation(self)
-        return N
+        return compute_nutation(self)
 
     @reify
     def NT(self):
-        self.NT = NT = rollaxis(self.N, 1)
-        return NT
+        return rollaxis(self.N, 1)
 
     @reify
     def M(self):
-        self.M = M = einsum('ij...,jk...,kl...->il...', self.N, self.P, B)
-        return M
+        return einsum('ij...,jk...,kl...->il...', self.N, self.P, B)
 
     @reify
     def MT(self):
-        self.MT = MT = rollaxis(self.M, 1)
-        return MT
+        return rollaxis(self.M, 1)
 
     # Conversion between timescales.
 
@@ -570,15 +564,12 @@ class Time(object):
 
     @reify
     def tai(self):
-        self.tai = tai = self.tt - tt_minus_tai
-        return tai
+        return self.tt - tt_minus_tai
 
     @reify
     def utc(self):
         utc = self._utc_tuple()
-        utc = array(utc) if self.shape else utc
-        self.utc = utc = utc
-        return utc
+        return array(utc) if self.shape else utc
 
     @reify
     def tdb(self):
@@ -587,14 +578,12 @@ class Time(object):
 
     @reify
     def ut1(self):
-        self.ut1 = ut1 = self.tt - self.delta_t / DAY_S
-        return ut1
+        return self.tt - self.delta_t / DAY_S
 
     @reify
     def delta_t(self):
         table = self.ts.delta_t_table
-        self.delta_t = delta_t = interpolate_delta_t(table, self.tt)
-        return delta_t
+        return interpolate_delta_t(table, self.tt)
 
     @reify
     def dut1(self):
@@ -602,13 +591,11 @@ class Time(object):
 
     @reify
     def gmst(self):
-        self.gmst = gmst = sidereal_time(self)
-        return gmst
+        return sidereal_time(self)
 
     @reify
     def gast(self):
-        self.gast = gast = self.gmst + earth_tilt(self)[2] / 3600.0
-        return gast
+        return self.gmst + earth_tilt(self)[2] / 3600.0
 
     def __eq__(self, other_time):
         if not isinstance(other_time, Time):
