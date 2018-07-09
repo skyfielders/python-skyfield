@@ -89,7 +89,7 @@ class Timescale(object):
         return self.utc(self._utcnow().replace(tzinfo=utc))
 
     def utc(self, year, month=1, day=1, hour=0, minute=0, second=0.0):
-        """Return the Time corresponding to a specific moment in UTC.
+        """Build a `Time` from a UTC calendar date.
 
         You can either specify the date as separate components, or
         provide a time zone aware Python datetime.  The following two
@@ -128,14 +128,16 @@ class Timescale(object):
 
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
-        """Return the Time corresponding to a specific moment in TAI.
+        """Build a `Time` from a TAI calendar date.
 
-        You can specify International Atomic Time (TAI) by providing
-        either a proleptic Gregorian calendar date or a raw Julian Date
-        float.  The following two method calls are equivalent::
+        Supply the International Atomic Time (TAI) as a proleptic
+        Gregorian calendar date:
 
-            timescale.tai(2014, 1, 18, 1, 35, 37.5)
-            timescale.tai(jd=2456675.56640625)
+        >>> t = ts.tai(2014, 1, 18, 1, 35, 37.5)
+        >>> t.tai
+        2456675.56640625
+        >>> t.tai_calendar()
+        (2014, 1, 18, 1, 35, 37.5)
 
         """
         if jd is not None:
@@ -145,21 +147,37 @@ class Timescale(object):
                 _to_array(year), _to_array(month), _to_array(day),
                 _to_array(hour), _to_array(minute), _to_array(second),
             )
-        tai = _to_array(tai)
+        return self.tai_jd(tai)
+
+    def tai_jd(self, jd):
+        """Build a `Time` from a TAI Julian date.
+
+        Supply the International Atomic Time (TAI) as a Julian date:
+
+        >>> t = ts.tai_jd(2456675.56640625)
+        >>> t.tai
+        2456675.56640625
+        >>> t.tai_calendar()
+        (2014, 1, 18, 1, 35, 37.5)
+
+        """
+        tai = _to_array(jd)
         t = Time(self, tai + tt_minus_tai)
         t.tai = tai
         return t
 
     def tt(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
            jd=None):
-        """Return the Time corresponding to a specific moment in TT.
+        """Build a `Time` from a TT calendar date.
 
-        You can supply the Terrestrial Time (TT) by providing either a
-        proleptic Gregorian calendar date or a raw Julian Date float.
-        The following two method calls are equivalent::
+        Supply the Terrestrial Time (TT) as a proleptic Gregorian
+        calendar date:
 
-            timescale.tt(2014, 1, 18, 1, 35, 37.5)
-            timescale.tt(jd=2456675.56640625)
+        >>> t = ts.tt(2014, 1, 18, 1, 35, 37.5)
+        >>> t.tt
+        2456675.56640625
+        >>> t.tt_calendar()
+        (2014, 1, 18, 1, 35, 37.5)
 
         """
         if jd is not None:
@@ -172,16 +190,31 @@ class Timescale(object):
         tt = _to_array(tt)
         return Time(self, tt)
 
+    def tt_jd(self, jd):
+        """Build a `Time` from a TT Julian date.
+
+        Supply the Terrestrial Time (TT) as a Julian date:
+
+        >>> t = ts.tt_jd(2456675.56640625)
+        >>> t.tt
+        2456675.56640625
+        >>> t.tt_calendar()
+        (2014, 1, 18, 1, 35, 37.5)
+
+        """
+        tt = _to_array(jd)
+        return Time(self, tt)
+
     def tdb(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
-        """Return the Time corresponding to a specific moment in TDB.
+        """Build a `Time` from a TDB calendar date.
 
-        You can supply the Barycentric Dynamical Time (TDB) by providing
-        either a proleptic Gregorian calendar date or a raw Julian Date
-        float.  The following two method calls are equivalent::
+        Supply the Barycentric Dynamical Time (TDB) as a proleptic
+        Gregorian calendar date:
 
-            timescale.tdb(2014, 1, 18, 1, 35, 37.5)
-            timescale.tdb(jd=2456675.56640625)
+        >>> t = ts.tdb(2014, 1, 18, 1, 35, 37.5)
+        >>> t.tdb
+        2456675.56640625
 
         """
         if jd is not None:
@@ -197,16 +230,32 @@ class Timescale(object):
         t.tdb = tdb
         return t
 
+    def tdb_jd(self, jd):
+        """Build a `Time` from a TDB Julian date.
+
+        Supply the Barycentric Dynamical Time (TDB) as a Julian date:
+
+        >>> t = ts.tdb_jd(2456675.56640625)
+        >>> t.tdb
+        2456675.56640625
+
+        """
+        tdb = _to_array(jd)
+        tt = tdb - tdb_minus_tt(tdb) / DAY_S
+        t = Time(self, tt)
+        t.tdb = tdb
+        return t
+
     def ut1(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
-        """Return the Time corresponding to a specific moment in UT1.
+        """Build a `Time` from a UT1 calendar date.
 
-        You can supply the Universal Time (UT1) by providing either a
-        proleptic Gregorian calendar date or a raw Julian Date float.
-        The following two method calls are equivalent::
+        Supply the Universal Time (UT1) as a proleptic Gregorian
+        calendar date:
 
-            timescale.ut1(2014, 1, 18, 1, 35, 37.5)
-            timescale.ut1(jd=2456675.56640625)
+        >>> t = ts.ut1(2014, 1, 18, 1, 35, 37.5)
+        >>> t.ut1
+        2456675.56640625
 
         """
         if jd is not None:
@@ -216,7 +265,19 @@ class Timescale(object):
                 _to_array(year), _to_array(month), _to_array(day),
                 _to_array(hour), _to_array(minute), _to_array(second),
             )
-        ut1 = _to_array(ut1)
+        return self.ut1_jd(ut1)
+
+    def ut1_jd(self, jd):
+        """Build a `Time` from UT1 a Julian date.
+
+        Supply the Universal Time (UT1) as a Julian date:
+
+        >>> t = ts.ut1_jd(2456675.56640625)
+        >>> t.ut1
+        2456675.56640625
+
+        """
+        ut1 = _to_array(jd)
 
         # Estimate TT = UT1, to get a rough Delta T estimate.
         tt_approx = ut1
@@ -237,7 +298,7 @@ class Timescale(object):
         return t
 
     def from_astropy(self, t):
-        """Return a Skyfield time corresponding to the AstroPy time `t`."""
+        """Build a Skyfield `Time` from an AstroPy time object."""
         return self.tt(jd=t.tt.jd)
 
 class Time(object):

@@ -54,9 +54,13 @@ and the more stable time scales used by astronomers.
    Timescale.now
    Timescale.utc
    Timescale.tai
+   Timescale.tai_jd
    Timescale.tt
+   Timescale.tt_jd
    Timescale.tdb
+   Timescale.tdb_jd
    Timescale.ut1
+   Timescale.ut1_jd
    Timescale.from_astropy
 
 Time objects

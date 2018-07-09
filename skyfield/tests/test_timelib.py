@@ -15,12 +15,18 @@ time_value = [(1973, 1, 18, 1, 35, 37.5), 2441700.56640625]
 def ts():
     yield api.load.timescale()
 
-def test_time_creation_methods(time_parameter, time_value):
-    method = getattr(api.load.timescale(), time_parameter)
+def test_time_creation_methods(ts, time_parameter, time_value):
+    method = getattr(ts, time_parameter)
     if isinstance(time_value, tuple):
         t = method(*time_value)
     else:
-        t = method(jd=time_value)
+        t = method(jd=time_value) # TODO: deprecate
+    assert getattr(t, time_parameter) == 2441700.56640625
+
+def test_time_creation_from_julian_day(ts, time_parameter):
+    # Test methods like "tt_jd()" and "tai_jd()".
+    method = getattr(ts, time_parameter + '_jd')
+    t = method(2441700.56640625)
     assert getattr(t, time_parameter) == 2441700.56640625
 
 time_scale_name = ['utc', 'tai', 'tt', 'tdb']
