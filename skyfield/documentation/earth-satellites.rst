@@ -105,12 +105,10 @@ in case your program wants to check how old the elements are:
 
 .. testcode::
 
-    print(satellite.epoch)
     print(satellite.epoch.utc_jpl())
 
 .. testoutput::
 
-    <Time tt=2456678.433463>
     A.D. 2014-Jan-20 22:23:04.0004 UT
 
 If the epoch is too far in the past,

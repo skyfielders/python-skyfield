@@ -8,6 +8,7 @@ from sgp4.propagation import sgp4
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import ITRF_to_GCRS2
+from .timelib import Timescale
 from .vectorlib import VectorFunction
 
 # important ones:
@@ -21,6 +22,16 @@ from .vectorlib import VectorFunction
 # no - mean motion
 
 _minutes_per_day = 1440.
+
+# Since satellite calculations are done entirely in UTC, we can display
+# and return their epoch using a null Timescale.  Let's just hope that
+# no one ever pulls the .epoch off of an EarthSatellite and tries to
+# generate high precision positions with it.  If that becomes a problem,
+# we can make a more severe change to the satellite API to require a
+# Timescale when the user asks for the epoch as a Time.  (It was
+# probably a mistake to have an .epoch convenience attribute.)
+_infs = array(('-inf', 'inf'), float)
+_ts = Timescale(array((_infs, (0.0, 0.0))), _infs, array((37.0, 37.0)))
 
 class EarthSatellite(VectorFunction):
     """An Earth satellite loaded from a TLE file and propagated with SGP4.
@@ -73,18 +84,12 @@ class EarthSatellite(VectorFunction):
     center = 399
     center_name = '399 EARTH'
 
-    # cache for timescale
-    timescale = None
-
     def __init__(self, line1, line2, name=None, ts=None):
+        ts = ts or _ts
+
         self.name = None if name is None else name.strip()
         sat = twoline2rv(line1, line2, whichconst=wgs72)
         self.model = sat
-        if ts is None:
-            if EarthSatellite.timescale is None:
-                from skyfield.api import load
-                EarthSatellite.timescale = load.timescale()
-            ts = EarthSatellite.timescale
         self.epoch = ts.utc(sat.epochyr, 1, sat.epochdays)
 
         self.target = object()  # TODO: make this more interesting
@@ -113,8 +118,7 @@ class EarthSatellite(VectorFunction):
 
         """
         sat = self.model
-        epoch = sat.jdsatepoch
-        minutes_past_epoch = (t._utc_float() - epoch) * 1440.0
+        minutes_past_epoch = (t._utc_float() - sat.jdsatepoch) * 1440.0
         if getattr(minutes_past_epoch, 'shape', None):
             position = []
             velocity = []
