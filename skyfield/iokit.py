@@ -65,7 +65,7 @@ class Loader(object):
     ``verbose``
       If set to ``False``, then the loader will not print a progress bar
       to the screen each time it downloads a file.  (If the standard
-      output is not a TTY, then no progress bar is printed in any case.)
+      output is not a TTY, then no progress bar is printed anyway.)
 
     ``expire``
       If set to ``False``, then Skyfield will always use an existing
@@ -190,7 +190,7 @@ class Loader(object):
     def _log(self, message, *args):
         self.events.append(message.format(*args))
 
-    def tle(self, url, reload=False):
+    def tle(self, url, reload=False, filename=None):
         """Load and parse a satellite TLE file.
 
         Given a URL or a local path, this loads a file of three-line records in
@@ -199,32 +199,45 @@ class Loader(object):
         the name of a satellite and the following two lines are the TLE orbital
         elements. A two-line element set comprises only these last two lines.
 
-        Returns a dictionary whose keys are satellite names and IDs, and
-        whose values are :class:`~skyfield.sgp4lib.EarthSatellite`
+        See the :meth:`~skyfield.iokit.Loader.open()` documentation for
+        the meaning of the ``reload`` and ``filename`` parameters.
+
+        Returns a dictionary whose keys are satellite names and numbers,
+        and whose values are :class:`~skyfield.sgp4lib.EarthSatellite`
         objects.  If you want to build a list in which each satellite
         appears only once, simply run ``sats = set(d.values())`` on the
         returned dictionary.
 
         """
         d = {}
-        with self.open(url, reload=reload) as f:
+        with self.open(url, reload=reload, filename=filename) as f:
             for names, sat in parse_tle(f):
                 d[sat.model.satnum] = sat
                 for name in names:
                     d[name] = sat
         return d
 
-    def open(self, url, mode='rb', reload=False):
+    def open(self, url, mode='rb', reload=False, filename=None):
         """Open a file, downloading it first if it does not yet exist.
 
-        Unlike when you call a loader ``my_loader()`` directly, this
-        ``my_loader.open()`` method does not attempt to parse or
+        Unlike when you call a loader directly like ``my_loader()``,
+        this ``my_loader.open()`` method does not attempt to parse or
         interpret the file; it simply returns an open file object.
 
+        If the ``reload`` parameter is true, then any existing file will
+        be removed before the download starts.
+
+        The ``filename`` parameter lets you specify an alternative local
+        filename instead of having the filename extracted from the final
+        component of the URL.
+
         """
-        filename = urlparse(url).path.split('/')[-1]
+        if filename is None:
+            filename = urlparse(url).path.split('/')[-1]
         path = self.path_to(filename)
-        if reload or not os.path.exists(path):
+        if reload and os.path.exists(path):
+            os.path.remove(path)
+        if not os.path.exists(path):
             download(url, path, self.verbose)
         return open(path, mode)
 
@@ -504,4 +517,3 @@ class ProgressBar(object):
         print('\r[{0:33}] {1:3}% {2}'.format(bar, percent, self.filename),
               end='\n' if (percent == 100) else '', file=sys.stderr)
         sys.stderr.flush()
-
