@@ -24,4 +24,6 @@ install:
 
 script:
   - "assay --batch skyfield.tests"
+  - "cd .."
+  - "mv tmp/*.bsp skyfield/documentation"
   - "./test-docs.sh"
