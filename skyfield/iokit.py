@@ -224,14 +224,20 @@ class Loader(object):
         this ``my_loader.open()`` method does not attempt to parse or
         interpret the file; it simply returns an open file object.
 
-        If the ``reload`` parameter is true, then any existing file will
-        be removed before the download starts.
+        The ``url`` can be either an external URL, or else the path to a
+        file on the current filesystem.  A relative path will be assumed
+        to be relative to the base directory of this loader object.
+
+        If a URL was provided and the ``reload`` parameter is true, then
+        any existing file will be removed before the download starts.
 
         The ``filename`` parameter lets you specify an alternative local
         filename instead of having the filename extracted from the final
         component of the URL.
 
         """
+        if '://' not in url:
+            return open(url, mode)
         if filename is None:
             filename = urlparse(url).path.split('/')[-1]
         path = self.path_to(filename)
