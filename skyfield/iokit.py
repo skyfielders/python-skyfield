@@ -194,11 +194,11 @@ class Loader(object):
         the name of a satellite and the following two lines are the TLE orbital
         elements. A two-line element set comprises only these last two lines.
 
-        If two-line element sets are provided, the EarthSatellite 'name'
-        attribute is set to the satellite ID number for the object.
-
-        Returns a Python dictionary whose keys are satellite names and
-        values are :class:`~skyfield.sgp4lib.EarthSatellite` objects.
+        Returns a dictionary whose keys are satellite names and IDs, and
+        whose values are :class:`~skyfield.sgp4lib.EarthSatellite`
+        objects.  If you want to build a list in which each satellite
+        appears only once, simply run ``sats = set(d.values())`` on the
+        returned dictionary.
 
         """
         d = {}
