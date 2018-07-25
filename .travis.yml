@@ -18,13 +18,9 @@ install:
   - "pip install --upgrade pip"
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
-  - "pip install sphinx==1.7.2"
   - "pip install unittest2"
   - "curl -O ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de405.bsp"
   - "curl -O ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de421.bsp"
 
 script:
   - "assay --batch skyfield.tests"
-  - "cd .."
-  - "mv tmp/*.bsp skyfield/documentation"
-  - "./test-docs.sh"
