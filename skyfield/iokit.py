@@ -19,6 +19,11 @@ try:
 except:
     lockf = None
 
+if sys.version_info >= (3, 3):
+    _replace = os.replace
+else:
+    _replace = os.rename  # Raises OSError on Windows if destination exists
+
 try:
     from urllib.parse import urlparse
     from urllib.request import urlopen
@@ -212,10 +217,9 @@ class Loader(object):
     def open(self, url, mode='rb', reload=False):
         """Open a file, downloading it first if it does not yet exist.
 
-        Unlike when you call a loader directly like ``my_loader()``,
-        this ``my_loader.open()`` method does not attempt to parse or
-        interpret the resulting file.  Instead, it simply returns an
-        open file object without trying to interpret the contents.
+        Unlike when you call a loader ``my_loader()`` directly, this
+        ``my_loader.open()`` method does not attempt to parse or
+        interpret the file; it simply returns an open file object.
 
         """
         filename = urlparse(url).path.split('/')[-1]
@@ -478,7 +482,7 @@ def download(url, path, verbose=None, blocksize=128*1024):
     if lockf is None:
         # On Windows, rename here because the file needs to be closed first.
         try:
-            os.rename(tempname, path)
+            _replace(tempname, path)
         except Exception as e:
             raise IOError('error renaming {0} to {1} - {2}'.format(
                 tempname, path, e))
