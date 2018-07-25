@@ -3,6 +3,24 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.6 — 2018 July 25
+------------------
+
+* Both of the loader methods :meth:`~skyfield.iokit.Loader.load()` and
+  :meth:`~skyfield.iokit.Loader.tle()` now accept not just URLs but also
+  plain local file paths; they correctly re-download a remote file if
+  “reload=True” is specified; and they allow specifying a different local
+  “filename=” than the one at the end of the URL.
+
+* Earth satellite objects no longer try to instantiate a timescale object
+  of their own, which often kicked off an unexpected download of the three
+  files needed to build a timescale.
+
+* Satellite names are now correctly loaded from Space-Track TLE files.
+
+* The ability to create times using Julian Dates is now better advertised,
+  thanks to dedicated timescale methods whose names end in ``…_jd()``.
+
 1.5 — 2018 July 4
 -----------------
 
