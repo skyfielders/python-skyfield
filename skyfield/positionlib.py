@@ -1,6 +1,6 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, arccos, clip, full, einsum, exp, nan
+from numpy import arccos, array, clip, full, einsum, exp, nan
 
 from .constants import ANGVEL, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
@@ -157,9 +157,14 @@ class ICRF(object):
         return Angle(radians=arccos(clip(c, -1.0, 1.0)))
 
     def ecliptic_xyz(self):
-        """Compute J2000 ecliptic coordinates (x, y, z)"""
+        """Compute J2000 ecliptic position vector (x, y, z)"""
         vector = _ECLIPJ2000.dot(self.position.au)
         return Distance(vector)
+
+    def ecliptic_velocity(self):
+        """Compute J2000 ecliptic velocity vector (x_dot, y_dot, z_dot)"""
+        vector = _ECLIPJ2000.dot(self.velocity.au_per_d)
+        return Velocity(vector)
 
     def ecliptic_latlon(self):
         """Compute J2000 ecliptic coordinates (lat, lon, distance)"""
@@ -294,10 +299,8 @@ class Barycentric(ICRF):
         astrometric.light_time = light_time
         return astrometric
 
-
 # TODO: pre-create a Barycentric object representing the SSB, and make
 # it possible for it to observe() a planet.
-
 
 class Astrometric(ICRF):
     """An astrometric (x, y, z) position relative to a particular observer.

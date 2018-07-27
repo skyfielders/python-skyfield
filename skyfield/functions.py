@@ -23,6 +23,24 @@ def length_of(xyz):
     """
     return sqrt((xyz * xyz).sum(axis=0))
 
+def angle_between(u_vec, v_vec):
+    """Given 2 vectors in `v` and `u`, return the angle separating them.
+
+    This works whether `v` and `u` each have the shape ``(3,)``, or
+    whether they are each whole arrays of corresponding x, y, and z
+    coordinates and have shape ``(3, N)``. The returned angle will be
+    between 0 and 180 degrees.
+
+    This formula is from Section 12 of:
+    https://people.eecs.berkeley.edu/~wkahan/Mindless.pdf
+
+    """
+    u = length_of(u_vec)
+    v = length_of(v_vec)
+    num = v*u_vec - u*v_vec
+    denom = v*u_vec + u*v_vec
+    return 2*arctan2(length_of(num), length_of(denom))
+
 def to_polar(xyz):
     """Convert ``[x y z]`` into spherical coordinates ``(r, theta, phi)``.
 
