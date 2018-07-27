@@ -16,6 +16,7 @@ install:
   - "mkdir tmp"
   - "cd tmp"
   - "pip install --upgrade pip"
+  - "pip install numpy==1.14.2"
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
   - "pip install unittest2"
