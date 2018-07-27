@@ -95,7 +95,7 @@ we will see that it looked for files in the current directory:
       Does not expire til: 2019-04-01
     Already exists: ./Leap_Second.dat
       Parsing with: parse_leap_seconds()
-      Does not expire til: 2019-01-27
+      Does not expire til: 2019-07-28
     Already exists: ./de421.bsp
       Opening with: SpiceKernel
 
