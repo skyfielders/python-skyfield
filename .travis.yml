@@ -16,7 +16,6 @@ install:
   - "mkdir tmp"
   - "cd tmp"
   - "pip install --upgrade pip"
-  - "pip install astropy=3.0.1 numpy==1.14.2"
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
   - "pip install unittest2"
@@ -25,4 +24,4 @@ install:
 
 script:
   - "assay --batch skyfield.tests"
-  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install sphinx==1.7.2 ; cd .. ; mv tmp/*.bsp skyfield/documentation ; ./test-docs.sh ; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy=3.0.1 numpy==1.14.2 sphinx==1.7.2 ; cd .. ; mv tmp/*.bsp skyfield/documentation ; ./test-docs.sh ; fi"
