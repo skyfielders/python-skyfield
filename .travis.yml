@@ -24,4 +24,4 @@ install:
 
 script:
   - "assay --batch skyfield.tests"
-  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install sphinx==1.7.2 ; cd .. ; mv tmp/*.bsp skyfield/documentation ; ./test-docs.sh"
+  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install sphinx==1.7.2 ; cd .. ; mv tmp/*.bsp skyfield/documentation ; ./test-docs.sh ; fi"
