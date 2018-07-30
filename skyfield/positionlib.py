@@ -91,7 +91,7 @@ class ICRF(object):
         """
         return Velocity(length_of(self.velocity.au_per_d))
 
-    def radec(self, epoch=None):
+    def radec(self, epoch=None, cirs=False):
         r"""Compute equatorial (RA, declination, distance)
 
         When called without a parameter, this returns standard ICRF
@@ -112,6 +112,9 @@ class ICRF(object):
         04h 13m 43.32s
         +53deg 17' 55.1"
 
+        By default coordinates are returned in Equinox based coordinate
+        system, to instead use the Celestial Intermediate Reference System
+        (CIRS) set `cirs=True`.
         """
         position_au = self.position.au
         if epoch is not None:
@@ -125,7 +128,8 @@ class ICRF(object):
                 raise ValueError('the epoch= must be a Time object,'
                                  ' a floating point Terrestrial Time (TT),'
                                  ' or the string "date" for epoch-of-date')
-            position_au = einsum('ij...,j...->i...', epoch.M, position_au)
+            A = epoch.C if cirs else epoch.M
+            position_au = einsum('ij...,j...->i...', A, position_au)
         r_au, dec, ra = to_polar(position_au)
         return (Angle(radians=ra, preference='hours'),
                 Angle(radians=dec, signed=True),
