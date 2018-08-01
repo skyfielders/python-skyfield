@@ -242,7 +242,7 @@ class Loader(object):
             filename = urlparse(url).path.split('/')[-1]
         path = self.path_to(filename)
         if reload and os.path.exists(path):
-            os.path.remove(path)
+            os.remove(path)
         if not os.path.exists(path):
             download(url, path, self.verbose)
         return open(path, mode)
