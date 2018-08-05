@@ -41,6 +41,7 @@ installer, like "pip install pandas" or "conda install pandas".
 """
 
 def load_dataframe(fobj):
+    """Given an open file for `hip_main.dat.gz`, return a parsed dataframe."""
     try:
         from pandas import read_fwf
     except ImportError:
@@ -57,6 +58,13 @@ def load_dataframe(fobj):
         df = read_fwf(g, names=names, colspecs=colspecs)
 
     return df.set_index('hip').assign(ra_hours = df['ra_degrees'] / 15.0)
+
+def _build_star(df):
+    """Build a :class:`skyfield.starlib.Star` from a Hipparcos dataframe."""
+    return Star(
+        ra_hours=df.ra_hours,
+        dec_degrees=df.dec_degrees,
+    )
 
 def get(which):
     "DEPRECATED; see :func:`~skyfield.data.hipparcos.load_dataframe() instead."
