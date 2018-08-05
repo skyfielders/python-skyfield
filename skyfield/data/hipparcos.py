@@ -8,7 +8,7 @@ days = T0 - 2448349.0625
 url = 'ftp://cdsarc.u-strasbg.fr/cats/I/239/hip_main.dat.gz'
 
 def parse(line):
-    """Return a `Star` build by parsing a Hipparcos catalog entry `line`."""
+    "DEPRECATED; see :func:`~skyfield.data.hipparcos.load_dataframe() instead."
     # See ftp://cdsarc.u-strasbg.fr/cats/I/239/ReadMe
     star = Star(
         ra=Angle(degrees=float(line[51:63])),
@@ -25,7 +25,7 @@ def parse(line):
     return star
 
 def load(match_function):
-    """Yield the Hipparcos stars for which `match_function(line)` is true."""
+    "DEPRECATED; see :func:`~skyfield.data.hipparcos.load_dataframe() instead."
     from skyfield import api
 
     with api.load.open(url) as f:
@@ -81,12 +81,7 @@ def load_dataframe(path):
     return df
 
 def get(which):
-    """Return a single star, or a list of stars, from the Hipparcos catalog.
-
-    A call like `get('54061')` returns a single `Star` object, while
-    `get(['54061', '53910'])` returns a list of stars.
-
-    """
+    "DEPRECATED; see :func:`~skyfield.data.hipparcos.load_dataframe() instead."
     if isinstance(which, str):
         pattern = ('H|      %6s' % which).encode('ascii')
         for star in load(lambda line: line.startswith(pattern)):
