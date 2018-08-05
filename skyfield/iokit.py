@@ -237,7 +237,9 @@ class Loader(object):
 
         """
         if '://' not in url:
-            return open(url, mode)
+            path_that_might_be_relative = url
+            path = os.path.join(self.directory, path_that_might_be_relative)
+            return open(path, mode)
         if filename is None:
             filename = urlparse(url).path.split('/')[-1]
         path = self.path_to(filename)
