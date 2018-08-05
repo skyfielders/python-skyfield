@@ -11,6 +11,7 @@ then
           lxml=4.2.1 \
           mock=2.0.0 \
           numpy=1.14.2 \
+          pandas=0.23.3 \
           python=3.6 \
           pytz \
           sphinx=1.7.2 \

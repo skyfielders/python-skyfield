@@ -1,5 +1,8 @@
 """Tests of how well we parse various file formats."""
 
+import gzip
+from unittest import SkipTest
+from skyfield.data.hipparcos import load_dataframe
 from skyfield.functions import BytesIO
 from skyfield.iokit import parse_tle
 
@@ -66,3 +69,17 @@ def test_extra_lines_in_tle_are_ignored():
     assert s[0][1].name == 'ISS (ZARYA)'
     assert s[1][0] == ['FLOCK 2E-1']
     assert s[1][1].name == 'FLOCK 2E-1'
+
+sample_hipparcos_line = b"""\
+H|           1| |00 00 00.22|+01 05 20.4| 9.10| |H|000.00091185|+01.08901332| |   3.54|   -5.20|   -1.88|  1.32|  0.74|  1.39|  1.36|  0.81| 0.32|-0.07|-0.11|-0.24| 0.09|-0.01| 0.10|-0.01| 0.01| 0.34|  0| 0.74|     1| 9.643|0.020| 9.130|0.019| | 0.482|0.025|T|0.55|0.03|L| | 9.2043|0.0020|0.017| 87| | 9.17| 9.24|       | | | |          | |  | 1| | | |  |   |       |     |     |    |S| | |224700|B+00 5077 |          |          |0.66|F5          |S \n\
+"""
+
+def test_hipparcos():
+    try:
+        df = load_dataframe(BytesIO(gzip.compress(sample_hipparcos_line)))
+    except ImportError:
+        raise SkipTest('pandas not available')
+    assert len(df) == 1
+    row = df.iloc[0]
+    assert abs(row.ra_degrees - 000.00091185) < 1e-30
+    assert abs(row.ra_hours == 000.00091185 / 15.0) < 1e-30

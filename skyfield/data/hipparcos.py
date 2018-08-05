@@ -33,23 +33,18 @@ def load(match_function):
             if match_function(line):
                 yield parse(line)
 
-def load_dataframe(path):
-    from pandas import read_fwf
-    # from csv import reader
+PANDAS_MESSAGE = """Skyfield needs Pandas to load the Hipparcos catalog
 
-    # with api.load.open(url) as f:
-    #     df = read_csv(f, sep='|', compression='gzip')
+To load the Hipparcos star catalog, Skyfield needs the Pandas data
+analysis toolkit.  Try installing it using your usual Python package
+installer, like "pip install pandas" or "conda install pandas".
+"""
 
-    from time import time
-    t0 = time()
-
-    # with api.load.open(url) as f:
-    #     #for line in reader(gzip.open(f, 'rt', encoding='ascii')):
-    #     for line in gzip.open(f, 'rt', encoding='ascii'):
-    #         # assert len(line) >= 43, repr(line)
-    #         assert line[43] == '.', (repr(line), repr(line[43]))
-    #         if match_function(line):
-    #             yield parse(line)
+def load_dataframe(fobj):
+    try:
+        from pandas import read_fwf
+    except ImportError:
+        raise ImportError(PANDAS_MESSAGE)
 
     names, colspecs = zip(
         ('hip', (2, 14)),
@@ -58,27 +53,10 @@ def load_dataframe(path):
         ('dec_degrees', (64, 76)),
     )
 
-    #with api.load.open(url) as f:
-    with open(path, 'rb') as f:
-        with gzip.open(f, 'rt', encoding='ascii') as g:
-        # with gzip.open(f, 'rb') as g:
-            #print(g)
-            df = read_fwf(g, names=names, colspecs=colspecs)
+    with gzip.open(fobj, 'rt', encoding='ascii') as g:
+        df = read_fwf(g, names=names, colspecs=colspecs)
 
-    #'H|         104| |00 01 18.42|-31 53 58.6| 9.'
-    #print(df.head(1))
-    print(time() - t0)
-    df = df.set_index('hip')
-    df['ra_hours'] = df['ra_degrees'] / 15.0
-    # print(df.head())
-    # print(df.info())
-    # print(df.magnitude.isnull().sum())
-    # print(df.ra_hours.isnull().sum())
-    # print(df.dec_degrees.isnull().sum())
-        # for line in gzip.GzipFile(fileobj=f):
-        #     if match_function(line):
-        #         yield parse(line)
-    return df
+    return df.set_index('hip').assign(ra_hours = df['ra_degrees'] / 15.0)
 
 def get(which):
     "DEPRECATED; see :func:`~skyfield.data.hipparcos.load_dataframe() instead."
