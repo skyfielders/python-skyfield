@@ -16,6 +16,10 @@
 
 from math import cos, pi, sin
 try:
+    intern         # Python 2
+except NameError:  # Python 3
+    from sys import intern
+try:
     from reportlab.pdfgen.canvas import Canvas
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
