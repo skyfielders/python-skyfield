@@ -14,6 +14,7 @@ python:
 install:
   - "python setup.py sdist"
   - "mkdir tmp"
+  - "ln ci/* tmp"
   - "cd tmp"
   - "pip install --upgrade pip"
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
@@ -24,4 +25,4 @@ install:
 
 script:
   - "assay --batch skyfield.tests"
-  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 numpy==1.14.2 sphinx==1.7.2 ; cd .. ; mv tmp/*.bsp skyfield/documentation ; ./test-docs.sh ; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 numpy==1.14.2 sphinx==1.7.2 ; cd .. ; ln ci/* tmp/*.bsp skyfield/documentation ; ./test-docs.sh ; fi"
