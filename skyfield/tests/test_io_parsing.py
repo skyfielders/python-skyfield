@@ -78,7 +78,9 @@ def test_hipparcos():
     try:
         df = load_dataframe(BytesIO(gzip.compress(sample_hipparcos_line)))
     except ImportError:
-        raise SkipTest('pandas not available')
+        # raise SkipTest('pandas not available')
+        # Assay doesn't understand skipping tests yet; just pass.
+        return
     assert len(df) == 1
     row = df.iloc[0]
     assert abs(row.ra_degrees - 000.00091185) < 1e-30
