@@ -75,11 +75,17 @@ H|           1| |00 00 00.22|+01 05 20.4| 9.10| |H|000.00091185|+01.08901332| | 
 """
 
 def test_hipparcos():
+    b = BytesIO()
+    g = gzip.GzipFile(mode='wb', fileobj=b)
+    g.write(sample_hipparcos_line)
+    g.close()
+    b.seek(0)
     try:
-        df = load_dataframe(BytesIO(gzip.compress(sample_hipparcos_line)))
+        df = load_dataframe(b)
     except ImportError:
         # raise SkipTest('pandas not available')
-        # Assay doesn't understand skipping tests yet; just pass.
+        # Assay doesn't understand skipping tests yet; just pass
+        # for now if Pandas cannot be imported.
         return
     assert len(df) == 1
     row = df.iloc[0]
