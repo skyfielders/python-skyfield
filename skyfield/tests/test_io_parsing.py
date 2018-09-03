@@ -1,7 +1,6 @@
 """Tests of how well we parse various file formats."""
 
 import gzip
-from unittest import SkipTest
 from skyfield.data.hipparcos import load_dataframe
 from skyfield.functions import BytesIO
 from skyfield.iokit import parse_tle
