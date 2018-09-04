@@ -38,6 +38,7 @@ together with all of the attributes and methods that they support:
      ├── `distance() <api.html#skyfield.positionlib.ICRF.distance>`_          →   distance
      │
      ├── `ecliptic_position() <api.html#skyfield.positionlib.ICRF.ecliptic_position>`_ →   x, y, z
+     ├── `ecliptic_velocity() <api.html#skyfield.positionlib.ICRF.ecliptic_velocity>`_ →   xdot, ydot, zdot
      ├── `ecliptic_latlon() <api.html#skyfield.positionlib.ICRF.ecliptic_latlon>`_   →   lat, lon, distance
      ├── `galactic_position() <api.html#skyfield.positionlib.ICRF.galactic_position>`_ →   x, y, z
      └── `galactic_latlon() <api.html#skyfield.positionlib.ICRF.galactic_latlon>`_   →   lat, lon, distance

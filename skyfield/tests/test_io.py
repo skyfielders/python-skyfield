@@ -1,5 +1,6 @@
 """Test whether Skyfield handles file download and file age correctly."""
 
+import os
 import shutil
 import tempfile
 from contextlib import contextmanager
@@ -52,6 +53,20 @@ def on(load, year, month, day):
             yield
 
 # The tests.
+
+def test_open_in_main_directory(load):
+    with open(os.path.join(load.directory, 'file.tle'), 'wb') as f:
+        f.write(b'example text\n')
+    data = load.open('file.tle').read()
+    print(repr(data))
+    assert data == b'example text\n'
+
+def test_open_in_subdirectory(load):
+    os.mkdir(os.path.join(load.directory, 'folder'))
+    with open(os.path.join(load.directory, 'folder', 'file.tle'), 'wb') as f:
+        f.write(b'example text\n')
+    data = load.open('folder/file.tle').read()
+    assert data == b'example text\n'
 
 def test_missing_file_gets_downloaded(load):
     with on(load, 2016, 1, 15):

@@ -3,6 +3,26 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.7 — 2018 September 3
+----------------------
+
+* Skyfield now supports loading the Hipparcos star catalog as a Pandas
+  dataframe, providing the user with convenient mechanisms for looking
+  up a single star by HIP number or filtering the entire catalog by
+  magnitude.  See :doc:`stars` for details.
+
+* Ecliptic coordinates can now be produced for epochs other than J2000
+  thanks to a new optional parameter specifying the desired epoch for
+  the :meth:`~skyfield.positionlib.ICRF.ecliptic_latlon()` method.
+
+* A position that gives a position, velocity, and time can now be
+  converted into full osculating orbital elements through the routine
+  :func:`~skyfield.elementslib.osculating_elements_of()`.
+
+* A couple of bugs in the ``load()`` routine have been fixed.
+  `#193 <https://github.com/skyfielders/python-skyfield/issues/193>`_
+  `#194 <https://github.com/skyfielders/python-skyfield/issues/194>`_
+
 1.6 — 2018 July 25
 ------------------
 

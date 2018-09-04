@@ -92,8 +92,8 @@ and can return results in native AstroPy units:
     [-2.19049548  0.71236701  0.36712443] AU
     25.465 deg
 
-Documenation
-============
+Documentation
+=============
 
 Skyfield’s documentation lives here at the main Skyfield web site:
 
@@ -106,33 +106,12 @@ But the source code and issue tracker live on other web sites:
 
 * `Skyfield on the Python Package Index <https://pypi.python.org/pypi/skyfield>`_
 
-* `GitHub project page <https://github.com/brandon-rhodes/python-skyfield/>`_
+* `GitHub project page <https://github.com/skyfielders/python-skyfield/>`_
 
-* `GitHub issue tracker <https://github.com/brandon-rhodes/python-skyfield/issues>`_
+* `GitHub issue tracker <https://github.com/skyfielders/python-skyfield/issues>`_
 
-Most recent release: Version 1.3 on 2018 April 15
-=================================================
-
-* Geocentric coordinates now have a
-  :meth:`~skyfield.positionlib.Geocentric.subpoint()`
-  method that computes the latitude and longitude
-  of the point beneath that body.
-
-* All of the ``Timescale`` time constructor methods now accept arrays.
-
-* Emergency fix to stop Skyfield
-  from endlessly downloading new copies of ``deltat.preds``,
-  since the file has gone out of date at the USNO site.
-
-* Fixed ability of a :class:`~skyfield.starlib.Star`
-  to be initialized with a tuple that breaks units into minutes and seconds
-  (broke in version 1.2).
-
-* Issues fixed:
-  `#170 <https://github.com/skyfielders/python-skyfield/issues/170>`_
-  `#172 <https://github.com/skyfielders/python-skyfield/issues/172>`_
-
-See the :ref:`changelog` for all previous versions!
+See the :ref:`changelog` for the current version’s release notes —
+and also for the updates that landed with each previous version!
 
 .. testcleanup::
 

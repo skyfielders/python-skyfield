@@ -1,14 +1,15 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, arccos, clip, full, einsum, exp, nan
+from numpy import arccos, array, clip, einsum, empty, exp, full, nan
 
-from .constants import ANGVEL, DAY_S, RAD2DEG, tau
+from .constants import ANGVEL, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
-from .functions import dots, from_polar, length_of, to_polar, rot_z
 from .earthlib import compute_limb_angle, refract, reverse_terra
+from .functions import dots, from_polar, length_of, rot_x, rot_z, to_polar
+from .nutationlib import earth_tilt
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
-from .units import Distance, Velocity, Angle, _interpret_angle
+from .units import Angle, Distance, Velocity, _interpret_angle
 
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GALACTIC = inertial_frames['GALACTIC']
@@ -193,15 +194,60 @@ class ICRF(object):
                 Angle(radians=dec, signed=True),
                 Distance(r_au))
 
-    def ecliptic_xyz(self):
-        """Compute J2000 ecliptic coordinates (x, y, z)"""
-        vector = _ECLIPJ2000.dot(self.position.au)
-        return Distance(vector)
+    def ecliptic_xyz(self, epoch=None):
+        """Compute J2000 ecliptic position vector (x, y, z).
 
-    def ecliptic_latlon(self):
-        """Compute J2000 ecliptic coordinates (lat, lon, distance)"""
-        vector = _ECLIPJ2000.dot(self.position.au)
-        d, lat, lon = to_polar(vector)
+        If you instead want the coordinates referenced to the dynamical
+        system defined by the Earth's true equator and equinox, provide
+        an epoch time.
+
+        """
+        position_au = self.position.au
+        if epoch is not None:
+            if isinstance(epoch, Time):
+                pass
+            elif isinstance(epoch, float):
+                epoch = Time(None, tt=epoch)
+            elif epoch == 'date':
+                epoch = self.t
+            else:
+                raise ValueError('the epoch= must be a Time object,'
+                                 ' a floating point Terrestrial Time (TT),'
+                                 ' or the string "date" for epoch-of-date')
+            position_au = einsum('ij...,j...->i...', epoch.M, position_au)
+            oblm, oblt, eqeq, psi, eps = earth_tilt(epoch)
+            e = oblt*DEG2RAD
+            E = rot_x(e)
+            if not epoch.shape:
+                vector = E.T.dot(position_au)
+            else:
+                result_array = empty((E.T.shape[0], E.T.shape[1]))
+                for a in range(0, E.T.shape[0]):
+                    vector = E.T[a, 0:].dot(position_au.T[a, 0:])
+                    result_array[a, 0:] = vector
+                vector = result_array
+        else:
+            vector = _ECLIPJ2000.dot(position_au)
+        if len(vector.shape) is 1:
+            return Distance(vector)
+        else:
+            return Distance(vector.T)
+
+    def ecliptic_velocity(self):
+        """Compute J2000 ecliptic velocity vector (x_dot, y_dot, z_dot)"""
+        vector = _ECLIPJ2000.dot(self.velocity.au_per_d)
+        return Velocity(vector)
+
+    def ecliptic_latlon(self, epoch=None):
+        """Compute J2000 ecliptic coordinates (lat, lon, distance)
+
+        If you instead want the coordinates referenced to the dynamical
+        system defined by the Earth's true equator and equinox, provide
+        an epoch time.
+
+        """
+        vector = self.ecliptic_xyz(epoch)
+        d, lat, lon = to_polar(vector.au)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
                 Distance(au=d))
@@ -331,10 +377,8 @@ class Barycentric(ICRF):
         astrometric.light_time = light_time
         return astrometric
 
-
 # TODO: pre-create a Barycentric object representing the SSB, and make
 # it possible for it to observe() a planet.
-
 
 class Astrometric(ICRF):
     """An astrometric (x, y, z) position relative to a particular observer.

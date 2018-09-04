@@ -11,9 +11,16 @@ python:
   - "3.5"
   - "3.6"
 
+# matrix:
+#   include:
+#     - python: "3.7"
+#       dist: xenial    # required for Python 3.7 (travis-ci/travis-ci#9069)
+#       sudo: required  # required for Python 3.7 (travis-ci/travis-ci#9069)
+
 install:
   - "python setup.py sdist"
   - "mkdir tmp"
+  - "ln ci/* tmp"
   - "cd tmp"
   - "pip install --upgrade pip"
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
@@ -24,3 +31,4 @@ install:
 
 script:
   - "assay --batch skyfield.tests"
+  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 matplotlib==2.2.3 numpy==1.14.2 pandas==0.23.3 sphinx==1.7.2 ; cd .. ; ln ci/* tmp/*.bsp skyfield/documentation ; ./test-docs.sh ; fi"

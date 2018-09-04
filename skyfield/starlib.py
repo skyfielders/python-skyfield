@@ -60,12 +60,12 @@ class Star(object):
                             ' dec=<skyfield.units.Angle object>')
 
         if isinstance(epoch, Time):
-            epoch = epoch.tdb
-        elif isinstance(epoch, float):
-            pass
-        else:
-            raise ValueError('the epoch= must be a Time object, or'
-                             ' a floating point Barycentric Dynamical Time (TDB)')
+            epoch = epoch.tt
+        # elif isinstance(epoch, float):
+        #     pass
+        # else:
+        #     raise ValueError('the epoch= must be a Time object, or'
+        #                      ' a floating point Barycentric Dynamical Time (TDB)')
 
         self.ra_mas_per_year = ra_mas_per_year
         self.dec_mas_per_year = dec_mas_per_year
@@ -85,6 +85,17 @@ class Star(object):
                 opts.append(', {0}={1!r}'.format(name, value))
         return 'Star(ra_hours={0!r}, dec_degrees={1!r}{2})'.format(
             self.ra.hours, self.dec.degrees, ''.join(opts))
+
+    @classmethod
+    def from_dataframe(cls, df):
+        epoch = 1721045.0 + _unwrap(df['epoch_year']) * 365.25
+        return cls(
+            ra_hours=_unwrap(df['ra_hours']),
+            dec_degrees=_unwrap(df['dec_degrees']),
+            ra_mas_per_year=_unwrap(df.get('ra_mas_per_year', 0)),
+            dec_mas_per_year=_unwrap(df.get('dec_mas_per_year', 0)),
+            epoch=epoch,
+        )
 
     def _observe_from_bcrs(self, observer):
         position, velocity = self._position_au, self._velocity_au_per_d
@@ -153,3 +164,7 @@ class Star(object):
               pmr * cra - pmd * sdc * sra + rvl * cdc * sra,
               pmd * cdc + rvl * sdc,
               ))
+
+def _unwrap(value):
+    """Return floats untouched, but ask Series for their NumPy arrays."""
+    return getattr(value, 'values', value)

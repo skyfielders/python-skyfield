@@ -10,6 +10,59 @@ about the API design of the Skyfield library,
 as well as the code samples that illustrate them
 and make sure that they keep working.
 
+Position classes with coordinate methods
+========================================
+
+One of the biggest sources of confusion in PyEphem was that it offered
+only a single routine to generate right ascension and declination
+coordinates, whose arguments selected both what kind of position to
+compute — astrometric or apparent — and also what coordinate system to
+use to represent those different positions in the sky.
+
+Users were chronically confused about which position they were asking
+for, and what kind of coordinates were being used to name that position.
+
+Skyfield therefore keeps these concepts strictly separate, by following
+these rules in its API design:
+
+* Positions are a big deal.  After all, in real life, two different
+  positions are two different places up in the sky.  If beneath the
+  night sky you point with your arm at one position, and then at another
+  position that is not equal to the first, you will have to physically
+  move your arm from the first to the second.
+
+* Coordinates are not as big a deal.  They are merely names.  Given a
+  position, you can name it with ICRS coordinates or equinox-of-date
+  coordinates; with equatorial or ecliptic or galactic coordinates; but
+  even as you step through all of those choices of coordinate, rattling
+  off different numbers for your audience, your arm will remain in the
+  exact same position.  Your finger will be pointing at exactly one
+  place in the sky that all those different coordinates designate.
+
+Therefore Skyfield deems each position as substantial enough to deserve
+its own Python object.  If you convert an astrometric position into an
+apparent position, you will be returned a new object to represent that
+different place in the sky::
+
+    apparent = astrometric.apparent()
+
+But coordinates are mere names and so do not earn a separate object for
+each choice of coordinate.  Instead, each kind of coordinate is simply a
+different method call on the position you have generated::
+
+    astrometric.radec()
+    astrometric.ecliptic_latlon()
+    astrometric.galactic_latlon()
+
+This approach stands in contrast to both PyEphem and its one method that
+generated all combinations of position and coordinate, and with AstroPy,
+which dignifies different coordinates with different objects even if
+those two coordinates designate exactly the same place in the sky.
+Skyfield instead tries to use the object-versus-method distinction in
+Python to provide extra signal to the amateur about when a program is
+talking about a truly different location in the sky, versus when it is
+merely generating different numbers to designate a single location.
+
 Angle Classes
 =============
 
@@ -127,61 +180,6 @@ the hundreds of ``np.`` prefixes would add only noise.
 As a consequence, Skyfield’s modules themselves simply do a
 ``from`` ``numpy`` ``import`` of any names that they need.
 
-Scalar Theory
-=============
-
-The Skyfield library is designed both for the use of naive users who
-understand only the concept of a single date and resulting position, as
-well as for users who confidently submit entire NumPy arrays of dates
-for which they expect entire arrays of output.
-
-How can a single API support both?
-
-To begin with, all lower-level functions use pure vectors.  So when
-implementing a fundamental algorithm, go ahead and assume that dates and
-positions are all going to be vectors holding zero or more quantities.
-
-It is only the top-level friendly API classes that need to support
-scalars.  They each do this through two maneuvers: *wrapping* each
-incoming scalar value as a length-one array, and *unwrapping* the
-resulting outputs before the user sees them.
-
-The maneuver is only slightly complicated by the fact that, when working
-in a NumPy universe, there are two slightly different kinds of scalars
-that the user might submit.
-
-1. A normal Python ``float`` or ``int`` is a scalar, and lacks all of
-   the special attributes that NumPy arrays enjoy.
-
-   >>> n = 3.4
-   >>> type(n).__name__
-   'float'
-   >>> hasattr(n, 'shape')
-   False
-
-2. But NumPy also offers its own form of scalar: objects that have the
-   same attributes and methods as arrays, but that have the empty tuple
-   ``()`` as their ``.shape`` instead of specifying one or more
-   dimensions.
-
-   >>> import numpy as np
-   >>> m = np.float64(3.4)
-   >>> m.shape
-   ()
-
-Our official approach to testing scalar-hood, therefore, is to attempt
-to access the shape to determine whether it is the empty tuple, with the
-empty tuple provided as the fallback if the object lacks a shape
-entirely:
-
->>> assert getattr(n, 'shape', ()) == ()
->>> assert getattr(m, 'shape', ()) == ()
->>> assert getattr(np.array([7]), 'shape', ()) != ()
-
-Note that, in addition, an empty array does *not* qualify as a scalar:
-
->>> assert getattr(np.array([]), 'shape', ()) != ()
-
 Cross products
 ==============
 
@@ -232,4 +230,3 @@ array([ 8., 10., 12.])
 array([[ 8., 12.],
        [10., 15.],
        [12., 18.]])
-

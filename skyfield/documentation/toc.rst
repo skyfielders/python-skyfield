@@ -17,6 +17,7 @@ that is accelerated using NumPy vector math!
    planets
    stars
    earth-satellites
+   elements
    astropy
    api
    api-iokit
@@ -27,6 +28,7 @@ that is accelerated using NumPy vector math!
    api-satellites
    api-stars
    api-position
+   api-elements
    api-units
    toc
    design
