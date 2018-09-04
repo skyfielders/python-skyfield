@@ -99,13 +99,8 @@ line of code:
 
     After filtering, there are 93 stars
 
-And:
-
-
-.. testcode::
-
-   bright_stars = Star.from_dataframe(df)
-   #print(bright_stars.epoch.values)
+You can use this dataframe to build a :class:`~skyfield.starlib.Star`
+object that will compute the positions of all 93 stars at once.
 
 .. testcode::
 
@@ -115,8 +110,22 @@ And:
    astrometric = earth.at(t).observe(bright_stars)
    ra, dec, distance = astrometric.radec()
 
+   print('There are {} right ascensions'.format(len(ra.hours)))
+   print('and {} declinations'.format(len(dec.degrees)))
+
+.. testoutput::
+
+    There are 93 right ascensions
+    and 93 declinations
+
+Each element of the right ascension array and the declination array
+corresponds to one of the 93 selected stars.  Their position can be
+combined with their magnitude to produce a plot.
+
+.. testcode::
+
    from matplotlib import pyplot as plt
-   plt.plot(ra.hours, dec.degrees, 'ko')
+   plt.scatter(ra.hours, dec.degrees, 8 - df['magnitude'], 'k')
    plt.xlim(7.0, 4.0)
    plt.ylim(-20, 20)
    plt.savefig('bright_stars.png')
@@ -126,9 +135,9 @@ primitive) rendering of Orion!
 
 .. image:: bright_stars.png
 
-Skyfield does not yet support public star chart routines, but hopefully
-they will appear before the end of the year.  For now you can peek at
-the Skyfield file ``charting.py`` and experiment on your own.
+Skyfield does not yet offer star chart routines, but hopefully they will
+appear before the end of the year.  For now you can peek at the Skyfield
+file ``charting.py`` and experiment on your own.
 
 Building a single star from its coordinates
 ===========================================
