@@ -89,4 +89,4 @@ def test_hipparcos():
     assert len(df) == 1
     row = df.iloc[0]
     assert abs(row.ra_degrees - 000.00091185) < 1e-30
-    assert abs(row.ra_hours == 000.00091185 / 15.0) < 1e-30
+    assert abs(row.dec_degrees - +01.08901332) < 1e-30
