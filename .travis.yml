@@ -31,4 +31,4 @@ install:
 
 script:
   - "assay --batch skyfield.tests"
-  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 numpy==1.14.2 sphinx==1.7.2 ; cd .. ; ln ci/* tmp/*.bsp skyfield/documentation ; ./test-docs.sh ; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 matplotlib=2.2.3 numpy==1.14.2 pandas=0.23.3 sphinx==1.7.2 ; cd .. ; ln ci/* tmp/*.bsp skyfield/documentation ; ./test-docs.sh ; fi"
