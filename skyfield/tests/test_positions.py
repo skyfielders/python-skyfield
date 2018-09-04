@@ -17,7 +17,7 @@ def test_cirs_era():
     tio = pos.at(st).from_altaz(alt_degrees=90, az_degrees=180)
 
     # Get the TIOs RA in CIRS coordinates, and the Earth Rotation Angle
-    tio_ra, tio_dec, _ = tio.radec(st, cirs=True)
+    tio_ra, tio_dec, _ = tio.cirs_radec(st)
     era = 360.0 * earth_rotation_angle(st.ut1)
 
     tol = (1e-8 / 3600.0)  # 10 nano arc-second precision
@@ -35,12 +35,12 @@ def test_cirs_meridian():
     planets = api.load('de421.bsp')
     pos = planets['earth'] + api.Topos(longitude_degrees=0.0, latitude_degrees=0.0)
 
-    # Get a series of points along the meridian 
+    # Get a series of points along the meridian
     alt = np.arange(1, 90)
     meridian = pos.at(st).from_altaz(alt_degrees=alt, az_degrees=0.0)
 
     # Get the TIOs RA in CIRS coordinates, and the Earth Rotation Angle
-    md_ra, md_dec, _ = meridian.radec(st, cirs=True)
+    md_ra, md_dec, _ = meridian.cirs_radec(st)
     era = 360.0 * earth_rotation_angle(st.ut1)
 
     tol = (1e-7 / 3600.0)  # 100 nano arc-second precision
@@ -102,7 +102,7 @@ def test_cirs_sofa():
     for ((ra_icrs, dec_icrs, tdb), (ra_sofa, dec_sofa)) in zip(test_data, sofa_results):
         ss = Star(ra_hours=(ra_icrs / 15.0), dec_degrees=dec_icrs)
         st = ts.tdb(jd=tdb)
-        ra_cirs, dec_cirs, _ = earth.at(st).observe(ss).apparent().radec(st, cirs=True)
+        ra_cirs, dec_cirs, _ = earth.at(st).observe(ss).apparent().cirs_radec(st)
 
         assert np.allclose(ra_cirs._degrees, ra_sofa, rtol=0.0, atol=tol)
         assert np.allclose(dec_cirs._degrees, dec_sofa, rtol=0.0, atol=tol)
