@@ -129,9 +129,7 @@ named_star_dict= {
 }
 
 def NamedStar(name):
-    """
-    Return a Star instance given the name of a named star
-    """
+    """DEPRECATED: See stars.rst for how to load a star catalog."""
     try:
         hid = named_star_dict[name]
         return hipparcos.get(str(hid))
