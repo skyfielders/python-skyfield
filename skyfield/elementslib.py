@@ -12,9 +12,11 @@ from numpy import (array, arctan2, sin, arctan, tan, inf, repeat, float64,
 def osculating_elements_of(position, reference_frame=None):
     """Produce the osculating orbital elements for a position.
 
-    The position should be an instance of ``positionlib.ICRF`` and will
-    need to specify a position, a velocity, and a time.  An instance of
-    ``OsculatingElements`` is returned.
+    The ``position`` should be an :class:`~skyfield.positionlib.ICRF`
+    instance like that returned by the ``at()`` method of any Solar
+    System body, specifying a position, a velocity, and a time.  An
+    instance of :class:`~skyfield.elementslib.OsculatingElements` is
+    returned.
 
     """
     mu = GM_dict.get(position.center, 0) + GM_dict.get(position.target, 0)
@@ -34,9 +36,6 @@ class OsculatingElements(object):
     An ``OsculatingElements`` object can be initialized with the following
     parameters:
 
-    ----------
-    Parameters
-    ----------
     position : Distance object
         Position vector with shape (3,) or (3, n)
     velocity : Velocity object
