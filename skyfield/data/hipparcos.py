@@ -5,7 +5,8 @@ from skyfield.timelib import T0
 from skyfield.units import Angle
 
 days = T0 - 2448349.0625
-url = 'ftp://cdsarc.u-strasbg.fr/cats/I/239/hip_main.dat.gz'
+URL = 'ftp://cdsarc.u-strasbg.fr/cats/I/239/hip_main.dat.gz'
+url = URL  # old name, in case anyone used it
 
 def parse(line):
     "DEPRECATED; see :func:`~skyfield.data.hipparcos.load_dataframe() instead."
@@ -40,8 +41,13 @@ analysis toolkit.  Try installing it using your usual Python package
 installer, like "pip install pandas" or "conda install pandas".
 """
 
-def load_dataframe(fobj):
-    """Given an open file for `hip_main.dat.gz`, return a parsed dataframe."""
+def load_dataframe(fobj, compression='gzip'):
+    """Given an open file for `hip_main.dat.gz`, return a parsed dataframe.
+
+    If your copy of ``hip_main.dat`` has already been unzipped, pass the
+    optional argument ``compression=None``.
+
+    """
     try:
         from pandas import read_fwf
     except ImportError:
@@ -52,19 +58,17 @@ def load_dataframe(fobj):
         ('magnitude', (41, 46)),
         ('ra_degrees', (51, 63)),
         ('dec_degrees', (64, 76)),
+        ('parallax_mas', (79, 86)),  # TODO: have Star load this
+        ('ra_mas_per_year', (87, 95)),
+        ('dec_mas_per_year', (96, 104)),
     )
 
-    with gzip.open(fobj, 'rt', encoding='ascii') as g:
-        df = read_fwf(g, names=names, colspecs=colspecs)
-
-    return df.set_index('hip').assign(ra_hours = df['ra_degrees'] / 15.0)
-
-def _build_star(df):
-    """Build a :class:`skyfield.starlib.Star` from a Hipparcos dataframe."""
-    return Star(
-        ra_hours=df.ra_hours,
-        dec_degrees=df.dec_degrees,
+    df = read_fwf(fobj, colspecs, names=names, compression=compression)
+    df = df.assign(
+        ra_hours = df['ra_degrees'] / 15.0,
+        epoch_year = 1991.25,
     )
+    return df.set_index('hip')
 
 def get(which):
     "DEPRECATED; see :func:`~skyfield.data.hipparcos.load_dataframe() instead."
