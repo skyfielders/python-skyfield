@@ -10,6 +10,13 @@ from numpy import (array, arctan2, sin, arctan, tan, inf, repeat, float64,
                    where, pi, cross)
 
 def osculating_elements_of(position, reference_frame=None):
+    """Produce the osculating orbital elements for a position.
+
+    The position should be an instance of ``positionlib.ICRF`` and will
+    need to specify a position, a velocity, and a time.  An instance of
+    ``OsculatingElements`` is returned.
+
+    """
     mu = GM_dict.get(position.center, 0) + GM_dict.get(position.target, 0)
     return OsculatingElements(
         position.position,

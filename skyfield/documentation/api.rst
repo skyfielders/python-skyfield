@@ -209,10 +209,10 @@ All positions support a basic set of methods:
    ICRF.speed
    ICRF.radec
    ICRF.separation_from
-   ICRF.ecliptic_position
+   ICRF.ecliptic_xyz
    ICRF.ecliptic_velocity
    ICRF.ecliptic_latlon
-   ICRF.galactic_position
+   ICRF.galactic_xyz
    ICRF.galactic_latlon
    ICRF.from_altaz
 
