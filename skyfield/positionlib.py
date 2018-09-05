@@ -157,6 +157,42 @@ class ICRF(object):
         c = dots(u1, u2)
         return Angle(radians=arccos(clip(c, -1.0, 1.0)))
 
+    def cirs_xyz(self, epoch):
+        """Compute cartesian CIRS coordinates at a given epoch (x, y, z).
+
+        Calculate coordinates in the Celestial Intermediate Reference System
+        (CIRS), a dynamical coordinate system referenced to the Celestial
+        Intermediate Origin (CIO). As this is a dynamical system it must be
+        calculated at a specific epoch.
+        """
+        if isinstance(epoch, Time):
+            pass
+        elif isinstance(epoch, float):
+            epoch = Time(None, tt=epoch)
+        elif epoch == 'date':
+            epoch = self.t
+        else:
+            raise ValueError('the epoch= must be a Time object,'
+                             ' a floating point Terrestrial Time (TT),'
+                             ' or the string "date" for epoch-of-date')
+
+        vector = einsum('ij...,j...->i...', epoch.C, self.position.au)
+        return Distance(vector)
+
+    def cirs_radec(self, epoch):
+        """Get spherical CIRS coordinates at a given epoch (ra, dec, distance).
+
+        Calculate coordinates in the Celestial Intermediate Reference System
+        (CIRS), a dynamical coordinate system referenced to the Celestial
+        Intermediate Origin (CIO). As this is a dynamical system it must be
+        calculated at a specific epoch.
+        """
+        r_au, dec, ra = to_polar(self.cirs_xyz(epoch).au)
+
+        return (Angle(radians=ra, preference='hours'),
+                Angle(radians=dec, signed=True),
+                Distance(r_au))
+
     def ecliptic_xyz(self, epoch=None):
         """Compute J2000 ecliptic position vector (x, y, z).
 

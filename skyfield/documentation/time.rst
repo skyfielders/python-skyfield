@@ -766,12 +766,16 @@ In case you are curious what they are, here is a list:
     and a vector in the dynamical reference system of this Julian date,
     where **B** is the frame tie between the two systems.
 
-``MT``, ``NT``, ``PT``
-    The three matrices **M**\ :sup:`T`, **N**\ :sup:`T`,
-    and **P**\ :sup:`T`
-    that are the transposes of the three previous matrices,
-    and that rotate back the other direction
-    from the dynamical reference system back to the ICRF frame.
+``C``
+    The matrix that performs a complete rotation between a vector in the ICRF
+    and a vector in the celestial intermediate reference system (CIRS) of
+    this Julian date.
+
+``MT``, ``NT``, ``PT``, ``CT``
+    The four matrices **M**\ :sup:`T`, **N**\ :sup:`T`, **P**\ :sup:`T`
+    and **C**\ :sup:`T` that are the transposes of the four previous
+    matrices, and that rotate back the other direction from the dynamical
+    reference system back to the ICRF frame.
 
 You will typically never need to access these matrices yourself,
 as they are used automatically by the :meth:`Position.radec()`

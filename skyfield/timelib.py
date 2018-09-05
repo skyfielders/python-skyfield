@@ -1,12 +1,12 @@
 from datetime import date, datetime, timedelta, tzinfo
-from numpy import (array, concatenate, einsum, float_, interp, isnan, nan,
+from numpy import (array, concatenate, einsum, float_, interp, isnan, nan, pi,
                    rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime
 from .constants import B1950, DAY_S, T0
 from .descriptorlib import reify
-from .earthlib import sidereal_time
+from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
-from .functions import load_bundled_npy
+from .functions import load_bundled_npy, rot_z
 from .nutationlib import compute_nutation, earth_tilt
 from .precessionlib import compute_precession
 
@@ -615,6 +615,17 @@ class Time(object):
     @reify
     def MT(self):
         return rollaxis(self.M, 1)
+
+    @reify
+    def C(self):
+        # Calculate the Equation of Origins in cycles 
+        eq_origins = (earth_rotation_angle(self.ut1) - self.gast / 24.0)
+        R = rot_z(2 * pi * eq_origins)
+        return einsum('ij...,jk...->ik...', R, self.M)
+
+    @reify
+    def CT(self):
+        return rollaxis(self.C, 1)
 
     # Conversion between timescales.
 
