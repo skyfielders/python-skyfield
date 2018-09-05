@@ -42,6 +42,9 @@ the Hipparcos designation “HIP 87937” and would be accessed like this:
    __import__('skyfield.tests.fixes').tests.fixes.setup(
        (2014, 1, 18, 23, 10, 9))
 
+   import matplotlib
+   matplotlib.use('Agg')  # to avoid “no display name” error on Travis CI
+
 .. testcode::
 
     from skyfield.api import Star, load
