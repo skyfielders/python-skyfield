@@ -165,17 +165,16 @@ class ICRF(object):
         Intermediate Origin (CIO). As this is a dynamical system it must be
         calculated at a specific epoch.
         """
-        if epoch is not None:
-            if isinstance(epoch, Time):
-                pass
-            elif isinstance(epoch, float):
-                epoch = Time(None, tt=epoch)
-            elif epoch == 'date':
-                epoch = self.t
-            else:
-                raise ValueError('the epoch= must be a Time object,'
-                                 ' a floating point Terrestrial Time (TT),'
-                                 ' or the string "date" for epoch-of-date')
+        if isinstance(epoch, Time):
+            pass
+        elif isinstance(epoch, float):
+            epoch = Time(None, tt=epoch)
+        elif epoch == 'date':
+            epoch = self.t
+        else:
+            raise ValueError('the epoch= must be a Time object,'
+                             ' a floating point Terrestrial Time (TT),'
+                             ' or the string "date" for epoch-of-date')
 
         vector = einsum('ij...,j...->i...', epoch.C, self.position.au)
         return Distance(vector)
