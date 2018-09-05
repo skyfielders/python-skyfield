@@ -48,7 +48,11 @@ def to_polar(xyz):
     ``theta`` - angle above (+) or below (-) the xy-plane
     ``phi`` - angle around the z-axis
 
-    The order of the three return values is intended to match ISO 31-11.
+    The meaning and order of the three return values is designed to
+    match both ISO 31-11 and the traditional order used by physicists.
+    Mathematicians usually define ``theta`` and ``phi`` the other way
+    around, and may need to use caution when using the return values.
+    See: https://en.wikipedia.org/wiki/Spherical_coordinate_system
 
     """
     r = length_of(xyz)
@@ -64,7 +68,11 @@ def from_polar(r, theta, phi):
     ``theta`` - angle above (+) or below (-) the xy-plane
     ``phi`` - angle around the z-axis
 
-    The order of the three arguments is intended to match ISO 31-11.
+    The meaning and order of the three polar parameters is designed to
+    match both ISO 31-11 and the traditional order used by physicists.
+    Mathematicians usually define ``theta`` and ``phi`` the other way
+    around, and may need to use caution when calling this function.
+    See: https://en.wikipedia.org/wiki/Spherical_coordinate_system
 
     """
     rxy = r * cos(theta)
