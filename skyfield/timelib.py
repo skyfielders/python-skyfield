@@ -669,7 +669,11 @@ class Time(object):
 
     @reify
     def gast(self):
-        return self.gmst + earth_tilt(self)[2] / 3600.0
+        return self.gmst + self._earth_tilt[2] / 3600.0
+
+    @reify
+    def _earth_tilt(self):
+        return earth_tilt(self)
 
     def __eq__(self, other_time):
         if not isinstance(other_time, Time):

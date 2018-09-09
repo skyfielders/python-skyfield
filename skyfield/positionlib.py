@@ -214,7 +214,7 @@ class ICRF(object):
                                  ' a floating point Terrestrial Time (TT),'
                                  ' or the string "date" for epoch-of-date')
             position_au = einsum('ij...,j...->i...', epoch.M, position_au)
-            oblm, oblt, eqeq, psi, eps = earth_tilt(epoch)
+            oblm, oblt, eqeq, psi, eps = epoch._earth_tilt
             e = oblt*DEG2RAD
             E = rot_x(e)
             if not epoch.shape:
