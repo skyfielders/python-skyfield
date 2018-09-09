@@ -10,7 +10,7 @@ def find(start_time, end_time, f, epsilon=EPSILON, step=None, num=12):
     jd0 = start_time.tt
     jd1 = end_time.tt
     if jd0 >= jd1:
-        raise ValueError('your start_time {} is later than your end_time {}'
+        raise ValueError('your start_time {0} is later than your end_time {1}'
                          .format(start_time, end_time))
     step = 0.1  # TODO
 
@@ -22,7 +22,7 @@ def find(start_time, end_time, f, epsilon=EPSILON, step=None, num=12):
         if i == 0:
             name = getattr(f, '__name__', None)
             parens = '' if name is None else '()'
-            raise ValueError('{}{} is already true at your start time'
+            raise ValueError('{0}{1} is already true at your start time'
                              .format(name or 'your criterion', parens))
         jd0, jd1 = jd[i-1], jd[i]
         if jd1 - jd0 <= epsilon:
@@ -36,7 +36,7 @@ def find_all(start_time, end_time, f, epsilon=EPSILON, step=None, num=12):
     jd0 = start_time.tt
     jd1 = end_time.tt
     if jd0 >= jd1:
-        raise ValueError('your start_time {} is later than your end_time {}'
+        raise ValueError('your start_time {0} is later than your end_time {1}'
                          .format(start_time, end_time))
     step = 0.1  # TODO
     jd = arange(jd0, jd1, step)
@@ -67,7 +67,7 @@ def find_all2(start_time, end_time, f, epsilon=EPSILON, step=None, num=12):
     jd0 = start_time.tt
     jd1 = end_time.tt
     if jd0 >= jd1:
-        raise ValueError('your start_time {} is later than your end_time {}'
+        raise ValueError('your start_time {0} is later than your end_time {1}'
                          .format(start_time, end_time))
     step = 0.1  # TODO
     step = 7.0
