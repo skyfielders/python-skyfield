@@ -339,6 +339,8 @@ class Time(object):
 
     def __getitem__(self, index):
         # TODO: also copy cached matrices?
+        # TODO: raise non-IndexError exception if this Time is not an array;
+        # otherwise, a `for` loop over it will not raise an error.
         t = Time(self.ts, self.tt[index])
         for name in 'tai', 'tdb', 'ut1', 'delta_t':
             value = getattr(self, name, None)
