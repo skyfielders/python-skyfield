@@ -282,8 +282,8 @@ def iau2000b(jd_tt):
     1995 and 2020.
 
     """
-    dpplan = -0.000135
-    deplan =  0.000388
+    dpplan = -0.000135 * 1e7
+    deplan =  0.000388 * 1e7
 
     nals_t = array((
         ( 0,    0,    0,    0,    1),
@@ -462,9 +462,6 @@ def iau2000b(jd_tt):
     om  = fmod (450160.398036 -
              t * 6962890.5431, ASEC360) * ASEC2RAD;
 
-    dp = 0.0;
-    de = 0.0;
-
     a = array((el, elp, f, d, om))
 
     arg = nals_t.dot(a)
@@ -473,30 +470,14 @@ def iau2000b(jd_tt):
     sarg = sin(arg)
     carg = cos(arg)
 
-    # dp += (cls_t[i][0] + cls_t[i][1] * t) * sarg + cls_t[i][2] * carg
-    # de += (cls_t[i][3] + cls_t[i][4] * t) * carg + cls_t[i][5] * sarg
-
     stsc = array((sarg, t * sarg, carg)).T
     ctcs = array((carg, t * carg, sarg)).T
 
     dp = tensordot(stsc, cls_t[:,0:3])
     de = tensordot(ctcs, cls_t[:,3:6])
 
-    factor = 1.0e-7 * ASEC2RAD;
-    dpsils = dp * factor;
-    depsls = de * factor;
-
-    dpsipl = dpplan * ASEC2RAD;
-    depspl = deplan * ASEC2RAD;
-
-    dpsi = dpsipl + dpsils;
-    deps = depspl + depsls;
-
-    dpsi /= ASEC2RAD
-    dpsi *= 1e7
-
-    deps /= ASEC2RAD
-    deps *= 1e7
+    dpsi = dpplan + dp;
+    deps = deplan + de;
 
     return dpsi, deps
 
