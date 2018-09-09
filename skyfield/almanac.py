@@ -71,6 +71,7 @@ def find_all2(start_time, end_time, f, epsilon=EPSILON, step=None, num=12):
                          .format(start_time, end_time))
     step = 0.1  # TODO
     step = 7.0
+    step = 1.0
     jd = arange(jd0, jd1, step)
 
     end_mask = linspace(0.0, 1.0, num)

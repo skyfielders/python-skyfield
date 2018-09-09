@@ -10,7 +10,7 @@ def compute_nutation(t):
     matrices is returned with dimensions ``(3, 3, n)``.
 
     """
-    oblm, oblt, eqeq, psi, eps = earth_tilt(t)
+    oblm, oblt, eqeq, psi, eps = t._earth_tilt
 
     cobm = cos(oblm * DEG2RAD)
     sobm = sin(oblm * DEG2RAD)
