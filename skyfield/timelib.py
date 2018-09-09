@@ -61,7 +61,7 @@ class Timescale(object):
     >>> ts = load.timescale()
     >>> t = ts.utc(1980, 3, 1, 9, 30)
     >>> t
-    <Time tt=2444299.896426>
+    <Time tt=2444299.896425741>
 
     Loading a timescale downloads tables from the United States Naval
     Observatory and the International Earth Rotation Service.  These
@@ -309,7 +309,7 @@ class Time(object):
 
     >>> ts = load.timescale()
     >>> print(ts.utc(1980, 1, 1))
-    <Time tt=2444239.500592>
+    <Time tt=2444239.500592408>
 
     Times are represented internally by floating point Julian dates, but
     can be converted to other formats by using the many methods that
@@ -329,13 +329,13 @@ class Time(object):
 
     def __repr__(self):
         size = getattr(self.tt, 'size', -1)
-        if size > 1:
-            rstr = '<Time {0} values from tt={1:.6f} to tt={2:.6f}>'
-            return rstr.format(self.tt.size, self.tt.min(), self.tt.max())
-        elif size == 0:
-            return '<Time []>'
+        if size > 3:
+            rstr = '<Time tt=[{0} ... {1}] len={2}>'
+            return rstr.format(self.tt.min(), self.tt.max(), size)
+        elif size >= 0:
+            return '<Time tt={0}>'.format(self.tt)
         else:
-            return '<Time tt={0:.6f}>'.format(self.tt)
+            return '<Time tt={0}>'.format(self.tt)
 
     def __getitem__(self, index):
         # TODO: also copy cached matrices?

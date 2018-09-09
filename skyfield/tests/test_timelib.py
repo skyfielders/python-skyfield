@@ -281,6 +281,13 @@ def test_time_repr(ts):
     # Check array conversion
     assert isinstance(repr(ts.utc(year=range(2000, 2010))), str)
 
+    assert repr(ts.tt_jd(1)) == '<Time tt=1.0>'
+    assert repr(ts.tt_jd([])) == '<Time tt=[]>'
+    assert repr(ts.tt_jd([1])) == '<Time tt=[1]>'
+    assert repr(ts.tt_jd([1, 2])) == '<Time tt=[1 2]>'
+    assert repr(ts.tt_jd([1, 2, 3])) == '<Time tt=[1 2 3]>'
+    assert repr(ts.tt_jd([1, 2, 3, 4])) == '<Time tt=[1 ... 4] len=4>'
+
 def test_jd_calendar():
 
     import numbers
