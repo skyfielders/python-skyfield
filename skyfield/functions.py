@@ -104,5 +104,5 @@ except:
 
 def load_bundled_npy(filename):
     """Load a binary NumPy array file that is bundled with Skyfield."""
-    data = get_data('skyfield', 'data/{0}.npy'.format(filename))
+    data = get_data('skyfield', 'data/{0}'.format(filename))
     return load(BytesIO(data))

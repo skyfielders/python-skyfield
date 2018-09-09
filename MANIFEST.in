@@ -1,5 +1,6 @@
 include README.rst
 include LICENSE
 include skyfield/data/*.npy
+include skyfield/data/*.npz
 include skyfield/documentation/*.rst
 include skyfield/tests/data/*

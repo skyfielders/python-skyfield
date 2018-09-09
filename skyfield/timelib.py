@@ -804,8 +804,8 @@ def build_delta_t_table(delta_t_recent):
       values for Delta T over the years 1657 through 1984.
 
     """
-    ancient = load_bundled_npy('morrison_stephenson_deltat')
-    historic = load_bundled_npy('historic_deltat')
+    ancient = load_bundled_npy('morrison_stephenson_deltat.npy')
+    historic = load_bundled_npy('historic_deltat.npy')
 
     # Prefer USNO over Morrison and Stephenson where they overlap.
     historic_start_time = historic[0,0]
