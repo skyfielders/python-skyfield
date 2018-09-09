@@ -1,20 +1,9 @@
 """Routines to solve for circumstances like sunrise, sunset, and moon phase."""
 
 from numpy import arange, argmax, flatnonzero, linspace, multiply
-from .constants import DAY_S
+from .constants import DAY_S, tau
 
 EPSILON = 0.001 / DAY_S
-
-def sunrise(ephemeris, topos):
-    """Return a function that, given a time, knows whether the sun is up."""
-    sun = ephemeris['sun']
-    topos_at = (ephemeris['earth'] + topos).at
-
-    def is_sun_above_the_horizon(t):
-        """Return `True` if the sun has risen by time `t`."""
-        return topos_at(t).observe(sun).apparent().altaz()[0].degrees > -0.8333
-
-    return is_sun_above_the_horizon
 
 def find(start_time, end_time, f, epsilon=EPSILON, step=None, num=12):
     ts = start_time.ts
@@ -72,3 +61,66 @@ def find_all(start_time, end_time, f, epsilon=EPSILON, step=None, num=12):
         jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()
 
     return ts.tt_jd(starts)
+
+def find_all2(start_time, end_time, f, epsilon=EPSILON, step=None, num=12):
+    ts = start_time.ts
+    jd0 = start_time.tt
+    jd1 = end_time.tt
+    if jd0 >= jd1:
+        raise ValueError('your start_time {} is later than your end_time {}'
+                         .format(start_time, end_time))
+    step = 0.1  # TODO
+    step = 7.0
+    jd = arange(jd0, jd1, step)
+
+    end_mask = linspace(0.0, 1.0, num)
+    start_mask = end_mask[::-1]
+    o = multiply.outer
+
+    while True:
+        t = ts.tt_jd(jd)
+        from numpy import diff
+        y = f(t)
+        indices = flatnonzero(diff(y))
+        starts = jd.take(indices)
+        ends = jd.take(indices + 1)
+
+        # Since we create the intervals equal, they all should fall
+        # below epsilon at around the same time; so for efficiency we
+        # only test the first pair.
+        if ends[0] - starts[0] <= epsilon:
+            break
+
+        jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()
+
+    return ts.tt_jd(ends)
+
+def sunrise_sunset(ephemeris, topos):
+    """Return a function of time that returns whether the sun is up."""
+    sun = ephemeris['sun']
+    topos_at = (ephemeris['earth'] + topos).at
+
+    def is_sun_above_the_horizon_at(t):
+        """Return `True` if the sun has risen by time `t`."""
+        return topos_at(t).observe(sun).apparent().altaz()[0].degrees > -0.8333
+
+    return is_sun_above_the_horizon_at
+
+# MOON_QUARTER_NAMES = {
+#     'First Quarter',
+# }
+
+def moon_quarter(ephemeris):
+    """Return a function of time that returns the moon phase 0 through 3."""
+    earth = ephemeris['earth']
+    moon = ephemeris['moon']
+    sun = ephemeris['sun']
+
+    def moon_quarter_at(t):
+        """Return `True` if the sun has risen by time `t`."""
+        e = earth.at(t)
+        _, mlon, _ = e.observe(moon).apparent().ecliptic_latlon('date')
+        _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
+        return (mlon.radians - slon.radians) // (tau / 4) % 4
+
+    return moon_quarter_at
