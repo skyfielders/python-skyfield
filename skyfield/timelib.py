@@ -14,7 +14,7 @@ try:
     from pytz import utc
 except ImportError:
 
-    # Lacking a full suite of timezones from pytz, we need to at least a
+    # Lacking a full suite of timezones from pytz, we at least need a
     # time zone object for UTC.
 
     class UTC(tzinfo):
