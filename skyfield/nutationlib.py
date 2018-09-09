@@ -219,7 +219,7 @@ anomaly_constant, anomaly_coefficient = array([
     (0.02438175, 0.00000538691),
     ]).T
 
-def iau2000a(jd_tt, term_slice=slice(None)):
+def iau2000a(jd_tt):
     """Compute Earth nutation based on the IAU 2000A nutation model.
 
     `jd_tt` - Terrestrial Time: Julian date float, or NumPy array of floats
@@ -240,7 +240,7 @@ def iau2000a(jd_tt, term_slice=slice(None)):
     # ** Luni-solar nutation **
     # Summation of luni-solar nutation series (in reverse order).
 
-    arg = nals_t[term_slice].dot(a)
+    arg = nals_t.dot(a)
     fmod(arg, tau, out=arg)
 
     sarg = sin(arg)
@@ -249,8 +249,8 @@ def iau2000a(jd_tt, term_slice=slice(None)):
     stsc = array((sarg, t * sarg, carg)).T
     ctcs = array((carg, t * carg, sarg)).T
 
-    dpsi = tensordot(stsc, lunisolar_longitude_coefficients[term_slice])
-    deps = tensordot(ctcs, lunisolar_obliquity_coefficients[term_slice])
+    dpsi = tensordot(stsc, lunisolar_longitude_coefficients)
+    deps = tensordot(ctcs, lunisolar_obliquity_coefficients)
 
     # Compute and add in planetary components.
 
@@ -272,7 +272,7 @@ def iau2000a(jd_tt, term_slice=slice(None)):
 
 #
 
-fa0, fa1, fa2, fa3, fa4 = array([
+fa0, fa1, fa2, fa3, fa4 = array((
 
     # Mean Anomaly of the Moon.
     (485868.249036, 1717915923.2178, 31.8792, 0.051635, - .00024470),
@@ -290,7 +290,7 @@ fa0, fa1, fa2, fa3, fa4 = array([
     # Mean Longitude of the Ascending Node of the Moon.
     (450160.398036, - 6962890.5431, 7.4722, 0.007702, - 0.00005939),
 
-    ]).T[:,:,None]
+    )).T[:,:,None]
 
 def fundamental_arguments(t):
     """Compute the fundamental arguments (mean elements) of Sun and Moon.

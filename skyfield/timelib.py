@@ -318,7 +318,6 @@ class Time(object):
     """
     psi_correction = 0.0
     eps_correction = 0.0
-    _nutation_term_slice = slice(None)
 
     def __init__(self, ts, tt):
         self.ts = ts
@@ -678,7 +677,7 @@ class Time(object):
 
     @reify
     def _iau2000a(self):
-        return iau2000a(self.tt, self._nutation_term_slice)
+        return iau2000a(self.tt)
 
     def __eq__(self, other_time):
         if not isinstance(other_time, Time):
