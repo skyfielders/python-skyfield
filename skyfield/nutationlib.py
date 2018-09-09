@@ -277,95 +277,18 @@ def iau2000b(jd_tt):
 
     Returns a tuple ``(delta_psi, delta_epsilon)`` measured in tenths of
     a micro-arcsecond.  Each is either a float, or a NumPy array with
-    the same dimensions as the input argument.  The result should agree
-    with ``iau2000a()`` to within a milliarcsecond between the years
-    1995 and 2020.
+    the same dimensions as the input argument.  The result will not take
+    as long to compute as the full IAU 2000A series, but should still
+    agree with ``iau2000a()`` to within a milliarcsecond between the
+    years 1995 and 2020.
 
     """
     dpplan = -0.000135 * 1e7
     deplan =  0.000388 * 1e7
 
-    nals_t = array((
-        ( 0,    0,    0,    0,    1),
-        ( 0,    0,    2,   -2,    2),
-        ( 0,    0,    2,    0,    2),
-        ( 0,    0,    0,    0,    2),
-        ( 0,    1,    0,    0,    0),
-        ( 0,    1,    2,   -2,    2),
-        ( 1,    0,    0,    0,    0),
-        ( 0,    0,    2,    0,    1),
-        ( 1,    0,    2,    0,    2),
-        ( 0,   -1,    2,   -2,    2),
-        ( 0,    0,    2,   -2,    1),
-        (-1,    0,    2,    0,    2),
-        (-1,    0,    0,    2,    0),
-        ( 1,    0,    0,    0,    1),
-        (-1,    0,    0,    0,    1),
-        (-1,    0,    2,    2,    2),
-        ( 1,    0,    2,    0,    1),
-        (-2,    0,    2,    0,    1),
-        ( 0,    0,    0,    2,    0),
-        ( 0,    0,    2,    2,    2),
-        ( 0,   -2,    2,   -2,    2),
-        (-2,    0,    0,    2,    0),
-        ( 2,    0,    2,    0,    2),
-        ( 1,    0,    2,   -2,    2),
-        (-1,    0,    2,    0,    1),
-        ( 2,    0,    0,    0,    0),
-        ( 0,    0,    2,    0,    0),
-        ( 0,    1,    0,    0,    1),
-        (-1,    0,    0,    2,    1),
-        ( 0,    2,    2,   -2,    2),
-        ( 0,    0,   -2,    2,    0),
-        ( 1,    0,    0,   -2,    1),
-        ( 0,   -1,    0,    0,    1),
-        (-1,    0,    2,    2,    1),
-        ( 0,    2,    0,    0,    0),
-        ( 1,    0,    2,    2,    2),
-        (-2,    0,    2,    0,    0),
-        ( 0,    1,    2,    0,    2),
-        ( 0,    0,    2,    2,    1),
-        ( 0,   -1,    2,    0,    2),
-        ( 0,    0,    0,    2,    1),
-        ( 1,    0,    2,   -2,    1),
-        ( 2,    0,    2,   -2,    2),
-        (-2,    0,    0,    2,    1),
-        ( 2,    0,    2,    0,    1),
-        ( 0,   -1,    2,   -2,    1),
-        ( 0,    0,    0,   -2,    1),
-        (-1,   -1,    0,    2,    0),
-        ( 2,    0,    0,   -2,    1),
-        ( 1,    0,    0,    2,    0),
-        ( 0,    1,    2,   -2,    1),
-        ( 1,   -1,    0,    0,    0),
-        (-2,    0,    2,    0,    2),
-        ( 3,    0,    2,    0,    2),
-        ( 0,   -1,    0,    2,    0),
-        ( 1,   -1,    2,    0,    2),
-        ( 0,    0,    0,    1,    0),
-        (-1,   -1,    2,    2,    2),
-        (-1,    0,    2,    0,    0),
-        ( 0,   -1,    2,    2,    2),
-        (-2,    0,    0,    0,    1),
-        ( 1,    1,    2,    0,    2),
-        ( 2,    0,    0,    0,    1),
-        (-1,    1,    0,    1,    0),
-        ( 1,    1,    0,    0,    0),
-        ( 1,    0,    2,    0,    0),
-        (-1,    0,    2,   -2,    1),
-        ( 1,    0,    0,    0,    2),
-        (-1,    0,    0,    1,    0),
-        ( 0,    0,    2,    1,    2),
-        (-1,    0,    2,    4,    2),
-        (-1,    1,    0,    1,    1),
-        ( 0,   -2,    2,   -2,    1),
-        ( 1,    0,    2,    2,    1),
-        (-2,    0,    2,    2,    2),
-        (-1,    0,    0,    0,    2),
-        ( 1,    1,    2,   -2,    2),
-    ))
-
     t = (jd_tt - T0) / 36525.0
+
+    # TODO: can these be replaced with fa0 and f1?
 
     el  = fmod (485868.249036 +
           t * 1717915923.2178, ASEC360) * ASEC2RAD;
@@ -384,7 +307,7 @@ def iau2000b(jd_tt):
 
     a = array((el, elp, f, d, om))
 
-    arg = nals_t.dot(a)
+    arg = nals_t[:77].dot(a)
     fmod(arg, tau, out=arg)
 
     sarg = sin(arg)
@@ -396,13 +319,10 @@ def iau2000b(jd_tt):
     dp = tensordot(stsc, lunisolar_longitude_coefficients[:77,])
     de = tensordot(ctcs, lunisolar_obliquity_coefficients[:77,])
 
-    dpsi = dpplan + dp;
-    deps = deplan + de;
+    dpsi = dpplan + dp
+    deps = deplan + de
 
     return dpsi, deps
-
-
-#
 
 fa0, fa1, fa2, fa3, fa4 = array((
 
