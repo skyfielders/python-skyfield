@@ -38,7 +38,7 @@ setup(
         ],
     package_data = {
         'skyfield': ['documentation/*.rst'],
-        'skyfield.data': ['*.npy'],
+        'skyfield.data': ['*.npy', '*.npz'],
         'skyfield.tests': ['data/*'],
         },
     install_requires=[
