@@ -7,7 +7,7 @@ from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
 from .functions import load_bundled_npy, rot_z
-from .nutationlib import compute_nutation, earth_tilt
+from .nutationlib import compute_nutation, earth_tilt, iau2000a
 from .precessionlib import compute_precession
 
 try:
@@ -318,10 +318,11 @@ class Time(object):
     """
     psi_correction = 0.0
     eps_correction = 0.0
+    _nutation_term_slice = slice(None)
 
     def __init__(self, ts, tt):
-        self.tt = tt
         self.ts = ts
+        self.tt = tt
         self.shape = getattr(tt, 'shape', ())
 
     def __len__(self):
@@ -674,6 +675,10 @@ class Time(object):
     @reify
     def _earth_tilt(self):
         return earth_tilt(self)
+
+    @reify
+    def _iau2000a(self):
+        return iau2000a(self.tt, self._nutation_term_slice)
 
     def __eq__(self, other_time):
         if not isinstance(other_time, Time):

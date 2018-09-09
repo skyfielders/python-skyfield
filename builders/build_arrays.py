@@ -2,7 +2,6 @@ import argparse
 import sys
 
 from numpy import array, savez_compressed
-from skyfield import nutationlib
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Save arrays to a file')
@@ -2879,6 +2878,3 @@ nutation_coefficients_obliquity = nutation_coefficients[:,2:]
 
 if __name__ == '__main__':
     main(sys.argv[1:])
-
-
-

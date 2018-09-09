@@ -119,6 +119,7 @@ def moon_quarter(ephemeris):
 
     def moon_quarter_at(t):
         """Return `True` if the sun has risen by time `t`."""
+        t._nutation_term_slice = slice(0, 79)
         e = earth.at(t)
         _, mlon, _ = e.observe(moon).apparent().ecliptic_latlon('date')
         _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')

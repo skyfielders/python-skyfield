@@ -57,7 +57,7 @@ def earth_tilt(t):
     ``d_eps`` - Nutation in obliquity in arcseconds.
 
     """
-    dp, de = iau2000a(t.tt)
+    dp, de = t._iau2000a
     c_terms = equation_of_the_equinoxes_complimentary_terms(t.tt) / ASEC2RAD
 
     d_psi = dp * 1e-7 + t.psi_correction
@@ -219,7 +219,7 @@ anomaly_constant, anomaly_coefficient = array([
     (0.02438175, 0.00000538691),
     ]).T
 
-def iau2000a(jd_tt):
+def iau2000a(jd_tt, term_slice=slice(None)):
     """Compute Earth nutation based on the IAU 2000A nutation model.
 
     `jd_tt` - Terrestrial Time: Julian date float, or NumPy array of floats
@@ -240,7 +240,7 @@ def iau2000a(jd_tt):
     # ** Luni-solar nutation **
     # Summation of luni-solar nutation series (in reverse order).
 
-    arg = nals_t.dot(a)
+    arg = nals_t[term_slice].dot(a)
     fmod(arg, tau, out=arg)
 
     sarg = sin(arg)
@@ -249,8 +249,8 @@ def iau2000a(jd_tt):
     stsc = array((sarg, t * sarg, carg)).T
     ctcs = array((carg, t * carg, sarg)).T
 
-    dpsi = tensordot(stsc, lunisolar_longitude_coefficients)
-    deps = tensordot(ctcs, lunisolar_obliquity_coefficients)
+    dpsi = tensordot(stsc, lunisolar_longitude_coefficients[term_slice])
+    deps = tensordot(ctcs, lunisolar_obliquity_coefficients[term_slice])
 
     # Compute and add in planetary components.
 
