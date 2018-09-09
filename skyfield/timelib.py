@@ -7,7 +7,7 @@ from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
 from .functions import load_bundled_npy, rot_z
-from .nutationlib import compute_nutation, earth_tilt, iau2000a
+from .nutationlib import compute_nutation, earth_tilt, iau2000a, iau2000b
 from .precessionlib import compute_precession
 
 try:
@@ -678,6 +678,7 @@ class Time(object):
     @reify
     def _iau2000a(self):
         return iau2000a(self.tt)
+        return iau2000b(self.tt)
 
     def __eq__(self, other_time):
         if not isinstance(other_time, Time):
