@@ -150,6 +150,16 @@ def output_subroutine_tests(dates):
                         array([{psi!r}, {eps!r}]), 0.001)
             """)
 
+    for i, jd in enumerate(date_floats):
+        psi, eps = nutation_module.iau2000b(jd, 0.0)
+        psi *= 1e7 / ASEC2RAD
+        eps *= 1e7 / ASEC2RAD
+        output(locals(), """\
+            def test_iau2000b_date{i}():
+                compare(nutationlib.iau2000b({jd!r}),
+                        array([{psi!r}, {eps!r}]), 0.001)
+            """)
+
     for i, args in enumerate([
           (-4712, 1, 1, 0.0),
           (-4712, 3, 1, 0.0),

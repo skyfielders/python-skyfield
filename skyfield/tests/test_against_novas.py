@@ -130,6 +130,26 @@ def test_iau2000a_date3():
     compare(nutationlib.iau2000a(2456164.5),
             array([159767295.3348004, -42599231.779328726]), 0.001)
 
+def test_iau2000b_date0():
+    print(nutationlib.iau2000b(2440423.345833333))
+    print([26048264.528388523, 88619675.68529966])
+    print(array(nutationlib.iau2000b(2440423.345833333))
+          / [26048264.528388523, 88619675.68529966])
+    compare(nutationlib.iau2000b(2440423.345833333),
+            array([26048264.528388523, 88619675.68529966]), 0.001)
+
+def test_iau2000b_date1():
+    compare(nutationlib.iau2000b(2448031.5),
+            array([116274598.48837188, 59322174.624764845]), 0.001)
+
+def test_iau2000b_date2():
+    compare(nutationlib.iau2000b(2451545.0),
+            array([-139316638.88969785, -57694170.77292847]), 0.001)
+
+def test_iau2000b_date3():
+    compare(nutationlib.iau2000b(2456164.5),
+            array([159765584.29895684, -42598702.03944705]), 0.001)
+
 def test_julian_date_function_date0():
     compare(timelib.julian_date(-4712, 1, 1, 0.0), 37.5, 0.0)
 
