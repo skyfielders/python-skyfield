@@ -620,7 +620,7 @@ class Time(object):
 
     @reify
     def C(self):
-        # Calculate the Equation of Origins in cycles 
+        # Calculate the Equation of Origins in cycles
         eq_origins = (earth_rotation_angle(self.ut1) - self.gast / 24.0)
         R = rot_z(2 * pi * eq_origins)
         return einsum('ij...,jk...->ik...', R, self.M)
@@ -676,9 +676,8 @@ class Time(object):
         return earth_tilt(self)
 
     @reify
-    def _iau2000a(self):
+    def _nutation_angles(self):
         return iau2000a(self.tt)
-        return iau2000b(self.tt)
 
     def __eq__(self, other_time):
         if not isinstance(other_time, Time):

@@ -6,7 +6,6 @@ from .constants import ANGVEL, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
 from .functions import dots, from_polar, length_of, rot_x, rot_z, to_polar
-from .nutationlib import earth_tilt
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Angle, Distance, Velocity, _interpret_angle
