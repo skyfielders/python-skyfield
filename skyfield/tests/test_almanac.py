@@ -27,7 +27,7 @@ def test_sunrise_sunset():
     t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     assert strings == ['2018-09-12 11:13', '2018-09-12 23:50']
-    assert (y == (0, 1)).all()
+    assert (y == (1, 0)).all()
 
 # Compare with USNO:
 # http://aa.usno.navy.mil/cgi-bin/aa_phases.pl?year=2018&month=9&day=11&nump=50&format=p
@@ -41,4 +41,4 @@ def test_moon_quarters():
     t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     assert strings == ['2018-09-16 23:15', '2018-09-25 02:52']
-    assert (y == (0, 1)).all()
+    assert (y == (1, 2)).all()

@@ -57,7 +57,7 @@ def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
 
         jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()
 
-    return ts.tt_jd(ends), y.take(indices)
+    return ts.tt_jd(ends), y.take(indices + 1)
 
 def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
     ts = start_time.ts
