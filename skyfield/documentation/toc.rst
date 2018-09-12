@@ -26,6 +26,7 @@ that is accelerated using NumPy vector math!
    api-vectors
    api-ephemeris
    api-topos
+   api-almanac.rst
    api-satellites
    api-stars
    api-position

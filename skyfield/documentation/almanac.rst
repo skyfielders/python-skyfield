@@ -101,3 +101,30 @@ sunrises and sunsets in between.
 
 The result ``t`` will be an array of times, and ``y`` will be ``True``
 if the sun rises at the corresponding time and ``False`` if it sets.
+
+Phases of the Moon
+==================
+
+The phases of the Moon are the same for everyone on Earth, so no Topos
+is necessary but only an ephemeris object.
+
+.. testcode::
+
+    t0 = ts.utc(2018, 9, 1)
+    t1 = ts.utc(2018, 9, 10)
+    t, y = almanac.find_discrete(t0, t1, almanac.moon_phases(e))
+
+    print(t.utc_iso())
+    print(y)
+    print([almanac.MOON_PHASES[yi] for yi in y])
+
+.. testoutput::
+
+    ['2018-09-03T02:37:24Z', '2018-09-09T18:01:28Z']
+    [3 0]
+    ['Last Quarter', 'New Moon']
+
+The result ``t`` will be an array of times, and ``y`` will be a
+corresponding array of Moon phases with 0 for New Moon and 3 for Last
+Quarter.  You can use the array ``MOON_PHASES`` to retrieve names for
+each phase.

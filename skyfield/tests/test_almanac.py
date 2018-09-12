@@ -32,12 +32,12 @@ def test_sunrise_sunset():
 # Compare with USNO:
 # http://aa.usno.navy.mil/cgi-bin/aa_phases.pl?year=2018&month=9&day=11&nump=50&format=p
 
-def test_moon_quarters():
+def test_moon_phases():
     ts = api.load.timescale()
     t0 = ts.utc(2018, 9, 11)
     t1 = ts.utc(2018, 9, 30)
     e = api.load('de421.bsp')
-    t, y = almanac.find_discrete(t0, t1, almanac.moon_quarter(e))
+    t, y = almanac.find_discrete(t0, t1, almanac.moon_phases(e))
     t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     assert strings == ['2018-09-16 23:15', '2018-09-25 02:52']

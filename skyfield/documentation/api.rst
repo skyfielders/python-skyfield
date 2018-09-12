@@ -132,6 +132,21 @@ predicting the positions of the Moon, Sun, and planets.
    SpiceKernel.decode
    SpiceKernel.__getitem__
 
+Almanac
+=======
+
+.. currentmodule:: skyfield.almanac
+
+Routines to search for events like sunrise, sunset, and Moon phase.
+
+.. autosummary::
+
+   phase_angle
+   fraction_illuminated
+   find_discrete
+   sunrise_sunset
+   moon_phases
+
 Topocentric Locations
 =====================
 

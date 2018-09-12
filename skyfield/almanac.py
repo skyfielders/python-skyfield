@@ -9,6 +9,14 @@ EPSILON = 0.001 / DAY_S
 # Simple facts.
 
 def phase_angle(ephemeris, body, t):
+    """Compute the phase angle of a body viewed from Earth.
+
+    The ``body`` should be an integer or string that can be looked up in
+    the given ``ephemeris``, which will also be asked to provide
+    positions for the Earth and Sun.  The return value will be an
+    :class:`~skyfield.units.Angle` object.
+
+    """
     earth = ephemeris['earth']
     sun = ephemeris['sun']
     body = ephemeris[body]
@@ -19,12 +27,41 @@ def phase_angle(ephemeris, body, t):
     return pe.separation_from(ps)
 
 def fraction_illuminated(ephemeris, body, t):
+    """Compute the illuminated fraction of a body viewed from Earth.
+
+    The ``body`` should be an integer or string that can be looked up in
+    the given ``ephemeris``, which will also be asked to provide
+    positions for the Earth and Sun.  The return value will be a
+    floating point number between zero and one.  This simple routine
+    assumes that the body is a perfectly uniform sphere.
+
+    """
     a = phase_angle(ephemeris, body, t).radians
     return 0.5 * (1.0 + cos(a))
 
 # Search routines.
 
 def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
+    """Find the times when a function changes value.
+
+    Searches between ``start_time`` and ``end_time``, which should both
+    be :class:`~skyfield.timelib.Time` objects, for the occasions where
+    the function ``f`` changes from one value to another.  Use this to
+    search for events like sunrise or moon phases.
+
+    A tuple of two arrays is returned. The first array gives the times
+    at which the input function changes, and the second array specifies
+    the new value of the function at each corresponding time.
+
+    This is an expensive operation as it needs to repeatedly call the
+    function to narrow down the times that it changes.  It continues
+    searching until it knows each time to at least an accuracy of
+    ``epsilon`` Julian days.  At each step, it creates an array of
+    ``num`` new points between the lower and upper bound that it has
+    established for each transition.  These two values can be changed to
+    tune the behavior of the search.
+
+    """
     ts = start_time.ts
     jd0 = start_time.tt
     jd1 = end_time.tt
@@ -44,7 +81,7 @@ def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
 
         indices = flatnonzero(diff(y))
         if not len(indices):
-            raise ValueError('cannot find a change in that range')
+            return indices, y[0:0]
 
         starts = jd.take(indices)
         ends = jd.take(indices + 1)
@@ -97,7 +134,13 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
 # Discrete circumstances to search.
 
 def sunrise_sunset(ephemeris, topos):
-    """Return a function of time that returns whether the sun is up."""
+    """Build a function of time that returns whether the sun is up.
+
+    The function that this returns will expect a single argument that is
+    a :class:`~skyfield.timelib.Time` and will return ``True`` if the
+    sun is up, else ``False``.
+
+    """
     sun = ephemeris['sun']
     topos_at = (ephemeris['earth'] + topos).at
 
@@ -109,29 +152,36 @@ def sunrise_sunset(ephemeris, topos):
     is_sun_up_at.rough_period = 0.5  # twice a day
     return is_sun_up_at
 
-MOON_QUARTER_NAMES = [
+MOON_PHASES = [
     'New Moon',
     'First Quarter',
     'Full Moon',
     'Last Quarter',
 ]
 
-def moon_quarter(ephemeris):
-    """Return a function of time that returns the moon phase 0 through 3."""
+def moon_phases(ephemeris):
+    """Build a function of time that returns the moon phase 0 through 3.
+
+    The function that this returns will expect a single argument that is
+    a :class:`~skyfield.timelib.Time` and will return the phase of the
+    moon as an integer.  See the accompanying array ``MOON_PHASES`` if
+    you want to give string names to each phase.
+
+    """
     earth = ephemeris['earth']
     moon = ephemeris['moon']
     sun = ephemeris['sun']
 
-    def moon_quarter_at(t):
-        """Return the quarter of the moon 0 through 3 at time `t`."""
+    def moon_phase_at(t):
+        """Return the phase of the moon 0 through 3 at time `t`."""
         t._nutation_angles = iau2000b(t.tt)
         e = earth.at(t)
         _, mlon, _ = e.observe(moon).apparent().ecliptic_latlon('date')
         _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
         return ((mlon.radians - slon.radians) // (tau / 4) % 4).astype(int)
 
-    moon_quarter_at.rough_period = 7.0  # one lunar quarter per week
-    return moon_quarter_at
+    moon_phase_at.rough_period = 7.0  # one lunar phase per week
+    return moon_phase_at
 
 def _distance_to(center, target):
     def distance_at(t):

@@ -3,6 +3,20 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.8 — 2018 September 12
+-----------------------
+
+* There is now an :doc:`almanac` module can compute the times of
+  sunrise, sunset, and the phases of the moon, based on the search
+  algorithms announced at my recent PyBay talk “An Import Loop and a
+  Fiery Reentry.”
+
+* Two new methods :meth:`~skyfield.positionlib.ICRF.cirs_xyz()` and
+  :meth:`~skyfield.positionlib.ICRF.cirs_radec()` have been contributed
+  which provide support for rotating a position into the Celestial
+  Intermediate Reference System (CIRS).
+  `#192 <https://github.com/skyfielders/python-skyfield/issues/192>`_
+
 1.7 — 2018 September 3
 ----------------------
 
