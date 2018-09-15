@@ -47,13 +47,17 @@ Here is a list of the attributes of the Elements object and their types:
 
 .. parsed-literal::
 
-    Elements describing orientation of the orbit plane:
-     ├── ``inclination``                 → Angle object
-     └── ``longitude_of_periapsis``      → Angle object
+    Element describing shape of the orbit:
+     └── ``eccentricity``                → numpy.ndarray
 
-    Elements describing shape and direction the orbit within its plane:
+    Element describing the tilt of the orbital plane:
+     └── ``inclination``                 → Angle object
+
+    Element describing the direction in which the orbital plane is tilted:
+     └── ``longitude_of_ascending node`` → Angle object
+
+    Elements describing direction of periapsis:
      ├── ``argument_of_periapsis``       → Angle object
-     ├── ``eccentricity``                → numpy.ndarray
      ├── ``longitude_of_periapsis``      → Angle object
      └── ``periapsis_time``              → Time object
 
@@ -72,10 +76,14 @@ Here is a list of the attributes of the Elements object and their types:
      ├── ``mean_anomaly``                → Angle object
      ├── ``mean_longitude``              → Angle object
      ├── ``true_anomaly``                → Angle object
-     └── ``true_longitude``              → Angle object
+     ├── ``true_longitude``              → Angle object
+     └── (the secondary's position can be implicit in periapsis_time 
+              because at periapsis all anomalies are 0)
 
     Other attributes:
      └── ``time``                        → Time object
+
+To fully define an object's location and orbit, one element is required from each of the above categories.
 
 Reference Planes
 ================
