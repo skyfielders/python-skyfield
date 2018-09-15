@@ -258,7 +258,7 @@ def test_equatorial_au_d(ts):
     compare(calc_data, horizons_data, epsilon)
 
 
-def BROKEN_test_ecliptic_km_d(ts):
+def test_ecliptic_km_d(ts):
     """Tests against data from Horizons in km and days, with ecliptic reference plane
     """
     geocentric_pos = (moon - earth).at(ts.tdb(2015, 3, 2, 2))
@@ -279,7 +279,7 @@ def BROKEN_test_ecliptic_km_d(ts):
     compare(calc_data, horizons_data, epsilon)
 
 
-def BROKEN_test_ecliptic_km_s(ts):
+def test_ecliptic_km_s(ts):
     """Tests against data from Horizons in km and seconds, with ecliptic reference plane
     """
     geocentric_pos = (moon - earth).at(ts.tdb(2015, 3, 2, 2))
@@ -300,7 +300,7 @@ def BROKEN_test_ecliptic_km_s(ts):
     compare(calc_data, horizons_data, epsilon)
 
 
-def BROKEN_test_ecliptic_au_d(ts):
+def test_ecliptic_au_d(ts):
     """Tests against data from Horizons in au and days, with ecliptic reference plane
     """
     geocentric_pos = (moon - earth).at(ts.tdb(2015, 3, 2, 2))

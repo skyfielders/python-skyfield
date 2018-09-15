@@ -3,7 +3,7 @@
 from .functions import dots, length_of, angle_between
 from .constants import DAY_S, tau
 from .data.gravitational_parameters import GM_dict
-from .units import Distance, Angle
+from .units import Distance, Angle, Velocity
 from .descriptorlib import reify
 from numpy import (array, arctan2, sin, arctan, tan, inf, repeat, float64,
                    sinh, sqrt, arccos, arctanh, zeros_like, ones_like, divide,
@@ -20,13 +20,19 @@ def osculating_elements_of(position, reference_frame=None):
 
     """
     mu = GM_dict.get(position.center, 0) + GM_dict.get(position.target, 0)
-    return OsculatingElements(
-        position.position,
-        position.velocity,
-        position.t,
-        mu,
-        reference_frame,
-    )
+    
+    if reference_frame is not None:
+        position_vec = Distance(reference_frame.dot(position.position.au))
+        velocity_vec = Velocity(reference_frame.dot(position.velocity.au_per_d))
+    else:
+        position_vec = position.position
+        velocity_vec = position.velocity
+        
+    return OsculatingElements(position_vec,
+                              velocity_vec,
+                              position.t,
+                              mu)
+
 
 class OsculatingElements(object):
     """
@@ -55,7 +61,6 @@ class OsculatingElements(object):
         self._h_vec = cross(self._pos_vec, self._vel_vec, 0, 0).T
         self._e_vec = eccentricity_vector(self._pos_vec, self._vel_vec, self._mu)
         self._n_vec = node_vector(self._h_vec)
-
 
     @reify
     def apoapsis_distance(self):
