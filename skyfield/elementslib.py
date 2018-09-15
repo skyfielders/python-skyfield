@@ -58,8 +58,6 @@ class OsculatingElements(object):
         self._e_vec = eccentricity_vector(self._pos_vec, self._vel_vec, self._mu)
         self._n_vec = node_vector(self._h_vec)
 
-        self.size = position.km[0].size
-        self.shape = position.km[0].shape
 
         self._ref_frame = ref_frame
 
