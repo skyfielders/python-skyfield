@@ -176,7 +176,7 @@ class OsculatingElements(object):
         return Angle(radians=l)
 
     def __repr__(self):
-        return '<Elements {} sets>'.format(self.size)
+        return '<Elements {} sets>'.format(self.time.tt.size)
 
 # a = semi-major axis
 # b = semi-minor axis
