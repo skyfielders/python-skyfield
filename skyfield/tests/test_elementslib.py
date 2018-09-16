@@ -180,6 +180,11 @@ def horizons_array(elem, units='km_d', ):
     return array_
 
 
+def test_repr(ts):
+    elements = osculating_elements_of((moon-earth).at(ts.utc(2015, 3, 2, 12)))
+    assert repr(elements) == '<Elements 1 sets>'
+
+
 def test_single_time(ts):
     """Tests creation of an OsculatingElements object with a single set of elements
     """
