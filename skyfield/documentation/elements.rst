@@ -14,8 +14,9 @@ Generating Elements
 ===================
 
 Call :func:`~skyfield.elementslib.osculating_elements_of()` to generate
-:class:`~skyfield.elementslib.OsculatingElements`.  For example, here is
-how to find the osculating elements of the moon orbiting earth:
+an :class:`~skyfield.elementslib.OsculatingElements` object.  For 
+example, here is how to find the osculating elements of the moon 
+orbiting earth:
 
  .. testcode::
 
@@ -47,41 +48,42 @@ Here is a list of the attributes of the Elements object and their types:
 
 .. parsed-literal::
 
-    Element describing shape of the orbit:
-     └── ``eccentricity``                → numpy.ndarray
-
-    Element describing the tilt of the orbital plane:
-     └── ``inclination``                 → Angle object
-
-    Element describing the direction in which the orbital plane is tilted:
-     └── ``longitude_of_ascending node`` → Angle object
-
-    Elements describing direction of periapsis:
-     ├── ``argument_of_periapsis``       → Angle object
-     ├── ``longitude_of_periapsis``      → Angle object
-     └── ``periapsis_time``              → Time object
-
-    Elements describing the size of the orbit:
-     ├── ``apoapsis_distance``           → Distance object
-     ├── ``mean_motion_per_day``         → Angle object
-     ├── ``periapsis_distance``          → Distance object
-     ├── ``period_in_days``              → numpy.ndarray
-     ├── ``semi_latus_rectum``           → Distance object
-     ├── ``semi_major_axis``             → Distance object
-     └── ``semi_minor_axis``             → Distance object
-
-    Elements describing the secondary's position in the orbit:
-     ├── ``argument_of_latitude``        → Angle object
-     ├── ``eccentric_anomaly``           → Angle object
-     ├── ``mean_anomaly``                → Angle object
-     ├── ``mean_longitude``              → Angle object
-     ├── ``true_anomaly``                → Angle object
-     ├── ``true_longitude``              → Angle object
-     └── (the secondary's position can be implicit in periapsis_time 
-              because at periapsis all anomalies are 0)
-
-    Other attributes:
-     └── ``time``                        → Time object
+    **OsculatingElements object**
+     │   **Element describing the shape of the orbit:**
+     ├── eccentricity                → `numpy.ndarray <https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
+     │
+     │   **Element describing the tilt of the orbital plane:**
+     ├── inclination                 → `Angle object <api-units.html>`_
+     │
+     │   **Element describing the direction in which the orbital plane is tilted:**
+     ├── longitude_of_ascending node → `Angle object <api-units.html>`_
+     │
+     │   **Elements describing direction of periapsis:**
+     ├── argument_of_periapsis       → `Angle object <api-units.html>`_
+     ├── longitude_of_periapsis      → `Angle object <api-units.html>`_
+     ├── periapsis_time              → `Time object <api.html#time-objects>`_
+     │
+     │   **Elements describing the size of the orbit:**
+     ├── apoapsis_distance           → `Distance object <api-units.html>`_
+     ├── mean_motion_per_day         → `Angle object <api-units.html>`_
+     ├── periapsis_distance          → `Distance object <api-units.html>`_
+     ├── period_in_days              → `numpy.ndarray <https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
+     ├── semi_latus_rectum           → `Distance object <api-units.html>`_
+     ├── semi_major_axis             → `Distance object <api-units.html>`_
+     ├── semi_minor_axis             → `Distance object <api-units.html>`_
+     │
+     │   **Elements describing the secondary's position in the orbit:**
+     ├── argument_of_latitude        → `Angle object <api-units.html>`_
+     ├── eccentric_anomaly           → `Angle object <api-units.html>`_
+     ├── mean_anomaly                → `Angle object <api-units.html>`_
+     ├── mean_longitude              → `Angle object <api-units.html>`_
+     ├── true_anomaly                → `Angle object <api-units.html>`_
+     ├── true_longitude              → `Angle object <api-units.html>`_
+     ├── (the secondary's position can be implicit in periapsis_time 
+     │        because at periapsis all anomalies are 0)
+     │
+     │   **Other attributes:**
+     └── time                        → `Time object <api.html#time-objects>`_
 
 To fully define an object's location and orbit, one element is required from each of the above categories.
 
