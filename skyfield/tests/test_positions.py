@@ -4,7 +4,27 @@ from skyfield.earthlib import earth_rotation_angle
 from skyfield.positionlib import ICRF
 from skyfield.starlib import Star
 
-def test_ecliptic_coordinates_with_and_without_a_time_array():
+def test_J2000_ecliptic_coordinates_with_and_without_a_time_array():
+    p0 = ICRF((1,0,0))
+    p1 = ICRF((0,1,0))
+    p2 = ICRF(((1, 0),
+               (0, 1),
+               (0, 0)))
+
+    lat0, lon0, distance0 = p0.ecliptic_latlon(epoch=None)
+    lat1, lon1, distance1 = p1.ecliptic_latlon(epoch=None)
+    lat2, lon2, distance2 = p2.ecliptic_latlon(epoch=None)
+
+    assert lat2.degrees[0] == lat0.degrees
+    assert lat2.degrees[1] == lat1.degrees
+
+    assert lon2.degrees[0] == lon0.degrees
+    assert lon2.degrees[1] == lon1.degrees
+
+    assert distance2.au[0] == distance0.au
+    assert distance2.au[1] == distance1.au
+
+def test_dynamic_ecliptic_coordinates_with_and_without_a_time_array():
     ts = api.load.timescale()
     t = ts.utc(1980)
 
@@ -18,14 +38,14 @@ def test_ecliptic_coordinates_with_and_without_a_time_array():
     lat1, lon1, distance1 = p1.ecliptic_latlon(epoch=t)
     lat2, lon2, distance2 = p2.ecliptic_latlon(epoch=t)
 
-    assert lat2[0] == lat0
-    assert lat2[1] == lat1
+    assert lat2.degrees[0] == lat0.degrees
+    assert lat2.degrees[1] == lat1.degrees
 
-    assert lon2[0] == lon0
-    assert lon2[1] == lon1
+    assert lon2.degrees[0] == lon0.degrees
+    assert lon2.degrees[1] == lon1.degrees
 
-    assert distance2[0] == distance0
-    assert distance2[1] == distance1
+    assert distance2.au[0] == distance0.au
+    assert distance2.au[1] == distance1.au
 
 # Test that the CIRS coordinate of the TIO is consistent with the Earth Rotation Angle
 # This is mostly an internal consistency check

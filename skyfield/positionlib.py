@@ -200,6 +200,10 @@ class ICRF(object):
         an epoch time.
 
         """
+        if epoch is None:
+            vector = _ECLIPJ2000.dot(self.position.au)
+            return Distance(vector)
+
         position_au = self.position.au
         if epoch is not None:
             if isinstance(epoch, Time):
