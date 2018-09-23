@@ -205,35 +205,23 @@ class ICRF(object):
             return Distance(vector)
 
         position_au = self.position.au
-        if epoch is not None:
-            if isinstance(epoch, Time):
-                pass
-            elif isinstance(epoch, float):
-                epoch = Time(None, tt=epoch)
-            elif epoch == 'date':
-                epoch = self.t
-            else:
-                raise ValueError('the epoch= must be a Time object,'
-                                 ' a floating point Terrestrial Time (TT),'
-                                 ' or the string "date" for epoch-of-date')
-            position_au = einsum('ij...,j...->i...', epoch.M, position_au)
-            oblm, oblt, eqeq, psi, eps = epoch._earth_tilt
-            e = oblt*DEG2RAD
-            E = rot_x(e)
-            if not epoch.shape:
-                vector = E.T.dot(position_au)
-            else:
-                result_array = empty((E.T.shape[0], E.T.shape[1]))
-                for a in range(0, E.T.shape[0]):
-                    vector = E.T[a, 0:].dot(position_au.T[a, 0:])
-                    result_array[a, 0:] = vector
-                vector = result_array
+
+        if isinstance(epoch, Time):
+            pass
+        elif isinstance(epoch, float):
+            epoch = Time(None, tt=epoch)
+        elif epoch == 'date':
+            epoch = self.t
         else:
-            vector = _ECLIPJ2000.dot(position_au)
-        if len(vector.shape) is 1:
-            return Distance(vector)
-        else:
-            return Distance(vector.T)
+            raise ValueError('the epoch= must be a Time object,'
+                             ' a floating point Terrestrial Time (TT),'
+                             ' or the string "date" for epoch-of-date')
+
+        oblm, oblt, eqeq, psi, eps = epoch._earth_tilt
+        e = oblt * DEG2RAD
+        rotation = einsum('ij...,jk...->ik...', rot_x(-e), epoch.M)
+        position_au = einsum('ij...,j...->i...', rotation, position_au)
+        return Distance(position_au)
 
     def ecliptic_velocity(self):
         """Compute J2000 ecliptic velocity vector (x_dot, y_dot, z_dot)"""

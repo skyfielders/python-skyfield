@@ -3,6 +3,14 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.9 — 2018 September 23
+-----------------------
+
+* Fix: the ecliptic coordinate routines no longer raise ``ValueError:
+  too many values to unpack`` if they are passed a time array.
+  `#207 <https://github.com/skyfielders/python-skyfield/issues/207>`_
+  `#208 <https://github.com/skyfielders/python-skyfield/issues/208>`_
+
 1.8 — 2018 September 12
 -----------------------
 
