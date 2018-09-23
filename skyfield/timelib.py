@@ -485,7 +485,7 @@ class Time(object):
                 delimiter, places)
             args = (year, month, day, hour, minute, second, fraction)
         else:
-            format = '%04d-%02d-%02d{}%02d:%02d:%02dZ'.format(delimiter)
+            format = '%04d-%02d-%02d{0}%02d:%02d:%02dZ'.format(delimiter)
             args = self._utc_tuple(_half_second)
 
         if self.shape:
