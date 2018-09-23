@@ -133,7 +133,43 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
 
 # Discrete circumstances to search.
 
+SEASONS = [
+    'Spring',
+    'Summer',
+    'Autumn',
+    'Winter',
+]
+
+SEASON_EVENTS = [
+    'Vernal Equinox',
+    'Summer Solstice',
+    'Autumnal Equinox',
+    'Winter Solstice',
+]
+
+def seasons(ephemeris):
+    """Build a function of time that returns the quarter of the year.
+
+    The function that this returns will expect a single argument that is
+    a :class:`~skyfield.timelib.Time` and will return 0 through 3 for
+    the seasons Spring, Summer, Autumn, and Winter.
+
+    """
+    earth = ephemeris['earth']
+    sun = ephemeris['sun']
+
+    def season_at(t):
+        """Return season 0 (Spring) through 3 (Winter) at time `t`."""
+        t._nutation_angles = iau2000b(t.tt)
+        e = earth.at(t)
+        _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
+        return (slon.radians // (tau / 4) % 4).astype(int)
+
+    season_at.rough_period = 90.0
+    return season_at
+
 def sunrise_sunset(ephemeris, topos):
+
     """Build a function of time that returns whether the sun is up.
 
     The function that this returns will expect a single argument that is

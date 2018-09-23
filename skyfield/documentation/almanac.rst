@@ -71,6 +71,32 @@ before truncating the seconds.
 
 The results should then agree with the tables produced by the USNO.
 
+The Seasons
+===========
+
+Create a start time and an end time to ask for all of the equinoxes and
+solstices that fall in between.
+
+.. testcode::
+
+    t0 = ts.utc(2018, 1, 1)
+    t1 = ts.utc(2018, 12, 31)
+    t, y = almanac.find_discrete(t0, t1, almanac.seasons(e))
+
+    for yi, ti in zip(y, t):
+        print(yi, almanac.SEASON_EVENTS[yi], ti.utc_iso(' '))
+
+.. testoutput::
+
+    0 Vernal Equinox 2018-03-20 16:15:27Z
+    1 Summer Solstice 2018-06-21 10:07:18Z
+    2 Autumnal Equinox 2018-09-23 01:54:06Z
+    3 Winter Solstice 2018-12-21 22:22:44Z
+
+The result ``t`` will be an array of times, and ``y`` will be ``0``
+through ``3`` for the Vernal Equinox through the Winter Solstice.
+
+
 Sunrise and Sunset
 ==================
 

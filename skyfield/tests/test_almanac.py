@@ -15,6 +15,21 @@ def test_fraction_illuminated():
     assert (i == (0, 0, 0.03, 0.08, 0.15, 0.24, 0.33, 0.43, 0.52, 0.62)).all()
 
 # Compare with USNO:
+# http://aa.usno.navy.mil/seasons?year=2018&tz=+0
+
+def test_seasons():
+    ts = api.load.timescale()
+    t0 = ts.utc(2018, 9, 20)
+    t1 = ts.utc(2018, 12, 31)
+    e = api.load('de421.bsp')
+    t, y = almanac.find_discrete(t0, t1, almanac.seasons(e))
+    t.tt += half_minute
+    strings = t.utc_strftime('%Y-%m-%d %H:%M')
+    print(strings)
+    assert strings == ['2018-09-23 01:54', '2018-12-21 22:23']
+    assert (y == (2, 3)).all()
+
+# Compare with USNO:
 # http://aa.usno.navy.mil/rstt/onedaytable?ID=AA&year=2018&month=9&day=12&state=OH&place=Bluffton
 
 def test_sunrise_sunset():

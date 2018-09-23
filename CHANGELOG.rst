@@ -6,6 +6,9 @@ Changelog
 1.9 — 2018 September 23
 -----------------------
 
+* Added :func:`~skyfield.almanac.seasons` to the :doc:`almanac` module
+  that can be used to predict solstices and equinoxes.
+
 * Fix: the ecliptic coordinate routines no longer raise ``ValueError:
   too many values to unpack`` if they are passed a time array.
   `#207 <https://github.com/skyfielders/python-skyfield/issues/207>`_

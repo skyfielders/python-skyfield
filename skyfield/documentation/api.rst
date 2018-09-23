@@ -144,6 +144,7 @@ Routines to search for events like sunrise, sunset, and Moon phase.
    phase_angle
    fraction_illuminated
    find_discrete
+   seasons
    sunrise_sunset
    moon_phases
 

@@ -14,6 +14,8 @@ times of sunrise, sunset, and the phases of the moon.
 
 .. autofunction:: find_discrete
 
+.. autofunction:: seasons
+
 .. autofunction:: sunrise_sunset
 
 .. autofunction:: moon_phases
