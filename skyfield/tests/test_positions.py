@@ -1,7 +1,31 @@
 import numpy as np
 from skyfield import api
 from skyfield.earthlib import earth_rotation_angle
+from skyfield.positionlib import ICRF
 from skyfield.starlib import Star
+
+def test_ecliptic_coordinates_with_and_without_a_time_array():
+    ts = api.load.timescale()
+    t = ts.utc(1980)
+
+    p0 = ICRF((1,0,0))
+    p1 = ICRF((0,1,0))
+    p2 = ICRF(((1, 0),
+               (0, 1),
+               (0, 0)))
+
+    lat0, lon0, distance0 = p0.ecliptic_latlon(epoch=t)
+    lat1, lon1, distance1 = p1.ecliptic_latlon(epoch=t)
+    lat2, lon2, distance2 = p2.ecliptic_latlon(epoch=t)
+
+    assert lat2[0] == lat0
+    assert lat2[1] == lat1
+
+    assert lon2[0] == lon0
+    assert lon2[1] == lon1
+
+    assert distance2[0] == distance0
+    assert distance2[1] == distance1
 
 # Test that the CIRS coordinate of the TIO is consistent with the Earth Rotation Angle
 # This is mostly an internal consistency check
