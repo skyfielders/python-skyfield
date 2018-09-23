@@ -461,23 +461,31 @@ class Time(object):
             dt = datetime(year, month, day, hour, minute, second, milli, utc)
         return dt, leap_second
 
-    def utc_iso(self, places=0):
+    def utc_iso(self, delimiter='T', places=0):
         """Convert to an ISO 8601 string like ``2014-01-18T01:35:38Z`` in UTC.
 
         If this time is an array of dates, then a sequence of strings is
         returned instead of a single string.
 
         """
+        # "places" used to be the 1st argument, so continue to allow an
+        # integer in that spot.  TODO: deprecate this in Skyfield 2.0
+        # and remove it in 3.0.
+        if isinstance(delimiter, int):
+            places = delimiter
+            delimiter = 'T'
+
         if places:
             power_of_ten = 10 ** places
             offset = _half_second / power_of_ten
             year, month, day, hour, minute, second = self._utc_tuple(offset)
             second, fraction = divmod(second, 1.0)
             fraction *= power_of_ten
-            format = '%%04d-%%02d-%%02dT%%02d:%%02d:%%02d.%%0%ddZ' % places
+            format = '%04d-%02d-%02d{0}%02d:%02d:%02d.%0{1}dZ'.format(
+                delimiter, places)
             args = (year, month, day, hour, minute, second, fraction)
         else:
-            format = '%04d-%02d-%02dT%02d:%02d:%02dZ'
+            format = '%04d-%02d-%02d{}%02d:%02d:%02dZ'.format(delimiter)
             args = self._utc_tuple(_half_second)
 
         if self.shape:
