@@ -347,7 +347,7 @@ objects never appear at exactly the position in the sky
 predicted by the simple and ideal astrometric position.
 But it is useful for mapping the planet
 against the background of stars in a
-`printed star atlas <http://www.amazon.com/s/?_encoding=UTF8&camp=1789&creative=390957&linkCode=ur2&pageMinusResults=1&suo=1389754954253&tag=letsdisthemat-20&url=search-alias%3Daps#/ref=nb_sb_noss_1?url=search-alias%3Daps&field-keywords=star%20atlas&sprefix=star+%2Caps&rh=i%3Aaps%2Ck%3Astar%20atlas&sepatfbtf=true&tc=1389754955568>`_,
+`printed star atlas <https://www.amazon.com/s/&field-keywords=star%20atlas>`_,
 because star atlases use astrometric positions.
 
 If you have several bodies for which you want to generate positions,
@@ -465,7 +465,7 @@ when you ask the apparent position for coordinates:
 These are the coordinates
 that should match other astronomy software
 and the data in the
-`Astronomical Almanac <http://www.amazon.com/s/?_encoding=UTF8&camp=1789&creative=390957&field-keywords=astronomical%20almanac&linkCode=ur2&tag=letsdisthemat-20&url=search-alias%3Daps>`_,
+`Astronomical Almanac <https://www.amazon.com/s/&field-keywords=astronomical%20almanac>`_,
 and are sometimes said to be expressed
 in the “dynamical reference system” defined by the Earth itself.
 
