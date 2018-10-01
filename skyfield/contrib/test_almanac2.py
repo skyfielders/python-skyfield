@@ -1,8 +1,8 @@
 from skyfield.api import Loader, Topos
 from skyfield.timelib import Time
-from phenomena2 import (meridian_transits, culminations, twilights, 
+from almanac2 import (meridian_transits, culminations, twilights, 
                        risings_settings, equinoxes, solstices, moon_quarters)
-from phenomena2 import (_ecliptic_lon_diff, _moon_ul_alt, _lha, _alt,
+from almanac2 import (_ecliptic_lon_diff, _moon_ul_alt, _lha, _alt,
                        _satellite_alt, _ecliptic_lon)
 from numpy import concatenate, ndarray
 from functools import partial
@@ -401,3 +401,8 @@ def test_ISS_culminations():
     # Check that same result is found if plain Topos is used as observer
     times2 = culminations(greenwich.positives[-1], ISS, t0, t1, 'all')
     assert (times.tt == times2.tt).all()
+
+
+if __name__ == '__main__':
+    import pytest
+    pytest.main(['-s'])

@@ -1,6 +1,6 @@
-from .api import load, Topos, EarthSatellite
-from .constants import tau
-from .optimizelib import newton, brent_min
+from skyfield.api import load, Topos, EarthSatellite
+from skyfield.constants import tau
+from optimizelib import newton, brent_min
 from numpy import array, degrees, arcsin, where, diff, sort, hstack, linspace, ceil
 from functools import partial
 from scipy.misc import derivative
