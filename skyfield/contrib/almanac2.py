@@ -3,7 +3,6 @@ from skyfield.constants import tau
 from optimizelib import newton, brent_min
 from numpy import array, degrees, arcsin, where, diff, sort, hstack, linspace, ceil
 from functools import partial
-from scipy.misc import derivative
 
 __all__ = ['meridian_transits', 'culminations', 'risings_settings', 
            'twilights', 'equinoxes', 'solstices', 'moon_quarters']
@@ -53,13 +52,20 @@ def _find_value(f, value, partition_edges, slope_at_zero='positive', tol=1e-10):
             
     return newton(g, array(left_edges), array(right_edges), tol=tol)
 
+
+def derivative(f, x):
+    left = f(x - 1e-6)
+    right = f(x + 1e-6)
+    return (right - left)/2e-6
+
+
 def _find_extremes(f, partition_edges, find='min', tol=1e-15):
     if find == 'min':
         g = f
     elif find == 'max':
         g = lambda t:-f(t) + 360
 
-    g_dot_edges = derivative(g, partition_edges, dx=1e-6)
+    g_dot_edges = derivative(g, partition_edges)
             
     sign_changes = diff((g_dot_edges>0).astype(int))
     indices = where(sign_changes == 1)[0]
