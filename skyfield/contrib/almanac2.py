@@ -453,8 +453,12 @@ def seasons(earth, t0, t1):
     """Calculates data about March and September equinoxes.
     
     This function searches between ``t0`` and ``t1`` for times when the sun's 
-    ecliptic longitude is 0, 90, 180, or 270 degrees, for march equinoxes, 
-    june solstices, september equinoxes, and december solstices, respectively.
+    ecliptic longitude is:
+        
+        * 0 degrees for march equinoxes
+        * 90 degrees for june solstices
+        * 180 degrees for september equinoxes
+        * 270 degrees for december solstices
     
     Example
     -------
@@ -479,7 +483,8 @@ def seasons(earth, t0, t1):
     times : Time
         Times of solstices
     longitudes : ndarray
-        sun's ecliptic longitude corresponding to each time
+        sun's ecliptic longitude corresponding to each time in ``times`` in 
+        degrees
     """
     sun = earth.ephemeris['sun']
 
@@ -515,7 +520,8 @@ def moon_quarters(moon, t0, t1, kind='all'):
     >>> moon = planets['moon']
     >>> t0 = ts.utc(2017, 1)
     >>> t1 = ts.utc(2017, 2)
-    >>> moon_quarters(moon, t0, t1, kind='full')
+    >>> times, lon_diffs = moon_quarters(moon, t0, t1)
+    >>> new_moons = times[lon_diffs==0]
     
     Arguments
     ---------
@@ -525,17 +531,15 @@ def moon_quarters(moon, t0, t1, kind='all'):
         Time object of length 1 representing the start of the search interval
     t1 : Time
         Time object of length 1 representing the end of the search interval
-    kind : str
-        ``'new'``  for new moons
-        ``'first'``  for first quarters
-        ``'full'``  for full moons
-        ``'last'``  for last quarters
-        ``'all'``  for all quarters of the moon
         
     Returns
     -------
     times : Time
         Times of moon quarters
+    longitude_diffs: ndarray
+        moon's ecliptic longitude - sun's ecliptic longitude corresponding to 
+        ``times``, in degrees.
+        
     """ 
     earth = moon.ephemeris['earth']
     sun = moon.ephemeris['sun']
@@ -547,22 +551,9 @@ def moon_quarters(moon, t0, t1, kind='all'):
     partition_width = 29*.2
     num_partitions = int(ceil((end - start)/partition_width))
     partition_edges = linspace(start, end, num_partitions+1)
-    
-    if kind == 'all':
-        values = [0, 90, 180, 270]
-    elif kind == 'new':
-        values = [0]
-    elif kind == 'first':
-        values = [90]
-    elif kind == 'full':
-        values = [180]
-    elif kind == 'last':
-        values = [270]
-    else:
-        raise ValueError("kind must be 'all', 'new', 'first', 'full', or 'last'")
 
-    left_edges, right_edges, targets = _find_value(f, values, partition_edges)
+    left_edges, right_edges, targets = _find_value(f, [0, 90, 180, 270], partition_edges)
         
     times = newton(f, left_edges, right_edges, fn=targets)
 
-    return ts.tt(jd=times)
+    return ts.tt(jd=times), targets

@@ -98,28 +98,18 @@ def test_seasons():
 def test_moon_quarters():
     t0 = ts.utc(2017)
     t1 = ts.utc(2018)
-    times = moon_quarters(moon, t0, t1)
+    times, lon_diffs = moon_quarters(moon, t0, t1)
     
     assert isinstance(times, Time)
-    assert len(times) == 49
+    assert isinstance(lon_diffs, ndarray)
+    assert len(times) == len(lon_diffs) == 49
     
     compare(times[0].tt, ts.utc(2017, 1, 5, 19, 47).tt, minute/2)
     
-    new_times = moon_quarters(moon, t0, t1, 'new')
-    first_times = moon_quarters(moon, t0, t1, 'first')
-    full_times = moon_quarters(moon, t0, t1, 'full')
-    last_times = moon_quarters(moon, t0, t1, 'last')
-    all_times = concatenate([new_times.tt, first_times.tt, full_times.tt, last_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all()
-    
     # Check that the found times produce the correct data    
     f = partial(_ecliptic_lon_diff, earth, moon, sun)
-    assert is_root(f, new_times.tt, 0, ms/2)
-    assert is_root(f, first_times.tt, 90, ms/2)
-    assert is_root(f, full_times.tt, 180, ms/2)
-    assert is_root(f, last_times.tt, 270, ms/2)
-    
+    assert is_root(f, times.tt, lon_diffs, ms/2)
+
 
 # Data Source:
 # http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=0&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
