@@ -447,9 +447,9 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
     
 #%% Geocentric Phenomena, pg. 478 in Explanatory Supplement (1992)
 
-# TODO test how much time is saved finding particular seasons vs. finding them all and throwing out the rest.
+# TODO: Make function called make_partitions()
 
-def seasons(earth, t0, t1, kind='all'):
+def seasons(earth, t0, t1):
     """Calculates data about March and September equinoxes.
     
     This function searches between ``t0`` and ``t1`` for times when the sun's 
@@ -462,7 +462,8 @@ def seasons(earth, t0, t1, kind='all'):
     >>> earth = planets['earth']
     >>> t0 = ts.utc(2017)
     >>> t1 = ts.utc(2018)
-    >>> seasons(earth, t0, t1, kind='march')
+    >>> times, lons = seasons(earth, t0, t1)
+    >>> vernal_equinoxes = times[lons==90]
     
     Arguments
     ---------
@@ -472,17 +473,13 @@ def seasons(earth, t0, t1, kind='all'):
         Time object of length 1 representing the start of the search interval
     t1 : Time
         Time object of length 1 representing the end of the search interval
-    kind : str
-        ``'march'``  finds equinoxes in march
-        ``'june'`` finds solstices in june
-        ``'september'``  finds equinoxes in september
-        ``'december'`` finds solstices in december
-        ``'all'``  finds all equinoxes and solstices
         
     Returns
     -------
     times : Time
         Times of solstices
+    longitudes : ndarray
+        sun's ecliptic longitude corresponding to each time
     """
     sun = earth.ephemeris['sun']
 
@@ -493,25 +490,12 @@ def seasons(earth, t0, t1, kind='all'):
     partition_width = 365*.2
     num_partitions = int(ceil((end - start)/partition_width))
     partition_edges = linspace(start, end, num_partitions+1)
-        
-    if kind == 'all':
-        values = [0, 90, 180, 270]
-    elif kind == 'march':
-        values = [0]
-    elif kind == 'june':
-        values = [90]
-    elif kind == 'september':
-        values = [180]
-    elif kind == 'december':
-        values = [270]
-    else:
-        raise ValueError("kind must be 'all', 'march', 'june', 'september', or 'december'")
-        
-    left_edges, right_edges, targets = _find_value(f, values, partition_edges)
+
+    left_edges, right_edges, targets = _find_value(f, [0, 90, 180, 270], partition_edges)
         
     times = newton(f, left_edges, right_edges, fn=targets)
 
-    return ts.tt(jd=times)
+    return ts.tt(jd=times), targets
 
 
 def moon_quarters(moon, t0, t1, kind='all'):
