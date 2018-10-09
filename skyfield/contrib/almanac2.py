@@ -1,4 +1,4 @@
-from skyfield.api import load, Topos, EarthSatellite
+from skyfield.api import load, Topos, EarthSatellite, Angle
 from skyfield.constants import tau
 from optimizelib import newton, brent_min
 from numpy import (degrees, arcsin, isfinite, hstack, nan, empty, linspace, 
@@ -6,11 +6,14 @@ from numpy import (degrees, arcsin, isfinite, hstack, nan, empty, linspace,
 from functools import partial
 
 __all__ = ['meridian_transits', 'culminations', 'risings_settings', 
-           'twilights', 'equinoxes', 'solstices', 'moon_quarters']
+           'twilights', 'seasons', 'moon_quarters']
 
 ts = load.timescale()
 
 #%% Test Functions   
+
+# TODO: make these uneccesary:
+
 def _is_earth_based(location):
     """Returns True if ``location`` is geocentric or topocentric, False otherwise.
     """
@@ -181,17 +184,16 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     -------
     >>> planets = load('de430t.bsp')
     >>> sun = planets['sun']
-    >>> earth = planets['earth']
-    >>> greenwich = earth + Topos('51.5 N', '0 W')
+    >>> greenwich = Topos('51.5 N', '0 W')
     >>> t0 = ts.utc(2017, 1, 1)
     >>> t1 = ts.utc(2017, 1, 8)
     >>> times, hour_angle = transits(greenwich, mars, t0, t1)
-    >>> upper transits = times[hour_angle==0]
+    >>> upper_transits = times[hour_angle.hours==0]
     
     Arguments
     ---------
-    observer : VectorSum
-        VectorSum of earth + Topos
+    observer : Topos
+        Location of observer
     body : Segment or VectorSum
         Vector representing the object whose transits are being found
     t0 : Time
@@ -203,10 +205,11 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     -------
     times : Time
         Times of transits
-    hour_angles : ndarray
-        Local hour angle of ``body`` corresponding to ``times``, in hours
+    hour_angles : Angle
+        Local hour angle of ``body`` at ``times``
     """ 
-    # TODO: should the angles returned be angle objects?
+    observer = body.ephemeris['earth'] + observer
+    
     f = partial(_lha, observer, body)    
     partition_edges = make_partitions(t0.tt, t1.tt, .2)
     
@@ -214,7 +217,7 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     
     times = newton(f, left_edges, right_edges, fn=targets)
     
-    return ts.tt(jd=times), targets/15
+    return ts.tt(jd=times), Angle(degrees=targets, preference='hours')
 
 # TODO: make all functions expect a bare Topos object
 
@@ -429,8 +432,6 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
     
 #%% Geocentric Phenomena, pg. 478 in Explanatory Supplement (1992)
 
-# TODO: Make function called make_partitions()
-
 def seasons(earth, t0, t1):
     """Calculates data about March and September equinoxes.
     
@@ -449,7 +450,7 @@ def seasons(earth, t0, t1):
     >>> t0 = ts.utc(2017)
     >>> t1 = ts.utc(2018)
     >>> times, lons = seasons(earth, t0, t1)
-    >>> vernal_equinoxes = times[lons==90]
+    >>> vernal_equinoxes = times[lons.degrees==90]
     
     Arguments
     ---------
@@ -464,9 +465,8 @@ def seasons(earth, t0, t1):
     -------
     times : Time
         Times of solstices
-    longitudes : ndarray
-        sun's ecliptic longitude corresponding to each time in ``times`` in 
-        degrees
+    longitudes : Angle
+        sun's ecliptic longitude at ``times``
     """
     sun = earth.ephemeris['sun']
 
@@ -478,7 +478,7 @@ def seasons(earth, t0, t1):
         
     times = newton(f, left_edges, right_edges, fn=targets)
 
-    return ts.tt(jd=times), targets
+    return ts.tt(jd=times), Angle(degrees=targets)
 
 
 def moon_quarters(moon, t0, t1, kind='all'):
@@ -499,7 +499,7 @@ def moon_quarters(moon, t0, t1, kind='all'):
     >>> t0 = ts.utc(2017, 1)
     >>> t1 = ts.utc(2017, 2)
     >>> times, lon_diffs = moon_quarters(moon, t0, t1)
-    >>> new_moons = times[lon_diffs==0]
+    >>> new_moons = times[lon_diffs.degrees==0]
     
     Arguments
     ---------
@@ -514,9 +514,8 @@ def moon_quarters(moon, t0, t1, kind='all'):
     -------
     times : Time
         Times of moon quarters
-    longitude_diffs: ndarray
-        moon's ecliptic longitude - sun's ecliptic longitude corresponding to 
-        ``times``, in degrees.
+    longitude_diffs: Angle
+        moon's ecliptic longitude - sun's ecliptic longitude at ``times``
         
     """ 
     earth = moon.ephemeris['earth']
@@ -530,4 +529,4 @@ def moon_quarters(moon, t0, t1, kind='all'):
         
     times = newton(f, left_edges, right_edges, fn=targets)
 
-    return ts.tt(jd=times), targets
+    return ts.tt(jd=times), Angle(degrees=targets)

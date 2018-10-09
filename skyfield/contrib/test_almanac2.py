@@ -1,4 +1,4 @@
-from skyfield.api import Loader, Topos
+from skyfield.api import Loader, Topos, Angle
 from skyfield.timelib import Time
 from almanac2 import (meridian_transits, culminations, twilights, 
                        risings_settings, seasons, moon_quarters)
@@ -18,7 +18,10 @@ mars = ephem['mars barycenter']
 venus = ephem['venus']
 jupiter_bc = ephem['jupiter barycenter']
 mercury = ephem['mercury']
+
+# TODO: use greenwich_topos in all places
 greenwich = earth + Topos('51.5 N', '0 W')
+greenwich_topos = Topos('51.5 N', '0 W')
 
 satellites = load.tle(r'stations.txt')
 ISS = earth + satellites['ISS']
@@ -82,15 +85,15 @@ def test_seasons():
     times, lons = seasons(earth, t0, t1)
     
     assert isinstance(times, Time)
-    assert isinstance(lons, ndarray)
-    assert len(times) == len(lons) == 104
+    assert isinstance(lons, Angle)
+    assert len(times) == len(lons.radians) == 104
     
     compare(times[0].tt, ts.utc(2000, 3, 20, 7, 35).tt, minute/2)
     compare(times[1].tt, ts.utc(2000, 6, 21, 1, 48).tt, minute/2)
     
     # Check that the found times produce the correct data
     f = partial(_ecliptic_lon, earth, sun)
-    assert is_root(f, times.tt, lons, ms/2)
+    assert is_root(f, times.tt, lons.degrees, ms/2)
     
 
 # Data Source:
@@ -101,14 +104,14 @@ def test_moon_quarters():
     times, lon_diffs = moon_quarters(moon, t0, t1)
     
     assert isinstance(times, Time)
-    assert isinstance(lon_diffs, ndarray)
-    assert len(times) == len(lon_diffs) == 49
+    assert isinstance(lon_diffs, Angle)
+    assert len(times) == len(lon_diffs.radians) == 49
     
     compare(times[0].tt, ts.utc(2017, 1, 5, 19, 47).tt, minute/2)
     
     # Check that the found times produce the correct data    
     f = partial(_ecliptic_lon_diff, earth, moon, sun)
-    assert is_root(f, times.tt, lon_diffs, ms/2)
+    assert is_root(f, times.tt, lon_diffs.degrees, ms/2)
 
 
 # Data Source:
@@ -248,7 +251,7 @@ def test_astronomical_twilights():
     assert (times.tt == all_times).all() 
     
     # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, sun)
+    f = partial(_alt, earth+greenwich_topos, sun)
     assert is_root(f, begin_times.tt, -18, ms/2)
     assert is_root(f, end_times.tt, -18, ms/2)
     
@@ -258,17 +261,17 @@ def test_astronomical_twilights():
 def test_sun_transits():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times, lhas = meridian_transits(greenwich, sun, t0, t1)
+    times, lhas = meridian_transits(greenwich_topos, sun, t0, t1)
     
     assert isinstance(times, Time)
-    assert isinstance(lhas, ndarray)
-    assert len(times) == len(lhas) == 62
+    assert isinstance(lhas, Angle)
+    assert len(times) == len(lhas.radians) == 62
         
     compare(times[1].tt, ts.utc(2017, 1, 1, 12, 4).tt, minute/2)
 
     # Check that the found times produce the correct data
-    f = partial(_lha, greenwich, sun)
-    assert is_root(f, times.tt, lhas*15, ms/2)
+    f = partial(_lha, earth+greenwich_topos, sun)
+    assert is_root(f, times.tt, lhas._degrees, ms/2)
     
 
 # Data Source:
@@ -276,17 +279,17 @@ def test_sun_transits():
 def test_mars_transits():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times, lhas = meridian_transits(greenwich, mars, t0, t1, 'all')
+    times, lhas = meridian_transits(greenwich_topos, mars, t0, t1, 'all')
     
     assert isinstance(times, Time)
-    assert isinstance(lhas, ndarray)
-    assert len(times) == len(lhas) == 62
+    assert isinstance(lhas, Angle)
+    assert len(times) == len(lhas.radians) == 62
     
     compare(times[1].tt, ts.utc(2017, 1, 1, 16, 2).tt, minute/2)
     
     # Check that the found times produce the correct data
     f = partial(_lha, greenwich, mars)
-    assert is_root(f, times.tt, lhas*15, ms/2)
+    assert is_root(f, times.tt, lhas._degrees, ms/2)
     
 
 def test_sun_culminations():
