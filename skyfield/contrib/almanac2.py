@@ -96,7 +96,7 @@ def _find_extremes(f, partition_edges, find='min'):
     return left_edges, right_edges, sign_of_extremes
 
 
-#%% Partial Functions
+#%% Objective Functions
 
 def _ra(observer, body, t):
     """Returns:
@@ -182,7 +182,8 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     >>> greenwich = earth + Topos('51.5 N', '0 W')
     >>> t0 = ts.utc(2017, 1, 1)
     >>> t1 = ts.utc(2017, 1, 8)
-    >>> transits(greenwich, mars, t0, t1)
+    >>> times, hour_angle = transits(greenwich, mars, t0, t1)
+    >>> upper transits = times[hour_angle==0]
     
     Arguments
     ---------
@@ -194,16 +195,15 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
         Time object of length 1 representing the start of the search interval
     t1 : Time
         Time object of length 1 representing the end of the search interval
-    kind : str
-        ``'upper'`` for upper transits
-        ``'lower'`` for lower transits
-        ``'all'`` for upper and lower transits
         
     Returns
     -------
     times : Time
         Times of transits
+    hour_angles : ndarray
+        Local hour angle of ``body`` corresponding to ``times``, in hours
     """ 
+    # TODO: should the angles returned be angle objects?
     f = partial(_lha, observer, body)
     
     start = t0.tt
@@ -212,21 +212,11 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     num_partitions = int(ceil((end - start)/partition_width))
     partition_edges = linspace(start, end, num_partitions+1)
     
-    if kind == 'all':
-        values = [0, 180]
-    elif kind == 'upper':
-        values = [0]
-    elif kind == 'lower':
-        values = [180]
-    else:
-        raise ValueError("kind must be 'all', 'upper', or 'lower'")
+    left_edges, right_edges, targets = _find_value(f, [0, 180], partition_edges)
     
-    left_edges, right_edges, targets = _find_value(f, values, partition_edges)
-    
-    # TODO: is the array function really necessary here?
     times = newton(f, left_edges, right_edges, fn=targets)
     
-    return ts.tt(jd=times)
+    return ts.tt(jd=times), targets/15
 
 
 def culminations(observer, body, t0, t1, kind='upper'):

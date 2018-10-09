@@ -258,23 +258,17 @@ def test_astronomical_twilights():
 def test_sun_transits():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times = meridian_transits(greenwich, sun, t0, t1, 'all')
+    times, lhas = meridian_transits(greenwich, sun, t0, t1)
     
     assert isinstance(times, Time)
-    assert len(times) == 62
+    assert isinstance(lhas, ndarray)
+    assert len(times) == len(lhas) == 62
         
     compare(times[1].tt, ts.utc(2017, 1, 1, 12, 4).tt, minute/2)
-    
-    upper_times = meridian_transits(greenwich, sun, t0, t1, 'upper')
-    lower_times = meridian_transits(greenwich, sun, t0, t1, 'lower')
-    all_times = concatenate([upper_times.tt, lower_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all()
 
     # Check that the found times produce the correct data
     f = partial(_lha, greenwich, sun)
-    assert is_root(f, upper_times.tt, 0, ms/2)
-    assert is_root(f, lower_times.tt, 180, ms/2)
+    assert is_root(f, times.tt, lhas*15, ms/2)
     
 
 # Data Source:
@@ -282,23 +276,17 @@ def test_sun_transits():
 def test_mars_transits():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times = meridian_transits(greenwich, mars, t0, t1, 'all')
+    times, lhas = meridian_transits(greenwich, mars, t0, t1, 'all')
     
     assert isinstance(times, Time)
-    assert len(times) == 62
+    assert isinstance(lhas, ndarray)
+    assert len(times) == len(lhas) == 62
     
     compare(times[1].tt, ts.utc(2017, 1, 1, 16, 2).tt, minute/2)
     
-    upper_times = meridian_transits(greenwich, mars, t0, t1, 'upper')
-    lower_times = meridian_transits(greenwich, mars, t0, t1, 'lower')
-    all_times = concatenate([upper_times.tt, lower_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all()
-    
     # Check that the found times produce the correct data
     f = partial(_lha, greenwich, mars)
-    assert is_root(f, upper_times.tt, 0, ms/2)
-    assert is_root(f, lower_times.tt, 180, ms/2)
+    assert is_root(f, times.tt, lhas*15, ms/2)
     
 
 def test_sun_culminations():
