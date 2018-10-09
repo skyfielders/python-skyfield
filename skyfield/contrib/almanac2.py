@@ -447,13 +447,14 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
     
 #%% Geocentric Phenomena, pg. 478 in Explanatory Supplement (1992)
 
-# TODO: combine equinoxes and solstices into seasons
-def equinoxes(earth, t0, t1, kind='all'):
+# TODO test how much time is saved finding particular seasons vs. finding them all and throwing out the rest.
+
+def seasons(earth, t0, t1, kind='all'):
     """Calculates data about March and September equinoxes.
     
     This function searches between ``t0`` and ``t1`` for times when the sun's 
-    ecliptic longitude  is 0 and 180 degrees, for vernal and autumnal 
-    equinoxes, respectively.
+    ecliptic longitude is 0, 90, 180, or 270 degrees, for march equinoxes, 
+    june solstices, september equinoxes, and december solstices, respectively.
     
     Example
     -------
@@ -461,7 +462,7 @@ def equinoxes(earth, t0, t1, kind='all'):
     >>> earth = planets['earth']
     >>> t0 = ts.utc(2017)
     >>> t1 = ts.utc(2018)
-    >>> equinoxes(earth, t0, t1, kind='march')
+    >>> seasons(earth, t0, t1, kind='march')
     
     Arguments
     ---------
@@ -473,8 +474,10 @@ def equinoxes(earth, t0, t1, kind='all'):
         Time object of length 1 representing the end of the search interval
     kind : str
         ``'march'``  finds equinoxes in march
+        ``'june'`` finds solstices in june
         ``'september'``  finds equinoxes in september
-        ``'all'``  finds all equinoxes
+        ``'december'`` finds solstices in december
+        ``'all'``  finds all equinoxes and solstices
         
     Returns
     -------
@@ -487,78 +490,23 @@ def equinoxes(earth, t0, t1, kind='all'):
 
     start = t0.tt
     end = t1.tt
-    partition_width = 365*.45
+    partition_width = 365*.2
     num_partitions = int(ceil((end - start)/partition_width))
     partition_edges = linspace(start, end, num_partitions+1)
         
     if kind == 'all':
-        values = [0, 180]
+        values = [0, 90, 180, 270]
     elif kind == 'march':
         values = [0]
-    elif kind == 'september':
-        values = [180]
-    else:
-        raise ValueError("kind must be 'all', 'march', or 'september'")
-        
-    left_edges, right_edges, targets = _find_value(f, values, partition_edges)
-        
-    times = newton(f, left_edges, right_edges, fn=targets)
-
-    return ts.tt(jd=times)
-        
-
-def solstices(earth, t0, t1, kind='all'):
-    """Calculates data about June and December solstices.
-    
-    This function searches between ``t0`` and ``t1`` for times when the sun's 
-    ecliptic longitude is 90 and 270 degrees, for June and December solstices, 
-    respectively.
-    
-    Example
-    -------
-    >>> planets = load('de430t.bsp')
-    >>> earth = planets['earth']
-    >>> t0 = ts.utc(2017, 1)
-    >>> t1 = ts.utc(2017, 2)
-    >>> solstices(earth, t0, t1, kind='June')
-    
-    Arguments
-    ---------
-    earth : Segment
-        Vector representing earth
-    t0 : Time
-        Time object of length 1 representing the start of the search interval
-    t1 : Time
-        Time object of length 1 representing the end of the search interval
-    kind : str
-        ``'june'``  finds solstices in June
-        ``'december'``  finds solstices in December
-        ``'all'``  finds all solstices
-        
-    Returns
-    -------
-    times : Time
-        Times of solstices
-    """
-    sun = earth.ephemeris['sun']
-    
-    f = partial(_ecliptic_lon, earth, sun)
-    
-    start = t0.tt
-    end = t1.tt
-    partition_width = 365*.45
-    num_partitions = int(ceil((end - start)/partition_width))
-    partition_edges = linspace(start, end, num_partitions+1)
-    
-    if kind == 'all':
-        values = [90, 270]
     elif kind == 'june':
         values = [90]
+    elif kind == 'september':
+        values = [180]
     elif kind == 'december':
         values = [270]
     else:
-        raise ValueError("kind must be 'all', 'june', or 'december'")
-    
+        raise ValueError("kind must be 'all', 'march', 'june', 'september', or 'december'")
+        
     left_edges, right_edges, targets = _find_value(f, values, partition_edges)
         
     times = newton(f, left_edges, right_edges, fn=targets)

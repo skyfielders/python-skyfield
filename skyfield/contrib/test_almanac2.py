@@ -1,7 +1,7 @@
 from skyfield.api import Loader, Topos
 from skyfield.timelib import Time
 from almanac2 import (meridian_transits, culminations, twilights, 
-                       risings_settings, equinoxes, solstices, moon_quarters)
+                       risings_settings, seasons, moon_quarters)
 from almanac2 import (_ecliptic_lon_diff, _moon_ul_alt, _lha, _alt,
                        _satellite_alt, _ecliptic_lon)
 from numpy import concatenate, ndarray
@@ -76,51 +76,32 @@ def is_extreme(f, times, epsilon):
 
 # Data Source:
 # web.archive.org/web/20171223014917/http://aa.usno.navy.mil/data/docs/EarthSeasons.php
-def test_equinoxes():
+def test_seasons():
     t0 = ts.utc(2000)
     t1 = ts.utc(2026)
-    times = equinoxes(earth, t0, t1)
+    times = seasons(earth, t0, t1)
     
     assert isinstance(times, Time)
-    assert len(times) == 52
+    assert len(times) == 104
     
     compare(times[0].tt, ts.utc(2000, 3, 20, 7, 35).tt, minute/2)
+    compare(times[1].tt, ts.utc(2000, 6, 21, 1, 48).tt, minute/2)
     
-    # Check that the two parts equal the whole
-    march_times = equinoxes(earth, t0, t1, 'march')
-    sept_times = equinoxes(earth, t0, t1, 'september')
-    all_times = concatenate([march_times.tt, sept_times.tt])
+    # Check that the parts equal the whole
+    march_times = seasons(earth, t0, t1, 'march')
+    june_times = seasons(earth, t0, t1, 'june')
+    sept_times = seasons(earth, t0, t1, 'september')
+    dec_times = seasons(earth, t0, t1, 'december')
+    all_times = concatenate([march_times.tt, june_times.tt, sept_times.tt, dec_times.tt])
     all_times.sort()
     assert (times.tt == all_times).all()
     
     # Check that the found times produce the correct data
     f = partial(_ecliptic_lon, earth, sun)
     assert is_root(f, march_times.tt, 0, ms/2)
-    assert is_root(f, sept_times.tt, 180, ms/2)    
-
-
-# Data Source:
-# http://aa.usno.navy.mil/data/docs/EarthSeasons.php
-def test_solstices():
-    t0 = ts.utc(2000)
-    t1 = ts.utc(2026)
-    times = solstices(earth, t0, t1)
-    
-    assert isinstance(times, Time)
-    assert len(times) == 52
-
-    compare(times[0].tt, ts.utc(2000, 6, 21, 1, 48).tt, minute/2)
-    
-    june_times = solstices(earth, t0, t1, 'june')
-    dec_times = solstices(earth, t0, t1, 'december')
-    all_times = concatenate([june_times.tt, dec_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all()
-    
-    # Check that the found times produce the correct data
-    f = partial(_ecliptic_lon, earth, sun)
     assert is_root(f, june_times.tt, 90, ms/2)
-    assert is_root(f, dec_times.tt, 270, ms/2)    
+    assert is_root(f, sept_times.tt, 180, ms/2)   
+    assert is_root(f, dec_times.tt, 270, ms/2)
     
 
 # Data Source:
