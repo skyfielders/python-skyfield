@@ -24,13 +24,16 @@ def newton(f, x0, x1, fn=None, tol=1e-10):
     return x1
 
 
-def bracket(func, xa, xb, grow_limit=110.0, maxiter=1000):
+def bracket(func, xa, xb, sign_of_extremes=None, grow_limit=110.0, maxiter=1000):
     _gold = 1.618034  # golden ratio: (1.0+sqrt(5.0))/2.0
     _verysmall_num = 1e-21
     failing = numpy.ones_like(xa, dtype=bool)
     
-    fa = func(xa)
-    fb = func(xb)
+    def g(x, sign_of_extremes):
+        return -sign_of_extremes*func(x) + (sign_of_extremes==1)*360
+    
+    fa = g(xa, sign_of_extremes)
+    fb = g(xb, sign_of_extremes)
     
     # Switch so fa > fb
     ind = fa<fb
@@ -38,7 +41,7 @@ def bracket(func, xa, xb, grow_limit=110.0, maxiter=1000):
     fa[ind], fb[ind] = fb[ind], fa[ind]
     
     xc = xb + _gold * (xb - xa)
-    fc = func(xc)
+    fc = g(xc, sign_of_extremes)
     funcalls = 3
     iter_ = 0
     
@@ -67,7 +70,7 @@ def bracket(func, xa, xb, grow_limit=110.0, maxiter=1000):
         
         fw = numpy.zeros_like(xa)
         
-        fw[case1] = func(w[case1])
+        fw[case1] = g(w[case1], sign_of_extremes[case1])
         funcalls += 1
         
         ind1 = case1 * (fw < fc) * failing
@@ -84,16 +87,16 @@ def bracket(func, xa, xb, grow_limit=110.0, maxiter=1000):
         failing[ind2] = False
             
         w[case1] = xc[case1] + _gold * (xc[case1] - xb[case1])
-        fw[case1] = func(w[case1])
+        fw[case1] = g(w[case1], sign_of_extremes[case1])
         funcalls += 1
 
         w[case2] = wlim[case2]
         if case2.any():
-            fw[case2] = func(w[case2])
+            fw[case2] = g(w[case2], sign_of_extremes[case2])
             funcalls += 1
 
         if case3.any():
-            fw[case3] = func(w[case3])
+            fw[case3] = g(w[case3], sign_of_extremes[case3])
             funcalls += 1
         
         ind = case3 * (fw < fc) * failing
@@ -104,13 +107,13 @@ def bracket(func, xa, xb, grow_limit=110.0, maxiter=1000):
         fc[ind] = fw[ind]
         
         if ind.any():
-            fw[ind] = func(w[ind])
+            fw[ind] = g(w[ind], sign_of_extremes[ind])
             funcalls += 1
 
         w[case4] = xc[case4] + _gold * (xc[case4] - xb[case4])
         
         if case4.any():
-            fw[case4] = func(w[case4])
+            fw[case4] = g(w[case4], sign_of_extremes[case4])
             funcalls += 1
         
         xa[failing] = xb[failing]
@@ -122,18 +125,21 @@ def bracket(func, xa, xb, grow_limit=110.0, maxiter=1000):
     return xa, xb, xc, fa, fb, fc, funcalls
 
 
-def brent_min(f, left, right, tol=1.48e-8):
+def brent_min(f, left, right, sign_of_extremes=None, tol=1.48e-8):
     # set up for optimization
     maxiter = 500
     mintol = 1e-11
     
+    def g(x, sign_of_extremes):
+        return -sign_of_extremes*func(x) + (sign_of_extremes==1)*360
+    
     func = f
-    xa, xb, xc, fa, fb, fc, funcalls = bracket(f, left, right)
+    xa, xb, xc, fa, fb, fc, funcalls = bracket(f, left, right, sign_of_extremes)
     _cg = 0.3819660
     x = numpy.copy(xb)
     w = numpy.copy(xb)
     v = numpy.copy(xb)
-    fw = func(x)
+    fw = g(x, sign_of_extremes)
     fv = numpy.copy(fw)
     fx = numpy.copy(fw)
     
@@ -209,7 +215,7 @@ def brent_min(f, left, right, tol=1.48e-8):
             else:
                 u[i] = x[i] + rat[i]
                 
-        fu[not_converged] = func(u[not_converged])      # calculate new output value
+        fu[not_converged] = g(u[not_converged], sign_of_extremes[not_converged])      # calculate new output value
         funcalls += 1
 
         for i in not_converged:

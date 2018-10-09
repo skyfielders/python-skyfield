@@ -1,8 +1,8 @@
 from skyfield.api import load, Topos, EarthSatellite
 from skyfield.constants import tau
 from optimizelib import newton, brent_min
-from numpy import (array, degrees, arcsin, where, diff, sort, isfinite, hstack, 
-                   nan, empty, linspace, ceil, sign, nonzero)
+from numpy import (degrees, arcsin, isfinite, hstack, nan, empty, linspace, 
+                   ceil, sign, nonzero, zeros)
 from functools import partial
 
 __all__ = ['meridian_transits', 'culminations', 'risings_settings', 
@@ -55,7 +55,7 @@ def _find_value(f, values, partition_edges, slope_at_zero='positive'):
             found = sign(g_values[:-1]) != sign(g_values[1:])
         
         if (isfinite(partition_values) * found).any():
-            raise ValueError('Multiple target values found in the same partition')
+            raise ValueError('Multiple target values found in the same partition. Make the partitions smaller.')
             
         partition_values[found] = value
         
@@ -73,20 +73,27 @@ def derivative(f, x):
     return (right - left)/2e-6
 
 
-def _find_extremes(f, partition_edges, find='min', tol=1e-15):
-    if find == 'min':
-        g = f
-    elif find == 'max':
-        g = lambda t:-f(t) + 360
-
-    g_dot_edges = derivative(g, partition_edges)
-            
-    sign_changes = diff((g_dot_edges>0).astype(int))
-    indices = where(sign_changes == 1)[0]
+def _find_extremes(f, partition_edges, find='min'):
+    f_dot = derivative(f, partition_edges)
+    
+    partition_values = zeros(len(partition_edges)-1)
+    
+    if find == 'min' or find == 'any':
+        found = (sign(f_dot[:-1])==-1) * (sign(f_dot[1:])==1)
+        partition_values[found] = -1
+    
+    if find == 'max' or find == 'any':
+        found = (sign(f_dot[:-1])==1) * (sign(f_dot[1:])==-1)
+        if ((partition_values!=0) * found).any():
+            raise ValueError('Multiple extremes found in the same partition. Make the partitions smaller.')
+        partition_values[found] = 1
+        
+    indices = nonzero(partition_values)[0]
     left_edges = partition_edges[indices]
     right_edges = partition_edges[indices+1]
-            
-    return brent_min(g, array(left_edges), array(right_edges), tol=tol)
+    sign_of_extremes = partition_values[indices]
+    
+    return left_edges, right_edges, sign_of_extremes
 
 
 #%% Partial Functions
@@ -266,10 +273,10 @@ def culminations(observer, body, t0, t1, kind='upper'):
             observer = observer.positives[-1]
         f = partial(_satellite_alt, observer, body)
         period = tau/body.model.no/60/24 # days/orbit
-        partition_width = period * .25
+        partition_width = period * .2
     else:
         f = partial(_alt, observer, body)
-        partition_width = .25
+        partition_width = .2
     
     start = t0.tt
     end = t1.tt
@@ -277,15 +284,17 @@ def culminations(observer, body, t0, t1, kind='upper'):
     partition_edges = linspace(start, end, num_partitions)
     
     if kind == 'all':
-        upper_times = _find_extremes(f, partition_edges, find='max')
-        lower_times = _find_extremes(f, partition_edges)
-        times = sort(hstack([upper_times, lower_times]))
+        find = 'any'
     elif kind == 'upper':
-        times = _find_extremes(f, partition_edges, find='max')
+        find = 'max'
     elif kind == 'lower':
-        times = _find_extremes(f, partition_edges)
+        find = 'min'
     else:
         raise ValueError("kind must be 'all', 'upper', or 'lower'")
+
+    left_edges, right_edges, sign_of_extreme = _find_extremes(f, partition_edges, find)
+
+    times = brent_min(f, left_edges, right_edges, sign_of_extreme, tol=1e-15)
 
     return ts.tt(jd=times)
     
