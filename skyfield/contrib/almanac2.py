@@ -36,9 +36,7 @@ def _is_satellite(body):
     
     
 #%% _find functions
-        
-# TODO: Make finding functions only calculate partitions and have the original function call newton or brent min
-    
+            
 def _find_value(f, values, partition_edges, slope_at_zero='positive'):
     f_values = f(partition_edges)             
                 
@@ -94,6 +92,11 @@ def _find_extremes(f, partition_edges, find='min'):
     sign_of_extremes = partition_values[indices]
     
     return left_edges, right_edges, sign_of_extremes
+
+
+def make_partitions(start, end, partition_width):
+    num_partitions = int(ceil((end - start)/partition_width))
+    return linspace(start, end, num_partitions+1)
 
 
 #%% Objective Functions
@@ -204,13 +207,8 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
         Local hour angle of ``body`` corresponding to ``times``, in hours
     """ 
     # TODO: should the angles returned be angle objects?
-    f = partial(_lha, observer, body)
-    
-    start = t0.tt
-    end = t1.tt
-    partition_width = .2
-    num_partitions = int(ceil((end - start)/partition_width))
-    partition_edges = linspace(start, end, num_partitions+1)
+    f = partial(_lha, observer, body)    
+    partition_edges = make_partitions(t0.tt, t1.tt, .2)
     
     left_edges, right_edges, targets = _find_value(f, [0, 180], partition_edges)
     
@@ -218,6 +216,7 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     
     return ts.tt(jd=times), targets/15
 
+# TODO: make all functions expect a bare Topos object
 
 def culminations(observer, body, t0, t1, kind='upper'):
     """Calculates data about upper and lower culminations.
@@ -268,10 +267,7 @@ def culminations(observer, body, t0, t1, kind='upper'):
         f = partial(_alt, observer, body)
         partition_width = .2
     
-    start = t0.tt
-    end = t1.tt
-    num_partitions = int(ceil((end - start)/partition_width))
-    partition_edges = linspace(start, end, num_partitions+1)
+    partition_edges = make_partitions(t0.tt, t1.tt, partition_width)
     
     if kind == 'all':
         find = 'any'
@@ -343,10 +339,8 @@ def risings_settings(observer, body, t0, t1, kind='all'):
         f = partial(_alt, observer, body)
         value = [0]
     
-    start = t0.tt
-    end = t1.tt
     body_culminations = culminations(observer, body, t0, t1, kind='all').tt
-    partition_edges = hstack([start, body_culminations, end])    
+    partition_edges = hstack([t0.tt, body_culminations, t1.tt])    
     
     if kind == 'all':
         slope='any'
@@ -405,10 +399,8 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
         Times that twilight starts in the morning and/ or ends in the evening
         """
         
-    start = t0.tt
-    end = t1.tt       
     sun_culminations = culminations(observer, sun, t0, t1, kind='all').tt
-    partition_edges = hstack([start, sun_culminations, end])
+    partition_edges = hstack([t0.tt, sun_culminations, t1.tt])
     
     f = partial(_alt, observer, sun)
     if kind == 'civil':
@@ -480,11 +472,7 @@ def seasons(earth, t0, t1):
 
     f = partial(_ecliptic_lon, earth, sun)
 
-    start = t0.tt
-    end = t1.tt
-    partition_width = 365*.2
-    num_partitions = int(ceil((end - start)/partition_width))
-    partition_edges = linspace(start, end, num_partitions+1)
+    partition_edges = make_partitions(t0.tt, t1.tt, 365*.2)
 
     left_edges, right_edges, targets = _find_value(f, [0, 90, 180, 270], partition_edges)
         
@@ -536,11 +524,7 @@ def moon_quarters(moon, t0, t1, kind='all'):
     
     f = partial(_ecliptic_lon_diff, earth, moon, sun)
     
-    start = t0.tt
-    end = t1.tt    
-    partition_width = 29*.2
-    num_partitions = int(ceil((end - start)/partition_width))
-    partition_edges = linspace(start, end, num_partitions+1)
+    partition_edges = make_partitions(t0.tt, t1.tt, 29*.2)
 
     left_edges, right_edges, targets = _find_value(f, [0, 90, 180, 270], partition_edges)
         
