@@ -210,7 +210,7 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     end = t1.tt
     partition_width = .2
     num_partitions = int(ceil((end - start)/partition_width))
-    partition_edges = linspace(start, end, num_partitions)
+    partition_edges = linspace(start, end, num_partitions+1)
     
     if kind == 'all':
         values = [0, 180]
@@ -281,7 +281,7 @@ def culminations(observer, body, t0, t1, kind='upper'):
     start = t0.tt
     end = t1.tt
     num_partitions = int(ceil((end - start)/partition_width))
-    partition_edges = linspace(start, end, num_partitions)
+    partition_edges = linspace(start, end, num_partitions+1)
     
     if kind == 'all':
         find = 'any'
@@ -447,6 +447,7 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
     
 #%% Geocentric Phenomena, pg. 478 in Explanatory Supplement (1992)
 
+# TODO: combine equinoxes and solstices into seasons
 def equinoxes(earth, t0, t1, kind='all'):
     """Calculates data about March and September equinoxes.
     
@@ -488,7 +489,7 @@ def equinoxes(earth, t0, t1, kind='all'):
     end = t1.tt
     partition_width = 365*.45
     num_partitions = int(ceil((end - start)/partition_width))
-    partition_edges = linspace(start, end, num_partitions)
+    partition_edges = linspace(start, end, num_partitions+1)
         
     if kind == 'all':
         values = [0, 180]
@@ -547,7 +548,7 @@ def solstices(earth, t0, t1, kind='all'):
     end = t1.tt
     partition_width = 365*.45
     num_partitions = int(ceil((end - start)/partition_width))
-    partition_edges = linspace(start, end, num_partitions)
+    partition_edges = linspace(start, end, num_partitions+1)
     
     if kind == 'all':
         values = [90, 270]
@@ -613,7 +614,7 @@ def moon_quarters(moon, t0, t1, kind='all'):
     end = t1.tt    
     partition_width = 29*.2
     num_partitions = int(ceil((end - start)/partition_width))
-    partition_edges = linspace(start, end, num_partitions)
+    partition_edges = linspace(start, end, num_partitions+1)
     
     if kind == 'all':
         values = [0, 90, 180, 270]
