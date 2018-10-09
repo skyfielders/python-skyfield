@@ -1,8 +1,15 @@
 import numpy
 
-def newton(f, x0, x1, tol=1e-10):
+def newton(f, x0, x1, fn=None, tol=1e-10):
     max_iters = 50
-    f0, f1 = f(x0), f(x1)
+    
+    if fn is None:
+        fn = numpy.zeros_like(x0)
+    
+    def g(x, fn):
+        return (f(x) - fn + 180)%360 - 180
+    
+    f0, f1 = g(x0, fn), g(x1, fn)
     
     iters = 0
     while iters < max_iters:   
@@ -12,7 +19,7 @@ def newton(f, x0, x1, tol=1e-10):
         inds = ~converged
 
         x0[inds], x1[inds] = x1[inds], x1[inds] + (x1[inds] - x0[inds]) / (f0[inds]/f1[inds] - 1)
-        f0[inds], f1[inds] = f1[inds], f(x1[inds])
+        f0[inds], f1[inds] = f1[inds], g(x1[inds], fn[inds])
         iters += 1
     return x1
 

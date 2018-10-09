@@ -1,7 +1,8 @@
 from skyfield.api import load, Topos, EarthSatellite
 from skyfield.constants import tau
 from optimizelib import newton, brent_min
-from numpy import array, degrees, arcsin, where, diff, sort, hstack, linspace, ceil
+from numpy import (array, degrees, arcsin, where, diff, sort, isfinite, hstack, 
+                   nan, empty, linspace, ceil, sign, nonzero)
 from functools import partial
 
 __all__ = ['meridian_transits', 'culminations', 'risings_settings', 
@@ -35,22 +36,35 @@ def _is_satellite(body):
     
     
 #%% _find functions
-def _find_value(f, value, partition_edges, slope_at_zero='positive', tol=1e-10):
-    g = lambda t: (f(t) - value + 180) % 360 - 180
-    g_edges = g(partition_edges)
-            
-    sign_changes = diff((g_edges>0).astype(int))
-    if slope_at_zero=='positive':
-        indices = where(sign_changes == 1)[0]
-    elif slope_at_zero=='negative':
-        indices = where(sign_changes == -1)[0]
-    elif slope_at_zero=='any':
-        indices = where(sign_changes != 0)[0]
         
+# TODO: Make finding functions only calculate partitions and have the original function call newton or brent min
+    
+def _find_value(f, values, partition_edges, slope_at_zero='positive'):
+    f_values = f(partition_edges)             
+                
+    partition_values = empty(len(partition_edges)-1)
+    partition_values.fill(nan)
+    
+    for value in values:
+        g_values = (f_values - value + 180)%360 - 180
+        if slope_at_zero=='positive':
+            found = (sign(g_values[:-1])==-1) * (sign(g_values[1:])==1)
+        elif slope_at_zero=='negative':
+            found = (sign(g_values[:-1])==1) * (sign(g_values[1:])==-1)
+        elif slope_at_zero=='any':
+            found = sign(g_values[:-1]) != sign(g_values[1:])
+        
+        if (isfinite(partition_values) * found).any():
+            raise ValueError('Multiple target values found in the same partition')
+            
+        partition_values[found] = value
+        
+    indices = nonzero(isfinite(partition_values))[0]
     left_edges = partition_edges[indices]
     right_edges = partition_edges[indices+1]
-            
-    return newton(g, array(left_edges), array(right_edges), tol=tol)
+    targets = partition_values[indices]
+    
+    return left_edges, right_edges, targets
 
 
 def derivative(f, x):
@@ -187,20 +201,23 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     
     start = t0.tt
     end = t1.tt
-    partition_width = .45
+    partition_width = .2
     num_partitions = int(ceil((end - start)/partition_width))
     partition_edges = linspace(start, end, num_partitions)
     
     if kind == 'all':
-        upper_times = _find_value(f, 0, partition_edges)        
-        lower_times = _find_value(f, 180, partition_edges)
-        times = sort(hstack([upper_times, lower_times]))
+        values = [0, 180]
     elif kind == 'upper':
-        times = _find_value(f, 0, partition_edges)
+        values = [0]
     elif kind == 'lower':
-        times = _find_value(f, 180, partition_edges)
+        values = [180]
     else:
         raise ValueError("kind must be 'all', 'upper', or 'lower'")
+    
+    left_edges, right_edges, targets = _find_value(f, values, partition_edges)
+    
+    # TODO: is the array function really necessary here?
+    times = newton(f, left_edges, right_edges, fn=targets)
     
     return ts.tt(jd=times)
 
@@ -316,34 +333,34 @@ def risings_settings(observer, body, t0, t1, kind='all'):
         if not isinstance(observer, Topos):
             observer = observer.positives[-1]
         f = partial(_satellite_alt, observer, body)
-        value = -34/60
+        value = [-34/60]
     elif body.target == 10: # sun
         f = partial(_alt, observer, body)
-        value = -50/60
+        value = [-50/60]
     elif body.target == 301: # moon
         f = partial(_moon_ul_alt, observer, body)
-        value = -34/60
+        value = [-34/60]
     else:
         f = partial(_alt, observer, body)
-        value = 0
-        
-    
+        value = [0]
     
     start = t0.tt
     end = t1.tt
     body_culminations = culminations(observer, body, t0, t1, kind='all').tt
     partition_edges = hstack([start, body_culminations, end])    
     
-    tol = 1e-15
-    
     if kind == 'all':
-        times = _find_value(f, value, partition_edges, slope_at_zero='any', tol=tol)
+        slope='any'
     elif kind == 'rise':
-        times = _find_value(f, value, partition_edges, tol=tol)
+        slope='positive'
     elif kind == 'set':
-        times = _find_value(f, value, partition_edges, slope_at_zero='negative', tol=tol)
+        slope='negative'
     else:
         raise ValueError("kind must be 'all', 'rise', or 'set'")
+    
+    left_edges, right_edges, targets = _find_value(f, value, partition_edges, slope_at_zero=slope)
+    
+    times = newton(f, left_edges, right_edges, fn=targets, tol=1e-15)
     
     return ts.tt(jd=times)
     
@@ -396,22 +413,26 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
     
     f = partial(_alt, observer, sun)
     if kind == 'civil':
-        value = -6
+        value = [-6]
     elif kind == 'nautical':
-        value = -12
+        value = [-12]
     elif kind == 'astronomical':
-        value = -18
+        value = [-18]
     else:
         raise ValueError("kind must be 'civil', 'nautical', or 'astronomical'")
 
     if begin_or_end == 'all':
-        times = _find_value(f, value, partition_edges, slope_at_zero='any')
+        slope = 'any'
     elif begin_or_end == 'begin':
-        times = _find_value(f, value, partition_edges)
+        slope = 'positive'
     elif begin_or_end == 'end':
-        times = _find_value(f, value, partition_edges, slope_at_zero='negative')
+        slope = 'negative'
     else:
         raise ValueError("begin_or_end must be 'all', 'begin', or 'end'")
+
+    left_edges, right_edges, targets = _find_value(f, value, partition_edges, slope_at_zero=slope)
+
+    times = newton(f, left_edges, right_edges, fn=targets)
 
     return ts.tt(jd=times)
     
@@ -459,18 +480,20 @@ def equinoxes(earth, t0, t1, kind='all'):
     partition_width = 365*.45
     num_partitions = int(ceil((end - start)/partition_width))
     partition_edges = linspace(start, end, num_partitions)
-    
+        
     if kind == 'all':
-        march_times = _find_value(f, 0, partition_edges)
-        september_times = _find_value(f, 180, partition_edges)
-        times = sort(hstack([march_times, september_times]))
+        values = [0, 180]
     elif kind == 'march':
-        times = _find_value(f, 0, partition_edges)
+        values = [0]
     elif kind == 'september':
-        times = _find_value(f, 180, partition_edges)
+        values = [180]
     else:
         raise ValueError("kind must be 'all', 'march', or 'september'")
         
+    left_edges, right_edges, targets = _find_value(f, values, partition_edges)
+        
+    times = newton(f, left_edges, right_edges, fn=targets)
+
     return ts.tt(jd=times)
         
 
@@ -518,16 +541,18 @@ def solstices(earth, t0, t1, kind='all'):
     partition_edges = linspace(start, end, num_partitions)
     
     if kind == 'all':
-        june_times = _find_value(f, 90, partition_edges)
-        december_times = _find_value(f, 270, partition_edges)
-        times = sort(hstack([june_times, december_times]))
+        values = [90, 270]
     elif kind == 'june':
-        times = _find_value(f, 90, partition_edges)
+        values = [90]
     elif kind == 'december':
-        times = _find_value(f, 270, partition_edges)
+        values = [270]
     else:
         raise ValueError("kind must be 'all', 'june', or 'december'")
     
+    left_edges, right_edges, targets = _find_value(f, values, partition_edges)
+        
+    times = newton(f, left_edges, right_edges, fn=targets)
+
     return ts.tt(jd=times)
 
 
@@ -577,25 +602,25 @@ def moon_quarters(moon, t0, t1, kind='all'):
     
     start = t0.tt
     end = t1.tt    
-    partition_width = 29*.25
+    partition_width = 29*.2
     num_partitions = int(ceil((end - start)/partition_width))
     partition_edges = linspace(start, end, num_partitions)
     
     if kind == 'all':
-        new_times = _find_value(f, 0, partition_edges)
-        first_times = _find_value(f, 90, partition_edges)
-        full_times = _find_value(f, 180, partition_edges)
-        last_times = _find_value(f, 270, partition_edges)
-        times = sort(hstack([new_times, first_times, full_times, last_times]))
+        values = [0, 90, 180, 270]
     elif kind == 'new':
-        times = _find_value(f, 0, partition_edges)
+        values = [0]
     elif kind == 'first':
-        times = _find_value(f, 90, partition_edges)
+        values = [90]
     elif kind == 'full':
-        times = _find_value(f, 180, partition_edges)
+        values = [180]
     elif kind == 'last':
-        times = _find_value(f, 270, partition_edges)
+        values = [270]
     else:
         raise ValueError("kind must be 'all', 'new', 'first', 'full', or 'last'")
+
+    left_edges, right_edges, targets = _find_value(f, values, partition_edges)
+        
+    times = newton(f, left_edges, right_edges, fn=targets)
 
     return ts.tt(jd=times)
