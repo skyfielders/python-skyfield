@@ -1,10 +1,10 @@
 import numpy
 
-def secant(f, t0, t1, targets=None, f0=None, f1=None, tol=1e-10):
+def secant(f, t0, t1, targets=0, f0=None, f1=None, tol=1e-10):
     max_iters = 50
     
-    if targets is None:
-        targets = numpy.zeros_like(t0)
+    if numpy.isscalar(targets):
+        targets = numpy.ones_like(t0) * targets
     
     def g(t, targets):
         return (f(t) - targets + 180)%360 - 180
