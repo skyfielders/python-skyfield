@@ -298,16 +298,11 @@ def test_mars_transits():
 def test_sun_culminations():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times = culminations(greenwich, sun, t0, t1, 'all')
+    times, kinds = culminations(greenwich, sun, t0, t1)
     
     assert isinstance(times, Time)
-    assert len(times) == 62
-    
-    upper_times = culminations(greenwich, sun, t0, t1, 'upper')
-    lower_times = culminations(greenwich, sun, t0, t1, 'lower')
-    all_times = concatenate([upper_times.tt, lower_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all()
+    assert isinstance(kinds, ndarray)
+    assert len(times) == len(kinds) == 62
     
     # Check that the found times produce the correct data
     f = partial(_alt, greenwich, sun)        
@@ -317,16 +312,11 @@ def test_sun_culminations():
 def test_moon_culminations():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times = culminations(greenwich, moon, t0, t1, 'all')
+    times, kinds = culminations(greenwich, moon, t0, t1)
     
     assert isinstance(times, Time)
-    assert len(times) == 60
-    
-    upper_times = culminations(greenwich, moon, t0, t1, 'upper')
-    lower_times = culminations(greenwich, moon, t0, t1, 'lower')
-    all_times = concatenate([upper_times.tt, lower_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all()
+    assert isinstance(kinds, ndarray)
+    assert len(times) == len(kinds) == 60
 
     # Check that the found times produce the correct data
     f = partial(_alt, greenwich, moon)    
@@ -337,23 +327,18 @@ def test_moon_culminations():
 def test_ISS_culminations():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 2)
-    times = culminations(greenwich, ISS, t0, t1, 'all')
+    times, kinds = culminations(greenwich, ISS, t0, t1)
     
     assert isinstance(times, Time)
-    assert len(times) == 31
-
-    upper_times = culminations(greenwich, ISS, t0, t1, 'upper')
-    lower_times = culminations(greenwich, ISS, t0, t1, 'lower')
-    all_times = concatenate([upper_times.tt, lower_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all()
+    assert isinstance(kinds, ndarray)
+    assert len(times) == len(kinds) == 31
 
     # Check that the found times produce the correct data
     f = partial(_satellite_alt, greenwich.positives[-1], ISS.positives[-1])
     assert is_extreme(f, times.tt, 2*ms)
     
     # Check that same result is found if plain Topos is used as observer
-    times2 = culminations(greenwich.positives[-1], ISS, t0, t1, 'all')
+    times2, _ = culminations(greenwich.positives[-1], ISS, t0, t1, 'all')
     assert (times.tt == times2.tt).all()
 
 

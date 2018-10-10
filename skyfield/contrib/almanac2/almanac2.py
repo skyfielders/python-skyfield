@@ -2,7 +2,7 @@ from skyfield.api import load, Topos, EarthSatellite, Angle
 from skyfield.constants import tau
 from optimizelib import secant, brent_min
 from numpy import (degrees, arcsin, isfinite, hstack, nan, empty, linspace, 
-                   ceil, sign, nonzero, zeros)
+                   ceil, sign, nonzero, zeros, empty_like)
 from functools import partial
 
 __all__ = ['meridian_transits', 'culminations', 'risings_settings', 
@@ -273,21 +273,17 @@ def culminations(observer, body, t0, t1, kind='upper'):
         partition_width = .2
     
     partition_edges = make_partitions(t0.tt, t1.tt, partition_width)
-    
-    if kind == 'all':
-        find = 'any'
-    elif kind == 'upper':
-        find = 'max'
-    elif kind == 'lower':
-        find = 'min'
-    else:
-        raise ValueError("kind must be 'all', 'upper', or 'lower'")
 
-    left_edges, right_edges, sign_of_accel, f0, f1 = _find_extremes(f, partition_edges, find)
+    left_edges, right_edges, sign_of_accel, f0, f1 = _find_extremes(f, partition_edges, 'any')
 
     times = brent_min(f, left_edges, right_edges, sign_of_accel, f0, f1, tol=1e-15)
 
-    return ts.tt(jd=times)
+    kinds = empty_like(sign_of_accel, dtype=str)
+    minimums = sign_of_accel == 1
+    kinds[minimums] = 'min'
+    kinds[~minimums] = 'max'
+
+    return ts.tt(jd=times), kinds
     
 
 def risings_settings(observer, body, t0, t1, kind='all'):
@@ -344,7 +340,7 @@ def risings_settings(observer, body, t0, t1, kind='all'):
         f = partial(_alt, observer, body)
         value = [0]
     
-    body_culminations = culminations(observer, body, t0, t1, kind='all').tt
+    body_culminations = culminations(observer, body, t0, t1, kind='all')[0].tt
     partition_edges = hstack([t0.tt, body_culminations, t1.tt])    
     
     if kind == 'all':
@@ -404,7 +400,7 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
         Times that twilight starts in the morning and/ or ends in the evening
         """
         
-    sun_culminations = culminations(observer, sun, t0, t1, kind='all').tt
+    sun_culminations = culminations(observer, sun, t0, t1, kind='all')[0].tt
     partition_edges = hstack([t0.tt, sun_culminations, t1.tt])
     
     f = partial(_alt, observer, sun)
