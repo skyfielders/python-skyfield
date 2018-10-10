@@ -12,8 +12,6 @@ ts = load.timescale()
 
 #%% Test Functions   
 
-# TODO: make these uneccesary:
-
 def _is_earth_based(location):
     """Returns True if ``location`` is geocentric or topocentric, False otherwise.
     """
@@ -38,7 +36,7 @@ def _is_satellite(body):
         return False
     
     
-#%% _find functions
+#%% functions for finding/ isolating partitions
             
 def _find_value(f, values, partition_edges, slope_at_zero='positive'):
     f_values = f(partition_edges)             
@@ -68,14 +66,14 @@ def _find_value(f, values, partition_edges, slope_at_zero='positive'):
     return left_edges, right_edges, targets
 
 
-def derivative(f, x):
-    left = f(x - 1e-6)
-    right = f(x + 1e-6)
-    return (right - left)/2e-6
-
-
 def _find_extremes(f, partition_edges, find='min'):
-    f_dot = derivative(f, partition_edges)
+    # approximate the derivative in such a way that f(partition_edges) can be 
+    # returned and reused in brent_min later, saving a function call
+    combined_array = hstack([partition_edges, partition_edges+1e-6])
+    combined_results = f(combined_array)
+    left = combined_results[:len(partition_edges)]
+    right = combined_results[len(partition_edges):]
+    f_dot = (right - left)/1e-6
     
     partition_values = zeros(len(partition_edges)-1)
     
@@ -85,7 +83,7 @@ def _find_extremes(f, partition_edges, find='min'):
     
     if find == 'max' or find == 'any':
         found = (sign(f_dot[:-1])==1) * (sign(f_dot[1:])==-1)
-        if ((partition_values!=0) * found).any():
+        if find == 'any' and ((partition_values!=0) * found).any():
             raise ValueError('Multiple extremes found in the same partition. Make the partitions smaller.')
         partition_values[found] = 1
         
@@ -93,8 +91,10 @@ def _find_extremes(f, partition_edges, find='min'):
     left_edges = partition_edges[indices]
     right_edges = partition_edges[indices+1]
     sign_of_extremes = partition_values[indices]
+    f0 = left[indices]
+    f1 = left[indices+1]
     
-    return left_edges, right_edges, sign_of_extremes
+    return left_edges, right_edges, sign_of_extremes, f0, f1
 
 
 def make_partitions(start, end, partition_width):
@@ -189,6 +189,7 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     >>> t1 = ts.utc(2017, 1, 8)
     >>> times, hour_angle = transits(greenwich, mars, t0, t1)
     >>> upper_transits = times[hour_angle.hours==0]
+    >>> lower_transits = times[hour_angle.hours==12]
     
     Arguments
     ---------
@@ -206,7 +207,7 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     times : Time
         Times of transits
     hour_angles : Angle
-        Local hour angle of ``body`` at ``times``
+        Local Hour Angle of ``body`` at ``times``
     """ 
     observer = body.ephemeris['earth'] + observer
     
@@ -215,11 +216,10 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     
     left_edges, right_edges, targets = _find_value(f, [0, 180], partition_edges)
     
-    times = newton(f, left_edges, right_edges, fn=targets)
+    times = newton(f, left_edges, right_edges, targets)
     
     return ts.tt(jd=times), Angle(degrees=targets, preference='hours')
 
-# TODO: make all functions expect a bare Topos object
 
 def culminations(observer, body, t0, t1, kind='upper'):
     """Calculates data about upper and lower culminations.
@@ -281,9 +281,9 @@ def culminations(observer, body, t0, t1, kind='upper'):
     else:
         raise ValueError("kind must be 'all', 'upper', or 'lower'")
 
-    left_edges, right_edges, sign_of_extreme = _find_extremes(f, partition_edges, find)
+    left_edges, right_edges, sign_of_extreme, f0, f1 = _find_extremes(f, partition_edges, find)
 
-    times = brent_min(f, left_edges, right_edges, sign_of_extreme, tol=1e-15)
+    times = brent_min(f, left_edges, right_edges, sign_of_extreme, f0, f1, tol=1e-15)
 
     return ts.tt(jd=times)
     
@@ -356,7 +356,7 @@ def risings_settings(observer, body, t0, t1, kind='all'):
     
     left_edges, right_edges, targets = _find_value(f, value, partition_edges, slope_at_zero=slope)
     
-    times = newton(f, left_edges, right_edges, fn=targets, tol=1e-15)
+    times = newton(f, left_edges, right_edges, targets, tol=1e-15)
     
     return ts.tt(jd=times)
     
@@ -426,7 +426,7 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
 
     left_edges, right_edges, targets = _find_value(f, value, partition_edges, slope_at_zero=slope)
 
-    times = newton(f, left_edges, right_edges, fn=targets)
+    times = newton(f, left_edges, right_edges, targets)
 
     return ts.tt(jd=times)
     
@@ -450,7 +450,10 @@ def seasons(earth, t0, t1):
     >>> t0 = ts.utc(2017)
     >>> t1 = ts.utc(2018)
     >>> times, lons = seasons(earth, t0, t1)
-    >>> vernal_equinoxes = times[lons.degrees==90]
+    >>> march_equinoxes = times[lons.degrees==0]
+    >>> june_solstices = times[lons.degrees==90]
+    >>> sept_equinoxes = times[lons.degrees==180]
+    >>> dec_solstices = times[lons.degrees==270]
     
     Arguments
     ---------
@@ -476,7 +479,7 @@ def seasons(earth, t0, t1):
 
     left_edges, right_edges, targets = _find_value(f, [0, 90, 180, 270], partition_edges)
         
-    times = newton(f, left_edges, right_edges, fn=targets)
+    times = newton(f, left_edges, right_edges, targets)
 
     return ts.tt(jd=times), Angle(degrees=targets)
 
@@ -500,6 +503,9 @@ def moon_quarters(moon, t0, t1, kind='all'):
     >>> t1 = ts.utc(2017, 2)
     >>> times, lon_diffs = moon_quarters(moon, t0, t1)
     >>> new_moons = times[lon_diffs.degrees==0]
+    >>> first_quarters = times[lon_diffs.degrees==90]
+    >>> full_moons = times[lon_diffs.degrees==180]
+    >>> last_quarters = times[lon_diffs.degrees==270]
     
     Arguments
     ---------
@@ -527,6 +533,6 @@ def moon_quarters(moon, t0, t1, kind='all'):
 
     left_edges, right_edges, targets = _find_value(f, [0, 90, 180, 270], partition_edges)
         
-    times = newton(f, left_edges, right_edges, fn=targets)
+    times = newton(f, left_edges, right_edges, targets)
 
     return ts.tt(jd=times), Angle(degrees=targets)

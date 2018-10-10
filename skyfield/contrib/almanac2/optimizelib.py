@@ -1,39 +1,51 @@
 import numpy
 
-def newton(f, x0, x1, fn=None, tol=1e-10):
+def newton(f, t0, t1, targets=None, tol=1e-10):
     max_iters = 50
     
-    if fn is None:
-        fn = numpy.zeros_like(x0)
+    if targets is None:
+        targets = numpy.zeros_like(t0)
     
-    def g(x, fn):
-        return (f(x) - fn + 180)%360 - 180
+    def g(t, targets):
+        return (f(t) - targets + 180)%360 - 180
     
-    f0, f1 = g(x0, fn), g(x1, fn)
+    f0, f1 = g(t0, targets), g(t1, targets)
     
     iters = 0
     while iters < max_iters:   
-        converged = (f1 == 0) + (abs(x1 - x0) < tol) + (f1 == f0)
+        converged = (f1 == 0) + (abs(t1 - t0) < tol) + (f1 == f0)
         if converged.all():
             break
         inds = ~converged
 
-        x0[inds], x1[inds] = x1[inds], x1[inds] + (x1[inds] - x0[inds]) / (f0[inds]/f1[inds] - 1)
-        f0[inds], f1[inds] = f1[inds], g(x1[inds], fn[inds])
+        t0[inds], t1[inds] = t1[inds], t1[inds] + (t1[inds] - t0[inds]) / (f0[inds]/f1[inds] - 1)
+        f0[inds], f1[inds] = f1[inds], g(t1[inds], targets[inds])
         iters += 1
-    return x1
+    return t1
 
 
-def bracket(func, xa, xb, sign_of_extremes=None, grow_limit=110.0, maxiter=1000):
+def bracket(func, xa, xb, sign_of_extremes=None, f0=None, f1=None):
     _gold = 1.618034  # golden ratio: (1.0+sqrt(5.0))/2.0
     _verysmall_num = 1e-21
+    grow_limit=110.0
+    maxiter=1000
+    funcalls = 0
     failing = numpy.ones_like(xa, dtype=bool)
     
     def g(x, sign_of_extremes):
         return -sign_of_extremes*func(x) + (sign_of_extremes==1)*360
     
-    fa = g(xa, sign_of_extremes)
-    fb = g(xb, sign_of_extremes)
+    if f0 is not None:
+        fa = -sign_of_extremes*f0 + (sign_of_extremes==1)*360
+    else:
+        fa = g(xa, sign_of_extremes)
+        funcalls += 1
+ 
+    if f1 is not None:
+        fb = -sign_of_extremes*f1 + (sign_of_extremes==1)*360
+    else:
+        fb = g(xb, sign_of_extremes)
+        funcalls += 1
     
     # Switch so fa > fb
     ind = fa<fb
@@ -42,7 +54,7 @@ def bracket(func, xa, xb, sign_of_extremes=None, grow_limit=110.0, maxiter=1000)
     
     xc = xb + _gold * (xb - xa)
     fc = g(xc, sign_of_extremes)
-    funcalls = 3
+    funcalls += 1
     iter_ = 0
     
     failing[fc>=fb] = False
@@ -125,23 +137,22 @@ def bracket(func, xa, xb, sign_of_extremes=None, grow_limit=110.0, maxiter=1000)
     return xa, xb, xc, fa, fb, fc, funcalls
 
 
-def brent_min(f, left, right, sign_of_extremes=None, tol=1.48e-8):
+def brent_min(f, left, right, sign_of_extremes=None, f0=None, f1=None, tol=1.48e-8):
     # set up for optimization
     maxiter = 500
     mintol = 1e-11
     
     def g(x, sign_of_extremes):
-        return -sign_of_extremes*func(x) + (sign_of_extremes==1)*360
+        return -sign_of_extremes*f(x) + (sign_of_extremes==1)*360
     
-    func = f
-    xa, xb, xc, fa, fb, fc, funcalls = bracket(f, left, right, sign_of_extremes)
+    xa, xb, xc, fa, fb, fc, funcalls = bracket(f, left, right, sign_of_extremes, f0, f1)
     _cg = 0.3819660
     x = numpy.copy(xb)
     w = numpy.copy(xb)
     v = numpy.copy(xb)
-    fw = g(x, sign_of_extremes)
-    fv = numpy.copy(fw)
-    fx = numpy.copy(fw)
+    fw = numpy.copy(fb)
+    fv = numpy.copy(fb)
+    fx = numpy.copy(fb)
     
     a = numpy.zeros_like(xa)
     b = numpy.zeros_like(xb)
@@ -161,7 +172,6 @@ def brent_min(f, left, right, sign_of_extremes=None, tol=1.48e-8):
     p = numpy.zeros_like(a)
     dx_temp = numpy.zeros_like(a)
 
-    funcalls = 1
     iter_ = 0
     while (iter_ < maxiter):
         tol1 = tol * numpy.abs(x) + mintol
