@@ -38,7 +38,7 @@ def _is_satellite(body):
     
 #%% functions for finding/ isolating partitions
             
-def _find_value(f, values, partition_edges, slope_at_zero='positive'):
+def _find_value(f, values, partition_edges, slope='any'):
     f_values = f(partition_edges)             
                 
     partition_values = empty(len(partition_edges)-1)
@@ -46,11 +46,11 @@ def _find_value(f, values, partition_edges, slope_at_zero='positive'):
     
     for value in values:
         g_values = (f_values - value + 180)%360 - 180
-        if slope_at_zero=='positive':
+        if slope=='positive':
             found = (sign(g_values[:-1])==-1) * (sign(g_values[1:])==1)
-        elif slope_at_zero=='negative':
+        elif slope=='negative':
             found = (sign(g_values[:-1])==1) * (sign(g_values[1:])==-1)
-        elif slope_at_zero=='any':
+        elif slope=='any':
             found = sign(g_values[:-1]) != sign(g_values[1:])
         
         if (isfinite(partition_values) * found).any():
@@ -218,7 +218,7 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     f = partial(_lha, observer, body)    
     partition_edges = make_partitions(t0.tt, t1.tt, .2)
     
-    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 180], partition_edges)
+    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 180], partition_edges, slope='positive')
     
     times = secant(f, left_edges, right_edges, targets, f0, f1)
     
@@ -345,7 +345,7 @@ def risings_settings(observer, body, t0, t1):
     body_culminations = culminations(observer, body, t0, t1)[0].tt
     partition_edges = hstack([t0.tt, body_culminations, t1.tt])    
     
-    left_edges, right_edges, targets, f0, f1, is_positive = _find_value(f, value, partition_edges, slope_at_zero='any')
+    left_edges, right_edges, targets, f0, f1, is_positive = _find_value(f, value, partition_edges)
     
     times = secant(f, left_edges, right_edges, targets, f0, f1, tol=1e-15)
     
@@ -410,7 +410,7 @@ def twilights(observer, sun, t0, t1, kind='civil'):
     else:
         raise ValueError("kind must be 'civil', 'nautical', or 'astronomical'")
 
-    left_edges, right_edges, targets, f0, f1, is_positive = _find_value(f, value, partition_edges, slope_at_zero='any')
+    left_edges, right_edges, targets, f0, f1, is_positive = _find_value(f, value, partition_edges)
 
     times = secant(f, left_edges, right_edges, targets, f0, f1)
 
@@ -467,7 +467,7 @@ def seasons(earth, t0, t1):
 
     partition_edges = make_partitions(t0.tt, t1.tt, 365*.2)
 
-    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges)
+    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges, slope='positive')
         
     times = secant(f, left_edges, right_edges, targets, f0, f1)
 
@@ -521,7 +521,7 @@ def moon_quarters(moon, t0, t1, kind='all'):
     
     partition_edges = make_partitions(t0.tt, t1.tt, 29*.2)
 
-    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges)
+    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges, slope='positive')
         
     times = secant(f, left_edges, right_edges, targets, f0, f1)
 
