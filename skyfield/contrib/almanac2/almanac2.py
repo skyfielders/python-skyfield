@@ -81,22 +81,22 @@ def _find_extremes(f, partition_edges, find='min'):
     
     if find == 'min' or find == 'any':
         found = (sign(f_dot[:-1])==-1) * (sign(f_dot[1:])==1)
-        partition_values[found] = -1
+        partition_values[found] = 1
     
     if find == 'max' or find == 'any':
         found = (sign(f_dot[:-1])==1) * (sign(f_dot[1:])==-1)
         if find == 'any' and ((partition_values!=0) * found).any():
             raise ValueError('Multiple extremes found in the same partition. Make the partitions smaller.')
-        partition_values[found] = 1
+        partition_values[found] = -1
         
     indices = nonzero(partition_values)[0]
     left_edges = partition_edges[indices]
     right_edges = partition_edges[indices+1]
-    sign_of_extremes = partition_values[indices]
+    sign_of_accel = partition_values[indices]
     f0 = left[indices]
     f1 = left[indices+1]
     
-    return left_edges, right_edges, sign_of_extremes, f0, f1
+    return left_edges, right_edges, sign_of_accel, f0, f1
 
 
 def make_partitions(start, end, partition_width):
@@ -283,9 +283,9 @@ def culminations(observer, body, t0, t1, kind='upper'):
     else:
         raise ValueError("kind must be 'all', 'upper', or 'lower'")
 
-    left_edges, right_edges, sign_of_extreme, f0, f1 = _find_extremes(f, partition_edges, find)
+    left_edges, right_edges, sign_of_accel, f0, f1 = _find_extremes(f, partition_edges, find)
 
-    times = brent_min(f, left_edges, right_edges, sign_of_extreme, f0, f1, tol=1e-15)
+    times = brent_min(f, left_edges, right_edges, sign_of_accel, f0, f1, tol=1e-15)
 
     return ts.tt(jd=times)
     

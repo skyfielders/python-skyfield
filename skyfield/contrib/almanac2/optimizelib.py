@@ -32,7 +32,7 @@ def secant(f, t0, t1, targets=None, f0=None, f1=None, tol=1e-10):
     return t1
 
 
-def bracket(func, xa, xb, sign_of_extremes=None, f0=None, f1=None):
+def bracket(func, xa, xb, sign_of_accel=None, f0=None, f1=None):
     _gold = 1.618034  # golden ratio: (1.0+sqrt(5.0))/2.0
     _verysmall_num = 1e-21
     grow_limit=110.0
@@ -40,19 +40,19 @@ def bracket(func, xa, xb, sign_of_extremes=None, f0=None, f1=None):
     funcalls = 0
     failing = numpy.ones_like(xa, dtype=bool)
     
-    def g(x, sign_of_extremes):
-        return -sign_of_extremes*func(x) + (sign_of_extremes==1)*360
+    def g(x, sign_of_accel):
+        return sign_of_accel*func(x) + (sign_of_accel==1)*360
     
     if f0 is not None:
-        fa = -sign_of_extremes*f0 + (sign_of_extremes==1)*360
+        fa = sign_of_accel*f0 + (sign_of_accel==1)*360
     else:
-        fa = g(xa, sign_of_extremes)
+        fa = g(xa, sign_of_accel)
         funcalls += 1
  
     if f1 is not None:
-        fb = -sign_of_extremes*f1 + (sign_of_extremes==1)*360
+        fb = sign_of_accel*f1 + (sign_of_accel==1)*360
     else:
-        fb = g(xb, sign_of_extremes)
+        fb = g(xb, sign_of_accel)
         funcalls += 1
     
     # Switch so fa > fb
@@ -61,7 +61,7 @@ def bracket(func, xa, xb, sign_of_extremes=None, f0=None, f1=None):
     fa[ind], fb[ind] = fb[ind], fa[ind]
     
     xc = xb + _gold * (xb - xa)
-    fc = g(xc, sign_of_extremes)
+    fc = g(xc, sign_of_accel)
     funcalls += 1
     iter_ = 0
     
@@ -90,7 +90,7 @@ def bracket(func, xa, xb, sign_of_extremes=None, f0=None, f1=None):
         
         fw = numpy.zeros_like(xa)
         
-        fw[case1] = g(w[case1], sign_of_extremes[case1])
+        fw[case1] = g(w[case1], sign_of_accel[case1])
         funcalls += 1
         
         ind1 = case1 * (fw < fc) * failing
@@ -107,16 +107,16 @@ def bracket(func, xa, xb, sign_of_extremes=None, f0=None, f1=None):
         failing[ind2] = False
             
         w[case1] = xc[case1] + _gold * (xc[case1] - xb[case1])
-        fw[case1] = g(w[case1], sign_of_extremes[case1])
+        fw[case1] = g(w[case1], sign_of_accel[case1])
         funcalls += 1
 
         w[case2] = wlim[case2]
         if case2.any():
-            fw[case2] = g(w[case2], sign_of_extremes[case2])
+            fw[case2] = g(w[case2], sign_of_accel[case2])
             funcalls += 1
 
         if case3.any():
-            fw[case3] = g(w[case3], sign_of_extremes[case3])
+            fw[case3] = g(w[case3], sign_of_accel[case3])
             funcalls += 1
         
         ind = case3 * (fw < fc) * failing
@@ -127,13 +127,13 @@ def bracket(func, xa, xb, sign_of_extremes=None, f0=None, f1=None):
         fc[ind] = fw[ind]
         
         if ind.any():
-            fw[ind] = g(w[ind], sign_of_extremes[ind])
+            fw[ind] = g(w[ind], sign_of_accel[ind])
             funcalls += 1
 
         w[case4] = xc[case4] + _gold * (xc[case4] - xb[case4])
         
         if case4.any():
-            fw[case4] = g(w[case4], sign_of_extremes[case4])
+            fw[case4] = g(w[case4], sign_of_accel[case4])
             funcalls += 1
         
         xa[failing] = xb[failing]
@@ -145,15 +145,15 @@ def bracket(func, xa, xb, sign_of_extremes=None, f0=None, f1=None):
     return xa, xb, xc, fa, fb, fc, funcalls
 
 
-def brent_min(f, left, right, sign_of_extremes=None, f0=None, f1=None, tol=1.48e-8):
+def brent_min(f, left, right, sign_of_accel=None, f0=None, f1=None, tol=1.48e-8):
     # set up for optimization
     maxiter = 500
     mintol = 1e-11
     
-    def g(x, sign_of_extremes):
-        return -sign_of_extremes*f(x) + (sign_of_extremes==1)*360
+    def g(x, sign_of_accel):
+        return sign_of_accel*f(x) + (sign_of_accel==1)*360
     
-    xa, xb, xc, fa, fb, fc, funcalls = bracket(f, left, right, sign_of_extremes, f0, f1)
+    xa, xb, xc, fa, fb, fc, funcalls = bracket(f, left, right, sign_of_accel, f0, f1)
     _cg = 0.3819660
     x = numpy.copy(xb)
     w = numpy.copy(xb)
@@ -233,7 +233,7 @@ def brent_min(f, left, right, sign_of_extremes=None, f0=None, f1=None, tol=1.48e
             else:
                 u[i] = x[i] + rat[i]
                 
-        fu[not_converged] = g(u[not_converged], sign_of_extremes[not_converged])      # calculate new output value
+        fu[not_converged] = g(u[not_converged], sign_of_accel[not_converged])      # calculate new output value
         funcalls += 1
 
         for i in not_converged:
