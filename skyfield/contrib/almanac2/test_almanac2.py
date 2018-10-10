@@ -122,18 +122,13 @@ def test_moon_quarters():
 def test_sun_risings_settings():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times = risings_settings(greenwich, sun, t0, t1)
+    times, kinds = risings_settings(greenwich, sun, t0, t1)
     
     assert isinstance(times, Time)
-    assert len(times) == 62
+    assert isinstance(kinds, ndarray)
+    assert len(times) == len(kinds) == 62
     
     compare(times[0].tt, ts.utc(2017, 1, 1, 8, 6).tt, minute/2)
-    
-    rise_times = risings_settings(greenwich, sun, t0, t1, 'rise')
-    set_times = risings_settings(greenwich, sun, t0, t1, 'set')
-    all_times = concatenate([rise_times.tt, set_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all()
     
     # Check that the found times produce the correct data    
     f = partial(_alt, greenwich, sun)
@@ -145,18 +140,13 @@ def test_sun_risings_settings():
 def test_moon_risings_settings():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times = risings_settings(greenwich, moon, t0, t1)
+    times, kinds = risings_settings(greenwich, moon, t0, t1)
     
     assert isinstance(times, Time)
-    assert len(times) == 60
+    assert isinstance(kinds, ndarray)
+    assert len(times) == len(kinds) == 60
     
     compare(times[0].tt, ts.utc(2017, 1, 1, 9, 46).tt, minute/2)
-    
-    rise_times = risings_settings(greenwich, moon, t0, t1, 'rise')
-    set_times = risings_settings(greenwich, moon, t0, t1, 'set')
-    all_times = concatenate([rise_times.tt, set_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all() 
     
     # Check that the found times produce the correct data
     f = partial(_moon_ul_alt, greenwich, moon)
@@ -167,23 +157,18 @@ def test_moon_risings_settings():
 def test_ISS_risings_settings():
     t0 = ts.utc(2017, 6, 1)
     t1 = ts.utc(2017, 6, 2)
-    times = risings_settings(greenwich, ISS, t0, t1)
+    times, kinds = risings_settings(greenwich, ISS, t0, t1)
     
     assert isinstance(times, Time)
-    assert len(times) == 13
-    
-    rise_times = risings_settings(greenwich, ISS, t0, t1, 'rise')
-    set_times = risings_settings(greenwich, ISS, t0, t1, 'set')
-    all_times = concatenate([rise_times.tt, set_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all() 
+    assert isinstance(kinds, ndarray)
+    assert len(times) == len(kinds) == 13
     
     # Check that the found times produce the correct data
     f = partial(_satellite_alt, greenwich, ISS)
     assert is_root(f, times.tt, -34/60, ms/2)
     
     # Check that same result is found if plain Topos is used as observer
-    times2 = risings_settings(greenwich.positives[-1], ISS, t0, t1)
+    times2, _ = risings_settings(greenwich.positives[-1], ISS, t0, t1)
     assert (times.tt == times2.tt).all()
     
 
@@ -338,7 +323,7 @@ def test_ISS_culminations():
     assert is_extreme(f, times.tt, 2*ms)
     
     # Check that same result is found if plain Topos is used as observer
-    times2, _ = culminations(greenwich.positives[-1], ISS, t0, t1, 'all')
+    times2, _ = culminations(greenwich.positives[-1], ISS, t0, t1)
     assert (times.tt == times2.tt).all()
 
 

@@ -65,7 +65,9 @@ def _find_value(f, values, partition_edges, slope_at_zero='positive'):
     f0 = f_values[indices]
     f1 = f_values[indices+1]
     
-    return left_edges, right_edges, targets, f0, f1
+    is_positive = ((sign(g_values[:-1])==-1) * (sign(g_values[1:])==1))[indices]
+    
+    return left_edges, right_edges, targets, f0, f1, is_positive
 
 
 def _find_extremes(f, partition_edges, find='min'):
@@ -216,14 +218,14 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     f = partial(_lha, observer, body)    
     partition_edges = make_partitions(t0.tt, t1.tt, .2)
     
-    left_edges, right_edges, targets, f0, f1 = _find_value(f, [0, 180], partition_edges)
+    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 180], partition_edges)
     
     times = secant(f, left_edges, right_edges, targets, f0, f1)
     
     return ts.tt(jd=times), Angle(degrees=targets, preference='hours')
 
 
-def culminations(observer, body, t0, t1, kind='upper'):
+def culminations(observer, body, t0, t1):
     """Calculates data about upper and lower culminations.
     
     This function searches between ``t0`` and ``t1`` for times when `body`'s 
@@ -238,7 +240,9 @@ def culminations(observer, body, t0, t1, kind='upper'):
     >>> greenwich = earth + Topos('51.5 N', '0 W')
     >>> t0 = ts.utc(2017, 1, 1)
     >>> t1 = ts.utc(2017, 1, 8)
-    >>> culminations(greenwich, sun, t0, t1)
+    >>> times, kinds = culminations(greenwich, sun, t0, t1)
+    >>> upper_culminations = times[kinds=='upper']
+    >>> lower_culminations = times[kinds=='lower']
     
     Arguments
     ---------
@@ -250,15 +254,14 @@ def culminations(observer, body, t0, t1, kind='upper'):
         Time object of length 1 representing the start of the search interval
     t1 : Time
         Time object of length 1 representing the end of the search interval
-    kind : str
-        ``'upper'`` for local altitude maximums
-        ``'lower'`` for local altitude minimums
-        ``'all'`` for both upper and lower culminations
         
     Returns
     -------
     times : Time
         Times of altitude maximums or minimums
+    kinds : ndarray, dtype=str
+        an array that contains 'upper' for upper culminations, or 'lower' for 
+        lower culminations
     """
     if _is_satellite(body):
         if getattr(body, 'positives', ()):
@@ -279,14 +282,13 @@ def culminations(observer, body, t0, t1, kind='upper'):
     times = brent_min(f, left_edges, right_edges, sign_of_accel, f0, f1, tol=1e-15)
 
     kinds = empty_like(sign_of_accel, dtype=str)
-    minimums = sign_of_accel == 1
-    kinds[minimums] = 'min'
-    kinds[~minimums] = 'max'
+    kinds[sign_of_accel==1] = 'lower'
+    kinds[sign_of_accel==-1] = 'upper'
 
     return ts.tt(jd=times), kinds
     
 
-def risings_settings(observer, body, t0, t1, kind='all'):
+def risings_settings(observer, body, t0, t1):
     """Calculates data about when an object rises and sets.
     
     This function searches between ``t0`` and ``t1`` for times when `body`'s 
@@ -301,7 +303,9 @@ def risings_settings(observer, body, t0, t1, kind='all'):
     >>> greenwich = earth + Topos('51.5 N', '0 W')
     >>> t0 = ts.utc(2017, 1, 1)
     >>> t1 = ts.utc(2017, 1, 8)
-    >>> risings_settings(greenwich, sun, t0, t1, 'rise')
+    >>> times, kinds = risings_settings(greenwich, sun, t0, t1)
+    >>> risings = times[kinds=='rise']
+    >>> settings = times[kinds=='set']
     
     Arguments
     ---------
@@ -313,15 +317,13 @@ def risings_settings(observer, body, t0, t1, kind='all'):
         Time object of length 1 representing the start of the search interval
     t1 : Time
         Time object of length 1 representing the end of the search interval
-    kind : str
-        ``'all'`` for when ``body`` rises and sets
-        ``'rise'`` for when ``body`` rises
-        ``'set'`` for when ``body`` sets
         
     Returns
     -------
     times : Time
         Times that `body` rises or sets
+    kinds : ndarray, dtype=str
+        an array that contains 'rise' for risings, or 'set' for settings
     """
     if _is_satellite(body):
         if getattr(body, 'positives', ()):
@@ -340,23 +342,18 @@ def risings_settings(observer, body, t0, t1, kind='all'):
         f = partial(_alt, observer, body)
         value = [0]
     
-    body_culminations = culminations(observer, body, t0, t1, kind='all')[0].tt
+    body_culminations = culminations(observer, body, t0, t1)[0].tt
     partition_edges = hstack([t0.tt, body_culminations, t1.tt])    
     
-    if kind == 'all':
-        slope='any'
-    elif kind == 'rise':
-        slope='positive'
-    elif kind == 'set':
-        slope='negative'
-    else:
-        raise ValueError("kind must be 'all', 'rise', or 'set'")
-    
-    left_edges, right_edges, targets, f0, f1 = _find_value(f, value, partition_edges, slope_at_zero=slope)
+    left_edges, right_edges, targets, f0, f1, is_positive = _find_value(f, value, partition_edges, slope_at_zero='any')
     
     times = secant(f, left_edges, right_edges, targets, f0, f1, tol=1e-15)
     
-    return ts.tt(jd=times)
+    kinds = empty_like(is_positive, dtype=str)
+    kinds[is_positive] = 'rise'
+    kinds[~is_positive] = 'set'
+
+    return ts.tt(jd=times), kinds
     
 
 def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
@@ -400,7 +397,7 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
         Times that twilight starts in the morning and/ or ends in the evening
         """
         
-    sun_culminations = culminations(observer, sun, t0, t1, kind='all')[0].tt
+    sun_culminations = culminations(observer, sun, t0, t1)[0].tt
     partition_edges = hstack([t0.tt, sun_culminations, t1.tt])
     
     f = partial(_alt, observer, sun)
@@ -422,7 +419,7 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
     else:
         raise ValueError("begin_or_end must be 'all', 'begin', or 'end'")
 
-    left_edges, right_edges, targets, f0, f1 = _find_value(f, value, partition_edges, slope_at_zero=slope)
+    left_edges, right_edges, targets, f0, f1, is_positive = _find_value(f, value, partition_edges, slope_at_zero=slope)
 
     times = secant(f, left_edges, right_edges, targets, f0, f1)
 
@@ -475,7 +472,7 @@ def seasons(earth, t0, t1):
 
     partition_edges = make_partitions(t0.tt, t1.tt, 365*.2)
 
-    left_edges, right_edges, targets, f0, f1 = _find_value(f, [0, 90, 180, 270], partition_edges)
+    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges)
         
     times = secant(f, left_edges, right_edges, targets, f0, f1)
 
@@ -529,7 +526,7 @@ def moon_quarters(moon, t0, t1, kind='all'):
     
     partition_edges = make_partitions(t0.tt, t1.tt, 29*.2)
 
-    left_edges, right_edges, targets, f0, f1 = _find_value(f, [0, 90, 180, 270], partition_edges)
+    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges)
         
     times = secant(f, left_edges, right_edges, targets, f0, f1)
 
