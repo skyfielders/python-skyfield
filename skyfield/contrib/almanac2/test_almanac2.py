@@ -1,4 +1,4 @@
-from skyfield.api import Loader, Topos, Angle
+from skyfield.api import Loader, Topos, Angle, EarthSatellite
 from skyfield.timelib import Time
 from almanac2 import (meridian_transits, culminations, twilights, 
                        risings_settings, seasons, moon_quarters)
@@ -23,8 +23,11 @@ mercury = ephem['mercury']
 greenwich = earth + Topos('51.5 N', '0 W')
 greenwich_topos = Topos('51.5 N', '0 W')
 
-satellites = load.tle(r'stations.txt')
-ISS = earth + satellites['ISS']
+iss_tle = """\
+1 25544U 98067A   18161.85073725  .00003008  00000-0  52601-4 0  9993
+2 25544  51.6418  50.3007 0003338 171.6979 280.7366 15.54163173117534
+"""
+ISS = earth + EarthSatellite(*iss_tle.splitlines())
 
 jup_ephem = load('jup310.bsp')
 jupiter = jup_ephem['jupiter']
