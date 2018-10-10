@@ -1,6 +1,6 @@
 import numpy
 
-def newton(f, t0, t1, targets=None, f0=None, f1=None, tol=1e-10):
+def secant(f, t0, t1, targets=None, f0=None, f1=None, tol=1e-10):
     max_iters = 50
     
     if targets is None:

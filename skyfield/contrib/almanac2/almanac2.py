@@ -1,6 +1,6 @@
 from skyfield.api import load, Topos, EarthSatellite, Angle
 from skyfield.constants import tau
-from optimizelib import newton, brent_min
+from optimizelib import secant, brent_min
 from numpy import (degrees, arcsin, isfinite, hstack, nan, empty, linspace, 
                    ceil, sign, nonzero, zeros)
 from functools import partial
@@ -218,7 +218,7 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     
     left_edges, right_edges, targets, f0, f1 = _find_value(f, [0, 180], partition_edges)
     
-    times = newton(f, left_edges, right_edges, targets, f0, f1)
+    times = secant(f, left_edges, right_edges, targets, f0, f1)
     
     return ts.tt(jd=times), Angle(degrees=targets, preference='hours')
 
@@ -358,7 +358,7 @@ def risings_settings(observer, body, t0, t1, kind='all'):
     
     left_edges, right_edges, targets, f0, f1 = _find_value(f, value, partition_edges, slope_at_zero=slope)
     
-    times = newton(f, left_edges, right_edges, targets, f0, f1, tol=1e-15)
+    times = secant(f, left_edges, right_edges, targets, f0, f1, tol=1e-15)
     
     return ts.tt(jd=times)
     
@@ -428,7 +428,7 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
 
     left_edges, right_edges, targets, f0, f1 = _find_value(f, value, partition_edges, slope_at_zero=slope)
 
-    times = newton(f, left_edges, right_edges, targets, f0, f1)
+    times = secant(f, left_edges, right_edges, targets, f0, f1)
 
     return ts.tt(jd=times)
     
@@ -481,7 +481,7 @@ def seasons(earth, t0, t1):
 
     left_edges, right_edges, targets, f0, f1 = _find_value(f, [0, 90, 180, 270], partition_edges)
         
-    times = newton(f, left_edges, right_edges, targets, f0, f1)
+    times = secant(f, left_edges, right_edges, targets, f0, f1)
 
     return ts.tt(jd=times), Angle(degrees=targets)
 
@@ -535,6 +535,6 @@ def moon_quarters(moon, t0, t1, kind='all'):
 
     left_edges, right_edges, targets, f0, f1 = _find_value(f, [0, 90, 180, 270], partition_edges)
         
-    times = newton(f, left_edges, right_edges, targets, f0, f1)
+    times = secant(f, left_edges, right_edges, targets, f0, f1)
 
     return ts.tt(jd=times), Angle(degrees=targets)
