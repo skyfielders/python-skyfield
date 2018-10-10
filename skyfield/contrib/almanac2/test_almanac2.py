@@ -4,7 +4,7 @@ from almanac2 import (meridian_transits, culminations, twilights,
                        risings_settings, seasons, moon_quarters)
 from almanac2 import (_ecliptic_lon_diff, _moon_ul_alt, _lha, _alt,
                        _satellite_alt, _ecliptic_lon)
-from numpy import concatenate, ndarray
+from numpy import ndarray
 from functools import partial
 
 load = Loader(r'C:\Users\Josh\Scripts\Skyfield_Data')
@@ -19,15 +19,13 @@ venus = ephem['venus']
 jupiter_bc = ephem['jupiter barycenter']
 mercury = ephem['mercury']
 
-# TODO: use greenwich_topos in all places
-greenwich = earth + Topos('51.5 N', '0 W')
-greenwich_topos = Topos('51.5 N', '0 W')
+greenwich = Topos('51.5 N', '0 W')
 
 iss_tle = """\
 1 25544U 98067A   18161.85073725  .00003008  00000-0  52601-4 0  9993
 2 25544  51.6418  50.3007 0003338 171.6979 280.7366 15.54163173117534
 """
-ISS = earth + EarthSatellite(*iss_tle.splitlines())
+ISS = EarthSatellite(*iss_tle.splitlines())
 
 jup_ephem = load('jup310.bsp')
 jupiter = jup_ephem['jupiter']
@@ -131,7 +129,7 @@ def test_sun_risings_settings():
     compare(times[0].tt, ts.utc(2017, 1, 1, 8, 6).tt, minute/2)
     
     # Check that the found times produce the correct data    
-    f = partial(_alt, greenwich, sun)
+    f = partial(_alt, earth+greenwich, sun)
     assert is_root(f, times.tt, -50/60, ms/2)
 
 
@@ -149,7 +147,7 @@ def test_moon_risings_settings():
     compare(times[0].tt, ts.utc(2017, 1, 1, 9, 46).tt, minute/2)
     
     # Check that the found times produce the correct data
-    f = partial(_moon_ul_alt, greenwich, moon)
+    f = partial(_moon_ul_alt, earth+greenwich, moon)
     assert is_root(f, times.tt, -34/60, ms/2)
     
     
@@ -167,10 +165,6 @@ def test_ISS_risings_settings():
     f = partial(_satellite_alt, greenwich, ISS)
     assert is_root(f, times.tt, -34/60, ms/2)
     
-    # Check that same result is found if plain Topos is used as observer
-    times2, _ = risings_settings(greenwich.positives[-1], ISS, t0, t1)
-    assert (times.tt == times2.tt).all()
-    
 
 # Data Source:
 # http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=2&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
@@ -186,7 +180,7 @@ def test_civil_twilights():
     compare(times[0].tt, ts.utc(2017, 1, 1, 7, 26).tt, minute/2)
     
     # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, sun)
+    f = partial(_alt, earth+greenwich, sun)
     assert is_root(f, times.tt, -6, ms/2)
 
 
@@ -204,7 +198,7 @@ def test_nautical_twilights():
     compare(times[0].tt, ts.utc(2017, 1, 1, 6, 43).tt, minute/2)
     
     # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, sun)
+    f = partial(_alt, earth+greenwich, sun)
     assert is_root(f, times.tt, -12, ms/2)
     
     
@@ -222,7 +216,7 @@ def test_astronomical_twilights():
     compare(times[0].tt, ts.utc(2017, 1, 1, 6, 2).tt, minute/2)
     
     # Check that the found times produce the correct data
-    f = partial(_alt, earth+greenwich_topos, sun)
+    f = partial(_alt, earth+greenwich, sun)
     assert is_root(f, times.tt, -18, ms/2)
     
 
@@ -231,7 +225,7 @@ def test_astronomical_twilights():
 def test_sun_transits():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times, lhas = meridian_transits(greenwich_topos, sun, t0, t1)
+    times, lhas = meridian_transits(greenwich, sun, t0, t1)
     
     assert isinstance(times, Time)
     assert isinstance(lhas, Angle)
@@ -240,7 +234,7 @@ def test_sun_transits():
     compare(times[1].tt, ts.utc(2017, 1, 1, 12, 4).tt, minute/2)
 
     # Check that the found times produce the correct data
-    f = partial(_lha, earth+greenwich_topos, sun)
+    f = partial(_lha, earth+greenwich, sun)
     assert is_root(f, times.tt, lhas._degrees, ms/2)
     
 
@@ -249,7 +243,7 @@ def test_sun_transits():
 def test_mars_transits():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times, lhas = meridian_transits(greenwich_topos, mars, t0, t1, 'all')
+    times, lhas = meridian_transits(greenwich, mars, t0, t1, 'all')
     
     assert isinstance(times, Time)
     assert isinstance(lhas, Angle)
@@ -258,7 +252,7 @@ def test_mars_transits():
     compare(times[1].tt, ts.utc(2017, 1, 1, 16, 2).tt, minute/2)
     
     # Check that the found times produce the correct data
-    f = partial(_lha, greenwich, mars)
+    f = partial(_lha, earth+greenwich, mars)
     assert is_root(f, times.tt, lhas._degrees, ms/2)
     
 
@@ -272,7 +266,7 @@ def test_sun_culminations():
     assert len(times) == len(kinds) == 62
     
     # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, sun)        
+    f = partial(_alt, earth+greenwich, sun)        
     assert is_extreme(f, times.tt, 2*ms)
     
     
@@ -286,7 +280,7 @@ def test_moon_culminations():
     assert len(times) == len(kinds) == 60
 
     # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, moon)    
+    f = partial(_alt, earth+greenwich, moon)    
     assert is_extreme(f, times.tt, 6*ms)
     
     
@@ -301,12 +295,8 @@ def test_ISS_culminations():
     assert len(times) == len(kinds) == 31
 
     # Check that the found times produce the correct data
-    f = partial(_satellite_alt, greenwich.positives[-1], ISS.positives[-1])
+    f = partial(_satellite_alt, greenwich, ISS)
     assert is_extreme(f, times.tt, 2*ms)
-    
-    # Check that same result is found if plain Topos is used as observer
-    times2, _ = culminations(greenwich.positives[-1], ISS, t0, t1)
-    assert (times.tt == times2.tt).all()
 
 
 if __name__ == '__main__':

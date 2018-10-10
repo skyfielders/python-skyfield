@@ -1,25 +1,17 @@
 import numpy
 
 def secant(f, t0, t1, targets=0, f0=None, f1=None, tol=1e-10):
-    max_iters = 50
-    
     if numpy.isscalar(targets):
         targets = numpy.ones_like(t0) * targets
     
     def g(t, targets):
         return (f(t) - targets + 180)%360 - 180
     
-    if f0 is None:
-        g0 = g(t0, targets)
-    else:
-        g0 = (f0 - targets + 180)%360 - 180
-        
-    if f1 is None:
-        g1 = g(t1, targets)
-    else:
-        g1 = (f1 - targets + 180)%360 - 180
+    g0 = (f0 - targets + 180)%360 - 180 if f0 is not None else g(t0, targets)
+    g1 = (f1 - targets + 180)%360 - 180 if f1 is not None else g(t1, targets)
     
     iters = 0
+    max_iters = 50
     while iters < max_iters:   
         converged = (g1 == 0) + (abs(t1 - t0) < tol) + (g1 == g0)
         if converged.all():

@@ -1,5 +1,6 @@
 from skyfield.api import load, Topos, EarthSatellite, Angle
 from skyfield.constants import tau
+from skyfield.vectorlib import VectorSum
 from optimizelib import secant, brent_min
 from numpy import (degrees, arcsin, isfinite, hstack, nan, empty, linspace, 
                    ceil, sign, nonzero, zeros, empty_like)
@@ -9,32 +10,6 @@ __all__ = ['meridian_transits', 'culminations', 'risings_settings',
            'twilights', 'seasons', 'moon_quarters']
 
 ts = load.timescale()
-
-#%% Test Functions   
-
-def _is_earth_based(location):
-    """Returns True if ``location`` is geocentric or topocentric, False otherwise.
-    """
-    if not hasattr(location, 'positives'):
-        return False
-    elif location.target == 399:
-        return True
-    elif isinstance(location.positives[-1], Topos):
-        return True
-    else:
-        return False
-    
-    
-def _is_satellite(body):
-    """Returns true if body or body.positives[-1] is an Earth Satellite
-    """
-    if isinstance(body, EarthSatellite):
-        return True
-    elif getattr(body, 'positives', ()) and isinstance(body.positives[-1], EarthSatellite):
-        return True
-    else:
-        return False
-    
     
 #%% functions for finding/ isolating partitions
             
@@ -123,10 +98,7 @@ def _ecliptic_lon(observer, body, t):
     observer.at(ts.tt(jd=t)).observe(body).apparent().ecliptic_latlon()[1].degrees
     or the ecliptic latitude of body in degrees at terrestrial time t.
     """
-    if _is_earth_based(observer):
-        return observer.at(ts.tt(jd=t)).observe(body).apparent().ecliptic_latlon(epoch='date')[1].degrees
-    else:
-        return observer.at(ts.tt(jd=t)).observe(body).ecliptic_latlon(epoch='date')[1].degrees
+    return observer.at(ts.tt(jd=t)).observe(body).apparent().ecliptic_latlon(epoch='date')[1].degrees
 
 
 def _ecliptic_lon_diff(observer, body1, body2, t):
@@ -200,7 +172,7 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     observer : Topos
         Location of observer
     body : Segment or VectorSum
-        Vector representing the object whose transits are being found
+        Vector representing the object whose transits are being found.
     t0 : Time
         Time object of length 1 representing the start of the search interval
     t1 : Time
@@ -213,9 +185,14 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     hour_angles : Angle
         Local Hour Angle of ``body`` at ``times``
     """ 
-    observer = body.ephemeris['earth'] + observer
+    if not isinstance(observer, Topos):
+        raise ValueError('`observer` should be a plain Topos object.')
+    observer_vector = body.ephemeris['earth'] + observer
     
-    f = partial(_lha, observer, body)    
+    if isinstance(body, EarthSatellite) or (isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite)):
+        raise ValueError("meridian_transits doesn't support EarthSatellites.")
+    
+    f = partial(_lha, observer_vector, body)    
     partition_edges = make_partitions(t0.tt, t1.tt, .2)
     
     left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 180], partition_edges, slope='positive')
@@ -246,10 +223,11 @@ def culminations(observer, body, t0, t1):
     
     Arguments
     ---------
-    observer : VectorSum or Topos
-        VectorSum of earth + Topos, or a plain Topos if ``body`` is a satellite
+    observer : Topos
+        Location of observer
     body : Segment, VectorSum, or EarthSatellite
-        Vector representing the object whose culminations are being found
+        Vector representing the object whose culminations are being found. For 
+        EarthSatellites use a plain Earthsatellite and not a VectorSum.
     t0 : Time
         Time object of length 1 representing the start of the search interval
     t1 : Time
@@ -263,16 +241,19 @@ def culminations(observer, body, t0, t1):
         array containing 'upper' for upper culminations, or 'lower' for lower 
         culminations
     """
-    if _is_satellite(body):
-        if getattr(body, 'positives', ()):
-            body = body.positives[-1]
-        if not isinstance(observer, Topos):
-            observer = observer.positives[-1]
+    if not isinstance(observer, Topos):
+        raise ValueError('`observer` should be a plain Topos object.')
+            
+    if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
+        raise ValueError('`body` should be a plain EarthSatellite, not a VectorSum')
+    
+    if isinstance(body, EarthSatellite):
         f = partial(_satellite_alt, observer, body)
         period = tau/body.model.no/60/24 # days/orbit
         partition_width = period * .2
     else:
-        f = partial(_alt, observer, body)
+        observer_vector = body.ephemeris['earth'] + observer
+        f = partial(_alt, observer_vector, body)
         partition_width = .2
     
     partition_edges = make_partitions(t0.tt, t1.tt, partition_width)
@@ -309,10 +290,11 @@ def risings_settings(observer, body, t0, t1):
     
     Arguments
     ---------
-    observer : VectorSum or Topos
-        VectorSum of earth + Topos, or a plain Topos if ``body`` is a satellite
-    body : Segment or VectorSum
-        Vector representing the object whose rise/set times are being found
+    observer : Topos
+        Location of observer
+    body : Segment, VectorSum, or EarthSatellite
+        Vector representing the object whose rise/set times are being found. 
+        For EarthSatellites use a plain Earthsatellite and not a VectorSum.
     t0 : Time
         Time object of length 1 representing the start of the search interval
     t1 : Time
@@ -325,21 +307,26 @@ def risings_settings(observer, body, t0, t1):
     kinds : ndarray, dtype=str
         array containing 'rise' for risings, or 'set' for settings
     """
-    if _is_satellite(body):
-        if getattr(body, 'positives', ()):
-            body = body.positives[-1]
-        if not isinstance(observer, Topos):
-            observer = observer.positives[-1]
+    if not isinstance(observer, Topos):
+        raise ValueError('`observer` should be a plain Topos object.')
+        
+    if not isinstance(body, EarthSatellite):
+        observer_vector = body.ephemeris['earth'] + observer
+        
+    if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
+        raise ValueError('`body` should be a plain EarthSatellite, not a VectorSum')
+    
+    if isinstance(body, EarthSatellite):
         f = partial(_satellite_alt, observer, body)
         value = [-34/60]
     elif body.target == 10: # sun
-        f = partial(_alt, observer, body)
+        f = partial(_alt, observer_vector, body)
         value = [-50/60]
     elif body.target == 301: # moon
-        f = partial(_moon_ul_alt, observer, body)
+        f = partial(_moon_ul_alt, observer_vector, body)
         value = [-34/60]
     else:
-        f = partial(_alt, observer, body)
+        f = partial(_alt, observer_vector, body)
         value = [0]
     
     body_culminations = culminations(observer, body, t0, t1)[0].tt
@@ -376,8 +363,8 @@ def twilights(observer, sun, t0, t1, kind='civil'):
     
     Arguments
     ---------
-    observer : Segment or VectorSum
-        Vector representing earth or a VectorSum of earth + Topos
+    observer : Topos
+        Location of observer
     sun : Segment
         Segment representing the sun
     t0 : Time
@@ -397,10 +384,14 @@ def twilights(observer, sun, t0, t1, kind='civil'):
         array containing 'am' for morning twilight, or 'pm' for evening twilight
         """
         
+    if not isinstance(observer, Topos):
+        raise ValueError('`observer` should be a plain Topos object.')
+    observer_vector = sun.ephemeris['earth'] + observer
+        
     sun_culminations = culminations(observer, sun, t0, t1)[0].tt
     partition_edges = hstack([t0.tt, sun_culminations, t1.tt])
     
-    f = partial(_alt, observer, sun)
+    f = partial(_alt, observer_vector, sun)
     if kind == 'civil':
         value = [-6]
     elif kind == 'nautical':
