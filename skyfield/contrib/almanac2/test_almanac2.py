@@ -177,23 +177,17 @@ def test_ISS_risings_settings():
 def test_civil_twilights():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times = twilights(greenwich, sun, t0, t1, 'civil')
+    times, am_pm = twilights(greenwich, sun, t0, t1, 'civil')
 
     assert isinstance(times, Time)
-    assert len(times) == 62
+    assert isinstance(am_pm, ndarray)
+    assert len(times) == len(am_pm) == 62
     
     compare(times[0].tt, ts.utc(2017, 1, 1, 7, 26).tt, minute/2)
     
-    begin_times = twilights(greenwich, sun, t0, t1, 'civil', 'begin')
-    end_times = twilights(greenwich, sun, t0, t1, 'civil', 'end')
-    all_times = concatenate([begin_times.tt, end_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all()
-    
     # Check that the found times produce the correct data
     f = partial(_alt, greenwich, sun)
-    assert is_root(f, begin_times.tt, -6, ms/2)
-    assert is_root(f, end_times.tt, -6, ms/2)
+    assert is_root(f, times.tt, -6, ms/2)
 
 
 # Data Source:
@@ -201,23 +195,17 @@ def test_civil_twilights():
 def test_nautical_twilights():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times = twilights(greenwich, sun, t0, t1, 'nautical')
+    times, am_pm = twilights(greenwich, sun, t0, t1, 'nautical')
     
     assert isinstance(times, Time)
-    assert len(times) == 62
+    assert isinstance(am_pm, ndarray)
+    assert len(times) == len(am_pm) == 62
     
     compare(times[0].tt, ts.utc(2017, 1, 1, 6, 43).tt, minute/2)
     
-    begin_times = twilights(greenwich, sun, t0, t1, 'nautical', 'begin')
-    end_times = twilights(greenwich, sun, t0, t1, 'nautical', 'end')
-    all_times = concatenate([begin_times.tt, end_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all() 
-    
     # Check that the found times produce the correct data
     f = partial(_alt, greenwich, sun)
-    assert is_root(f, begin_times.tt, -12, ms/2)
-    assert is_root(f, end_times.tt, -12, ms/2)
+    assert is_root(f, times.tt, -12, ms/2)
     
     
 # Data Source:
@@ -225,23 +213,17 @@ def test_nautical_twilights():
 def test_astronomical_twilights():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times = twilights(greenwich, sun, t0, t1, 'astronomical')
+    times, am_pm = twilights(greenwich, sun, t0, t1, 'astronomical')
     
     assert isinstance(times, Time)
-    assert len(times) == 62
+    assert isinstance(am_pm, ndarray)
+    assert len(times) == len(am_pm) == 62
     
     compare(times[0].tt, ts.utc(2017, 1, 1, 6, 2).tt, minute/2)
     
-    begin_times = twilights(greenwich, sun, t0, t1, 'astronomical', 'begin')
-    end_times = twilights(greenwich, sun, t0, t1, 'astronomical', 'end')
-    all_times = concatenate([begin_times.tt, end_times.tt])
-    all_times.sort()
-    assert (times.tt == all_times).all() 
-    
     # Check that the found times produce the correct data
     f = partial(_alt, earth+greenwich_topos, sun)
-    assert is_root(f, begin_times.tt, -18, ms/2)
-    assert is_root(f, end_times.tt, -18, ms/2)
+    assert is_root(f, times.tt, -18, ms/2)
     
 
 # Data Source:

@@ -260,8 +260,8 @@ def culminations(observer, body, t0, t1):
     times : Time
         Times of altitude maximums or minimums
     kinds : ndarray, dtype=str
-        an array that contains 'upper' for upper culminations, or 'lower' for 
-        lower culminations
+        array containing 'upper' for upper culminations, or 'lower' for lower 
+        culminations
     """
     if _is_satellite(body):
         if getattr(body, 'positives', ()):
@@ -323,7 +323,7 @@ def risings_settings(observer, body, t0, t1):
     times : Time
         Times that `body` rises or sets
     kinds : ndarray, dtype=str
-        an array that contains 'rise' for risings, or 'set' for settings
+        array containing 'rise' for risings, or 'set' for settings
     """
     if _is_satellite(body):
         if getattr(body, 'positives', ()):
@@ -356,7 +356,7 @@ def risings_settings(observer, body, t0, t1):
     return ts.tt(jd=times), kinds
     
 
-def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
+def twilights(observer, sun, t0, t1, kind='civil'):
     """Calculates times when twilight starts in the morning.
    
     This function searches between ``t0`` and ``t1`` for times when the sun's 
@@ -370,7 +370,9 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
     >>> greenwich = earth + Topos('51.5 N', '0 W')
     >>> t0 = ts.utc(2017, 1, 1)
     >>> t1 = ts.utc(2017, 1, 8)
-    >>> twilight_ends(greenwich, t0, t1, kind='nautical')
+    >>> times, am_pm = (greenwich, t0, t1, kind='civil')
+    >>> am_twilights = times[am_pm=='am']
+    >>> pm_twilights = times[am_pm=='pm']
     
     Arguments
     ---------
@@ -386,15 +388,13 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
         ``'civil'`` for civil twilight
         ``'nautical'`` for nautical twilight
         ``'astronomical'`` for astronomical twilight
-    begin_or_end : str
-        ``'all'`` for when twilight begins and ends
-        ``'begin'`` for when twilight begins in the morning
-        ``'end'`` for when twilight ends in the evening
         
     Returns
     -------
     times : Time
         Times that twilight starts in the morning and/ or ends in the evening
+    am_pm : ndarray, dtype=str
+        array containing 'am' for morning twilight, or 'pm' for evening twilight
         """
         
     sun_culminations = culminations(observer, sun, t0, t1)[0].tt
@@ -410,20 +410,15 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
     else:
         raise ValueError("kind must be 'civil', 'nautical', or 'astronomical'")
 
-    if begin_or_end == 'all':
-        slope = 'any'
-    elif begin_or_end == 'begin':
-        slope = 'positive'
-    elif begin_or_end == 'end':
-        slope = 'negative'
-    else:
-        raise ValueError("begin_or_end must be 'all', 'begin', or 'end'")
-
-    left_edges, right_edges, targets, f0, f1, is_positive = _find_value(f, value, partition_edges, slope_at_zero=slope)
+    left_edges, right_edges, targets, f0, f1, is_positive = _find_value(f, value, partition_edges, slope_at_zero='any')
 
     times = secant(f, left_edges, right_edges, targets, f0, f1)
 
-    return ts.tt(jd=times)
+    am_pm = empty_like(is_positive, dtype=str)
+    am_pm[is_positive] = 'am'
+    am_pm[~is_positive] = 'pm'
+
+    return ts.tt(jd=times), am_pm
     
 #%% Geocentric Phenomena, pg. 478 in Explanatory Supplement (1992)
 
