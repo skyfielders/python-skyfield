@@ -1,6 +1,6 @@
 import numpy
 
-def newton(f, t0, t1, targets=None, tol=1e-10):
+def newton(f, t0, t1, targets=None, f0=None, f1=None, tol=1e-10):
     max_iters = 50
     
     if targets is None:
@@ -9,17 +9,25 @@ def newton(f, t0, t1, targets=None, tol=1e-10):
     def g(t, targets):
         return (f(t) - targets + 180)%360 - 180
     
-    f0, f1 = g(t0, targets), g(t1, targets)
+    if f0 is None:
+        g0 = g(t0, targets)
+    else:
+        g0 = (f0 - targets + 180)%360 - 180
+        
+    if f1 is None:
+        g1 = g(t1, targets)
+    else:
+        g1 = (f1 - targets + 180)%360 - 180
     
     iters = 0
     while iters < max_iters:   
-        converged = (f1 == 0) + (abs(t1 - t0) < tol) + (f1 == f0)
+        converged = (g1 == 0) + (abs(t1 - t0) < tol) + (g1 == g0)
         if converged.all():
             break
         inds = ~converged
 
-        t0[inds], t1[inds] = t1[inds], t1[inds] + (t1[inds] - t0[inds]) / (f0[inds]/f1[inds] - 1)
-        f0[inds], f1[inds] = f1[inds], g(t1[inds], targets[inds])
+        t0[inds], t1[inds] = t1[inds], t1[inds] + (t1[inds] - t0[inds]) / (g0[inds]/g1[inds] - 1)
+        g0[inds], g1[inds] = g1[inds], g(t1[inds], targets[inds])
         iters += 1
     return t1
 

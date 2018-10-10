@@ -62,8 +62,10 @@ def _find_value(f, values, partition_edges, slope_at_zero='positive'):
     left_edges = partition_edges[indices]
     right_edges = partition_edges[indices+1]
     targets = partition_values[indices]
+    f0 = f_values[indices]
+    f1 = f_values[indices+1]
     
-    return left_edges, right_edges, targets
+    return left_edges, right_edges, targets, f0, f1
 
 
 def _find_extremes(f, partition_edges, find='min'):
@@ -214,9 +216,9 @@ def meridian_transits(observer, body, t0, t1, kind='upper'):
     f = partial(_lha, observer, body)    
     partition_edges = make_partitions(t0.tt, t1.tt, .2)
     
-    left_edges, right_edges, targets = _find_value(f, [0, 180], partition_edges)
+    left_edges, right_edges, targets, f0, f1 = _find_value(f, [0, 180], partition_edges)
     
-    times = newton(f, left_edges, right_edges, targets)
+    times = newton(f, left_edges, right_edges, targets, f0, f1)
     
     return ts.tt(jd=times), Angle(degrees=targets, preference='hours')
 
@@ -354,9 +356,9 @@ def risings_settings(observer, body, t0, t1, kind='all'):
     else:
         raise ValueError("kind must be 'all', 'rise', or 'set'")
     
-    left_edges, right_edges, targets = _find_value(f, value, partition_edges, slope_at_zero=slope)
+    left_edges, right_edges, targets, f0, f1 = _find_value(f, value, partition_edges, slope_at_zero=slope)
     
-    times = newton(f, left_edges, right_edges, targets, tol=1e-15)
+    times = newton(f, left_edges, right_edges, targets, f0, f1, tol=1e-15)
     
     return ts.tt(jd=times)
     
@@ -424,9 +426,9 @@ def twilights(observer, sun, t0, t1, kind='civil', begin_or_end='all'):
     else:
         raise ValueError("begin_or_end must be 'all', 'begin', or 'end'")
 
-    left_edges, right_edges, targets = _find_value(f, value, partition_edges, slope_at_zero=slope)
+    left_edges, right_edges, targets, f0, f1 = _find_value(f, value, partition_edges, slope_at_zero=slope)
 
-    times = newton(f, left_edges, right_edges, targets)
+    times = newton(f, left_edges, right_edges, targets, f0, f1)
 
     return ts.tt(jd=times)
     
@@ -477,9 +479,9 @@ def seasons(earth, t0, t1):
 
     partition_edges = make_partitions(t0.tt, t1.tt, 365*.2)
 
-    left_edges, right_edges, targets = _find_value(f, [0, 90, 180, 270], partition_edges)
+    left_edges, right_edges, targets, f0, f1 = _find_value(f, [0, 90, 180, 270], partition_edges)
         
-    times = newton(f, left_edges, right_edges, targets)
+    times = newton(f, left_edges, right_edges, targets, f0, f1)
 
     return ts.tt(jd=times), Angle(degrees=targets)
 
@@ -531,8 +533,8 @@ def moon_quarters(moon, t0, t1, kind='all'):
     
     partition_edges = make_partitions(t0.tt, t1.tt, 29*.2)
 
-    left_edges, right_edges, targets = _find_value(f, [0, 90, 180, 270], partition_edges)
+    left_edges, right_edges, targets, f0, f1 = _find_value(f, [0, 90, 180, 270], partition_edges)
         
-    times = newton(f, left_edges, right_edges, targets)
+    times = newton(f, left_edges, right_edges, targets, f0, f1)
 
     return ts.tt(jd=times), Angle(degrees=targets)
