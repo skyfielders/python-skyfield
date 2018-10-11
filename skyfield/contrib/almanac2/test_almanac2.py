@@ -1,7 +1,7 @@
 from skyfield.api import Loader, Topos, Angle, EarthSatellite
 from skyfield.timelib import Time
 from almanac2 import (meridian_transits, culminations, twilights, 
-                       risings_settings, seasons, moon_quarters)
+                       risings_settings, seasons, moon_phases)
 from almanac2 import (_ecliptic_lon_diff, _moon_ul_alt, _lha, _alt,
                        _satellite_alt, _ecliptic_lon)
 from numpy import ndarray
@@ -101,10 +101,10 @@ def test_seasons():
 
 # Data Source:
 # http://aa.usno.navy.mil/cgi-bin/aa_phases.pl?year=2017&month=1&day=1&nump=50&format=p
-def test_moon_quarters():
+def test_moon_phases():
     t0 = ts.utc(2017)
     t1 = ts.utc(2018)
-    times, lon_diffs = moon_quarters(moon, t0, t1)
+    times, lon_diffs = moon_phases(moon, t0, t1)
     
     assert ((lon_diffs.degrees==0) + (lon_diffs.degrees==90) + (lon_diffs.degrees==180) + (lon_diffs.degrees==270)).all()
 

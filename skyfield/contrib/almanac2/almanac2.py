@@ -7,7 +7,7 @@ from numpy import (degrees, arcsin, isfinite, hstack, nan, empty, linspace,
 from functools import partial
 
 __all__ = ['meridian_transits', 'culminations', 'risings_settings', 
-           'twilights', 'seasons', 'moon_quarters']
+           'twilights', 'seasons', 'moon_phases']
 
 ts = load.timescale()
     
@@ -465,7 +465,7 @@ def seasons(earth, t0, t1):
     return ts.tt(jd=times), Angle(degrees=targets)
 
 
-def moon_quarters(moon, t0, t1):
+def moon_phases(moon, t0, t1):
     """Calculates data about new and full moons, first and last quarters.
     
     This function searches between ``t0`` and ``t1`` for times when the moon's 
@@ -482,7 +482,7 @@ def moon_quarters(moon, t0, t1):
     >>> moon = planets['moon']
     >>> t0 = ts.utc(2017, 1)
     >>> t1 = ts.utc(2017, 2)
-    >>> times, lon_diffs = moon_quarters(moon, t0, t1)
+    >>> times, lon_diffs = moon_phases(moon, t0, t1)
     >>> new_moons = times[lon_diffs.degrees==0]
     >>> first_quarters = times[lon_diffs.degrees==90]
     >>> full_moons = times[lon_diffs.degrees==180]
