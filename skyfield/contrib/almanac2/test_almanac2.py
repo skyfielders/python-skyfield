@@ -85,6 +85,8 @@ def test_seasons():
     t1 = ts.utc(2026)
     times, lons = seasons(earth, t0, t1)
     
+    assert ((lons.degrees==0) + (lons.degrees==90) + (lons.degrees==180) + (lons.degrees==270)).all()
+    
     assert isinstance(times, Time)
     assert isinstance(lons, Angle)
     assert len(times) == len(lons.radians) == 104
@@ -104,6 +106,8 @@ def test_moon_quarters():
     t1 = ts.utc(2018)
     times, lon_diffs = moon_quarters(moon, t0, t1)
     
+    assert ((lon_diffs.degrees==0) + (lon_diffs.degrees==90) + (lon_diffs.degrees==180) + (lon_diffs.degrees==270)).all()
+
     assert isinstance(times, Time)
     assert isinstance(lon_diffs, Angle)
     assert len(times) == len(lon_diffs.radians) == 49
@@ -121,6 +125,8 @@ def test_sun_risings_settings():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
     times, kinds = risings_settings(greenwich, sun, t0, t1)
+    
+    assert ((kinds=='rise') + (kinds=='set')).all()
     
     assert isinstance(times, Time)
     assert isinstance(kinds, ndarray)
@@ -140,6 +146,8 @@ def test_moon_risings_settings():
     t1 = ts.utc(2017, 1, 32)
     times, kinds = risings_settings(greenwich, moon, t0, t1)
     
+    assert ((kinds=='rise') + (kinds=='set')).all()
+    
     assert isinstance(times, Time)
     assert isinstance(kinds, ndarray)
     assert len(times) == len(kinds) == 60
@@ -157,6 +165,8 @@ def test_ISS_risings_settings():
     t1 = ts.utc(2017, 6, 2)
     times, kinds = risings_settings(greenwich, ISS, t0, t1)
     
+    assert ((kinds=='rise') + (kinds=='set')).all()
+    
     assert isinstance(times, Time)
     assert isinstance(kinds, ndarray)
     assert len(times) == len(kinds) == 13
@@ -172,6 +182,8 @@ def test_civil_twilights():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
     times, am_pm = twilights(greenwich, sun, t0, t1, 'civil')
+
+    assert ((am_pm=='am') + (am_pm=='pm')).all()
 
     assert isinstance(times, Time)
     assert isinstance(am_pm, ndarray)
@@ -191,6 +203,8 @@ def test_nautical_twilights():
     t1 = ts.utc(2017, 1, 32)
     times, am_pm = twilights(greenwich, sun, t0, t1, 'nautical')
     
+    assert ((am_pm=='am') + (am_pm=='pm')).all()
+
     assert isinstance(times, Time)
     assert isinstance(am_pm, ndarray)
     assert len(times) == len(am_pm) == 62
@@ -209,6 +223,8 @@ def test_astronomical_twilights():
     t1 = ts.utc(2017, 1, 32)
     times, am_pm = twilights(greenwich, sun, t0, t1, 'astronomical')
     
+    assert ((am_pm=='am') + (am_pm=='pm')).all()
+
     assert isinstance(times, Time)
     assert isinstance(am_pm, ndarray)
     assert len(times) == len(am_pm) == 62
@@ -227,6 +243,8 @@ def test_sun_transits():
     t1 = ts.utc(2017, 1, 32)
     times, lhas = meridian_transits(greenwich, sun, t0, t1)
     
+    assert ((lhas.hours==0) + (lhas.hours==12)).all()
+
     assert isinstance(times, Time)
     assert isinstance(lhas, Angle)
     assert len(times) == len(lhas.radians) == 62
@@ -243,7 +261,9 @@ def test_sun_transits():
 def test_mars_transits():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
-    times, lhas = meridian_transits(greenwich, mars, t0, t1, 'all')
+    times, lhas = meridian_transits(greenwich, mars, t0, t1)
+    
+    assert ((lhas.hours==0) + (lhas.hours==12)).all()
     
     assert isinstance(times, Time)
     assert isinstance(lhas, Angle)
@@ -261,6 +281,8 @@ def test_sun_culminations():
     t1 = ts.utc(2017, 1, 32)
     times, kinds = culminations(greenwich, sun, t0, t1)
     
+    assert ((kinds=='upper') + (kinds=='lower')).all()
+    
     assert isinstance(times, Time)
     assert isinstance(kinds, ndarray)
     assert len(times) == len(kinds) == 62
@@ -275,6 +297,8 @@ def test_moon_culminations():
     t1 = ts.utc(2017, 1, 32)
     times, kinds = culminations(greenwich, moon, t0, t1)
     
+    assert ((kinds=='upper') + (kinds=='lower')).all()
+
     assert isinstance(times, Time)
     assert isinstance(kinds, ndarray)
     assert len(times) == len(kinds) == 60
@@ -290,6 +314,8 @@ def test_ISS_culminations():
     t1 = ts.utc(2017, 1, 2)
     times, kinds = culminations(greenwich, ISS, t0, t1)
     
+    assert ((kinds=='upper') + (kinds=='lower')).all()
+
     assert isinstance(times, Time)
     assert isinstance(kinds, ndarray)
     assert len(times) == len(kinds) == 31

@@ -150,7 +150,7 @@ def _satellite_alt(observer, satellite, t):
 
 #%% Topocentric Phenomena, pg. 482 in Explanatory Supplement (1992)
 
-def meridian_transits(observer, body, t0, t1, kind='upper'):
+def meridian_transits(observer, body, t0, t1):
     """Calculates data about upper and lower transits of the local meridian.
     
     This function searches between ``t0`` and ``t1`` for times when ``body``'s 
@@ -262,7 +262,7 @@ def culminations(observer, body, t0, t1):
 
     times = brent_min(f, left_edges, right_edges, sign_of_accel, f0, f1, tol=1e-15)
 
-    kinds = empty_like(sign_of_accel, dtype=str)
+    kinds = empty_like(sign_of_accel, dtype='U5')
     kinds[sign_of_accel==1] = 'lower'
     kinds[sign_of_accel==-1] = 'upper'
 
@@ -336,7 +336,7 @@ def risings_settings(observer, body, t0, t1):
     
     times = secant(f, left_edges, right_edges, targets, f0, f1, tol=1e-15)
     
-    kinds = empty_like(is_positive, dtype=str)
+    kinds = empty_like(is_positive, dtype='U4')
     kinds[is_positive] = 'rise'
     kinds[~is_positive] = 'set'
 
@@ -405,7 +405,7 @@ def twilights(observer, sun, t0, t1, kind='civil'):
 
     times = secant(f, left_edges, right_edges, targets, f0, f1)
 
-    am_pm = empty_like(is_positive, dtype=str)
+    am_pm = empty_like(is_positive, dtype='U2')
     am_pm[is_positive] = 'am'
     am_pm[~is_positive] = 'pm'
 
@@ -465,7 +465,7 @@ def seasons(earth, t0, t1):
     return ts.tt(jd=times), Angle(degrees=targets)
 
 
-def moon_quarters(moon, t0, t1, kind='all'):
+def moon_quarters(moon, t0, t1):
     """Calculates data about new and full moons, first and last quarters.
     
     This function searches between ``t0`` and ``t1`` for times when the moon's 
