@@ -33,39 +33,41 @@ ts = load.timescale()
 #%% functions for finding/ isolating partitions
             
 def _find_value(f, values, partition_edges, slope='any'):
-    """ Performs secant search to find target values in f.
-    
-    This is a vectorized version of the function newton from pyephem:
-    https://github.com/brandon-rhodes/pyephem/blob/f96daf12d4f815be92e0caa52611b444517b9e0d/ephem/__init__.py#L91
-    
-    
+    """ Evaluates ``f`` at ``partition_edges`` and returns the left and right 
+    edges of those partitions that contain ``values``.
     
     Arguments
     ---------
     f : function
         Objective function. Must accept and return ndarrays.
-    jd0 : ndarray
-        Left sides of partitions known to contain the target value
-    jd1 : ndarray
-        Right sides of partitions known to contain the target value
-    targets : float or ndarray
-        Target values corresponding to the partitions defined by jd0 and jd1
-    f0 : ndarray
-        f(jd0). Providing this saves an extra function call
-    f1 : ndarray
-        f(jd1). Providing this saves an extra function call
-    tol : float
-        Tolerance used to determine when convergence is complete.
+    values : list
+        List of values of ``f`` that are to be found
+    partition_edges : ndarray
+        Array of partition edges
+    slope : str
+        'positive' to find ``values`` when the slope is positive
+        'negative' to find ``values`` when the slope is negative
+        'any' to find ``values`` at any slope
         
     Returns
     -------
-    jd : ndarray
-        the jd values at which f(jd) == targets
+    jd0 : ndarray
+        Left edges of those partitions found to contain ``values``
+    jd1 : ndarray
+        Right edges of those partitions found to contain ``values``
+    targets : ndarray
+        target from ``values`` that each partition is found to contain
+    f0 : ndarray
+        ``f(jd0)``
+    f1 : ndarray
+        ``f(jd1)``
+    is_positive : ndarray, dtype=bool
+        whether or not the slope of ``f`` in the partition is positive
     """
     f_values = f(partition_edges)             
                 
-    partition_values = empty(len(partition_edges)-1)
-    partition_values.fill(nan)
+    targets = empty(len(partition_edges)-1)
+    targets.fill(nan)
     
     for value in values:
         g_values = (f_values - value + 180)%360 - 180
@@ -76,52 +78,55 @@ def _find_value(f, values, partition_edges, slope='any'):
         elif slope=='any':
             found = sign(g_values[:-1]) != sign(g_values[1:])
         
-        if (isfinite(partition_values) * found).any():
+        if (isfinite(targets) * found).any():
             raise ValueError('Multiple target values found in the same partition. Make the partitions smaller.')
             
-        partition_values[found] = value
+        targets[found] = value
         
-    indices = nonzero(isfinite(partition_values))[0]
-    left_edges = partition_edges[indices]
-    right_edges = partition_edges[indices+1]
-    targets = partition_values[indices]
+    indices = nonzero(isfinite(targets))[0]
+    jd0 = partition_edges[indices]
+    jd1 = partition_edges[indices+1]
     f0 = f_values[indices]
     f1 = f_values[indices+1]
     
     is_positive = ((sign(g_values[:-1])==-1) * (sign(g_values[1:])==1))[indices]
     
-    return left_edges, right_edges, targets, f0, f1, is_positive
+    return jd0, jd1, targets[indices], f0, f1, is_positive
 
 
 def _find_extremes(f, partition_edges, find='min'):
-    """ Performs secant search to find target values in f.
-    
-    This is a vectorized version of the function newton from pyephem:
-    https://github.com/brandon-rhodes/pyephem/blob/f96daf12d4f815be92e0caa52611b444517b9e0d/ephem/__init__.py#L91
+    """ Evaluates the derivative of ``f`` at ``partition_edges`` and returns 
+    the left and right edges of those partitions that contain extrema.
     
     Arguments
     ---------
     f : function
         Objective function. Must accept and return ndarrays.
-    jd0 : ndarray
-        Left sides of partitions known to contain the target value
-    jd1 : ndarray
-        Right sides of partitions known to contain the target value
-    targets : float or ndarray
-        Target values corresponding to the partitions defined by jd0 and jd1
-    f0 : ndarray
-        f(jd0). Providing this saves an extra function call
-    f1 : ndarray
-        f(jd1). Providing this saves an extra function call
-    tol : float
-        Tolerance used to determine when convergence is complete.
+    partition_edges : ndarray
+        Array of partition edges
+    find : str
+        'min' to find minima
+        'max' to find maxima
+        'any' to find all extrema
         
     Returns
     -------
-    jd : ndarray
-        the jd values at which f(jd) == targets
-    """    
-    # evaluate the derivative using forward difference method.
+    jd0 : ndarray
+        Left edges of those partitions found to contain ``values``
+    jd1 : ndarray
+        Right edges of those partitions found to contain ``values``
+    targets : ndarray
+        target from ``values`` that each partition is found to contain
+    f0 : ndarray
+        ``f(jd0)``
+    f1 : ndarray
+        ``f(jd1)``
+    minimum : ndarray, dtype=bool
+        whether or not each partition contains a minima (False means the 
+        partition contains a maxima)
+    """  
+    # evaluate the derivative using forward difference method. Combine both 
+    # sides of the approximation so only one function call is necessary.
     step_size = 1e-6
     combined_array = hstack([partition_edges, partition_edges+step_size])
     combined_results = f(combined_array)
@@ -142,13 +147,13 @@ def _find_extremes(f, partition_edges, find='min'):
         has_extreme[has_max] = 1
         
     indices = nonzero(has_extreme)[0]
-    left_edges = partition_edges[indices]
-    right_edges = partition_edges[indices+1]
-    find_minimum = has_extreme[indices]==-1
+    jd0 = partition_edges[indices]
+    jd1 = partition_edges[indices+1]
+    minimum = has_extreme[indices]==-1
     f0 = left[indices]
     f1 = left[indices+1]
     
-    return left_edges, right_edges, find_minimum, f0, f1
+    return jd0, jd1, minimum, f0, f1
 
 
 def divide_evenly(start, end, max_width):
@@ -281,9 +286,9 @@ def meridian_transits(observer, body, t0, t1):
     f = partial(_lha, observer_vector, body)    
     partition_edges = divide_evenly(t0.tt, t1.tt, .2)
     
-    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 180], partition_edges, slope='positive')
+    jd0, jd1, targets, f0, f1, _ = _find_value(f, [0, 180], partition_edges, slope='positive')
     
-    times = secant(f, left_edges, right_edges, targets, f0, f1)
+    times = secant(f, jd0, jd1, targets, f0, f1)
     
     return ts.tt(jd=times), Angle(degrees=targets, preference='hours')
 
@@ -344,9 +349,9 @@ def culminations(observer, body, t0, t1):
     
     partition_edges = divide_evenly(t0.tt, t1.tt, max_width)
 
-    left_edges, right_edges, minimum, f0, f1 = _find_extremes(f, partition_edges, 'any')
+    jd0, jd1, minimum, f0, f1 = _find_extremes(f, partition_edges, 'any')
 
-    times = brent_min(f, left_edges, right_edges, minimum, f0, f1, tol=1e-15)
+    times = brent_min(f, jd0, jd1, minimum, f0, f1, tol=1e-15)
 
     kinds = empty_like(minimum, dtype='U5')
     kinds[minimum] = 'lower'
@@ -418,11 +423,9 @@ def risings_settings(observer, body, t0, t1):
     body_culminations = culminations(observer, body, t0, t1)[0].tt
     partition_edges = hstack([t0.tt, body_culminations, t1.tt])    
     
-    # TODO: change is_positive to positive_slope?
+    jd0, jd1, targets, f0, f1, is_positive = _find_value(f, value, partition_edges)
     
-    left_edges, right_edges, targets, f0, f1, is_positive = _find_value(f, value, partition_edges)
-    
-    times = secant(f, left_edges, right_edges, targets, f0, f1, tol=1e-15)
+    times = secant(f, jd0, jd1, targets, f0, f1, tol=1e-15)
     
     kinds = empty_like(is_positive, dtype='U4')
     kinds[is_positive] = 'rise'
@@ -489,9 +492,9 @@ def twilights(observer, sun, t0, t1, kind='civil'):
     else:
         raise ValueError("kind must be 'civil', 'nautical', or 'astronomical'")
 
-    left_edges, right_edges, targets, f0, f1, is_positive = _find_value(f, value, partition_edges)
+    jd0, jd1, targets, f0, f1, is_positive = _find_value(f, value, partition_edges)
 
-    times = secant(f, left_edges, right_edges, targets, f0, f1)
+    times = secant(f, jd0, jd1, targets, f0, f1)
 
     am_pm = empty_like(is_positive, dtype='U2')
     am_pm[is_positive] = 'am'
@@ -546,9 +549,9 @@ def seasons(earth, t0, t1):
 
     partition_edges = divide_evenly(t0.tt, t1.tt, 365*.2)
 
-    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges, slope='positive')
+    jd0, jd1, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges, slope='positive')
         
-    times = secant(f, left_edges, right_edges, targets, f0, f1)
+    times = secant(f, jd0, jd1, targets, f0, f1)
 
     return ts.tt(jd=times), Angle(degrees=targets)
 
@@ -600,8 +603,8 @@ def moon_phases(moon, t0, t1):
     
     partition_edges = divide_evenly(t0.tt, t1.tt, 29*.2)
 
-    left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges, slope='positive')
+    jd0, jd1, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges, slope='positive')
         
-    times = secant(f, left_edges, right_edges, targets, f0, f1)
+    times = secant(f, jd0, jd1, targets, f0, f1)
 
     return ts.tt(jd=times), Angle(degrees=targets)
