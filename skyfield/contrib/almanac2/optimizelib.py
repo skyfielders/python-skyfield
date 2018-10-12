@@ -66,23 +66,21 @@ def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
     _verysmall_num = 1e-21
     grow_limit=110.0
     maxiter=1000
-    funcalls = 0
     failing = numpy.ones_like(xa, dtype=bool)
     
     def g(x, multiplier):
         return multiplier*func(x) + (multiplier==1)*360
     
+    # TODO: combine
     if f0 is not None:
         fa = multiplier*f0 + (multiplier==1)*360
     else:
         fa = g(xa, multiplier)
-        funcalls += 1
  
     if f1 is not None:
         fb = multiplier*f1 + (multiplier==1)*360
     else:
         fb = g(xb, multiplier)
-        funcalls += 1
     
     # Switch so fa > fb
     ind1 = fa<fb
@@ -91,7 +89,6 @@ def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
     
     xc = xb + _gold * (xb - xa)
     fc = g(xc, multiplier)
-    funcalls += 1
     iter_ = 0
     
     failing[fc>=fb] = False
@@ -120,7 +117,6 @@ def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
         fw = numpy.zeros_like(xa)
         
         fw[case1] = g(w[case1], multiplier[case1])
-        funcalls += 1
         
         ind1 = case1 * (fw < fc) * failing
         ind2 = case1 * ~ind1 * (fw > fb) * failing
@@ -137,16 +133,13 @@ def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
             
         w[case1] = xc[case1] + _gold * (xc[case1] - xb[case1])
         fw[case1] = g(w[case1], multiplier[case1])
-        funcalls += 1
 
         w[case2] = wlim[case2]
         if case2.any():
             fw[case2] = g(w[case2], multiplier[case2])
-            funcalls += 1
 
         if case3.any():
             fw[case3] = g(w[case3], multiplier[case3])
-            funcalls += 1
         
         ind3 = case3 * (fw < fc) * failing
         xb[ind3] = xc[ind3]
@@ -157,13 +150,11 @@ def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
         
         if ind3.any():
             fw[ind3] = g(w[ind3], multiplier[ind3])
-            funcalls += 1
 
         w[case4] = xc[case4] + _gold * (xc[case4] - xb[case4])
         
         if case4.any():
             fw[case4] = g(w[case4], multiplier[case4])
-            funcalls += 1
         
         xa[failing] = xb[failing]
         xb[failing] = xc[failing]
@@ -171,7 +162,7 @@ def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
         fa[failing] = fb[failing]
         fb[failing] = fc[failing]
         fc[failing] = fw[failing]
-    return xa, xb, xc, fa, fb, fc, funcalls
+    return xa, xb, xc, fa, fb, fc
 
 
 def brent_min(f, jd0, jd1, minimum=True, f0=None, f1=None, tol=1.48e-8):
@@ -223,7 +214,7 @@ def brent_min(f, jd0, jd1, minimum=True, f0=None, f1=None, tol=1.48e-8):
     def g(x, multiplier):
         return multiplier*f(x) + (multiplier==1)*360
     
-    xa, xb, xc, fa, fb, fc, funcalls = _bracket(f, jd0, jd1, multiplier, f0, f1)
+    xa, xb, xc, fa, fb, fc = _bracket(f, jd0, jd1, multiplier, f0, f1)
     _cg = 0.3819660
     x = numpy.copy(xb)
     w = numpy.copy(xb)
@@ -304,7 +295,6 @@ def brent_min(f, jd0, jd1, minimum=True, f0=None, f1=None, tol=1.48e-8):
                 u[i] = x[i] + rat[i]
                 
         fu[not_converged] = g(u[not_converged], multiplier[not_converged])      # calculate new output value
-        funcalls += 1
 
         for i in not_converged:
             if (fu[i] > fx[i]):                 # if it's bigger than current
