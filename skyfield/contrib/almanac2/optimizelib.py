@@ -171,7 +171,7 @@ def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
     return xa, xb, xc, fa, fb, fc, funcalls
 
 
-def brent_min(f, jd0, jd1, find_minimum=True, f0=None, f1=None, tol=1.48e-8):
+def brent_min(f, jd0, jd1, minimum=True, f0=None, f1=None, tol=1.48e-8):
     """ Vectorized version of Brent's method for finding maxima and minima.
     
     This is a vectorized version of scipy.optimize.optimize.Brent.optimize:
@@ -185,7 +185,7 @@ def brent_min(f, jd0, jd1, find_minimum=True, f0=None, f1=None, tol=1.48e-8):
         Left sides of partitions known to contain maxima or minima
     jd1 : ndarray
         Right sides of partitions known to contain the target value
-    find_minimum : bool or ndarray
+    minimum : bool or ndarray
         Whether or not the corresponding partitions contain minima. True means 
         the corresponding partition contains a minimum, False means it 
         contains a maximum.
@@ -201,14 +201,14 @@ def brent_min(f, jd0, jd1, find_minimum=True, f0=None, f1=None, tol=1.48e-8):
     jd : ndarray
         the jd values at which f(jd) is a maximum or minimum.
     """
-    if isinstance(find_minimum, bool):
-        if find_minimum:
+    if isinstance(minimum, bool):
+        if minimum:
             multiplier = numpy.ones_like(jd0)
         else:
             multiplier = -numpy.ones_like(jd0)
     else:
-        multiplier = numpy.ones_like(find_minimum, dtype=int)
-        multiplier[~find_minimum] = -1
+        multiplier = numpy.ones_like(minimum, dtype=int)
+        multiplier[~minimum] = -1
     
     maxiter = 500
     mintol = 1e-11

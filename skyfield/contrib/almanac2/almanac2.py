@@ -258,13 +258,13 @@ def culminations(observer, body, t0, t1):
     
     partition_edges = make_partitions(t0.tt, t1.tt, partition_width)
 
-    left_edges, right_edges, has_minimum, f0, f1 = _find_extremes(f, partition_edges, 'any')
+    left_edges, right_edges, minimum, f0, f1 = _find_extremes(f, partition_edges, 'any')
 
-    times = brent_min(f, left_edges, right_edges, has_minimum, f0, f1, tol=1e-15)
+    times = brent_min(f, left_edges, right_edges, minimum, f0, f1, tol=1e-15)
 
-    kinds = empty_like(has_minimum, dtype='U5')
-    kinds[has_minimum] = 'lower'
-    kinds[~has_minimum] = 'upper'
+    kinds = empty_like(minimum, dtype='U5')
+    kinds[minimum] = 'lower'
+    kinds[~minimum] = 'upper'
 
     return ts.tt(jd=times), kinds
     
