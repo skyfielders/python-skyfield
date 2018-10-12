@@ -46,34 +46,34 @@ def _find_value(f, values, partition_edges, slope='any'):
 
 
 def _find_extremes(f, partition_edges, find='min'):
-    # approximate the derivative in such a way that f(partition_edges) can be 
-    # returned and reused in brent_min later, saving a function call
-    combined_array = hstack([partition_edges, partition_edges+1e-6])
+    # evaluate the derivative using forward difference method.
+    step_size = 1e-6
+    combined_array = hstack([partition_edges, partition_edges+step_size])
     combined_results = f(combined_array)
     left = combined_results[:len(partition_edges)]
     right = combined_results[len(partition_edges):]
-    f_dot = (right - left)/1e-6
+    f_dot = (right - left)/step_size
     
-    partition_values = zeros(len(partition_edges)-1)
+    has_extreme = zeros(len(partition_edges)-1)
     
     if find == 'min' or find == 'any':
-        found = (sign(f_dot[:-1])==-1) * (sign(f_dot[1:])==1)
-        partition_values[found] = 1
+        has_min = (sign(f_dot[:-1])==-1) * (sign(f_dot[1:])==1)
+        has_extreme[has_min] = -1
     
     if find == 'max' or find == 'any':
-        found = (sign(f_dot[:-1])==1) * (sign(f_dot[1:])==-1)
-        if find == 'any' and ((partition_values!=0) * found).any():
+        has_max = (sign(f_dot[:-1])==1) * (sign(f_dot[1:])==-1)
+        if find == 'any' and (has_min * has_max).any():
             raise ValueError('Multiple extremes found in the same partition. Make the partitions smaller.')
-        partition_values[found] = -1
+        has_extreme[has_max] = 1
         
-    indices = nonzero(partition_values)[0]
+    indices = nonzero(has_extreme)[0]
     left_edges = partition_edges[indices]
     right_edges = partition_edges[indices+1]
-    sign_of_accel = partition_values[indices]
+    find_minimum = has_extreme[indices]==-1
     f0 = left[indices]
     f1 = left[indices+1]
     
-    return left_edges, right_edges, sign_of_accel, f0, f1
+    return left_edges, right_edges, find_minimum, f0, f1
 
 
 def make_partitions(start, end, partition_width):
@@ -258,13 +258,13 @@ def culminations(observer, body, t0, t1):
     
     partition_edges = make_partitions(t0.tt, t1.tt, partition_width)
 
-    left_edges, right_edges, sign_of_accel, f0, f1 = _find_extremes(f, partition_edges, 'any')
+    left_edges, right_edges, has_minimum, f0, f1 = _find_extremes(f, partition_edges, 'any')
 
-    times = brent_min(f, left_edges, right_edges, sign_of_accel, f0, f1, tol=1e-15)
+    times = brent_min(f, left_edges, right_edges, has_minimum, f0, f1, tol=1e-15)
 
-    kinds = empty_like(sign_of_accel, dtype='U5')
-    kinds[sign_of_accel==1] = 'lower'
-    kinds[sign_of_accel==-1] = 'upper'
+    kinds = empty_like(has_minimum, dtype='U5')
+    kinds[has_minimum] = 'lower'
+    kinds[~has_minimum] = 'upper'
 
     return ts.tt(jd=times), kinds
     
@@ -331,6 +331,8 @@ def risings_settings(observer, body, t0, t1):
     
     body_culminations = culminations(observer, body, t0, t1)[0].tt
     partition_edges = hstack([t0.tt, body_culminations, t1.tt])    
+    
+    # TODO: change is_positive to positive_slope?
     
     left_edges, right_edges, targets, f0, f1, is_positive = _find_value(f, value, partition_edges)
     

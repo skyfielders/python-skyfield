@@ -19,11 +19,11 @@ def secant(f, jd0, jd1, targets=0, f0=None, f1=None, tol=1e-10):
     targets : float or ndarray
         Target values corresponding to the partitions defined by jd0 and jd1
     f0 : ndarray
-        f(jd0). Providing this saves secant from the extra function call
+        f(jd0). Providing this saves an extra function call
     f1 : ndarray
-        f(jd1). Providing this saves secant from the extra function call
+        f(jd1). Providing this saves an extra function call
     tol : float
-        
+        Tolerance used to determine when convergence is complete.
         
     Returns
     -------
@@ -53,9 +53,12 @@ def secant(f, jd0, jd1, targets=0, f0=None, f1=None, tol=1e-10):
     return jd1
 
 
-def _bracket(func, xa, xb, sign_of_accel=None, f0=None, f1=None):
+def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
     """ This function is only meant to be used by brent_min
     """
+    if multiplier is None:
+        multiplier = numpy.ones_like(xa)
+    
     _gold = 1.618034  # golden ratio: (1.0+sqrt(5.0))/2.0
     _verysmall_num = 1e-21
     grow_limit=110.0
@@ -63,19 +66,19 @@ def _bracket(func, xa, xb, sign_of_accel=None, f0=None, f1=None):
     funcalls = 0
     failing = numpy.ones_like(xa, dtype=bool)
     
-    def g(x, sign_of_accel):
-        return sign_of_accel*func(x) + (sign_of_accel==1)*360
+    def g(x, multiplier):
+        return multiplier*func(x) + (multiplier==1)*360
     
     if f0 is not None:
-        fa = sign_of_accel*f0 + (sign_of_accel==1)*360
+        fa = multiplier*f0 + (multiplier==1)*360
     else:
-        fa = g(xa, sign_of_accel)
+        fa = g(xa, multiplier)
         funcalls += 1
  
     if f1 is not None:
-        fb = sign_of_accel*f1 + (sign_of_accel==1)*360
+        fb = multiplier*f1 + (multiplier==1)*360
     else:
-        fb = g(xb, sign_of_accel)
+        fb = g(xb, multiplier)
         funcalls += 1
     
     # Switch so fa > fb
@@ -84,7 +87,7 @@ def _bracket(func, xa, xb, sign_of_accel=None, f0=None, f1=None):
     fa[ind], fb[ind] = fb[ind], fa[ind]
     
     xc = xb + _gold * (xb - xa)
-    fc = g(xc, sign_of_accel)
+    fc = g(xc, multiplier)
     funcalls += 1
     iter_ = 0
     
@@ -113,7 +116,7 @@ def _bracket(func, xa, xb, sign_of_accel=None, f0=None, f1=None):
         
         fw = numpy.zeros_like(xa)
         
-        fw[case1] = g(w[case1], sign_of_accel[case1])
+        fw[case1] = g(w[case1], multiplier[case1])
         funcalls += 1
         
         ind1 = case1 * (fw < fc) * failing
@@ -130,16 +133,16 @@ def _bracket(func, xa, xb, sign_of_accel=None, f0=None, f1=None):
         failing[ind2] = False
             
         w[case1] = xc[case1] + _gold * (xc[case1] - xb[case1])
-        fw[case1] = g(w[case1], sign_of_accel[case1])
+        fw[case1] = g(w[case1], multiplier[case1])
         funcalls += 1
 
         w[case2] = wlim[case2]
         if case2.any():
-            fw[case2] = g(w[case2], sign_of_accel[case2])
+            fw[case2] = g(w[case2], multiplier[case2])
             funcalls += 1
 
         if case3.any():
-            fw[case3] = g(w[case3], sign_of_accel[case3])
+            fw[case3] = g(w[case3], multiplier[case3])
             funcalls += 1
         
         ind = case3 * (fw < fc) * failing
@@ -150,13 +153,13 @@ def _bracket(func, xa, xb, sign_of_accel=None, f0=None, f1=None):
         fc[ind] = fw[ind]
         
         if ind.any():
-            fw[ind] = g(w[ind], sign_of_accel[ind])
+            fw[ind] = g(w[ind], multiplier[ind])
             funcalls += 1
 
         w[case4] = xc[case4] + _gold * (xc[case4] - xb[case4])
         
         if case4.any():
-            fw[case4] = g(w[case4], sign_of_accel[case4])
+            fw[case4] = g(w[case4], multiplier[case4])
             funcalls += 1
         
         xa[failing] = xb[failing]
@@ -168,7 +171,7 @@ def _bracket(func, xa, xb, sign_of_accel=None, f0=None, f1=None):
     return xa, xb, xc, fa, fb, fc, funcalls
 
 
-def brent_min(f, jd0, jd1, sign_of_accel=1, f0=None, f1=None, tol=1.48e-8):
+def brent_min(f, jd0, jd1, find_minimum=True, f0=None, f1=None, tol=1.48e-8):
     """ Vectorized version of Brent's method for finding maxima and minima.
     
     This is a vectorized version of scipy.optimize.optimize.Brent.optimize:
@@ -182,30 +185,41 @@ def brent_min(f, jd0, jd1, sign_of_accel=1, f0=None, f1=None, tol=1.48e-8):
         Left sides of partitions known to contain maxima or minima
     jd1 : ndarray
         Right sides of partitions known to contain the target value
-    sign_of_accel : float or ndarray
-        Target values corresponding to the partitions defined by jd0 and jd1
+    find_minimum : bool or ndarray
+        Whether or not the corresponding partitions contain minima. True means 
+        the corresponding partition contains a minimum, False means it 
+        contains a maximum.
     f0 : ndarray
-        f(jd0). Providing this saves secant from the extra function call
+        f(jd0). Providing this saves an extra function call
     f1 : ndarray
-        f(jd1). Providing this saves secant from the extra function call
+        f(jd1). Providing this saves an extra function call
     tol : float
-        
+        Tolerance used to determine when convergence is complete.
         
     Returns
     -------
     jd : ndarray
-        the jd values at which f(jd) == targets
+        the jd values at which f(jd) is a maximum or minimum.
     """
-    if numpy.isscalar(sign_of_accel):
-        sign_of_accel = numpy.ones_like(jd0) * sign_of_accel
+    if isinstance(find_minimum, bool):
+        if find_minimum:
+            multiplier = numpy.ones_like(jd0)
+        else:
+            multiplier = -numpy.ones_like(jd0)
+    else:
+        multiplier = numpy.ones_like(find_minimum, dtype=int)
+        multiplier[~find_minimum] = -1
     
     maxiter = 500
     mintol = 1e-11
     
-    def g(x, sign_of_accel):
-        return sign_of_accel*f(x) + (sign_of_accel==1)*360
+    # TODO: can + (multiplier==1)*360 be removed?
+    # If not, can find_minima be used directly?
     
-    xa, xb, xc, fa, fb, fc, funcalls = _bracket(f, jd0, jd1, sign_of_accel, f0, f1)
+    def g(x, multiplier):
+        return multiplier*f(x) + (multiplier==1)*360
+    
+    xa, xb, xc, fa, fb, fc, funcalls = _bracket(f, jd0, jd1, multiplier, f0, f1)
     _cg = 0.3819660
     x = numpy.copy(xb)
     w = numpy.copy(xb)
@@ -285,7 +299,7 @@ def brent_min(f, jd0, jd1, sign_of_accel=1, f0=None, f1=None, tol=1.48e-8):
             else:
                 u[i] = x[i] + rat[i]
                 
-        fu[not_converged] = g(u[not_converged], sign_of_accel[not_converged])      # calculate new output value
+        fu[not_converged] = g(u[not_converged], multiplier[not_converged])      # calculate new output value
         funcalls += 1
 
         for i in not_converged:
