@@ -71,16 +71,8 @@ def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
     def g(x, multiplier):
         return multiplier*func(x) + (multiplier==1)*360
     
-    # TODO: combine
-    if f0 is not None:
-        fa = multiplier*f0 + (multiplier==1)*360
-    else:
-        fa = g(xa, multiplier)
- 
-    if f1 is not None:
-        fb = multiplier*f1 + (multiplier==1)*360
-    else:
-        fb = g(xb, multiplier)
+    fa = g(xa, multiplier) if f0 is not None else multiplier*f0 + (multiplier==1)*360
+    fb = g(xb, multiplier) if f1 is not None else multiplier*f1 + (multiplier==1)*360
     
     # Switch so fa > fb
     ind1 = fa<fb
