@@ -1,30 +1,61 @@
 import numpy
 
-def secant(f, t0, t1, targets=0, f0=None, f1=None, tol=1e-10):
+def secant(f, jd0, jd1, targets=0, f0=None, f1=None, tol=1e-10):
+    """ Performs secant search to find target values in f.
+    
+    This is a vectorized version of the function newton from pyephem:
+    https://github.com/brandon-rhodes/pyephem/blob/f96daf12d4f815be92e0caa52611b444517b9e0d/ephem/__init__.py#L91
+    
+    
+    
+    Arguments
+    ---------
+    f : function
+        Objective function. Must accept and return ndarrays.
+    jd0 : ndarray
+        Left sides of partitions known to contain the target value
+    jd1 : ndarray
+        Right sides of partitions known to contain the target value
+    targets : float or ndarray
+        Target values corresponding to the partitions defined by jd0 and jd1
+    f0 : ndarray
+        f(jd0). Providing this saves secant from the extra function call
+    f1 : ndarray
+        f(jd1). Providing this saves secant from the extra function call
+    tol : float
+        
+        
+    Returns
+    -------
+    jd : ndarray
+        the jd values at which f(jd) == targets
+    """
     if numpy.isscalar(targets):
-        targets = numpy.ones_like(t0) * targets
+        targets = numpy.ones_like(jd0) * targets
     
     def g(t, targets):
         return (f(t) - targets + 180)%360 - 180
     
-    g0 = (f0 - targets + 180)%360 - 180 if f0 is not None else g(t0, targets)
-    g1 = (f1 - targets + 180)%360 - 180 if f1 is not None else g(t1, targets)
+    g0 = (f0 - targets + 180)%360 - 180 if f0 is not None else g(jd0, targets)
+    g1 = (f1 - targets + 180)%360 - 180 if f1 is not None else g(jd1, targets)
     
     iters = 0
     max_iters = 50
     while iters < max_iters:   
-        converged = (g1 == 0) + (abs(t1 - t0) < tol) + (g1 == g0)
+        converged = (g1 == 0) + (abs(jd1 - jd0) < tol) + (g1 == g0)
         if converged.all():
             break
         inds = ~converged
 
-        t0[inds], t1[inds] = t1[inds], t1[inds] + (t1[inds] - t0[inds]) / (g0[inds]/g1[inds] - 1)
-        g0[inds], g1[inds] = g1[inds], g(t1[inds], targets[inds])
+        jd0[inds], jd1[inds] = jd1[inds], jd1[inds] + (jd1[inds] - jd0[inds]) / (g0[inds]/g1[inds] - 1)
+        g0[inds], g1[inds] = g1[inds], g(jd1[inds], targets[inds])
         iters += 1
-    return t1
+    return jd1
 
 
-def bracket(func, xa, xb, sign_of_accel=None, f0=None, f1=None):
+def _bracket(func, xa, xb, sign_of_accel=None, f0=None, f1=None):
+    """ This function is only meant to be used by brent_min
+    """
     _gold = 1.618034  # golden ratio: (1.0+sqrt(5.0))/2.0
     _verysmall_num = 1e-21
     grow_limit=110.0
@@ -137,15 +168,44 @@ def bracket(func, xa, xb, sign_of_accel=None, f0=None, f1=None):
     return xa, xb, xc, fa, fb, fc, funcalls
 
 
-def brent_min(f, left, right, sign_of_accel=None, f0=None, f1=None, tol=1.48e-8):
-    # set up for optimization
+def brent_min(f, jd0, jd1, sign_of_accel=1, f0=None, f1=None, tol=1.48e-8):
+    """ Vectorized version of Brent's method for finding maxima and minima.
+    
+    This is a vectorized version of scipy.optimize.optimize.Brent.optimize:
+    https://github.com/scipy/scipy/blob/de9e0d6022be0319c1ba73c07a0946be46e02a24/scipy/optimize/optimize.py#L1896
+    
+    Arguments
+    ---------
+    f : function
+        Objective function. Must accept and return ndarrays.
+    jd0 : ndarray
+        Left sides of partitions known to contain maxima or minima
+    jd1 : ndarray
+        Right sides of partitions known to contain the target value
+    sign_of_accel : float or ndarray
+        Target values corresponding to the partitions defined by jd0 and jd1
+    f0 : ndarray
+        f(jd0). Providing this saves secant from the extra function call
+    f1 : ndarray
+        f(jd1). Providing this saves secant from the extra function call
+    tol : float
+        
+        
+    Returns
+    -------
+    jd : ndarray
+        the jd values at which f(jd) == targets
+    """
+    if numpy.isscalar(sign_of_accel):
+        sign_of_accel = numpy.ones_like(jd0) * sign_of_accel
+    
     maxiter = 500
     mintol = 1e-11
     
     def g(x, sign_of_accel):
         return sign_of_accel*f(x) + (sign_of_accel==1)*360
     
-    xa, xb, xc, fa, fb, fc, funcalls = bracket(f, left, right, sign_of_accel, f0, f1)
+    xa, xb, xc, fa, fb, fc, funcalls = _bracket(f, jd0, jd1, sign_of_accel, f0, f1)
     _cg = 0.3819660
     x = numpy.copy(xb)
     w = numpy.copy(xb)
