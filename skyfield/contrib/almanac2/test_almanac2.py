@@ -321,6 +321,29 @@ def test_ISS_culminations():
     assert is_extreme(f, times.tt, 2*ms)
 
 
+def test_small_intervals():
+    t0 = ts.utc(2018)
+    t1 = ts.utc(2018, 1, 1, 1, 1)
+    
+    times, kinds = meridian_transits(greenwich, moon, t0, t1)
+    assert len(times) == len(kinds.radians) == 0
+
+    times, kinds = culminations(greenwich, moon, t0, t1)
+    assert len(times) == len(kinds) == 0
+    
+    times, kinds = risings_settings(greenwich, moon, t0, t1)
+    assert len(times) == len(kinds) == 0
+    
+    times, kinds = twilights(greenwich, sun, t0, t1)
+    assert len(times) == len(kinds) == 0
+    
+    times, kinds = seasons(earth, t0, t1)
+    assert len(times) == len(kinds.radians) == 0
+    
+    times, kinds = moon_phases(moon, t0, t1)
+    assert len(times) == len(kinds.radians) == 0
+
+
 if __name__ == '__main__':
     import pytest
     pytest.main(['-s'])

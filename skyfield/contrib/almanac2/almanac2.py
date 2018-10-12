@@ -22,7 +22,7 @@ from skyfield.constants import tau
 from skyfield.vectorlib import VectorSum
 from optimizelib import secant, brent_min
 from numpy import (degrees, arcsin, isfinite, hstack, nan, empty, linspace, 
-                   ceil, sign, nonzero, zeros, empty_like)
+                   ceil, sign, nonzero, zeros, empty_like, array)
 from functools import partial
 
 __all__ = ['meridian_transits', 'culminations', 'risings_settings', 
@@ -351,7 +351,10 @@ def culminations(observer, body, t0, t1):
 
     jd0, jd1, minimum, f0, f1 = _find_extremes(f, partition_edges, 'any')
 
-    times = brent_min(f, jd0, jd1, minimum, f0, f1, tol=1e-15)
+    if len(jd0)!=0:
+        times = brent_min(f, jd0, jd1, minimum, f0, f1, tol=1e-15)
+    else:
+        times = array([])
 
     kinds = empty_like(minimum, dtype='U5')
     kinds[minimum] = 'lower'
