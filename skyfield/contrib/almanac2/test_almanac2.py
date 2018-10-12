@@ -49,7 +49,6 @@ def is_root(f, times, target_f, epsilon):
     left_f = (f(left_times) - target_f + 180)%360 - 180
     right_f = (f(right_times) - target_f + 180)%360 - 180
     
-    # TODO: could this be success = sign(left_edge) != sign(right_edge)
     success_increasing = (left_f <= 0) * (right_f >= 0)
     success_decreasing = (left_f >= 0) * (right_f <= 0)
     success = success_increasing + success_decreasing
@@ -67,7 +66,6 @@ def is_extreme(f, times, epsilon):
     left_f = (f(left_times) - center_f + 180)%360 - 180
     right_f = (f(right_times) - center_f + 180)%360 - 180
     
-    # TODO: could this be success = sign(left_edge) == sign(right_edge)
     is_max = (left_f <= 0) * (right_f <= 0)
     is_min = (left_f >= 0) * (right_f >= 0)
     success = is_max + is_min
@@ -159,7 +157,6 @@ def test_moon_risings_settings():
     assert is_root(f, times.tt, -34/60, ms/2)
     
     
-#TODO: how can this test be stable as tle's change?
 def test_ISS_risings_settings():
     t0 = ts.utc(2017, 6, 1)
     t1 = ts.utc(2017, 6, 2)
@@ -308,7 +305,6 @@ def test_moon_culminations():
     assert is_extreme(f, times.tt, 6*ms)
     
     
-#TODO: how can this test be stable as tle's change?
 def test_ISS_culminations():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 2)
