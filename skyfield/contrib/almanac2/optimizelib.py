@@ -6,29 +6,32 @@ def secant(f, jd0, jd1, targets=0, f0=None, f1=None, tol=1e-10):
     This is a vectorized version of the function newton from pyephem:
     https://github.com/brandon-rhodes/pyephem/blob/f96daf12d4f815be92e0caa52611b444517b9e0d/ephem/__init__.py#L91
     
-    
+    ``f`` is the plain objective function, and ``g`` is the objective function 
+    translated vertically such that all of the target values appear to the 
+    algorithm as roots, and renormalized to -180 to 180 degrees so that the 
+    partitions won't contain any discontinuities.
     
     Arguments
     ---------
     f : function
         Objective function. Must accept and return ndarrays.
     jd0 : ndarray
-        Left sides of partitions known to contain the target value
+        Left sides of partitions known to contain the ``targets``
     jd1 : ndarray
-        Right sides of partitions known to contain the target value
+        Right sides of partitions known to contain the ``target``
     targets : float or ndarray
         Target values corresponding to the partitions defined by jd0 and jd1
     f0 : ndarray
-        f(jd0). Providing this saves an extra function call
+        ``f(jd0)``. Providing this saves an extra function call
     f1 : ndarray
-        f(jd1). Providing this saves an extra function call
+        ``f(jd1)``. Providing this saves an extra function call
     tol : float
         Tolerance used to determine when convergence is complete.
         
     Returns
     -------
     jd : ndarray
-        the jd values at which f(jd) == targets
+        the jd values at which ``f(jd) == targets``
     """
     if numpy.isscalar(targets):
         targets = numpy.ones_like(jd0) * targets
@@ -82,9 +85,9 @@ def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
         funcalls += 1
     
     # Switch so fa > fb
-    ind = fa<fb
-    xa[ind], xb[ind] = xb[ind], xa[ind]
-    fa[ind], fb[ind] = fb[ind], fa[ind]
+    ind1 = fa<fb
+    xa[ind1], xb[ind1] = xb[ind1], xa[ind1]
+    fa[ind1], fb[ind1] = fb[ind1], fa[ind1]
     
     xc = xb + _gold * (xb - xa)
     fc = g(xc, multiplier)
@@ -99,9 +102,9 @@ def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
         val = tmp2 - tmp1
         
         denom = numpy.zeros_like(val)
-        ind = numpy.abs(val) < _verysmall_num
-        denom[ind] = 2.0 * _verysmall_num
-        denom[~ind] = 2.0 * val
+        ind2 = numpy.abs(val) < _verysmall_num
+        denom[ind2] = 2.0 * _verysmall_num
+        denom[~ind2] = 2.0 * val
         
         w = xb - ((xb - xc) * tmp2 - (xb - xa) * tmp1) / denom
         wlim = xb + grow_limit * (xc - xb)
@@ -145,15 +148,15 @@ def _bracket(func, xa, xb, multiplier=None, f0=None, f1=None):
             fw[case3] = g(w[case3], multiplier[case3])
             funcalls += 1
         
-        ind = case3 * (fw < fc) * failing
-        xb[ind] = xc[ind]
-        xc[ind] = w[ind]
-        w[ind] = xc[ind] + _gold * (xc[ind] - xb[ind])
-        fb[ind] = fc[ind]
-        fc[ind] = fw[ind]
+        ind3 = case3 * (fw < fc) * failing
+        xb[ind3] = xc[ind3]
+        xc[ind3] = w[ind3]
+        w[ind3] = xc[ind3] + _gold * (xc[ind3] - xb[ind3])
+        fb[ind3] = fc[ind3]
+        fc[ind3] = fw[ind3]
         
-        if ind.any():
-            fw[ind] = g(w[ind], multiplier[ind])
+        if ind3.any():
+            fw[ind3] = g(w[ind3], multiplier[ind3])
             funcalls += 1
 
         w[case4] = xc[case4] + _gold * (xc[case4] - xb[case4])
@@ -176,6 +179,10 @@ def brent_min(f, jd0, jd1, minimum=True, f0=None, f1=None, tol=1.48e-8):
     
     This is a vectorized version of scipy.optimize.optimize.Brent.optimize:
     https://github.com/scipy/scipy/blob/de9e0d6022be0319c1ba73c07a0946be46e02a24/scipy/optimize/optimize.py#L1896
+    
+    ``f`` is the plain objective function, and ``g`` is the objective function 
+    optionally mirrored over the horizontal axis such that all of the extrema 
+    appear to the algorithm as minima.
     
     Arguments
     ---------
@@ -212,9 +219,6 @@ def brent_min(f, jd0, jd1, minimum=True, f0=None, f1=None, tol=1.48e-8):
     
     maxiter = 500
     mintol = 1e-11
-    
-    # TODO: can + (multiplier==1)*360 be removed?
-    # If not, can find_minima be used directly?
     
     def g(x, multiplier):
         return multiplier*f(x) + (multiplier==1)*360

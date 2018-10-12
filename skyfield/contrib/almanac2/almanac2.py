@@ -1,3 +1,22 @@
+"""
+Rough outline of how this module finds times of phenomena:
+
+    * Split the time interval evenly into partitions. The partitions 
+    should be small enough that no partitions contain multiple target values.
+    * Evaluate the objective function at the partition edges to determine which 
+    partitions contain the points of interest.
+    * Pass the partitions that contain points of interest to the vectorized 
+    optimization routines.
+    
+Some other things to be aware of are:
+    
+    * The variable ``f`` is the plain objective function that returns numbers 
+    directly from skyfield.
+    * The variable ``g`` is ``f`` transformed such that either all the target 
+    values appear to the secant method as roots, or such that all of the 
+    extremes appear to Brent's method as minima.
+    
+"""
 from skyfield.api import load, Topos, EarthSatellite, Angle
 from skyfield.constants import tau
 from skyfield.vectorlib import VectorSum
@@ -14,6 +33,35 @@ ts = load.timescale()
 #%% functions for finding/ isolating partitions
             
 def _find_value(f, values, partition_edges, slope='any'):
+    """ Performs secant search to find target values in f.
+    
+    This is a vectorized version of the function newton from pyephem:
+    https://github.com/brandon-rhodes/pyephem/blob/f96daf12d4f815be92e0caa52611b444517b9e0d/ephem/__init__.py#L91
+    
+    
+    
+    Arguments
+    ---------
+    f : function
+        Objective function. Must accept and return ndarrays.
+    jd0 : ndarray
+        Left sides of partitions known to contain the target value
+    jd1 : ndarray
+        Right sides of partitions known to contain the target value
+    targets : float or ndarray
+        Target values corresponding to the partitions defined by jd0 and jd1
+    f0 : ndarray
+        f(jd0). Providing this saves an extra function call
+    f1 : ndarray
+        f(jd1). Providing this saves an extra function call
+    tol : float
+        Tolerance used to determine when convergence is complete.
+        
+    Returns
+    -------
+    jd : ndarray
+        the jd values at which f(jd) == targets
+    """
     f_values = f(partition_edges)             
                 
     partition_values = empty(len(partition_edges)-1)
@@ -46,6 +94,33 @@ def _find_value(f, values, partition_edges, slope='any'):
 
 
 def _find_extremes(f, partition_edges, find='min'):
+    """ Performs secant search to find target values in f.
+    
+    This is a vectorized version of the function newton from pyephem:
+    https://github.com/brandon-rhodes/pyephem/blob/f96daf12d4f815be92e0caa52611b444517b9e0d/ephem/__init__.py#L91
+    
+    Arguments
+    ---------
+    f : function
+        Objective function. Must accept and return ndarrays.
+    jd0 : ndarray
+        Left sides of partitions known to contain the target value
+    jd1 : ndarray
+        Right sides of partitions known to contain the target value
+    targets : float or ndarray
+        Target values corresponding to the partitions defined by jd0 and jd1
+    f0 : ndarray
+        f(jd0). Providing this saves an extra function call
+    f1 : ndarray
+        f(jd1). Providing this saves an extra function call
+    tol : float
+        Tolerance used to determine when convergence is complete.
+        
+    Returns
+    -------
+    jd : ndarray
+        the jd values at which f(jd) == targets
+    """    
     # evaluate the derivative using forward difference method.
     step_size = 1e-6
     combined_array = hstack([partition_edges, partition_edges+step_size])
@@ -76,35 +151,46 @@ def _find_extremes(f, partition_edges, find='min'):
     return left_edges, right_edges, find_minimum, f0, f1
 
 
-def make_partitions(start, end, partition_width):
-    num_partitions = int(ceil((end - start)/partition_width))
+def divide_evenly(start, end, max_width):
+    """ Evenly divides the interval between start and end into intervals that 
+    are at most max_width wide.
+    
+    Arguments
+    ---------
+    start : float
+        Start of the interval
+    end : float
+        End of the interval
+    max_width : float
+        Maximum width of the divisions
+        
+    Returns
+    -------
+    divisions : ndarray
+        Resulting array
+    """
+    num_partitions = int(ceil((end - start)/max_width))
     return linspace(start, end, num_partitions+1)
 
 
 #%% Objective Functions
 
 def _ra(observer, body, t):
-    """Returns:
-    observer.at(ts.tt(jd=t)).observe(body).apparent().radec(epoch='date')[0]._degrees
-        
-    or the right ascension of 'body' in degrees at terrestrial time 't' 
+    """Returns the right ascension of 'body' in degrees at terrestrial time 't' 
     when seen from 'observer'.
     """
     return observer.at(ts.tt(jd=t)).observe(body).apparent().radec(epoch='date')[0]._degrees
 
 
 def _ecliptic_lon(observer, body, t):
-    """Returns:
-    observer.at(ts.tt(jd=t)).observe(body).apparent().ecliptic_latlon()[1].degrees
-    or the ecliptic latitude of body in degrees at terrestrial time t.
+    """Returns the ecliptic latitude of body in degrees at terrestrial time t.
     """
     return observer.at(ts.tt(jd=t)).observe(body).apparent().ecliptic_latlon(epoch='date')[1].degrees
 
 
 def _ecliptic_lon_diff(observer, body1, body2, t):
     """Returns the ecliptic longitudes of body1 minus that of body2
-    in degrees at terrestrial time t. Ecliptic longitude is found with:
-    observer.at(ts.tt(jd=t)).observe(body).apparent().ecliptic_latlon()[1].degrees
+    in degrees at terrestrial time t.
     """
     diff = _ecliptic_lon(observer, body1, t) - _ecliptic_lon(observer, body2, t)
     return (diff + 180)%360 - 180
@@ -193,7 +279,7 @@ def meridian_transits(observer, body, t0, t1):
         raise ValueError("meridian_transits doesn't support EarthSatellites.")
     
     f = partial(_lha, observer_vector, body)    
-    partition_edges = make_partitions(t0.tt, t1.tt, .2)
+    partition_edges = divide_evenly(t0.tt, t1.tt, .2)
     
     left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 180], partition_edges, slope='positive')
     
@@ -250,13 +336,13 @@ def culminations(observer, body, t0, t1):
     if isinstance(body, EarthSatellite):
         f = partial(_satellite_alt, observer, body)
         period = tau/body.model.no/60/24 # days/orbit
-        partition_width = period * .2
+        max_width = period * .2
     else:
         observer_vector = body.ephemeris['earth'] + observer
         f = partial(_alt, observer_vector, body)
-        partition_width = .2
+        max_width = .2
     
-    partition_edges = make_partitions(t0.tt, t1.tt, partition_width)
+    partition_edges = divide_evenly(t0.tt, t1.tt, max_width)
 
     left_edges, right_edges, minimum, f0, f1 = _find_extremes(f, partition_edges, 'any')
 
@@ -458,7 +544,7 @@ def seasons(earth, t0, t1):
 
     f = partial(_ecliptic_lon, earth, sun)
 
-    partition_edges = make_partitions(t0.tt, t1.tt, 365*.2)
+    partition_edges = divide_evenly(t0.tt, t1.tt, 365*.2)
 
     left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges, slope='positive')
         
@@ -512,7 +598,7 @@ def moon_phases(moon, t0, t1):
     
     f = partial(_ecliptic_lon_diff, earth, moon, sun)
     
-    partition_edges = make_partitions(t0.tt, t1.tt, 29*.2)
+    partition_edges = divide_evenly(t0.tt, t1.tt, 29*.2)
 
     left_edges, right_edges, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges, slope='positive')
         
