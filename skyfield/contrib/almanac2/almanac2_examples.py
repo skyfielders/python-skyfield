@@ -10,7 +10,7 @@ sun = ephem['sun']
 moon = ephem['moon']
 mars = ephem['mars barycenter']
 
-greenwich = Topos(latitude_degrees=(51, 28, 40), longitude_degrees=(0, 0, -5))
+greenwich = earth + Topos(latitude_degrees=(51, 28, 40), longitude_degrees=(0, 0, -5))
 
 iss_tle = """\
 1 25544U 98067A   18161.85073725  .00003008  00000-0  52601-4 0  9993

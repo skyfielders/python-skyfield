@@ -17,7 +17,7 @@ Some other things to be aware of are:
     extremes appear to Brent's method as minima.
     
 """
-from skyfield.api import load, Topos, EarthSatellite, Angle
+from skyfield.api import load, Topos, EarthSatellite, Angle, Star
 from skyfield.constants import tau
 from skyfield.vectorlib import VectorSum
 from optimizelib import secant, brent_min
@@ -260,8 +260,8 @@ def meridian_transits(observer, body, t0, t1):
     
     Arguments
     ---------
-    observer : Topos
-        Location of observer
+    observer : VectorSum
+        VectorSum of earth + Topos
     body : Segment or VectorSum
         Vector representing the object whose transits are being found.
     t0 : Time
@@ -276,14 +276,13 @@ def meridian_transits(observer, body, t0, t1):
     hour_angles : Angle
         Local Hour Angle of ``body`` at ``times``
     """ 
-    if not isinstance(observer, Topos):
-        raise ValueError('`observer` should be a plain Topos object.')
-    observer_vector = body.ephemeris['earth'] + observer
+    if isinstance(observer, Topos):
+        raise ValueError('`observer` should be a VectorSum of earth + Topos.')
     
     if isinstance(body, EarthSatellite) or (isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite)):
         raise ValueError("meridian_transits doesn't support EarthSatellites.")
     
-    f = partial(_lha, observer_vector, body)    
+    f = partial(_lha, observer, body)    
     partition_edges = divide_evenly(t0.tt, t1.tt, .2)
     
     jd0, jd1, targets, f0, f1, _ = _find_value(f, [0, 180], partition_edges, slope='positive')
@@ -314,8 +313,9 @@ def culminations(observer, body, t0, t1):
     
     Arguments
     ---------
-    observer : Topos
-        Location of observer
+    observer : VectorSum or Topos
+        VectorSum of earth + Topos. If ``body`` is an EarthSatellite, 
+        ``observer`` can be a plain Topos object.
     body : Segment, VectorSum, or EarthSatellite
         Vector representing the object whose culminations are being found. For 
         EarthSatellites use a plain Earthsatellite and not a VectorSum.
@@ -332,9 +332,13 @@ def culminations(observer, body, t0, t1):
         array containing 'upper' for upper culminations, or 'lower' for lower 
         culminations
     """
-    if not isinstance(observer, Topos):
-        raise ValueError('`observer` should be a plain Topos object.')
-            
+    if not isinstance(body, EarthSatellite) and not isinstance(observer, VectorSum):
+        raise ValueError('Unless ``body`` is an EarthSatellite, ``observer``'
+                         'must be a VectorSum of Earth + Topos')
+        
+    if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
+        raise ValueError('`body` should be a plain EarthSatellite')
+        
     if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
         raise ValueError('`body` should be a plain EarthSatellite, not a VectorSum')
     
@@ -343,8 +347,7 @@ def culminations(observer, body, t0, t1):
         period = tau/body.model.no/60/24 # days/orbit
         max_width = period * .2
     else:
-        observer_vector = body.ephemeris['earth'] + observer
-        f = partial(_alt, observer_vector, body)
+        f = partial(_alt, observer, body)
         max_width = .2
     
     partition_edges = divide_evenly(t0.tt, t1.tt, max_width)
@@ -384,8 +387,9 @@ def risings_settings(observer, body, t0, t1):
     
     Arguments
     ---------
-    observer : Topos
-        Location of observer
+    observer : VectorSum or Topos
+        VectorSum of earth + Topos. If ``body`` is an EarthSatellite, 
+        ``observer`` can be a plain Topos object.
     body : Segment, VectorSum, or EarthSatellite
         Vector representing the object whose rise/set times are being found. 
         For EarthSatellites use a plain Earthsatellite and not a VectorSum.
@@ -401,11 +405,12 @@ def risings_settings(observer, body, t0, t1):
     kinds : ndarray, dtype=str
         array containing 'rise' for risings, or 'set' for settings
     """
-    if not isinstance(observer, Topos):
-        raise ValueError('`observer` should be a plain Topos object.')
+    if not isinstance(body, EarthSatellite) and not isinstance(observer, VectorSum):
+        raise ValueError('Unless ``body`` is an EarthSatellite, ``observer``'
+                         'must be a VectorSum of Earth + Topos')
         
-    if not isinstance(body, EarthSatellite):
-        observer_vector = body.ephemeris['earth'] + observer
+    if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
+        raise ValueError('`body` should be a plain EarthSatellite')
         
     if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
         raise ValueError('`body` should be a plain EarthSatellite, not a VectorSum')
@@ -413,14 +418,17 @@ def risings_settings(observer, body, t0, t1):
     if isinstance(body, EarthSatellite):
         f = partial(_satellite_alt, observer, body)
         value = [-34/60]
+    elif isinstance(body, Star):
+        f = partial(_alt, observer, body)
+        value = [0]
     elif body.target == 10: # sun
-        f = partial(_alt, observer_vector, body)
+        f = partial(_alt, observer, body)
         value = [-50/60]
     elif body.target == 301: # moon
-        f = partial(_moon_ul_alt, observer_vector, body)
+        f = partial(_moon_ul_alt, observer, body)
         value = [-34/60]
     else:
-        f = partial(_alt, observer_vector, body)
+        f = partial(_alt, observer, body)
         value = [0]
     
     body_culminations = culminations(observer, body, t0, t1)[0].tt
@@ -457,8 +465,8 @@ def twilights(observer, sun, t0, t1, kind='civil'):
     
     Arguments
     ---------
-    observer : Topos
-        Location of observer
+    observer : VectorSum
+        VectorSum of earth + Topos
     sun : Segment
         Segment representing the sun
     t0 : Time
@@ -477,15 +485,13 @@ def twilights(observer, sun, t0, t1, kind='civil'):
     am_pm : ndarray, dtype=str
         array containing 'am' for morning twilight, or 'pm' for evening twilight
         """
-        
-    if not isinstance(observer, Topos):
-        raise ValueError('`observer` should be a plain Topos object.')
-    observer_vector = sun.ephemeris['earth'] + observer
+    if not isinstance(observer.positives[-1], Topos):
+        raise ValueError('`observer` should be a VectorSum of earth + Topos.')
         
     sun_culminations = culminations(observer, sun, t0, t1)[0].tt
     partition_edges = hstack([t0.tt, sun_culminations, t1.tt])
     
-    f = partial(_alt, observer_vector, sun)
+    f = partial(_alt, observer, sun)
     if kind == 'civil':
         value = [-6]
     elif kind == 'nautical':

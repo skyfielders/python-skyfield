@@ -16,7 +16,8 @@ sun = ephem['sun']
 moon = ephem['moon']
 mars = ephem['mars barycenter']
 
-greenwich = Topos('51.5 N', '0 W')
+plain_greenwich = Topos(latitude='51.5 N', longitude='0 W')
+greenwich = earth + plain_greenwich
 
 iss_tle = """\
 1 25544U 98067A   18161.85073725  .00003008  00000-0  52601-4 0  9993
@@ -127,7 +128,7 @@ def test_sun_risings_settings():
     compare(times[0].tt, ts.utc(2017, 1, 1, 8, 6).tt, minute/2)
     
     # Check that the found times produce the correct data    
-    f = partial(_alt, earth+greenwich, sun)
+    f = partial(_alt, greenwich, sun)
     assert is_root(f, times.tt, -50/60, ms/2)
 
 
@@ -147,14 +148,14 @@ def test_moon_risings_settings():
     compare(times[0].tt, ts.utc(2017, 1, 1, 9, 46).tt, minute/2)
     
     # Check that the found times produce the correct data
-    f = partial(_moon_ul_alt, earth+greenwich, moon)
+    f = partial(_moon_ul_alt, greenwich, moon)
     assert is_root(f, times.tt, -34/60, ms/2)
     
     
 def test_ISS_risings_settings():
     t0 = ts.utc(2017, 6, 1)
     t1 = ts.utc(2017, 6, 2)
-    times, kinds = risings_settings(greenwich, ISS, t0, t1)
+    times, kinds = risings_settings(plain_greenwich, ISS, t0, t1)
     
     assert ((kinds=='rise') + (kinds=='set')).all()
     
@@ -163,7 +164,7 @@ def test_ISS_risings_settings():
     assert len(times) == len(kinds) == 13
     
     # Check that the found times produce the correct data
-    f = partial(_satellite_alt, greenwich, ISS)
+    f = partial(_satellite_alt, plain_greenwich, ISS)
     assert is_root(f, times.tt, -34/60, ms/2)
 
 
@@ -179,8 +180,8 @@ def test_sirius_risings_settings():
     assert len(times) == len(kinds) == 62
     
     # Check that the found times produce the correct data
-    f = partial(_satellite_alt, greenwich, sirius)
-    assert is_root(f, times.tt, -34/60, ms/2)
+    f = partial(_alt, greenwich, sirius)
+    assert is_root(f, times.tt, 0, ms/2)
     
 
 # Data Source:
@@ -199,7 +200,7 @@ def test_civil_twilights():
     compare(times[0].tt, ts.utc(2017, 1, 1, 7, 26).tt, minute/2)
     
     # Check that the found times produce the correct data
-    f = partial(_alt, earth+greenwich, sun)
+    f = partial(_alt, greenwich, sun)
     assert is_root(f, times.tt, -6, ms/2)
 
 
@@ -219,7 +220,7 @@ def test_nautical_twilights():
     compare(times[0].tt, ts.utc(2017, 1, 1, 6, 43).tt, minute/2)
     
     # Check that the found times produce the correct data
-    f = partial(_alt, earth+greenwich, sun)
+    f = partial(_alt, greenwich, sun)
     assert is_root(f, times.tt, -12, ms/2)
     
     
@@ -239,7 +240,7 @@ def test_astronomical_twilights():
     compare(times[0].tt, ts.utc(2017, 1, 1, 6, 2).tt, minute/2)
     
     # Check that the found times produce the correct data
-    f = partial(_alt, earth+greenwich, sun)
+    f = partial(_alt, greenwich, sun)
     assert is_root(f, times.tt, -18, ms/2)
     
 
@@ -259,7 +260,7 @@ def test_sun_transits():
     compare(times[1].tt, ts.utc(2017, 1, 1, 12, 4).tt, minute/2)
 
     # Check that the found times produce the correct data
-    f = partial(_lha, earth+greenwich, sun)
+    f = partial(_lha, greenwich, sun)
     assert is_root(f, times.tt, lhas._degrees, ms/2)
     
 
@@ -279,7 +280,7 @@ def test_mars_transits():
     compare(times[1].tt, ts.utc(2017, 1, 1, 16, 2).tt, minute/2)
     
     # Check that the found times produce the correct data
-    f = partial(_lha, earth+greenwich, mars)
+    f = partial(_lha, greenwich, mars)
     assert is_root(f, times.tt, lhas._degrees, ms/2)
     
 
@@ -292,12 +293,10 @@ def test_sirius_transits():
     
     assert isinstance(times, Time)
     assert isinstance(lhas, Angle)
-    assert len(times) == len(lhas.radians) == 62
-    
-    compare(times[1].tt, ts.utc(2017, 1, 1, 16, 2).tt, minute/2)
-    
+    assert len(times) == len(lhas.radians) == 63
+        
     # Check that the found times produce the correct data
-    f = partial(_lha, earth+greenwich, sirius)
+    f = partial(_lha, greenwich, sirius)
     assert is_root(f, times.tt, lhas._degrees, ms/2)
     
 
@@ -313,7 +312,7 @@ def test_sun_culminations():
     assert len(times) == len(kinds) == 62
     
     # Check that the found times produce the correct data
-    f = partial(_alt, earth+greenwich, sun)        
+    f = partial(_alt, greenwich, sun)        
     assert is_extreme(f, times.tt, 2*ms)
     
     
@@ -329,14 +328,14 @@ def test_moon_culminations():
     assert len(times) == len(kinds) == 60
 
     # Check that the found times produce the correct data
-    f = partial(_alt, earth+greenwich, moon)    
+    f = partial(_alt, greenwich, moon)    
     assert is_extreme(f, times.tt, 6*ms)
     
     
 def test_ISS_culminations():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 2)
-    times, kinds = culminations(greenwich, ISS, t0, t1)
+    times, kinds = culminations(plain_greenwich, ISS, t0, t1)
     
     assert ((kinds=='upper') + (kinds=='lower')).all()
 
@@ -345,7 +344,7 @@ def test_ISS_culminations():
     assert len(times) == len(kinds) == 31
 
     # Check that the found times produce the correct data
-    f = partial(_satellite_alt, greenwich, ISS)
+    f = partial(_satellite_alt, plain_greenwich, ISS)
     assert is_extreme(f, times.tt, 2*ms)
     
 
@@ -358,10 +357,10 @@ def test_sirius_culminations():
     
     assert isinstance(times, Time)
     assert isinstance(kinds, ndarray)
-    assert len(times) == len(kinds) == 62
+    assert len(times) == len(kinds) == 63
     
     # Check that the found times produce the correct data
-    f = partial(_alt, earth+greenwich, sirius)        
+    f = partial(_alt, greenwich, sirius)        
     assert is_extreme(f, times.tt, 2*ms)
 
 
