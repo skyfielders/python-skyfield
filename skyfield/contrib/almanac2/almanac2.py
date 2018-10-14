@@ -255,7 +255,7 @@ def meridian_transits(observer, body, t0, t1):
     >>> greenwich = earth + Topos('51.5 N', '0 W')
     >>> t0 = ts.utc(2017, 1, 1)
     >>> t1 = ts.utc(2017, 1, 8)
-    >>> times, hour_angles = transits(greenwich, mars, t0, t1)
+    >>> times, hour_angles = meridian_transits(greenwich, mars, t0, t1)
     >>>
     >>> upper_transits = times[hour_angles.hours==0]
     >>> lower_transits = times[hour_angles.hours==12]
@@ -464,7 +464,7 @@ def twilights(observer, sun, t0, t1, kind='civil'):
     >>> greenwich = earth + Topos('51.5 N', '0 W')
     >>> t0 = ts.utc(2017, 1, 1)
     >>> t1 = ts.utc(2017, 1, 8)
-    >>> times, am_pm = (greenwich, t0, t1, kind='civil')
+    >>> times, am_pm = twilights(greenwich, sun, t0, t1, kind='nautical')
     >>>
     >>> am_twilights = times[am_pm=='am']
     >>> pm_twilights = times[am_pm=='pm']
