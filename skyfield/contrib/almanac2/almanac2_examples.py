@@ -20,28 +20,29 @@ ISS = EarthSatellite(*iss_tle.splitlines())
 
 sirius = Star(ra_hours=(6, 45, 8.91728), dec_degrees=(-16, 42, 58.0171))
 
+t0 = ts.utc(2017, 1, 1)
+t1 = ts.utc(2017, 1, 8)
+
 
 # Equinoxes and Solstices
 season_times, lons = seasons(earth, ts.utc(2000), ts.utc(2026))
 
-# They can be separated like this:
-march_equinoxes = season_times[lons.degrees==0]
-june_solstices = season_times[lons.degrees==90]
-sept_equinoxs = season_times[lons.degrees==180]
-dec_solstices = season_times[lons.degrees==270]
-
-
 # Moon Phases
 phase_times, lon_diffs = moon_phases(moon, ts.utc(2018, 1), ts.utc(2018, 2))
 
-# They can be separated like this:
-new_moons = phase_times[lon_diffs.degrees==0]
-first_quarters = phase_times[lon_diffs.degrees==90]
-full_moons = phase_times[lon_diffs.degrees==180]
-last_quarters = phase_times[lon_diffs.degrees==270]
-
-
 # Rise and Set Times
-for name, body in zip(['sun', 'mars', "Barnard's Star"], [sun, mars, barnard]):
-    times, kinds = risings_settings(greenwich, body, ts.utc(2018, 1, 1), ts.utc(2018, 1, 2))
-    print (name, ' rises at:', times[kinds=='rise'].utc_jpl)
+rise_set_times, rise_or_set = risings_settings(greenwich, sun, t0, t1)
+
+# Culminations
+culmination_times, kinds = culminations(greenwich, sun, t0, t1)
+
+# Meridian Transits
+transit_times, hour_angles = meridian_transits(greenwich, mars, t0, t1)
+
+# Twilights
+naut_twilight_times, am_pm = twilights(greenwich, sun, t0, t1, kind='nautical')
+
+# You can submit different object types to the same function:
+for name, body in zip(['Sun', 'Mars', 'Sirius', 'ISS'], [sun, mars, sirius, ISS]):
+    times, kinds = risings_settings(greenwich, body, t0, t1)
+    print (name, 'first rises at:', times[kinds=='rise'][0].utc_jpl())
