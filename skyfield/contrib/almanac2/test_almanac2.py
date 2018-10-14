@@ -165,6 +165,22 @@ def test_ISS_risings_settings():
     # Check that the found times produce the correct data
     f = partial(_satellite_alt, greenwich, ISS)
     assert is_root(f, times.tt, -34/60, ms/2)
+
+
+def test_sirius_risings_settings():
+    t0 = ts.utc(2017, 1, 1)
+    t1 = ts.utc(2017, 1, 32)
+    times, kinds = risings_settings(greenwich, sirius, t0, t1)
+    
+    assert ((kinds=='rise') + (kinds=='set')).all()
+    
+    assert isinstance(times, Time)
+    assert isinstance(kinds, ndarray)
+    assert len(times) == len(kinds) == 62
+    
+    # Check that the found times produce the correct data
+    f = partial(_satellite_alt, greenwich, sirius)
+    assert is_root(f, times.tt, -34/60, ms/2)
     
 
 # Data Source:
@@ -267,6 +283,24 @@ def test_mars_transits():
     assert is_root(f, times.tt, lhas._degrees, ms/2)
     
 
+def test_sirius_transits():
+    t0 = ts.utc(2017, 1, 1)
+    t1 = ts.utc(2017, 1, 32)
+    times, lhas = meridian_transits(greenwich, sirius, t0, t1)
+    
+    assert ((lhas.hours==0) + (lhas.hours==12)).all()
+    
+    assert isinstance(times, Time)
+    assert isinstance(lhas, Angle)
+    assert len(times) == len(lhas.radians) == 62
+    
+    compare(times[1].tt, ts.utc(2017, 1, 1, 16, 2).tt, minute/2)
+    
+    # Check that the found times produce the correct data
+    f = partial(_lha, earth+greenwich, sirius)
+    assert is_root(f, times.tt, lhas._degrees, ms/2)
+    
+
 def test_sun_culminations():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 32)
@@ -312,6 +346,22 @@ def test_ISS_culminations():
 
     # Check that the found times produce the correct data
     f = partial(_satellite_alt, greenwich, ISS)
+    assert is_extreme(f, times.tt, 2*ms)
+    
+
+def test_sirius_culminations():
+    t0 = ts.utc(2017, 1, 1)
+    t1 = ts.utc(2017, 1, 32)
+    times, kinds = culminations(greenwich, sirius, t0, t1)
+    
+    assert ((kinds=='upper') + (kinds=='lower')).all()
+    
+    assert isinstance(times, Time)
+    assert isinstance(kinds, ndarray)
+    assert len(times) == len(kinds) == 62
+    
+    # Check that the found times produce the correct data
+    f = partial(_alt, earth+greenwich, sirius)        
     assert is_extreme(f, times.tt, 2*ms)
 
 
