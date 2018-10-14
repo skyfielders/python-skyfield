@@ -1,4 +1,4 @@
-from skyfield.api import Loader, Topos, Angle, EarthSatellite
+from skyfield.api import Loader, Topos, Angle, EarthSatellite, Star
 from skyfield.timelib import Time
 from almanac2 import (meridian_transits, culminations, twilights, 
                        risings_settings, seasons, moon_phases)
@@ -15,9 +15,6 @@ earth = ephem['earth']
 sun = ephem['sun']
 moon = ephem['moon']
 mars = ephem['mars barycenter']
-venus = ephem['venus']
-jupiter_bc = ephem['jupiter barycenter']
-mercury = ephem['mercury']
 
 greenwich = Topos('51.5 N', '0 W')
 
@@ -27,13 +24,10 @@ iss_tle = """\
 """
 ISS = EarthSatellite(*iss_tle.splitlines())
 
-jup_ephem = load('jup310.bsp')
-jupiter = jup_ephem['jupiter']
-io = jup_ephem['io']
+sirius = Star(ra_hours=(6, 45, 8.91728), dec_degrees=(-16, 42, 58.0171))
 
 minute = 1/24/60
-sec = minute/60
-ms = sec/1000
+ms = minute/60/1000
 
 
 def compare(value, expected_value, epsilon):
