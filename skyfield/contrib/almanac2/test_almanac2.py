@@ -155,13 +155,16 @@ def test_moon_risings_settings():
 def test_ISS_risings_settings():
     t0 = ts.utc(2017, 6, 1)
     t1 = ts.utc(2017, 6, 2)
-    times, kinds = risings_settings(plain_greenwich, ISS, t0, t1)
+    times, kinds = risings_settings(greenwich, ISS, t0, t1)
     
     assert ((kinds=='rise') + (kinds=='set')).all()
     
     assert isinstance(times, Time)
     assert isinstance(kinds, ndarray)
     assert len(times) == len(kinds) == 13
+    
+    # make sure it also works with plain Topos objects
+    assert (times==risings_settings(plain_greenwich, ISS, t0, t1)[0]).all()
     
     # Check that the found times produce the correct data
     f = partial(_satellite_alt, plain_greenwich, ISS)
@@ -335,13 +338,16 @@ def test_moon_culminations():
 def test_ISS_culminations():
     t0 = ts.utc(2017, 1, 1)
     t1 = ts.utc(2017, 1, 2)
-    times, kinds = culminations(plain_greenwich, ISS, t0, t1)
+    times, kinds = culminations(greenwich, ISS, t0, t1)
     
     assert ((kinds=='upper') + (kinds=='lower')).all()
 
     assert isinstance(times, Time)
     assert isinstance(kinds, ndarray)
     assert len(times) == len(kinds) == 31
+    
+    # make sure it also works with plain Topos objects
+    assert (times==culminations(plain_greenwich, ISS, t0, t1)[0]).all()
 
     # Check that the found times produce the correct data
     f = partial(_satellite_alt, plain_greenwich, ISS)

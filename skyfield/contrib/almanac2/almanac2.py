@@ -96,7 +96,7 @@ def _find_value(f, values, partition_edges, slope='any'):
 
 def _find_extremes(f, partition_edges, find='min'):
     """ Evaluates the derivative of ``f`` at ``partition_edges`` and returns 
-    the left and right edges of those partitions that contain extrema.
+    the left and right edges of the partitions that contain extrema.
     
     Arguments
     ---------
@@ -242,21 +242,23 @@ def _satellite_alt(observer, satellite, t):
 #%% Topocentric Phenomena, pg. 482 in Explanatory Supplement (1992)
 
 def meridian_transits(observer, body, t0, t1):
-    """Calculates data about upper and lower transits of the local meridian.
+    """Calculates times of upper and lower transits of the local meridian.
     
     This function searches between ``t0`` and ``t1`` for times when ``body``'s 
     local hour angle is 0h for an upper transit or 12h for a lower transit.
 
     Example
     -------
-    >>> planets = load('de430t.bsp')
-    >>> sun = planets['sun']
-    >>> greenwich = Topos('51.5 N', '0 W')
+    >>> ephem = load('de430t.bsp')
+    >>> sun = ephem['sun']
+    >>> earth = ephem['earth']
+    >>> greenwich = earth + Topos('51.5 N', '0 W')
     >>> t0 = ts.utc(2017, 1, 1)
     >>> t1 = ts.utc(2017, 1, 8)
-    >>> times, hour_angle = transits(greenwich, mars, t0, t1)
-    >>> upper_transits = times[hour_angle.hours==0]
-    >>> lower_transits = times[hour_angle.hours==12]
+    >>> times, hour_angles = transits(greenwich, mars, t0, t1)
+    >>>
+    >>> upper_transits = times[hour_angles.hours==0]
+    >>> lower_transits = times[hour_angles.hours==12]
     
     Arguments
     ---------
@@ -293,7 +295,7 @@ def meridian_transits(observer, body, t0, t1):
 
 
 def culminations(observer, body, t0, t1):
-    """Calculates data about upper and lower culminations.
+    """Calculates times of upper and lower culminations.
     
     This function searches between ``t0`` and ``t1`` for times when `body`'s 
     altitude reaches a local maximum or minimum. Finds upper culminations only 
@@ -301,13 +303,14 @@ def culminations(observer, body, t0, t1):
 
     Example
     -------
-    >>> planets = load('de430t.bsp')
-    >>> sun = planets['sun']
+    >>> ephem = load('de430t.bsp')
+    >>> sun = ephem['sun']
     >>> earth = planets['earth']
     >>> greenwich = earth + Topos('51.5 N', '0 W')
     >>> t0 = ts.utc(2017, 1, 1)
     >>> t1 = ts.utc(2017, 1, 8)
     >>> times, kinds = culminations(greenwich, sun, t0, t1)
+    >>>
     >>> upper_culminations = times[kinds=='upper']
     >>> lower_culminations = times[kinds=='lower']
     
@@ -315,7 +318,7 @@ def culminations(observer, body, t0, t1):
     ---------
     observer : VectorSum or Topos
         VectorSum of earth + Topos. If ``body`` is an EarthSatellite, 
-        ``observer`` can be a plain Topos object.
+        ``observer`` can be either a VectorSum or a plain Topos object.
     body : Segment, VectorSum, or EarthSatellite
         Vector representing the object whose culminations are being found. For 
         EarthSatellites use a plain Earthsatellite and not a VectorSum.
@@ -331,13 +334,13 @@ def culminations(observer, body, t0, t1):
     kinds : ndarray, dtype=str
         array containing 'upper' for upper culminations, or 'lower' for lower 
         culminations
-    """
+    """    
+    if isinstance(body, EarthSatellite) and isinstance(observer, VectorSum):
+        observer = observer.positives[-1]
+        
     if not isinstance(body, EarthSatellite) and not isinstance(observer, VectorSum):
         raise ValueError('Unless ``body`` is an EarthSatellite, ``observer``'
                          'must be a VectorSum of Earth + Topos')
-        
-    if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
-        raise ValueError('`body` should be a plain EarthSatellite')
         
     if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
         raise ValueError('`body` should be a plain EarthSatellite, not a VectorSum')
@@ -367,7 +370,7 @@ def culminations(observer, body, t0, t1):
     
 
 def risings_settings(observer, body, t0, t1):
-    """Calculates data about when an object rises and sets.
+    """Calculates times when an object rises and sets.
     
     This function searches between ``t0`` and ``t1`` for times when `body`'s 
     altitude (uncorrected for refraction) is -34 arcminutes. The sun's and 
@@ -375,13 +378,14 @@ def risings_settings(observer, body, t0, t1):
 
     Example
     -------
-    >>> planets = load('de430t.bsp')
-    >>> sun = planets['sun']
-    >>> earth = planets['earth']
+    >>> ephem = load('de430t.bsp')
+    >>> sun = ephem['sun']
+    >>> earth = ephem['earth']
     >>> greenwich = earth + Topos('51.5 N', '0 W')
     >>> t0 = ts.utc(2017, 1, 1)
     >>> t1 = ts.utc(2017, 1, 8)
     >>> times, kinds = risings_settings(greenwich, sun, t0, t1)
+    >>>
     >>> risings = times[kinds=='rise']
     >>> settings = times[kinds=='set']
     
@@ -389,10 +393,11 @@ def risings_settings(observer, body, t0, t1):
     ---------
     observer : VectorSum or Topos
         VectorSum of earth + Topos. If ``body`` is an EarthSatellite, 
-        ``observer`` can be a plain Topos object.
+        ``observer`` can be either a VectorSum or a plain Topos object.
     body : Segment, VectorSum, or EarthSatellite
         Vector representing the object whose rise/set times are being found. 
-        For EarthSatellites use a plain Earthsatellite and not a VectorSum.
+        For EarthSatellite objects use a plain EarthSatellite and not a 
+        VectorSum.
     t0 : Time
         Time object of length 1 representing the start of the search interval
     t1 : Time
@@ -405,12 +410,12 @@ def risings_settings(observer, body, t0, t1):
     kinds : ndarray, dtype=str
         array containing 'rise' for risings, or 'set' for settings
     """
+    if isinstance(body, EarthSatellite) and isinstance(observer, VectorSum):
+        observer = observer.positives[-1]
+    
     if not isinstance(body, EarthSatellite) and not isinstance(observer, VectorSum):
         raise ValueError('Unless ``body`` is an EarthSatellite, ``observer``'
                          'must be a VectorSum of Earth + Topos')
-        
-    if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
-        raise ValueError('`body` should be a plain EarthSatellite')
         
     if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
         raise ValueError('`body` should be a plain EarthSatellite, not a VectorSum')
@@ -446,7 +451,7 @@ def risings_settings(observer, body, t0, t1):
     
 
 def twilights(observer, sun, t0, t1, kind='civil'):
-    """Calculates times when twilight starts in the morning.
+    """Calculates times when twilight starts or ends in the morning or evening.
    
     This function searches between ``t0`` and ``t1`` for times when the sun's 
     altitude is -6, -12, or -18 degrees for civil, nautical, or astronomical 
@@ -454,12 +459,13 @@ def twilights(observer, sun, t0, t1, kind='civil'):
 
     Example
     -------
-    >>> planets = load('de430t.bsp')
-    >>> earth = planets['earth']
+    >>> ephem = load('de430t.bsp')
+    >>> earth = ephem['earth']
     >>> greenwich = earth + Topos('51.5 N', '0 W')
     >>> t0 = ts.utc(2017, 1, 1)
     >>> t1 = ts.utc(2017, 1, 8)
     >>> times, am_pm = (greenwich, t0, t1, kind='civil')
+    >>>
     >>> am_twilights = times[am_pm=='am']
     >>> pm_twilights = times[am_pm=='pm']
     
@@ -514,7 +520,7 @@ def twilights(observer, sun, t0, t1, kind='civil'):
 #%% Geocentric Phenomena, pg. 478 in Explanatory Supplement (1992)
 
 def seasons(earth, t0, t1):
-    """Calculates data about March and September equinoxes.
+    """Calculates times of equinoxes and solstices.
     
     This function searches between ``t0`` and ``t1`` for times when the sun's 
     ecliptic longitude is:
@@ -526,11 +532,12 @@ def seasons(earth, t0, t1):
     
     Example
     -------
-    >>> planets = load('de430t.bsp')
-    >>> earth = planets['earth']
+    >>> ephem = load('de430t.bsp')
+    >>> earth = ephem['earth']
     >>> t0 = ts.utc(2017)
     >>> t1 = ts.utc(2018)
     >>> times, lons = seasons(earth, t0, t1)
+    >>>
     >>> march_equinoxes = times[lons.degrees==0]
     >>> june_solstices = times[lons.degrees==90]
     >>> sept_equinoxes = times[lons.degrees==180]
@@ -566,7 +573,7 @@ def seasons(earth, t0, t1):
 
 
 def moon_phases(moon, t0, t1):
-    """Calculates data about new and full moons, first and last quarters.
+    """Calculates times of the phases of the moon.
     
     This function searches between ``t0`` and ``t1`` for times when the moon's 
     geocentric ecliptic longitude minus that of the sun is:
@@ -578,11 +585,12 @@ def moon_phases(moon, t0, t1):
     
     Example
     -------
-    >>> planets = load('de430t.bsp')
-    >>> moon = planets['moon']
+    >>> ephem = load('de430t.bsp')
+    >>> moon = ephem['moon']
     >>> t0 = ts.utc(2017, 1)
     >>> t1 = ts.utc(2017, 2)
     >>> times, lon_diffs = moon_phases(moon, t0, t1)
+    >>>
     >>> new_moons = times[lon_diffs.degrees==0]
     >>> first_quarters = times[lon_diffs.degrees==90]
     >>> full_moons = times[lon_diffs.degrees==180]

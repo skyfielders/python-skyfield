@@ -1,3 +1,12 @@
+"""
+The variable ``f`` is the plain objective function that returns numbers 
+directly from skyfield.
+
+The variable ``g`` is ``f`` transformed such that either all the target 
+values appear to the secant method as roots, or such that all of the 
+extremes appear to Brent's method as minima.
+"""
+
 import numpy
 
 def secant(f, jd0, jd1, targets=0, f0=None, f1=None, tol=1e-10):
