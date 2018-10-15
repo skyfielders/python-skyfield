@@ -7,7 +7,8 @@ from almanac2 import (_ecliptic_lon_diff, _moon_ul_alt, _lha, _alt,
 from numpy import ndarray
 from functools import partial
 
-load = Loader(r'C:\Users\Josh\Scripts\Skyfield_Data')
+# Put your data directory here before running this file:
+load = Loader(r'')
 
 ts = load.timescale()
 ephem = load('de430.bsp')

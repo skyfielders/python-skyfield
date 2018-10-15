@@ -1,7 +1,9 @@
 from skyfield.api import Loader, Topos, EarthSatellite, Star
 from almanac2 import seasons, moon_phases, meridian_transits, culminations, twilights, risings_settings
 
-load = Loader(r'C:\Users\Josh\Scripts\Skyfield_Data')
+# Put your data directory here before running this file:
+load = Loader('')
+
 ts = load.timescale()
 
 ephem = load('de430.bsp')
