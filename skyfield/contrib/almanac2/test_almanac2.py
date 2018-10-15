@@ -11,7 +11,7 @@ from functools import partial
 load = Loader(r'')
 
 ts = load.timescale()
-ephem = load('de430.bsp')
+ephem = load('de430t.bsp')
 earth = ephem['earth']
 sun = ephem['sun']
 moon = ephem['moon']
