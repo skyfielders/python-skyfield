@@ -1,6 +1,6 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import arccos, array, clip, einsum, empty, exp, full, nan
+from numpy import arccos, array, clip, einsum, empty, exp, full, nan, array
 
 from .constants import ANGVEL, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
@@ -329,7 +329,16 @@ class Geometric(ICRF):
         return _to_altaz(self.position.au, self.observer_data,
                          temperature_C, pressure_mbar)
 
+    def east_north_up( self ):
+        """ return (east, north, up) cartesian coordinates in the local 
+        reference frame, using kilometers
+        """
+        R = self.observer_data.altaz_rotation
 
+        position_km = einsum('ij...,j...->i...', R, self.position.km)
+        position_km = array([ position_km[1], position_km[0], position_km[2] ])
+        return position_km        
+        
 class Barycentric(ICRF):
     """An (x, y, z) position measured from the Solar System barycenter.
 
