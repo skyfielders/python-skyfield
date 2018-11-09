@@ -2,10 +2,12 @@ from __future__ import print_function
 import itertools
 import os
 import errno
+import locale
 import numpy as np
 import sys
 from datetime import date, datetime, timedelta
 from fnmatch import fnmatch
+from threading import Lock
 from time import time
 
 from .jpllib import SpiceKernel
@@ -13,6 +15,7 @@ from .sgp4lib import EarthSatellite
 from .timelib import Timescale, julian_date
 
 today = date.today
+_lock = Lock()
 
 try:
     from fcntl import LOCK_EX, LOCK_UN, lockf
@@ -368,7 +371,15 @@ def parse_leap_seconds(fileobj):
     else:
         raise ValueError('Leap_Second.dat is missing its expiration date')
     line = line.decode('ascii')
-    dt = datetime.strptime(line, '#  File expires on %d %B %Y\n')
+
+    with _lock:  # won't help if anyone user threads are doing parsing, alas
+        original_locale = locale.setlocale(locale.LC_ALL)
+        locale.setlocale(locale.LC_ALL, 'C')
+        try:
+            dt = datetime.strptime(line, '#  File expires on %d %B %Y\n')
+        finally:
+            locale.setlocale(locale.LC_ALL, original_locale)
+
     # The file went out of date at the beginning of July 2016, and kept
     # downloading every time a user ran a Skyfield program.  So we now
     # build in a grace period:
