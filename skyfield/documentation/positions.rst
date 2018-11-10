@@ -191,6 +191,13 @@ or else by generating a whole series of positions.
 
     geometry = satellite.at(t)
 
+    # Geographic point beneath satellite
+
+    subpoint = geometry.subpoint()
+    print('Latitude:', subpoint.latitude)
+    print('Longitude:', subpoint.longitude)
+    print('Elevation (m):', subpoint.elevation.m)
+
     # Topocentric
 
     difference = satellite - boston

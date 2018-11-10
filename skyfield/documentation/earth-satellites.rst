@@ -168,7 +168,26 @@ than those of the old J2000 system.)
    in the satellite’s position relative to the Earth’s center
    and instead want to know ...
 
-But you are probably more interested
+Another approach is to ask which point on the Earth’s globe
+is directly beneath the satellite.
+You can access this through the
+:meth:`~skyfield.positionlib.Geocentric.subpoint()`
+method of the geocentric position computed above.
+
+.. testcode::
+
+    subpoint = geocentric.subpoint()
+    print('Latitude:', subpoint.latitude)
+    print('Longitude:', subpoint.longitude)
+    print('Elevation (m):', subpoint.elevation.m)
+
+.. testoutput::
+
+    Latitude: -38deg 12' 47.5"
+    Longitude: -02deg 20' 24.4"
+    Elevation (m): 379774.000071
+
+Finally, you might be most interested
 in whether the satellite is above or below the horizon
 from your own position as an observer.
 If you build a Topos object to represent your location,
