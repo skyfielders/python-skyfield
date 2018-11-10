@@ -61,6 +61,17 @@ simply create an issue on the project’s GitHub page:
 
 Good luck!
 
+Citing Skyfield
+===============
+
+If Skyfield has proven useful in your research,
+the project welcomes your citation
+to bring it to the attention of other academics
+who might benefit from it.
+Here is Skyfield’s DOI:
+
+    http://rhodesmill.org/skyfield/
+
 .. _changelog:
 
 .. include:: ../../CHANGELOG.rst
