@@ -194,9 +194,9 @@ or else by generating a whole series of positions.
     # Geographic point beneath satellite
 
     subpoint = geometry.subpoint()
-    print('Latitude:', subpoint.latitude)
-    print('Longitude:', subpoint.longitude)
-    print('Elevation (m):', subpoint.elevation.m)
+    latitude = subpoint.latitude
+    longitude = subpoint.longitude
+    elevation = subpoint.elevation
 
     # Topocentric
 
