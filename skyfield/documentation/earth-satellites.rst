@@ -179,13 +179,13 @@ method of the geocentric position computed above.
     subpoint = geocentric.subpoint()
     print('Latitude:', subpoint.latitude)
     print('Longitude:', subpoint.longitude)
-    print('Elevation (m):', subpoint.elevation.m)
+    print('Elevation (m):', int(subpoint.elevation.m))
 
 .. testoutput::
 
-    Latitude: -38deg 12' 47.5"
-    Longitude: -02deg 20' 24.4"
-    Elevation (m): 379774.000071
+    Latitude: 50deg 14' 37.4"
+    Longitude: -86deg 23' 23.3"
+    Elevation (m): 420874
 
 Finally, you might be most interested
 in whether the satellite is above or below the horizon
