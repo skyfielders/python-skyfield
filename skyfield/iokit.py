@@ -116,6 +116,9 @@ class Loader(object):
             '.bsp': [
                 ('*.bsp', SpiceKernel),
             ],
+            '.bpc': [
+                ('*.bpc', SpiceKernel),
+            ],
         }
 
     def path_to(self, filename):
