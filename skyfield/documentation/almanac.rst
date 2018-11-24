@@ -110,6 +110,14 @@ geographic location.
 
 Then you can create a start time and an end time and ask for all of the
 sunrises and sunsets in between.
+Skyfield uses the
+`official definition of sunrise and sunset
+<http://aa.usno.navy.mil/faq/docs/RST_defs.php>`_
+from the United States Naval Observatory,
+which defines them as the moment when the center — not the limb —
+of the sun is 0.8333 degrees below the horizon,
+to account for both the average radius of the Sun itself
+and for the average refraction of the atmosphere at the horizon.
 
 .. testcode::
 
