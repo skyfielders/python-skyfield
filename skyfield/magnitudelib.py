@@ -10,9 +10,21 @@ def mercury_magnitude(r, delta, ph_ang):
         + 1.6893e-09 * ph_ang**5
         - 3.0334e-12 * ph_ang**6
     )
-    ap_mag = -0.613 + distance_mag_factor + ph_ang_factor
-    return ap_mag
+    return -0.613 + distance_mag_factor + ph_ang_factor
 
-if __name__ == '__main__':
-    print(mercury_magnitude(0.310295423552, 1.32182643625754, 1.1677))
-    print(mercury_magnitude(0.413629222334, 0.9264480871861, 90.1662))
+def venus_magnitude(r, delta, ph_ang):
+    distance_mag_factor = 5 * log10(r * delta)
+    if ph_ang < 163.7:
+        ph_ang_factor = (
+            -1.044E-03 * ph_ang
+            + 3.687E-04 * ph_ang**2
+            - 2.814E-06 * ph_ang**3
+            + 8.938E-09 * ph_ang**4
+        )
+    else:
+        ph_ang_factor = (
+            236.05828 + 4.384
+            - 2.81914E+00 * ph_ang
+            + 8.39034E-03 * ph_ang**2
+        )
+    return -4.384 + distance_mag_factor + ph_ang_factor
