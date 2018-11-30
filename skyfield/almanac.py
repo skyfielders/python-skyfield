@@ -147,6 +147,13 @@ SEASON_EVENTS = [
     'Winter Solstice',
 ]
 
+SEASON_EVENTS_NEUTRAL = [
+    'March Equinox',
+    'June Solstice',
+    'September Equinox',
+    'December Solstice',
+]
+
 def seasons(ephemeris):
     """Build a function of time that returns the quarter of the year.
 
