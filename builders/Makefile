@@ -1,6 +1,6 @@
 
 all:
-	echo "Targets: fonts, novas, spice"
+	echo "Targets: fonts, magnitudes, novas, spice"
 
 # Download and unzip:
 # http://scripts.sil.org/cms/scripts/render_download.php?format=file&media_id=GentiumPlus-5.000-web.zip&filename=GentiumPlus-5.000-web.zip
@@ -29,6 +29,12 @@ spice: ../skyfield/data/spice.py
 
 ../skyfield/data/spice.py: build_spice.py ~/spice/toolkit/src/spicelib/chgirf.f
 	python build_spice.py ~/spice/toolkit > $@
+
+magnitudes: ../skyfield/tests/test_magnitudes_raw.py
+
+../skyfield/tests/test_magnitudes_raw.py: build_magnitude_tests.py Ap_Mag_Input_V3.txt
+	python build_magnitude_tests.py > $@
+	cat $@
 
 novas: ../skyfield/tests/test_against_novas.py
 
