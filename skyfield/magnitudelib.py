@@ -1,3 +1,10 @@
+"""Routines for computing magnitudes.
+
+Planetary routines adapted from:
+
+https://arxiv.org/pdf/1808.01973.pdf
+
+"""
 from numpy import log10
 
 def mercury_magnitude(r, delta, ph_ang):
