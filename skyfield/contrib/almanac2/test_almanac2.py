@@ -115,297 +115,303 @@ def test_moon_phases():
     assert is_root(f, times.tt, lon_diffs.degrees, ms/2)
 
 
-# Data Source:
-# http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=0&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
-def test_sun_risings_settings():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, kinds = risings_settings(greenwich, sun, t0, t1)
-    
-    assert ((kinds=='rise') + (kinds=='set')).all()
-    
-    assert isinstance(times, Time)
-    assert isinstance(kinds, ndarray)
-    assert len(times) == len(kinds) == 62
-    
-    compare(times[0].tt, ts.utc(2017, 1, 1, 8, 6).tt, minute/2)
-    
-    # Check that the found times produce the correct data    
-    f = partial(_alt, greenwich, sun)
-    assert is_root(f, times.tt, -50/60, ms/2)
-
-
-# Data Source:   
-# http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=1&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
-def test_moon_risings_settings():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, kinds = risings_settings(greenwich, moon, t0, t1)
-    
-    assert ((kinds=='rise') + (kinds=='set')).all()
-    
-    assert isinstance(times, Time)
-    assert isinstance(kinds, ndarray)
-    assert len(times) == len(kinds) == 60
-    
-    compare(times[0].tt, ts.utc(2017, 1, 1, 9, 46).tt, minute/2)
-    
-    # Check that the found times produce the correct data
-    f = partial(_moon_ul_alt, greenwich, moon)
-    assert is_root(f, times.tt, -34/60, ms/2)
-    
-    
-def test_ISS_risings_settings():
-    t0 = ts.utc(2017, 6, 1)
-    t1 = ts.utc(2017, 6, 2)
-    times, kinds = risings_settings(greenwich, ISS, t0, t1)
-    
-    assert ((kinds=='rise') + (kinds=='set')).all()
-    
-    assert isinstance(times, Time)
-    assert isinstance(kinds, ndarray)
-    assert len(times) == len(kinds) == 13
-    
-    # make sure it also works with plain Topos objects
-    assert (times==risings_settings(plain_greenwich, ISS, t0, t1)[0]).all()
-    
-    # Check that the found times produce the correct data
-    f = partial(_satellite_alt, plain_greenwich, ISS)
-    assert is_root(f, times.tt, -34/60, ms/2)
-
-
-def test_sirius_risings_settings():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, kinds = risings_settings(greenwich, sirius, t0, t1)
-    
-    assert ((kinds=='rise') + (kinds=='set')).all()
-    
-    assert isinstance(times, Time)
-    assert isinstance(kinds, ndarray)
-    assert len(times) == len(kinds) == 62
-    
-    # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, sirius)
-    assert is_root(f, times.tt, 0, ms/2)
-    
-
-# Data Source:
-# http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=2&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
-def test_civil_twilights():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, am_pm = twilights(greenwich, sun, t0, t1, 'civil')
-
-    assert ((am_pm=='am') + (am_pm=='pm')).all()
-
-    assert isinstance(times, Time)
-    assert isinstance(am_pm, ndarray)
-    assert len(times) == len(am_pm) == 62
-    
-    compare(times[0].tt, ts.utc(2017, 1, 1, 7, 26).tt, minute/2)
-    
-    # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, sun)
-    assert is_root(f, times.tt, -6, ms/2)
-
-
-# Data Source:
-# http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=3&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
-def test_nautical_twilights():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, am_pm = twilights(greenwich, sun, t0, t1, 'nautical')
-    
-    assert ((am_pm=='am') + (am_pm=='pm')).all()
-
-    assert isinstance(times, Time)
-    assert isinstance(am_pm, ndarray)
-    assert len(times) == len(am_pm) == 62
-    
-    compare(times[0].tt, ts.utc(2017, 1, 1, 6, 43).tt, minute/2)
-    
-    # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, sun)
-    assert is_root(f, times.tt, -12, ms/2)
-    
-    
-# Data Source:
-# http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=4&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
-def test_astronomical_twilights():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, am_pm = twilights(greenwich, sun, t0, t1, 'astronomical')
-    
-    assert ((am_pm=='am') + (am_pm=='pm')).all()
-
-    assert isinstance(times, Time)
-    assert isinstance(am_pm, ndarray)
-    assert len(times) == len(am_pm) == 62
-    
-    compare(times[0].tt, ts.utc(2017, 1, 1, 6, 2).tt, minute/2)
-    
-    # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, sun)
-    assert is_root(f, times.tt, -18, ms/2)
-    
-
-# Data Source:
-# http://aa.usno.navy.mil/cgi-bin/aa_mrst2.pl?form=2&ID=AA&year=2017&month=1&day=1&reps=31&body=10&place=Greenwich&lon_sign=-1&lon_deg=&lon_min=&lon_sec=&lat_sign=1&lat_deg=51&lat_min=30&lat_sec=&height=&tz=&tz_sign=-1
-def test_sun_transits():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, lhas = meridian_transits(greenwich, sun, t0, t1)
-    
-    assert ((lhas.hours==0) + (lhas.hours==12)).all()
-
-    assert isinstance(times, Time)
-    assert isinstance(lhas, Angle)
-    assert len(times) == len(lhas.radians) == 62
+class TestRisingsSettings():
+    # Data Source:
+    # http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=0&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
+    def test_sun_risings_settings(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, kinds = risings_settings(greenwich, sun, t0, t1)
         
-    compare(times[1].tt, ts.utc(2017, 1, 1, 12, 4).tt, minute/2)
-
-    # Check that the found times produce the correct data
-    f = partial(_lha, greenwich, sun)
-    assert is_root(f, times.tt, lhas._degrees, ms/2)
-    
-
-# Data Source:
-# http://aa.usno.navy.mil/cgi-bin/aa_mrst2.pl?form=2&ID=AA&year=2017&month=1&day=1&reps=31&body=4&place=Greenwich&lon_sign=-1&lon_deg=&lon_min=&lon_sec=&lat_sign=1&lat_deg=51&lat_min=30&lat_sec=&height=&tz=&tz_sign=-1
-def test_mars_transits():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, lhas = meridian_transits(greenwich, mars, t0, t1)
-    
-    assert ((lhas.hours==0) + (lhas.hours==12)).all()
-    
-    assert isinstance(times, Time)
-    assert isinstance(lhas, Angle)
-    assert len(times) == len(lhas.radians) == 62
-    
-    compare(times[1].tt, ts.utc(2017, 1, 1, 16, 2).tt, minute/2)
-    
-    # Check that the found times produce the correct data
-    f = partial(_lha, greenwich, mars)
-    assert is_root(f, times.tt, lhas._degrees, ms/2)
-    
-
-def test_sirius_transits():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, lhas = meridian_transits(greenwich, sirius, t0, t1)
-    
-    assert ((lhas.hours==0) + (lhas.hours==12)).all()
-    
-    assert isinstance(times, Time)
-    assert isinstance(lhas, Angle)
-    assert len(times) == len(lhas.radians) == 63
+        assert ((kinds=='rise') + (kinds=='set')).all()
         
-    # Check that the found times produce the correct data
-    f = partial(_lha, greenwich, sirius)
-    assert is_root(f, times.tt, lhas._degrees, ms/2)
-    
-
-def test_sun_culminations():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, kinds = culminations(greenwich, sun, t0, t1)
-    
-    assert ((kinds=='upper') + (kinds=='lower')).all()
-    
-    assert isinstance(times, Time)
-    assert isinstance(kinds, ndarray)
-    assert len(times) == len(kinds) == 62
-    
-    # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, sun)        
-    assert is_extreme(f, times.tt, 2*ms)
-    
-    
-def test_moon_culminations():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, kinds = culminations(greenwich, moon, t0, t1)
-    
-    assert ((kinds=='upper') + (kinds=='lower')).all()
-
-    assert isinstance(times, Time)
-    assert isinstance(kinds, ndarray)
-    assert len(times) == len(kinds) == 60
-
-    # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, moon)    
-    assert is_extreme(f, times.tt, 6*ms)
-    
-    
-def test_ISS_culminations():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 2)
-    times, kinds = culminations(greenwich, ISS, t0, t1)
-    
-    assert ((kinds=='upper') + (kinds=='lower')).all()
-
-    assert isinstance(times, Time)
-    assert isinstance(kinds, ndarray)
-    assert len(times) == len(kinds) == 31
-    
-    # make sure it also works with plain Topos objects
-    assert (times==culminations(plain_greenwich, ISS, t0, t1)[0]).all()
-
-    # Check that the found times produce the correct data
-    f = partial(_satellite_alt, plain_greenwich, ISS)
-    assert is_extreme(f, times.tt, 2*ms)
-    
-
-def test_sirius_culminations():
-    t0 = ts.utc(2017, 1, 1)
-    t1 = ts.utc(2017, 1, 32)
-    times, kinds = culminations(greenwich, sirius, t0, t1)
-    
-    assert ((kinds=='upper') + (kinds=='lower')).all()
-    
-    assert isinstance(times, Time)
-    assert isinstance(kinds, ndarray)
-    assert len(times) == len(kinds) == 63
-    
-    # Check that the found times produce the correct data
-    f = partial(_alt, greenwich, sirius)        
-    assert is_extreme(f, times.tt, 2*ms)
-    
-# Data Source:
-# web.archive.org/web/20171223014917/http://aa.usno.navy.mil/data/docs/EarthSeasons.php
-def test_earth_apsides():
-    t0 = ts.utc(2000)
-    t1 = ts.utc(2026)
-    times, kinds = apsides(earth, sun, t0, t1)
-    
-    assert ((kinds=='peri') + (kinds=='apo')).all()
-    
-    assert isinstance(times, Time)
-    assert isinstance(kinds, ndarray)
-    assert len(times) == len(kinds) == 52
-
-    compare(times[0].tt, ts.utc(2000, 1, 3, 5, 18).tt, minute/2)
-    
-    # Check that the found times produce the correct data
-    f = partial(_linear_dist, earth, sun)        
-    assert is_extreme(f, times.tt, ms)
-    
-    
-def test_moon_apsides():
-    t0 = ts.utc(2017)
-    t1 = ts.utc(2018)
-    times, kinds = apsides(earth, moon, t0, t1)
-    
-    assert ((kinds=='peri') + (kinds=='apo')).all()
-    
-    assert isinstance(times, Time)
-    assert isinstance(kinds, ndarray)
-    assert len(times) == len(kinds) == 26
+        assert isinstance(times, Time)
+        assert isinstance(kinds, ndarray)
+        assert len(times) == len(kinds) == 62
         
-    # Check that the found times produce the correct data
-    f = partial(_linear_dist, earth, moon)        
-    assert is_extreme(f, times.tt, ms)
+        compare(times[0].tt, ts.utc(2017, 1, 1, 8, 6).tt, minute/2)
+        
+        # Check that the found times produce the correct data    
+        f = partial(_alt, greenwich, sun)
+        assert is_root(f, times.tt, -50/60, ms/2)
+    
+    
+    # Data Source:   
+    # http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=1&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
+    def test_moon_risings_settings(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, kinds = risings_settings(greenwich, moon, t0, t1)
+        
+        assert ((kinds=='rise') + (kinds=='set')).all()
+        
+        assert isinstance(times, Time)
+        assert isinstance(kinds, ndarray)
+        assert len(times) == len(kinds) == 60
+        
+        compare(times[0].tt, ts.utc(2017, 1, 1, 9, 46).tt, minute/2)
+        
+        # Check that the found times produce the correct data
+        f = partial(_moon_ul_alt, greenwich, moon)
+        assert is_root(f, times.tt, -34/60, ms/2)
+        
+        
+    def test_ISS_risings_settings(self):
+        t0 = ts.utc(2017, 6, 1)
+        t1 = ts.utc(2017, 6, 2)
+        times, kinds = risings_settings(greenwich, ISS, t0, t1)
+        
+        assert ((kinds=='rise') + (kinds=='set')).all()
+        
+        assert isinstance(times, Time)
+        assert isinstance(kinds, ndarray)
+        assert len(times) == len(kinds) == 13
+        
+        # make sure it also works with plain Topos objects
+        assert (times==risings_settings(plain_greenwich, ISS, t0, t1)[0]).all()
+        
+        # Check that the found times produce the correct data
+        f = partial(_satellite_alt, plain_greenwich, ISS)
+        assert is_root(f, times.tt, -34/60, ms/2)
+    
+    
+    def test_sirius_risings_settings(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, kinds = risings_settings(greenwich, sirius, t0, t1)
+        
+        assert ((kinds=='rise') + (kinds=='set')).all()
+        
+        assert isinstance(times, Time)
+        assert isinstance(kinds, ndarray)
+        assert len(times) == len(kinds) == 62
+        
+        # Check that the found times produce the correct data
+        f = partial(_alt, greenwich, sirius)
+        assert is_root(f, times.tt, 0, ms/2)
+    
+
+class TestTwilights():
+    # Data Source:
+    # http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=2&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
+    def test_civil_twilights(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, am_pm = twilights(greenwich, sun, t0, t1, 'civil')
+    
+        assert ((am_pm=='am') + (am_pm=='pm')).all()
+    
+        assert isinstance(times, Time)
+        assert isinstance(am_pm, ndarray)
+        assert len(times) == len(am_pm) == 62
+        
+        compare(times[0].tt, ts.utc(2017, 1, 1, 7, 26).tt, minute/2)
+        
+        # Check that the found times produce the correct data
+        f = partial(_alt, greenwich, sun)
+        assert is_root(f, times.tt, -6, ms/2)
+    
+    
+    # Data Source:
+    # http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=3&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
+    def test_nautical_twilights(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, am_pm = twilights(greenwich, sun, t0, t1, 'nautical')
+        
+        assert ((am_pm=='am') + (am_pm=='pm')).all()
+    
+        assert isinstance(times, Time)
+        assert isinstance(am_pm, ndarray)
+        assert len(times) == len(am_pm) == 62
+        
+        compare(times[0].tt, ts.utc(2017, 1, 1, 6, 43).tt, minute/2)
+        
+        # Check that the found times produce the correct data
+        f = partial(_alt, greenwich, sun)
+        assert is_root(f, times.tt, -12, ms/2)
+        
+        
+    # Data Source:
+    # http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl?ID=AA&year=2017&task=4&place=Greenwich&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=30&tz=&tz_sign=-1
+    def test_astronomical_twilights(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, am_pm = twilights(greenwich, sun, t0, t1, 'astronomical')
+        
+        assert ((am_pm=='am') + (am_pm=='pm')).all()
+    
+        assert isinstance(times, Time)
+        assert isinstance(am_pm, ndarray)
+        assert len(times) == len(am_pm) == 62
+        
+        compare(times[0].tt, ts.utc(2017, 1, 1, 6, 2).tt, minute/2)
+        
+        # Check that the found times produce the correct data
+        f = partial(_alt, greenwich, sun)
+        assert is_root(f, times.tt, -18, ms/2)
+    
+
+class TestTransits():
+    # Data Source:
+    # http://aa.usno.navy.mil/cgi-bin/aa_mrst2.pl?form=2&ID=AA&year=2017&month=1&day=1&reps=31&body=10&place=Greenwich&lon_sign=-1&lon_deg=&lon_min=&lon_sec=&lat_sign=1&lat_deg=51&lat_min=30&lat_sec=&height=&tz=&tz_sign=-1
+    def test_sun_transits(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, lhas = meridian_transits(greenwich, sun, t0, t1)
+        
+        assert ((lhas.hours==0) + (lhas.hours==12)).all()
+    
+        assert isinstance(times, Time)
+        assert isinstance(lhas, Angle)
+        assert len(times) == len(lhas.radians) == 62
+            
+        compare(times[1].tt, ts.utc(2017, 1, 1, 12, 4).tt, minute/2)
+    
+        # Check that the found times produce the correct data
+        f = partial(_lha, greenwich, sun)
+        assert is_root(f, times.tt, lhas._degrees, ms/2)
+        
+    
+    # Data Source:
+    # http://aa.usno.navy.mil/cgi-bin/aa_mrst2.pl?form=2&ID=AA&year=2017&month=1&day=1&reps=31&body=4&place=Greenwich&lon_sign=-1&lon_deg=&lon_min=&lon_sec=&lat_sign=1&lat_deg=51&lat_min=30&lat_sec=&height=&tz=&tz_sign=-1
+    def test_mars_transits(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, lhas = meridian_transits(greenwich, mars, t0, t1)
+        
+        assert ((lhas.hours==0) + (lhas.hours==12)).all()
+        
+        assert isinstance(times, Time)
+        assert isinstance(lhas, Angle)
+        assert len(times) == len(lhas.radians) == 62
+        
+        compare(times[1].tt, ts.utc(2017, 1, 1, 16, 2).tt, minute/2)
+        
+        # Check that the found times produce the correct data
+        f = partial(_lha, greenwich, mars)
+        assert is_root(f, times.tt, lhas._degrees, ms/2)
+        
+    
+    def test_sirius_transits(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, lhas = meridian_transits(greenwich, sirius, t0, t1)
+        
+        assert ((lhas.hours==0) + (lhas.hours==12)).all()
+        
+        assert isinstance(times, Time)
+        assert isinstance(lhas, Angle)
+        assert len(times) == len(lhas.radians) == 63
+            
+        # Check that the found times produce the correct data
+        f = partial(_lha, greenwich, sirius)
+        assert is_root(f, times.tt, lhas._degrees, ms/2)
+    
+
+class TestCulminations():
+    def test_sun_culminations(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, kinds = culminations(greenwich, sun, t0, t1)
+        
+        assert ((kinds=='upper') + (kinds=='lower')).all()
+        
+        assert isinstance(times, Time)
+        assert isinstance(kinds, ndarray)
+        assert len(times) == len(kinds) == 62
+        
+        # Check that the found times produce the correct data
+        f = partial(_alt, greenwich, sun)        
+        assert is_extreme(f, times.tt, 2*ms)
+        
+        
+    def test_moon_culminations(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, kinds = culminations(greenwich, moon, t0, t1)
+        
+        assert ((kinds=='upper') + (kinds=='lower')).all()
+    
+        assert isinstance(times, Time)
+        assert isinstance(kinds, ndarray)
+        assert len(times) == len(kinds) == 60
+    
+        # Check that the found times produce the correct data
+        f = partial(_alt, greenwich, moon)    
+        assert is_extreme(f, times.tt, 6*ms)
+        
+        
+    def test_ISS_culminations(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 2)
+        times, kinds = culminations(greenwich, ISS, t0, t1)
+        
+        assert ((kinds=='upper') + (kinds=='lower')).all()
+    
+        assert isinstance(times, Time)
+        assert isinstance(kinds, ndarray)
+        assert len(times) == len(kinds) == 31
+        
+        # make sure it also works with plain Topos objects
+        assert (times==culminations(plain_greenwich, ISS, t0, t1)[0]).all()
+    
+        # Check that the found times produce the correct data
+        f = partial(_satellite_alt, plain_greenwich, ISS)
+        assert is_extreme(f, times.tt, 2*ms)
+        
+    
+    def test_sirius_culminations(self):
+        t0 = ts.utc(2017, 1, 1)
+        t1 = ts.utc(2017, 1, 32)
+        times, kinds = culminations(greenwich, sirius, t0, t1)
+        
+        assert ((kinds=='upper') + (kinds=='lower')).all()
+        
+        assert isinstance(times, Time)
+        assert isinstance(kinds, ndarray)
+        assert len(times) == len(kinds) == 63
+        
+        # Check that the found times produce the correct data
+        f = partial(_alt, greenwich, sirius)        
+        assert is_extreme(f, times.tt, 2*ms)
+    
+    
+class TestApsides():
+    # Data Source:
+    # web.archive.org/web/20171223014917/http://aa.usno.navy.mil/data/docs/EarthSeasons.php
+    def test_earth_apsides(self):
+        t0 = ts.utc(2000)
+        t1 = ts.utc(2026)
+        times, kinds = apsides(earth, sun, t0, t1)
+        
+        assert ((kinds=='peri') + (kinds=='apo')).all()
+        
+        assert isinstance(times, Time)
+        assert isinstance(kinds, ndarray)
+        assert len(times) == len(kinds) == 52
+    
+        compare(times[0].tt, ts.utc(2000, 1, 3, 5, 18).tt, minute/2)
+        
+        # Check that the found times produce the correct data
+        f = partial(_linear_dist, earth, sun)        
+        assert is_extreme(f, times.tt, ms)
+        
+        
+    def test_moon_apsides(self):
+        t0 = ts.utc(2017)
+        t1 = ts.utc(2018)
+        times, kinds = apsides(earth, moon, t0, t1)
+        
+        assert ((kinds=='peri') + (kinds=='apo')).all()
+        
+        assert isinstance(times, Time)
+        assert isinstance(kinds, ndarray)
+        assert len(times) == len(kinds) == 26
+            
+        # Check that the found times produce the correct data
+        f = partial(_linear_dist, earth, moon)        
+        assert is_extreme(f, times.tt, ms)
     
 
 def test_moon_nodes():
