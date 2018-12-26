@@ -1,7 +1,8 @@
 from skyfield.api import Loader, Topos, Angle, EarthSatellite, Star
 from skyfield.timelib import Time
 from almanac2 import (meridian_transits, culminations, twilights, 
-                       risings_settings, seasons, moon_phases, apsides, nodes)
+                       risings_settings, seasons, moon_phases, apsides, nodes,
+                       max_ecliptic_latitudes)
 from almanac2 import (_ecliptic_lon_diff, _moon_ul_alt, _lha, _alt,
                        _satellite_alt, _ecliptic_lon, _linear_dist, 
                        _ecliptic_lat)
@@ -17,6 +18,7 @@ earth = ephem['earth']
 sun = ephem['sun']
 moon = ephem['moon']
 mars = ephem['mars barycenter']
+venus = ephem['venus']
 
 plain_greenwich = Topos(latitude='51.5 N', longitude='0 W')
 greenwich = earth + plain_greenwich
@@ -457,6 +459,50 @@ def test_small_intervals():
     
     times, kinds = nodes(moon, earth, t0, t1)
     assert len(times) == len(kinds) == 0
+    
+
+class TestMaxLatitudes():
+    def test_mars_max_ecliptic_latitudes(self):
+        t0 = ts.utc(2017)
+        t1 = ts.utc(2030)
+        times, lats = max_ecliptic_latitudes(mars, sun, t0, t1)
+    
+        assert isinstance(times, Time)
+        assert isinstance(lats, Angle)
+        assert len(times) == len(lats.radians) == 14
+    
+        # Check that the found times produce the correct data
+        f = partial(_ecliptic_lat, sun, mars)
+        assert is_extreme(f, times.tt, ms)
+    
+    
+    def test_venus_max_ecliptic_latitudes(self):
+        t0 = ts.utc(2017)
+        t1 = ts.utc(2022)
+        times, lats = max_ecliptic_latitudes(venus, sun, t0, t1)
+        
+        assert isinstance(times, Time)
+        assert isinstance(lats, Angle)
+        assert len(times) == len(lats.radians) == 16
+        
+        # Check that the found times produce the correct data
+        f = partial(_ecliptic_lat, sun, venus)
+        assert is_extreme(f, times.tt, ms)
+    
+    
+    def test_moon_max_ecliptic_latitudes(self):
+        t0 = ts.utc(2017, 1)
+        t1 = ts.utc(2017, 6)
+        times, lats = max_ecliptic_latitudes(earth, moon, t0, t1)
+        
+        assert isinstance(times, Time)
+        assert isinstance(lats, Angle)
+        assert len(times) == len(lats.radians) == 11
+        
+        # Check that the found times produce the correct data
+        f = partial(_ecliptic_lat, moon, earth)
+        # TODO: Why is this 400ms?
+        assert is_extreme(f, times.tt, 400*ms)
 
 
 if __name__ == '__main__':

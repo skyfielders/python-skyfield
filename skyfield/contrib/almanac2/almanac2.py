@@ -748,3 +748,60 @@ def nodes(secondary, primary, t0, t1):
     kinds[~is_positive] = 'descending'
 
     return ts.tt(jd=times), kinds
+
+
+def max_ecliptic_latitudes(secondary, primary, t0, t1):
+    """Calculates data about extreme max and min ecliptic latitudes.
+
+    This function searches between ``t0`` and ``t1``
+    for times when `secondary`'s ecliptic latitude centered at ``primary`` is at a 
+    local maximum, e.g., if ``primary`` is the sun, the ecliptic latitudes will 
+    be heliocentric.
+
+    Example
+    -------
+    >>> ephem = load('de430t.bsp')
+    >>> venus = ephem['venus']
+    >>> sun = ephem['sun']
+    >>> t0 = ts.utc(2017)
+    >>> t1 = ts.utc(2020)
+    >>> times, lats = extreme_ecliptic_latitudes(venus, sun, t0, t1)
+    >>> north_times = times[lats>0]
+    >>> south_times = times[lats<0]
+    
+    Arguments
+    ---------
+    secondary : Segment or VectorSum
+        Vector representing the object whose maximum ecliptic latitudes are 
+        being found
+    primary : Segment or VectorSum
+        Vector representing the object orbited by `secondary`
+    t0 : Time
+        The start of the time range to search
+    t1 : Time
+        The end of the time range to search
+
+    Returns
+    -------
+    times : Time
+        Times of extreme ecliptic latitudes
+    lats : Angle
+        Ecliptic latitudes that correspond to `times`
+    """
+    
+    period = _sidereal_period(secondary, primary)
+    partition_edges = _divide_evenly(t0.tt, t1.tt, period*.2)   
+    
+    f = partial(_ecliptic_lat, secondary, primary)
+
+    jd0, jd1, minimum, f0, f1 = _find_extremes(f, partition_edges, find='any')
+
+    if len(jd0)!=0:
+        times = brent_min(f, jd0, jd1, minimum, f0, f1, tol=1e-15)
+    else:
+        times = array([])
+        
+    # TODO: Should brent_min retur f(x) to avoid this function call?
+    lats = f(times)
+
+    return ts.tt(jd=times), Angle(degrees=lats)
