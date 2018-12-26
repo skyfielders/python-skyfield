@@ -1,9 +1,10 @@
 from skyfield.api import Loader, Topos, Angle, EarthSatellite, Star
 from skyfield.timelib import Time
 from almanac2 import (meridian_transits, culminations, twilights, 
-                       risings_settings, seasons, moon_phases, apsides)
+                       risings_settings, seasons, moon_phases, apsides, nodes)
 from almanac2 import (_ecliptic_lon_diff, _moon_ul_alt, _lha, _alt,
-                       _satellite_alt, _ecliptic_lon, _linear_dist)
+                       _satellite_alt, _ecliptic_lon, _linear_dist, 
+                       _ecliptic_lat)
 from numpy import ndarray
 from functools import partial
 
@@ -405,6 +406,22 @@ def test_moon_apsides():
     # Check that the found times produce the correct data
     f = partial(_linear_dist, earth, moon)        
     assert is_extreme(f, times.tt, ms)
+    
+
+def test_moon_nodes():
+    t0 = ts.utc(2017)
+    t1 = ts.utc(2018)
+    times, kinds = nodes(moon, earth, t0, t1)
+    
+    assert ((kinds=='ascending') + (kinds=='descending')).all()
+    
+    assert isinstance(times, Time)
+    assert isinstance(kinds, ndarray)
+    assert len(times) == len(kinds) == 27
+    
+    # Check that the found times produce the correct data
+    f = partial(_ecliptic_lat, earth, moon)
+    assert is_root(f, times.tt, 0, ms/2)
 
 
 def test_small_intervals():
@@ -428,6 +445,12 @@ def test_small_intervals():
     
     times, kinds = moon_phases(moon, t0, t1)
     assert len(times) == len(kinds.radians) == 0
+
+    times, kinds = apsides(moon, earth, t0, t1)
+    assert len(times) == len(kinds) == 0
+    
+    times, kinds = nodes(moon, earth, t0, t1)
+    assert len(times) == len(kinds) == 0
 
 
 if __name__ == '__main__':

@@ -245,10 +245,17 @@ def _satellite_alt(observer, satellite, t):
     return (satellite - observer).at(ts.tt(jd=t)).altaz()[0].degrees
 
 def _linear_dist(observer, body, t):
-    """Returns the distance between observer and body in au at 
+    """Returns the geometric distance between observer and body in au at 
     terrestrial time t.
     """
     return (body - observer).at(ts.tt(jd=t)).distance().au
+
+
+def _ecliptic_lat(observer, body, t):
+    """Returns geometric ecliptic latitude in degrees at terrestrial time `t`.
+    """
+    return (body - observer).at(ts.tt(jd=t)).ecliptic_latlon()[0].degrees
+
 
 #%% Topocentric Phenomena, pg. 482 in Explanatory Supplement (1992)
 
@@ -640,7 +647,7 @@ def moon_phases(moon, t0, t1):
 #%% Heliocentric Phenomena, pg. 478 in Explanatory Supplement (1992)
     
 def apsides(secondary, primary, t0, t1):
-    """Calculates data about periapsides and apoapsides.
+    """Calculates times of periapsides and apoapsides.
     
     This function searches between ``t0`` and ``t1`` for times when 
     `secondary`'s distance from `primary` is a maximum or minimum.
@@ -689,5 +696,55 @@ def apsides(secondary, primary, t0, t1):
     kinds = empty_like(minimum, dtype='U5')
     kinds[minimum] = 'peri'
     kinds[~minimum] = 'apo'
+
+    return ts.tt(jd=times), kinds
+
+
+def nodes(secondary, primary, t0, t1):
+    """Calculates times of ascending and descending nodes.
+
+    This function searches between ``t0`` and ``t1``
+    for times when `secondary`'s ecliptic latitude is 0 degrees.
+    
+    Example
+    -------
+    >>> ephem = load('de430t.bsp')
+    >>> sun = ephem['sun']
+    >>> mars = planets['mars']
+    >>> t0 = ts.utc(2017)
+    >>> t1 = ts.utc(2018)
+    >>> times, kinds = nodes(mars, sun, t0, t1)
+    
+    Arguments
+    ---------
+    secondary : Segment or VectorSum
+        Vector representing the object whose nodes are being found
+    primary : Segment or VectorSum
+        Vector representing the object orbited by `secondary`
+    t0 : Time
+        The start of the time range to search
+    t1 : Time
+        The end of the time range to search
+
+    Returns
+    -------
+    times : Time
+        Times of nodes
+    kinds : ndarray, dtype=str
+        array containing 'ascending' for apoapsides, or 'descending' for periapsides
+    """
+    
+    period = _sidereal_period(secondary, primary)
+    partition_edges = _divide_evenly(t0.tt, t1.tt, period*.2)   
+    
+    f = partial(_ecliptic_lat, secondary, primary)
+    
+    jd0, jd1, targets, f0, f1, is_positive = _find_value(f, [0], partition_edges)
+    
+    times = secant(f, jd0, jd1, targets, f0, f1, tol=1e-10)
+    
+    kinds = empty_like(is_positive, dtype='U10')
+    kinds[is_positive] = 'ascending'
+    kinds[~is_positive] = 'descending'
 
     return ts.tt(jd=times), kinds
