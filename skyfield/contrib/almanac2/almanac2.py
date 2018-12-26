@@ -157,7 +157,7 @@ def _find_extremes(f, partition_edges, find='min'):
     return jd0, jd1, minimum, f0, f1
 
 
-def divide_evenly(start, end, max_width):
+def _divide_evenly(start, end, max_width):
     """ Evenly divides the interval between start and end into intervals that 
     are at most max_width wide.
     
@@ -296,7 +296,7 @@ def meridian_transits(observer, body, t0, t1):
         raise ValueError("meridian_transits doesn't support EarthSatellites.")
     
     f = partial(_lha, observer, body)    
-    partition_edges = divide_evenly(t0.tt, t1.tt, .2)
+    partition_edges = _divide_evenly(t0.tt, t1.tt, .2)
     
     jd0, jd1, targets, f0, f1, _ = _find_value(f, [0, 180], partition_edges, slope='positive')
     
@@ -364,9 +364,9 @@ def culminations(observer, body, t0, t1):
         f = partial(_alt, observer, body)
         max_width = .2
     
-    partition_edges = divide_evenly(t0.tt, t1.tt, max_width)
+    partition_edges = _divide_evenly(t0.tt, t1.tt, max_width)
 
-    jd0, jd1, minimum, f0, f1 = _find_extremes(f, partition_edges, 'any')
+    jd0, jd1, minimum, f0, f1 = _find_extremes(f, partition_edges, find='any')
 
     if len(jd0)!=0:
         times = brent_min(f, jd0, jd1, minimum, f0, f1, tol=1e-15)
@@ -574,7 +574,7 @@ def seasons(earth, t0, t1):
 
     f = partial(_ecliptic_lon, earth, sun)
 
-    partition_edges = divide_evenly(t0.tt, t1.tt, 365*.2)
+    partition_edges = _divide_evenly(t0.tt, t1.tt, 365*.2)
 
     jd0, jd1, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges, slope='positive')
         
@@ -629,7 +629,7 @@ def moon_phases(moon, t0, t1):
     
     f = partial(_ecliptic_lon_diff, earth, moon, sun)
     
-    partition_edges = divide_evenly(t0.tt, t1.tt, 29*.2)
+    partition_edges = _divide_evenly(t0.tt, t1.tt, 29*.2)
 
     jd0, jd1, targets, f0, f1, _ = _find_value(f, [0, 90, 180, 270], partition_edges, slope='positive')
         
@@ -677,7 +677,7 @@ def apsides(secondary, primary, t0, t1):
     f = partial(_linear_dist, secondary, primary)
     
     period = _sidereal_period(secondary, primary)
-    partition_edges = divide_evenly(t0.tt, t1.tt, period*.2)
+    partition_edges = _divide_evenly(t0.tt, t1.tt, period*.2)
         
     jd0, jd1, minimum, f0, f1 = _find_extremes(f, partition_edges, find='any')
 
