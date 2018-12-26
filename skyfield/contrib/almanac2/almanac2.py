@@ -20,6 +20,7 @@ Some other things to be aware of are:
 from skyfield.api import load, Topos, EarthSatellite, Angle, Star
 from skyfield.constants import tau
 from skyfield.vectorlib import VectorSum
+from skyfield.elementslib import osculating_elements_of
 from optimizelib import secant, brent_min
 from numpy import (degrees, arcsin, isfinite, hstack, nan, empty, linspace, 
                    ceil, sign, nonzero, zeros, empty_like, array)
@@ -177,6 +178,10 @@ def divide_evenly(start, end, max_width):
     num_partitions = int(ceil((end - start)/max_width))
     return linspace(start, end, num_partitions+1)
 
+def _sidereal_period(secondary, primary):
+    elements = osculating_elements_of((secondary-primary).at(ts.utc(2017)))
+    return elements.period_in_days
+
 
 #%% Objective Functions
 
@@ -238,6 +243,12 @@ def _satellite_alt(observer, satellite, t):
     at terrestrial time `t`.
     """
     return (satellite - observer).at(ts.tt(jd=t)).altaz()[0].degrees
+
+def _linear_dist(observer, body, t):
+    """Returns the distance between observer and body in au at 
+    terrestrial time t.
+    """
+    return (body - observer).at(ts.tt(jd=t)).distance().au
 
 #%% Topocentric Phenomena, pg. 482 in Explanatory Supplement (1992)
 
@@ -625,3 +636,58 @@ def moon_phases(moon, t0, t1):
     times = secant(f, jd0, jd1, targets, f0, f1)
 
     return ts.tt(jd=times), Angle(degrees=targets)
+
+#%% Heliocentric Phenomena, pg. 478 in Explanatory Supplement (1992)
+    
+def apsides(secondary, primary, t0, t1):
+    """Calculates data about periapsides and apoapsides.
+    
+    This function searches between ``t0`` and ``t1`` for times when 
+    `secondary`'s distance from `primary` is a maximum or minimum.
+
+    Example
+    -------
+    >>> ephem = load('de430t.bsp')
+    >>> earth = ephem['earth']
+    >>> sun = ephem['sun']
+    >>> t0 = ts.utc(2017)
+    >>> t1 = ts.utc(2018)
+    >>> apsides(earth, sun, t0, t1)
+    
+    Arguments
+    ---------
+    secondary : Segment or VectorSum
+        Vector representing the object whose apsides are being found
+    primary : Segment or VectorSum
+        Vector representing the primary of the object whose apsides are being 
+        found
+    t0 : Time
+        The start of the time range to search
+    t1 : Time
+        The end of the time range to search
+        
+    Returns
+    -------
+    times : Time
+        Times of apsides
+    kinds : ndarray, dtype=str
+        array containing 'apo' for apoapsides, or 'peri' for periapsides
+    """
+    
+    f = partial(_linear_dist, secondary, primary)
+    
+    period = _sidereal_period(secondary, primary)
+    partition_edges = divide_evenly(t0.tt, t1.tt, period*.2)
+        
+    jd0, jd1, minimum, f0, f1 = _find_extremes(f, partition_edges, find='any')
+
+    if len(jd0)!=0:
+        times = brent_min(f, jd0, jd1, minimum, f0, f1, tol=1e-13)
+    else:
+        times = array([])
+
+    kinds = empty_like(minimum, dtype='U5')
+    kinds[minimum] = 'peri'
+    kinds[~minimum] = 'apo'
+
+    return ts.tt(jd=times), kinds

@@ -1,9 +1,9 @@
 from skyfield.api import Loader, Topos, Angle, EarthSatellite, Star
 from skyfield.timelib import Time
 from almanac2 import (meridian_transits, culminations, twilights, 
-                       risings_settings, seasons, moon_phases)
+                       risings_settings, seasons, moon_phases, apsides)
 from almanac2 import (_ecliptic_lon_diff, _moon_ul_alt, _lha, _alt,
-                       _satellite_alt, _ecliptic_lon)
+                       _satellite_alt, _ecliptic_lon, _linear_dist)
 from numpy import ndarray
 from functools import partial
 
@@ -29,7 +29,8 @@ ISS = EarthSatellite(*iss_tle.splitlines())
 sirius = Star(ra_hours=(6, 45, 8.91728), dec_degrees=(-16, 42, 58.0171))
 
 minute = 1/24/60
-ms = minute/60/1000
+sec = minute/60
+ms = sec/1000
 
 
 def compare(value, expected_value, epsilon):
@@ -369,6 +370,41 @@ def test_sirius_culminations():
     # Check that the found times produce the correct data
     f = partial(_alt, greenwich, sirius)        
     assert is_extreme(f, times.tt, 2*ms)
+    
+# Data Source:
+# web.archive.org/web/20171223014917/http://aa.usno.navy.mil/data/docs/EarthSeasons.php
+def test_earth_apsides():
+    t0 = ts.utc(2000)
+    t1 = ts.utc(2026)
+    times, kinds = apsides(earth, sun, t0, t1)
+    
+    assert ((kinds=='peri') + (kinds=='apo')).all()
+    
+    assert isinstance(times, Time)
+    assert isinstance(kinds, ndarray)
+    assert len(times) == len(kinds) == 52
+
+    compare(times[0].tt, ts.utc(2000, 1, 3, 5, 18).tt, minute/2)
+    
+    # Check that the found times produce the correct data
+    f = partial(_linear_dist, earth, sun)        
+    assert is_extreme(f, times.tt, ms)
+    
+    
+def test_moon_apsides():
+    t0 = ts.utc(2017)
+    t1 = ts.utc(2018)
+    times, kinds = apsides(earth, moon, t0, t1)
+    
+    assert ((kinds=='peri') + (kinds=='apo')).all()
+    
+    assert isinstance(times, Time)
+    assert isinstance(kinds, ndarray)
+    assert len(times) == len(kinds) == 26
+        
+    # Check that the found times produce the correct data
+    f = partial(_linear_dist, earth, moon)        
+    assert is_extreme(f, times.tt, ms)
 
 
 def test_small_intervals():
