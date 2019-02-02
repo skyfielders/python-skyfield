@@ -3,6 +3,14 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.10 — 2019 February 2
+----------------------
+
+* Fix: teach Skyfield the new format of the Naval Observatory ΔT data
+  file ``deltat.preds``, whose change in format caused Skyfield to start
+  throwing an exception for new users.
+  `#236 <https://github.com/skyfielders/python-skyfield/issues/236>`_
+
 1.9 — 2018 September 23
 -----------------------
 

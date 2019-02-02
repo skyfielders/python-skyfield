@@ -338,22 +338,35 @@ def parse_deltat_data(fileobj):
 def parse_deltat_preds(fileobj):
     """Parse the United States Naval Observatory ``deltat.preds`` file.
 
-    Each line gives a floating point year, the value of Delta T, and one
-    or two other fields::
+    The old format supplies a floating point year, the value of Delta T,
+    and one or two other fields::
 
     2015.75      67.97               0.210         0.02
+
+    The new format adds a modified Julian day as the first field:
+
+    58484.000  2019.00   69.34      -0.152       0.117
 
     This function returns a 2xN array of raw Julian dates and matching
     Delta T values.
 
     """
-    year_float, delta_t = np.loadtxt(fileobj, skiprows=3, usecols=[0, 1]).T
+    lines = iter(fileobj)
+    header = next(lines)
+
+    if header.startswith(b'YEAR'):
+        # Format in use until 2019 February
+        next(lines)             # discard blank line
+        year_float, delta_t = np.loadtxt(lines, usecols=[0, 1]).T
+    else:
+        # Format in use since 2019 February
+        year_float, delta_t = np.loadtxt(lines, usecols=[1, 2]).T
+
     year = year_float.astype(int)
     month = 1 + (year_float * 12.0).astype(int) % 12
     expiration_date = date(year[0] + 2, month[0], 1)
     data = np.array((julian_date(year, month, 1), delta_t))
     return expiration_date, data
-
 
 def parse_leap_seconds(fileobj):
     """Parse the IERS file ``Leap_Second.dat``.
