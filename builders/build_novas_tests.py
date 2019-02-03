@@ -456,7 +456,7 @@ def call(function, *args):
 
 
 def slugify(name):
-    """Turn 'jupiter_barycenter' into 'jupiter barycenter'."""
+    """Turn 'jupiter barycenter' into 'jupiter_barycenter'."""
     return name.replace(' ', '_')
 
 
