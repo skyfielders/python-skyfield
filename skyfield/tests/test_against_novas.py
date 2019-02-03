@@ -131,10 +131,6 @@ def test_iau2000a_date3():
             array([159767295.3348004, -42599231.779328726]), 0.001)
 
 def test_iau2000b_date0():
-    print(nutationlib.iau2000b(2440423.345833333))
-    print([26048264.528388523, 88619675.68529966])
-    print(array(nutationlib.iau2000b(2440423.345833333))
-          / [26048264.528388523, 88619675.68529966])
     compare(nutationlib.iau2000b(2440423.345833333),
             array([26048264.528388523, 88619675.68529966]), 0.001)
 
@@ -483,6 +479,12 @@ def test_tdb_minus_tt_on_date2():
 def test_tdb_minus_tt_on_date3():
     result = timelib.tdb_minus_tt(2456164.5)
     compare(result, -0.001241030165936046, 1e-16)
+
+def test_position_and_velocity(de405, ts):
+    t = ts.tt(jd=2451545.0)
+    e = de405['earth'].at(t)
+    compare(e.position.au, (-0.18427156190936703, 0.8847815016994275, 0.3838199425739002), 10 * meter)
+    compare(e.velocity.au_per_d, (-0.017202246596776286, -0.0029049259923337044, -0.0012594278596487706), 1e-5 * meter / one_second)
 
 def test_mercury_geocentric_date0(de405, ts):
     t = ts.tt(jd=2440423.345833333)

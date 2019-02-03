@@ -76,6 +76,7 @@ def main():
     dates = date_vector + [date_vector]
 
     output_subroutine_tests(dates)
+    output_ephemeris_tests()
     output_geocentric_tests(dates)
     output_topocentric_tests(dates)
     output_catalog_tests(dates)
@@ -293,6 +294,30 @@ def output_subroutine_tests(dates):
                 compare(result, {result!r}, 1e-16)
             """)
 
+
+def output_ephemeris_tests():
+    code = 3
+    cel_obj = novas.make_object(0, code, 'planet{0}'.format(code), None)
+
+    ssb = 0
+    full_accuracy = 0
+    jd = T0
+    pos, vel = novas.ephemeris([jd, 0], cel_obj, ssb, full_accuracy)
+
+    # TODO: why are two uses of exactly the same ephemeris not agreeing
+    # any more closely than 10 meters?
+
+    # TODO: are my units meaningful when comparing the velocity?
+
+    output(locals(), """\
+
+    def test_position_and_velocity(de405, ts):
+        t = ts.tt(jd={jd!r})
+        e = de405['earth'].at(t)
+        compare(e.position.au, {pos!r}, 10 * meter)
+        compare(e.velocity.au_per_d, {vel!r}, 1e-5 * meter / one_second)
+
+    """)
 
 def output_geocentric_tests(dates):
     for (planet, code), (i, jd) in product(planets, enumerate(dates)):
