@@ -361,8 +361,7 @@ class Barycentric(ICRF):
         <Astrometric position and velocity at date t>
 
         """
-        p, v, light_time = body._observe_from_bcrs(self)
-        t = self.t
+        p, v, t, light_time = body._observe_from_bcrs(self)
         astrometric = Astrometric(p, v, t, observer_data=self.observer_data)
         astrometric.light_time = light_time
         return astrometric
