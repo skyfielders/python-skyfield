@@ -3,6 +3,14 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.11 — 2019 ?
+-------------
+
+* Fix: `find_discrete()` was generating empty arrays of search dates,
+  upsetting the astronomy code, if the start and end dates were very
+  close together.
+  `#240 <https://github.com/skyfielders/python-skyfield/issues/240>`_
+
 1.10 — 2019 February 2
 ----------------------
 
