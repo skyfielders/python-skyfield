@@ -278,8 +278,8 @@ def meridian_transits(observer, body, t0, t1):
     >>> upper_transits = times[hour_angles.hours==0]
     >>> lower_transits = times[hour_angles.hours==12]
     
-    Arguments
-    ---------
+    Parameters
+    ----------
     observer : VectorSum
         VectorSum of earth + Topos
     body : Segment or VectorSum
@@ -331,8 +331,8 @@ def culminations(observer, body, t0, t1):
     >>> upper_culminations = times[kinds=='upper']
     >>> lower_culminations = times[kinds=='lower']
     
-    Arguments
-    ---------
+    Parameters
+    ----------
     observer : VectorSum or Topos
         VectorSum of earth + Topos. If ``body`` is an EarthSatellite, 
         ``observer`` can be either a VectorSum or a plain Topos object.
@@ -406,8 +406,8 @@ def risings_settings(observer, body, t0, t1):
     >>> risings = times[kinds=='rise']
     >>> settings = times[kinds=='set']
     
-    Arguments
-    ---------
+    Parameters
+    ----------
     observer : VectorSum or Topos
         VectorSum of earth + Topos. If ``body`` is an EarthSatellite, 
         ``observer`` can be either a VectorSum or a plain Topos object.
@@ -486,8 +486,8 @@ def twilights(observer, sun, t0, t1, kind='civil'):
     >>> am_twilights = times[am_pm=='am']
     >>> pm_twilights = times[am_pm=='pm']
     
-    Arguments
-    ---------
+    Parameters
+    ----------
     observer : VectorSum
         VectorSum of earth + Topos
     sun : Segment
@@ -560,8 +560,8 @@ def seasons(earth, t0, t1):
     >>> sept_equinoxes = times[lons.degrees==180]
     >>> dec_solstices = times[lons.degrees==270]
     
-    Arguments
-    ---------
+    Parameters
+    ----------
     earth : Segment
         Vector representing earth
     t0 : Time
@@ -613,8 +613,8 @@ def moon_phases(moon, t0, t1):
     >>> full_moons = times[lon_diffs.degrees==180]
     >>> last_quarters = times[lon_diffs.degrees==270]
     
-    Arguments
-    ---------
+    Parameters
+    ----------
     moon : Segment
         Vector representing the moon
     t0 : Time
@@ -660,8 +660,8 @@ def apsides(secondary, primary, t0, t1):
     >>> t1 = ts.utc(2018)
     >>> apsides(earth, sun, t0, t1)
     
-    Arguments
-    ---------
+    Parameters
+    ----------
     secondary : Segment or VectorSum
         Vector representing the object whose apsides are being found
     primary : Segment or VectorSum
@@ -714,8 +714,8 @@ def nodes(secondary, primary, t0, t1):
     >>> t1 = ts.utc(2018)
     >>> times, kinds = nodes(mars, sun, t0, t1)
     
-    Arguments
-    ---------
+    Parameters
+    ----------
     secondary : Segment or VectorSum
         Vector representing the object whose nodes are being found
     primary : Segment or VectorSum
@@ -768,8 +768,8 @@ def max_ecliptic_latitudes(secondary, primary, t0, t1):
     >>> north_times = times[lats>0]
     >>> south_times = times[lats<0]
     
-    Arguments
-    ---------
+    Parameters
+    ----------
     secondary : Segment or VectorSum
         Vector representing the object whose maximum ecliptic latitudes are 
         being found
