@@ -1,8 +1,5 @@
-from skyfield.api import Loader, Topos, EarthSatellite, Star
+from skyfield.api import load, Topos, EarthSatellite, Star
 from almanac2 import seasons, moon_phases, meridian_transits, culminations, twilights, risings_settings
-
-# Put your data directory here before running this file:
-load = Loader('')
 
 ts = load.timescale()
 
