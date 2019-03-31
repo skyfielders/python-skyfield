@@ -16,10 +16,6 @@ python:
 #       dist: xenial    # required for Python 3.7 (travis-ci/travis-ci#9069)
 #       sudo: required  # required for Python 3.7 (travis-ci/travis-ci#9069)
 
-cache:
-  directories:
-    - $HOME/Ephemerides
-
 install:
   - "python setup.py sdist"
   - "mkdir tmp"
@@ -29,11 +25,6 @@ install:
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
   - "pip install unittest2"
-  - "mkdir -p $HOME/Ephemerides"
-  - "cp $HOME/Ephemerides/*.bsp . || true"
-  - "curl -O ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de405.bsp"
-  - "curl -O ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de421.bsp"
-  - "cp *.bsp $HOME/Ephemerides"
 
 script:
   - "assay --batch skyfield.tests"
