@@ -40,10 +40,12 @@ Time scales
 .. currentmodule:: skyfield.timelib
 
 A Skyfield `Timescale` object is typically built
-at the beginning of each program::
+at the beginning of each program:
+
+.. testcode::
 
     from skyfield import api
-    ts = api.load_timescale()
+    ts = api.load.timescale()
 
 It downloads and parses the data tables necessary
 to correctly convert between Universal Time

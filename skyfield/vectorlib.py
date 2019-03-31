@@ -227,7 +227,7 @@ def _correct_for_light_travel_time(observer, target):
         light_time0 = light_time
     else:
         raise ValueError('light-travel time failed to converge')
-    return tposition - cposition, tvelocity - cvelocity, light_time
+    return tposition - cposition, tvelocity - cvelocity, t, light_time
 
 
 class ObserverData(object):

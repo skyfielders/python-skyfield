@@ -1,9 +1,54 @@
 """Tests of how well we parse various file formats."""
 
 import gzip
+from skyfield import iokit
 from skyfield.data.hipparcos import load_dataframe
 from skyfield.functions import BytesIO
 from skyfield.iokit import parse_tle
+
+old_deltat_preds = b"""\
+YEAR    TT-UT PREDICTION  UT1-UTC PREDICTION  ERROR
+
+ 2017.00      68.591             -0.408         0.000
+ 2017.25      68.72               0.469         0.00
+ 2017.50      68.81               0.376         0.01
+ 2017.75      68.86               0.322         0.01
+ 2018.00      68.99               0.192         0.02
+ 2018.25      69.14               0.041         0.02
+ 2018.50      69.3                              0.2
+"""
+
+def test_old_deltat_preds():
+    lines = old_deltat_preds.splitlines()
+    expiration_date, data = iokit.parse_deltat_preds(lines)
+    assert expiration_date.strftime('%Y-%m-%d') == '2019-01-01'
+
+    assert data[0][0] == 2457754.5
+    assert str(data[1][0]) == '68.591'
+
+    assert data[0][-1] == 2458300.5
+    assert str(data[1][-1]) == '69.3'
+
+new_deltat_preds = b"""\
+   MJD        YEAR    TT-UT Pred  UT1-UTC Pred  ERROR
+   58484.000  2019.00   69.34      -0.152       0.117
+   58575.000  2019.25   69.48      -0.295       0.162
+   58666.000  2019.50   69.62      -0.440       0.215
+   58758.000  2019.75   69.71      -0.527       0.273
+   58849.000  2020.00   69.87                   0.335
+"""
+
+def test_new_deltat_preds():
+    lines = new_deltat_preds.splitlines()
+    expiration_date, data = iokit.parse_deltat_preds(lines)
+
+    assert expiration_date.strftime('%Y-%m-%d') == '2021-01-01'
+
+    assert data[0][0] == 2458484.5
+    assert str(data[1][0]) == '69.34'
+
+    assert data[0][-1] == 2458849.5
+    assert str(data[1][-1]) == '69.87'
 
 sample_celestrak_text = b"""\
 ISS (ZARYA)             \n\

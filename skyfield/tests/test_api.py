@@ -57,6 +57,7 @@ def test_star_vector(ts):
     p = o.observe(s)
     assert p.position.au.shape == (3, 2)
     assert p.velocity.au_per_d.shape == (3, 2)
+    assert p.t.shape == (2,)
 
 def test_altaz_needs_topos(ts):
     e = api.load('de421.bsp')

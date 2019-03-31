@@ -1,6 +1,6 @@
 """Python class for a distant object with, at most, proper motion."""
 
-from numpy import array, cos, outer, sin
+from numpy import array, cos, empty, outer, sin
 from .constants import AU_KM, ASEC2RAD, C, C_AUDAY, DAY_S, T0
 from .functions import length_of
 from .relativity import light_time_difference
@@ -117,7 +117,11 @@ class Star(object):
             vel = (observer.velocity.au_per_d.T - velocity).T
         distance = length_of(vector)
         light_time = distance / C_AUDAY
-        return vector, vel, light_time
+        if len(position.shape) > 1 and not t.shape:
+            tt = empty(position.shape[1:])
+            tt.fill(t.tt)
+            t = t.ts.tt(tt)
+        return vector, vel, t, light_time
 
     def _compute_vectors(self):
         """Compute the star's position as an ICRF position and velocity."""

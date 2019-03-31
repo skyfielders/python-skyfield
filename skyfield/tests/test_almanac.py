@@ -57,3 +57,15 @@ def test_moon_phases():
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     assert strings == ['2018-09-16 23:15', '2018-09-25 02:52']
     assert (y == (1, 2)).all()
+
+# Logic.
+
+def test_close_start_and_end():
+    ts = api.load.timescale()
+    t0 = ts.utc(2018, 9, 23, 1)
+    t1 = ts.utc(2018, 9, 23, 2)
+    e = api.load('de421.bsp')
+    t, y = almanac.find_discrete(t0, t1, almanac.seasons(e))
+    t.tt += half_minute
+    strings = t.utc_strftime('%Y-%m-%d %H:%M')
+    assert strings == ['2018-09-23 01:54']
