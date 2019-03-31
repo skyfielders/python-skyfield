@@ -316,8 +316,7 @@ def culminations(observer, body, t0, t1):
     """Calculates times of upper and lower culminations.
     
     This function searches between ``t0`` and ``t1`` for times when `body`'s 
-    altitude reaches a local maximum or minimum. Finds upper culminations only 
-    by default, but this can be changed with the ``kind`` keyword.
+    altitude reaches a local maximum or minimum.
 
     Example
     -------
