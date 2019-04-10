@@ -158,8 +158,8 @@ def _find_extremes(f, partition_edges, find='min'):
 
 
 def _divide_evenly(start, end, max_width):
-    """ Evenly divides the interval between start and end into intervals that 
-    are at most max_width wide.
+    """ Evenly divides the interval between ``start`` and ``end`` into 
+    intervals that are at most ``max_width`` wide.
     
     Arguments
     ---------
