@@ -182,7 +182,18 @@ class Loader(object):
                              .format(filename))
 
         self._log('  Downloading: {0}', url)
-        download(url, path, self.verbose)
+        try:
+            download(url, path, self.verbose)
+        except OSError as download_err:
+            self._log('  Failed to download')
+            # If we made a backup revert the name change.
+            try:
+                os.rename(self.path_to(backup_name), self.path_to(filename))
+                self._log('  The backup was restored')
+            except:
+                self._log('  Backup not restored')
+                pass
+            raise download_err
 
         if parser is not None:
             self._log('  Parsing with: {0}()', parser.__name__)
