@@ -134,7 +134,7 @@ def propagate(position, velocity, t0, t1, gm):
         oldx[past] = x[past]
         x[past] = bracket(lower[past], -bound, bound)
         if (x[past] == oldx[past]).any():
-            raise ValueError(f'The input delta time (dt) has a value of {0}.'
+            raise ValueError('The input delta time (dt) has a value of {0}.'
                              'This is beyond the range of DT for which we '
                              'can reliably propagate states. The limits for '
                              'this GM and initial state are from {1}'
