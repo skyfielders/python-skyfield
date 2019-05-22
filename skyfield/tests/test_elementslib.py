@@ -583,7 +583,7 @@ def test_parabolic_equatorial(ts):
     e = 1
     i = 0
     Om = 0
-    check_orbit(300000, e, i, Om, angles1, 2, t)
+    check_orbit(300000, e, i, Om, angles1, 2, ts)
     check_orbit(300000, e, i, Om, 4, angles2, ts)
 
     for angle in angles1:
