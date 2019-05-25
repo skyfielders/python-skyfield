@@ -461,7 +461,7 @@ def ele_to_vec(p, e, i, Om, w, v, mu):
     return array([X, Y, Z]), array([X_dot, Y_dot, Z_dot])
 
 
-def check_orbit(p, e, i, Om, w, v, ts, mod=False):
+def check_orbit(p, e, i, Om, w, v, ts):
     """Checks that the given set of elements are calculated properly by
     elementslib.py
 
@@ -486,16 +486,10 @@ def check_orbit(p, e, i, Om, w, v, ts, mod=False):
     compare(time, elements.time, 1e-9)
     compare(elements.semi_latus_rectum.km, p, 1e-9)
     compare(elements.eccentricity, e, 1e-14)
-    if mod:
-        compare(elements.inclination.radians, i, 1e-14, mod=True)
-        compare(elements.longitude_of_ascending_node.radians, Om, 1e-14, mod=True)
-        compare(elements.argument_of_periapsis.radians, w, 1e-14, mod=True)
-        compare(elements.true_anomaly.radians, v, 1e-14, mod=True)
-    else:
-        compare(elements.inclination.radians, i, 1e-14)
-        compare(elements.longitude_of_ascending_node.radians, Om, 1e-14)
-        compare(elements.argument_of_periapsis.radians, w, 1e-14)
-        compare(elements.true_anomaly.radians, v, 1e-14)
+    compare(elements.inclination.radians, i, 1e-14, mod=True)
+    compare(elements.longitude_of_ascending_node.radians, Om, 1e-14, mod=True)
+    compare(elements.argument_of_periapsis.radians, w, 1e-14, mod=True)
+    compare(elements.true_anomaly.radians, v, 1e-14, mod=True)
 
 
 # The remaining tests check that certain edge case orbits are being handled
@@ -537,37 +531,37 @@ def test_circular_polar(ts):
         check_orbit(300000, e, i, 1, w, angle, ts)
 
 def test_elliptical(ts):
-    check_orbit(300000, .3, angles1[:4], 0, 4, 5, ts, mod=True)
+    check_orbit(300000, .3, angles1[:4], 0, 4, 5, ts)
     check_orbit(300000, .3, .1, angles1, 4, 5, ts)
-    check_orbit(300000, .3, .1, 2, angles1, 5, ts, mod=True)
+    check_orbit(300000, .3, .1, 2, angles1, 5, ts)
     check_orbit(300000, .3, .1, 2, 4, angles1, ts)
 
     for angle in angles1[:4]:
-        check_orbit(300000, .3, angle, 0, 4, 5, ts, mod=True)
+        check_orbit(300000, .3, angle, 0, 4, 5, ts)
     for angle in angles1:
         check_orbit(300000, .3, .1, angle, 4, 5, ts)
-        check_orbit(300000, .3, .1, 2, angle, 5, ts, mod=True)
+        check_orbit(300000, .3, .1, 2, angle, 5, ts)
         check_orbit(300000, .3, .1, 2, 4, angle, ts)
 
 def test_elliptical_equatorial(ts):
     i = 0
     Om = 0
     check_orbit(300000, .3, i, Om, angles1, 5, ts)
-    check_orbit(300000, .3, i, Om, 4, angles1, ts, mod=True)
+    check_orbit(300000, .3, i, Om, 4, angles1, ts)
 
     for angle in angles1:
         check_orbit(300000, .3, i, Om, angle, 5, ts)
-        check_orbit(300000, .3, i, Om, 4, angle, ts, mod=True)
+        check_orbit(300000, .3, i, Om, 4, angle, ts)
 
 def test_elliptical_polar(ts):
     i = pi/2
-    check_orbit(300000, .2, i, angles1, 2, 3, ts, mod=True)
-    check_orbit(300000, .2, i, 1, angles1, 3, ts, mod=True)
+    check_orbit(300000, .2, i, angles1, 2, 3, ts)
+    check_orbit(300000, .2, i, 1, angles1, 3, ts)
     check_orbit(300000, .2, i, 1, 2, angles1, ts)
 
     for angle in angles1:
-        check_orbit(300000, .2, i, angle, 2, 3, ts, mod=True)
-        check_orbit(300000, .2, i, 1, angle, 3, ts, mod=True)
+        check_orbit(300000, .2, i, angle, 2, 3, ts)
+        check_orbit(300000, .2, i, 1, angle, 3, ts)
         check_orbit(300000, .2, i, 1, 2, angle, ts)
 
 def test_parabolic(ts):
@@ -589,11 +583,11 @@ def test_parabolic_equatorial(ts):
     e = 1
     i = 0
     Om = 0
-    check_orbit(300000, e, i, Om, angles1, 2, ts, mod=True)
+    check_orbit(300000, e, i, Om, angles1, 2, ts)
     check_orbit(300000, e, i, Om, 4, angles2, ts)
 
     for angle in angles1:
-        check_orbit(300000, e, i, Om, angle, 2, ts, mod=True)
+        check_orbit(300000, e, i, Om, angle, 2, ts)
     for angle in angles2:
         check_orbit(300000, e, i, Om, 4, angle, ts)
 
@@ -612,13 +606,13 @@ def test_parabolic_polar(ts):
 
 def test_hyperbolic(ts):
     e = 1.3
-    check_orbit(300000, e, angles1[:4], 0, 4, .5, ts, mod=True)
+    check_orbit(300000, e, angles1[:4], 0, 4, .5, ts)
     check_orbit(300000, e, 2, angles1, 4, .5, ts)
     check_orbit(300000, e, 2, 3, angles1, .5, ts)
     check_orbit(300000, e, 2, 3, 4, angles2, ts)
 
     for angle in angles1[:4]:
-        check_orbit(300000, e, angle, 0, 4, .5, ts, mod=True)
+        check_orbit(300000, e, angle, 0, 4, .5, ts)
     for angle in angles1:
         check_orbit(300000, e, 2, angle, 4, .5, ts)
         check_orbit(300000, e, 2, 3, angle, .5, ts)
@@ -661,5 +655,4 @@ def test_all_types_at_once(ts):
                 Om=array([ 1, 0,    1,  2,  0,    1, 3, 0,    1,   3,   0,    1]),
                 w=array([ 0, 0,    0,  4,  4,    2, 4, 4,    2,   4,   4,    2]),
                 v=array([ 1, 5,    3,  5,  5,    3, 5, 5,    3,  .5,  .5,   .5]),
-                ts=ts,
-                mod=True)
+                ts=ts)
