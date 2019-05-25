@@ -1,7 +1,8 @@
 # Test the behavior of all combinations of vector.
 
 from assay import assert_raises
-from skyfield.api import Topos, load
+from skyfield.api import T0, Topos, load
+from skyfield.positionlib import Geocentric
 
 def test_bad_addition():
     planets = load('de421.bsp')
@@ -64,3 +65,6 @@ Sum of 4 vectors:
 
     assert str(v.at(t)) == "\
 <Geometric position and velocity at date t center=499 target=399>"
+
+    geocentric = Geocentric([0,0,0])
+    assert geocentric.center == 399
