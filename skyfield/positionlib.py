@@ -35,6 +35,8 @@ class ICRF(object):
     is tighter than the accuracy of J2000 itself.
 
     """
+    _default_center = None
+
     def __init__(self, position_au, velocity_au_per_d=None, t=None,
                  center=None, target=None, observer_data=None):
         self.t = t
@@ -44,7 +46,7 @@ class ICRF(object):
         self.velocity = Velocity(velocity_au_per_d)
         # TODO: are center and target useful? Then why are they not
         # propagated down to Astrometric and Apparent positions?
-        self.center = center
+        self.center = self._default_center if center is None else center
         self.target = target
         self.observer_data = observer_data
 
@@ -450,6 +452,8 @@ class Apparent(ICRF):
 
 class Geocentric(ICRF):
     """An (x,y,z) position measured from the geocenter."""
+
+    _default_center = 399
 
     def subpoint(self):
         """Return the latitude and longitude directly beneath this position.
