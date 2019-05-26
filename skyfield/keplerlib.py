@@ -70,6 +70,11 @@ def stumpff(x):
     
 
 def propagate(position, velocity, t0, t1, gm):
+    """Propagates a position and velocity vector with an array of times.
+    
+    Based on the function toolkit/src/spicelib/prop2b.f from the SPICE toolkit, 
+    which can be downloaded here: naif.jpl.nasa.gov/naif/toolkit_FORTRAN.html
+    """
     if gm <= 0: raise ValueError("'gm' should be positive")
     if length_of(velocity) == 0: raise ValueError('Velocity vector has zero magnitude')
     if length_of(position) == 0: raise ValueError('Position vector has zero magnitude')
