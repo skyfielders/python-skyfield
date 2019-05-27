@@ -1,12 +1,244 @@
-from skyfield.functions import length_of, dots
 import sys
+import math
 from numpy import (sum, array, arange, power, cross, sqrt, log, exp, cos, sin, 
                    cosh, sinh, zeros_like, abs, tile, repeat, newaxis, amax, 
-                   amin, ones_like)
-import math
+                   amin, ones_like, ndarray, arccos, pi, arctan, tan)
+
+from skyfield.functions import length_of, dots
+from skyfield.descriptorlib import reify
+from skyfield.elementslib import OsculatingElements, normpi
+from skyfield.positionlib import build_position
+from skyfield.units import Distance, Velocity, Angle
+
+
+class KeplerOrbit():
+    def __init__(self, position, velocity, epoch, mu_km_s, center=None, target=None):
+        """ 
+        
+        Parameters
+        ----------
+        position : Distance
+            Position vector at epoch with shape (3,)
+        velocity : Velocity
+            Velocity vector at epoch with shape (3,)
+        epoch : Time
+            Time corresponding to `position` and `velocity`
+        mu_km_s : float
+            Value of mu (G * M) in km^3/s^2
+        center : int
+            NAIF ID of the primary body, 399 for geocentric orbits, 10 for 
+            heliocentric orbits
+        target : int
+            NAIF ID of the secondary body
+        """
+        self._pos_vec = position
+        self._vel_vec = velocity
+        self._mu = mu_km_s
+        self.epoch = epoch
+        self.center = center
+        self.target = target
+        
+    
+    @classmethod
+    def from_true_anomaly(cls, p, e, i, Om, w, v, 
+                          epoch, 
+                          mu_km_s, 
+                          center=None, 
+                          target=None):
+        """ Creates KeplerOrbit object from elements using true anomaly
+        
+        Parameters
+        ----------
+        p : Distance
+            Semi-Latus Rectum
+        e : float
+             Eccentricity
+        i : Angle
+            Inclination
+        Om : Angle
+            Longitude of Ascending Node
+        w : Angle
+            Argument of periapsis
+        v : Angle
+            True anomaly
+        epoch : Time
+            Time corresponding to `position` and `velocity`
+        mu_km_s : float
+            Value of mu (G * M) in km^3/s^2
+        center : int
+            NAIF ID of the primary body, 399 for geocentric orbits, 10 for 
+            heliocentric orbits
+        target : int
+            NAIF ID of the secondary body
+        """
+        position, velocity = ele_to_vec(p.km, e, i.radians, Om.radians, w.radians, v.radians, mu_km_s)
+        return cls(Distance(km=position), Velocity(km_per_s=velocity), epoch, mu_km_s, center=center, target=target)
+        
+
+    @classmethod
+    def from_mean_anomaly(cls, p, e, i, Om, w, M, 
+                          epoch, 
+                          mu_km_s, 
+                          center=None, 
+                          target=None):
+        """ Creates KeplerOrbit object from elements using mean anomaly
+        
+        Parameters
+        ----------
+        p : Distance
+            Semi-Latus Rectum
+        e : float
+             Eccentricity
+        i : Angle
+            Inclination
+        Om : Angle
+            Longitude of Ascending Node
+        w : Angle
+            Argument of periapsis
+        M : Angle
+            Mean anomaly
+        epoch : Time
+            Time corresponding to `position` and `velocity`
+        mu_km_s : float
+            Value of mu (G * M) in km^3/s^2
+        center : int
+            NAIF ID of the primary body, 399 for geocentric orbits, 10 for 
+            heliocentric orbits
+        target : int
+            NAIF ID of the secondary body
+        """
+        E = eccentric_anomaly(e, M.radians)
+        v = Angle(radians=true_anomaly(e, E))
+        pos, vel = ele_to_vec(p.km, e, i.radians, Om.radians, w.radians, v.radians, mu_km_s)
+        return cls(Distance(km=pos), Velocity(km_per_s=vel), epoch, mu_km_s, center=center, target=target)
+    
+    
+    @classmethod
+    def from_mpcorb_dataframe(cls, df):
+        ...
+        
+    
+    @classmethod
+    def from_comet_dataframe(cls, df):
+        ...
+        
+        
+    def at(self, time):
+        pos, vel = propagate(self._pos_vec.km, 
+                             self.vel_vec.km_per_s,
+                             self.epoch.tt,
+                             time.tt,
+                             self.mu)
+        return build_position(Distance(km=pos).au,
+                              Velocity(km_per_s=vel).au_per_d,
+                              time,
+                              center = self.center,
+                              target = self.target)
+        
+        
+    @reify
+    def elements_at_epoch(self):
+        return OsculatingElements(self._pos_vec, self._vel_vec, self.epoch, self._mu)
+
+
+def eccentric_anomaly(e, M):
+    """ Iterates to solve Kepler's equation to find eccentric anomaly
+    
+    Based on the algorithm in section 8.10.2 of the Explanatory Supplement 
+    to the Astronomical Almanac, 3rd ed. 
+    """
+    M = normpi(M)
+    E = M + e*sin(M)
+    
+    max_iters = 100
+    iters = 0
+    while iters < max_iters:
+        dM = M - (E - e*sin(E))
+        dE = dM/(1 - e*cos(E))
+        E = E + dE
+        if dE < 1e-14: return E
+        iters += 1
+    else:
+        raise ValueError('Failed to converge')
+    
+
+def true_anomaly(e, E):
+    """Calculates true anomaly from eccentric anomaly
+    
+    Equation from  here step 3 here:
+    https://web.archive.org/web/*/http://ccar.colorado.edu/asen5070/handouts/kep2cart_2002.doc
+    """
+    return 2 * arctan(((1+e)/(1-e))**.5 * tan(E/2))
+
+
+def ele_to_vec(p, e, i, Om, w, v, mu):
+    """Calculates state vectors from orbital elements. Also checks for invalid
+    sets of elements.
+
+    Based on equations from this document:
+
+    https://web.archive.org/web/*/http://ccar.colorado.edu/asen5070/handouts/kep2cart_2002.doc
+    """
+    # Checks that longitude of ascending node is 0 if inclination is 0
+    if isinstance(i, ndarray) or isinstance(Om, ndarray):
+        if ((i==0)*(Om!=0)).any():
+            raise ValueError('If inclination is 0, longitude of ascending node must be 0')
+    else:
+        if i==0 and Om!=0:
+            raise ValueError('If inclination is 0, longitude of ascending node must be 0')
+
+    # Checks that argument of periapsis is 0  if eccentricity is 0
+    if isinstance(e, ndarray) or isinstance(w, ndarray):
+        if ((e==0)*(w!=0)).any():
+            raise ValueError('If eccentricity is 0, argument of periapsis must be 0')
+    else:
+        if e==0 and w!=0:
+            raise ValueError('If eccentricity is 0, argument of periapsis must be 0')
+
+    # Checks that true anomaly is less than arccos(-1/e) for hyperbolic orbits
+    if isinstance(e, ndarray) and isinstance(v, ndarray):
+        inds = (e>1)
+        if (v[inds]>arccos(-1/e[inds])).any():
+            raise ValueError('If eccentricity is >1, abs(true anomaly) cannot be more than arccos(-1/e)')
+    elif isinstance(e, ndarray) and not isinstance(v, ndarray):
+        inds = (e>1)
+        if (v>arccos(-1/e[inds])).any():
+            raise ValueError('If eccentricity is >1, abs(true anomaly) cannot be more than arccos(-1/e)')
+    elif isinstance(v, ndarray) and not isinstance(e, ndarray):
+        if e>1 and (v>arccos(-1/e)).any():
+            raise ValueError('If eccentricity is >1, abs(true anomaly) cannot be more than arccos(-1/e)')
+    else:
+        if e>1 and v>arccos(-1/e):
+            raise ValueError('If eccentricity is >1, abs(true anomaly) cannot be more than arccos(-1/e)')
+
+    # Checks that inclination is between 0 and pi
+    if isinstance(i, ndarray):
+        assert ((i>=0) * (i < pi)).all()
+    else:
+        assert i>=0 and i<pi
+        
+    r = p/(1 + e*cos(v))
+    h = sqrt(p*mu)
+    u = v+w
+
+    X = r*(cos(Om)*cos(u) - sin(Om)*sin(u)*cos(i))
+    Y = r*(sin(Om)*cos(u) + cos(Om)*sin(u)*cos(i))
+    Z = r*(sin(i)*sin(u))
+
+    X_dot = X*h*e/(r*p)*sin(v) - h/r*(cos(Om)*sin(u) + sin(Om)*cos(u)*cos(i))
+    Y_dot = Y*h*e/(r*p)*sin(v) - h/r*(sin(Om)*sin(u) - cos(Om)*cos(u)*cos(i))
+    Z_dot = Z*h*e/(r*p)*sin(v) + h/r*sin(i)*cos(u)
+
+    # z and z_dot are independent of Om, so if Om is an array and the other
+    # elements are scalars, z and z_dot need to be repeated
+    if Z.size!=X.size:
+        Z = repeat(Z, X.size)
+        Z_dot = repeat(Z_dot, X.size)
+
+    return array([X, Y, Z]), array([X_dot, Y_dot, Z_dot])
+
 
 dpmax = sys.float_info.max
-
 
 def bracket(num, end1, end2):
     num[num<end1] = end1
@@ -33,6 +265,11 @@ even_factorials = array([math.factorial(i) for i in range(2, trunc*2, 2)])
 
 
 def stumpff(x):
+    """Calculates Stumpff functions
+    
+    Based on the function toolkit/src/spicelib/stmp03.f from the SPICE toolkit, 
+    which can be downloaded from naif.jpl.nasa.gov/naif/toolkit_FORTRAN.html
+    """
     if (x < (-(log(2) + log(dpmax))**2)).any():
         raise ValueError('Argument below lower bound')
         
@@ -73,7 +310,7 @@ def propagate(position, velocity, t0, t1, gm):
     """Propagates a position and velocity vector with an array of times.
     
     Based on the function toolkit/src/spicelib/prop2b.f from the SPICE toolkit, 
-    which can be downloaded here: naif.jpl.nasa.gov/naif/toolkit_FORTRAN.html
+    which can be downloaded from naif.jpl.nasa.gov/naif/toolkit_FORTRAN.html
     """
     if gm <= 0: raise ValueError("'gm' should be positive")
     if length_of(velocity) == 0: raise ValueError('Velocity vector has zero magnitude')
