@@ -139,6 +139,16 @@ class KeplerOrbit():
     @reify
     def elements_at_epoch(self):
         return OsculatingElements(self._pos_vec, self._vel_vec, self.epoch, self._mu)
+    
+    
+    def __repr__(self):
+        ele = self.elements_at_epoch
+        string = '<KeplerOrbit q={0:.2}au, e={1:.1f}, i={2:.1f}°, Ω={3:.1f}°, ω={4:.1f}°>'
+        return string.format(ele.periapsis_distance.au, 
+                             ele.eccentricity, 
+                             ele.inclination.degrees, 
+                             ele.longitude_of_ascending_node.degrees, 
+                             ele.argument_of_periapsis.degrees)
 
 
 def eccentric_anomaly(e, M):
