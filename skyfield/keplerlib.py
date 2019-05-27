@@ -1,8 +1,8 @@
 import sys
 import math
-from numpy import (sum, array, arange, power, cross, sqrt, log, exp, cos, sin, 
-                   cosh, sinh, zeros_like, abs, tile, repeat, newaxis, amax, 
-                   amin, ones_like, ndarray, arccos, pi, arctan, tan)
+from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh, 
+                  cross, exp, log, ndarray, newaxis, ones_like, pi, power, 
+                  repeat, sin, sinh, sqrt, sum, tan, tile, zeros_like)
 
 from skyfield.functions import length_of, dots
 from skyfield.descriptorlib import reify
