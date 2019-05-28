@@ -1,19 +1,21 @@
 import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh, 
-                  cross, exp, log, ndarray, newaxis, ones_like, pi, power, 
+                  cross, exp, log, nan, ndarray, newaxis, ones_like, pi, power, 
                   repeat, sin, sinh, sqrt, sum, tan, tile, zeros_like)
 
 from skyfield.functions import length_of, dots
 from skyfield.descriptorlib import reify
 from skyfield.elementslib import OsculatingElements, normpi
-from skyfield.positionlib import build_position
 from skyfield.units import Distance, Velocity, Angle
+from skyfield.vectorlib import VectorFunction
+from skyfield.data.gravitational_parameters import GM_dict
+from skyfield.constants import AU_KM, DAY_S
 
-
-class KeplerOrbit():
-    def __init__(self, position, velocity, epoch, mu_km_s, center=None, target=None):
-        """ 
+class KeplerOrbit(VectorFunction):
+    def __init__(self, position, velocity, epoch, mu_km_s, 
+                 center=None, target=None, center_name=None, target_name=None):
+        """ Calculates the position of an object using 2 body propagation
         
         Parameters
         ----------
@@ -31,12 +33,14 @@ class KeplerOrbit():
         target : int
             NAIF ID of the secondary body
         """
-        self._pos_vec = position
-        self._vel_vec = velocity
+        self.position_at_epoch = position
+        self.velocity_at_epoch = velocity
         self._mu = mu_km_s
         self.epoch = epoch
         self.center = center
         self.target = target
+        self.center_name = center_name
+        self.target_name = target_name
         
     
     @classmethod
@@ -44,8 +48,11 @@ class KeplerOrbit():
                           epoch, 
                           mu_km_s, 
                           center=None, 
-                          target=None):
-        """ Creates KeplerOrbit object from elements using true anomaly
+                          target=None,
+                          center_name=None,
+                          target_name=None,
+                          ):
+        """ Creates a `KeplerOrbit` object from elements using true anomaly
         
         Parameters
         ----------
@@ -71,8 +78,23 @@ class KeplerOrbit():
         target : int
             NAIF ID of the secondary body
         """
-        position, velocity = ele_to_vec(p.km, e, i.radians, Om.radians, w.radians, v.radians, mu_km_s)
-        return cls(Distance(km=position), Velocity(km_per_s=velocity), epoch, mu_km_s, center=center, target=target)
+        position, velocity = ele_to_vec(p.km, 
+                                        e, 
+                                        i.radians, 
+                                        Om.radians, 
+                                        w.radians, 
+                                        v.radians, 
+                                        mu_km_s,
+                                        )
+        return cls(Distance(km=position), 
+                   Velocity(km_per_s=velocity), 
+                   epoch, 
+                   mu_km_s, 
+                   center=center, 
+                   target=target,
+                   center_name=center_name,
+                   target_name=target_name,
+                   )
         
 
     @classmethod
@@ -80,8 +102,11 @@ class KeplerOrbit():
                           epoch, 
                           mu_km_s, 
                           center=None, 
-                          target=None):
-        """ Creates KeplerOrbit object from elements using mean anomaly
+                          target=None,
+                          center_name=None,
+                          target_name=None,
+                          ):
+        """ Creates a `KeplerOrbit` object from elements using mean anomaly
         
         Parameters
         ----------
@@ -109,47 +134,108 @@ class KeplerOrbit():
         """
         E = eccentric_anomaly(e, M.radians)
         v = Angle(radians=true_anomaly(e, E))
-        pos, vel = ele_to_vec(p.km, e, i.radians, Om.radians, w.radians, v.radians, mu_km_s)
-        return cls(Distance(km=pos), Velocity(km_per_s=vel), epoch, mu_km_s, center=center, target=target)
+        pos, vel = ele_to_vec(p.km, 
+                              e, 
+                              i.radians, 
+                              Om.radians, 
+                              w.radians, 
+                              v.radians, 
+                              mu_km_s,
+                              )
+        return cls(Distance(km=pos), 
+                   Velocity(km_per_s=vel), 
+                   epoch, mu_km_s, 
+                   center=center, 
+                   target=target,
+                   center_name=center_name,
+                   target_name=target_name,
+                   )
     
     
     @classmethod
-    def from_mpcorb_dataframe(cls, df):
-        ...
-        
+    def from_mpcorb_dataframe(cls, df, ts):
+        target = int(df.Number.strip('()')) + 2000000
+        return cls.from_mean_anomaly(p=Distance(au=df.Semilatus_rectum),
+                                     e=df.e,
+                                     i=Angle(degrees=df.i), 
+                                     Om=Angle(degrees=df.Node), 
+                                     w=Angle(degrees=df.Peri), 
+                                     M=Angle(degrees=df.M),
+                                     epoch=ts.tdb_jd(df.Epoch),
+                                     mu_km_s=GM_dict[10] + GM_dict.get(target, 0),
+                                     center=10,
+                                     target=target,
+                                     center_name='SUN',
+                                     target_name=df.Name if df.Name!=nan else df.Principal_desig)
+    
     
     @classmethod
-    def from_comet_dataframe(cls, df):
-        ...
+    def from_comet_dataframe(cls, df, ts):
+        mu_km_s = GM_dict[10]
+        mu_au_d = mu_km_s / (AU_KM**3) * (DAY_S**2)
+        e = df.e
+        a = df.Perihelion_dist / (1 - e)
+        p = a * (1 - e**2)
+        n = sqrt(mu_au_d/a**3)
+        peri_day = ts.tt(df.Year_of_perihelion, 0, df.Day_of_perihelion)
+        epoch = ts.tt(df.Epoch_year, df.Epoch_month, df.Epoch_day)
+        M = n * (epoch - peri_day)
+        return cls.from_mean_anomaly(p=Distance(au=p),
+                                     e=e,
+                                     i=Angle(degrees=df.i),
+                                     Om=Angle(degrees=df.Node), 
+                                     w=Angle(degrees=df.Peri), 
+                                     M=Angle(radians=M),
+                                     epoch=epoch,
+                                     mu_km_s=mu_km_s,
+                                     center=10,
+                                     center_name='SUN',
+                                     target_name=df.Designation_and_name)
         
         
-    def at(self, time):
-        pos, vel = propagate(self._pos_vec.km, 
-                             self.vel_vec.km_per_s,
+    def _at(self, time):
+        """Propagate the KeplerOrbit to the given Time object
+        
+        The Time object can contain one time, or an array of times
+        """
+        pos, vel = propagate(self.position_at_epoch.km, 
+                             self.velocity_at_epoch.km_per_s,
                              self.epoch.tt,
                              time.tt,
-                             self.mu)
-        return build_position(Distance(km=pos).au,
-                              Velocity(km_per_s=vel).au_per_d,
-                              time,
-                              center = self.center,
-                              target = self.target)
+                             self._mu,
+                             )
+        return pos, vel, None, None
         
         
     @reify
     def elements_at_epoch(self):
-        return OsculatingElements(self._pos_vec, self._vel_vec, self.epoch, self._mu)
+        return OsculatingElements(self.position_at_epoch, 
+                                  self.velocity_at_epoch, 
+                                  self.epoch, 
+                                  self._mu,
+                                  )
     
     
     def __repr__(self):
         ele = self.elements_at_epoch
-        string = '<KeplerOrbit q={0:.2}au, e={1:.1f}, i={2:.1f}°, Ω={3:.1f}°, ω={4:.1f}°>'
-        return string.format(ele.periapsis_distance.au, 
-                             ele.eccentricity, 
-                             ele.inclination.degrees, 
-                             ele.longitude_of_ascending_node.degrees, 
-                             ele.argument_of_periapsis.degrees)
-
+        if self.target_name:
+            return '<KeplerOrbit {0} {1} -> {2} {3}>'.format(self.center,
+                                                             self.center_name,
+                                                             self.target,
+                                                             self.target_name,
+                                                             )
+        else:
+            ele = self.elements_at_epoch
+            string = '<KeplerOrbit {0} {1} -> q={2:.2}au, e={3:.1f}, i={4:.1f}°, Ω={5:.1f}°, ω={6:.1f}°>'
+            return string.format(self.center,
+                                 self.center_name,
+                                 ele.periapsis_distance.au,
+                                 ele.eccentricity,
+                                 ele.inclination.degrees,
+                                 ele.longitude_of_ascending_node.degrees,
+                                 ele.argument_of_periapsis.degrees,
+                                 )
+         
 
 def eccentric_anomaly(e, M):
     """ Iterates to solve Kepler's equation to find eccentric anomaly
@@ -321,6 +407,19 @@ def propagate(position, velocity, t0, t1, gm):
     
     Based on the function toolkit/src/spicelib/prop2b.f from the SPICE toolkit, 
     which can be downloaded from naif.jpl.nasa.gov/naif/toolkit_FORTRAN.html
+    
+    Parameters
+    ----------
+    position : ndarray
+       Position vector with shape (3,)
+    velocity : ndarray
+        Velocity vector with shape (3,)
+    t0 : float
+        Time corresponding to `position` and `velocity`
+    t1 : float or ndarray
+        Time or times to propagate to
+    gm : float
+        Gravitational parameter in units that match the other arguments 
     """
     if gm <= 0: raise ValueError("'gm' should be positive")
     if length_of(velocity) == 0: raise ValueError('Velocity vector has zero magnitude')
@@ -366,6 +465,10 @@ def propagate(position, velocity, t0, t1, gm):
         return x*(br0*c1 + x*(b2rv*c2 + x*(bq*c3)))
     
     dt = t1 - t0
+    
+    if not isinstance(dt, ndarray):
+        dt = array([dt])
+        return_1d_array = True
     
     x = bracket(dt/bq, -bound, bound)
     kfun = kepler(x)
@@ -440,7 +543,11 @@ def propagate(position, velocity, t0, t1, gm):
     pcdot = -qovr0 / br * x * c1
     vcdot = 1 - bq / br * x**2 * c2
     
-    position_prop = pc*tile(position[newaxis].T, dt.size) + vc*tile(velocity[newaxis].T, dt.size)
-    velocity_prop = pcdot*tile(position[newaxis].T, dt.size) + vcdot*tile(velocity[newaxis].T, dt.size)
+    if return_1d_array:
+        position_prop = pc*position + vc*velocity
+        velocity_prop = pcdot*position + vcdot*velocity
+    else:
+        position_prop = pc*tile(position[newaxis].T, dt.size) + vc*tile(velocity[newaxis].T, dt.size)
+        velocity_prop = pcdot*tile(position[newaxis].T, dt.size) + vcdot*tile(velocity[newaxis].T, dt.size)
     
     return position_prop, velocity_prop
