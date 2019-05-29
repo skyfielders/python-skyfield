@@ -53,6 +53,8 @@ class OsculatingElements(object):
 
     """
     def __init__(self, position, velocity, time, mu_km_s):
+        if mu_km_s == 0: raise ValueError('`mu_km_s` is zero')
+        
         self._pos_vec = position.km
         self._vel_vec = velocity.km_per_s
         self.time = time
