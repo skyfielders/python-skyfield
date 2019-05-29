@@ -35,7 +35,7 @@ class KeplerOrbit(VectorFunction):
         """
         self.position_at_epoch = position
         self.velocity_at_epoch = velocity
-        self._mu = mu_km_s
+        self._mu_km_s = mu_km_s
         self.epoch = epoch
         self.center = center
         self.target = target
@@ -51,7 +51,7 @@ class KeplerOrbit(VectorFunction):
                           target=None,
                           center_name=None,
                           target_name=None,
-                          ):
+        ):
         """ Creates a `KeplerOrbit` object from elements using true anomaly
         
         Parameters
@@ -85,7 +85,7 @@ class KeplerOrbit(VectorFunction):
                                         w.radians, 
                                         v.radians, 
                                         mu_km_s,
-                                        )
+        )
         return cls(Distance(km=position), 
                    Velocity(km_per_s=velocity), 
                    epoch, 
@@ -94,7 +94,7 @@ class KeplerOrbit(VectorFunction):
                    target=target,
                    center_name=center_name,
                    target_name=target_name,
-                   )
+        )
         
 
     @classmethod
@@ -105,7 +105,7 @@ class KeplerOrbit(VectorFunction):
                           target=None,
                           center_name=None,
                           target_name=None,
-                          ):
+        ):
         """ Creates a `KeplerOrbit` object from elements using mean anomaly
         
         Parameters
@@ -141,15 +141,16 @@ class KeplerOrbit(VectorFunction):
                               w.radians, 
                               v.radians, 
                               mu_km_s,
-                              )
+        )
         return cls(Distance(km=pos), 
                    Velocity(km_per_s=vel), 
-                   epoch, mu_km_s, 
+                   epoch, 
+                   mu_km_s, 
                    center=center, 
                    target=target,
                    center_name=center_name,
                    target_name=target_name,
-                   )
+        )
     
     
     @classmethod
@@ -166,7 +167,8 @@ class KeplerOrbit(VectorFunction):
                                      center=10,
                                      target=target,
                                      center_name='SUN',
-                                     target_name=df.Name if df.Name!=nan else df.Principal_desig)
+                                     target_name=df.Name if df.Name!=nan else df.Principal_desig,
+        )
     
     
     @classmethod
@@ -189,8 +191,10 @@ class KeplerOrbit(VectorFunction):
                                      epoch=epoch,
                                      mu_km_s=mu_km_s,
                                      center=10,
+                                     # TODO: infer target SPK-ID from info in dataframe
                                      center_name='SUN',
-                                     target_name=df.Designation_and_name)
+                                     target_name=df.Designation_and_name,
+        )
         
         
     def _at(self, time):
@@ -202,9 +206,9 @@ class KeplerOrbit(VectorFunction):
                              self.velocity_at_epoch.km_per_s,
                              self.epoch.tt,
                              time.tt,
-                             self._mu,
-                             )
-        return pos, vel, None, None
+                             self._mu_km_s,
+        )
+        return pos / AU_KM, vel / AU_KM * DAY_S, None, None
         
         
     @reify
@@ -212,21 +216,21 @@ class KeplerOrbit(VectorFunction):
         return OsculatingElements(self.position_at_epoch, 
                                   self.velocity_at_epoch, 
                                   self.epoch, 
-                                  self._mu,
-                                  )
+                                  self._mu_km_s,
+        )
     
     
-    def __repr__(self):
+    def __str__(self):
         ele = self.elements_at_epoch
         if self.target_name:
-            return '<KeplerOrbit {0} {1} -> {2} {3}>'.format(self.center,
-                                                             self.center_name,
-                                                             self.target,
-                                                             self.target_name,
-                                                             )
+            return 'KeplerOrbit {0} {1} -> {2} {3}'.format(self.center,
+                                                           self.center_name,
+                                                           self.target,
+                                                           self.target_name,
+            )
         else:
             ele = self.elements_at_epoch
-            string = '<KeplerOrbit {0} {1} -> q={2:.2}au, e={3:.1f}, i={4:.1f}°, Ω={5:.1f}°, ω={6:.1f}°>'
+            string = 'KeplerOrbit {0} {1} -> q={2:.2}au, e={3:.1f}, i={4:.1f}°, Ω={5:.1f}°, ω={6:.1f}°'
             return string.format(self.center,
                                  self.center_name,
                                  ele.periapsis_distance.au,
@@ -234,7 +238,11 @@ class KeplerOrbit(VectorFunction):
                                  ele.inclination.degrees,
                                  ele.longitude_of_ascending_node.degrees,
                                  ele.argument_of_periapsis.degrees,
-                                 )
+            )
+    
+    
+    def __repr__(self):
+        return '<{0}>'.format(str(self))
          
 
 def eccentric_anomaly(e, M):
@@ -252,7 +260,7 @@ def eccentric_anomaly(e, M):
         dM = M - (E - e*sin(E))
         dE = dM/(1 - e*cos(E))
         E = E + dE
-        if dE < 1e-14: return E
+        if abs(dE) < 1e-14: return E
         iters += 1
     else:
         raise ValueError('Failed to converge')
