@@ -292,7 +292,8 @@ class Loader(object):
                        'One_km_NEO_flag',
                        'One_opposition_object_flag',
                        'PHA_flag']:
-            df[column] = df[column].fillna(0).astype('bool')
+            if column in df:
+                df[column] = df[column].fillna(0).astype('bool')
             
         for column in ['Orbit_type', 'U']:
             df[column] = df[column].astype('category')
