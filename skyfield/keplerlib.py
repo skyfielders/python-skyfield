@@ -12,6 +12,7 @@ from skyfield.vectorlib import VectorFunction
 from skyfield.data.gravitational_parameters import GM_dict
 from skyfield.constants import AU_KM, DAY_S
 
+
 class KeplerOrbit(VectorFunction):
     def __init__(self, position, velocity, epoch, mu_km_s, 
                  center=None, target=None, center_name=None, target_name=None):
@@ -155,8 +156,18 @@ class KeplerOrbit(VectorFunction):
     
     @classmethod
     def from_mpcorb_dataframe(cls, df, ts):
-        target = int(df.Number.strip('()')) + 2000000
-        return cls.from_mean_anomaly(p=Distance(au=df.Semilatus_rectum),
+        if 'Number' in df:
+            target = int(df.Number.strip('()')) + 2000000
+        else:
+            target = None
+        
+        if 'Name' not in df or df.Name == nan:
+            target_name = df.Principal_desig
+        else:
+            target_name = df.Name
+            
+        p = df.a * (1 - df.e**2)
+        return cls.from_mean_anomaly(p=Distance(au=p),
                                      e=df.e,
                                      i=Angle(degrees=df.i), 
                                      Om=Angle(degrees=df.Node), 
@@ -167,7 +178,7 @@ class KeplerOrbit(VectorFunction):
                                      center=10,
                                      target=target,
                                      center_name='SUN',
-                                     target_name=df.Name if df.Name!=nan else df.Principal_desig,
+                                     target_name=target_name,
         )
     
     
