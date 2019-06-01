@@ -14,8 +14,17 @@ from skyfield.constants import AU_KM, DAY_S
 
 
 class KeplerOrbit(VectorFunction):
-    def __init__(self, position, velocity, epoch, mu_km_s, 
-                 center=None, target=None, center_name=None, target_name=None):
+    def __init__(self, 
+                 position, 
+                 velocity, 
+                 epoch, 
+                 mu_km_s=None, 
+                 mu_au_d=None, 
+                 center=None, 
+                 target=None, 
+                 center_name=None, 
+                 target_name=None
+        ):
         """ Calculates the position of an object using 2 body propagation
         
         Parameters
@@ -28,15 +37,24 @@ class KeplerOrbit(VectorFunction):
             Time corresponding to `position` and `velocity`
         mu_km_s : float
             Value of mu (G * M) in km^3/s^2
+        mu_au_d : float
+            Value of mu (G * M) in au^3/d^2
         center : int
             NAIF ID of the primary body, 399 for geocentric orbits, 10 for 
             heliocentric orbits
         target : int
             NAIF ID of the secondary body
         """
+        if (mu_km_s and mu_au_d) or (not mu_km_s and not mu_au_d):
+            raise ValueError('Either mu_km_s or mu_au_d should be used, but not both')
+
+        if mu_km_s:
+            self._mu_km_s = mu_km_s
+        elif mu_au_d:
+            self._mu_km_s =  mu_au_d / AU_KM**3 * DAY_S**2
+        
         self.position_at_epoch = position
         self.velocity_at_epoch = velocity
-        self._mu_km_s = mu_km_s
         self.epoch = epoch
         self.center = center
         self.target = target
@@ -47,7 +65,8 @@ class KeplerOrbit(VectorFunction):
     @classmethod
     def from_true_anomaly(cls, p, e, i, Om, w, v, 
                           epoch, 
-                          mu_km_s, 
+                          mu_km_s=None,
+                          mu_au_d=None,
                           center=None, 
                           target=None,
                           center_name=None,
@@ -73,12 +92,20 @@ class KeplerOrbit(VectorFunction):
             Time corresponding to `position` and `velocity`
         mu_km_s : float
             Value of mu (G * M) in km^3/s^2
+        mu_au_d : float
+            Value of mu (G * M) in au^3/d^2
         center : int
             NAIF ID of the primary body, 399 for geocentric orbits, 10 for 
             heliocentric orbits
         target : int
             NAIF ID of the secondary body
         """
+        if (mu_km_s and mu_au_d) or (not mu_km_s and not mu_au_d):
+            raise ValueError('Either mu_km_s or mu_au_d should be used, but not both')
+            
+        if mu_au_d:
+            mu_km_s = mu_au_d / AU_KM**3 * DAY_S**2
+        
         position, velocity = ele_to_vec(p.km, 
                                         e, 
                                         i.radians, 
@@ -101,7 +128,8 @@ class KeplerOrbit(VectorFunction):
     @classmethod
     def from_mean_anomaly(cls, p, e, i, Om, w, M, 
                           epoch, 
-                          mu_km_s, 
+                          mu_km_s=None,
+                          mu_au_d=None,
                           center=None, 
                           target=None,
                           center_name=None,
@@ -127,12 +155,20 @@ class KeplerOrbit(VectorFunction):
             Time corresponding to `position` and `velocity`
         mu_km_s : float
             Value of mu (G * M) in km^3/s^2
+        mu_au_d : float
+            Value of mu (G * M) in au^3/d^2
         center : int
             NAIF ID of the primary body, 399 for geocentric orbits, 10 for 
             heliocentric orbits
         target : int
             NAIF ID of the secondary body
         """
+        if (mu_km_s and mu_au_d) or (not mu_km_s and not mu_au_d):
+            raise ValueError('Either mu_km_s or mu_au_d should be used, but not both')
+            
+        if mu_au_d:
+            mu_km_s = mu_au_d  / AU_KM**3 * DAY_S**2
+        
         E = eccentric_anomaly(e, M.radians)
         v = Angle(radians=true_anomaly(e, E))
         pos, vel = ele_to_vec(p.km, 
