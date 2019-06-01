@@ -226,7 +226,7 @@ class KeplerOrbit(VectorFunction):
     def elements_at_epoch(self):
         return OsculatingElements(self.position_at_epoch, 
                                   self.velocity_at_epoch, 
-                                  self.epoch, 
+                                  self.epoch,
                                   self._mu_km_s,
         )
     
@@ -488,6 +488,8 @@ def propagate(position, velocity, t0, t1, gm):
     if not isinstance(dt, ndarray):
         dt = array([dt])
         return_1d_array = True
+    else:
+        return_1d_array = False
     
     x = bracket(dt/bq, -bound, bound)
     kfun = kepler(x)
