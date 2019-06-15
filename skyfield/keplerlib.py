@@ -476,9 +476,12 @@ def propagate(position, velocity, t0, t1, gm):
     gm : float
         Gravitational parameter in units that match the other arguments 
     """
-    if gm <= 0: raise ValueError("'gm' should be positive")
-    if length_of(velocity) == 0: raise ValueError('Velocity vector has zero magnitude')
-    if length_of(position) == 0: raise ValueError('Position vector has zero magnitude')
+    if gm <= 0: 
+        raise ValueError("'gm' should be positive")
+    if length_of(velocity) == 0:
+        raise ValueError('Velocity vector has zero magnitude')
+    if length_of(position) == 0:
+        raise ValueError('Position vector has zero magnitude')
         
     r0 = length_of(position)
     rv = dots(position, velocity)
@@ -486,7 +489,8 @@ def propagate(position, velocity, t0, t1, gm):
     hvec = cross(position, velocity)
     h2 = dots(hvec, hvec)
     
-    if h2 == 0: raise ValueError('Motion is not conical')
+    if h2 == 0: 
+        raise ValueError('Motion is not conical')
  
     eqvec = cross(velocity, hvec)/gm + -position/r0
     e = length_of(eqvec)
