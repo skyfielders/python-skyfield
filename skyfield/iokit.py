@@ -282,8 +282,8 @@ class Loader(object):
         leap_dates, leap_offsets = self('Leap_Second.dat')
         return Timescale(delta_t_recent, leap_dates, leap_offsets)
     
-    def mpcorb(self, url):
-        with self.open(url) as gzip_file:
+    def mpcorb(self, url, reload=False, filename=None):
+        with self.open(url, reload=reload, filename=filename) as gzip_file:
             with gzip.open(gzip_file) as json_file:
                 df = pd.read_json(json_file)
             
@@ -300,8 +300,8 @@ class Loader(object):
             
         return df
     
-    def mpc_comets(self, url):
-        with self.open(url) as gzip_file:
+    def mpc_comets(self, url, reload=False, filename=None):
+        with self.open(url, reload=reload, filename=filename) as gzip_file:
             with gzip.open(gzip_file) as json_file:
                 df = pd.read_json(json_file)
             
