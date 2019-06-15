@@ -53,9 +53,9 @@ class OsculatingElements(object):
 
     """
     def __init__(self, position, velocity, time, mu_km_s):
-        if mu_km_s == 0: 
-            raise ValueError('`mu_km_s`, which represents the gravity between '
-                             'the orbiting and orbited bodies cannot be zero')
+        if mu_km_s <= 0: 
+            raise ValueError('`mu_km_s` (the standard gravitational parameter '
+                             'in km^3/s^2) must be positive and non-zero')
         
         self._pos_vec = position.km
         self._vel_vec = velocity.km_per_s
