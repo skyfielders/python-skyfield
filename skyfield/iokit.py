@@ -7,12 +7,18 @@ import numpy as np
 import sys
 from datetime import date, datetime, timedelta
 from fnmatch import fnmatch
+from pkgutil import get_data
 from threading import Lock
 from time import time
 
 from .jpllib import SpiceKernel
 from .sgp4lib import EarthSatellite
 from .timelib import Timescale, julian_date
+
+try:
+    from io import BytesIO
+except:
+    from StringIO import StringIO as BytesIO
 
 today = date.today
 _lock = Lock()
@@ -255,7 +261,7 @@ class Loader(object):
             download(url, path, self.verbose)
         return open(path, mode)
 
-    def timescale(self, delta_t=None):
+    def timescale(self, delta_t=None, builtin=False):
         """Open or download three time scale files, returning a `Timescale`.
 
         This method is how most Skyfield users build a `Timescale`
@@ -268,7 +274,26 @@ class Loader(object):
         UTC is defined by ``Leap_Second.dat`` from the International
         Earth Rotation Service.
 
+        If ``builtin`` is ``True`` then instead of downloading the
+        files, Skyfield will load a version of each file that it ships
+        internally.  Beware that these files will gradually fall out of
+        date as you use one particular version of Skyfield.
+
         """
+        if builtin:
+            b = get_data('skyfield', 'data/deltat.data')
+            expiration_date, data = parse_deltat_data(BytesIO(b))
+            b = get_data('skyfield', 'data/deltat.preds')
+            expiration_date, preds = parse_deltat_preds(BytesIO(b))
+            data_end_time = data[0, -1]
+            i = np.searchsorted(preds[0], data_end_time, side='right')
+            delta_t_recent = np.concatenate([data, preds[:,i:]], axis=1)
+
+            b = get_data('skyfield', 'data/Leap_Second.dat')
+            leap_dates, leap_offsets = parse_leap_seconds(BytesIO(b))
+
+            return Timescale(delta_t_recent, leap_dates, leap_offsets)
+
         if delta_t is not None:
             delta_t_recent = np.array(((-1e99, 1e99), (delta_t, delta_t)))
         else:

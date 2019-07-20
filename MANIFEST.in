@@ -1,5 +1,8 @@
 include README.rst
 include LICENSE
+include skyfield/data/Leap_Second.dat
+include skyfield/data/deltat.data
+include skyfield/data/deltat.preds
 include skyfield/data/*.npy
 include skyfield/data/*.npz
 include skyfield/documentation/*.rst

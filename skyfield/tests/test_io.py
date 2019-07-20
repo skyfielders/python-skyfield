@@ -87,3 +87,6 @@ def test_12_month_old_file_gets_redownloaded(load):
         data = load('deltat.data')
         assert file_contents(load).endswith(b' 68.1577\n')
     assert data[1][-1] == 68.1577
+
+def test_builtin_timescale(load):
+    load.timescale(builtin=True)
