@@ -6,6 +6,11 @@ Changelog
 1.11 — 2019 ?
 -------------
 
+* You can now call ``load.timescale(builtin=True)`` to use time scale
+  files that are distributed with Skyfield, instead of needing to wait
+  while they download.  Note that the time scale files distributed with
+  any given version of Skyfield will fall gradually out of date.
+
 * Fix: `find_discrete()` was generating empty arrays of search dates,
   upsetting the astronomy code, if the start and end dates were very
   close together.

@@ -51,6 +51,18 @@ It downloads and parses the data tables necessary
 to correctly convert between Universal Time
 and the more stable time scales used by astronomers.
 
+If you want to skip downloading up-to-date time scale files,
+you can run:
+
+.. testcode::
+
+    ts = api.load.timescale(builtin=True)
+
+This can avoid problems connecting
+to the servers from which the official files are distributed.
+Note that the time scale files distributed with
+any given version of Skyfield will fall gradually out of date.
+
 .. autosummary::
 
    Timescale.now
