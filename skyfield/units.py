@@ -6,7 +6,7 @@ from __future__ import print_function
 import numpy as np
 import sys
 from numpy import abs, array, copysign, isnan
-from .constants import AU_KM, AU_M, DAY_S, tau
+from .constants import ASEC2RAD, AU_KM, AU_M, DAY_S, tau
 from .descriptorlib import reify
 
 def _to_array(value):
@@ -206,6 +206,10 @@ class Angle(object):
             return '<{0} []>'.format(type(self).__name__, self)
         else:
             return '<{0} {1}>'.format(type(self).__name__, self)
+
+    @reify
+    def arcseconds(self):
+        return self.radians / ASEC2RAD
 
     def hms(self, warn=True):
         """Convert to a tuple (hours, minutes, seconds).

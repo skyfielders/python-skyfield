@@ -39,6 +39,31 @@ def fraction_illuminated(ephemeris, body, t):
     a = phase_angle(ephemeris, body, t).radians
     return 0.5 * (1.0 + cos(a))
 
+def jovian_moons(ephemeris, center):
+    """Compute the relative positions to Jupiter of its 4 major moons.
+
+    Given both an ephemeris and the Solar System position of a
+    ``center`` from which to observe Jupiter (usually the result of
+    calling ``earth.at(t)``), return a list of ``(name, x, y)`` tuples
+    each giving the name of a moon and its angular separation from
+    Jupiter in arcseconds.  Positive arcseconds are east of Jupiter
+    while negative values indicate a moon that is trailing to the west.
+
+    """
+    t = center.t
+
+    j = ephemeris['JUPITER BARYCENTER']
+    lat, lon, distance = center.observe(j).ecliptic_latlon(t)
+    jlon_arcseconds = lon.arcseconds
+
+    names = ('Io', 'Europa', 'Ganymede', 'Callisto')
+    result = []
+    for name in names:
+        moon = ephemeris[name]
+        lat, lon, distance = center.observe(moon).ecliptic_latlon(t)
+        result.append((name, lon.arcseconds - jlon_arcseconds))
+    return result
+
 # Search routines.
 
 def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
