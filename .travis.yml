@@ -24,7 +24,7 @@ install:
   - "pip install --upgrade pip"
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
-  - "pip install unittest2"
+  - "pip install pandas unittest2"
 
 script:
   - "assay --batch skyfield.tests"
