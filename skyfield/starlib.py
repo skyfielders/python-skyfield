@@ -1,6 +1,6 @@
 """Python class for a distant object with, at most, proper motion."""
 
-from numpy import array, cos, empty, outer, sin
+from numpy import array, cos, empty, isnan, outer, sin, where
 from .constants import AU_KM, ASEC2RAD, C, C_AUDAY, DAY_S, T0
 from .functions import length_of
 from .relativity import light_time_difference
@@ -139,6 +139,7 @@ class Star(object):
         parallax = self.parallax_mas
         shape = getattr(parallax, 'shape', None)
         if shape:
+            parallax = where(isnan(parallax), 0.0, parallax)
             parallax[parallax <= 0.0] = 1.0e-6
         elif parallax <= 0.0:
             parallax = 1.0e-6
