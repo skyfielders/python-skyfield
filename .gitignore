@@ -19,7 +19,6 @@ MANIFEST
 MPCORB.DAT
 Untitled*.ipynb
 build
-hip_main.dat.gz
 htmlcov/
 stations.txt
 tmp*.py
