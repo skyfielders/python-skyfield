@@ -89,4 +89,5 @@ def test_12_month_old_file_gets_redownloaded(load):
     assert data[1][-1] == 68.1577
 
 def test_builtin_timescale(load):
-    load.timescale(builtin=True)
+    ts = load.timescale(builtin=True)
+    ts.utc(2019, 7, 21, 11, 11)

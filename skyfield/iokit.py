@@ -290,7 +290,8 @@ class Loader(object):
             delta_t_recent = np.concatenate([data, preds[:,i:]], axis=1)
 
             b = get_data('skyfield', 'data/Leap_Second.dat')
-            leap_dates, leap_offsets = parse_leap_seconds(BytesIO(b))
+            expiration_date, arrays = parse_leap_seconds(BytesIO(b))
+            leap_dates, leap_offsets = arrays
 
             return Timescale(delta_t_recent, leap_dates, leap_offsets)
 
