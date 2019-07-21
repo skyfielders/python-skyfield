@@ -73,8 +73,8 @@ the star:
 
 .. testoutput::
 
-    17h 57m 47.75s
-    +04deg 44' 01.3"
+    17h 57m 47.77s
+    +04deg 44' 01.1"
 
 The position will properly reflect the star’s proper motion as measured
 by the HIPPARCOS mission.

@@ -78,13 +78,20 @@ class Star(object):
 
     def __repr__(self):
         opts = []
-        for name in ['ra_mas_per_year', 'dec_mas_per_year',
-                     'parallax_mas', 'radial_km_per_s', 'names', 'epoch']:
+        for name in ['ra', 'dec',
+                     'ra_mas_per_year', 'dec_mas_per_year',
+                     'parallax_mas', 'radial_km_per_s',
+                     'names', 'epoch']:
             value = getattr(self, name)
-            if value:
-                opts.append(', {0}={1!r}'.format(name, value))
-        return 'Star(ra_hours={0!r}, dec_degrees={1!r}{2})'.format(
-            self.ra.hours, self.dec.degrees, ''.join(opts))
+            if isinstance(value, Angle):
+                value = value._degrees
+            shape = getattr(value, 'shape', None)
+            if shape is not None:
+                shapes = ','.join(str(n) for n in shape)
+                opts.append('{0} shape={1}'.format(name, shapes))
+            elif value:
+                opts.append('{0}={1!r}'.format(name, value))
+        return 'Star({0})'.format(', '.join(opts))
 
     @classmethod
     def from_dataframe(cls, df):
@@ -94,6 +101,7 @@ class Star(object):
             dec_degrees=_unwrap(df['dec_degrees']),
             ra_mas_per_year=_unwrap(df.get('ra_mas_per_year', 0)),
             dec_mas_per_year=_unwrap(df.get('dec_mas_per_year', 0)),
+            parallax_mas=_unwrap(df.get('parallax_mas', 0)),
             epoch=epoch,
         )
 
@@ -129,7 +137,10 @@ class Star(object):
         # Use 1 gigaparsec for stars whose parallax is zero.
 
         parallax = self.parallax_mas
-        if parallax <= 0.0:
+        shape = getattr(parallax, 'shape', None)
+        if shape:
+            parallax[parallax <= 0.0] = 1.0e-6
+        elif parallax <= 0.0:
             parallax = 1.0e-6
 
         # Convert right ascension, declination, and parallax to position

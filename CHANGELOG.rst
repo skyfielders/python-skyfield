@@ -11,6 +11,10 @@ Changelog
   while they download.  Note that the time scale files distributed with
   any given version of Skyfield will fall gradually out of date.
 
+* Fix: the ``Star`` method ``from_dataframe()`` now correctly pulls
+  stellar parallax data from the dataframe if available.
+  `#266 <https://github.com/skyfielders/python-skyfield/issues/266>`_
+
 * Fix: `find_discrete()` was generating empty arrays of search dates,
   upsetting the astronomy code, if the start and end dates were very
   close together.
