@@ -19,8 +19,6 @@ python:
 install:
   - "python setup.py sdist"
   - "mkdir tmp"
-  - "ln skyfield/data/Leap_Second.dat ci"
-  - "ln skyfield/data/deltat.* ci"
   - "ln ci/* tmp"
   - "cd tmp"
   - "pip install --upgrade pip"
