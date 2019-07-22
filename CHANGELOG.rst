@@ -11,9 +11,6 @@ Changelog
   while they download.  Note that the time scale files distributed with
   any given version of Skyfield will fall gradually out of date.
 
-* Fix: Earth satellite velocities should now be much more accurate.
-  `#224 <https://github.com/skyfielders/python-skyfield/issues/224>`_
-
 * Fix: the ``Star`` method ``from_dataframe()`` now correctly pulls
   stellar parallax data from the dataframe if available.
   `#266 <https://github.com/skyfielders/python-skyfield/issues/266>`_

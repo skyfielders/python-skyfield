@@ -529,8 +529,8 @@ def ITRF_to_GCRS2(t, rITRF, vITRF):
     position = einsum('ij...,j...->i...', t.MT, position)
 
     velocity = einsum('ij...,j...->i...', spin, array(vITRF))
-    velocity[0] -= DAY_S * ANGVEL * position[1]
-    velocity[1] += DAY_S * ANGVEL * position[0]
     velocity = einsum('ij...,j...->i...', t.MT, velocity)
+    velocity[0] += DAY_S * ANGVEL * - position[1]
+    velocity[1] += DAY_S * ANGVEL * position[0]
 
     return position, velocity
