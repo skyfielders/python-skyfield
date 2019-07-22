@@ -43,7 +43,16 @@ for artificial satellites in Earth orbit:
    and for dates outside of that range
    you will want to download a fresh set of elements.
 
-4. Given the low accuracy of TLE elements,
+4. Expect a satellite’s orbit to constantly change
+   as the SGP4 propagation routine models effects
+   like atmospheric drag and the Moon’s gravity.
+   In particular, the true anomaly parameter can swing wildly
+   for satellites with nearly circular orbits,
+   because the reference point from which true anomaly is measured —
+   the satellite’s perigee —
+   can be moved by even slight perturbations to the orbit.
+
+5. Given the low accuracy of TLE elements,
    there is no point in calling the usual Skyfield
    :meth:`~skyfield.positionlib.Barycentric.observe()` method
    that repeatedly re-computes an object’s position
