@@ -70,8 +70,15 @@ class ICRF(object):
         return ICRF(p, v, self.t)
 
     def __getitem__(self, i):
-        # TODO: grab other data too
-        return type(self)(self.position.au[:,i], t=self.t[i])
+        return type(self)(
+            self.position.au[:,i],
+            self.velocity.au_per_d[:,i],
+            self.t[i],
+            self.center,
+            self.target,
+            # TODO: figure out how to slice observer data
+            #self.observer_data,
+        )
 
     def distance(self):
         """Compute the distance from the origin to this position.
