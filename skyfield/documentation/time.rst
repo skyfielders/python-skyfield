@@ -54,6 +54,9 @@ specified using any of the time scales listed above:
     ts = load.timescale()
     t = ts.utc(2014, 1, 18)
 
+If your computer has difficulty downloading the official time scale files,
+try :ref:`built-in-timescale-files`.
+
 The possibilities that will be explored in the course of this page
 are::
 

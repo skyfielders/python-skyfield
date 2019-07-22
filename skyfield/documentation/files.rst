@@ -71,6 +71,24 @@ provided in the :mod:`skyfield.api` module.
 But other programs may want to build their own loader
 so that they have the chance to specify non-default behavior.
 
+.. _built-in-timescale-files:
+
+Using built-in timescale files
+==============================
+
+Some computers have difficulty downloading
+the official time scale files for ΔT and leap seconds,
+so Skyfield carries an extra copy of each file.
+You can use these built-in time scale files with:
+
+.. testcode::
+
+   ts = load.timescale(builtin=True)
+
+Note that these files will gradually go out of date,
+eventually making your calculations of future dates wrong by several seconds
+unless you upgrade Skyfield.
+
 Specifying the download directory
 =================================
 

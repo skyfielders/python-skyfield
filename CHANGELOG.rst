@@ -3,13 +3,13 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-1.11 — 2019 ?
--------------
+1.11 — 2019 July 22
+-------------------
 
 * You can now call ``load.timescale(builtin=True)`` to use time scale
-  files that are distributed with Skyfield, instead of needing to wait
-  while they download.  Note that the time scale files distributed with
-  any given version of Skyfield will fall gradually out of date.
+  files that Skyfield carries internally, instead of downloading them.
+  Note that the time scale files distributed with any given version of
+  Skyfield will gradually fall out of date.
 
 * Fix: indexing a position now returns a position with an actual velocity.
   `#241 <https://github.com/skyfielders/python-skyfield/issues/241>`_
