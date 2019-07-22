@@ -24,9 +24,9 @@ install:
   - "pip install --upgrade pip"
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
-  - "pip install pandas==0.22.0 unittest2"
+  - "pip install pandas==0.17.0 unittest2"
   - "python -c 'import pandas'"
 
 script:
   - "assay --batch skyfield.tests"
-  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 matplotlib==2.2.3 numpy==1.14.2 pandas==0.23.3 sphinx==1.7.2 ; cd .. ; ./test-docs.sh ; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 matplotlib==2.2.3 numpy==1.14.2 sphinx==1.7.2 ; cd .. ; ./test-docs.sh ; fi"
