@@ -458,11 +458,11 @@ def parse_tle(fileobj):
             b2.startswith(b'2 ') and len(b2) >= 69):
 
             b0 = b0.rstrip(b'\n\r')
-            if len(b0) == 24:   # Celestrak
-                name = b0.decode('ascii').rstrip()
-                names = [name]
-            elif b0.startswith(b'0 '): # Spacetrack 3-line format
+            if b0.startswith(b'0 '): # Spacetrack 3-line format
                 name = b0[2:].decode('ascii').rstrip()
+                names = [name]
+            elif ((not b0.startswith(b'1 ')) and (not b0.startswith(b'2 '))): # Celestrak and others
+                name = b0.decode('ascii').rstrip()
                 names = [name]
             else:
                 name = None
