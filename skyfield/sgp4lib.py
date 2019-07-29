@@ -30,6 +30,8 @@ class EarthSatellite(VectorFunction):
     ``epoch``
         A Skyfield :class:`~skyfield.timelib.Time` giving the exact
         epoch moment for these satellite orbit parameters.
+    ``name``
+        Satellite name
 
     When building a satellite, use the arguments ``line1`` and ``line2``
     to provide the two data lines from a TLE file as separate strings.
@@ -45,6 +47,10 @@ class EarthSatellite(VectorFunction):
 
     ``model.satnum``
         The unique satellite NORAD catalog number given in the TLE file.
+    ``model.classification``
+        Satellite classification or `U`
+    ``model.intldesg``
+        International designator
     ``model.epochyr``
         Full four-digit year of this element set's epoch moment.
     ``model.epochdays``
@@ -57,6 +63,10 @@ class EarthSatellite(VectorFunction):
         Second time derivative of the mean motion (ignored by SGP4).
     ``model.bstar``
         Ballistic drag coefficient B* in inverse earth radii.
+    ``model.ephtype``
+        Ephemeris type (ignored by SGP4 as determination now automatic)
+    ``model.elnum``
+        Element number
     ``model.inclo``
         Inclination in radians.
     ``model.nodeo``
@@ -69,6 +79,8 @@ class EarthSatellite(VectorFunction):
         Mean anomaly in radians.
     ``model.no_kozai``
         Mean motion in radians per minute.
+    ``model.revnum``
+        Revolution number at epoch [Revs]
 
     """
     center = 399
