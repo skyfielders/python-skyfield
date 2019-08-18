@@ -21,5 +21,6 @@ Untitled*.ipynb
 build
 htmlcov/
 stations.txt
+weather.txt
 tmp*.py
 .DS_Store
