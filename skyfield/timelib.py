@@ -1,5 +1,5 @@
-from datetime import date, datetime, timedelta, tzinfo
-from numpy import (array, concatenate, einsum, float_, interp, isnan, nan, pi,
+from datetime import date, datetime, timedelta, tzinfo, timezone
+from numpy import (array, concatenate, einsum, float_, int64, interp, isnan, nan, pi,
                    rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime
 from .constants import B1950, DAY_S, T0
@@ -125,6 +125,24 @@ class Timescale(object):
         t = Time(self, tai + tt_minus_tai)
         t.tai = tai
         return t
+
+    def timestamp(self, timestamps, tz=timezone.utc):
+        """Build a `Time` from a timestamp with timezone tz (default: UTC).
+
+        Convenient method for converting a timestamp to a Time object.
+        The timestamp must be an integer. If the given timestamp is a float it will be implicitly downcasted to an int.
+        """
+
+        if isinstance(timestamps, int64):
+            return self.utc(datetime.fromtimestamp(timestamps, tz))
+        elif isinstance(timestamps, float):
+            return self.utc(datetime.fromtimestamp(int(timestamps), tz))
+        elif hasattr(timestamps, '__len__') & isinstance(timestamps[0], int64):
+            return self.utc([datetime.fromtimestamp(timestamp, tz) for timestamp in timestamps])
+        elif hasattr(timestamps, '__len__') & isinstance(timestamps[0], float):
+            return self.utc([datetime.fromtimestamp(int(timestamp), tz) for timestamp in timestamps])
+        else:
+            raise TypeError("Invalid type for timestamp.")
 
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
@@ -460,6 +478,17 @@ class Time(object):
         else:
             dt = datetime(year, month, day, hour, minute, second, milli, utc)
         return dt, leap_second
+
+    def timestamp(self):
+        """Convert to a timestamp.
+
+        If this time is an array, then a sequence of
+        timestamps is returned instead of a single value.
+        """
+        if self.shape:
+            return array([datetime.timestamp(dt) for dt in self.utc_datetime()])
+        else:
+            return datetime.timestamp(self.utc_datetime())
 
     def utc_iso(self, delimiter='T', places=0):
         """Convert to an ISO 8601 string like ``2014-01-18T01:35:38Z`` in UTC.
