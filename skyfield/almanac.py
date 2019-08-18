@@ -1,10 +1,16 @@
 """Routines to solve for circumstances like sunrise, sunset, and moon phase."""
 
-from numpy import cos, diff, flatnonzero, linspace, multiply, sign
+from datetime import datetime, timedelta, timezone
+from numpy import arange, array, cos, diff, ediff1d, flatnonzero, linspace, multiply, pi, sign
+from scipy import optimize
 from .constants import DAY_S, tau
 from .nutationlib import iau2000b
+from .timelib import Timescale, Time
 
 EPSILON = 0.001 / DAY_S
+
+_infs = array(('-inf', 'inf'), float)
+_ts = Timescale(array((_infs, (0.0, 0.0))), _infs, array((37.0, 37.0)))
 
 # Simple facts.
 
@@ -134,6 +140,88 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
         jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()
 
     return ts.tt_jd(ends), y.take(indices)
+
+
+def get_satellite_passes(planet, ground_station, satellite, ts=None,
+    from_t=datetime.now(timezone.utc),
+    to_t=datetime.now(timezone.utc)+timedelta(days=1),
+    alt_deg_thresh=0):
+    """
+    Predict the satellite's passes in an certain time interval.
+
+    planet: Sum of vectors - The planet where the ground station is located. Generally Earth.
+    ground_station: Topos - The passes will be calculated with respect to this position.
+    satellite: EarthSatellite - Satellite to calculate passes of.
+    from_t and to_t: Time or datetime - Interval during which the passes will be calculated. Default: from_t=now, to_t=24h from now
+    alt_deg_thresh: float - Degrees above the horizon. Will be calculated only the passes that reach an altitude above this threshold
+
+    Returns a list of tuples each of which is of dimension 1x4 and contains, respectively, a rising Time, the Time at the satellite apex, the altitude in degrees at the apex and a setting Time. The rising Time and the setting Time are based on the set alt_deg_threshold.
+
+    TODO:
+    Return direction from which the satellite is coming from when rising and the direction it is going when setting. (e.g. 4° N)
+    """
+
+    ts = ts or _ts
+
+    ground_station = planet + ground_station
+
+    # Get timestamps
+    if isinstance(from_t, Time):
+        from_ts = from_t.timestamp()
+    elif isinstance(from_t, datetime):
+        from_ts = datetime.timestamp(from_t)
+    else:
+        raise TypeError("Invalid type for from_t. Expected datetime or Time")
+
+    if isinstance(to_t, Time):
+        to_ts = to_t.timestamp()
+    elif isinstance(to_t, datetime):
+        to_ts = datetime.timestamp(to_t)
+    else:
+        raise TypeError("Invalid type for to_t. Expected datetime or Time")
+
+    # Get altitude in degress at a certain timestamp. Shift needed for optimizer (It can only find roots of function).
+    def f(timestamp, alt_deg_shift=0):
+        alt, az, distance = ground_station.at(ts.timestamp(timestamps=timestamp)).observe(planet + satellite).apparent().altaz()
+        return alt.degrees - alt_deg_shift
+
+    # Generate time interval and the altitude points
+    ts_range = arange(from_ts, to_ts, 60)
+    altitude = array([f(t) for t in ts_range])
+
+
+    # Find rough altitude maxima
+    left_diff = ediff1d(altitude, to_begin=0)
+    right_diff = ediff1d(altitude, to_end=0)
+    maxima = (left_diff > 0) & (right_diff < 0)
+
+    # Find precise altitude maxima with a precision in the order of a second.
+    def find_highest(timestamp):
+        return optimize.minimize_scalar(lambda x: -f(x), bracket=[timestamp-60, timestamp, timestamp+60], tol=1/86400).x
+
+    ts_highest = [find_highest(t) for t in ts_range[maxima] if f(t) >= alt_deg_thresh]
+    dt_highest = ts.timestamp(ts_highest)
+    highest = [f(t) for t in ts_highest]
+
+
+    # Define step to be used in the following methods. [timestamp-step,timestamp+step] interval within which we are looking for rising, setting and maximum poinTimescale.
+    period = 2*pi / satellite.model.no * 60
+    step = 0.1 * period    # 10% of the period?
+
+    def find_rising(timestamp):
+        return optimize.brentq(f, timestamp - step, timestamp, args=(alt_deg_thresh,))
+
+    def find_setting(timestamp):
+        return optimize.brentq(f, timestamp, timestamp + step, args=(alt_deg_thresh,))
+
+    ts_rising = [find_rising(t) for t in ts_highest]
+    dt_rising = ts.timestamp(ts_rising)
+
+    ts_setting = [find_setting(t) for t in ts_highest]
+    dt_setting = ts.timestamp(ts_setting)
+
+    return list(zip(dt_rising, dt_highest, highest, dt_setting))
+
 
 # Discrete circumstances to search.
 
