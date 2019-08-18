@@ -22,3 +22,4 @@ build
 htmlcov/
 stations.txt
 tmp*.py
+.DS_Store
