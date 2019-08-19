@@ -163,13 +163,11 @@ def get_satellite_passes(
     alt_deg_thresh: float - Degrees above the horizon. Will be calculated only
     the passes that reach an altitude above this threshold
 
-    Returns a list of tuples each of which is of dimension 1x3 and contains,
-    respectively, the rising Time, the apex Time, the setting Time. The rising
-    Time and the setting Time are based on the set alt_deg_threshold.
-
-    TODO:
-    Return azimut from which the satellite is coming from when rising and the
-    direction it is going when setting. (e.g. 4° N)
+    Returns a list of tuples each of which is of dimension 1x7 and contains,
+    respectively, the rising Time, the apex Time, the setting Time, the rising
+    azimut, the azimut at the apex, the setting azimut in degrees and the
+    altitude at the apex. The rising Time and the setting Time are based on the
+    set alt_deg_threshold.
     """
 
     # Get timestamps
@@ -203,6 +201,26 @@ def get_satellite_passes(
     rise_time = t[y]
     set_time = t[~y]
 
+    azimuts_at_rise_time = [
+        satellite_azimut_at(
+            ephemeris,
+            topos,
+            satellite,
+            t
+        )
+        for t in rise_time
+    ]
+
+    azimuts_at_set_time = [
+        satellite_azimut_at(
+            ephemeris,
+            topos,
+            satellite,
+            t
+        )
+        for t in set_time
+    ]
+
     rise_set_times = list(zip(rise_time, set_time))
 
     # Find apices
@@ -221,21 +239,34 @@ def get_satellite_passes(
         for _rise_time, _set_time in rise_set_times
     ]
 
+    azimuts_at_apex_time = [
+        satellite_azimut_at(
+            ephemeris,
+            topos,
+            satellite,
+            t
+        )
+        for t in apices_time
+    ]
+
     altitudes = [
         satellite_altitude_at(
             ephemeris,
             topos,
             satellite,
-            apex_time
+            t
         )
-        for apex_time in apices_time
+        for t in apices_time
     ]
 
     return list(
         zip(
             rise_time,
+            azimuts_at_rise_time,
             apices_time,
+            azimuts_at_apex_time,
             set_time,
+            azimuts_at_set_time,
             altitudes
         )
     )
@@ -402,7 +433,7 @@ def satellite_apices(ephemeris, topos, satellite, ts=_ts):
 
 
 def satellite_altitude_at(ephemeris, topos, satellite, t, ts=_ts):
-    """Returns the altitude of the satellite in degrees.
+    """Returns the altitude of the satellite in degrees at time t.
 
     """
     topos_at = (ephemeris['earth'] + topos).at
@@ -410,3 +441,14 @@ def satellite_altitude_at(ephemeris, topos, satellite, t, ts=_ts):
     return topos_at(t).observe(
         ephemeris['earth'] + satellite
     ).apparent().altaz()[0].degrees
+
+
+def satellite_azimut_at(ephemeris, topos, satellite, t, ts=_ts):
+    """Returns the azimut of the satellite in degrees at time t.
+
+    """
+    topos_at = (ephemeris['earth'] + topos).at
+
+    return topos_at(t).observe(
+        ephemeris['earth'] + satellite
+    ).apparent().altaz()[1].degrees
