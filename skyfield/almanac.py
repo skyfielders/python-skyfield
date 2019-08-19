@@ -2,7 +2,6 @@
 
 from datetime import datetime, timedelta, timezone
 from numpy import arange, array, cos, diff, ediff1d, flatnonzero, linspace, multiply, pi, sign
-from scipy import optimize
 from .constants import DAY_S, tau
 from .nutationlib import iau2000b
 from .timelib import Timescale, Time
@@ -141,29 +140,35 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
 
     return ts.tt_jd(ends), y.take(indices)
 
-
-def get_satellite_passes(planet, ground_station, satellite, ts=None,
+def get_satellite_passes(ephemeris, ground_station, satellite, ts=None,
     from_t=datetime.now(timezone.utc),
-    to_t=datetime.now(timezone.utc)+timedelta(days=1),
+    to_t=datetime.now(timezone.utc) + timedelta(days=1),
     alt_deg_thresh=0):
+
     """
     Predict the satellite's passes in an certain time interval.
 
-    planet: Sum of vectors - The planet where the ground station is located. Generally Earth.
-    ground_station: Topos - The passes will be calculated with respect to this position.
+    ephemeris: Sum of vectors - The planet where the ground station is located.
+    Generally Earth.
+    ground_station: Topos - The passes will be calculated with respect to this
+    position.
     satellite: EarthSatellite - Satellite to calculate passes of.
-    from_t and to_t: Time or datetime - Interval during which the passes will be calculated. Default: from_t=now, to_t=24h from now
-    alt_deg_thresh: float - Degrees above the horizon. Will be calculated only the passes that reach an altitude above this threshold
+    from_t and to_t: Time or datetime - Interval during which the passes will
+    be calculated. Default: from_t=now, to_t=24h from now
+    alt_deg_thresh: float - Degrees above the horizon. Will be calculated only
+    the passes that reach an altitude above this threshold
 
-    Returns a list of tuples each of which is of dimension 1x4 and contains, respectively, a rising Time, the Time at the satellite apex, the altitude in degrees at the apex and a setting Time. The rising Time and the setting Time are based on the set alt_deg_threshold.
+    Returns a list of tuples each of which is of dimension 1x2 and contains,
+    respectively, the rising Time, the setting Time. The rising Time and the
+    setting Time are based on the set alt_deg_threshold.
 
     TODO:
-    Return direction from which the satellite is coming from when rising and the direction it is going when setting. (e.g. 4° N)
+    Return altitude and Time at the apex
+    Return azimut from which the satellite is coming from when rising and the
+    direction it is going when setting. (e.g. 4° N)
     """
 
     ts = ts or _ts
-
-    ground_station = planet + ground_station
 
     # Get timestamps
     if isinstance(from_t, Time):
@@ -180,48 +185,17 @@ def get_satellite_passes(planet, ground_station, satellite, ts=None,
     else:
         raise TypeError("Invalid type for to_t. Expected datetime or Time")
 
-    # Get altitude in degress at a certain timestamp. Shift needed for optimizer (It can only find roots of function).
-    def f(timestamp, alt_deg_shift=0):
-        alt, az, distance = ground_station.at(ts.timestamp(timestamps=timestamp)).observe(planet + satellite).apparent().altaz()
-        return alt.degrees - alt_deg_shift
+    t, y = find_discrete(
+        ts.timestamp(from_ts),
+        ts.timestamp(to_ts),
+        satellite_visible(ephemeris, ground_station, satellite, alt_deg_thresh),
+        epsilon=1.1574074074074074e-05
+    )
 
-    # Generate time interval and the altitude points
-    ts_range = arange(from_ts, to_ts, 60)
-    altitude = array([f(t) for t in ts_range])
+    rise_time = t[y]
+    set_time = t[~y]
 
-
-    # Find rough altitude maxima
-    left_diff = ediff1d(altitude, to_begin=0)
-    right_diff = ediff1d(altitude, to_end=0)
-    maxima = (left_diff > 0) & (right_diff < 0)
-
-    # Find precise altitude maxima with a precision in the order of a second.
-    def find_highest(timestamp):
-        return optimize.minimize_scalar(lambda x: -f(x), bracket=[timestamp-60, timestamp, timestamp+60], tol=1/86400).x
-
-    ts_highest = [find_highest(t) for t in ts_range[maxima] if f(t) >= alt_deg_thresh]
-    dt_highest = ts.timestamp(ts_highest)
-    highest = [f(t) for t in ts_highest]
-
-
-    # Define step to be used in the following methods. [timestamp-step,timestamp+step] interval within which we are looking for rising, setting and maximum poinTimescale.
-    period = 2*pi / satellite.model.no * 60
-    step = 0.1 * period    # 10% of the period?
-
-    def find_rising(timestamp):
-        return optimize.brentq(f, timestamp - step, timestamp, args=(alt_deg_thresh,))
-
-    def find_setting(timestamp):
-        return optimize.brentq(f, timestamp, timestamp + step, args=(alt_deg_thresh,))
-
-    ts_rising = [find_rising(t) for t in ts_highest]
-    dt_rising = ts.timestamp(ts_rising)
-
-    ts_setting = [find_setting(t) for t in ts_highest]
-    dt_setting = ts.timestamp(ts_setting)
-
-    return list(zip(dt_rising, dt_highest, highest, dt_setting))
-
+    return list(zip(rise_time, set_time))
 
 # Discrete circumstances to search.
 
@@ -324,3 +298,22 @@ def _distance_to(center, target):
         distance = center.at(t).observe(target).distance().au
         return distance
     return distance_at
+
+def satellite_visible(ephemeris, topos, satellite, alt_deg_thresh=0):
+    """Build a function of time that returns whether a satellite is visible in
+    the sky.
+
+    The function that this returns will expect a single argument that is
+    a :class:`~skyfield.timelib.Time` and will return ``True`` if the
+    satellite is visible, else ``False``.
+
+    """
+    topos_at = (ephemeris['earth'] + topos).at
+
+    def is_satellite_up_at(t):
+        """Return `True` if the satellite has risen by time `t`."""
+        t._nutation_angles = iau2000b(t.tt)
+        return topos_at(t).observe(ephemeris['earth'] + satellite).apparent().altaz()[0].degrees >= alt_deg_thresh
+
+    is_satellite_up_at.rough_period = 2 * pi / (satellite.model.no * 60 * 24)
+    return is_satellite_up_at
