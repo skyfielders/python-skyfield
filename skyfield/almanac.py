@@ -1,7 +1,7 @@
 """Routines to solve for circumstances like sunrise, sunset, and moon phase."""
 
 from datetime import datetime, timedelta, timezone
-from numpy import arange, array, cos, diff, ediff1d, flatnonzero, linspace, multiply, pi, sign
+from numpy import array, cos, diff, flatnonzero, linspace, multiply, pi, sign
 from .constants import DAY_S, tau
 from .nutationlib import iau2000b
 from .timelib import Timescale, Time
@@ -10,6 +10,7 @@ EPSILON = 0.001 / DAY_S
 
 _infs = array(('-inf', 'inf'), float)
 _ts = Timescale(array((_infs, (0.0, 0.0))), _infs, array((37.0, 37.0)))
+
 
 # Simple facts.
 
@@ -31,6 +32,7 @@ def phase_angle(ephemeris, body, t):
     ps = body.at(t2).observe(sun)
     return pe.separation_from(ps)
 
+
 def fraction_illuminated(ephemeris, body, t):
     """Compute the illuminated fraction of a body viewed from Earth.
 
@@ -43,6 +45,7 @@ def fraction_illuminated(ephemeris, body, t):
     """
     a = phase_angle(ephemeris, body, t).radians
     return 0.5 * (1.0 + cos(a))
+
 
 # Search routines.
 
@@ -105,6 +108,7 @@ def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
 
     return ts.tt_jd(ends), y.take(indices + 1)
 
+
 def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
     ts = start_time.ts
     jd0 = start_time.tt
@@ -140,13 +144,14 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
 
     return ts.tt_jd(ends), y.take(indices)
 
-def get_satellite_passes(ephemeris, ground_station, satellite, ts=None,
+
+def get_satellite_passes(
+    ephemeris, ground_station, satellite, ts=None,
     from_t=datetime.now(timezone.utc),
     to_t=datetime.now(timezone.utc) + timedelta(days=1),
-    alt_deg_thresh=0):
-
-    """
-    Predict the satellite's passes in an certain time interval.
+    alt_deg_thresh=0
+):
+    """Predict the satellite's passes in an certain time interval.
 
     ephemeris: Sum of vectors - The planet where the ground station is located.
     Generally Earth.
@@ -188,14 +193,20 @@ def get_satellite_passes(ephemeris, ground_station, satellite, ts=None,
     t, y = find_discrete(
         ts.timestamp(from_ts),
         ts.timestamp(to_ts),
-        satellite_visible(ephemeris, ground_station, satellite, alt_deg_thresh),
-        epsilon=1.1574074074074074e-05
+        satellite_visible(
+            ephemeris,
+            ground_station,
+            satellite,
+            alt_deg_thresh
+        ),
+        epsilon=1.1574074074074074e-05  # 1 second
     )
 
     rise_time = t[y]
     set_time = t[~y]
 
     return list(zip(rise_time, set_time))
+
 
 # Discrete circumstances to search.
 
@@ -220,6 +231,7 @@ SEASON_EVENTS_NEUTRAL = [
     'December Solstice',
 ]
 
+
 def seasons(ephemeris):
     """Build a function of time that returns the quarter of the year.
 
@@ -241,8 +253,8 @@ def seasons(ephemeris):
     season_at.rough_period = 90.0
     return season_at
 
-def sunrise_sunset(ephemeris, topos):
 
+def sunrise_sunset(ephemeris, topos):
     """Build a function of time that returns whether the sun is up.
 
     The function that this returns will expect a single argument that is
@@ -261,12 +273,14 @@ def sunrise_sunset(ephemeris, topos):
     is_sun_up_at.rough_period = 0.5  # twice a day
     return is_sun_up_at
 
+
 MOON_PHASES = [
     'New Moon',
     'First Quarter',
     'Full Moon',
     'Last Quarter',
 ]
+
 
 def moon_phases(ephemeris):
     """Build a function of time that returns the moon phase 0 through 3.
@@ -292,12 +306,14 @@ def moon_phases(ephemeris):
     moon_phase_at.rough_period = 7.0  # one lunar phase per week
     return moon_phase_at
 
+
 def _distance_to(center, target):
     def distance_at(t):
         t._nutation_angles = iau2000b(t.tt)
         distance = center.at(t).observe(target).distance().au
         return distance
     return distance_at
+
 
 def satellite_visible(ephemeris, topos, satellite, alt_deg_thresh=0):
     """Build a function of time that returns whether a satellite is visible in
@@ -313,7 +329,9 @@ def satellite_visible(ephemeris, topos, satellite, alt_deg_thresh=0):
     def is_satellite_up_at(t):
         """Return `True` if the satellite has risen by time `t`."""
         t._nutation_angles = iau2000b(t.tt)
-        return topos_at(t).observe(ephemeris['earth'] + satellite).apparent().altaz()[0].degrees >= alt_deg_thresh
+        return topos_at(t).observe(
+            ephemeris['earth'] + satellite
+            ).apparent().altaz()[0].degrees >= alt_deg_thresh
 
     is_satellite_up_at.rough_period = 2 * pi / (satellite.model.no * 60 * 24)
     return is_satellite_up_at
