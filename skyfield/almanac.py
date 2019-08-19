@@ -146,7 +146,7 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
 
 
 def get_satellite_passes(
-    ephemeris, ground_station, satellite, ts=None,
+    ephemeris, topos, satellite, ts=_ts,
     from_t=datetime.now(timezone.utc),
     to_t=datetime.now(timezone.utc) + timedelta(days=1),
     alt_deg_thresh=0
@@ -155,7 +155,7 @@ def get_satellite_passes(
 
     ephemeris: Sum of vectors - The planet where the ground station is located.
     Generally Earth.
-    ground_station: Topos - The passes will be calculated with respect to this
+    topos: Topos - The passes will be calculated with respect to this
     position.
     satellite: EarthSatellite - Satellite to calculate passes of.
     from_t and to_t: Time or datetime - Interval during which the passes will
@@ -163,17 +163,14 @@ def get_satellite_passes(
     alt_deg_thresh: float - Degrees above the horizon. Will be calculated only
     the passes that reach an altitude above this threshold
 
-    Returns a list of tuples each of which is of dimension 1x2 and contains,
-    respectively, the rising Time, the setting Time. The rising Time and the
-    setting Time are based on the set alt_deg_threshold.
+    Returns a list of tuples each of which is of dimension 1x3 and contains,
+    respectively, the rising Time, the apex Time, the setting Time. The rising
+    Time and the setting Time are based on the set alt_deg_threshold.
 
     TODO:
-    Return altitude and Time at the apex
     Return azimut from which the satellite is coming from when rising and the
     direction it is going when setting. (e.g. 4° N)
     """
-
-    ts = ts or _ts
 
     # Get timestamps
     if isinstance(from_t, Time):
@@ -190,12 +187,13 @@ def get_satellite_passes(
     else:
         raise TypeError("Invalid type for to_t. Expected datetime or Time")
 
+    # Find rise time and set time pairs
     t, y = find_discrete(
         ts.timestamp(from_ts),
         ts.timestamp(to_ts),
         satellite_visible(
             ephemeris,
-            ground_station,
+            topos,
             satellite,
             alt_deg_thresh
         ),
@@ -205,7 +203,42 @@ def get_satellite_passes(
     rise_time = t[y]
     set_time = t[~y]
 
-    return list(zip(rise_time, set_time))
+    rise_set_times = list(zip(rise_time, set_time))
+
+    # Find apices
+    apices_time = [
+        find_discrete(
+            _rise_time,
+            _set_time,
+            satellite_apices(
+                ephemeris,
+                topos,
+                satellite,
+                alt_deg_thresh
+            ),
+            epsilon=1.1574074074074074e-05  # 1 second
+        )[0][0]
+        for _rise_time, _set_time in rise_set_times
+    ]
+
+    altitudes = [
+        satellite_altitude_at(
+            ephemeris,
+            topos,
+            satellite,
+            apex_time
+        )
+        for apex_time in apices_time
+    ]
+
+    return list(
+        zip(
+            rise_time,
+            apices_time,
+            set_time,
+            altitudes
+        )
+    )
 
 
 # Discrete circumstances to search.
@@ -324,14 +357,56 @@ def satellite_visible(ephemeris, topos, satellite, alt_deg_thresh=0):
     satellite is visible, else ``False``.
 
     """
-    topos_at = (ephemeris['earth'] + topos).at
 
     def is_satellite_up_at(t):
         """Return `True` if the satellite has risen by time `t`."""
         t._nutation_angles = iau2000b(t.tt)
-        return topos_at(t).observe(
-            ephemeris['earth'] + satellite
-            ).apparent().altaz()[0].degrees >= alt_deg_thresh
+        return satellite_altitude_at(
+            ephemeris,
+            topos,
+            satellite,
+            t
+        ) >= alt_deg_thresh
 
     is_satellite_up_at.rough_period = 2 * pi / (satellite.model.no * 60 * 24)
     return is_satellite_up_at
+
+
+def satellite_apices(ephemeris, topos, satellite, ts=_ts):
+    """Build a function of time that returns whether a satellite is rising in
+    the sky.
+
+    The function that this returns will expect a single argument that is
+    a :class:`~skyfield.timelib.Time` and will return ``True`` if the
+    satellite is visible, else ``False``.
+
+    """
+
+    def is_satellite_rising(t, ts=_ts):
+        """Return `True` if the satellite is rising at time `t`."""
+        t._nutation_angles = iau2000b(t.tt)
+        return satellite_altitude_at(
+            ephemeris,
+            topos,
+            satellite,
+            t
+        ) > satellite_altitude_at(
+            ephemeris,
+            topos,
+            satellite,
+            ts.timestamp(t.timestamp() - 1)
+        )
+
+    is_satellite_rising.rough_period = 1
+    return is_satellite_rising
+
+
+def satellite_altitude_at(ephemeris, topos, satellite, t, ts=_ts):
+    """Returns the altitude of the satellite in degrees.
+
+    """
+    topos_at = (ephemeris['earth'] + topos).at
+
+    return topos_at(t).observe(
+        ephemeris['earth'] + satellite
+    ).apparent().altaz()[0].degrees
