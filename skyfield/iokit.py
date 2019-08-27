@@ -97,7 +97,7 @@ class Loader(object):
         try:
             os.makedirs(self.directory)
         except OSError as e:
-            if e.errno != errno.EEXIST:
+            if e.errno != errno.EEXIST and not os.path.isdir(name):
                 raise
 
         # Each instance gets its own copy of these data structures,
