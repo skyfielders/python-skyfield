@@ -23,7 +23,7 @@ install:
   - "pip install --upgrade pip"
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
-  - "pip install pandas==0.25.1 unittest2"
+  - "pip install pandas==0.24.2 unittest2"
   - "python -c 'import pandas'"
 
 script:
