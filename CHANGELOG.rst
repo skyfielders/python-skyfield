@@ -3,6 +3,18 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.12 — 2019 September 2
+-----------------------
+
+* Fix: an exception was being thrown when creating a ``Loader`` pointed
+  at a Windows directory for which Python’s ``os.makedirs()`` function
+  returned a spurious error.
+  `#283 <https://github.com/skyfielders/python-skyfield/issues/283>`_
+
+* The internal ``reverse_terra()`` routine can now be given an
+  ``iterations=0`` argument if the caller wants geocentric latitude and
+  longitude.
+
 1.11 — 2019 July 22
 -------------------
 
