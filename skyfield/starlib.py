@@ -86,7 +86,7 @@ class Star(object):
             if isinstance(value, Angle):
                 value = value._degrees
             shape = getattr(value, 'shape', None)
-            if shape is not None:
+            if shape:
                 shapes = ','.join(str(n) for n in shape)
                 opts.append('{0} shape={1}'.format(name, shapes))
             elif value:
