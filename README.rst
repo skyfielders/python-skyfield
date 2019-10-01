@@ -32,8 +32,9 @@ The result:
    +09deg 03' 23.1"
    2.33251 au
 
-Skyfield’s only binary dependency is NumPy.
-Once that is available, Skyfield can usually be installed with::
+Skyfield's only binary dependency is NumPy though jplepehm and sgp4
+are also required. Once those are available, Skyfield can usually be
+installed with::
 
     pip install skyfield
 
