@@ -11,6 +11,7 @@ that is accelerated using NumPy vector math!
    :maxdepth: 2
 
    installation
+   examples
    files
    almanac
    positions
