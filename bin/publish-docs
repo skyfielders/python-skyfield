@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec make -C skyfield/documentation html sync
