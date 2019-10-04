@@ -10,7 +10,8 @@ http://cdsarc.u-strasbg.fr/viz-bin/Cat?VI/42
 import argparse
 import os
 import sys
-from numpy import array, savez_compressed, searchsorted
+import numpy as np
+from numpy import array, searchsorted
 from skyfield import api
 
 URL = 'http://cdsarc.u-strasbg.fr/ftp/VI/42/data.dat'
@@ -125,12 +126,13 @@ def main():
 
     path = os.path.dirname(__file__) + '/../skyfield/data/constellations'
 
-    savez_compressed(path, {
-        'sorted_ra': sorted_ra,
-        'sorted_dec': sorted_dec,
-        'radec_indices_to_tla_index': grid,
-        'sorted_tla': sorted_consts,
-    })
+    np.savez_compressed(
+        path,
+        sorted_ra=sorted_ra,
+        sorted_dec=sorted_dec,
+        radec_to_index=grid,
+        indexed_abbreviations=sorted_consts,
+    )
 
 def compute_constellation(ra, dec, sorted_ra, sorted_dec, sorted_consts, grid):
     i = searchsorted(sorted_ra, ra)
