@@ -35,6 +35,12 @@ _ts = Timescale(array((_infs, (0.0, 0.0))), _infs, array((37.0, 37.0)))
 
 class EarthSatellite(VectorFunction):
     """An Earth satellite loaded from a TLE file and propagated with SGP4.
+    The two initialization arguments ``line1`` and ``line2`` correspond to
+    the two data lines in a TLE file. ``name`` allows you to give a name to
+    the satellite, accessible with ``self.name``. ``ts`` is a
+    :class:`~skyfield.timelib.Timescale object, used to generate the
+    ``epoch`` value. If it is not provided, __init__ will use a built in
+    Timescale object.
 
     An earth satellite object is a Skyfield vector function, so call its
     :meth:`~skyfield.vectorlib.VectorSum.at()` method to generate its
