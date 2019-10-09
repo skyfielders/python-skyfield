@@ -6,7 +6,10 @@ Changelog
 1.13 — ?
 --------
 
-* Added :func:`skyfield.positionlib.position_from_radec()`.
+* Provided a constellation lookup routine through
+  :func:`~skyfield.api.load_constellation_map()`.
+
+* Added :func:`~skyfield.positionlib.position_from_radec()`.
 
 1.12 — 2019 September 2
 -----------------------

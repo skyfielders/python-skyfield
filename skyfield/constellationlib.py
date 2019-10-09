@@ -26,21 +26,37 @@ declination, then look up the indexes in the grid.  Memory requirement:
 """
 from numpy import searchsorted
 from .functions import load_bundled_npy
+from .timelib import Time, julian_date_of_besselian_epoch
 
-def load_constellation_lookup():
+def load_constellation_map():
+    """Load Skyfield's constellation map and return a lookup function
+
+    Skyfield carries an internal constellation map that is optimized for
+    quick position lookup.  Call this function to load the map and
+    return a function mapping position to constellation name.
+
+    >>> from skyfield.api import position_from_radec, load_constellation_map
+    >>> constellation_at = load_constellation_map()
+    >>> north_pole = position_from_radec(0, 90)
+    >>> constellation_at(north_pole)
+    'UMi'
+
+    If you pass an array of positions, you'll receive an array of names.
+
+    """
+    t1875 = Time(None, julian_date_of_besselian_epoch(1875))
+
     arrays = load_bundled_npy('constellations.npz')
     sorted_ra = arrays['sorted_ra']
     sorted_dec = arrays['sorted_dec']
     radec_to_index = arrays['radec_to_index']
     indexed_abbreviations = arrays['indexed_abbreviations']
 
-    def lookup(ra_hours, dec_degrees):
-        i = searchsorted(sorted_ra, ra_hours)
-        j = searchsorted(sorted_dec, dec_degrees, side='right')
+    def constellation_at(position):
+        ra, dec, distance = position.radec(epoch=t1875)
+        i = searchsorted(sorted_ra, ra.hours)
+        j = searchsorted(sorted_dec, dec.degrees, side='right')
         k = radec_to_index[i, j]
         return indexed_abbreviations[k]
 
-    return lookup
-
-lookup = load_constellation_lookup()
-print(lookup(0,0))
+    return constellation_at

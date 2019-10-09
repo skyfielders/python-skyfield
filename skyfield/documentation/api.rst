@@ -3,6 +3,10 @@
  API Reference
 ===============
 
+Quick links to the sections below:
+
+.. contents:: :local:
+
 Opening files
 =============
 
@@ -264,6 +268,11 @@ Position methods specific to one class
    Astrometric.apparent
    Apparent.altaz
    Geocentric.subpoint
+
+Constellations
+==============
+
+.. autofunction:: skyfield.api.load_constellation_map
 
 Osculating Orbital Elements
 ===========================

@@ -1,6 +1,6 @@
 """Basic operations that are needed repeatedly throughout Skyfield."""
 
-from numpy import arcsin, arctan2, array, cos, load, sin, sqrt
+from numpy import arcsin, arctan2, array, cos, float_, load, sin, sqrt
 from pkgutil import get_data
 from skyfield.constants import tau
 
@@ -96,6 +96,21 @@ def rot_z(theta):
     zero = theta * 0.0
     one = zero + 1.0
     return array(((c, -s, zero), (s, c, zero), (zero, zero, one)))
+
+def _to_array(value):
+    """Convert plain Python sequences into NumPy arrays.
+
+    This helps Skyfield endpoints convert caller-provided tuples and
+    lists into NumPy arrays.  If the ``value`` is not a sequence, then
+    it is coerced to a Numpy float object, but not an actual array.
+
+    """
+    if hasattr(value, 'shape'):
+        return value
+    elif hasattr(value, '__len__'):
+        return array(value)
+    else:
+        return float_(value)
 
 try:
     from io import BytesIO

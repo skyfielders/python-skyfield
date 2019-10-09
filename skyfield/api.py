@@ -9,6 +9,7 @@ way for most users to use Skyfield's main features.
 from datetime import datetime
 from math import pi
 from .constants import B1950, tau
+from .constellationlib import load_constellation_map
 from .errors import DeprecationError
 from .iokit import Loader, load_file
 from .positionlib import position_from_radec

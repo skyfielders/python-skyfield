@@ -5,7 +5,9 @@ from numpy import arccos, array, clip, einsum, empty, exp, full, nan
 from .constants import ANGVEL, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
-from .functions import dots, from_polar, length_of, rot_x, rot_z, to_polar
+from .functions import (
+    dots, from_polar, length_of, rot_x, rot_z, to_polar, _to_array,
+)
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Angle, Distance, Velocity, _interpret_angle
@@ -34,8 +36,8 @@ def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
     they will be assumed to be ICRS (the modern replacement for J2000).
 
     """
-    theta = dec_degrees * tau / 360.0
-    phi = ra_hours * tau / 24.0
+    theta = _to_array(dec_degrees) * tau / 360.0
+    phi = _to_array(ra_hours) * tau / 24.0
     position_au = from_polar(distance, theta, phi)
     if epoch is not None:
         position_au = einsum('ij...,j...->i...', epoch.MT, position_au)
