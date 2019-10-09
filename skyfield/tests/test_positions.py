@@ -1,6 +1,7 @@
 import numpy as np
 from skyfield import api
 from skyfield.earthlib import earth_rotation_angle
+from skyfield.functions import length_of
 from skyfield.positionlib import ICRF
 from skyfield.starlib import Star
 
@@ -46,6 +47,25 @@ def test_dynamic_ecliptic_coordinates_with_and_without_a_time_array():
 
     assert distance2.au[0] == distance0.au
     assert distance2.au[1] == distance1.au
+
+def test_position_from_radec():
+    p = api.position_from_radec(0, 0)
+    assert length_of(p.position.au - [1, 0, 0]) < 1e-16
+
+    p = api.position_from_radec(6, 0)
+    assert length_of(p.position.au - [0, 1, 0]) < 1e-16
+
+    p = api.position_from_radec(12, 90, 2)
+    assert length_of(p.position.au - [0, 0, 2]) < 2e-16
+
+    ts = api.load.timescale(builtin=True)
+    epoch = ts.tt_jd(api.B1950)
+    p = api.position_from_radec(0, 0, epoch=epoch)
+    assert length_of(p.position.au - [1, 0, 0]) > 1e-16
+    ra, dec, distance = p.radec(epoch=epoch)
+    assert abs(ra.hours) < 1e-12
+    assert abs(dec.degrees) < 1e-12
+    assert abs(distance.au - 1) < 1e-16
 
 # Test that the CIRS coordinate of the TIO is consistent with the Earth Rotation Angle
 # This is mostly an internal consistency check

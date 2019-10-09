@@ -8,9 +8,10 @@ way for most users to use Skyfield's main features.
 """
 from datetime import datetime
 from math import pi
-from .constants import tau
+from .constants import B1950, tau
 from .errors import DeprecationError
 from .iokit import Loader, load_file
+from .positionlib import position_from_radec
 from .starlib import Star
 from .sgp4lib import EarthSatellite
 from .timelib import T0, Time, Timescale, utc

@@ -25,6 +25,21 @@ def build_position(position_au, velocity_au_per_d=None, t=None,
         cls = ICRF
     return cls(position_au, velocity_au_per_d, t, center, target, observer_data)
 
+def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
+                   t=None, center=None, target=None, observer_data=None):
+    """Build a position object from a right ascension and declination.
+
+    If an ``epoch`` is specified, the input coordinates are understood
+    to be in the dynamical system of that particular date; otherwise
+    they will be assumed to be ICRS (the modern replacement for J2000).
+
+    """
+    theta = dec_degrees * tau / 360.0
+    phi = ra_hours * tau / 24.0
+    position_au = from_polar(distance, theta, phi)
+    if epoch is not None:
+        position_au = einsum('ij...,j...->i...', epoch.MT, position_au)
+    return build_position(position_au, None, t, center, target, observer_data)
 
 class ICRF(object):
     """An (x, y, z) position and velocity oriented to the ICRF axes.

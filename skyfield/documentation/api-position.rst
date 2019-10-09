@@ -71,3 +71,8 @@ Geometric instantaneous position between two objects
 
 .. autoclass:: Geometric
    :members:
+
+Building a position from right ascension and declination
+========================================================
+
+.. autofunction:: position_from_radec
