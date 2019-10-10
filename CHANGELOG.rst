@@ -3,13 +3,17 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-1.13 — ?
---------
+1.13 — 2019 October 10
+----------------------
 
 * Provided a constellation lookup routine through
   :func:`~skyfield.api.load_constellation_map()`.
 
 * Added :func:`~skyfield.positionlib.position_from_radec()`.
+
+* Fixed the ``apparent()`` method in the case where a single observer
+  position is observing an entire vector of target positions.
+  `#229 <https://github.com/skyfielders/python-skyfield/issues/229>`_
 
 1.12 — 2019 September 2
 -----------------------
