@@ -438,10 +438,22 @@ class Astrometric(ICRF):
                 position_au, gcrs_position)
             include_earth_deflection = nadir_angle >= 0.8
 
-        add_deflection(position_au, observer_data.bcrs_position,
+        observer_position = observer_data.bcrs_position
+        observer_velocity = observer_data.bcrs_velocity
+
+        # If a single observer position (3,) is observing an array of
+        # targets (3,n), then both deflection and aberration will
+        # complain that "operands could not be broadcast together"
+        # unless we give the observer another dimension too.
+        if len(observer_position.shape) < len(position_au.shape):
+            shape = observer_position.shape + (1,)
+            observer_position = observer_position.reshape(shape)
+            observer_velocity = observer_velocity.reshape(shape)
+
+        add_deflection(position_au, observer_position,
                        observer_data.ephemeris, t, include_earth_deflection)
 
-        add_aberration(position_au, observer_data.bcrs_velocity,
+        add_aberration(position_au, observer_velocity,
                        self.light_time)
 
         return Apparent(position_au, t=t, observer_data=observer_data)
