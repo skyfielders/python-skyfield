@@ -66,9 +66,6 @@ Sprint Possibilities
 
 * Iterating across an ephemeris should probably give you object names.
 
-* See about switching ``requirements.sh`` to be a conda environment
-  file.
-
 * Update the earth satellite IPython Notebook to the new API, or remove
   it in favor of keeping notebooks in the separate astronomy notebook
   repository.
