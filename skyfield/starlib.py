@@ -128,7 +128,7 @@ class Star(object):
         if len(position.shape) > 1 and not t.shape:
             tt = empty(position.shape[1:])
             tt.fill(t.tt)
-            t = t.ts.tt(tt)
+            t = t.ts.tt_jd(tt)
         return vector, vel, t, light_time
 
     def _compute_vectors(self):
