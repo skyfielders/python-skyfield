@@ -12,6 +12,37 @@ to solve a general problem,
 that should provide readers with a basis
 for solving other similar problems of their own.
 
+When is the Galactic Center above the horizon?
+==============================================
+
+.. testcode::
+
+    from skyfield.api import Star, Topos, load
+    from skyfield.almanac import find_discrete, risings_and_settings
+    from pytz import timezone
+
+    ts = load.timescale()
+    t0 = ts.utc(2019, 1, 19)
+    t1 = ts.utc(2019, 1, 21)
+
+    moab = Topos('38.5725 N', '109.54972238 W')
+    eph = load('de421.bsp')
+    gc = Star(ra_hours=(17, 45, 40.04), dec_degrees=(-29, 0, 28.1))
+
+    f = risings_and_settings(eph, gc, moab)
+    tz = timezone('US/Mountain')
+
+    for t, updown in zip(*find_discrete(t0, t1, f)):
+        print(t.astimezone(tz).strftime('%a %d %H:%M'), 'MST',
+              'rises' if updown else 'sets')
+
+.. testoutput::
+
+    Sat 19 05:53 MST rises
+    Sat 19 14:26 MST sets
+    Sun 20 05:49 MST rises
+    Sun 20 14:22 MST sets
+
 Which geographic location is farther from Earth’s center?
 =========================================================
 

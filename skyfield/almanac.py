@@ -180,7 +180,6 @@ def seasons(ephemeris):
     return season_at
 
 def sunrise_sunset(ephemeris, topos):
-
     """Build a function of time that returns whether the sun is up.
 
     The function that this returns will expect a single argument that is
@@ -198,6 +197,28 @@ def sunrise_sunset(ephemeris, topos):
 
     is_sun_up_at.rough_period = 0.5  # twice a day
     return is_sun_up_at
+
+def risings_and_settings(ephemeris, target, topos, horizon=-0.3333, radius=0):
+    """Build a function of time that returns whether a body is up.
+
+    This builds and returns a function taking a single argument
+    :class:`~skyfield.timelib.Time` that returns ``True`` if the body is
+    above the horizon, else ``False``.  It considers a body to be above
+    the horizon if its elevation plus the supplied ``radius`` is more
+    than ``horizon`` degrees, which by default is -0.3333 to account for
+    typical atmospheric refraction.
+
+    """
+    topos_at = (ephemeris['earth'] + topos).at
+    h = horizon - radius
+
+    def is_body_up_at(t):
+        """Return `True` if the target has risen by time `t`."""
+        t._nutation_angles = iau2000b(t.tt)
+        return topos_at(t).observe(target).apparent().altaz()[0].degrees > h
+
+    is_body_up_at.rough_period = 0.5  # twice a day
+    return is_body_up_at
 
 MOON_PHASES = [
     'New Moon',

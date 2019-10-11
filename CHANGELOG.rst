@@ -3,6 +3,13 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.14 — 2019 October ?
+---------------------
+
+* Added a :func:`~skyfield.almanac.rising_setting()` function for
+  computing rising and setting times.
+  `#271 <https://github.com/skyfielders/python-skyfield/issues/271>`_
+
 1.13 — 2019 October 10
 ----------------------
 
