@@ -427,36 +427,37 @@ class Astrometric(ICRF):
 
         """
         t = self.t
-        position_au = self.position.au.copy()
+        target_au = self.position.au.copy()
+
         observer_data = self.observer_data
         gcrs_position = observer_data.gcrs_position
+        bcrs_position = observer_data.bcrs_position
+        bcrs_velocity = observer_data.bcrs_velocity
+
+        # If a single observer position (3,) is observing an array of
+        # targets (3,n), then deflection and aberration will complain
+        # that "operands could not be broadcast together" unless we give
+        # the observer another dimension too.
+        if len(bcrs_position.shape) < len(target_au.shape):
+            shape = bcrs_position.shape + (1,)
+            bcrs_position = bcrs_position.reshape(shape)
+            bcrs_velocity = bcrs_velocity.reshape(shape)
+            if gcrs_position is not None:
+                gcrs_position = gcrs_position.reshape(shape)
 
         if gcrs_position is None:
             include_earth_deflection = array((False,))
         else:
             limb_angle, nadir_angle = compute_limb_angle(
-                position_au, gcrs_position)
+                target_au, gcrs_position)
             include_earth_deflection = nadir_angle >= 0.8
 
-        observer_position = observer_data.bcrs_position
-        observer_velocity = observer_data.bcrs_velocity
-
-        # If a single observer position (3,) is observing an array of
-        # targets (3,n), then both deflection and aberration will
-        # complain that "operands could not be broadcast together"
-        # unless we give the observer another dimension too.
-        if len(observer_position.shape) < len(position_au.shape):
-            shape = observer_position.shape + (1,)
-            observer_position = observer_position.reshape(shape)
-            observer_velocity = observer_velocity.reshape(shape)
-
-        add_deflection(position_au, observer_position,
+        add_deflection(target_au, bcrs_position,
                        observer_data.ephemeris, t, include_earth_deflection)
 
-        add_aberration(position_au, observer_velocity,
-                       self.light_time)
+        add_aberration(target_au, bcrs_velocity, self.light_time)
 
-        return Apparent(position_au, t=t, observer_data=observer_data)
+        return Apparent(target_au, t=t, observer_data=observer_data)
 
 
 class Apparent(ICRF):
