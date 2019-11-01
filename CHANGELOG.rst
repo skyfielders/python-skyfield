@@ -3,8 +3,14 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-1.14 — 2019 October ?
----------------------
+1.14 — 2019 November 1
+----------------------
+
+* Changed the URL from which leap second files are downloaded; the
+  server that previously provided them is no longer responding.
+  Thanks to Richard Shaw for the pull request.
+  `#296 <https://github.com/skyfielders/python-skyfield/issues/296>`_
+  `#297 <https://github.com/skyfielders/python-skyfield/issues/297>`_
 
 * Added a :func:`~skyfield.almanac.rising_setting()` function for
   computing rising and setting times.
