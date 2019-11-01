@@ -51,7 +51,7 @@ def _filename_of(url):
 _IERS = 'https://hpiers.obspm.fr/iers/bul/bulc/'
 _JPL = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/'
 _NAIF = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
-_USNO = 'http://maia.usno.navy.mil/ser7/'
+_CDDIS = 'ftp://cddis.nasa.gov/products/iers/'
 
 class Loader(object):
     """A tool for downloading and opening astronomical data files.
@@ -105,8 +105,8 @@ class Loader(object):
         # without changing the behavior of other Loader objects:
 
         self.urls = {
-            'deltat.data': _USNO,
-            'deltat.preds': _USNO,
+            'deltat.data': _CDDIS,
+            'deltat.preds': _CDDIS,
             'Leap_Second.dat': _IERS,
             '.bsp': [
                 ('jup*.bsp', _NAIF),
