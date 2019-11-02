@@ -492,6 +492,27 @@ class Geocentric(ICRF):
 
     _default_center = 399
 
+    def itrf_xyz(self):
+        """Return this position as an (x,y,z) vector in the ITRF frame.
+
+        Returns a :class:`~skyfield.units.Distance` object giving the
+        (x,y,z) of this coordinate in the International Terrestrial
+        Reference Frame (ITRF), an internationally agreed upon
+        Earth-centered Earth-fixed (ECEF) coordinate system.
+
+        """
+        if self.center != 399:
+            raise ValueError("you can only ask for an Earth-centered position"
+                             " to be converted into an ITRF coordinate")
+
+        t = self.t
+        au = einsum('ij...,j...->i...', t.M, self.position.au)
+
+        spin = rot_z(- t.gast * tau / 24.0)
+        au = einsum('ij...,j...->i...', spin, array(au))
+
+        return Distance(au)
+
     def subpoint(self):
         """Return the latitude and longitude directly beneath this position.
 

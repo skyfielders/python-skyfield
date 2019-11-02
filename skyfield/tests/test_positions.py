@@ -1,5 +1,5 @@
 import numpy as np
-from skyfield import api
+from skyfield import api, constants
 from skyfield.earthlib import earth_rotation_angle
 from skyfield.functions import length_of
 from skyfield.positionlib import ICRF
@@ -66,6 +66,16 @@ def test_position_from_radec():
     assert abs(ra.hours) < 1e-12
     assert abs(dec.degrees) < 1e-12
     assert abs(distance.au - 1) < 1e-16
+
+def test_itrf_vector():
+    ts = api.load.timescale(builtin=True)
+    t = ts.utc(2019, 11, 2, 3, 53)
+    top = api.Topos(latitude_degrees=45, longitude_degrees=0,
+                    elevation_m=constants.AU_M - constants.ERAD)
+    x, y, z = top.at(t).itrf_xyz().au
+    assert abs(x - 0.7071) < 1e-4
+    assert abs(y - 0.0) < 1e-14
+    assert abs(z - 0.7071) < 1e-4
 
 # Test that the CIRS coordinate of the TIO is consistent with the Earth Rotation Angle
 # This is mostly an internal consistency check
