@@ -20,6 +20,19 @@ Promises for next version
 Sprint Possibilities
 ====================
 
+* Skyfield rounds times to the nearest millisecond when turning them
+  into datetimes, to avoid times like 16:18:00 from being displayed as
+  16:18:00.000512.  But we should be able to be more clever, and adjust
+  the number of digits retained to match the precision of the Julian
+  date 64-bit float — because, after all, dates closer to zero (long
+  before the modern era) will have far more digits of precision, while
+  dates in the far future might have noise even in the millisecond
+  digit.  We should learn what Python did in the same situation with the
+  repr() of its floats, and see if something similar could let us
+  choose, for a given date, the minimum number of nonzero digits that
+  would let the exact floating point value be reconstituted if the
+  datetime were turned back into a Skyfield Time.
+
 * If we are going to allow times like TT to be submitted using
   calendar dates, then we should probably provide methods that would
   fetch them back as calendar dates.

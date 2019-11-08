@@ -403,11 +403,19 @@ class Time(object):
     def utc_datetime(self):
         """Convert to a Python ``datetime`` in UTC.
 
+        The result is rounded to the nearest millisecond.  While
+        Skyfield's 64-bit floating-point Julian dates often supply at
+        least one more digit of precision, milliseconds provide a safe
+        stopping point that prevents times like 16:18:00 from being
+        displayed as 16:18:00.000512.
+
         If the third-party `pytz`_ package is available, then its
         ``utc`` timezone will be used as the timezone of the returned
         `datetime`_.  Otherwise, an equivalent Skyfield ``utc`` timezone
-        object is used.  If this time is an array, then a sequence of
-        datetimes is returned instead of a single value.
+        object is used.
+
+        If this time is an array, then a sequence of datetimes is
+        returned instead of a single value.
 
         """
         dt, leap_second = self.utc_datetime_and_leap_second()
@@ -419,6 +427,12 @@ class Time(object):
         Convert this time to a `datetime`_ object and a leap second::
 
             dt, leap_second = t.utc_datetime_and_leap_second()
+
+        The result is rounded to the nearest millisecond.  While
+        Skyfield's 64-bit floating-point Julian dates often supply at
+        least one more digit of precision, milliseconds provide a safe
+        stopping point that prevents times like 16:18:00 from being
+        displayed as 16:18:00.000512.
 
         If the third-party `pytz`_ package is available, then its
         ``utc`` timezone will be used as the timezone of the return
@@ -443,13 +457,13 @@ class Time(object):
         second = second.astype(int)
         leap_second = second // 60
         second -= leap_second
-        milli = (fraction * 1000).astype(int) * 1000
+        micro = (fraction * 1000).astype(int) * 1000
         if self.shape:
             utcs = [utc] * self.shape[0]
-            argsets = zip(year, month, day, hour, minute, second, milli, utcs)
+            argsets = zip(year, month, day, hour, minute, second, micro, utcs)
             dt = array([datetime(*args) for args in argsets])
         else:
-            dt = datetime(year, month, day, hour, minute, second, milli, utc)
+            dt = datetime(year, month, day, hour, minute, second, micro, utc)
         return dt, leap_second
 
     def utc_iso(self, delimiter='T', places=0):

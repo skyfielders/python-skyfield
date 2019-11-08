@@ -127,9 +127,9 @@ def test_astimezone_and_leap_second(ts):
     assert leap_second == 0
 
 def test_utc_datetime(ts):
-    t = ts.utc(1969, 7, 20, 20, 18)
+    t = ts.utc(1969, 7, 20, 20, 18, 42.186479)
     dt = t.utc_datetime()
-    assert dt == datetime(1969, 7, 20, 20, 18, 0, 0, utc)
+    assert dt == datetime(1969, 7, 20, 20, 18, 42, 186000, utc)
 
 def test_utc_datetime_and_leap_second(ts):
     t = ts.utc(1969, 7, 20, 20, 18)
