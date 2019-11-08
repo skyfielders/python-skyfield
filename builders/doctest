@@ -1,3 +1,0 @@
-#!/bin/bash
-
-make -C skyfield/documentation doctest 2>&1 | less
