@@ -164,6 +164,7 @@ Routines to search for events like sunrise, sunset, and Moon phase.
    find_discrete
    seasons
    sunrise_sunset
+   dark_twilight_day
    moon_phases
 
 Topocentric Locations

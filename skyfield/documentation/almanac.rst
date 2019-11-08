@@ -141,6 +141,38 @@ and for the average refraction of the atmosphere at the horizon.
 The result ``t`` will be an array of times, and ``y`` will be ``True``
 if the sun rises at the corresponding time and ``False`` if it sets.
 
+Twilight
+========
+
+An expanded version of the sunrise-sunset routine separately codes each
+of the phases of twilight using integers:
+
+0. Dark of night.
+1. Astronomical twilight.
+2. Nautical twilight.
+3. Civil twilight.
+4. Daytime.
+
+.. testcode::
+
+    t0 = ts.utc(2019, 11, 8, 5)
+    t1 = ts.utc(2019, 11, 9, 5)
+    t, y = almanac.find_discrete(t0, t1, almanac.dark_twilight_day(e, bluffton))
+    for ti, yi in zip(t, y):
+        print(yi, ti.utc_iso())
+
+.. testoutput::
+
+    1 2019-11-08T10:40:20Z
+    2 2019-11-08T11:12:31Z
+    3 2019-11-08T11:45:18Z
+    4 2019-11-08T12:14:15Z
+    3 2019-11-08T22:23:52Z
+    2 2019-11-08T22:52:49Z
+    1 2019-11-08T23:25:34Z
+    0 2019-11-08T23:57:44Z
+
+
 Phases of the Moon
 ==================
 

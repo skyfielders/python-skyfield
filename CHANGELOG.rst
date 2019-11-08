@@ -3,6 +3,14 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+Next
+----
+
+* Added a :func:`~skyfield.almanac.dark_twilight_day()` function that
+  not only handles sunrise and sunset but also all three kinds of
+  twilight.
+  `#225 <https://github.com/skyfielders/python-skyfield/issues/225>`_
+
 1.14 — 2019 November 1
 ----------------------
 
