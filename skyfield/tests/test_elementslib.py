@@ -7,8 +7,10 @@ from skyfield.elementslib import (
     normpi,
     osculating_elements_of,
 )
-from numpy import (array, sin, cos, pi, sqrt, ndarray, float64, repeat,
-                   seterr, inf, linspace, arccos)
+from numpy import (
+    array, sin, cos, pi, sqrt, ndarray, float64, repeat, seterr, inf,
+    linspace, arccos,
+)
 import os
 
 def ts():
@@ -51,8 +53,12 @@ def compare(value, expected_value, epsilon, mod=False):
 
 
 def check_types(elements, length):
-    """Checks that all of the attributes in the OsculatingElements object are
-    present, have the correct type, and have the expected size.
+    """Raise an assertion error for any problems with orbital `elements`.
+
+    Checks that all of the attributes in the OsculatingElements object
+    `elements` are present, have the correct type, and have the expected
+    size.
+
     """
     for item in ['inclination', 'longitude_of_ascending_node',
                  'argument_of_periapsis', 'true_anomaly',
@@ -84,8 +90,7 @@ def check_types(elements, length):
 
 
 def horizons_dict(elem, units='km_d', ):
-    """
-    Outputs dictionary with keys that match labels used by Horizons.
+    """Return a dictionary with keys that match labels used by Horizons.
 
     The data from this method is exactly the same as the data in the
     elements object and differs from it only in units.
@@ -110,6 +115,7 @@ def horizons_dict(elem, units='km_d', ):
         'km_s' for kilometers and seconds
         'km_d' for kilometers and days
         'au_d' for au and days
+
     """
     data = {}
     data['EC'] = elem.eccentricity
@@ -148,8 +154,7 @@ def horizons_dict(elem, units='km_d', ):
 
 
 def horizons_array(elem, units='km_d', ):
-    """
-    Outputs numpy array containing data in the same order as horizons.
+    """Return a numpy array containing data in the same order as horizons.
 
     The data from this method is exactly the same as the data in the
     elements object and differs from it only in units.
@@ -161,8 +166,10 @@ def horizons_array(elem, units='km_d', ):
         'km_d' for kilometers and days
         'au_d' for au and days
 
-    The shape of the array is ``(12,)`` if the time used to construct the
-    position is a float, and ``(12, n)`` if the time is an array of length n.
+    The shape of the array is ``(12,)`` if the time used to construct
+    the position is a float, and ``(12, n)`` if the time is an array of
+    length n.
+
     """
     dict_ = horizons_dict(elem, units=units)
     array_ = array([dict_['EC'],

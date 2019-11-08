@@ -20,14 +20,14 @@ def osculating_elements_of(position, reference_frame=None):
 
     """
     mu = GM_dict.get(position.center, 0) + GM_dict.get(position.target, 0)
-    
+
     if reference_frame is not None:
         position_vec = Distance(reference_frame.dot(position.position.au))
         velocity_vec = Velocity(reference_frame.dot(position.velocity.au_per_d))
     else:
         position_vec = position.position
         velocity_vec = position.velocity
-        
+
     return OsculatingElements(position_vec,
                               velocity_vec,
                               position.t,
@@ -35,12 +35,10 @@ def osculating_elements_of(position, reference_frame=None):
 
 
 class OsculatingElements(object):
-    """
-    Contains one or more sets of osculating orbital elements. Different
-    elements are accessed as attributes of the ``OsculatingElements`` object.
+    """One or more sets of osculating orbital elements.
 
-    An ``OsculatingElements`` object can be initialized with the following
-    parameters:
+    An ``OsculatingElements`` object can be initialized with the
+    following parameters:
 
     position : Distance object
         Position vector with shape (3,) or (3, n)
@@ -53,10 +51,10 @@ class OsculatingElements(object):
 
     """
     def __init__(self, position, velocity, time, mu_km_s):
-        if mu_km_s <= 0: 
+        if mu_km_s <= 0:
             raise ValueError('`mu_km_s` (the standard gravitational parameter '
                              'in km^3/s^2) must be positive and non-zero')
-        
+
         self._pos_vec = position.km
         self._vel_vec = velocity.km_per_s
         self.time = time
