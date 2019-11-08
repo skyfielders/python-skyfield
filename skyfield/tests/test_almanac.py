@@ -44,6 +44,22 @@ def test_sunrise_sunset():
     assert strings == ['2018-09-12 11:13', '2018-09-12 23:50']
     assert (y == (1, 0)).all()
 
+def test_dark_twilight_day():
+    ts = api.load.timescale()
+    t0 = ts.utc(2019, 11, 8, 4)
+    t1 = ts.utc(2019, 11, 9, 4)
+    e = api.load('de421.bsp')
+    defiance = api.Topos('41.281944 N', '84.362778 W')
+    t, y = almanac.find_discrete(t0, t1, almanac.dark_twilight_day(e, defiance))
+    t.tt += half_minute
+    strings = t.utc_strftime('%Y-%m-%d %H:%M')
+    assert strings == [
+        '2019-11-08 10:42', '2019-11-08 11:15', '2019-11-08 11:48',
+        '2019-11-08 12:17', '2019-11-08 22:25', '2019-11-08 22:54',
+        '2019-11-08 23:27', '2019-11-08 23:59',
+    ]
+    assert (y == (1, 2, 3, 4, 3, 2, 1, 0)).all()
+
 # Compare with USNO:
 # http://aa.usno.navy.mil/cgi-bin/aa_phases.pl?year=2018&month=9&day=11&nump=50&format=p
 

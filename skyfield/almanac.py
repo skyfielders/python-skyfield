@@ -1,6 +1,6 @@
 """Routines to solve for circumstances like sunrise, sunset, and moon phase."""
 
-from numpy import cos, diff, flatnonzero, linspace, multiply, sign
+from numpy import cos, diff, flatnonzero, linspace, multiply, sign, zeros_like
 from .constants import DAY_S, tau
 from .nutationlib import iau2000b
 
@@ -193,10 +193,40 @@ def sunrise_sunset(ephemeris, topos):
     def is_sun_up_at(t):
         """Return `True` if the sun has risen by time `t`."""
         t._nutation_angles = iau2000b(t.tt)
-        return topos_at(t).observe(sun).apparent().altaz()[0].degrees > -0.8333
+        return topos_at(t).observe(sun).apparent().altaz()[0].degrees >= -0.8333
 
     is_sun_up_at.rough_period = 0.5  # twice a day
     return is_sun_up_at
+
+def dark_twilight_day(ephemeris, topos):
+    """Build a function of time returning whether it is dark, twilight, or day.
+
+    The function that this returns will expect a single argument that is
+    a :class:`~skyfield.timelib.Time` and will return:
+
+    | 0 — Dark of night.
+    | 1 — Astronomical twilight.
+    | 2 — Nautical twilight.
+    | 3 — Civil twilight.
+    | 4 — Sun is up.
+
+    """
+    sun = ephemeris['sun']
+    topos_at = (ephemeris['earth'] + topos).at
+
+    def is_it_dark_twilight_day_at(t):
+        """Return whether the sun is up, down, or whether there is twilight."""
+        t._nutation_angles = iau2000b(t.tt)
+        degrees = topos_at(t).observe(sun).apparent().altaz()[0].degrees
+        r = zeros_like(degrees, int)
+        r[degrees >= -18.0] = 1
+        r[degrees >= -12.0] = 2
+        r[degrees >= -6.0] = 3
+        r[degrees >= -0.8333] = 4
+        return r
+
+    is_it_dark_twilight_day_at.rough_period = 0.5  # twice a day
+    return is_it_dark_twilight_day_at
 
 def risings_and_settings(ephemeris, target, topos, horizon=-0.3333, radius=0):
     """Build a function of time that returns whether a body is up.
