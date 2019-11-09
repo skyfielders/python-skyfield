@@ -73,7 +73,7 @@ def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
     if periods < 1.0:
         periods = 1.0
 
-    jd = linspace(jd0, jd1, periods * num // 1.0)
+    jd = linspace(jd0, jd1, int(periods * num))
 
     end_mask = linspace(0.0, 1.0, num)
     start_mask = end_mask[::-1]
@@ -108,7 +108,7 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
         raise ValueError('your start_time {0} is later than your end_time {1}'
                          .format(start_time, end_time))
 
-    jd = linspace(jd0, jd1, (jd1 - jd0) / f.rough_period * num // 1.0)
+    jd = linspace(jd0, jd1, int((jd1 - jd0) / f.rough_period * num))
 
     end_mask = linspace(0.0, 1.0, num)
     start_mask = end_mask[::-1]
