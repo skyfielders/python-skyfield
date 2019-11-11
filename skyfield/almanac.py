@@ -1,10 +1,9 @@
 """Routines to solve for circumstances like sunrise, sunset, and moon phase."""
 
-from datetime import datetime, timedelta, timezone
 from numpy import array, cos, diff, flatnonzero, linspace, multiply, pi, sign
 from .constants import DAY_S, tau
 from .nutationlib import iau2000b
-from .timelib import Timescale, Time
+from .timelib import Timescale
 
 EPSILON = 0.001 / DAY_S
 
@@ -146,9 +145,11 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
 
 
 def get_satellite_passes(
-    ephemeris, topos, satellite, ts=_ts,
-    from_t=datetime.now(timezone.utc),
-    to_t=datetime.now(timezone.utc) + timedelta(days=1),
+    ephemeris,
+    topos,
+    satellite,
+    from_time,
+    to_time,
     alt_deg_thresh=0
 ):
     """Predict the satellite's passes in an certain time interval.
@@ -158,8 +159,8 @@ def get_satellite_passes(
     topos: Topos - The passes will be calculated with respect to this
     position.
     satellite: EarthSatellite - Satellite to calculate passes of.
-    from_t and to_t: Time or datetime - Interval during which the passes will
-    be calculated. Default: from_t=now, to_t=24h from now
+    from_time and to_time: Time - Interval during which the passes will
+    be calculated.
     alt_deg_thresh: float - Degrees above the horizon. Will be calculated only
     the passes that reach an altitude above this threshold
 
@@ -170,25 +171,10 @@ def get_satellite_passes(
     set alt_deg_threshold.
     """
 
-    # Get timestamps
-    if isinstance(from_t, Time):
-        from_ts = from_t.timestamp()
-    elif isinstance(from_t, datetime):
-        from_ts = datetime.timestamp(from_t)
-    else:
-        raise TypeError("Invalid type for from_t. Expected datetime or Time")
-
-    if isinstance(to_t, Time):
-        to_ts = to_t.timestamp()
-    elif isinstance(to_t, datetime):
-        to_ts = datetime.timestamp(to_t)
-    else:
-        raise TypeError("Invalid type for to_t. Expected datetime or Time")
-
     # Find rise time and set time pairs
     t, y = find_discrete(
-        ts.timestamp(from_ts),
-        ts.timestamp(to_ts),
+        from_time,
+        to_time,
         satellite_visible(
             ephemeris,
             topos,
