@@ -185,8 +185,8 @@ def get_satellite_passes(
         epsilon=1.1574074074074074e-05  # 1 second
     )
 
-    rise_time = t[y]
-    set_time = t[~y]
+    rise_times = t[y]
+    set_times = t[~y]
 
     azimuts_at_rise_time = [
         satellite_azimut_at(
@@ -195,7 +195,7 @@ def get_satellite_passes(
             satellite,
             t
         )
-        for t in rise_time
+        for t in rise_times
     ]
 
     azimuts_at_set_time = [
@@ -205,10 +205,18 @@ def get_satellite_passes(
             satellite,
             t
         )
-        for t in set_time
+        for t in set_times
     ]
 
-    rise_set_times = list(zip(rise_time, set_time))
+    if len(rise_times) < (len(set_times)):
+        # The satellite has already risen above the horizon
+        rise_set_times = list(
+            zip(rise_times, set_times[1:])
+        )
+    else:
+        rise_set_times = list(
+            zip(rise_times, set_times)
+        )
 
     # Find apices
     apices_time = [
@@ -248,13 +256,21 @@ def get_satellite_passes(
 
     return list(
         zip(
-            rise_time,
+            rise_times,
             azimuts_at_rise_time,
+        )
+    ),
+    list(
+        zip(
             apices_time,
             azimuts_at_apex_time,
-            set_time,
-            azimuts_at_set_time,
             altitudes
+        )
+    ),
+    list(
+        zip(
+            set_times,
+            azimuts_at_set_time
         )
     )
 
