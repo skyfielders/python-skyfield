@@ -38,6 +38,7 @@ class Star(object):
 
     """
     au_km = AU_KM
+    target = None
 
     def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,
                  ra_mas_per_year=0.0, dec_mas_per_year=0.0,

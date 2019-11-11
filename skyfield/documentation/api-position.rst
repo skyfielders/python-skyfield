@@ -48,11 +48,17 @@ Position measured from the Solar System barycenter
 .. autoclass:: Barycentric
    :members:
 
+   This class inherits the methods of is parent class :class:`ICRF` as
+   well as the orientation of its axes in space.
+
 Astrometric position relative to an observer
 ============================================
 
 .. autoclass:: Astrometric
    :members:
+
+   This class inherits the methods of is parent class :class:`ICRF` as
+   well as the orientation of its axes in space.
 
 Apparent position relative to an observer
 =========================================
@@ -60,17 +66,26 @@ Apparent position relative to an observer
 .. autoclass:: Apparent
    :members:
 
+   This class inherits the methods of is parent class :class:`ICRF` as
+   well as the orientation of its axes in space.
+
 Geocentric position relative to the Earth
 =========================================
 
 .. autoclass:: Geocentric
    :members:
 
+   This class inherits the methods of is parent class :class:`ICRF` as
+   well as the orientation of its axes in space.
+
 Geometric instantaneous position between two objects
 ====================================================
 
 .. autoclass:: Geometric
    :members:
+
+   This class inherits the methods of is parent class :class:`ICRF` as
+   well as the orientation of its axes in space.
 
 Building a position from right ascension and declination
 ========================================================
