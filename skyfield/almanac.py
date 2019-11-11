@@ -1,5 +1,6 @@
 """Routines to solve for circumstances like sunrise, sunset, and moon phase."""
 
+from datetime import timedelta
 from numpy import array, cos, diff, flatnonzero, linspace, multiply, pi, sign
 from .constants import DAY_S, tau
 from .nutationlib import iau2000b
@@ -411,7 +412,7 @@ def satellite_apices(ephemeris, topos, satellite, ts=_ts):
             ephemeris,
             topos,
             satellite,
-            ts.timestamp(t.timestamp() - 1)
+            ts.utc(t.utc_datetime() - timedelta(seconds=1))
         )
 
     is_satellite_rising.rough_period = 1
