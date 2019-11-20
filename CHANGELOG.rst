@@ -3,8 +3,12 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-Next
-----
+1.15 — 2019 November 20
+-----------------------
+
+* Changed the URL for the Hipparcos catalog, because the VizieR archives
+  FTP server is no longer responding.
+  `#301 <https://github.com/skyfielders/python-skyfield/issues/301>`_
 
 * Added a :func:`~skyfield.almanac.dark_twilight_day()` function that
   not only handles sunrise and sunset but also all three kinds of
