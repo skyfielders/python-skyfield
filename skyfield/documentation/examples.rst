@@ -15,6 +15,19 @@ for solving other similar problems of their own.
 When is the Galactic Center above the horizon?
 ==============================================
 
+This approach is not specific to the galactic center,
+which is used here merely as an example target.
+You can use any Skyfield body
+that generates a position when passed as an argument
+to a call like::
+
+    observer.at(t).observe(...)
+
+Possible targets include the Sun, Moon, planets,
+and any star or other distant object
+whose right ascension and declination
+you use to build a ``Star()`` object.
+
 .. testcode::
 
     from skyfield.api import Star, Topos, load
