@@ -9,6 +9,9 @@ Next
 * Added :func:`~skyfield.almanac.oppositions_conjunctions()` for finding
   the dates when a planet is at opposition and conjunction with the sun.
 
+* Added :func:`~skyfield.trigonometry.position_angle_of()` for computing
+  astronomical position angles.
+
 1.15 — 2019 November 20
 -----------------------
 

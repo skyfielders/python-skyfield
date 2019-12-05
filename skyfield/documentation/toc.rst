@@ -33,6 +33,7 @@ that is accelerated using NumPy vector math!
    api-position
    api-elements
    api-units
+   api-trigonometry
    toc
    design
    bibliography

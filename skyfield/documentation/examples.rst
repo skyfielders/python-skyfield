@@ -33,24 +33,24 @@ and 270° if the Sun is to the right of the Moon.
 
 .. testcode::
 
-    from datetime import datetime
     from skyfield.api import load, Topos
+    from skyfield.trigonometry import position_angle_of
 
     ts = load.timescale()
     t = ts.utc(2019, 9, 30, 23)
 
     eph = load('de421.bsp')
-    sun, moon = eph['sun'], eph['moon']
-    boston = eph['earth'] + Topos('42.3583 N', '71.0636 W')
+    sun, moon, earth = eph['sun'], eph['moon'], eph['earth']
+    boston = earth + Topos('42.3583 N', '71.0636 W')
 
     b = boston.at(t)
-    p1 = b.observe(moon).apparent()
-    p2 = b.observe(sun).apparent()
-    print(p1.position_angle_of(p2))
+    m = b.observe(moon).apparent()
+    s = b.observe(sun).apparent()
+    print(position_angle_of(m.altaz(), s.altaz()))
 
 .. testoutput::
 
-    282deg 28' 15.7"
+    238deg 55' 57.0"
 
 The position angle is relative to the zenith
 when computed between ...

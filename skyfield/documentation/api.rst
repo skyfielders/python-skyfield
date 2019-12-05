@@ -255,7 +255,6 @@ All positions support a basic set of methods:
    ICRF.speed
    ICRF.radec
    ICRF.separation_from
-   ICRF.position_angle_of
    ICRF.ecliptic_xyz
    ICRF.ecliptic_velocity
    ICRF.ecliptic_latlon
@@ -345,3 +344,12 @@ All three kinds of quantity support one or more methods.
    Angle.dms
    Angle.signed_dms
    Angle.dstr
+
+Trigonometry
+============
+
+.. currentmodule:: skyfield.trigonometry
+
+.. autosummary::
+
+   position_angle_of
