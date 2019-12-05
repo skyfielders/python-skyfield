@@ -16,8 +16,8 @@ times of sunrise, sunset, and the phases of the moon.
 
 .. autofunction:: seasons
 
+.. autofunction:: moon_phases
+
 .. autofunction:: sunrise_sunset
 
 .. autofunction:: dark_twilight_day
-
-.. autofunction:: moon_phases

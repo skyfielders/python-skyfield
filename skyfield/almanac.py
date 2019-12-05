@@ -179,6 +179,37 @@ def seasons(ephemeris):
     season_at.rough_period = 90.0
     return season_at
 
+MOON_PHASES = [
+    'New Moon',
+    'First Quarter',
+    'Full Moon',
+    'Last Quarter',
+]
+
+def moon_phases(ephemeris):
+    """Build a function of time that returns the moon phase 0 through 3.
+
+    The function that this returns will expect a single argument that is
+    a :class:`~skyfield.timelib.Time` and will return the phase of the
+    moon as an integer.  See the accompanying array ``MOON_PHASES`` if
+    you want to give string names to each phase.
+
+    """
+    earth = ephemeris['earth']
+    moon = ephemeris['moon']
+    sun = ephemeris['sun']
+
+    def moon_phase_at(t):
+        """Return the phase of the moon 0 through 3 at time `t`."""
+        t._nutation_angles = iau2000b(t.tt)
+        e = earth.at(t)
+        _, mlon, _ = e.observe(moon).apparent().ecliptic_latlon('date')
+        _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
+        return ((mlon.radians - slon.radians) // (tau / 4) % 4).astype(int)
+
+    moon_phase_at.rough_period = 7.0  # one lunar phase per week
+    return moon_phase_at
+
 def sunrise_sunset(ephemeris, topos):
     """Build a function of time that returns whether the sun is up.
 
@@ -249,37 +280,6 @@ def risings_and_settings(ephemeris, target, topos, horizon=-0.3333, radius=0):
 
     is_body_up_at.rough_period = 0.5  # twice a day
     return is_body_up_at
-
-MOON_PHASES = [
-    'New Moon',
-    'First Quarter',
-    'Full Moon',
-    'Last Quarter',
-]
-
-def moon_phases(ephemeris):
-    """Build a function of time that returns the moon phase 0 through 3.
-
-    The function that this returns will expect a single argument that is
-    a :class:`~skyfield.timelib.Time` and will return the phase of the
-    moon as an integer.  See the accompanying array ``MOON_PHASES`` if
-    you want to give string names to each phase.
-
-    """
-    earth = ephemeris['earth']
-    moon = ephemeris['moon']
-    sun = ephemeris['sun']
-
-    def moon_phase_at(t):
-        """Return the phase of the moon 0 through 3 at time `t`."""
-        t._nutation_angles = iau2000b(t.tt)
-        e = earth.at(t)
-        _, mlon, _ = e.observe(moon).apparent().ecliptic_latlon('date')
-        _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
-        return ((mlon.radians - slon.radians) // (tau / 4) % 4).astype(int)
-
-    moon_phase_at.rough_period = 7.0  # one lunar phase per week
-    return moon_phase_at
 
 def _distance_to(center, target):
     def distance_at(t):

@@ -30,6 +30,20 @@ def test_seasons():
     assert (y == (2, 3)).all()
 
 # Compare with USNO:
+# http://aa.usno.navy.mil/cgi-bin/aa_phases.pl?year=2018&month=9&day=11&nump=50&format=p
+
+def test_moon_phases():
+    ts = api.load.timescale()
+    t0 = ts.utc(2018, 9, 11)
+    t1 = ts.utc(2018, 9, 30)
+    e = api.load('de421.bsp')
+    t, y = almanac.find_discrete(t0, t1, almanac.moon_phases(e))
+    t.tt += half_minute
+    strings = t.utc_strftime('%Y-%m-%d %H:%M')
+    assert strings == ['2018-09-16 23:15', '2018-09-25 02:52']
+    assert (y == (1, 2)).all()
+
+# Compare with USNO:
 # http://aa.usno.navy.mil/rstt/onedaytable?ID=AA&year=2018&month=9&day=12&state=OH&place=Bluffton
 
 def test_sunrise_sunset():
@@ -59,20 +73,6 @@ def test_dark_twilight_day():
         '2019-11-08 23:27', '2019-11-08 23:59',
     ]
     assert (y == (1, 2, 3, 4, 3, 2, 1, 0)).all()
-
-# Compare with USNO:
-# http://aa.usno.navy.mil/cgi-bin/aa_phases.pl?year=2018&month=9&day=11&nump=50&format=p
-
-def test_moon_phases():
-    ts = api.load.timescale()
-    t0 = ts.utc(2018, 9, 11)
-    t1 = ts.utc(2018, 9, 30)
-    e = api.load('de421.bsp')
-    t, y = almanac.find_discrete(t0, t1, almanac.moon_phases(e))
-    t.tt += half_minute
-    strings = t.utc_strftime('%Y-%m-%d %H:%M')
-    assert strings == ['2018-09-16 23:15', '2018-09-25 02:52']
-    assert (y == (1, 2)).all()
 
 # Logic.
 
