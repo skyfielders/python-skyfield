@@ -3,6 +3,12 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+Next
+----
+
+* Added :func:`~skyfield.almanac.oppositions_conjunctions()` for finding
+  the dates when a planet is at opposition and conjunction with the sun.
+
 1.15 — 2019 November 20
 -----------------------
 

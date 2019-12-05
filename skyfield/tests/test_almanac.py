@@ -43,6 +43,17 @@ def test_moon_phases():
     assert strings == ['2018-09-16 23:15', '2018-09-25 02:52']
     assert (y == (1, 2)).all()
 
+def test_oppositions_conjunctions():
+    ts = api.load.timescale(builtin=True)
+    t0 = ts.utc(2019, 1, 1)
+    t1 = ts.utc(2021, 1, 1)
+    e = api.load('de421.bsp')
+    f = almanac.oppositions_conjunctions(e, e['mars'])
+    t, y = almanac.find_discrete(t0, t1, f)
+    strings = t.utc_strftime('%Y-%m-%d %H:%M')
+    assert strings == ['2019-09-02 10:42', '2020-10-13 23:25']
+    assert (y == (0, 1)).all()
+
 # Compare with USNO:
 # http://aa.usno.navy.mil/rstt/onedaytable?ID=AA&year=2018&month=9&day=12&state=OH&place=Bluffton
 

@@ -18,6 +18,8 @@ times of sunrise, sunset, and the phases of the moon.
 
 .. autofunction:: moon_phases
 
+.. autofunction:: oppositions_conjunctions
+
 .. autofunction:: sunrise_sunset
 
 .. autofunction:: dark_twilight_day

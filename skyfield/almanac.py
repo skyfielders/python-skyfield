@@ -1,5 +1,6 @@
 """Routines to solve for circumstances like sunrise, sunset, and moon phase."""
 
+from math import pi
 from numpy import cos, diff, flatnonzero, linspace, multiply, sign, zeros_like
 from .constants import DAY_S, tau
 from .nutationlib import iau2000b
@@ -209,6 +210,26 @@ def moon_phases(ephemeris):
 
     moon_phase_at.rough_period = 7.0  # one lunar phase per week
     return moon_phase_at
+
+CONJUNCTIONS = [
+    'conjunction',
+    'opposition',
+]
+
+def oppositions_conjunctions(ephemeris, target):
+    """Build a function to find oppositions and conjunctions with the Sun."""
+    earth_at = ephemeris['earth'].at
+    sun = ephemeris['sun']
+
+    def leading_or_trailing(t):
+        """Return whether the target leads or trails the Sun around the sky."""
+        e = earth_at(t)
+        _, slon, _ = e.observe(sun).apparent().ecliptic_latlon()
+        _, tlon, _ = e.observe(target).apparent().ecliptic_latlon()
+        return ((slon.radians - tlon.radians) / pi % 2.0).astype('int8')
+
+    leading_or_trailing.rough_period = 60  # Mercury
+    return leading_or_trailing
 
 def sunrise_sunset(ephemeris, topos):
     """Build a function of time that returns whether the sun is up.

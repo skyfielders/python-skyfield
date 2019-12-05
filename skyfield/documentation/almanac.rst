@@ -129,6 +129,35 @@ corresponding array of Moon phases with 0 for New Moon and 3 for Last
 Quarter.  You can use the array ``MOON_PHASES`` to retrieve names for
 each phase.
 
+Opposition and Conjunction
+==========================
+
+The moment at which a planet is in opposition with the Sun or in
+conjunction with the Sun is when their ecliptic longitudes are at 0° or
+180° difference.
+
+.. testcode::
+
+    t0 = ts.utc(2019, 1, 1)
+    t1 = ts.utc(2021, 1, 1)
+    f = almanac.oppositions_conjunctions(e, e['mars'])
+    t, y = almanac.find_discrete(t0, t1, f)
+
+    print(t.utc_iso())
+    print(y)
+    print([almanac.CONJUNCTIONS[yi] for yi in y])
+
+.. testoutput::
+
+    ['2019-09-02T10:42:14Z', '2020-10-13T23:25:47Z']
+    [0 1]
+    ['conjunction', 'opposition']
+
+The result ``t`` will be an array of times, and ``y`` will be a
+corresponding array of Moon phases with 0 for New Moon and 3 for Last
+Quarter.  You can use the array ``MOON_PHASES`` to retrieve names for
+each phase.
+
 Sunrise and Sunset
 ==================
 
