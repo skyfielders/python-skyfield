@@ -1,7 +1,9 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import arccos, array, clip, einsum, empty, exp, full, nan
-
+from numpy import (
+    arccos, arctan2, array, clip, cross,
+    einsum, empty, exp, full, nan, sign,
+)
 from .constants import ANGVEL, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
@@ -197,6 +199,38 @@ class ICRF(object):
             u2 = u2[:,None]
         c = dots(u1, u2)
         return Angle(radians=arccos(clip(c, -1.0, 1.0)))
+
+    def position_angle_of(self, another_icrf, north=None):
+        """Return the position angle of another position.
+
+        The position angle is 0 if the other position is directly north
+        of this position on the celestial sphere, 90 degrees if east,
+        180 if south, and 270 if west.
+
+        >>> ICRF([1,1,1]).position_angle_of(ICRF([0,0,1]))
+        <Angle 00deg 00' 00.0">
+        >>> ICRF([1,1,1]).position_angle_of(ICRF([0,1,0]))
+        <Angle 120deg 00' 00.0">
+
+        An alternative ``north`` vector can be specified to produce, for
+        example, a position angle relative to a local horizon instead of
+        the celestial north pole.
+
+        >>> ICRF([1,1,1]).position_angle_of(ICRF([0,0,1]), ICRF([1,0,1]))
+        <Angle 60deg 00' 00.0">
+
+        """
+        if north is None:
+            north = ICRF((0, 0, 1))
+        north = north.position.au
+        p1 = self.position.au
+        p2 = another_icrf.position.au
+        c1 = cross(p1, p2)
+        c2 = cross(p1, north)
+        c12 = cross(c1, c2)
+        sina = length_of(c12) * sign(dots(c12, p1))
+        cosa = dots(c1, c2)
+        return Angle(radians=arctan2(sina, cosa) % tau)
 
     def cirs_xyz(self, epoch):
         """Compute cartesian CIRS coordinates at a given epoch (x,y,z).

@@ -12,6 +12,49 @@ to solve a general problem,
 that should provide readers with a basis
 for solving other similar problems of their own.
 
+At what angle is the sun to the crescent Moon?
+==============================================
+
+The angle of the crescent Moon changes with the seasons.
+In the spring,
+a crescent Moon will stand high above the Sun
+and appear to be lit from below.
+In the autumn,
+the Moon sets farther from the Sun along the horizon
+and is illuminated more from the side.
+What if we wanted to know the exact angle?
+
+You can find the answer
+by asking for the Sun’s “position angle” relative to the Moon,
+an angle you can compute between any two Skyfield positions.
+The angle will be 90° if the Sun is left of the moon,
+180° if the Sun is directly below,
+and 270° if the Sun is to the right of the Moon.
+
+.. testcode::
+
+    from datetime import datetime
+    from skyfield.api import load, Topos
+
+    ts = load.timescale()
+    t = ts.utc(2019, 9, 30, 23)
+
+    eph = load('de421.bsp')
+    sun, moon = eph['sun'], eph['moon']
+    boston = eph['earth'] + Topos('42.3583 N', '71.0636 W')
+
+    b = boston.at(t)
+    p1 = b.observe(moon).apparent()
+    p2 = b.observe(sun).apparent()
+    print(p1.position_angle_of(p2))
+
+.. testoutput::
+
+    282deg 28' 15.7"
+
+The position angle is relative to the zenith
+when computed between ...
+
 When is the Galactic Center above the horizon?
 ==============================================
 
