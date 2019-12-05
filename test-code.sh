@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-if ! command -v assaym >/dev/null
+if ! command -v assay >/dev/null
 then
     cat >&2 <<'EOF'
 Error: "assay" command not found
