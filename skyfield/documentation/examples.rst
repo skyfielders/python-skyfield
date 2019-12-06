@@ -65,12 +65,11 @@ Try reversing the coordinates, like:
 
 .. testcode::
 
-    def rev(tup): return tup[1], tup[0]
-    print(position_angle_of(rev(m.radec()), rev(s.radec())))
+    print(position_angle_of(m.radec(), s.radec()))
 
 .. testoutput::
 
-    77deg 31' 44.3"
+    282deg 28' 15.7"
 
 Drat, but this angle is backwards, because right ascension increases
 toward the east whereas the other angles, like azimuth, increase the

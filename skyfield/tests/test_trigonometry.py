@@ -20,8 +20,5 @@ def test_position_angle_against_nasa_horizons():
 
     a = position_angle_of(j.radec(epoch='date')[1::-1],
                           i.radec(epoch='date')[1::-1])
-    # TODO: eliminate the need for this reversal step
-    from skyfield.api import tau
-    a2 = Angle(radians=(-a.radians) % tau)
-    print(abs(a2.degrees - 293.671), 0.002)
-    assert abs(a2.degrees - 293.671) < 0.002
+
+    assert abs(a.degrees - 293.671) < 0.002
