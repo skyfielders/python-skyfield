@@ -18,7 +18,6 @@ def test_position_angle_against_nasa_horizons():
     j = b.observe(eph['jupiter'])#.apparent()
     i = b.observe(eph['io'])#.apparent()
 
-    a = position_angle_of(j.radec(epoch='date')[1::-1],
-                          i.radec(epoch='date')[1::-1])
+    a = position_angle_of(j.radec(epoch='date'), i.radec(epoch='date'))
 
     assert abs(a.degrees - 293.671) < 0.002
