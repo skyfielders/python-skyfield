@@ -52,8 +52,29 @@ and 270° if the Sun is to the right of the Moon.
 
     238deg 55' 57.0"
 
-The position angle is relative to the zenith
-when computed between ...
+The :func:`~skyfield.trigonometry.position_angle_of()` routine
+will not only accept the output of :meth:`~skyfield.positionlib.Apparent.altaz()`,
+but also of :meth:`~skyfield.positionlib.ICRF.ecliptic_latlon()`
+if you want a position angle relative to the ecliptic’s north pole.
+
+Beware, though, that :meth:`~skyfield.positionlib.ICRF.radec()`
+produces coordinates in the opposite order
+from what :func:`~skyfield.trigonometry.position_angle_of()` expects:
+right ascension is like longitude, not latitude.
+Try reversing the coordinates, like:
+
+.. testcode::
+
+    def rev(tup): return tup[1], tup[0]
+    print(position_angle_of(rev(m.radec()), rev(s.radec())))
+
+.. testoutput::
+
+    77deg 31' 44.3"
+
+Drat, but this angle is backwards, because right ascension increases
+toward the east whereas the other angles, like azimuth, increase the
+other way around the circle.
 
 When is the Galactic Center above the horizon?
 ==============================================
