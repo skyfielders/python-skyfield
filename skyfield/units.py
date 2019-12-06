@@ -174,24 +174,25 @@ class Angle(object):
                            else 'degrees')
         self.signed = signed
 
-    def __getattr__(self, name):
-        if name == '_hours':
-            self._hours = _hours = self.radians * _to_hours
-            return _hours
-        if name == '_degrees':
-            self._degrees = _degrees = self.radians * _to_degrees
-            return _degrees
-        if name == 'hours':
-            if self.preference != 'hours':
-                raise WrongUnitError('hours')
-            self.hours = hours = self._hours
-            return hours
-        if name == 'degrees':
-            if self.preference != 'degrees':
-                raise WrongUnitError('degrees')
-            self.degrees = degrees = self._degrees
-            return degrees
-        raise AttributeError('no attribute named %r' % (name,))
+    @reify
+    def _hours(self):
+        return self.radians * _to_hours
+
+    @reify
+    def _degrees(self):
+        return self.radians * _to_degrees
+
+    @reify
+    def hours(self):
+        if self.preference != 'hours':
+            raise WrongUnitError('hours')
+        return self._hours
+
+    @reify
+    def degrees(self):
+        if self.preference != 'degrees':
+            raise WrongUnitError('degrees')
+        return self._degrees
 
     def __str__(self):
         if self.radians.size == 0:
