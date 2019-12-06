@@ -234,16 +234,27 @@ def oppositions_conjunctions(ephemeris, target):
 def sunrise_sunset(ephemeris, topos):
     """Build a function of time that returns whether the sun is up.
 
-    The function that this returns will expect a single argument that is
-    a :class:`~skyfield.timelib.Time` and will return ``True`` if the
+    The function that is returned will expect a single argument that is
+    a :class:`~skyfield.timelib.Time`, and will return ``True`` if the
     sun is up, else ``False``.
+
+    Skyfield uses the same definition as the United States Naval
+    Observatory: the Sun is up when its center is 0.8333 degrees below
+    the horizon, which accounts for both its radius of 0.5 degrees, and
+    also for the 0.3333 degrees by which atmospheric refraction on
+    average lifts the image of the Sun.
 
     """
     sun = ephemeris['sun']
     topos_at = (ephemeris['earth'] + topos).at
 
     def is_sun_up_at(t):
-        """Return `True` if the sun has risen by time `t`."""
+        """Return `True` if the sun has risen by time `t`.
+
+        The Sun has risen if its altitude above the horizon is greater
+        than -0.8333 degrees.
+
+        """
         t._nutation_angles = iau2000b(t.tt)
         return topos_at(t).observe(sun).apparent().altaz()[0].degrees >= -0.8333
 
