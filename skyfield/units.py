@@ -44,13 +44,11 @@ class Distance(object):
 
     @reify
     def km(self):
-        self.km = km = self.au * AU_KM
-        return km
+        return self.au * AU_KM
 
     @reify
     def m(self):
-        self.m = m = self.au * AU_M
-        return m
+        return self.au * AU_M
 
     @reify
     def AU(self):
@@ -94,8 +92,7 @@ class Velocity(object):
 
     @reify
     def km_per_s(self):
-        self.km_per_s = self.au_per_d * AU_KM / DAY_S
-        return self.km_per_s
+        return self.au_per_d * AU_KM / DAY_S
 
     @reify
     def AU_per_d(self):
@@ -105,7 +102,7 @@ class Velocity(object):
                   ' "AU_per_day" in favor of "au_per_day"',
                   file=sys.stdout)
             Velocity._warned = True
-            return self.au_per_d
+        return self.au_per_d
 
     def __str__(self):
         n = self.au_per_d
