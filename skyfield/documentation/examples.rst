@@ -12,7 +12,7 @@ to solve a general problem,
 that should provide readers with a basis
 for solving other similar problems of their own.
 
-At what angle is the sun to the crescent Moon?
+At what angle in the sky is the crescent Moon?
 ==============================================
 
 The angle of the crescent Moon changes with the seasons.
@@ -75,21 +75,16 @@ Drat, but this angle is backwards, because right ascension increases
 toward the east whereas the other angles, like azimuth, increase the
 other way around the circle.
 
-When is the Galactic Center above the horizon?
-==============================================
+When is a body or fixed coordinate above the horizon?
+=====================================================
 
-This approach is not specific to the galactic center,
-which is used here merely as an example target.
-You can use any Skyfield body
-that generates a position when passed as an argument
-to a call like::
-
-    observer.at(t).observe(...)
-
-Possible targets include the Sun, Moon, planets,
-and any star or other distant object
-whose right ascension and declination
-you use to build a ``Star()`` object.
+The following code will determine
+when the Galactic Center is above the horizon.
+The Galactic Center is an example of a fixed object,
+like a star or nebula or galaxy,
+whose right ascension and declination can be plugged in to a ``Star()`` object.
+The code will also work with a body from an ephemeris,
+like the Sun, Moon, or one of the planets.
 
 .. testcode::
 
@@ -171,4 +166,3 @@ to both Accra, Ghana, and the top of Mount Bierstadt in Colorado.
     I was 4211 meters farther from the Earth's center
     when I visited Accra, at nearly sea level, than atop
     Mt. Bierstadt in Colorado.
-
