@@ -12,6 +12,39 @@ to solve a general problem,
 that should provide readers with a basis
 for solving other similar problems of their own.
 
+What phase is the Moon tonight?
+===============================
+
+The *phase* of the Moon is defined
+as the angle between the Moon and the Sun along the ecliptic.
+This angle is computed as the difference in the *ecliptic longitude*
+of the Moon and of the Sun.
+The result is an angle that is 0° for the New Moon,
+90° at the First Quarter,
+180° at the Full Moon,
+and 270° at the Last Quarter.
+
+.. testcode::
+
+    from skyfield.api import load
+
+    ts = load.timescale()
+    t = ts.utc(2019, 12, 9, 15, 36)
+
+    eph = load('de421.bsp')
+    sun, moon, earth = eph['sun'], eph['moon'], eph['earth']
+
+    e = earth.at(t)
+    _, slon, _ = e.observe(sun).apparent().ecliptic_latlon()
+    _, mlon, _ = e.observe(moon).apparent().ecliptic_latlon()
+    phase = (mlon.degrees - slon.degrees) % 360.0
+
+    print('{0:.1f}'.format(phase))
+
+.. testoutput::
+
+    149.4
+
 At what angle in the sky is the crescent Moon?
 ==============================================
 
