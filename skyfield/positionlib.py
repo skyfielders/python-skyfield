@@ -308,7 +308,7 @@ class ICRF(object):
         from astropy.coordinates import SkyCoord
         from astropy.units import au
         x, y, z = self.position.au
-        return SkyCoord(representation='cartesian', x=x, y=y, z=z, unit=au)
+        return SkyCoord(representation_type='cartesian', x=x, y=y, z=z, unit=au)
 
     def _to_spice_frame(self, name):
         vector = self.position.au
