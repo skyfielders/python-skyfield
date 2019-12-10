@@ -1,0 +1,111 @@
+*******************************************************************************
+Ephemeris / WWW_USER Tue Dec 10 12:45:26 2019 Pasadena, USA      / Horizons    
+*******************************************************************************
+Target body name: Earth (399)                     {source: DE431mx}
+Center body name: Moon (301)                      {source: DE431mx}
+Center-site name: (user defined site below)
+*******************************************************************************
+Start time      : A.D. 2019-Dec-10 00:00:00.0000 UT      
+Stop  time      : A.D. 2019-Dec-20 00:00:00.0000 UT      
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : Earth_EOP (high precision)      {East-longitude positive}
+Target radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}    
+Center geodetic : 313.200000,26.3000000,-6.18E-13 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 313.200000,1557.55552,769.79189 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : IAU_MOON                        {East-longitude positive}
+Center radii    : 1737.4 x 1737.4 x 1737.4 km     {Equator, meridian, pole}    
+Target primary  : Sun
+Vis. interferer : EARTH (R_eq= 6378.137) km       {source: DE431mx}
+Rel. light bend : Sun, EARTH                      {source: DE431mx}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2                              
+Atmos refraction: NO (AIRLESS)
+RA format       : DEG
+Time format     : CAL 
+EOP file        : eop.191209.p200301                                           
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2019-DEC-09. PREDICTS-> 2020-FEB-29
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s 
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass     n.a.    , Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )                           
+*******************************************************************************
+ Date__(UT)__HR:MN     R.A._(ICRF/J2K)_DEC
+******************************************
+$$SOE
+ 2019-Dec-10 00:00 *x  229.53885 -14.35162
+ 2019-Dec-11 00:00 *x  242.34042 -18.07197
+ 2019-Dec-12 00:00 *x  255.93523 -20.97941
+ 2019-Dec-13 00:00 *x  270.25905 -22.80797
+ 2019-Dec-14 00:00 *x  285.09168 -23.34048
+ 2019-Dec-15 00:00 *x  300.09488 -22.46605
+ 2019-Dec-16 00:00 *x  314.91544 -20.21460
+ 2019-Dec-17 00:00 *x  329.29969 -16.74824
+ 2019-Dec-18 00:00 *x  343.15391 -12.31857
+ 2019-Dec-19 00:00 *x  356.53540  -7.21828
+ 2019-Dec-20 00:00 *x    9.60458  -1.74873
+$$EOE
+*******************************************************************************
+Column meaning:
+ 
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+by introduction of integer leap-seconds for 1972 and later.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) to the
+non-uniform civil UT time-scale requested for output has not been determined
+for UTC times after the next July or January 1st. Therefore, the last known
+leap-second is used as a constant over future intervals.
+
+  Time tags refer to the UT time-scale conversion on Earth regardless of
+where the observer is located in the solar system. For example, if an
+observation from the surface of another body has an output time-tag of
+12:31:00 UT, it refers to a time-scale conversion from TDB to UT valid
+at the center of the Earth at that instant, not the observer's location
+elsewhere in the solar system, where clock rates may differ slightly due
+to the local gravity field and there is no precisely defined or adopted
+"UT" analog.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+ 
+SOLAR PRESENCE (OBSERVING SITE)
+  Time tag is followed by a blank, then a solar-presence symbol:
+
+        '*'  Daylight (solar upper-limb on or above apparent horizon)
+        ' '  Night OR body-centered ephemeris
+
+INTERFERING BODY PRESENCE (OBSERVING SITE)
+  The solar-presence symbol is immediately followed by an "interfering body"
+presence symbol.
+
+        'x'  Upper-limb of interfering body on or above apparent horizon
+        ' '  Upper-limb of interfering body below apparent horizon OR body
+               centered ephemeris.
+
+  An "interfering body" is the largest other body in the immediate
+planet/satellite system, potentially compromising visual observations due to
+its brightness. Any such body is identified in the print-out header.
+ 
+ R.A._(ICRF/J2K)_DEC =
+   Astrometric right ascension and declination of the TARGET CENTER with
+respect to the observing site in the coordinates of the ICRF/J2000 inertial
+reference frame. Compensated for down-leg light-time.
+   Units: DEGREES and DEGREES
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+
+*******************************************************************************
