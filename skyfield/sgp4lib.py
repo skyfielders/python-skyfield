@@ -100,7 +100,7 @@ class EarthSatellite(VectorFunction):
         self.model = sat
         self.epoch = ts.utc(sat.epochyr, 1, sat.epochdays)
 
-        self.target = object()  # TODO: make this more interesting
+        self.target = -100000 - self.model.satnum
         self.target_name = 'Satellite{0} {1}'.format(
             self.model.satnum,
             ' ' + repr(self.name) if self.name else '',
