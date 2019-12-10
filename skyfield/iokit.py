@@ -298,8 +298,12 @@ class Loader(object):
         if delta_t is not None:
             delta_t_recent = np.array(((-1e99, 1e99), (delta_t, delta_t)))
         else:
-            data = self('deltat.data')
-            preds = self('deltat.preds')
+            try:
+                data = self('deltat.data')
+                preds = self('deltat.preds')
+            except IOError as e:
+                e.args = (e.args[0] + _TIMESCALE_IO_ADVICE,) + e.args[1:]
+                raise
             data_end_time = data[0, -1]
             i = np.searchsorted(preds[0], data_end_time, side='right')
             delta_t_recent = np.concatenate([data, preds[:,i:]], axis=1)
@@ -310,6 +314,11 @@ class Loader(object):
     def log(self):
         return '\n'.join(self.events)
 
+_TIMESCALE_IO_ADVICE = """
+
+Try opening the same URL in your browser to learn more about the problem.
+If you want to fall back on the timescale files that Skyfield ships with,
+try `.timescale(builtin=True)` instead."""
 
 def _search(mapping, filename):
     """Search a Loader data structure for a filename."""
@@ -502,7 +511,9 @@ def download(url, path, verbose=None, blocksize=128*1024):
     try:
         connection = urlopen(url)
     except Exception as e:
-        raise IOError('cannot get {0} because {1}'.format(url, e))
+        e2 = IOError('cannot get {0} because {1}'.format(url, e))
+        e2.__cause__ = None
+        raise e2
     if verbose is None:
         verbose = sys.stderr.isatty()
 
