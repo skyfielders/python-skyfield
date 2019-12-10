@@ -1,0 +1,73 @@
+Ephemeris / WWW_USER Tue Dec 10 14:33:36 2019 Pasadena, USA      / Horizons    
+*******************************************************************************
+Target body name: Moon (301)                      {source: DE431mx}
+Center body name: Moon (301)                      {source: DE431mx}
+Center-site name: (user defined site below)
+*******************************************************************************
+Start time      : A.D. 2019-Dec-10 00:00:00.0000 TDB
+Stop  time      : A.D. 2019-Dec-11 00:00:00.0000 TDB
+Step-size       : 1440 minutes
+*******************************************************************************
+Center geodetic : 313.200000,26.3000000,-6.18E-13 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 313.200000,1557.55552,769.79189 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : IAU_MOON                        {East-longitude positive}
+Center radii    : 1737.4 x 1737.4 x 1737.4 km     {Equator, meridian, pole}    
+Output units    : AU-D                                                         
+Output type     : GEOMETRIC cartesian states
+Output format   : 3 (position, velocity, LT, range, range-rate)
+Reference frame : ICRF/J2000.0                                                 
+Coordinate systm: Ecliptic and Mean Equinox of Reference Epoch                 
+*******************************************************************************
+JDTDB
+   X     Y     Z
+   VX    VY    VZ
+   LT    RG    RR
+*******************************************************************************
+$$SOE
+2458827.500000000 = A.D. 2019-Dec-10 00:00:00.0000 TDB 
+ X = 1.043588965592271E-05 Y = 1.534286674325492E-06 Z =-4.859893068052085E-06
+ VX=-3.480953228580460E-07 VY= 2.369351625668184E-06 VZ= 5.309266950211364E-10
+ LT= 6.707572442098025E-08 RG= 1.161380166622920E-05 RR= 1.006640112459509E-22
+2458828.500000000 = A.D. 2019-Dec-11 00:00:00.0000 TDB 
+ X = 9.819692264712438E-06 Y = 3.842938325616424E-06 Z =-4.866811892231216E-06
+ VX=-8.788553888105641E-07 VY= 2.227582605424291E-06 VZ=-1.430646940630429E-08
+ LT= 6.707572442098023E-08 RG= 1.161380166622920E-05 RR= 1.325884952443294E-22
+$$EOE
+*******************************************************************************
+Coordinate system description:
+
+  Ecliptic and Mean Equinox of Reference Epoch
+
+    Reference epoch: J2000.0
+    XY-plane: plane of the Earth's orbit at the reference epoch
+              Note: obliquity of 84381.448 arcseconds wrt ICRF equator (IAU76)
+    X-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    Z-axis  : perpendicular to the xy-plane in the directional (+ or -) sense
+              of Earth's north pole at the reference epoch.
+
+  Symbol meaning [1 au= 149597870.700 km, 1 day= 86400.0 s]:
+
+    JDTDB    Julian Day Number, Barycentric Dynamical Time
+      X      X-component of position vector (au)                               
+      Y      Y-component of position vector (au)                               
+      Z      Z-component of position vector (au)                               
+      VX     X-component of velocity vector (au/day)                           
+      VY     Y-component of velocity vector (au/day)                           
+      VZ     Z-component of velocity vector (au/day)                           
+      LT     One-way down-leg Newtonian light-time (day)                       
+      RG     Range; distance from coordinate center (au)                       
+      RR     Range-rate; radial velocity wrt coord. center (au/day)            
+
+Geometric states/elements have no aberrations applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  http://ssd.jpl.nasa.gov/?horizons
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+*******************************************************************************
