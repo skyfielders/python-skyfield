@@ -106,7 +106,7 @@ But the source code and issue tracker live on other web sites:
 
 * `Skyfield on the Python Package Index <https://pypi.python.org/pypi/skyfield>`_
 
-* `GitHub project page <https://github.com/skyfielders/python-skyfield/>`_
+* `GitHub repository <https://github.com/skyfielders/python-skyfield/>`_
 
 * `GitHub issue tracker <https://github.com/skyfielders/python-skyfield/issues>`_
 
