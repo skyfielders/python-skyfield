@@ -10,7 +10,7 @@ def test_rotation():
     pc.read_text(load('moon_080317.tf'))
     pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
 
-    frame = pc.frame_from_name('MOON_PA_DE421')
+    frame = pc.build_frame_named('MOON_PA_DE421')
     r = frame.rotation_at(t)
 
     # import spiceypy as spice

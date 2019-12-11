@@ -43,11 +43,11 @@ class PlanetaryConstants(object):
             e.__cause__ = None
             raise e
 
-    def frame_from_name(self, name):
+    def build_frame_named(self, name):
         integer = self._get_assignment('FRAME_{0}'.format(name))
-        return self.frame_from_id(integer)
+        return self.build_frame(integer)
 
-    def frame_from_id(self, integer):
+    def build_frame(self, integer):
         center = self._get_assignment('FRAME_{0}_CENTER'.format(integer))
         segment = self._segment_map[integer]
         assert segment.frame == 1  # base frame should be ITRF/J2000
