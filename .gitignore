@@ -3,7 +3,7 @@
 *.egg-info
 *.ipynb_checkpoints
 *.pyc
-*.tf.txt
+*.tf
 .cache/
 .coverage/
 .project
