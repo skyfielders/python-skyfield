@@ -50,8 +50,12 @@ def _filename_of(url):
 
 _IERS = 'https://hpiers.obspm.fr/iers/bul/bulc/'
 _JPL = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/'
+_NAIF_KERNELS = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/'
 _NAIF = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
 _CDDIS = 'ftp://cddis.nasa.gov/products/iers/'
+
+def _open_binary(path):
+    return open(path, mode='rb')
 
 class Loader(object):
     """A tool for downloading and opening astronomical data files.
@@ -108,6 +112,8 @@ class Loader(object):
             'deltat.data': _CDDIS,
             'deltat.preds': _CDDIS,
             'Leap_Second.dat': _IERS,
+            'moon_080317.tf': _NAIF_KERNELS + 'fk/satellites/',
+            'moon_pa_de421_1900-2050.bpc': _NAIF_KERNELS + 'pck/',
             '.bsp': [
                 ('jup*.bsp', _NAIF),
                 ('*.bsp', _JPL),
@@ -119,12 +125,16 @@ class Loader(object):
             'Leap_Second.dat': parse_leap_seconds,
         }
         self.openers = {
+            # Old-fashioned: auto-create objects, leaving readers and
+            # code tools guessing what kind of object we have returned.
             '.bsp': [
                 ('*.bsp', SpiceKernel),
             ],
-            '.bpc': [
-                ('*.bpc', SpiceKernel),
-            ],
+            # New approach: just return open files, which callers can
+            # then pass to the right class, making the class visible in
+            # the code to both human readers and their IDEs.
+            '.bpc': [('*', _open_binary)],
+            '.tf': [('*', _open_binary)],
         }
 
     def path_to(self, filename):

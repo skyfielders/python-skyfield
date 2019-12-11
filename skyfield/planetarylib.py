@@ -13,19 +13,24 @@ class PlanetaryConstants(object):
         self._binary_files = []
         self._segment_map = {}
 
-    def load(self, file):
+    def read_text(self, file):
         file.seek(0)
-        seven = file.read(7)
-        file.seek(0)
-        if seven.startswith(b'KPL/FK'):
+        try:
+            if file.read(6) != b'KPL/FK':
+                raise ValueError('file must start with the bytes "KPL/FK"')
+            file.seek(0)
             self.assignments.update(parse_text_pck(file))
-        elif seven.startswith(b'DAF/PCK'):
-            pck = PCK(DAF(file))
-            self._binary_files.append(pck)
-            for segment in pck.segments:
-                self._segment_map[segment.body] = segment
-        else:
-            raise ValueError('unrecognized file type: %r' % seven.strip())
+        finally:
+            file.close()
+
+    def read_binary(self, file):
+        file.seek(0)
+        if file.read(7) != b'DAF/PCK':
+            raise ValueError('file must start with the bytes "DAF/PCK"')
+        pck = PCK(DAF(file))
+        self._binary_files.append(pck)
+        for segment in pck.segments:
+            self._segment_map[segment.body] = segment
 
 class PlanetaryConstantsFrame(object):
     def rotation_at(self, t):
