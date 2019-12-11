@@ -114,6 +114,7 @@ class Loader(object):
             'Leap_Second.dat': _IERS,
             'moon_080317.tf': _NAIF_KERNELS + 'fk/satellites/',
             'moon_pa_de421_1900-2050.bpc': _NAIF_KERNELS + 'pck/',
+            'pck00008.tpc': _NAIF_KERNELS + 'pck/a_old_versions/',
             '.bsp': [
                 ('jup*.bsp', _NAIF),
                 ('*.bsp', _JPL),
@@ -134,6 +135,7 @@ class Loader(object):
             # then pass to the right class, making the class visible in
             # the code to both human readers and their IDEs.
             '.bpc': [('*', _open_binary)],
+            '.tpc': [('*', _open_binary)],
             '.tf': [('*', _open_binary)],
         }
 

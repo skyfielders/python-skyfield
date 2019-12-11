@@ -33,3 +33,5 @@ def test_rotation():
     ]
     delta = r - spiceypy_matrix
     assert (delta < tolerance).all()
+
+    pc.read_text(load('pck00008.tpc'))
