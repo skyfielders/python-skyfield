@@ -7,8 +7,18 @@ from .units import Angle
 class PlanetaryConstants(object):
     """Planetary constants kernel."""
 
+    def __init__(self):
+        self.assignments = {}
+        self.segments = {}
+
     def load(self, something):
         """Yeah."""
+
+    def load_text_pck(self, lines):
+        self.assignments.update(parse_text_pck(lines))
+
+    def load_binary_pck(self):
+        pass
 
 class PlanetaryConstantsSegment(object):
     def rotation_at(self, t):
@@ -25,7 +35,6 @@ def parse_text_pck(lines):
         if equals != '=':
             raise ValueError('was expecting an equals sign after %r' % name)
         value = next(tokens)
-        print((name, equals, value))
         if value == '(':
             value = []
             for token2 in tokens:
@@ -42,6 +51,8 @@ def _evaluate(token):
         return token[1:-1]
     if token.isdigit():
         return int(token)
+    if token.startswith('@'):
+        raise NotImplemented('TODO: need parser for dates, like @01-MAY-1991/16:25')
     return float(token)
 
 _token_re = re.compile(r"'[^']*'|[^', ]+")
