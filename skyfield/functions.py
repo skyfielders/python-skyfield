@@ -65,8 +65,8 @@ def from_polar(r, theta, phi):
     """Convert ``(r, theta, phi)`` to Cartesian coordinates ``[x y z]``.
 
     ``r`` - vector length
-    ``theta`` - angle above (+) or below (-) the xy-plane
-    ``phi`` - angle around the z-axis
+    ``theta`` - angle in radians above (+) or below (-) the xy-plane
+    ``phi`` - angle in radians around the z-axis
 
     The meaning and order of the three polar parameters is designed to
     match both ISO 31-11 and the traditional order used by physicists.
