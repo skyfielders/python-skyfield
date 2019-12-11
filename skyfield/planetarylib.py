@@ -1,6 +1,7 @@
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
 import re
+from numpy import einsum
 from jplephem.pck import DAF, PCK
 from .functions import rot_x, rot_z
 from .units import Angle
@@ -14,6 +15,7 @@ class PlanetaryConstants(object):
         self._segment_map = {}
 
     def read_text(self, file):
+        """Read frame assignments from a KPL/FK file."""
         file.seek(0)
         try:
             if file.read(6) != b'KPL/FK':
@@ -24,6 +26,7 @@ class PlanetaryConstants(object):
             file.close()
 
     def read_binary(self, file):
+        """Read binary segments descriptions from a DAF/PCK file."""
         file.seek(0)
         if file.read(7) != b'DAF/PCK':
             raise ValueError('file must start with the bytes "DAF/PCK"')
@@ -32,9 +35,39 @@ class PlanetaryConstants(object):
         for segment in pck.segments:
             self._segment_map[segment.body] = segment
 
-class PlanetaryConstantsFrame(object):
+    def _get_assignment(self, key):
+        try:
+            return self.assignments[key]
+        except KeyError:
+            e = ValueError(_missing_name_message.format(key))
+            e.__cause__ = None
+            raise e
+
+    def frame_from_name(self, name):
+        integer = self._get_assignment('FRAME_{0}'.format(name))
+        return self.frame_from_id(integer)
+
+    def frame_from_id(self, integer):
+        center = self._get_assignment('FRAME_{0}_CENTER'.format(integer))
+        segment = self._segment_map[integer]
+        assert segment.frame == 1  # base frame should be ITRF/J2000
+        return Frame(segment)
+
+_missing_name_message = """unknown planetary constant {0!r}
+
+You should either use this object's `.read_text()` method to load an
+additional "*.tf" PCK text file that defines the missing constant, or
+manually provide a value by adding the key and value to the this
+object's `.assignments` dictionary."""
+
+class Frame(object):
+    """Planetary constants frame, for building rotation matrices."""
+
+    def __init__(self, segment):
+        self._segment = segment
+
     def rotation_at(self, t):
-        ra, dec, w = eph.segments[0].compute(tdb, 0.0, False)
+        ra, dec, w = self._segment.compute(t.tdb, 0.0, False)
         return einsum('ij...,jk...,kl...->il...',
                       rot_z(-w), rot_x(-dec), rot_z(-ra))
 
