@@ -54,7 +54,7 @@ class PlanetaryConstants(object):
         center = self._get_assignment('FRAME_{0}_CENTER'.format(integer))
         segment = self._segment_map[integer]
         assert segment.frame == 1  # base frame should be ITRF/J2000
-        return Frame(segment)
+        return Frame(center, segment)
 
 _missing_name_message = """unknown planetary constant {0!r}
 
@@ -66,7 +66,8 @@ object's `.assignments` dictionary."""
 class Frame(object):
     """Planetary constants frame, for building rotation matrices."""
 
-    def __init__(self, segment):
+    def __init__(self, center, segment):
+        self._center = center
         self._segment = segment
 
     def rotation_at(self, t):
@@ -112,18 +113,20 @@ def _evaluate(token):
     token = token.replace(b'D', b'E')  # for numbers like -1.4D-12
     return float(token)
 
-_token_re = re.compile(rb"'[^']*'|[^', ]+")
+_token_re = re.compile(b"'[^']*'|[^', ]+")
 
 def _parse_text_pck_tokens(lines):
     """Yield all the tokens inside the data segments of a PCK text file."""
     lines = iter(lines)
     for line in lines:
+        if b'\\begindata' not in line:
+            continue  # save cost of strip() on most lines
         line = line.strip()
-        if line != rb'\begindata':
+        if line != b'\\begindata':
             continue
         for line in lines:
             line = line.strip()
-            if line == rb'\begintext':
+            if line == b'\\begintext':
                 break
             for token in _token_re.findall(line):
                 yield token
