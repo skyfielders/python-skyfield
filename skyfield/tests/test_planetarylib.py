@@ -48,5 +48,10 @@ def test_rotation():
     # agree with the moon_080317.tf numbers to their level of precision,
     # which is only 9 digits.
 
+    # TODO:
+    # aliases for identical frames (can test against same vector as above)
+    # frames based on rotations of other frames (expand test above, from same file)
+    # a Moon-based topos object, tested against HORIZONS examples in repository
+
     # pc.read_text(load('pck00008.tpc'))
     # print(pc.assignments['BODY301_RADII'])

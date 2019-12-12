@@ -80,8 +80,9 @@ class _FramePosition(object):
     def __init__(self, frame):
         self._frame = frame
 
-    def at(self, t):
+    def _at(self, t):
         R = self._frame.at(t)
+        return pos, vel, pos, None
 
 def parse_text_pck(lines):
     """Yield ``(name, value)`` tuples parsed from a PCK text kernel."""
