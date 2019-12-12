@@ -3,6 +3,31 @@ from skyfield.api import PlanetaryConstants, T0, load
 from skyfield.positionlib import ICRF
 
 def test_frame_rotation():
+    # Ask a frame defined directly by a binary segment for rotation
+    # matrices, to test how we build and compose the rotation matrices.
+
+    ts = load.timescale(builtin=True)
+
+    pc = PlanetaryConstants()
+    pc.read_text(load('moon_080317.tf'))
+    pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
+    frame = pc.build_frame_named('MOON_PA_DE421')
+    assert frame._matrix is None  # pure segment, with no rotation applied
+
+    # First, a moment when the angle W is nearly zero radians, so all of
+    # its precision is available to the trigonometry.
+
+    tdb = T0 - 11150
+    spiceypy_matrix = [
+        [ 0.9994150897380264,  0.0323102706039267,  0.0112037858527199],
+        [-0.0341574268117634,  0.9272642685944782,  0.3728461430423364],
+        [ 0.0016578894811168, -0.3730107540024127,  0.9278255379116378],
+    ]
+    r = frame.rotation_at(ts.tdb_jd(tdb))
+    delta = r - spiceypy_matrix
+    assert (delta < 2e-16).all()  # we agree to roughly float64 precision!
+
+def test_frame_rotation2():
     et_seconds = 259056665.0
     ts = load.timescale(builtin=True)
     t = ts.tdb_jd(T0 + et_seconds / 3600. / 24.0)
@@ -33,6 +58,7 @@ def test_frame_rotation():
         [0.0155101669071617, -0.3778058121415016, 0.9257549368135243],
     ]
     delta = r - spiceypy_matrix
+    print(delta)
     assert (delta < tolerance).all()
 
     # Example of from moon_080317.tf (hoping that the vector quoted below

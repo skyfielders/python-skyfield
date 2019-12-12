@@ -40,6 +40,7 @@ class PlanetaryConstants(object):
             self._segment_map[segment.body] = segment
 
     def _get_assignment(self, key):
+        """Do .assignments[key] but with a pretty exception on failure."""
         try:
             return self.assignments[key]
         except KeyError:
