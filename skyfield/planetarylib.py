@@ -3,7 +3,8 @@
 import re
 from numpy import array, einsum
 from jplephem.pck import DAF, PCK
-from .functions import rot_x, rot_z
+from .constants import ASEC2RAD
+from .functions import rot_x, rot_y, rot_z
 from .units import Angle
 
 _TEXT_MAGIC_NUMBERS = b'KPL/FK', b'KPL/PCK'
@@ -52,19 +53,39 @@ class PlanetaryConstants(object):
 
     def build_frame(self, integer):
         center = self._get_assignment('FRAME_{0}_CENTER'.format(integer))
-        relative = self.assignments.get('TKFRAME_{0}_RELATIVE'.format(integer))
-        if relative is not None:
-            matrix = self.assignments['TKFRAME_{0}_MATRIX'.format(integer)]
-            matrix = array(matrix)
-            matrix.shape = 3, 3
-            integer = self.assignments['FRAME_{0}'.format(relative)]
-        else:
+        spec = self.assignments.get('TKFRAME_{0}_SPEC'.format(integer))
+        if spec is None:
             matrix = None
+        else:
+            if spec == 'ANGLES':
+                angles = self.assignments['TKFRAME_{0}_ANGLES'.format(integer)]
+                axes = self.assignments['TKFRAME_{0}_AXES'.format(integer)]
+                units = self.assignments['TKFRAME_{0}_UNITS'.format(integer)]
+                scale = _unit_scales[units]
+                matrix = 1,0,0, 0,1,0, 0,0,1
+                matrix = array(matrix)
+                matrix.shape = 3, 3
+                # TODO: test is not yet sensitive enough to know if we
+                # did these rotations correctly or in the right order.
+                # (Can we reverse order without loss of correctness?)
+                for angle, axis in list(zip(angles, axes))[::-1]:
+                    rot = _rotations[axis]
+                    matrix = rot(angle * scale).dot(matrix)
+            elif spec == 'MATRIX':
+                matrix = self.assignments['TKFRAME_{0}_MATRIX'.format(integer)]
+                matrix = array(matrix)
+                matrix.shape = 3, 3
+            else:
+                raise NotImplemented('spec %r not yet implemented' % spec)
+            relative = self.assignments['TKFRAME_{0}_RELATIVE'.format(integer)]
+            integer = self.assignments['FRAME_{0}'.format(relative)]
 
         segment = self._segment_map[integer]
         assert segment.frame == 1  # base frame should be ITRF/J2000
         return Frame(center, segment, matrix)
 
+_rotations = None, rot_x, rot_y, rot_z
+_unit_scales = {'ARCSECONDS': ASEC2RAD}
 _missing_name_message = """unknown planetary constant {0!r}
 
 You should either use this object's `.read_text()` method to load an

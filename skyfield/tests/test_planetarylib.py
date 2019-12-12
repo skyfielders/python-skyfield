@@ -35,7 +35,7 @@ def test_frame_rotation():
     delta = r - spiceypy_matrix
     assert (delta < tolerance).all()
 
-    # Example from moon_080317.tf (hoping that the vector quoted below
+    # Example of from moon_080317.tf (hoping that the vector quoted below
     # is exactly the same one that is computed behind the scenes in
     # their example):
 
@@ -48,10 +48,15 @@ def test_frame_rotation():
     # agree with the moon_080317.tf numbers to their level of precision,
     # which is only 9 digits.
 
+    relative_frame = pc.build_frame_named('MOON_ME_DE421')
+    result = vector.frame_xyz(relative_frame)
+    print(result.au - [379892.825, 33510.118, -12661.5278])
+    assert max(abs(result.au - [379892.825, 33510.118, -12661.5278])) < 1e-1
+
     # TODO:
-    # frames based on rotations of other frames (expand test above, from same file)
     # a Moon-based topos object, tested against HORIZONS examples in repository
     # good error message if bpc has not been loaded
+    # sensitive test of rotation based frame.
 
     # pc.read_text(load('pck00008.tpc'))
     # print(pc.assignments['BODY301_RADII'])
