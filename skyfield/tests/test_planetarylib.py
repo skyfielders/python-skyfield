@@ -2,9 +2,9 @@ import numpy as np
 from skyfield.api import PlanetaryConstants, T0, load
 from skyfield.positionlib import ICRF
 
-def test_rotation():
+def test_frame_rotation():
     et_seconds = 259056665.0
-    ts = load.timescale()
+    ts = load.timescale(builtin=True)
     t = ts.tdb_jd(T0 + et_seconds / 3600. / 24.0)
 
     pc = PlanetaryConstants()
@@ -49,9 +49,21 @@ def test_rotation():
     # which is only 9 digits.
 
     # TODO:
-    # aliases for identical frames (can test against same vector as above)
     # frames based on rotations of other frames (expand test above, from same file)
     # a Moon-based topos object, tested against HORIZONS examples in repository
+    # good error message if bpc has not been loaded
 
     # pc.read_text(load('pck00008.tpc'))
     # print(pc.assignments['BODY301_RADII'])
+
+def test_frame_alias():
+    pc = PlanetaryConstants()
+    pc.read_text(load('moon_080317.tf'))
+    pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
+
+    f1 = pc.build_frame_named('MOON_PA_DE421')
+    f2 = pc.build_frame_named('MOON_PA')
+
+    ts = load.timescale(builtin=True)
+    t = ts.tdb_jd(T0)
+    assert (f1.rotation_at(t) == f2.rotation_at(t)).all()

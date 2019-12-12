@@ -1,7 +1,7 @@
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
 import re
-from numpy import einsum
+from numpy import array, einsum
 from jplephem.pck import DAF, PCK
 from .functions import rot_x, rot_z
 from .units import Angle
@@ -52,9 +52,18 @@ class PlanetaryConstants(object):
 
     def build_frame(self, integer):
         center = self._get_assignment('FRAME_{0}_CENTER'.format(integer))
+        relative = self.assignments.get('TKFRAME_{0}_RELATIVE'.format(integer))
+        if relative is not None:
+            matrix = self.assignments['TKFRAME_{0}_MATRIX'.format(integer)]
+            matrix = array(matrix)
+            matrix.shape = 3, 3
+            integer = self.assignments['FRAME_{0}'.format(relative)]
+        else:
+            matrix = None
+
         segment = self._segment_map[integer]
         assert segment.frame == 1  # base frame should be ITRF/J2000
-        return Frame(center, segment)
+        return Frame(center, segment, matrix)
 
 _missing_name_message = """unknown planetary constant {0!r}
 
@@ -66,14 +75,18 @@ object's `.assignments` dictionary."""
 class Frame(object):
     """Planetary constants frame, for building rotation matrices."""
 
-    def __init__(self, center, segment):
+    def __init__(self, center, segment, matrix):
         self._center = center
         self._segment = segment
+        self._matrix = matrix
 
     def rotation_at(self, t):
         ra, dec, w = self._segment.compute(t.tdb, 0.0, False)
-        return einsum('ij...,jk...,kl...->il...',
-                      rot_z(-w), rot_x(-dec), rot_z(-ra))
+        R = einsum('ij...,jk...,kl...->il...',
+                   rot_z(-w), rot_x(-dec), rot_z(-ra))
+        if self._matrix is not None:
+            R = einsum('ij...,jk->ik...', self._matrix, R)
+        return R
 
 class _FramePosition(object):
 
