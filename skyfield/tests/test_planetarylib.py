@@ -42,6 +42,7 @@ def test_frame_rotation():
     vector = ICRF([247982.584262823, -261900.0687693838, -124558.3708890628])
     vector.t = t
     result = vector.frame_xyz(frame)
+    print(result.au)
     assert max(abs(result.au - [379908.634, 33385.003, -12516.8859])) < 1e-1
 
     # TODO: Why is the agreement not nearly 1e-4?  It would be nice to
@@ -50,12 +51,12 @@ def test_frame_rotation():
 
     relative_frame = pc.build_frame_named('MOON_ME_DE421')
     result = vector.frame_xyz(relative_frame)
+    print(result.au)
     print(result.au - [379892.825, 33510.118, -12661.5278])
     assert max(abs(result.au - [379892.825, 33510.118, -12661.5278])) < 1e-1
 
     # TODO:
     # a Moon-based topos object, tested against HORIZONS examples in repository
-    # good error message if bpc has not been loaded
     # sensitive test of rotation based frame.
 
     # pc.read_text(load('pck00008.tpc'))
@@ -72,3 +73,14 @@ def test_frame_alias():
     ts = load.timescale(builtin=True)
     t = ts.tdb_jd(T0)
     assert (f1.rotation_at(t) == f2.rotation_at(t)).all()
+
+def test_unloaded_bpc():
+    pc = PlanetaryConstants()
+    pc.read_text(load('moon_080317.tf'))
+    try:
+        pc.build_frame_named('MOON_PA_DE421')
+    except LookupError as e:
+        assert str(e) == (
+            'you have not yet loaded a binary PCK file'
+            ' that has a segment for frame 31006'
+        )

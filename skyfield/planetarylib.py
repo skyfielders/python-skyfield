@@ -66,11 +66,12 @@ class PlanetaryConstants(object):
                 matrix = array(matrix)
                 matrix.shape = 3, 3
                 # TODO: test is not yet sensitive enough to know if we
-                # did these rotations correctly or in the right order.
+                # did these rotations in the right order.
                 # (Can we reverse order without loss of correctness?)
-                for angle, axis in list(zip(angles, axes))[::-1]:
+                for angle, axis in list(zip(angles, axes)):
                     rot = _rotations[axis]
-                    matrix = rot(angle * scale).dot(matrix)
+                    #matrix = rot(angle * scale).dot(matrix)
+                    matrix = matrix.dot(rot(angle * scale))
             elif spec == 'MATRIX':
                 matrix = self.assignments['TKFRAME_{0}_MATRIX'.format(integer)]
                 matrix = array(matrix)
@@ -80,7 +81,10 @@ class PlanetaryConstants(object):
             relative = self.assignments['TKFRAME_{0}_RELATIVE'.format(integer)]
             integer = self.assignments['FRAME_{0}'.format(relative)]
 
-        segment = self._segment_map[integer]
+        segment = self._segment_map.get(integer)
+        if segment is None:
+            raise LookupError('you have not yet loaded a binary PCK file that'
+                              ' has a segment for frame {0}'.format(integer))
         assert segment.frame == 1  # base frame should be ITRF/J2000
         return Frame(center, segment, matrix)
 
