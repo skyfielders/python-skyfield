@@ -88,7 +88,9 @@ def rot_x(theta):
 def rot_y(theta):
     c = cos(theta)
     s = sin(theta)
-    return array([(c, 0.0, s), (0.0, 1.0, 0.0), (-s, 0.0, c)])
+    zero = theta * 0.0
+    one = zero + 1.0
+    return array(((c, zero, s), (zero, one, zero), (-s, zero, c)))
 
 def rot_z(theta):
     c = cos(theta)
