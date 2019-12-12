@@ -108,10 +108,9 @@ class Frame(object):
 
     def rotation_at(self, t):
         ra, dec, w = self._segment.compute(t.tdb, 0.0, False)
-        R = einsum('ij...,jk...,kl...->il...',
-                   rot_z(-w), rot_x(-dec), rot_z(-ra))
+        R = rot_z(-w).dot(rot_x(-dec)).dot(rot_z(-ra))
         if self._matrix is not None:
-            R = einsum('ij...,jk->ik...', self._matrix, R)
+            R = self._matrix.dot(R)
         return R
 
 class _FramePosition(object):
