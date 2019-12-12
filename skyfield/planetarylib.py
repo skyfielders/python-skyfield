@@ -75,7 +75,7 @@ class Frame(object):
         return einsum('ij...,jk...,kl...->il...',
                       rot_z(-w), rot_x(-dec), rot_z(-ra))
 
-class FramePosition(object):
+class _FramePosition(object):
 
     def __init__(self, frame):
         self._frame = frame

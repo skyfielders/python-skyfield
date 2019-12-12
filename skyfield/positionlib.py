@@ -299,6 +299,11 @@ class ICRF(object):
                 Angle(radians=lon),
                 Distance(au=d))
 
+    def frame_xyz(self, frame):
+        """Compute (x,y,z) coordinates in rotated into a particular frame."""
+        R = frame.rotation_at(self.t)
+        return Distance(au=R.dot(self.position.au))
+
     # Aliases; maybe someday turn into deprecations with warnings?
     ecliptic_position = ecliptic_xyz
     galactic_position = galactic_xyz

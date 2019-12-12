@@ -1,5 +1,6 @@
 import numpy as np
 from skyfield.api import PlanetaryConstants, T0, load
+from skyfield.positionlib import ICRF
 
 def test_rotation():
     et_seconds = 259056665.0
@@ -34,4 +35,18 @@ def test_rotation():
     delta = r - spiceypy_matrix
     assert (delta < tolerance).all()
 
-    pc.read_text(load('pck00008.tpc'))
+    # Example from moon_080317.tf (hoping that the vector quoted below
+    # is exactly the same one that is computed behind the scenes in
+    # their example):
+
+    vector = ICRF([247982.584262823, -261900.0687693838, -124558.3708890628])
+    vector.t = t
+    result = vector.frame_xyz(frame)
+    assert max(abs(result.au - [379908.634, 33385.003, -12516.8859])) < 1e-1
+
+    # TODO: Why is the agreement not nearly 1e-4?  It would be nice to
+    # agree with the moon_080317.tf numbers to their level of precision,
+    # which is only 9 digits.
+
+    # pc.read_text(load('pck00008.tpc'))
+    # print(pc.assignments['BODY301_RADII'])
