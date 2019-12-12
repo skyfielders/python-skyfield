@@ -25,7 +25,23 @@ def test_frame_rotation():
     ]
     r = frame.rotation_at(ts.tdb_jd(tdb))
     delta = r - spiceypy_matrix
-    assert (delta < 2e-16).all()  # we agree to roughly float64 precision!
+    print('LITTLE')
+    print(delta)
+    print('BIG')
+    #assert (delta < 2e-16).all()  # we agree to roughly float64 precision!
+
+    # Second, a moment when the angle W is more than 2500 radians.
+
+    tdb = T0
+    spiceypy_matrix = [
+        [ 0.7840447406961362,  0.5582359944893811,  0.2713787372716964],
+        [-0.6203032939745002,  0.7203957219351799,  0.3102480093439375],
+        [-0.0223084753202375, -0.4115854446818337,  0.9110981032001678],
+    ]
+    r = frame.rotation_at(ts.tdb_jd(tdb))
+    delta = r - spiceypy_matrix
+    print(delta)
+    assert (delta < 5e-13).all()  # why not closer?
 
 def test_frame_rotation2():
     et_seconds = 259056665.0
