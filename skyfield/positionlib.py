@@ -300,7 +300,7 @@ class ICRF(object):
                 Distance(au=d))
 
     def frame_xyz(self, frame):
-        """Compute (x,y,z) coordinates in rotated into a particular frame."""
+        """Express this position as an (x,y,z) vector in a particular frame."""
         R = frame.rotation_at(self.t)
         return Distance(au=R.dot(self.position.au))
 

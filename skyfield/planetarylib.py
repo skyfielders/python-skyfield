@@ -6,6 +6,7 @@ from jplephem.pck import DAF, PCK
 from .constants import ASEC2RAD
 from .functions import rot_x, rot_y, rot_z
 from .units import Angle
+from .vectorlib import VectorFunction
 
 _TEXT_MAGIC_NUMBERS = b'KPL/FK', b'KPL/PCK'
 
@@ -94,8 +95,8 @@ _unit_scales = {'ARCSECONDS': ASEC2RAD}
 _missing_name_message = """unknown planetary constant {0!r}
 
 You should either use this object's `.read_text()` method to load an
-additional "*.tf" PCK text file that defines the missing constant, or
-manually provide a value by adding the key and value to the this
+additional "*.tf" PCK text file that defines the missing name, or
+manually provide a value by adding the name and value to the this
 object's `.assignments` dictionary."""
 
 class Frame(object):
@@ -113,14 +114,21 @@ class Frame(object):
             R = self._matrix.dot(R)
         return R
 
-class _FramePosition(object):
+class PlanetTopos(VectorFunction):
 
-    def __init__(self, frame):
+    def __init__(self, center, frame, position):
+        self.center = center
+        self.target = object()  # TODO: make more interesting
+        self.center_name = 'TODO'
+        self.target_name = 'TODO'
         self._frame = frame
+        self._position = position
 
     def _at(self, t):
-        R = self._frame.at(t)
-        return pos, vel, pos, None
+        R = self._frame.rotation_at(t)
+        position = R.dot(self._position)
+        # TODO: altaz
+        return position, None, position, None
 
 def parse_text_pck(lines):
     """Yield ``(name, value)`` tuples parsed from a PCK text kernel."""

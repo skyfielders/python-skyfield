@@ -40,7 +40,6 @@ def test_frame_rotation_matrices():
     assert (delta < 2e-13).all()  # a few digits are lost in large W radians
 
 def test_rotating_vector_into_frame():
-    et_seconds = 259056665.0
     et_seconds = 259056665.1855896
     ts = load.timescale(builtin=True)
     t = ts.tdb_jd(T0 + et_seconds / 3600. / 24.0)
@@ -68,6 +67,68 @@ def test_rotating_vector_into_frame():
     # TODO:
     # a Moon-based topos object, tested against HORIZONS examples in repository
     # sensitive test of rotation based frame.
+
+def test_position_of_latitude_longitude_on_moon():
+    ts = load.timescale(builtin=True)
+    t = ts.utc(2019, 12, 10)  # TODO: switch to TDB date?
+    print(t.tdb)
+
+    pc = PlanetaryConstants()
+    pc.read_text(load('moon_080317.tf'))
+    pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
+
+    from ..constants import AU_KM, tau
+    from ..functions import rot_z, rot_y
+
+    print(360 - 46.8)
+    lat = 26.3 * tau / 360.0  # north
+    lon = -46.8 * tau / 360.0  # east (negative: west)
+
+    frame = pc.build_frame_named('MOON_ME_DE421')
+    position = np.array((1737.4, 0, 0))
+    position = rot_y(-lat).dot(position)
+    position = rot_z(lon).dot(position)  # sign?
+
+    from ..functions import length_of
+    print('length km:', length_of(np.array((1.043588965592271E-05, 1.534286674325492E-06, -4.859893068052085E-06))) * AU_KM)
+
+    print(position)
+
+    position /=  AU_KM
+
+    R = frame.rotation_at(t)
+    #position = R.dot(position)
+    position = R.T.dot(position)
+    position *= -1.0
+    print(position)
+    print(position-[1.043588965592271E-05, 3.340834944508400E-06, -3.848560523814720E-06])
+
+    want = [1.043588965592271E-05, 3.340834944508400E-06,
+            -3.848560523814720E-06]
+    assert max(abs(position - want)) < 2e-9
+
+    # from ..planetarylib import PlanetTopos
+    # topos = PlanetTopos(301, frame, position)
+    # geometric = topos.at(t)
+
+    # print(geometric.position.au)
+
+def test_observing_from_location_on_moon():
+    ts = load.timescale(builtin=True)
+    t = ts.utc(2019, 12, 13)
+
+    pc = PlanetaryConstants()
+    pc.read_text(load('moon_080317.tf'))
+    pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
+
+    from skyfield.constants import AU_KM
+    frame = pc.build_frame_named('MOON_ME_DE421')
+    position = np.array((1737.1, 0, 0)) / AU_KM
+
+    from ..planetarylib import PlanetTopos
+    topos = PlanetTopos(301, frame, position)
+
+    print(topos.at(t))
 
 def test_frame_alias():
     pc = PlanetaryConstants()
