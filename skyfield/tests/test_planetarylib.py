@@ -37,6 +37,7 @@ def test_frame_rotation_matrices():
     ]
     r = frame.rotation_at(ts.tdb_jd(tdb))
     delta = r - spiceypy_matrix
+    print(delta)
     assert (delta < 2e-13).all()  # a few digits are lost in large W radians
 
 def test_rotating_vector_into_frame():
