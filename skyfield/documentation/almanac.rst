@@ -238,10 +238,10 @@ The solar terms are widely used in East Asian calendars.
 
     t0 = ts.utc(2019, 12, 1)
     t1 = ts.utc(2019, 12, 31)
-    t, y = almanac.find_discrete(t0, t1, almanac_ea.solar_terms(e))
+    t, tm = almanac.find_discrete(t0, t1, almanac_ea.solar_terms(e))
 
-    for yi, ti in zip(y, t):
-        print(yi, almanac_ea.SOLAR_TERMS_ZHS[yi], ti.utc_iso(' '))
+    for tmi, ti in zip(tm, t):
+        print(tmi, almanac_ea.SOLAR_TERMS_ZHS[tmi], ti.utc_iso(' '))
 
 .. testoutput::
 
