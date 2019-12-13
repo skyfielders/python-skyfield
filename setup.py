@@ -43,7 +43,7 @@ setup(
         'skyfield.tests': ['data/*'],
         },
     install_requires=[
-        'jplephem>=2.3',
+        'jplephem>=2.11',
         'numpy',
         'sgp4>=1.4',
         ],
