@@ -25,7 +25,7 @@ def test_frame_rotation():
     ]
     r = frame.rotation_at(ts.tdb_jd(tdb))
     delta = r - spiceypy_matrix
-    assert (delta < 6e-17).all()  # we agree to roughly float64 precision!
+    assert (delta < 1e-16).all()  # we agree to roughly float64 precision!
 
     # Second, a moment when the angle W is more than 2500 radians.
 
