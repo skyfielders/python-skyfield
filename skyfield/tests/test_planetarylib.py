@@ -71,56 +71,47 @@ def test_rotating_vector_into_frame():
 def test_position_of_latitude_longitude_on_moon():
     ts = load.timescale(builtin=True)
     t = ts.tdb_jd(2458827.5)
-    print(t.tdb)
 
     pc = PlanetaryConstants()
-    #pc.read_text(load('moon_080317.tf'))
-    #pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
-    pc.read_text(load('moon_131127.tf'))
-    pc.read_binary(load('moon_pa_de430_1850-2150.bpc'))
+    pc.read_text(load('moon_080317.tf'))
+    pc.read_text(load('pck00008.tpc'))
+    pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
 
     from ..constants import AU_KM, tau
     from ..functions import rot_z, rot_y
 
-    print(360 - 46.8)
-    lat = 26.3 * tau / 360.0  # north
-    lon = -46.8 * tau / 360.0  # east (negative: west)
+    lat = 26.3 * tau / 360.0    # north
+    lon = -46.8 * tau / 360.0   # east (negative: west)
 
-    #frame = pc.build_frame_named('MOON_ME_DE421')
-    from jplephem.pck import PCK
-    pck = PCK.open('moon_pa_de430_1850-2150.bpc')
-    frame = pc.build_frame(31008, _segment=pck.segments[969])
+    body_id = 301
+    body_frame_name = 'MOON_ME_DE421'
+    frame = pc.build_frame_named(body_frame_name)
 
-    position = np.array((1737.4, 0, 0))
+    radii = pc._get_assignment('BODY{0}_RADII'.format(body_id))
+    if not radii[0] == radii[1] == radii[2]:
+        raise ValueError('only spherical objects are supported, but the radii'
+                         ' of this body are: %s' % radii)
+    radius = radii[0]
+
+    position = np.array((radius, 0, 0))
     position = rot_y(-lat).dot(position)
-    position = rot_z(lon).dot(position)  # sign?
-
-    from ..functions import length_of
-    print('length km:', length_of(np.array((1.043588965592271E-05, 1.534286674325492E-06, -4.859893068052085E-06))) * AU_KM)
-
-    print(position)
-
-    position /=  AU_KM
+    position = rot_z(lon).dot(position)
 
     R = frame.rotation_at(t)
-    #position = R.dot(position)
     position = R.T.dot(position)
-    position *= -1.0
 
-    #position = t.MT.dot(position)
+    position *= -1.0
+    position /=  AU_KM
 
     want = [1.043588965592271E-05, 3.340834944508400E-06,
             -3.848560523814720E-06]
     print(position)
     print(position-want)
-    #assert max(abs(position - want)) < 7e-10
     assert abs(position - want).max() < 4e-9
 
     # from ..planetarylib import PlanetTopos
     # topos = PlanetTopos(301, frame, position)
     # geometric = topos.at(t)
-
-    # print(geometric.position.au)
 
 def test_observing_from_location_on_moon():
     ts = load.timescale(builtin=True)
