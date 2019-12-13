@@ -227,3 +227,30 @@ of the phases of twilight using integers:
     2 2019-11-08T22:52:49Z
     1 2019-11-08T23:25:34Z
     0 2019-11-08T23:57:44Z
+
+Solar terms
+===========
+
+The solar terms are widely used in East Asian calendars.
+
+.. testcode::
+
+    t0 = ts.utc(2019, 12, 1)
+    t1 = ts.utc(2019, 12, 31)
+    t, y = almanac.find_discrete(t0, t1, almanac.solar_terms(e))
+
+    for yi, ti in zip(y, t):
+        print(yi, almanac.SOLAR_TERMS_ZHS[yi], ti.utc_iso(' '))
+
+.. testoutput::
+
+    17 大雪 2019-12-07 10:18:28Z
+    18 冬至 2019-12-22 04:19:26Z
+
+The result ``t`` will be an array of times, and ``y`` will be ``0``
+through ``23`` for an index of a solar term.
+
+If you or some of your users live in different countries or areas in East Asia, 
+eg. Japan, Vietnam, etc. you can use the ``SOLAR_TERMS_JP`` array, 
+``SOLAR_TERMS_VN`` array, or ``SOLAR_TERMS_ZHT`` array.
+
