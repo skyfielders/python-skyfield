@@ -70,7 +70,7 @@ def test_rotating_vector_into_frame():
 
 def test_position_of_latitude_longitude_on_moon():
     ts = load.timescale(builtin=True)
-    t = ts.utc(2019, 12, 10)  # TODO: switch to TDB date?
+    t = ts.tdb_jd(2458827.5)
     print(t.tdb)
 
     pc = PlanetaryConstants()
@@ -105,7 +105,7 @@ def test_position_of_latitude_longitude_on_moon():
 
     want = [1.043588965592271E-05, 3.340834944508400E-06,
             -3.848560523814720E-06]
-    assert max(abs(position - want)) < 2e-9
+    assert max(abs(position - want)) < 7e-10
 
     # from ..planetarylib import PlanetTopos
     # topos = PlanetTopos(301, frame, position)
