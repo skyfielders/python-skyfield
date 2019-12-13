@@ -112,29 +112,29 @@ def test_solar_terms():
     t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     print(strings)
-    assert strings == ['2019-02-04 19:14']
+    assert strings == ['2019-02-04 03:14']
     assert (y == (21)).all()
     
     # https://en.wikipedia.org/wiki/Lixia
     
     t0 = ts.utc(2019, 5, 4)
-    t1 = ts.utc(2019, 5, 7)
+    t1 = ts.utc(2019, 5, 6)
     t, y = almanac.find_discrete(t0, t1, almanac.solar_terms(e))
     t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     print(strings)
-    assert strings == ['2019-05-06 11:03']
+    assert strings == ['2019-05-05 19:03']
     assert (y == (3)).all()
     
     # https://en.wikipedia.org/wiki/Liqiu
     
-    t0 = ts.utc(2019, 8, 7)
-    t1 = ts.utc(2019, 8, 9)
+    t0 = ts.utc(2019, 8, 6)
+    t1 = ts.utc(2019, 8, 8)
     t, y = almanac.find_discrete(t0, t1, almanac.solar_terms(e))
     t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     print(strings)
-    assert strings == ['2019-08-08 11:13']
+    assert strings == ['2019-08-07 19:13']
     assert (y == (9)).all()
     
     # https://en.wikipedia.org/wiki/Lidong
@@ -145,6 +145,6 @@ def test_solar_terms():
     t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     print(strings)
-    assert strings == ['2019-11-08 09:24']
+    assert strings == ['2019-11-07 17:24']
     assert (y == (15)).all()
 
