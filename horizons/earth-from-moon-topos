@@ -1,12 +1,12 @@
 *******************************************************************************
-Ephemeris / WWW_USER Tue Dec 10 12:45:26 2019 Pasadena, USA      / Horizons    
+Ephemeris / WWW_USER Fri Dec 13 08:01:31 2019 Pasadena, USA      / Horizons    
 *******************************************************************************
 Target body name: Earth (399)                     {source: DE431mx}
 Center body name: Moon (301)                      {source: DE431mx}
 Center-site name: (user defined site below)
 *******************************************************************************
-Start time      : A.D. 2019-Dec-10 00:00:00.0000 UT      
-Stop  time      : A.D. 2019-Dec-20 00:00:00.0000 UT      
+Start time      : A.D. 2019-Dec-13 00:00:00.0000 UT      
+Stop  time      : A.D. 2019-Dec-14 00:00:00.0000 UT      
 Step-size       : 1440 minutes
 *******************************************************************************
 Target pole/equ : Earth_EOP (high precision)      {East-longitude positive}
@@ -22,27 +22,18 @@ Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
 Atmos refraction: NO (AIRLESS)
 RA format       : DEG
 Time format     : CAL 
-EOP file        : eop.191209.p200301                                           
-EOP coverage    : DATA-BASED 1962-JAN-20 TO 2019-DEC-09. PREDICTS-> 2020-FEB-29
+EOP file        : eop.191212.p200304                                           
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2019-DEC-12. PREDICTS-> 2020-MAR-03
 Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s 
 Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass     n.a.    , Daylight (NO )
 Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
 Table cut-offs 3: RA/DEC angular rate (     0.0=NO )                           
 *******************************************************************************
- Date__(UT)__HR:MN     R.A._(ICRF/J2K)_DEC
-******************************************
+ Date__(UT)__HR:MN     R.A._(ICRF/J2000)__DEC. Azi_(a-appr)_Elev
+****************************************************************
 $$SOE
- 2019-Dec-10 00:00 *x  229.53885 -14.35162
- 2019-Dec-11 00:00 *x  242.34042 -18.07197
- 2019-Dec-12 00:00 *x  255.93523 -20.97941
- 2019-Dec-13 00:00 *x  270.25905 -22.80797
- 2019-Dec-14 00:00 *x  285.09168 -23.34048
- 2019-Dec-15 00:00 *x  300.09488 -22.46605
- 2019-Dec-16 00:00 *x  314.91544 -20.21460
- 2019-Dec-17 00:00 *x  329.29969 -16.74824
- 2019-Dec-18 00:00 *x  343.15391 -12.31857
- 2019-Dec-19 00:00 *x  356.53540  -7.21828
- 2019-Dec-20 00:00 *x    9.60458  -1.74873
+ 2019-Dec-13 00:00 *x  270.2590484 -22.8079717 114.9380  42.0019
+ 2019-Dec-14 00:00 *x  285.0916817 -23.3404801 116.3859  40.7411
 $$EOE
 *******************************************************************************
 Column meaning:
@@ -92,11 +83,18 @@ presence symbol.
 planet/satellite system, potentially compromising visual observations due to
 its brightness. Any such body is identified in the print-out header.
  
- R.A._(ICRF/J2K)_DEC =
+ R.A._(ICRF/J2000)__DEC. =
    Astrometric right ascension and declination of the TARGET CENTER with
 respect to the observing site in the coordinates of the ICRF/J2000 inertial
 reference frame. Compensated for down-leg light-time.
    Units: DEGREES and DEGREES
+ 
+ Azi_(a-appr)_Elev =
+   Airless apparent azimuth and elevation of target center. Adjusted for
+light-time, the gravitational deflection of light, stellar aberration,
+precession and nutation. Azimuth measured North(0) -> East(90) -> South(180) ->
+West(270) -> North (360). Elevation is with respect to plane perpendicular
+to local zenith direction.  TOPOCENTRIC ONLY. Units: DEGREES
 
 
  Computations by ...
