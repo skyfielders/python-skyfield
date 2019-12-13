@@ -108,7 +108,7 @@ class Frame(object):
 
     def rotation_at(self, t):
         ra, dec, w = self._segment.compute(t.tdb, 0.0, False)
-        R = rot_z(-w).dot(rot_x(-dec)).dot(rot_z(-ra))
+        R = rot_z(-w).dot(rot_x(-dec).dot(rot_z(-ra)))
         if self._matrix is not None:
             R = self._matrix.dot(R)
         return R
