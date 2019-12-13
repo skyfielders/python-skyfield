@@ -74,8 +74,10 @@ def test_position_of_latitude_longitude_on_moon():
     print(t.tdb)
 
     pc = PlanetaryConstants()
-    pc.read_text(load('moon_080317.tf'))
-    pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
+    #pc.read_text(load('moon_080317.tf'))
+    #pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
+    pc.read_text(load('moon_131127.tf'))
+    pc.read_binary(load('moon_pa_de430_1850-2150.bpc'))
 
     from ..constants import AU_KM, tau
     from ..functions import rot_z, rot_y
@@ -84,7 +86,11 @@ def test_position_of_latitude_longitude_on_moon():
     lat = 26.3 * tau / 360.0  # north
     lon = -46.8 * tau / 360.0  # east (negative: west)
 
-    frame = pc.build_frame_named('MOON_ME_DE421')
+    #frame = pc.build_frame_named('MOON_ME_DE421')
+    from jplephem.pck import PCK
+    pck = PCK.open('moon_pa_de430_1850-2150.bpc')
+    frame = pc.build_frame(31008, _segment=pck.segments[969])
+
     position = np.array((1737.4, 0, 0))
     position = rot_y(-lat).dot(position)
     position = rot_z(lon).dot(position)  # sign?
@@ -100,12 +106,15 @@ def test_position_of_latitude_longitude_on_moon():
     #position = R.dot(position)
     position = R.T.dot(position)
     position *= -1.0
-    print(position)
-    print(position-[1.043588965592271E-05, 3.340834944508400E-06, -3.848560523814720E-06])
+
+    #position = t.MT.dot(position)
 
     want = [1.043588965592271E-05, 3.340834944508400E-06,
             -3.848560523814720E-06]
-    assert max(abs(position - want)) < 7e-10
+    print(position)
+    print(position-want)
+    #assert max(abs(position - want)) < 7e-10
+    assert abs(position - want).max() < 4e-9
 
     # from ..planetarylib import PlanetTopos
     # topos = PlanetTopos(301, frame, position)

@@ -53,7 +53,7 @@ class PlanetaryConstants(object):
         integer = self._get_assignment('FRAME_{0}'.format(name))
         return self.build_frame(integer)
 
-    def build_frame(self, integer):
+    def build_frame(self, integer, _segment=None):
         center = self._get_assignment('FRAME_{0}_CENTER'.format(integer))
         spec = self.assignments.get('TKFRAME_{0}_SPEC'.format(integer))
         if spec is None:
@@ -83,7 +83,11 @@ class PlanetaryConstants(object):
             relative = self.assignments['TKFRAME_{0}_RELATIVE'.format(integer)]
             integer = self.assignments['FRAME_{0}'.format(relative)]
 
-        segment = self._segment_map.get(integer)
+        if _segment is None:
+            segment = self._segment_map.get(integer)
+        else:
+            segment = _segment
+
         if segment is None:
             raise LookupError('you have not yet loaded a binary PCK file that'
                               ' has a segment for frame {0}'.format(integer))
