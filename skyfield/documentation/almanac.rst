@@ -249,10 +249,9 @@ The solar terms are widely used in East Asian calendars.
     17 大雪 2019-12-07 10:18:28Z
     18 冬至 2019-12-22 04:19:26Z
 
-The result ``t`` will be an array of times, and ``y`` will be ``0``
-through ``23`` for an index of a solar term.
-
-If you or some of your users live in different countries or areas in East Asia,
-eg. Japan, Vietnam, etc. you can use the ``SOLAR_TERMS_JP`` array,
-``SOLAR_TERMS_VN`` array, or ``SOLAR_TERMS_ZHT`` array.
-
+The result ``t`` will be an array of times, and ``y`` will be integers
+in the range 0–23 which are each the index of a solar term.  Localized
+names for the solar terms in different East Asia languages are provided
+as ``SOLAR_TERMS_JP`` for Japanese, ``SOLAR_TERMS_VN`` for Vietnamese,
+``SOLAR_TERMS_ZHT`` for Traditional Chinese, and (as shown above)
+``SOLAR_TERMS_ZHS`` for Simplified Chinese.
