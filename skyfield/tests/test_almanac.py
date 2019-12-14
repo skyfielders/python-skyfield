@@ -1,3 +1,4 @@
+import skyfield.almanac_east_asia
 from skyfield import api, almanac
 
 half_minute = 1.0 / 24.0 / 60.0 / 2.0
