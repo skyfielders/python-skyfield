@@ -234,6 +234,7 @@ Solar terms
 The solar terms are widely used in East Asian calendars.
 
 .. testcode::
+
     from skyfield import almanac_east_asia as almanac_ea
 
     t0 = ts.utc(2019, 12, 1)
