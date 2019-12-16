@@ -8,7 +8,7 @@ that is compatible with both Python 2 and 3
 and makes it easy to generate high precision research-grade
 positions for planets and Earth satellites.
 
-::
+.. code-block:: python
 
    from skyfield.api import load
 
