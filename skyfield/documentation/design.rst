@@ -180,6 +180,12 @@ the hundreds of ``np.`` prefixes would add only noise.
 As a consequence, Skyfield’s modules themselves simply do a
 ``from`` ``numpy`` ``import`` of any names that they need.
 
+Skyfield strives to support old versions of both Python and of NumPy,
+because many users in industry and government
+cannot upgrade their supporting libraries whenever they want.
+So the unit tests in CI are run against NumPy 1.11.3
+to maintain compatibility with that older version.
+
 Cross products
 ==============
 
