@@ -78,36 +78,48 @@ def test_position_of_latitude_longitude_on_moon():
     pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
 
     frame = pc.build_frame_named('MOON_ME_DE421')
+    assert frame.center == 301
+
     pt = pc.build_latlon_degrees(frame, 26.3, -46.8)
     assert pt.center == 301
 
     geometric = pt.at(t)
     assert geometric.center == 301
 
-    # Alas, only about 4-5 digits of agreement.  Yes, the latitude and
-    # longitude are only 4 digits each, but HORIZONS considers them to
-    # be very precise values like "313.200000".  The agreement here
-    # should be far greater.
+    # See the file `horizons/moon-from-moon-topos` for HORIZONS result.
+    # Alas, here we achieve only about 4-5 digits of agreement.  Yes,
+    # the latitude and longitude are only 4 digits each, but HORIZONS
+    # considers them to be very precise values like "313.200000".  The
+    # agreement here should be far greater.
     want = [1.043588965592271E-05, 3.340834944508400E-06,
             -3.848560523814720E-06]
     assert abs(geometric.position.au - want).max() < 4e-9
 
-def test_observing_from_location_on_moon():
+def test_observing_earth_from_location_on_moon():
     ts = load.timescale(builtin=True)
     t = ts.utc(2019, 12, 13)
+    # t = ts.tdb_jd(2458827.5) CLEAN UP
 
     pc = PlanetaryConstants()
     pc.read_text(load('moon_080317.tf'))
+    pc.read_text(load('pck00008.tpc'))
     pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
 
-    from skyfield.constants import AU_KM
     frame = pc.build_frame_named('MOON_ME_DE421')
-    position = np.array((1737.1, 0, 0)) / AU_KM
+    assert frame.center == 301
 
-    from ..planetarylib import PlanetTopos
-    topos = PlanetTopos(301, frame, position)
+    pt = pc.build_latlon_degrees(frame, 26.3, -46.8)
+    assert pt.center == 301
 
-    print(topos.at(t))
+    eph = load('de421.bsp')
+    astrometric = (eph['moon'] + pt).at(t).observe(eph['earth'])
+
+    # See the file `horizons/earth-from-moon-topos` for HORIZONS result.
+    print(astrometric.position.au)
+    ra, dec, distance = astrometric.radec()
+    ra, dec, distance = astrometric.apparent().radec()
+    print(ra._degrees)
+    print(dec.degrees)
 
 def test_frame_alias():
     pc = PlanetaryConstants()

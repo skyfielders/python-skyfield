@@ -1,7 +1,7 @@
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
 import re
-from numpy import array, einsum
+from numpy import array, einsum, nan
 from jplephem.pck import DAF, PCK
 from .constants import ASEC2RAD, AU_KM
 from .functions import rot_x, rot_y, rot_z
@@ -9,6 +9,7 @@ from .units import Angle, Distance
 from .vectorlib import VectorFunction
 
 _TEXT_MAGIC_NUMBERS = b'KPL/FK', b'KPL/PCK'
+_NAN3 = array((nan, nan, nan))
 
 class PlanetaryConstants(object):
     """Planetary constants kernel."""
@@ -136,10 +137,11 @@ class PlanetTopos(VectorFunction):
 
     """
     def __init__(self, center, frame, position_au):
+        # TODO: always take center from frame
         self.center = center
         self.target = object()  # TODO: make more interesting
-        self.center_name = 'TODO'
-        self.target_name = 'TODO'
+        self.center_name = None  # TODO: deprecate and remove
+        self.target_name = None
         self._frame = frame
         self._position_au = position_au
 
@@ -155,8 +157,9 @@ class PlanetTopos(VectorFunction):
 
     def _at(self, t):
         r = self._frame.rotation_at(t).T.dot(self._position_au)
+        v = _NAN3.copy()
         # TODO: altaz
-        return r, None, r, None
+        return r, v, r, None
 
 def parse_text_pck(lines):
     """Yield ``(name, value)`` tuples parsed from a PCK text kernel."""
