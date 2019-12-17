@@ -77,41 +77,20 @@ def test_position_of_latitude_longitude_on_moon():
     pc.read_text(load('pck00008.tpc'))
     pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
 
-    from ..constants import AU_KM, tau
-    from ..functions import rot_z, rot_y
+    frame = pc.build_frame_named('MOON_ME_DE421')
+    pt = pc.build_latlon_degrees(frame, 26.3, -46.8)
+    assert pt.center == 301
 
-    lat = 26.3 * tau / 360.0    # north
-    lon = -46.8 * tau / 360.0   # east (negative: west)
+    geometric = pt.at(t)
+    assert geometric.center == 301
 
-    body_id = 301
-    body_frame_name = 'MOON_ME_DE421'
-    frame = pc.build_frame_named(body_frame_name)
-
-    radii = pc._get_assignment('BODY{0}_RADII'.format(body_id))
-    if not radii[0] == radii[1] == radii[2]:
-        raise ValueError('only spherical objects are supported, but the radii'
-                         ' of this body are: %s' % radii)
-    radius = radii[0]
-
-    position = np.array((radius, 0, 0))
-    position = rot_y(-lat).dot(position)
-    position = rot_z(lon).dot(position)
-
-    R = frame.rotation_at(t)
-    position = R.T.dot(position)
-
-    position *= -1.0
-    position /=  AU_KM
-
+    # Alas, only about 4-5 digits of agreement.  Yes, the latitude and
+    # longitude are only 4 digits each, but HORIZONS considers them to
+    # be very precise values like "313.200000".  The agreement here
+    # should be far greater.
     want = [1.043588965592271E-05, 3.340834944508400E-06,
             -3.848560523814720E-06]
-    print(position)
-    print(position-want)
-    assert abs(position - want).max() < 4e-9
-
-    # from ..planetarylib import PlanetTopos
-    # topos = PlanetTopos(301, frame, position)
-    # geometric = topos.at(t)
+    assert abs(geometric.position.au - want).max() < 4e-9
 
 def test_observing_from_location_on_moon():
     ts = load.timescale(builtin=True)

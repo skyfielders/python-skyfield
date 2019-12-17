@@ -3,9 +3,9 @@
 import re
 from numpy import array, einsum
 from jplephem.pck import DAF, PCK
-from .constants import ASEC2RAD
+from .constants import ASEC2RAD, AU_KM
 from .functions import rot_x, rot_y, rot_z
-from .units import Angle
+from .units import Angle, Distance
 from .vectorlib import VectorFunction
 
 _TEXT_MAGIC_NUMBERS = b'KPL/FK', b'KPL/PCK'
@@ -94,6 +94,16 @@ class PlanetaryConstants(object):
         assert segment.frame == 1  # base frame should be ITRF/J2000
         return Frame(center, segment, matrix)
 
+    def build_latlon_degrees(self, frame, latitude_degrees, longitude_degrees):
+        lat = Angle.from_degrees(latitude_degrees)
+        lon = Angle.from_degrees(longitude_degrees)
+        radii = self._get_assignment('BODY{0}_RADII'.format(frame.center))
+        if not radii[0] == radii[1] == radii[2]:
+            raise ValueError('only spherical bodies are supported,'
+                             ' but the radii of this body are: %s' % radii)
+        distance = Distance(au=radii[0] / AU_KM)
+        return PlanetTopos.from_latlon_distance(frame, lat, lon, distance)
+
 _rotations = None, rot_x, rot_y, rot_z
 _unit_scales = {'ARCSECONDS': ASEC2RAD}
 _missing_name_message = """unknown planetary constant {0!r}
@@ -107,7 +117,7 @@ class Frame(object):
     """Planetary constants frame, for building rotation matrices."""
 
     def __init__(self, center, segment, matrix):
-        self._center = center
+        self.center = center
         self._segment = segment
         self._matrix = matrix
 
@@ -119,20 +129,34 @@ class Frame(object):
         return R
 
 class PlanetTopos(VectorFunction):
+    """Location that rotates with the surface of another Solar System body.
 
-    def __init__(self, center, frame, position):
+    The location can either be on the surface of the body, or in some
+    other fixed position that rotates with the body's surface.
+
+    """
+    def __init__(self, center, frame, position_au):
         self.center = center
         self.target = object()  # TODO: make more interesting
         self.center_name = 'TODO'
         self.target_name = 'TODO'
         self._frame = frame
-        self._position = position
+        self._position_au = position_au
+
+    @classmethod
+    def from_latlon_distance(cls, frame, latitude, longitude, distance):
+        r = array((-distance.au, 0.0, 0.0))
+        r = rot_z(longitude.radians).dot(rot_y(-latitude.radians).dot(r))
+
+        self = cls(frame.center, frame, r)
+        self.latitude = latitude
+        self.longitude = longitude
+        return self
 
     def _at(self, t):
-        R = self._frame.rotation_at(t)
-        position = R.dot(self._position)
+        r = self._frame.rotation_at(t).T.dot(self._position_au)
         # TODO: altaz
-        return position, None, position, None
+        return r, None, r, None
 
 def parse_text_pck(lines):
     """Yield ``(name, value)`` tuples parsed from a PCK text kernel."""

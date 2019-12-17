@@ -42,6 +42,12 @@ class Distance(object):
         else:
             raise ValueError('to construct a Distance provide au, km, or m')
 
+    @classmethod
+    def from_au(cls, au):
+        self = cls.__new__(cls)
+        self.au = _to_array(au)
+        return self
+
     @reify
     def km(self):
         return self.au * AU_KM
@@ -173,6 +179,16 @@ class Angle(object):
                            else 'hours' if hours is not None
                            else 'degrees')
         self.signed = signed
+
+    @classmethod
+    def from_degrees(cls, degrees, signed=False):
+        degrees = _to_array(_unsexagesimalize(degrees))
+        self = cls.__new__(cls)
+        self.degrees = degrees
+        self.radians = degrees * _from_degrees
+        self.preference = 'degrees'
+        self.signed = signed
+        return self
 
     @reify
     def _hours(self):
