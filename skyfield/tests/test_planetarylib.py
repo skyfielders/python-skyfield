@@ -45,20 +45,32 @@ def test_frame_rotation_matrices():
     assert (R == spiceypy_rotation).all()  # Boom.
 
     R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
-    assert (R == R2).all()  # (Less surprising: Python agrees with itself.)
+    assert (R == R2).all()
     assert (Rv == spiceypy_rate).all()  # Boom.
 
     # Second, a moment when the angle W is more than 2500 radians.
 
     tdb = T0
     spiceypy_rotation = [
-        [ 0.7840447406961362,  0.5582359944893811,  0.2713787372716964],
-        [-0.6203032939745002,  0.7203957219351799,  0.3102480093439375],
-        [-0.0223084753202375, -0.4115854446818337,  0.9110981032001678],
+        [0.7840447406961362, 0.5582359944893811, 0.2713787372716964],
+        [-0.6203032939745002, 0.7203957219351799, 0.31024800934393754],
+        [-0.02230847532023746, -0.41158544468183367, 0.9110981032001678],
     ]
-    r = frame.rotation_at(ts.tdb_jd(tdb))
-    delta = abs(r - spiceypy_rotation)
+    spiceypy_rate = [
+        [-1.6512401259577911e-06, 1.9173507906460613e-06,
+         8.265640603882371e-07],
+        [-2.0870970217531474e-06, -1.4860137438942676e-06,
+         -7.223743806558455e-07],
+        [-5.817943897465853e-10, -4.4636767256698343e-10,
+         -2.1589045361778893e-10],
+    ]
+    R = frame.rotation_at(ts.tdb_jd(tdb))
+    delta = abs(R - spiceypy_rotation)
     assert (delta < 2e-13).all()  # a few digits are lost in large W radians?
+
+    R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
+    assert (R == R2).all()
+    assert abs(Rv - spiceypy_rate).max() < 4e-19  # About 13 digits precision.
 
 def test_rotating_vector_into_frame():
     et_seconds = 259056665.1855896
