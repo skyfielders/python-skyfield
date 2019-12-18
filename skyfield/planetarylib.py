@@ -136,7 +136,8 @@ class Frame(object):
         print('<dot> ra dec w =', radot, decdot, wdot)
         R = rot_z(-w).dot(rot_x(-dec).dot(rot_z(-ra)))
 
-        locang = array((w, dec, ra, wdot, decdot, radot))
+        from math import pi
+        locang = array((0, w, dec, ra, wdot, decdot, radot))
 
         ALPHA = 1
         BETA = 2
@@ -145,12 +146,9 @@ class Frame(object):
         DBETA = 5
         DGAMMA = 6
 
-        AXISA = AXISC = 3
-        AXISB = 1
-
-        A = AXISA
-        B = AXISB
-        L = 6 - A - B
+        A = 3
+        B = 1
+        L = 2
         D = -1  # but could be +1; "DELTA(A,B)"
 
         CA = cos(locang[ALPHA])
@@ -167,7 +165,7 @@ class Frame(object):
 
         solutn = solutn.T #?
 
-        domega = solutn.dot(locang[3:])
+        domega = solutn.dot(locang[4:])
 
         import numpy as np
         drdtrt = np.zeros((3, 3))

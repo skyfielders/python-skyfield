@@ -55,9 +55,11 @@ def test_frame_rotation_matrices():
     print(Rv)
     print('actual:')
     print(np.array(spiceypy_rate))
+    print('difference:')
     print(Rv - spiceypy_rate)
 
     assert abs(Rv - spiceypy_rate).max() < 3e-10  # ack, pretty terrible?
+    asdf
 
     # Second, a moment when the angle W is more than 2500 radians.
 
