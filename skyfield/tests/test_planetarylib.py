@@ -99,7 +99,6 @@ def test_rotating_vector_into_frame():
 
     # TODO:
     # a Moon-based topos object, tested against HORIZONS examples in repository
-    # sensitive test of rotation based frame.
 
 def test_position_of_latitude_longitude_on_moon():
     ts = load.timescale(builtin=True)
@@ -126,7 +125,7 @@ def test_position_of_latitude_longitude_on_moon():
     # agreement here should be far greater.
     want = [1.043588965592271E-05, 3.340834944508400E-06,
             -3.848560523814720E-06]
-    assert abs(geometric.position.au - want).max() < 4e-9
+    assert abs(geometric.position.au - want).max() < 7e-10
 
 def test_observing_earth_from_location_on_moon():
     ts = load.timescale(builtin=True)
