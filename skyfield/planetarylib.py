@@ -134,6 +134,7 @@ class Frame(object):
         ra, dec, w = components
         radot, decdot, wdot = rates
         print('<dot> ra dec w =', radot, decdot, wdot)
+        from math import pi
         R = rot_z(-w).dot(rot_x(-dec).dot(rot_z(-ra)))
 
         from math import pi
@@ -156,6 +157,8 @@ class Frame(object):
 
         U = cos(locang[BETA])
         V = D * sin(locang[BETA])
+        print([repr(n) for n in (CA, SA, U, V)])   # exactly equal
+        print([repr(n) for n in locang[4:]])       # exactly equal
 
         solutn = array((
             (-D, 0.0, 0.0),
@@ -166,13 +169,14 @@ class Frame(object):
         solutn = solutn.T #?
 
         domega = solutn.dot(locang[4:])
+        assert domega.shape == (3,)
 
         import numpy as np
         drdtrt = np.zeros((3, 3))
 
-        L -= 1
+        A -= 1  #prep for use as indexes
         B -= 1
-        A -= 1
+        L -= 1
 
         drdtrt[L,B] = domega[1-1]
         drdtrt[B,L] = -domega[1-1]
@@ -180,12 +184,21 @@ class Frame(object):
         drdtrt[A,L] = domega[2-1]
         drdtrt[L,A] = -domega[2-1]
 
-        drdtrt[B,A] = domega[3-1]
-        drdtrt[A,B] = -domega[3-1]
+        drdtrt[B,A] = -domega[3-1]
+        drdtrt[A,B] = domega[3-1]
 
         drdtrt = drdtrt.T #?
 
+        np.set_printoptions(precision=16)
+        print('drdtrt =\n', np.vectorize(repr)(drdtrt))  # exactly equal
+        print('R =\n', np.vectorize(repr)(R))
+
+        #drdt = drdtrt.dot(R)
+        #drdt = R.dot(drdtrt)
         drdt = drdtrt.dot(R)
+        drdt = einsum('ij...,jk...->ik...', drdtrt, R)
+
+        print('drdt =\n', np.vectorize(repr)(drdt))
         D = drdt
 
         if self._matrix is not None:
