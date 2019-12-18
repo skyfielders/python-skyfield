@@ -1,7 +1,7 @@
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
 import re
-from numpy import array, einsum, nan
+from numpy import array, cos, einsum, nan, sin
 from jplephem.pck import DAF, PCK
 from .constants import ASEC2RAD, AU_KM
 from .functions import rot_x, rot_y, rot_z
@@ -128,6 +128,72 @@ class Frame(object):
         if self._matrix is not None:
             R = self._matrix.dot(R)
         return R
+
+    def rotation_and_rate_at(self, t):
+        components, rates = self._segment.compute(t.tdb, 0.0, True)
+        ra, dec, w = components
+        radot, decdot, wdot = rates
+        print('<dot> ra dec w =', radot, decdot, wdot)
+        R = rot_z(-w).dot(rot_x(-dec).dot(rot_z(-ra)))
+
+        locang = array((w, dec, ra, wdot, decdot, radot))
+
+        ALPHA = 1
+        BETA = 2
+        GAMMA = 3
+        DALPHA = 4
+        DBETA = 5
+        DGAMMA = 6
+
+        AXISA = AXISC = 3
+        AXISB = 1
+
+        A = AXISA
+        B = AXISB
+        L = 6 - A - B
+        D = -1  # but could be +1; "DELTA(A,B)"
+
+        CA = cos(locang[ALPHA])
+        SA = sin(locang[ALPHA])
+
+        U = cos(locang[BETA])
+        V = D * sin(locang[BETA])
+
+        solutn = array((
+            (-D, 0.0, 0.0),
+            (0.0, -D * CA, SA),
+            (-D * U, -SA * V, -D * CA * V),
+        ))
+
+        solutn = solutn.T #?
+
+        domega = solutn.dot(locang[3:])
+
+        import numpy as np
+        drdtrt = np.zeros((3, 3))
+
+        L -= 1
+        B -= 1
+        A -= 1
+
+        drdtrt[L,B] = domega[1-1]
+        drdtrt[B,L] = -domega[1-1]
+
+        drdtrt[A,L] = domega[2-1]
+        drdtrt[L,A] = -domega[2-1]
+
+        drdtrt[B,A] = domega[3-1]
+        drdtrt[A,B] = -domega[3-1]
+
+        drdtrt = drdtrt.T #?
+
+        drdt = drdtrt.dot(R)
+        D = drdt
+
+        if self._matrix is not None:
+            R = self._matrix.dot(R)
+        #D = rot_z(-wdot).dot(rot_x(-decdot).dot(rot_z(-radot)))
+        return R, D
 
 class PlanetTopos(VectorFunction):
     """Location that rotates with the surface of another Solar System body.
