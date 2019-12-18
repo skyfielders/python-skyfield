@@ -21,28 +21,20 @@ def test_frame_rotation_matrices():
 
     # To produce the following spiceypy matrices:
     #
-    import numpy as np
-    import spiceypy as spice
-    from skyfield.constants import DAY_S
-    spice.furnsh('moon_080317.tf')
-    spice.furnsh('moon_pa_de421_1900-2050.bpc')
-    g = np.vectorize(repr)
-    print(g(spice.pxform('J2000', 'MOON_PA', (tdb - T0) * DAY_S)))
-    print(g(spice.sxform('J2000', 'MOON_PA', (tdb - T0) * DAY_S)[3:6,:3]))
+    # import numpy as np
+    # import spiceypy as spice
+    # from skyfield.constants import DAY_S
+    # spice.furnsh('moon_080317.tf')
+    # spice.furnsh('moon_pa_de421_1900-2050.bpc')
+    # g = np.vectorize(repr)
+    # print(g(spice.pxform('J2000', 'MOON_PA', (tdb - T0) * DAY_S)))
+    # print(g(spice.sxform('J2000', 'MOON_PA', (tdb - T0) * DAY_S)[3:6,:3]))
 
     spiceypy_rotation = [
         [0.9994150897380264, 0.032310270603926675, 0.011203785852719871],
         [-0.034157426811763446, 0.9272642685944782, 0.37284614304233643],
         [0.0016578894811167893, -0.3730107540024127, 0.9278255379116378],
     ]
-    # spiceypy_rate = [
-    #     [ -9.0916992653055378e-08,   2.4682369763316187e-06,
-    #        9.9202268744491445e-07],
-    #     [ -2.6601275013494018e-06,  -8.6208910075886084e-08,
-    #       -2.9300741588246011e-08],
-    #     [  4.2459631446005060e-10,  -5.0678787655029271e-10,
-    #       -2.0450101227202991e-10],
-    # ]
     spiceypy_rate = [
         [-9.091699265305538e-08, 2.4682369763316187e-06, 9.920226874449144e-07],
         [-2.660127501349402e-06, -8.620891007588608e-08, -2.930074158824601e-08],
@@ -54,24 +46,7 @@ def test_frame_rotation_matrices():
 
     R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
     assert (R == R2).all()  # (Less surprising: Python agrees with itself.)
-
-    print('mine:')
-    print(Rv)
-    print('actual:')
-    print(np.array(spiceypy_rate))
-    print('difference:')
-    print(Rv - spiceypy_rate)
-
     assert (Rv == spiceypy_rate).all()  # Boom.
-    # print('candidate2:',
-    #       repr(0 + -2.6616852779228065e-06 * 0.032310270603926675
-    #            + -4.0568232474023717e-10 * 0.011203785852719871))
-    print('candidate1:',
-          repr(0 +  2.6616852779228065e-06 * -0.034157426811763446
-               + 4.0568232474023717e-10 * 0.0016578894811167893))
-    print('candidateC:',
-          repr(0 +  2.6616852779228065e-06 *   -3.4157426811763446e-02
-              + -4.0568232474023717e-10 *    1.6578894811167893e-03))
 
     # Second, a moment when the angle W is more than 2500 radians.
 

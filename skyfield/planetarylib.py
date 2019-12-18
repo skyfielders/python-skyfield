@@ -132,78 +132,34 @@ class Frame(object):
     def rotation_and_rate_at(self, t):
         components, rates = self._segment.compute(t.tdb, 0.0, True)
         ra, dec, w = components
-        radot, decdot, wdot = rates
-        print('<dot> ra dec w =', radot, decdot, wdot)
-        from math import pi
         R = rot_z(-w).dot(rot_x(-dec).dot(rot_z(-ra)))
 
-        from math import pi
-        locang = array((0, w, dec, ra, wdot, decdot, radot))
-
-        ALPHA = 1
-        BETA = 2
-        GAMMA = 3
-        DALPHA = 4
-        DBETA = 5
-        DGAMMA = 6
-
-        A = 3
-        B = 1
-        L = 2
-        D = -1  # but could be +1; "DELTA(A,B)"
-
-        CA = cos(locang[ALPHA])
-        SA = sin(locang[ALPHA])
-
-        U = cos(locang[BETA])
-        V = D * sin(locang[BETA])
-        print([repr(n) for n in (CA, SA, U, V)])   # exactly equal
-        print([repr(n) for n in locang[4:]])       # exactly equal
+        ca = cos(w)
+        sa = sin(w)
+        u = cos(dec)
+        v = -sin(dec)
 
         solutn = array((
-            (-D, 0.0, 0.0),
-            (0.0, -D * CA, SA),
-            (-D * U, -SA * V, -D * CA * V),
+            (1.0, 0.0, u),
+            (0.0, ca, -sa * v),
+            (0.0, sa, ca * v),
         ))
 
-        solutn = solutn.T #?
+        domega = solutn.dot(rates[::-1])
 
-        domega = solutn.dot(locang[4:])
-        assert domega.shape == (3,)
+        drdtrt = array((
+            (0.0, domega[0], domega[2]),
+            (-domega[0], 0.0, domega[1]),
+            (-domega[2], -domega[1], 0.0),
+        ))
 
-        import numpy as np
-        drdtrt = np.zeros((3, 3))
-
-        A -= 1  #prep for use as indexes
-        B -= 1
-        L -= 1
-
-        drdtrt[L,B] = domega[1-1]
-        drdtrt[B,L] = -domega[1-1]
-
-        drdtrt[A,L] = domega[2-1]
-        drdtrt[L,A] = -domega[2-1]
-
-        drdtrt[B,A] = -domega[3-1]
-        drdtrt[A,B] = domega[3-1]
-
-        drdtrt = drdtrt.T #?
-
-        np.set_printoptions(precision=16)
-        print('drdtrt =\n', np.vectorize(repr)(drdtrt))  # exactly equal
-        print('R =\n', np.vectorize(repr)(R))
-
-        #drdt = drdtrt.dot(R)
-        #drdt = R.dot(drdtrt)
-        drdt = drdtrt.dot(R)
-        drdt = einsum('ij...,jk...->ik...', drdtrt, R)
-
-        print('drdt =\n', np.vectorize(repr)(drdt))
-        D = drdt
+        D = einsum('ij...,jk...->ik...', drdtrt, R)
 
         if self._matrix is not None:
-            R = self._matrix.dot(R)
-        #D = rot_z(-wdot).dot(rot_x(-decdot).dot(rot_z(-radot)))
+            # Need to rotate rate as well.
+            #R = self._matrix.dot(R)
+            raise ValueError('not yet implemented')
+
         return R, D
 
 class PlanetTopos(VectorFunction):
