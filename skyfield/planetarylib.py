@@ -3,7 +3,7 @@
 import re
 from numpy import array, cos, einsum, nan, sin
 from jplephem.pck import DAF, PCK
-from .constants import ASEC2RAD, AU_KM, pi
+from .constants import ASEC2RAD, AU_KM, DAY_S, pi
 from .functions import rot_x, rot_y, rot_z
 from .units import Angle, Distance
 from .vectorlib import VectorFunction
@@ -191,8 +191,8 @@ class PlanetTopos(VectorFunction):
             return einsum('ij...,i...->j...', A, B)
 
         R, dRdt = self._frame.rotation_and_rate_at(t)
-        r = mul(R, self._position_au)  # TODO: sign flip earlier
-        v = mul(dRdt, self._position_au)
+        r = mul(R, self._position_au)
+        v = mul(dRdt, self._position_au) * DAY_S
         # TODO: altaz
         return r, v, None, None
 

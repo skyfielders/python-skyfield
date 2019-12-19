@@ -125,7 +125,18 @@ def test_rotating_vector_into_frame():
     result = vector.frame_xyz(relative_frame)
     assert max(abs(result.km - [379892.825, 33510.118, -12661.5278])) < meter
 
-def test_position_of_latitude_longitude_on_moon():
+def test_horizons_position_of_latitude_longitude_on_moon():
+    # This test against HORIZON is low-precision, with agreement only
+    # within about 100m.  This is a symptom of the fact that here we are
+    # using the recent high-accuracy MOON_ME frame, while HORIZONS says
+    # it is using the old "IAU_MOON".  Alas, the NAIF presentation
+    # `23_lunar-earth_pck-fk.pdf` says that the worse-case agreement
+    # between the frames is 155m and is on average only 76m, so our low
+    # agreement here is reasonable.
+    #
+    # See the file `horizons/moon-from-moon-topos` for the HORIZONS
+    # result this test compares against.
+
     ts = load.timescale(builtin=True)
     t = ts.tdb_jd(2458827.5)
 
@@ -143,22 +154,16 @@ def test_position_of_latitude_longitude_on_moon():
     geometric = pt.at(t)
     assert geometric.center == 301
 
-    # See the file `horizons/moon-from-moon-topos` for HORIZONS result.
-    # Alas, here we achieve only about 4-5 digits of agreement.  The
-    # agreement should be far greater.  Yes, the latitude and longitude
-    # are only 3 digits each, but HORIZONS considers them to be very
-    # precise values like "313.200000".
-    want = [-1.043588965592271E-05, -3.340834944508400E-06,
-            3.848560523814720E-06]
+    # Note that the sign of these two vectors is flipped, since HORIZONS
+    # measured the other direction, from the surface to the center.
+
+    want = -1.043588965592271E-05, -3.340834944508400E-06, 3.848560523814720E-06
     meter = 1.0 / AU_M
-    print(geometric.position.au)
-    print(want)
-    print(geometric.position.au - want)
-    print((geometric.position.au - want) / meter)
     assert abs(geometric.position.au - want).max() < 101 * meter
 
-    # TODO: add a "want" from the HORIZONS velocity
-    #print(geometric.velocity.au_per_d)
+    want = 3.480953228580460E-07, -2.173626424774260E-06, -9.429610667799021E-07
+    assert abs(geometric.velocity.au_per_d - want).max() < 1.6e-10
+    # Is this 4-5 digits of precision all we can expect?  No idea.
 
 def test_observing_earth_from_location_on_moon():
     ts = load.timescale(builtin=True)
