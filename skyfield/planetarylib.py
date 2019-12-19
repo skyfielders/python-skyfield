@@ -3,13 +3,16 @@
 import re
 from numpy import array, cos, einsum, nan, sin
 from jplephem.pck import DAF, PCK
-from .constants import ASEC2RAD, AU_KM
+from .constants import ASEC2RAD, AU_KM, pi
 from .functions import rot_x, rot_y, rot_z
 from .units import Angle, Distance
 from .vectorlib import VectorFunction
 
 _TEXT_MAGIC_NUMBERS = b'KPL/FK', b'KPL/PCK'
 _NAN3 = array((nan, nan, nan))
+
+def _matmul(A, B):
+    return einsum('ij...,jk...->ik...', A, B)
 
 class PlanetaryConstants(object):
     """Planetary constants kernel."""
@@ -68,13 +71,9 @@ class PlanetaryConstants(object):
                 matrix = 1,0,0, 0,1,0, 0,0,1
                 matrix = array(matrix)
                 matrix.shape = 3, 3
-                # TODO: test is not yet sensitive enough to know if we
-                # did these rotations in the right order.
-                # (Can we reverse order without loss of correctness?)
                 for angle, axis in list(zip(angles, axes)):
                     rot = _rotations[axis]
-                    #matrix = rot(angle * scale).dot(matrix)
-                    matrix = matrix.dot(rot(angle * scale))
+                    matrix = _matmul(rot(angle * scale), matrix)
             elif spec == 'MATRIX':
                 matrix = self.assignments['TKFRAME_{0}_MATRIX'.format(integer)]
                 matrix = array(matrix)
@@ -126,7 +125,7 @@ class Frame(object):
         ra, dec, w = self._segment.compute(t.tdb, 0.0, False)
         R = rot_z(-w).dot(rot_x(-dec).dot(rot_z(-ra)))
         if self._matrix is not None:
-            R = self._matrix.dot(R)
+            R = _matmul(self._matrix, R)
         return R
 
     def rotation_and_rate_at(self, t):
@@ -153,14 +152,13 @@ class Frame(object):
             (-domega[2], -domega[1], 0.0),
         ))
 
-        D = einsum('ij...,jk...->ik...', drdtrt, R)
+        dRdt = _matmul(drdtrt, R)
 
         if self._matrix is not None:
-            # Need to rotate rate as well.
-            #R = self._matrix.dot(R)
-            raise ValueError('not yet implemented')
+            R = _matmul(self._matrix, R)
+            dRdt = _matmul(self._matrix, dRdt)
 
-        return R, D
+        return R, dRdt
 
 class PlanetTopos(VectorFunction):
     """Location that rotates with the surface of another Solar System body.
@@ -169,9 +167,9 @@ class PlanetTopos(VectorFunction):
     other fixed position that rotates with the body's surface.
 
     """
-    def __init__(self, center, frame, position_au):
+    def __init__(self, frame, position_au):
         # TODO: always take center from frame
-        self.center = center
+        self.center = frame.center
         self.target = object()  # TODO: make more interesting
         self.center_name = None  # TODO: deprecate and remove
         self.target_name = None
@@ -180,19 +178,23 @@ class PlanetTopos(VectorFunction):
 
     @classmethod
     def from_latlon_distance(cls, frame, latitude, longitude, distance):
-        r = array((-distance.au, 0.0, 0.0))
+        r = array((distance.au, 0.0, 0.0))
         r = rot_z(longitude.radians).dot(rot_y(-latitude.radians).dot(r))
 
-        self = cls(frame.center, frame, r)
+        self = cls(frame, r)
         self.latitude = latitude
         self.longitude = longitude
         return self
 
     def _at(self, t):
-        r = self._frame.rotation_at(t).T.dot(self._position_au)
-        v = _NAN3.copy()
+        def mul(A, B):
+            return einsum('ij...,i...->j...', A, B)
+
+        R, dRdt = self._frame.rotation_and_rate_at(t)
+        r = mul(R, self._position_au)  # TODO: sign flip earlier
+        v = mul(dRdt, self._position_au)
         # TODO: altaz
-        return r, v, r, None
+        return r, v, None, None
 
 def parse_text_pck(lines):
     """Yield ``(name, value)`` tuples parsed from a PCK text kernel."""

@@ -476,6 +476,7 @@ class Astrometric(ICRF):
             bcrs_position = bcrs_position.reshape(shape)
             bcrs_velocity = bcrs_velocity.reshape(shape)
             if gcrs_position is not None:
+                asdfff
                 gcrs_position = gcrs_position.reshape(shape)
 
         if gcrs_position is None:
