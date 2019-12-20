@@ -202,6 +202,17 @@ Stars and other distant objects
 
    Star
 
+Planetary reference frames
+==========================
+
+.. currentmodule:: skyfield.planetarylib
+
+.. autosummary::
+   :nosignatures:
+
+   PlanetaryConstants
+   Frame
+
 Astronomical positions
 ======================
 

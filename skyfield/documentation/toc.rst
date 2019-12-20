@@ -18,6 +18,7 @@ that is accelerated using NumPy vector math!
    time
    planets
    stars
+   planetary
    earth-satellites
    elements
    astropy
@@ -27,9 +28,10 @@ that is accelerated using NumPy vector math!
    api-vectors
    api-ephemeris
    api-topos
-   api-almanac.rst
+   api-almanac
    api-satellites
    api-stars
+   api-planetary
    api-position
    api-elements
    api-units

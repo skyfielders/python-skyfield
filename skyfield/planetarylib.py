@@ -26,15 +26,33 @@ def _mxmxm(M1, M2, M3):
     return einsum('ij...,jk...,kl...->il...', M1, M2, M3)
 
 class PlanetaryConstants(object):
-    """Planetary constants kernel."""
+    """Planetary constants manager.
 
+    You can use this class to build working models of Solar System
+    bodies by loading text planetary constant files and binary
+    orientation kernels.  For a full description of how to use this, see
+    :doc:`planetary`.
+
+    """
     def __init__(self):
         self.assignments = {}
         self._binary_files = []
         self._segment_map = {}
 
     def read_text(self, file):
-        """Read frame assignments from a KPL/FK file."""
+        """Read frame assignments from a KPL/FK file.
+
+        Appropriate files will typically have the extension ``.tf`` or
+        ``.tpc`` and will define a series of names and values that will
+        be loaded into this object's ``.assignments`` dictionary.
+
+        >>> from skyfield.api import load
+        >>> pc = PlanetaryConstants()
+        >>> pc.read_text(load('moon_080317.tf'))
+        >>> pc.assignments['FRAME_31006_NAME']
+        'MOON_PA_DE421'
+
+        """
         file.seek(0)
         try:
             if not file.read(7).startswith(_TEXT_MAGIC_NUMBERS):
@@ -46,7 +64,12 @@ class PlanetaryConstants(object):
             file.close()
 
     def read_binary(self, file):
-        """Read binary segments descriptions from a DAF/PCK file."""
+        """Read binary segments descriptions from a DAF/PCK file.
+
+        Binary segments live in ``.bpc`` files and predict how a body
+        like a planet or moon will be oriented on a given date.
+
+        """
         file.seek(0)
         if file.read(7) != b'DAF/PCK':
             raise ValueError('file must start with the bytes "DAF/PCK"')
@@ -65,10 +88,12 @@ class PlanetaryConstants(object):
             raise e
 
     def build_frame_named(self, name):
+        """Given a frame name, return a :class:`Frame` object."""
         integer = self._get_assignment('FRAME_{0}'.format(name))
         return self.build_frame(integer)
 
     def build_frame(self, integer, _segment=None):
+        """Given a frame integer code, return a :class:`Frame` object."""
         center = self._get_assignment('FRAME_{0}_CENTER'.format(integer))
         spec = self.assignments.get('TKFRAME_{0}_SPEC'.format(integer))
         if spec is None:
@@ -106,6 +131,7 @@ class PlanetaryConstants(object):
         return Frame(center, segment, matrix)
 
     def build_latlon_degrees(self, frame, latitude_degrees, longitude_degrees):
+        """Build an object representing a location on a body's surface."""
         lat = Angle.from_degrees(latitude_degrees)
         lon = Angle.from_degrees(longitude_degrees)
         radii = self._get_assignment('BODY{0}_RADII'.format(frame.center))
@@ -133,6 +159,7 @@ class Frame(object):
         self._matrix = matrix
 
     def rotation_at(self, t):
+        """Return the rotation matrix for this frame at time ``t``."""
         ra, dec, w = self._segment.compute(t.tdb, 0.0, False)
         R = _mxm(rot_z(-w), _mxm(rot_x(-dec), rot_z(-ra)))
         if self._matrix is not None:
@@ -140,6 +167,7 @@ class Frame(object):
         return R
 
     def rotation_and_rate_at(self, t):
+        """Return rotation and rate matrices for this frame at time ``t``."""
         components, rates = self._segment.compute(t.tdb, 0.0, True)
         ra, dec, w = components
         R = _mxm(rot_z(-w), _mxm(rot_x(-dec), rot_z(-ra)))
@@ -202,7 +230,6 @@ class PlanetTopos(VectorFunction):
         R, dRdt = self._frame.rotation_and_rate_at(t)
         r = _mxv(_T(R), self._position_au)
         v = _mxv(_T(dRdt), self._position_au) * DAY_S
-        print(r.shape, v.shape)
         return r, v, None, None
 
     def _snag_observer_data(self, observer_data, t):
