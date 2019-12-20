@@ -28,5 +28,5 @@ install:
   - "python -c 'import pandas'"
 
 script:
-  - "./test-code.sh"
+  - "../test-code.sh"
   - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 matplotlib==2.2.3 numpy==1.14.2 sphinx==1.7.2 ; cd .. ; ./test-docs.sh ; fi"
