@@ -12,4 +12,5 @@ to install all of the tools and libraries for Skyfield development.
 EOF
     exit 2
 fi
+pyflakes skyfield/*.py
 exec assay --batch skyfield/tests

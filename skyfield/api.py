@@ -22,9 +22,10 @@ from .named_stars import NamedStar
 
 load = Loader('.')
 
-__all__ = ['Angle', 'Distance', 'EarthSatellite', 'Loader', 'NamedStar',
-           'Star', 'T0', 'Time', 'Timescale', 'Topos', 'datetime',
-           'load', 'load_file', 'utc', 'pi', 'tau']
+__all__ = ['Angle', 'B1950', 'Distance', 'EarthSatellite', 'Loader',
+           'NamedStar', 'PlanetaryConstants', 'Star', 'T0', 'Time',
+           'Timescale', 'Topos', 'datetime', 'load', 'load_constellation_map',
+           'load_file', 'position_from_radec', 'utc', 'pi', 'tau']
 
 # An attempt at friendliest-possible deprecations:
 

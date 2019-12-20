@@ -79,7 +79,7 @@ class PlanetaryConstants(object):
                 matrix = array(matrix)
                 matrix.shape = 3, 3
             else:
-                raise NotImplemented('spec %r not yet implemented' % spec)
+                raise NotImplementedError('spec %r not yet implemented' % spec)
             relative = self.assignments['TKFRAME_{0}_RELATIVE'.format(integer)]
             integer = self.assignments['FRAME_{0}'.format(relative)]
 
@@ -242,7 +242,8 @@ def _evaluate(token):
     if token.isdigit():
         return int(token)
     if token.startswith(b'@'):
-        raise NotImplemented('TODO: need parser for dates, like @01-MAY-1991/16:25')
+        raise NotImplementedError('TODO: need parser for dates,'
+                                  ' like @01-MAY-1991/16:25')
     token = token.replace(b'D', b'E')  # for numbers like -1.4D-12
     return float(token)
 

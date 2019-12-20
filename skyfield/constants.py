@@ -1,7 +1,5 @@
 """Various constants required by Skyfield."""
 
-from math import pi
-
 # Definitions.
 AU_M = 149597870700             # per IAU 2012 Resolution B2
 AU_KM = 149597870.700
@@ -12,6 +10,7 @@ DAY_S = 86400.0
 ASEC2RAD = 4.848136811095359935899141e-6
 DEG2RAD = 0.017453292519943296
 RAD2DEG = 57.295779513082321
+pi = 3.141592653589793
 tau = 6.283185307179586476925287  # lower case, for symmetry with math.pi
 
 # Physics.

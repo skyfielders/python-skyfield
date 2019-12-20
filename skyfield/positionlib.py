@@ -1,9 +1,6 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import (
-    arccos, arctan2, array, clip, cross,
-    einsum, empty, exp, full, nan, sign,
-)
+from numpy import arccos, array, clip, einsum, exp, full, nan
 from .constants import ANGVEL, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
