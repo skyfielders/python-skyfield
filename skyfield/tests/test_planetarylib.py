@@ -202,6 +202,32 @@ def test_observing_earth_from_location_on_moon():
     pair = alt.degrees, az.degrees
     assert abs(np.array(want) - pair).max() < 12 * arcsecond
 
+def test_observing_earth_from_location_on_moon_with_time_vector():
+    # See the above test for a more thorough blow-by-blow test of this
+    # complete operation.  Here, we simply run through it quickly and
+    # test only the end result, to see if the operation more thoroughly
+    # tested above will also work when given a time vector.
+
+    ts = load.timescale(builtin=True)
+    t = ts.utc(2019, 12, [13, 14])
+
+    pc = PlanetaryConstants()
+    pc.read_text(load('moon_080317.tf'))
+    pc.read_text(load('pck00008.tpc'))
+    pc.read_binary(load('moon_pa_de421_1900-2050.bpc'))
+
+    frame = pc.build_frame_named('MOON_ME_DE421')
+    pt = pc.build_latlon_degrees(frame, 26.3, 313.2)
+    eph = load('de421.bsp')
+    astrometric = (eph['moon'] + pt).at(t).observe(eph['earth'])
+    apparent = astrometric.apparent()
+    alt, az, distance = apparent.altaz()
+
+    want = (42.0019, 40.7411), (114.9380, 116.3859)
+    pair = alt.degrees, az.degrees
+    arcsecond = 1.0 / 3600.0
+    assert abs(np.array(want) - pair).max() < 12 * arcsecond
+
 def test_frame_alias():
     pc = PlanetaryConstants()
     pc.read_text(load('moon_080317.tf'))

@@ -1,7 +1,7 @@
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
 import re
-from numpy import array, cos, einsum, nan, sin
+from numpy import array, cos, einsum, nan, rollaxis, sin
 from jplephem.pck import DAF, PCK
 from .constants import ASEC2RAD, AU_KM, DAY_S, tau
 from .functions import rot_x, rot_y, rot_z
@@ -10,9 +10,20 @@ from .vectorlib import VectorFunction
 
 _TEXT_MAGIC_NUMBERS = b'KPL/FK', b'KPL/PCK'
 _NAN3 = array((nan, nan, nan))
+_halftau = tau / 2.0
+_quartertau = tau / 4.0
 
-def _matmul(A, B):
-    return einsum('ij...,jk...->ik...', A, B)
+def _T(M):
+    return rollaxis(M, 1)
+
+def _mxv(M, v):
+    return einsum('ij...,j...->i...', M, v)
+
+def _mxm(M1, M2):
+    return einsum('ij...,jk...->ik...', M1, M2)
+
+def _mxmxm(M1, M2, M3):
+    return einsum('ij...,jk...,kl...->il...', M1, M2, M3)
 
 class PlanetaryConstants(object):
     """Planetary constants kernel."""
@@ -73,7 +84,7 @@ class PlanetaryConstants(object):
                 matrix.shape = 3, 3
                 for angle, axis in list(zip(angles, axes)):
                     rot = _rotations[axis]
-                    matrix = _matmul(rot(angle * scale), matrix)
+                    matrix = _mxm(rot(angle * scale), matrix)
             elif spec == 'MATRIX':
                 matrix = self.assignments['TKFRAME_{0}_MATRIX'.format(integer)]
                 matrix = array(matrix)
@@ -123,40 +134,42 @@ class Frame(object):
 
     def rotation_at(self, t):
         ra, dec, w = self._segment.compute(t.tdb, 0.0, False)
-        R = rot_z(-w).dot(rot_x(-dec).dot(rot_z(-ra)))
+        R = _mxm(rot_z(-w), _mxm(rot_x(-dec), rot_z(-ra)))
         if self._matrix is not None:
-            R = _matmul(self._matrix, R)
+            R = _mxm(self._matrix, R)
         return R
 
     def rotation_and_rate_at(self, t):
         components, rates = self._segment.compute(t.tdb, 0.0, True)
         ra, dec, w = components
-        R = rot_z(-w).dot(rot_x(-dec).dot(rot_z(-ra)))
+        R = _mxm(rot_z(-w), _mxm(rot_x(-dec), rot_z(-ra)))
 
+        zero = w * 0.0
+        one = 1.0 + zero
         ca = cos(w)
         sa = sin(w)
         u = cos(dec)
         v = -sin(dec)
 
         solutn = array((
-            (1.0, 0.0, u),
-            (0.0, ca, -sa * v),
-            (0.0, sa, ca * v),
+            (one, zero, u),
+            (zero, ca, -sa * v),
+            (zero, sa, ca * v),
         ))
 
-        domega = solutn.dot(rates[::-1])
+        domega = _mxv(solutn, rates[::-1])
 
         drdtrt = array((
-            (0.0, domega[0], domega[2]),
-            (-domega[0], 0.0, domega[1]),
-            (-domega[2], -domega[1], 0.0),
+            (zero, domega[0], domega[2]),
+            (-domega[0], zero, domega[1]),
+            (-domega[2], -domega[1], zero),
         ))
 
-        dRdt = _matmul(drdtrt, R)
+        dRdt = _mxm(drdtrt, R)
 
         if self._matrix is not None:
-            R = _matmul(self._matrix, R)
-            dRdt = _matmul(self._matrix, dRdt)
+            R = _mxm(self._matrix, R)
+            dRdt = _mxm(self._matrix, dRdt)
 
         return R, dRdt
 
@@ -168,7 +181,6 @@ class PlanetTopos(VectorFunction):
 
     """
     def __init__(self, frame, position_au):
-        # TODO: always take center from frame
         self.center = frame.center
         self.target = object()  # TODO: make more interesting
         self.center_name = None  # TODO: deprecate and remove
@@ -179,7 +191,7 @@ class PlanetTopos(VectorFunction):
     @classmethod
     def from_latlon_distance(cls, frame, latitude, longitude, distance):
         r = array((distance.au, 0.0, 0.0))
-        r = rot_z(longitude.radians).dot(rot_y(-latitude.radians).dot(r))
+        r = _mxv(rot_z(longitude.radians), _mxv(rot_y(-latitude.radians), r))
 
         self = cls(frame, r)
         self.latitude = latitude
@@ -187,24 +199,22 @@ class PlanetTopos(VectorFunction):
         return self
 
     def _at(self, t):
-        def mul(M, v):
-            return einsum('ij...,j...->i...', M, v)
-
         R, dRdt = self._frame.rotation_and_rate_at(t)
-        r = mul(R.T, self._position_au)
-        v = mul(dRdt.T, self._position_au) * DAY_S
+        r = _mxv(_T(R), self._position_au)
+        v = _mxv(_T(dRdt), self._position_au) * DAY_S
+        print(r.shape, v.shape)
         return r, v, None, None
 
     def _snag_observer_data(self, observer_data, t):
         R = self._frame.rotation_at(t)
-
-        observer_data.altaz_rotation = _matmul(
-            rot_z(tau/2),
-            _matmul(
-                rot_y(self.latitude.radians - tau/4),
-                _matmul(
-                    rot_z(-self.longitude.radians),
-                    R)))
+        observer_data.altaz_rotation = _mxmxm(
+            # TODO: Figure out how to produce this rotation directly
+            # from _position_au, to support situations where we were not
+            # given a latitude and longitude.  If that is not feasible,
+            # then at least cache the product of these first two matrices.
+            rot_y(_quartertau - self.latitude.radians),
+            rot_z(_halftau - self.longitude.radians),
+            R)
 
         # Can clockwise be turned into counterclockwise through any
         # possible rotation?  For now, flip the sign of y so that
