@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Routines specific to some calculation related with cultures in East Asia."""
 
 from skyfield.constants import tau
