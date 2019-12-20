@@ -21,4 +21,4 @@ then
     d=$(python -c 'import skyfield as s; print(s.__file__.rsplit("/", 1)[0])')
     pyflakes "$d"/skyfield/*.py
 fi
-exec assay --batch skyfield/tests
+exec assay --batch skyfield.tests
