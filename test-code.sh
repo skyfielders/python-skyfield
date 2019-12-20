@@ -1,6 +1,8 @@
 #!/bin/bash
-
-cd "$(dirname "${BASH_SOURCE[0]}")"
+#
+# This script should not change directory, because CI strategically runs
+# it from somewhere besides the repository root to prevent Skyfield from
+# being imported directly from its source tree.
 
 set -e
 if ! command -v assay >/dev/null
@@ -15,6 +17,8 @@ EOF
     exit 2
 fi
 if python --version | grep -q 'Python 2.7'
-then pyflakes skyfield/*.py
+then
+    d=$(python -c 'import skyfield as s; print(s.__file__.rsplit("/", 1)[0])')
+    pyflakes "$d"/skyfield/*.py
 fi
 exec assay --batch skyfield/tests

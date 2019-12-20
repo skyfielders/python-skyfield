@@ -107,7 +107,7 @@ we will see that it looked for files in the current directory:
 
     Already exists: ./deltat.data
       Parsing with: parse_deltat_data()
-      Does not expire til: 2020-06-01
+      Does not expire til: 2020-09-01
     Already exists: ./deltat.preds
       Parsing with: parse_deltat_preds()
       Does not expire til: 2021-01-01
