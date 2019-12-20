@@ -91,7 +91,7 @@ def test_altaz_needs_topos(ts):
     e = api.load('de421.bsp')
     earth = e['earth']
     moon = e['moon']
-    with assert_raises(ValueError, 'using a Topos instance'):
+    with assert_raises(ValueError, 'from a specific Earth location'):
         earth.at(ts.utc(2016)).observe(moon).apparent().altaz()
 
 def test_from_altaz_needs_topos():
