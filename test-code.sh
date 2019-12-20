@@ -14,5 +14,7 @@ to install all of the tools and libraries for Skyfield development.
 EOF
     exit 2
 fi
-pyflakes skyfield/*.py
+if ! python --version | grep -q 'Python 2.7'
+then pyflakes skyfield/*.py
+fi
 exec assay --batch skyfield/tests
