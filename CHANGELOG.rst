@@ -3,8 +3,14 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-Next
-----
+1.16 — 2019 December 20
+-----------------------
+
+* Added basic :doc:`planetary` support, enough to compute the position
+  of a given latitude and longitude on the surface of the Moon.
+  `#79 <https://github.com/skyfielders/python-skyfield/issues/79>`_
+  `#124 <https://github.com/skyfielders/python-skyfield/issues/124>`_
+  `#258 <https://github.com/skyfielders/python-skyfield/issues/258>`_
 
 * Added :func:`~skyfield.almanac.oppositions_conjunctions()` for finding
   the dates when a planet is at opposition and conjunction with the sun.

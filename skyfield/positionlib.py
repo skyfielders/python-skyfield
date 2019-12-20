@@ -299,6 +299,10 @@ class ICRF(object):
     def frame_xyz(self, frame):
         """Express this position as an (x,y,z) vector in a particular frame."""
         R = frame.rotation_at(self.t)
+        # TODO: before documenting this routine, switch dot() to a real
+        # einsum multiply; and when doing so, make a central routine in
+        # functions.py for it instead of scattering yet more einsums
+        # everywhere.
         return Distance(au=R.dot(self.position.au))
 
     # Aliases; maybe someday turn into deprecations with warnings?
