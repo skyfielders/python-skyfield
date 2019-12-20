@@ -597,8 +597,9 @@ def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):
 
     if (elevation_m is None) or (R is None):
         raise ValueError('to compute an altazimuth position, you must'
-                         ' observe from a specific Earth location that'
-                         ' you specify using a Topos instance')
+                         ' observe from a specific Earth location or from'
+                         ' a position on another body loaded from a set'
+                         ' of planetary constants')
 
     # TODO: wobble
 

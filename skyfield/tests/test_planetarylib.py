@@ -183,13 +183,24 @@ def test_observing_earth_from_location_on_moon():
     eph = load('de421.bsp')
     astrometric = (eph['moon'] + pt).at(t).observe(eph['earth'])
 
-    # See the file `horizons/earth-from-moon-topos` for HORIZONS result.
-    print(astrometric.position.au)
+    # See the file `horizons/earth-from-moon-topos` for the HORIZONS
+    # source of the following `want` values.
+
     ra, dec, distance = astrometric.radec()
-    #ra, dec, distance = astrometric.apparent().radec()
-    print('want: 270.2590484        -22.8079717')
-    print('got:  {} {}'.format(ra._degrees, dec.degrees))
-    # asdf
+    want = 270.2590484, -22.8079717
+    arcsecond = 1.0 / 3600.0
+    assert abs(ra._degrees - want[0]) < 0.03 * arcsecond
+    assert abs(dec.degrees - want[1]) < 0.03 * arcsecond
+
+    # See the file `horizons/earth-from-moon-topos` for the HORIZONS
+    # source of these angles.  TODO: Investigate how we descended from
+    # the brilliant sub-arcsecond precision of the previous result to a
+    # mere 12 arcseconds of agreement.
+    apparent = astrometric.apparent()
+    alt, az, distance = apparent.altaz()
+    want = 42.0019, 114.9380
+    pair = alt.degrees, az.degrees
+    assert abs(np.array(want) - pair).max() < 12 * arcsecond
 
 def test_frame_alias():
     pc = PlanetaryConstants()

@@ -3,7 +3,7 @@
 import re
 from numpy import array, cos, einsum, nan, sin
 from jplephem.pck import DAF, PCK
-from .constants import ASEC2RAD, AU_KM, DAY_S, pi
+from .constants import ASEC2RAD, AU_KM, DAY_S, tau
 from .functions import rot_x, rot_y, rot_z
 from .units import Angle, Distance
 from .vectorlib import VectorFunction
@@ -187,14 +187,34 @@ class PlanetTopos(VectorFunction):
         return self
 
     def _at(self, t):
-        def mul(A, B):
-            return einsum('ij...,i...->j...', A, B)
+        def mul(M, v):
+            return einsum('ij...,j...->i...', M, v)
 
         R, dRdt = self._frame.rotation_and_rate_at(t)
-        r = mul(R, self._position_au)
-        v = mul(dRdt, self._position_au) * DAY_S
-        # TODO: altaz
+        r = mul(R.T, self._position_au)
+        v = mul(dRdt.T, self._position_au) * DAY_S
         return r, v, None, None
+
+    def _snag_observer_data(self, observer_data, t):
+        R = self._frame.rotation_at(t)
+
+        observer_data.altaz_rotation = _matmul(
+            rot_z(tau/2),
+            _matmul(
+                rot_y(self.latitude.radians - tau/4),
+                _matmul(
+                    rot_z(-self.longitude.radians),
+                    R)))
+
+        # Can clockwise be turned into counterclockwise through any
+        # possible rotation?  For now, flip the sign of y so that
+        # azimuth reads north-east rather than the other direction.
+        observer_data.altaz_rotation[1] *= -1
+
+        # TODO: find a better way to turn off atmospheric refraction in
+        # _to_altaz().  Consider: is elevation_m even the right value to
+        # be persisting through all the logic to that point?
+        observer_data.elevation_m = 'not None, yet not an Earth elevation'
 
 def parse_text_pck(lines):
     """Yield ``(name, value)`` tuples parsed from a PCK text kernel."""
