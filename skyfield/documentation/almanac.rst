@@ -153,10 +153,9 @@ conjunction with the Sun is when their ecliptic longitudes are at 0° or
     [0 1]
     ['conjunction', 'opposition']
 
-The result ``t`` will be an array of times, and ``y`` will be a
-corresponding array of Moon phases with 0 for New Moon and 3 for Last
-Quarter.  You can use the array ``MOON_PHASES`` to retrieve names for
-each phase.
+The result ``t`` will be an array of times, and ``y`` will be an array
+of integers where 0 means a conjunction and 1 means an opposition.  You
+can use the array ``CONJUNCTIONS`` to retrieve names for each value.
 
 Sunrise and Sunset
 ==================
