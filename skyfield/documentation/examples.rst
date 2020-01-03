@@ -147,6 +147,46 @@ like the Sun, Moon, or one of the planets.
     Sun 20 05:49 MST rises
     Sun 20 14:22 MST sets
 
+What latitude and longitude is beneath this right ascension and declination?
+============================================================================
+
+Most Skyfield calculations,
+like an observation of a planet or an Earth satellite,
+directly produce a vector position centered on the Earth.
+Calling the position’s
+:meth:`~skyfield.positionlib.Geocentric.subpoint()` method
+lets you compute the Earth latitude and longitude
+from which the position is directly overhead.
+
+But sometimes the right ascension and declination of the position
+are known already.
+Instead of creating a :class:`~skyfield.starlib.Star` with those coordinates
+and asking it to compute its position,
+there is a simpler approach:
+creating the position directly.
+
+.. testcode::
+
+    from skyfield.api import load
+    from skyfield.positionlib import position_from_radec
+
+    ts = load.timescale(builtin=True)
+    t = ts.utc(2020, 1, 3, 12, 45)
+
+    earth = 399  # NAIF code for the Earth center of mass
+    ra_hours = 3.79
+    dec_degrees = 24.1167
+    pleiades = position_from_radec(ra_hours, dec_degrees, t=t, center=earth)
+    subpoint = pleiades.subpoint()
+
+    print('Latitude:', subpoint.latitude)
+    print('Longitude:', subpoint.longitude)
+
+.. testoutput::
+
+    Latitude: 24deg 10' 33.5"
+    Longitude: 123deg 17' 01.6"
+
 Which geographic location is farther from Earth’s center?
 =========================================================
 
