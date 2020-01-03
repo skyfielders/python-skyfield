@@ -427,11 +427,12 @@ def _unsexagesimalize(value):
 
     """
     if isinstance(value, tuple):
-        for i, component in enumerate(value):
-            if i:
-                value = value + copysign(component, value) * 60.0 ** -i
-            else:
-                value = component
+        components = iter(value)
+        value = next(components)
+        factor = 1.0
+        for component in components:
+            factor *= 60.0
+            value += copysign(component, value) / factor
     return value
 
 def _interpret_angle(name, angle_object, angle_float, unit='degrees'):
