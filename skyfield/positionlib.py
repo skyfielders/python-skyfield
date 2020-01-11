@@ -375,9 +375,11 @@ class Geometric(ICRF):
     def altaz(self, temperature_C=None, pressure_mbar='standard'):
         """Compute (alt, az, distance) relative to the observer's horizon
 
-        The altitude returned is an `Angle` in degrees above the
-        horizon, while the azimuth is the compass direction in degrees
-        with north being 0 degrees and east being 90 degrees.
+        The altitude returned is an :class:`~skyfield.units.Angle`
+        measured in degrees above the horizon, while the azimuth
+        :class:`~skyfield.units.Angle` measures east along the horizon
+        from geographic north (so 0 degrees means north, 90 is east, 180
+        is south, and 270 is west).
 
         """
         return _to_altaz(self.position.au, self.observer_data,
@@ -515,9 +517,11 @@ class Apparent(ICRF):
     def altaz(self, temperature_C=None, pressure_mbar='standard'):
         """Compute (alt, az, distance) relative to the observer's horizon
 
-        The altitude returned is an `Angle` in degrees above the
-        horizon, while the azimuth is the compass direction in degrees
-        with north being 0 degrees and east being 90 degrees.
+        The altitude returned is an :class:`~skyfield.units.Angle`
+        measured in degrees above the horizon, while the azimuth
+        :class:`~skyfield.units.Angle` measures east along the horizon
+        from geographic north (so 0 degrees means north, 90 is east, 180
+        is south, and 270 is west).
 
         """
         return _to_altaz(self.position.au, self.observer_data,
