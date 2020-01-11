@@ -194,7 +194,7 @@ After my hike of Mount Bierstadt in Colorado,
 a friend suggested that its 14,000 feet of elevation
 might have carried me farther from the Earth’s center
 than I had ever traveled before.
-It was a romantic thought,
+It was a romantic thought:
 that under my own power
 I had hiked farther from my home planet’s core
 than ever I had stood before.
@@ -205,7 +205,7 @@ only a few degrees away from the Earth’s equator,
 and that the Earth’s equatorial bulge
 might push even modest elevations at that latitude
 out farther from the Earth’s center
-than even a mountaintop in Colorado.
+than a mountaintop in Colorado.
 
 So I wrote a quick Skyfield script
 to compare the distance from the Earth’s center
