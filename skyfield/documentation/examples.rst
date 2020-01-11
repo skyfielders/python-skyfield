@@ -147,6 +147,34 @@ like the Sun, Moon, or one of the planets.
     Sun 20 05:49 MST rises
     Sun 20 14:22 MST sets
 
+What is the right ascension and declination of a point in the sky?
+==================================================================
+
+An observer is often interested in the astronomical coordinates
+of a particular position in the sky above them.
+If the observer can specify the position
+using altitude and azimuth coordinates,
+then Skyfield can return its right ascension and declination.
+
+.. testcode::
+
+    from skyfield import api
+
+    ts = api.load.timescale()
+    t = ts.utc(2019, 9, 13, 20)
+    topos = api.Topos(latitude_degrees=42, longitude_degrees=-87)
+    observer = topos.at(t)
+    pos = observer.from_altaz(alt_degrees=90, az_degrees=0)
+
+    ra, dec, distance = pos.radec()
+    print(ra)
+    print(dec)
+
+.. testoutput::
+
+    13h 41m 14.49s
+    +42deg 05' 50.0"
+
 What latitude and longitude is beneath this right ascension and declination?
 ============================================================================
 
