@@ -222,7 +222,7 @@ def oppositions_conjunctions(ephemeris, target):
     sun = ephemeris['sun']
 
     def leading_or_trailing(t):
-        """Return whether the target leads or trails the Sun around the sky."""
+        """Return whether the target is east or west of the Sun."""
         e = earth_at(t)
         _, slon, _ = e.observe(sun).apparent().ecliptic_latlon()
         _, tlon, _ = e.observe(target).apparent().ecliptic_latlon()

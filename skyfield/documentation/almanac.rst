@@ -145,17 +145,30 @@ conjunction with the Sun is when their ecliptic longitudes are at 0° or
 
     print(t.utc_iso())
     print(y)
-    print([almanac.CONJUNCTIONS[yi] for yi in y])
 
 .. testoutput::
 
     ['2019-09-02T10:42:14Z', '2020-10-13T23:25:47Z']
     [0 1]
-    ['conjunction', 'opposition']
 
 The result ``t`` will be an array of times, and ``y`` will be an array
-of integers where 0 means a conjunction and 1 means an opposition.  You
-can use the array ``CONJUNCTIONS`` to retrieve names for each value.
+of integers indicating which half of the sky the body has just entered:
+0 means the half of the sky west of the Sun along the ecliptic, and 1
+means the half of the sky east of the Sun.  This means different things
+for different bodies:
+
+* For the outer planets Mars, Jupiter, Saturn, Uranus, and all other
+  bodies out beyond our orbit, 0 means the moment of conjunction with
+  the Sun and 1 means the moment of opposition.
+
+* Because the Moon moves eastward across our sky relative to the Sun,
+  not westward, the output is reversed compared to the outer planets: 0
+  means the moment of opposition or Full Moon, while 1 means the moment
+  of conjunction or New Moon.
+
+* The inner planets Mercury and Venus only ever experience conjunctions
+  with the Sun from our point of view, never oppositions, with 0
+  indicating an inferior conjunction and 1 a superior conjunction.
 
 Sunrise and Sunset
 ==================
