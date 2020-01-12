@@ -380,7 +380,7 @@ def satellite_altitude(satellite, topos, time, timescale=None, and_azdist=False)
 def linspace_time(start_time: Time, stop_time: Time, *, num=50, step=None, endpoint=True):
 """
 
-def linspace_time(start_time, stop_time, *, num=50, step=None, endpoint=True):
+def linspace_time(start_time, stop_time, num=50, step=None, endpoint=True):
     """
     Return an evenly-spaced array of skyfield.Time
 
