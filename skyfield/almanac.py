@@ -1,9 +1,13 @@
 """Routines to solve for circumstances like sunrise, sunset, and moon phase."""
 
-from math import pi
-from numpy import cos, diff, flatnonzero, linspace, multiply, sign, zeros_like
+from numpy import (cos, diff, flatnonzero, linspace, multiply, sign,
+                   zeros_like, pi, arange, ceil, argwhere)
+from scipy import optimize
+import skyfield.api
+from skyfield.api import Time, EarthSatellite, Topos
 from .constants import DAY_S, tau
 from .nutationlib import iau2000b
+
 
 EPSILON = 0.001 / DAY_S
 
@@ -319,3 +323,183 @@ def _distance_to(center, target):
         distance = center.at(t).observe(target).distance().au
         return distance
     return distance_at
+
+
+
+SATELLITE_EVENTS = [
+    'rise',  # rises above user-defined horizon
+    'culminate',  # reaches highest point during pass.  (Not the same as meridian crossing)
+    'set',  # sets below user-defined horizon
+    # 'eclipse-ingress',  # enters Earth's shadow (not illuminated)
+    # 'eclipse-egress',   # leaves Earths's shadow (illuminated)
+    # 'appearance',       # becomes visible (above horizon and illuminated)
+    # 'disappearance'     # becomes invisible (below horizon or not illuminated)
+]
+
+# Inverse dictionary
+SATELLITE_EVENTS_INVERSE = {ev: i for i, ev in enumerate(SATELLITE_EVENTS)}
+
+"""
+def satellite_altitude(satellite: skyfield.api.EarthSatellite, topos: Topos,
+                       time: Union[Time, float, Iterable[float]],
+                       timescale: Optional[Timescale] = None,
+                       and_azdist: bool = False
+                       ) -> Union[Angle, Iterable[Angle], Iterable[Iterable[float]]]:
+"""
+
+def satellite_altitude(satellite, topos, time, timescale=None, and_azdist=False):
+    """
+    Return altitude of a satellite from the observer location at a given time(s)
+
+    Times are scalar or array of skyfield.api.Time or floats representing
+    TAI as Julian Day based on timescale (or the builtin timescale if not given).
+
+    :param satellite: The satellite
+    :param topos: The location on Earth
+    :param time:   The Time(s)
+    :param timescale: Timescale to use if times are given as JD
+    :param and_azdist: return azimuth and distance (meters)
+    :return: altitude(s) (altitude(s), azimuth(s), distance(s))
+    """
+    if not isinstance(time, Time):
+        # Convert t to skyfield.Time
+        if timescale is None:
+            timescale = skyfield.api.load.timescale(builtin=True)
+        time = timescale.tai(jd=time)
+    difference = satellite - topos
+    topocentric = difference.at(time)
+    alt, az, dist = topocentric.altaz()
+    if and_azdist:
+        return alt, az, dist.m
+    else:
+        return alt
+
+
+"""
+def linspace_time(start_time: Time, stop_time: Time, *, num=50, step=None, endpoint=True):
+"""
+
+def linspace_time(start_time, stop_time, *, num=50, step=None, endpoint=True):
+    """
+    Return an evenly-spaced array of skyfield.Time
+
+    :param start_time: Starting time
+    :param stop_time:  Stopping time
+    :param num: Number of points
+    :param step: Interval in days (causes num to be ignored)
+    :param endpoint: Include the stopping time (if step is None, otherwise inclusion is subject to round-off)
+    :return:
+    """
+    if step:
+        jds = arange(start_time.tai, stop_time.tai, step)
+    else:
+        jds = linspace(start_time.tai, stop_time.tai, num=num, endpoint=endpoint)
+    return start_time.ts.tai(jd=jds)
+
+"""
+def find_satellite_events(start_time: Time, end_time: Time,
+                          satellite: EarthSatellite, topos: Topos,
+                          horizon:Union[Angle, float] = 0):
+"""
+def find_satellite_events(start_time, end_time,
+                          satellite, topos,
+                          horizon = 0):
+    """
+    Find satellite risings, culminations, and settings.
+
+    if horizon is non-zero, then rising and setting is relative to that elevation.
+
+    Only culminations above the horizon elevation are included.
+
+    After getting the event times, the elevations, azimuths, and distances can be
+    found with
+        elevation, azimuth, distance = satellite_altitude(sat, topos, times, and_azdist=False)
+
+    :param start_time:
+    :param end_time:
+    :param satellite: satellite under study
+    :param topos: Location of observer
+    :param horizon: elevation of horizon
+    :return: time, yi
+    """
+    try:
+        horizon = horizon.degrees
+    except:
+        pass
+    # based on
+    # https://github.com/skyfielders/astronomy-notebooks/blob/master/Solvers/Earth-Satellite-Passes.ipynb
+    timescale = start_time.ts
+    tolerance = 1 / (24 * 60 * 60)  # 1 second tolerance on time determination
+    stepsperrev = 6
+    revolutions_per_day = (satellite.model.no / tau) * 24 * 60
+    # Earth rotation complicates things, so add 1 rev/day to this calculation
+    stepsize = 1 / (stepsperrev * (1 + revolutions_per_day))
+    # Extend the timerange by one step on each end to find transitions
+    jds = [t.tai + pad for t, pad in zip((start_time, end_time), (-stepsize, stepsize))]
+    nsteps = ceil((jds[1] - jds[0]) / stepsize)
+    endpoints = [start_time.ts.tai(jd=jd) for jd in jds]
+    times = linspace_time(*endpoints, num=nsteps)
+    timesjd = times.tai
+    alts = satellite_altitude(satellite=satellite, topos=topos, time=times).degrees
+    ipeaks = argwhere((alts[1:-1] > alts[:-2])
+                         & (alts[1:-1] > alts[2:])).ravel() + 1
+    events = []  # To be filled with (timejd, altitude, yi) tuples
+
+    # Solvers sometimes choke when using x.ptp() << x, as in
+    # Julian days, so shift times to the average time
+    jd0 = timesjd.mean()
+
+    # Function for scipy.optimize to minimize
+    def zenithfunc(t):
+        return 90 - satellite_altitude(satellite=satellite, topos=topos, time=timescale.tai(jd=t + jd0)).degrees
+
+    # zenithfunc = partial(satellite_altitude, sat=satellite, topos=topos, zenith=True)
+    for ipeak in ipeaks:
+        # The event is a culmination, but it may be below horizon
+        result = optimize.minimize_scalar(zenithfunc,
+                                          bounds=[timesjd[ipeak - 1] - jd0,
+                                                  timesjd[ipeak + 1] - jd0],
+                                          method='bounded',
+                                          options={'xatol':tolerance})
+        if result.status != 0:
+            continue    # Minimization didn't work
+        teventjd = result.x + jd0
+        altevent = satellite_altitude(satellite=satellite, topos=topos, time=timescale.tai(jd=teventjd)).degrees
+        if altevent < horizon:
+            # Peak is too low
+            continue
+        events.append((teventjd, altevent, SATELLITE_EVENTS_INVERSE['culminate']))
+
+    # Make the not-always-correct assumption that if you have a culmination above the horizon,
+    # and no other grid points are below the horizon, then the object does not set/rise.
+
+    def altfunc(t):
+        return satellite_altitude(satellite=satellite, topos=topos, time=timescale.tai(jd=t + jd0)).degrees - horizon
+
+    # Put the grid times and peak times, with their altitudes, into
+    # time-sorted array so that rise/set can be found even if grid
+    # doesn't have any points above horizon
+
+    time_alts = sorted(list(zip(timesjd, alts, [None] * len(timesjd))) + events)
+    lasttime, lastalt, _ = time_alts[0]
+    for time, alt, _ in time_alts[1:]:
+        if (alt < horizon) != (lastalt < horizon):
+            # Cross horizon
+            result = optimize.root_scalar(altfunc,
+                                          bracket=[lasttime-jd0, time-jd0],
+                                          xtol=tolerance)
+            if not result.converged:
+                continue
+            teventjd = result.root + jd0
+            altevent = satellite_altitude(satellite=satellite, topos=topos, time=timescale.tai(jd=teventjd))
+            events.append((teventjd, altevent,
+                           SATELLITE_EVENTS_INVERSE['rise' if alt > horizon else 'set']))
+        lasttime, lastalt = time, alt
+
+    # Trim events to start_time:end_time and remove the altitude
+    trimevents = sorted([(t, yi) for t, alt, yi in events if (start_time.tai <= t <= end_time.tai)])
+    if len(trimevents) > 0:
+        time, yi = zip(*trimevents)
+        return timescale.tai(jd=time), yi
+    else:
+        return timescale.tai(jd=[]), []
