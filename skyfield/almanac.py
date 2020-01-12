@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Routines to solve for circumstances like sunrise, sunset, and moon phase."""
 
+from __future__ import print_function, division
+
 from numpy import (cos, diff, flatnonzero, linspace, multiply, sign,
                    zeros_like, pi, arange, ceil, argwhere)
 from scipy import optimize
