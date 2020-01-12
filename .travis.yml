@@ -24,9 +24,9 @@ install:
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
   - "pip install pyflakes"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
-  - "if [[ $TRAVIS_PYTHON_VERSION < 3.7 ]] ; then pip install numpy==1.11.3 pandas==0.23.4 unittest2 ; else pip install pandas ; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION < 3.7 ]] ; then pip install numpy==1.11.3 scipy==1.2.2 pandas==0.23.4 unittest2 ; else pip install pandas ; fi"
   - "python -c 'import pandas'"
 
 script:
   - "../test-code.sh"
-  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 matplotlib==2.2.3 numpy==1.14.2 sphinx==1.7.2 ; cd .. ; ./test-docs.sh ; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 matplotlib==2.2.3 numpy==1.14.2 scipy=1.2.2 sphinx==1.7.2 ; cd .. ; ./test-docs.sh ; fi"
