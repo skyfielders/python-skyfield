@@ -154,7 +154,7 @@ Angle(radians=value)
 Angle(degrees=value)
 Angle(hours=value)
 
-where `value` can be either a Python float, a list of Python floats, 
+where `value` can be either a Python float, a list of Python floats,
 or a NumPy array of floats"""
 
 class Angle(object):

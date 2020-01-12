@@ -316,7 +316,7 @@ def test_jd_calendar():
     # Check array conversion components
     jd_array = jd_unix + np.arange(5.0)
     cal_array = calendar_tuple(jd_array)
-    
+
     assert (cal_array[0] == 1970).all()
     assert (cal_array[1] == 1).all()
     assert (cal_array[2] == np.arange(1, 6)).all()
