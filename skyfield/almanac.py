@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Routines to solve for circumstances like sunrise, sunset, and moon phase."""
 
 from numpy import (cos, diff, flatnonzero, linspace, multiply, sign,
