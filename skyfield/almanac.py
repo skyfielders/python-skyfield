@@ -439,7 +439,7 @@ def find_satellite_events(start_time, end_time,
     stepsize = 1 / (stepsperrev * (1 + revolutions_per_day))
     # Extend the timerange by one step on each end to find transitions
     jds = [t.tai + pad for t, pad in zip((start_time, end_time), (-stepsize, stepsize))]
-    nsteps = ceil((jds[1] - jds[0]) / stepsize)
+    nsteps = int(ceil((jds[1] - jds[0]) / stepsize))
     endpoints = [start_time.ts.tai(jd=jd) for jd in jds]
     times = linspace_time(*endpoints, num=nsteps)
     timesjd = times.tai

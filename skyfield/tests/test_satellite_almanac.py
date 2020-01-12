@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, division
 from skyfield import api, almanac
 
 def test_sat_almanac_LEO():
