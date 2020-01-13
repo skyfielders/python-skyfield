@@ -6,8 +6,6 @@ from __future__ import print_function, division
 from numpy import (cos, diff, flatnonzero, linspace, multiply, sign,
                    zeros_like, pi, arange, ceil, argwhere)
 from scipy import optimize
-import skyfield.api
-from skyfield.api import Time, EarthSatellite, Topos
 from .constants import DAY_S, tau
 from .nutationlib import iau2000b
 
@@ -375,6 +373,7 @@ def satellite_altitude(satellite, topos, time, timescale=None, and_azdist=False)
     :param and_azdist: return azimuth and distance (meters)
     :return: altitude(s) (altitude(s), azimuth(s), distance(s))
     """
+    from skyfield.api import Time, EarthSatellite, Topos
     if not isinstance(time, Time):
         # Convert t to skyfield.Time
         if timescale is None:
