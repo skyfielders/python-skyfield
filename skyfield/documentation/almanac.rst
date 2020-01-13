@@ -226,19 +226,20 @@ of the phases of twilight using integers:
     t0 = ts.utc(2019, 11, 8, 5)
     t1 = ts.utc(2019, 11, 9, 5)
     t, y = almanac.find_discrete(t0, t1, almanac.dark_twilight_day(e, bluffton))
+
     for ti, yi in zip(t, y):
-        print(yi, ti.utc_iso())
+        print(yi, ti.utc_iso(), ' Start of', almanac.TWILIGHTS[yi])
 
 .. testoutput::
 
-    1 2019-11-08T10:40:20Z
-    2 2019-11-08T11:12:31Z
-    3 2019-11-08T11:45:18Z
-    4 2019-11-08T12:14:15Z
-    3 2019-11-08T22:23:52Z
-    2 2019-11-08T22:52:49Z
-    1 2019-11-08T23:25:34Z
-    0 2019-11-08T23:57:44Z
+    1 2019-11-08T10:40:20Z  Start of Astronomical twilight
+    2 2019-11-08T11:12:31Z  Start of Nautical twilight
+    3 2019-11-08T11:45:18Z  Start of Civil twilight
+    4 2019-11-08T12:14:15Z  Start of Day
+    3 2019-11-08T22:23:52Z  Start of Civil twilight
+    2 2019-11-08T22:52:49Z  Start of Nautical twilight
+    1 2019-11-08T23:25:34Z  Start of Astronomical twilight
+    0 2019-11-08T23:57:44Z  Start of Night
 
 Satellite Events
 ================

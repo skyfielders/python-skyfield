@@ -52,9 +52,9 @@ def fraction_illuminated(ephemeris, body, t):
 def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
     """Find the times when a function changes value.
 
-    Searches between ``start_time`` and ``end_time``, which should both
-    be :class:`~skyfield.timelib.Time` objects, for the occasions where
-    the function ``f`` changes from one value to another.  Use this to
+    Search between ``start_time`` and ``end_time``, which should both be
+    :class:`~skyfield.timelib.Time` objects, for the occasions where the
+    function ``f`` changes from one value to another.  Use this to
     search for events like sunrise or moon phases.
 
     A tuple of two arrays is returned. The first array gives the times
@@ -82,7 +82,10 @@ def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
         periods = 1.0
 
     jd = linspace(jd0, jd1, int(periods * num))
+    return _find_discrete(ts, jd, f, epsilon, num)
 
+def _find_discrete(ts, jd, f, epsilon, num):
+    """Algorithm core, for callers that already have a `jd` vector."""
     end_mask = linspace(0.0, 1.0, num)
     start_mask = end_mask[::-1]
     o = multiply.outer
@@ -267,6 +270,14 @@ def sunrise_sunset(ephemeris, topos):
 
     is_sun_up_at.rough_period = 0.5  # twice a day
     return is_sun_up_at
+
+TWILIGHTS = {
+    0: 'Night',
+    1: 'Astronomical twilight',
+    2: 'Nautical twilight',
+    3: 'Civil twilight',
+    4: 'Day',
+}
 
 def dark_twilight_day(ephemeris, topos):
     """Build a function of time returning whether it is dark, twilight, or day.
