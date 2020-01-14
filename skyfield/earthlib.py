@@ -74,6 +74,7 @@ def reverse_terra(xyz_au, gast, iterations=3):
     f = 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
     e2 = 2.0*f - f*f
     i = 0
+    C = 1.0
     while i < iterations:
         i += 1
         C = 1.0 / sqrt(1.0 - e2 * (sin(lat) ** 2.0))

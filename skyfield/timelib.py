@@ -6,7 +6,7 @@ from .constants import B1950, DAY_S, T0
 from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
-from .functions import load_bundled_npy, rot_z
+from .functions import load_bundled_npy, rot_z, _to_array
 from .nutationlib import compute_nutation, earth_tilt, iau2000a
 from .precessionlib import compute_precession
 
@@ -36,15 +36,6 @@ _half_millisecond = 0.5e-3 / DAY_S
 _half_microsecond = 0.5e-6 / DAY_S
 _months = array(['Month zero', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
-
-def _to_array(value):
-    """When `value` is a plain Python sequence, return it as a NumPy array."""
-    if hasattr(value, 'shape'):
-        return value
-    elif hasattr(value, '__len__'):
-        return array(value)
-    else:
-        return float_(value)
 
 tt_minus_tai = array(32.184 / DAY_S)
 
@@ -412,11 +403,19 @@ class Time(object):
     def utc_datetime(self):
         """Convert to a Python ``datetime`` in UTC.
 
+        The result is rounded to the nearest millisecond.  While
+        Skyfield's 64-bit floating-point Julian dates often supply at
+        least one more digit of precision, milliseconds provide a safe
+        stopping point that prevents times like 16:18:00 from being
+        displayed as 16:18:00.000512.
+
         If the third-party `pytz`_ package is available, then its
         ``utc`` timezone will be used as the timezone of the returned
         `datetime`_.  Otherwise, an equivalent Skyfield ``utc`` timezone
-        object is used.  If this time is an array, then a sequence of
-        datetimes is returned instead of a single value.
+        object is used.
+
+        If this time is an array, then a sequence of datetimes is
+        returned instead of a single value.
 
         """
         dt, leap_second = self.utc_datetime_and_leap_second()
@@ -428,6 +427,12 @@ class Time(object):
         Convert this time to a `datetime`_ object and a leap second::
 
             dt, leap_second = t.utc_datetime_and_leap_second()
+
+        The result is rounded to the nearest millisecond.  While
+        Skyfield's 64-bit floating-point Julian dates often supply at
+        least one more digit of precision, milliseconds provide a safe
+        stopping point that prevents times like 16:18:00 from being
+        displayed as 16:18:00.000512.
 
         If the third-party `pytz`_ package is available, then its
         ``utc`` timezone will be used as the timezone of the return
@@ -452,13 +457,13 @@ class Time(object):
         second = second.astype(int)
         leap_second = second // 60
         second -= leap_second
-        milli = (fraction * 1000).astype(int) * 1000
+        micro = (fraction * 1000).astype(int) * 1000
         if self.shape:
             utcs = [utc] * self.shape[0]
-            argsets = zip(year, month, day, hour, minute, second, milli, utcs)
+            argsets = zip(year, month, day, hour, minute, second, micro, utcs)
             dt = array([datetime(*args) for args in argsets])
         else:
-            dt = datetime(year, month, day, hour, minute, second, milli, utc)
+            dt = datetime(year, month, day, hour, minute, second, micro, utc)
         return dt, leap_second
 
     def utc_iso(self, delimiter='T', places=0):
@@ -710,6 +715,9 @@ def julian_date(year, month=1, day=1, hour=0, minute=0, second=0.0):
     """Given a proleptic Gregorian calendar date, return a Julian date float."""
     return julian_day(year, month, day) - 0.5 + (
         second + minute * 60.0 + hour * 3600.0) / DAY_S
+
+def julian_date_of_besselian_epoch(b):
+    return 2415020.31352 + (b - 1900.0) * 365.242198781
 
 def calendar_date(jd_integer):
     """Convert Julian Day `jd_integer` into a Gregorian (year, month, day)."""

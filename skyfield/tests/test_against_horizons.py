@@ -5,6 +5,7 @@ from numpy import max
 from skyfield import api
 from skyfield.api import Topos
 from skyfield.constants import AU_M
+from skyfield.trigonometry import position_angle_of
 
 def _data_path(filename):
     return os.path.join(os.path.dirname(__file__), 'data', filename)
@@ -15,7 +16,7 @@ ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
 meter = 1.0 / AU_M
 
 def ts():
-    yield api.load.timescale()
+    yield api.load.timescale(builtin=True)
 
 def compare(value, expected_value, epsilon):
     if hasattr(value, 'shape') or hasattr(expected_value, 'shape'):
@@ -118,3 +119,23 @@ def test_moon_from_boston_astrometric():
     compare(ra._degrees, 121.4796470, 0.001 * arcsecond)
     compare(dec.degrees, 14.9108450, 0.001 * arcsecond)
     compare(distance.au, 0.00265828588792, 1.4 * meter)  # TODO: improve this
+
+def test_position_angle_from_boston(ts):
+    t = ts.utc(2053, 10, 9)
+    eph = api.load_file(_data_path('jup310-2053-10-08.bsp'))
+    boston = eph['earth'] + Topos(longitude_degrees=(-71, 3, 24.8),
+                                  latitude_degrees=(42, 21, 24.1))
+
+    b = boston.at(t)
+    j = b.observe(eph['jupiter'])#.apparent()
+    i = b.observe(eph['io'])#.apparent()
+
+    a = position_angle_of(j.radec(epoch='date'), i.radec(epoch='date'))
+
+    assert abs(a.degrees - 293.671) < 0.002
+
+    print(a)
+    a = position_angle_of(j.ecliptic_latlon(epoch='date'),
+                          i.ecliptic_latlon(epoch='date'))
+    print(a)
+    #TODO: fix misbehavior for ecliptic coordinates that is illustrated above

@@ -42,15 +42,19 @@ class Distance(object):
         else:
             raise ValueError('to construct a Distance provide au, km, or m')
 
+    @classmethod
+    def from_au(cls, au):
+        self = cls.__new__(cls)
+        self.au = _to_array(au)
+        return self
+
     @reify
     def km(self):
-        self.km = km = self.au * AU_KM
-        return km
+        return self.au * AU_KM
 
     @reify
     def m(self):
-        self.m = m = self.au * AU_M
-        return m
+        return self.au * AU_M
 
     @reify
     def AU(self):
@@ -94,8 +98,7 @@ class Velocity(object):
 
     @reify
     def km_per_s(self):
-        self.km_per_s = self.au_per_d * AU_KM / DAY_S
-        return self.km_per_s
+        return self.au_per_d * AU_KM / DAY_S
 
     @reify
     def AU_per_d(self):
@@ -105,7 +108,7 @@ class Velocity(object):
                   ' "AU_per_day" in favor of "au_per_day"',
                   file=sys.stdout)
             Velocity._warned = True
-            return self.au_per_d
+        return self.au_per_d
 
     def __str__(self):
         n = self.au_per_d
@@ -151,7 +154,7 @@ Angle(radians=value)
 Angle(degrees=value)
 Angle(hours=value)
 
-where `value` can be either a Python float, a list of Python floats, 
+where `value` can be either a Python float, a list of Python floats,
 or a NumPy array of floats"""
 
 class Angle(object):
@@ -177,24 +180,35 @@ class Angle(object):
                            else 'degrees')
         self.signed = signed
 
-    def __getattr__(self, name):
-        if name == '_hours':
-            self._hours = _hours = self.radians * _to_hours
-            return _hours
-        if name == '_degrees':
-            self._degrees = _degrees = self.radians * _to_degrees
-            return _degrees
-        if name == 'hours':
-            if self.preference != 'hours':
-                raise WrongUnitError('hours')
-            self.hours = hours = self._hours
-            return hours
-        if name == 'degrees':
-            if self.preference != 'degrees':
-                raise WrongUnitError('degrees')
-            self.degrees = degrees = self._degrees
-            return degrees
-        raise AttributeError('no attribute named %r' % (name,))
+    @classmethod
+    def from_degrees(cls, degrees, signed=False):
+        degrees = _to_array(_unsexagesimalize(degrees))
+        self = cls.__new__(cls)
+        self.degrees = degrees
+        self.radians = degrees * _from_degrees
+        self.preference = 'degrees'
+        self.signed = signed
+        return self
+
+    @reify
+    def _hours(self):
+        return self.radians * _to_hours
+
+    @reify
+    def _degrees(self):
+        return self.radians * _to_degrees
+
+    @reify
+    def hours(self):
+        if self.preference != 'hours':
+            raise WrongUnitError('hours')
+        return self._hours
+
+    @reify
+    def degrees(self):
+        if self.preference != 'degrees':
+            raise WrongUnitError('degrees')
+        return self._degrees
 
     def __str__(self):
         if self.radians.size == 0:
@@ -413,11 +427,12 @@ def _unsexagesimalize(value):
 
     """
     if isinstance(value, tuple):
-        for i, component in enumerate(value):
-            if i:
-                value = value + copysign(component, value) * 60.0 ** -i
-            else:
-                value = component
+        components = iter(value)
+        value = next(components)
+        factor = 1.0
+        for component in components:
+            factor *= 60.0
+            value += copysign(component, value) / factor
     return value
 
 def _interpret_angle(name, angle_object, angle_float, unit='degrees'):

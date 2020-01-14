@@ -38,6 +38,7 @@ class Star(object):
 
     """
     au_km = AU_KM
+    target = None
 
     def __init__(self, ra=None, dec=None, ra_hours=None, dec_degrees=None,
                  ra_mas_per_year=0.0, dec_mas_per_year=0.0,
@@ -86,7 +87,7 @@ class Star(object):
             if isinstance(value, Angle):
                 value = value._degrees
             shape = getattr(value, 'shape', None)
-            if shape is not None:
+            if shape:
                 shapes = ','.join(str(n) for n in shape)
                 opts.append('{0} shape={1}'.format(name, shapes))
             elif value:
@@ -128,7 +129,7 @@ class Star(object):
         if len(position.shape) > 1 and not t.shape:
             tt = empty(position.shape[1:])
             tt.fill(t.tt)
-            t = t.ts.tt(tt)
+            t = t.ts.tt_jd(tt)
         return vector, vel, t, light_time
 
     def _compute_vectors(self):

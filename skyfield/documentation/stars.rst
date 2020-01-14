@@ -79,6 +79,28 @@ the star:
 The position will properly reflect the star’s proper motion as measured
 by the HIPPARCOS mission.
 
+Stars with “nan” positions
+==========================
+
+The Hipparcos catalog, as pointed out in its official publication `The
+Hipparcos and Tycho Catalogues`_, includes 263 target stars for which no
+reliable position could be computed.  These stars have blanks for their
+right ascension and declination in the text of the catalog itself.  In
+Skyfield they will always return coordinates with the value ``nan`` (the
+floating point value “not a number”).
+
+If you want to avoid ``nan`` coordinates, you can filter them out of
+your dataframe with:
+
+.. testcode::
+
+    df = df[df['ra_degrees'].notnull()]
+
+The result will be the same if you filter by the ``dec_degrees`` column
+instead.
+
+.. _The Hipparcos and Tycho Catalogues: https://www.cosmos.esa.int/documents/532822/552851/vol1_all.pdf/99adf6e3-6893-4824-8fc2-8d3c9cbba2b5
+
 Filtering the star catalog
 ==========================
 

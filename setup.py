@@ -43,8 +43,9 @@ setup(
         'skyfield.tests': ['data/*'],
         },
     install_requires=[
-        'jplephem>=2.3',
+        'jplephem>=2.11',
         'numpy',
+        'scipy',
         'sgp4>=1.4',
         ],
     extras_require=extras,          # support "pip install skyfield[tests]"

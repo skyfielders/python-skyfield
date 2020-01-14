@@ -3,6 +3,70 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.16 — 2019 December 20
+-----------------------
+
+* Added basic :doc:`planetary` support, enough to compute the position
+  of a given latitude and longitude on the surface of the Moon.
+  `#79 <https://github.com/skyfielders/python-skyfield/issues/79>`_
+  `#124 <https://github.com/skyfielders/python-skyfield/issues/124>`_
+  `#258 <https://github.com/skyfielders/python-skyfield/issues/258>`_
+
+* Added :func:`~skyfield.almanac.oppositions_conjunctions()` for finding
+  the dates when a planet is at opposition and conjunction with the sun.
+
+* Added :func:`~skyfield.trigonometry.position_angle_of()` for computing
+  astronomical position angles.
+
+1.15 — 2019 November 20
+-----------------------
+
+* Changed the URL for the Hipparcos catalog, because the VizieR archives
+  FTP server is no longer responding.
+  `#301 <https://github.com/skyfielders/python-skyfield/issues/301>`_
+
+* Added a :func:`~skyfield.almanac.dark_twilight_day()` function that
+  not only handles sunrise and sunset but also all three kinds of
+  twilight.
+  `#225 <https://github.com/skyfielders/python-skyfield/issues/225>`_
+
+1.14 — 2019 November 1
+----------------------
+
+* Changed the URL from which leap second files are downloaded; the
+  server that previously provided them is no longer responding.
+  Thanks to Richard Shaw for the pull request.
+  `#296 <https://github.com/skyfielders/python-skyfield/issues/296>`_
+  `#297 <https://github.com/skyfielders/python-skyfield/issues/297>`_
+
+* Added a :func:`~skyfield.almanac.rising_setting()` function for
+  computing rising and setting times.
+  `#271 <https://github.com/skyfielders/python-skyfield/issues/271>`_
+
+1.13 — 2019 October 10
+----------------------
+
+* Provided a constellation lookup routine through
+  :func:`~skyfield.api.load_constellation_map()`.
+
+* Added :func:`~skyfield.positionlib.position_from_radec()`.
+
+* Fixed the ``apparent()`` method in the case where a single observer
+  position is observing an entire vector of target positions.
+  `#229 <https://github.com/skyfielders/python-skyfield/issues/229>`_
+
+1.12 — 2019 September 2
+-----------------------
+
+* Fix: an exception was being thrown when creating a ``Loader`` pointed
+  at a Windows directory for which Python’s ``os.makedirs()`` function
+  returned a spurious error.
+  `#283 <https://github.com/skyfielders/python-skyfield/issues/283>`_
+
+* The internal ``reverse_terra()`` routine can now be given an
+  ``iterations=0`` argument if the caller wants geocentric latitude and
+  longitude.
+
 1.11 — 2019 July 22
 -------------------
 

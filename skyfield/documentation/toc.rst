@@ -11,12 +11,14 @@ that is accelerated using NumPy vector math!
    :maxdepth: 2
 
    installation
+   examples
    files
    almanac
    positions
    time
    planets
    stars
+   planetary
    earth-satellites
    elements
    astropy
@@ -26,12 +28,14 @@ that is accelerated using NumPy vector math!
    api-vectors
    api-ephemeris
    api-topos
-   api-almanac.rst
+   api-almanac
    api-satellites
    api-stars
+   api-planetary
    api-position
    api-elements
    api-units
+   api-trigonometry
    toc
    design
    bibliography

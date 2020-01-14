@@ -7,10 +7,12 @@ way for most users to use Skyfield's main features.
 
 """
 from datetime import datetime
-from math import pi
-from .constants import tau
+from .constants import B1950, pi, tau
+from .constellationlib import load_constellation_map
 from .errors import DeprecationError
 from .iokit import Loader, load_file
+from .planetarylib import PlanetaryConstants
+from .positionlib import position_from_radec
 from .starlib import Star
 from .sgp4lib import EarthSatellite
 from .timelib import T0, Time, Timescale, utc
@@ -20,9 +22,10 @@ from .named_stars import NamedStar
 
 load = Loader('.')
 
-__all__ = ['Angle', 'Distance', 'EarthSatellite', 'Loader', 'NamedStar',
-           'Star', 'T0', 'Time', 'Timescale', 'Topos', 'datetime',
-           'load', 'load_file', 'utc', 'pi', 'tau']
+__all__ = ['Angle', 'B1950', 'Distance', 'EarthSatellite', 'Loader',
+           'NamedStar', 'PlanetaryConstants', 'Star', 'T0', 'Time',
+           'Timescale', 'Topos', 'datetime', 'load', 'load_constellation_map',
+           'load_file', 'position_from_radec', 'utc', 'pi', 'tau']
 
 # An attempt at friendliest-possible deprecations:
 

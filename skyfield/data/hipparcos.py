@@ -5,7 +5,7 @@ from skyfield.timelib import T0
 from skyfield.units import Angle
 
 days = T0 - 2448349.0625
-URL = 'ftp://cdsarc.u-strasbg.fr/cats/I/239/hip_main.dat.gz'
+URL = 'http://cdsarc.u-strasbg.fr/ftp/cats/I/239/hip_main.dat.gz'
 url = URL  # old name, in case anyone used it
 
 def parse(line):

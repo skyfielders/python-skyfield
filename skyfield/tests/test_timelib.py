@@ -127,9 +127,9 @@ def test_astimezone_and_leap_second(ts):
     assert leap_second == 0
 
 def test_utc_datetime(ts):
-    t = ts.utc(1969, 7, 20, 20, 18)
+    t = ts.utc(1969, 7, 20, 20, 18, 42.186479)
     dt = t.utc_datetime()
-    assert dt == datetime(1969, 7, 20, 20, 18, 0, 0, utc)
+    assert dt == datetime(1969, 7, 20, 20, 18, 42, 186000, utc)
 
 def test_utc_datetime_and_leap_second(ts):
     t = ts.utc(1969, 7, 20, 20, 18)
@@ -316,7 +316,7 @@ def test_jd_calendar():
     # Check array conversion components
     jd_array = jd_unix + np.arange(5.0)
     cal_array = calendar_tuple(jd_array)
-    
+
     assert (cal_array[0] == 1970).all()
     assert (cal_array[1] == 1).all()
     assert (cal_array[2] == np.arange(1, 6)).all()

@@ -4,6 +4,7 @@ import numpy as np
 import os
 from skyfield.api import load
 from skyfield.timelib import julian_date
+from skyfield.iokit import _CDDIS
 
 def morrison_and_stephenson_2004_table():
     """Table of smoothed Delta T values from Morrison and Stephenson, 2004."""
@@ -15,7 +16,7 @@ def morrison_and_stephenson_2004_table():
 
 def usno_historic_delta_t():
     import pandas as pd
-    f = load.open('http://maia.usno.navy.mil/ser7/historic_deltat.data')
+    f = load.open(_CDDIS + 'historic_deltat.data')
     df = pd.read_table(f, sep=b' +', engine='python', skiprows=[1])
     return pd.DataFrame({'year': df[b'Year'], 'delta_t': df[b'TDT-UT1']})
 

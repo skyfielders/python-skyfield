@@ -102,6 +102,74 @@ Instead of naming specific seasons,
 it names the equinoxes and solstices by the month in which they occur —
 so the ``March Equinox``, for example, is followed by the ``June Solstice``.
 
+Phases of the Moon
+==================
+
+The phases of the Moon are the same for everyone on Earth, so no Topos
+is necessary but only an ephemeris object.
+
+.. testcode::
+
+    t0 = ts.utc(2018, 9, 1)
+    t1 = ts.utc(2018, 9, 10)
+    t, y = almanac.find_discrete(t0, t1, almanac.moon_phases(e))
+
+    print(t.utc_iso())
+    print(y)
+    print([almanac.MOON_PHASES[yi] for yi in y])
+
+.. testoutput::
+
+    ['2018-09-03T02:37:24Z', '2018-09-09T18:01:28Z']
+    [3 0]
+    ['Last Quarter', 'New Moon']
+
+The result ``t`` will be an array of times, and ``y`` will be a
+corresponding array of Moon phases with 0 for New Moon and 3 for Last
+Quarter.  You can use the array ``MOON_PHASES`` to retrieve names for
+each phase.
+
+Opposition and Conjunction
+==========================
+
+The moment at which a planet is in opposition with the Sun or in
+conjunction with the Sun is when their ecliptic longitudes are at 0° or
+180° difference.
+
+.. testcode::
+
+    t0 = ts.utc(2019, 1, 1)
+    t1 = ts.utc(2021, 1, 1)
+    f = almanac.oppositions_conjunctions(e, e['mars'])
+    t, y = almanac.find_discrete(t0, t1, f)
+
+    print(t.utc_iso())
+    print(y)
+
+.. testoutput::
+
+    ['2019-09-02T10:42:14Z', '2020-10-13T23:25:47Z']
+    [0 1]
+
+The result ``t`` will be an array of times, and ``y`` will be an array
+of integers indicating which half of the sky the body has just entered:
+0 means the half of the sky west of the Sun along the ecliptic, and 1
+means the half of the sky east of the Sun.  This means different things
+for different bodies:
+
+* For the outer planets Mars, Jupiter, Saturn, Uranus, and all other
+  bodies out beyond our orbit, 0 means the moment of conjunction with
+  the Sun and 1 means the moment of opposition.
+
+* Because the Moon moves eastward across our sky relative to the Sun,
+  not westward, the output is reversed compared to the outer planets: 0
+  means the moment of opposition or Full Moon, while 1 means the moment
+  of conjunction or New Moon.
+
+* The inner planets Mercury and Venus only ever experience conjunctions
+  with the Sun from our point of view, never oppositions, with 0
+  indicating an inferior conjunction and 1 a superior conjunction.
+
 Sunrise and Sunset
 ==================
 
@@ -141,29 +209,106 @@ and for the average refraction of the atmosphere at the horizon.
 The result ``t`` will be an array of times, and ``y`` will be ``True``
 if the sun rises at the corresponding time and ``False`` if it sets.
 
-Phases of the Moon
-==================
+Twilight
+========
 
-The phases of the Moon are the same for everyone on Earth, so no Topos
-is necessary but only an ephemeris object.
+An expanded version of the sunrise-sunset routine separately codes each
+of the phases of twilight using integers:
+
+0. Dark of night.
+1. Astronomical twilight.
+2. Nautical twilight.
+3. Civil twilight.
+4. Daytime.
 
 .. testcode::
 
-    t0 = ts.utc(2018, 9, 1)
-    t1 = ts.utc(2018, 9, 10)
-    t, y = almanac.find_discrete(t0, t1, almanac.moon_phases(e))
+    t0 = ts.utc(2019, 11, 8, 5)
+    t1 = ts.utc(2019, 11, 9, 5)
+    t, y = almanac.find_discrete(t0, t1, almanac.dark_twilight_day(e, bluffton))
 
-    print(t.utc_iso())
-    print(y)
-    print([almanac.MOON_PHASES[yi] for yi in y])
+    for ti, yi in zip(t, y):
+        print(yi, ti.utc_iso(), ' Start of', almanac.TWILIGHTS[yi])
 
 .. testoutput::
 
-    ['2018-09-03T02:37:24Z', '2018-09-09T18:01:28Z']
-    [3 0]
-    ['Last Quarter', 'New Moon']
+    1 2019-11-08T10:40:20Z  Start of Astronomical twilight
+    2 2019-11-08T11:12:31Z  Start of Nautical twilight
+    3 2019-11-08T11:45:18Z  Start of Civil twilight
+    4 2019-11-08T12:14:15Z  Start of Day
+    3 2019-11-08T22:23:52Z  Start of Civil twilight
+    2 2019-11-08T22:52:49Z  Start of Nautical twilight
+    1 2019-11-08T23:25:34Z  Start of Astronomical twilight
+    0 2019-11-08T23:57:44Z  Start of Night
 
-The result ``t`` will be an array of times, and ``y`` will be a
-corresponding array of Moon phases with 0 for New Moon and 3 for Last
-Quarter.  You can use the array ``MOON_PHASES`` to retrieve names for
-each phase.
+Satellite Events
+================
+
+The times when a satellite rises, culminates, and sets
+are based on the satellite, a location, and the horizon elevation.
+
+.. testcode::
+
+    satellite = api.EarthSatellite(
+            "1 25544U 98067A   20012.52707367  .00016717  00000-0  10270-3 0  9043",
+            "2 25544  51.6437  43.6359 0004998 123.7741 236.3886 15.49565134  7728",
+            name="Zarya")
+    bluffton = api.Topos('40.8939 N', '83.8917 W')
+    t0 = ts.utc(2020, 1, 15, 0)
+    t1 = ts.utc(2020, 1, 16, 0)
+    t, y = almanac.find_satellite_events(t0, t1,
+                satellite=satellite, topos=bluffton, horizon=10)
+    altitude, azimuth, distance = almanac.satellite_altitude(
+                satellite=satellite, topos=bluffton, time=t, and_azdist=True)
+
+    for ti, yi, alti, azi in zip(t, y, altitude.degrees, azimuth.degrees):
+        print("%1d. %-9s %s alt=%2d az=%3.0f deg" %
+                (yi, almanac.SATELLITE_EVENTS[yi], ti.utc_iso(' '), round(alti), round(azi)))
+
+.. testoutput::
+
+    0. rise      2020-01-15 02:44:35Z alt=10 az=228 deg
+    1. culminate 2020-01-15 02:47:55Z alt=78 az=142 deg
+    2. set       2020-01-15 02:51:17Z alt=10 az= 56 deg
+    0. rise      2020-01-15 04:22:23Z alt=10 az=289 deg
+    1. culminate 2020-01-15 04:25:01Z alt=21 az=340 deg
+    2. set       2020-01-15 04:27:39Z alt=10 az= 32 deg
+    0. rise      2020-01-15 06:01:04Z alt=10 az=330 deg
+    1. culminate 2020-01-15 06:02:45Z alt=13 az=  1 deg
+    2. set       2020-01-15 06:04:26Z alt=10 az= 31 deg
+    0. rise      2020-01-15 07:37:45Z alt=10 az=327 deg
+    1. culminate 2020-01-15 07:40:27Z alt=22 az= 21 deg
+    2. set       2020-01-15 07:43:10Z alt=10 az= 75 deg
+    0. rise      2020-01-15 09:14:10Z alt=10 az=302 deg
+    1. culminate 2020-01-15 09:17:29Z alt=67 az=219 deg
+    2. set       2020-01-15 09:20:48Z alt=10 az=136 deg
+
+
+
+Solar terms
+===========
+
+The solar terms are widely used in East Asian calendars.
+
+.. testcode::
+
+    from skyfield import almanac_east_asia as almanac_ea
+
+    t0 = ts.utc(2019, 12, 1)
+    t1 = ts.utc(2019, 12, 31)
+    t, tm = almanac.find_discrete(t0, t1, almanac_ea.solar_terms(e))
+
+    for tmi, ti in zip(tm, t):
+        print(tmi, almanac_ea.SOLAR_TERMS_ZHS[tmi], ti.utc_iso(' '))
+
+.. testoutput::
+
+    17 大雪 2019-12-07 10:18:28Z
+    18 冬至 2019-12-22 04:19:26Z
+
+The result ``t`` will be an array of times, and ``y`` will be integers
+in the range 0–23 which are each the index of a solar term.  Localized
+names for the solar terms in different East Asia languages are provided
+as ``SOLAR_TERMS_JP`` for Japanese, ``SOLAR_TERMS_VN`` for Vietnamese,
+``SOLAR_TERMS_ZHT`` for Traditional Chinese, and (as shown above)
+``SOLAR_TERMS_ZHS`` for Simplified Chinese.

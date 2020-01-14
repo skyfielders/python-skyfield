@@ -50,20 +50,48 @@ def test_star_position_class(ts):
     p = e['earth'].at(ts.utc(2014, 2, 9, 15, 1)).observe(star)
     assert isinstance(p, positionlib.Astrometric)
 
-def test_star_vector(ts):
-    t = ts.tt(api.T0)
-    s = api.Star(ra_hours=[1.0, 2.0], dec_degrees=[+3.0, +4.0])
-    o = positionlib.Barycentric([0.0, 0.0, 0.0], t=t)
-    p = o.observe(s)
+def test_star_vector_from_earth(ts):
+    t = ts.tt_jd(api.T0)
+    eph = api.load('de421.bsp')
+    e = eph['earth'].at(t)
+
+    star = api.Star(ra_hours=[1.0, 2.0], dec_degrees=[+3.0, +4.0])
+    p = e.observe(star)
     assert p.position.au.shape == (3, 2)
     assert p.velocity.au_per_d.shape == (3, 2)
     assert p.t.shape == (2,)
+    assert (p.t.tt == api.T0).all()
+    a = p.apparent()
+
+    a1 = e.observe(api.Star(ra_hours=1.0, dec_degrees=+3.0)).apparent()
+    a2 = e.observe(api.Star(ra_hours=2.0, dec_degrees=+4.0)).apparent()
+    assert (a1.position.au == a.position.au[:,0]).all()
+    assert (a2.position.au == a.position.au[:,1]).all()
+
+def test_star_vector_from_topos(ts):
+    t = ts.tt_jd(api.T0)
+    eph = api.load('de421.bsp')
+    boston = eph['earth'] + Topos('42.3583 N', '71.0636 W')
+    b = boston.at(t)
+
+    star = api.Star(ra_hours=[1.0, 2.0], dec_degrees=[+3.0, +4.0])
+    p = b.observe(star)
+    assert p.position.au.shape == (3, 2)
+    assert p.velocity.au_per_d.shape == (3, 2)
+    assert p.t.shape == (2,)
+    assert (p.t.tt == api.T0).all()
+    a = p.apparent()
+
+    a1 = b.observe(api.Star(ra_hours=1.0, dec_degrees=+3.0)).apparent()
+    a2 = b.observe(api.Star(ra_hours=2.0, dec_degrees=+4.0)).apparent()
+    assert (a1.position.au == a.position.au[:,0]).all()
+    assert (a2.position.au == a.position.au[:,1]).all()
 
 def test_altaz_needs_topos(ts):
     e = api.load('de421.bsp')
     earth = e['earth']
     moon = e['moon']
-    with assert_raises(ValueError, 'using a Topos instance'):
+    with assert_raises(ValueError, 'from a specific Earth location'):
         earth.at(ts.utc(2016)).observe(moon).apparent().altaz()
 
 def test_from_altaz_needs_topos():

@@ -1,11 +1,12 @@
 """Classes representing different kinds of astronomical position."""
 
-from numpy import arccos, array, clip, einsum, empty, exp, full, nan
-
+from numpy import arccos, array, clip, einsum, exp, full, nan
 from .constants import ANGVEL, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
-from .functions import dots, from_polar, length_of, rot_x, rot_z, to_polar
+from .functions import (
+    dots, from_polar, length_of, rot_x, rot_z, to_polar, _to_array,
+)
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Angle, Distance, Velocity, _interpret_angle
@@ -25,14 +26,34 @@ def build_position(position_au, velocity_au_per_d=None, t=None,
         cls = ICRF
     return cls(position_au, velocity_au_per_d, t, center, target, observer_data)
 
+def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
+                   t=None, center=None, target=None, observer_data=None):
+    """Build a position object from a right ascension and declination.
+
+    If an ``epoch`` is specified, the input coordinates are understood
+    to be in the dynamical system of that particular date; otherwise
+    they will be assumed to be ICRS (the modern replacement for J2000).
+
+    """
+    theta = _to_array(dec_degrees) * tau / 360.0
+    phi = _to_array(ra_hours) * tau / 24.0
+    position_au = from_polar(distance, theta, phi)
+    if epoch is not None:
+        position_au = einsum('ij...,j...->i...', epoch.MT, position_au)
+    return build_position(position_au, None, t, center, target, observer_data)
 
 class ICRF(object):
-    """An (x, y, z) position and velocity oriented to the ICRF axes.
+    """An (x,y,z) position and velocity oriented to the ICRF axes.
 
-    The ICRF is a permanent coordinate system that has superseded the
-    old series of equinox-based systems like B1900 and B1950.  Its axes
-    are aligned with the axes of J2000 to within 0.02 arcseconds, which
-    is tighter than the accuracy of J2000 itself.
+    The International Coordinate Reference Frame (ICRF) is a permanent
+    reference frame that is the replacement for J2000.  Their axes agree
+    to within 0.02 arcseconds.  It also supersedes older equinox-based
+    systems like B1900 and B1950.
+
+    Each instance of this class provides a ``.position`` vector and a
+    ``.velocity`` vector that specify (x,y,z) coordinates along the axes
+    of the ICRF.  A specific time ``.t`` might be specified or might be
+    ``None``.
 
     """
     _default_center = None
@@ -51,8 +72,19 @@ class ICRF(object):
         self.observer_data = observer_data
 
     def __repr__(self):
-        return '<{0} position{1}{2}{3}{4}>'.format(
-            self.__class__.__name__,
+        name = self.__class__.__name__
+        center = self.center
+        if name == 'Barycentric' and center == 0:
+            suffix = ' BCRS'
+        elif name == 'Apparent' and center == 399:
+            suffix = ' GCRS'
+        elif name != 'ICRF':
+            suffix = ' ICRS'
+        else:
+            suffix = ''
+        return '<{0}{1} position{2}{3}{4}{5}>'.format(
+            name,
+            suffix,
             '' if (self.velocity is None) else ' and velocity',
             '' if self.t is None else ' at date t',
             '' if self.center is None else ' center={0}'.format(self.center),
@@ -166,7 +198,7 @@ class ICRF(object):
         return Angle(radians=arccos(clip(c, -1.0, 1.0)))
 
     def cirs_xyz(self, epoch):
-        """Compute cartesian CIRS coordinates at a given epoch (x, y, z).
+        """Compute cartesian CIRS coordinates at a given epoch (x,y,z).
 
         Calculate coordinates in the Celestial Intermediate Reference System
         (CIRS), a dynamical coordinate system referenced to the Celestial
@@ -202,7 +234,7 @@ class ICRF(object):
                 Distance(r_au))
 
     def ecliptic_xyz(self, epoch=None):
-        """Compute J2000 ecliptic position vector (x, y, z).
+        """Compute J2000 ecliptic position vector (x,y,z).
 
         If you instead want the coordinates referenced to the dynamical
         system defined by the Earth's true equator and equinox, provide
@@ -252,7 +284,7 @@ class ICRF(object):
                 Distance(au=d))
 
     def galactic_xyz(self):
-        """Compute galactic coordinates (x, y, z)"""
+        """Compute galactic coordinates (x,y,z)"""
         vector = _GALACTIC.dot(self.position.au)
         return Distance(vector)
 
@@ -264,6 +296,15 @@ class ICRF(object):
                 Angle(radians=lon),
                 Distance(au=d))
 
+    def frame_xyz(self, frame):
+        """Express this position as an (x,y,z) vector in a particular frame."""
+        R = frame.rotation_at(self.t)
+        # TODO: before documenting this routine, switch dot() to a real
+        # einsum multiply; and when doing so, make a central routine in
+        # functions.py for it instead of scattering yet more einsums
+        # everywhere.
+        return Distance(au=R.dot(self.position.au))
+
     # Aliases; maybe someday turn into deprecations with warnings?
     ecliptic_position = ecliptic_xyz
     galactic_position = galactic_xyz
@@ -273,7 +314,7 @@ class ICRF(object):
         from astropy.coordinates import SkyCoord
         from astropy.units import au
         x, y, z = self.position.au
-        return SkyCoord(representation='cartesian', x=x, y=y, z=z, unit=au)
+        return SkyCoord(representation_type='cartesian', x=x, y=y, z=z, unit=au)
 
     def _to_spice_frame(self, name):
         vector = self.position.au
@@ -326,13 +367,19 @@ class Geometric(ICRF):
     corrected for the fact that, in real physics, it will take time for
     light to travel from one position to the other.
 
+    Both the ``.position`` and ``.velocity`` are (x,y,z) vectors
+    oriented along the axes of the International Terrestrial Reference
+    Frame (ITRF), the modern replacement for J2000 coordinates.
+
     """
     def altaz(self, temperature_C=None, pressure_mbar='standard'):
         """Compute (alt, az, distance) relative to the observer's horizon
 
-        The altitude returned is an `Angle` in degrees above the
-        horizon, while the azimuth is the compass direction in degrees
-        with north being 0 degrees and east being 90 degrees.
+        The altitude returned is an :class:`~skyfield.units.Angle`
+        measured in degrees above the horizon, while the azimuth
+        :class:`~skyfield.units.Angle` measures east along the horizon
+        from geographic north (so 0 degrees means north, 90 is east, 180
+        is south, and 270 is west).
 
         """
         return _to_altaz(self.position.au, self.observer_data,
@@ -340,19 +387,19 @@ class Geometric(ICRF):
 
 
 class Barycentric(ICRF):
-    """An (x, y, z) position measured from the Solar System barycenter.
+    """An (x,y,z) position measured from the Solar System barycenter.
 
-    Each barycentric position is an ICRS position vector, meaning that
-    the coordinate axes are defined by the high-precision ICRF that has
-    replaced the old J2000.0 reference frame, and the coordinate origin
-    is the BCRS gravitational center of the Solar System.
-
-    Skyfield generates a `Barycentric` position whenever you ask a Solar
-    System body for its location at a particular time:
+    Skyfield generates a `Barycentric` position measured from the
+    gravitational center of the Solar System whenever you ask a body for
+    its location at a particular time:
 
     >>> t = ts.utc(2003, 8, 29)
     >>> mars.at(t)
-    <Barycentric position and velocity at date t center=0 target=499>
+    <Barycentric BCRS position and velocity at date t center=0 target=499>
+
+    Both the ``.position`` and ``.velocity`` are (x,y,z) vectors
+    oriented along the axes of the International Terrestrial Reference
+    Frame (ITRF), the modern replacement for J2000 coordinates.
 
     """
     def observe(self, body):
@@ -367,11 +414,13 @@ class Barycentric(ICRF):
         when it emitted the light that is now reaching this position.
 
         >>> earth.at(t).observe(mars)
-        <Astrometric position and velocity at date t>
+        <Astrometric ICRS position and velocity at date t center=399 target=499>
 
         """
         p, v, t, light_time = body._observe_from_bcrs(self)
-        astrometric = Astrometric(p, v, t, observer_data=self.observer_data)
+        astrometric = Astrometric(p, v, t,
+                                  center=self.target, target=body.target,
+                                  observer_data=self.observer_data)
         astrometric.light_time = light_time
         return astrometric
 
@@ -379,12 +428,16 @@ class Barycentric(ICRF):
 # it possible for it to observe() a planet.
 
 class Astrometric(ICRF):
-    """An astrometric (x, y, z) position relative to a particular observer.
+    """An astrometric (x,y,z) position relative to a particular observer.
 
     The *astrometric position* of a body is its position relative to an
-    observer, adjusted for light-time delay: the position of the body
-    back when it emitted (or reflected) the light that is now reaching
-    the observer's eyes or telescope.
+    observer, adjusted for light-time delay.  It is the position of the
+    body back when it emitted (or reflected) the light that is now
+    reaching the observer's eyes or telescope.
+
+    Both the ``.position`` and ``.velocity`` are (x,y,z) vectors
+    oriented along the axes of the International Terrestrial Reference
+    Frame (ITRF), the modern replacement for J2000 coordinates.
 
     Astrometric positions are usually generated in Skyfield by calling
     the `Barycentric` method `observe()` to determine where a body will
@@ -401,7 +454,7 @@ class Astrometric(ICRF):
         aberration of light caused by the observer's own velocity.
 
         >>> earth.at(t).observe(mars).apparent()
-        <Apparent position and velocity at date t>
+        <Apparent GCRS position and velocity at date t center=399 target=499>
 
         These transforms convert the position from the BCRS reference
         frame of the Solar System barycenter and to the reference frame
@@ -410,28 +463,43 @@ class Astrometric(ICRF):
 
         """
         t = self.t
-        position_au = self.position.au.copy()
+        target_au = self.position.au.copy()
+
         observer_data = self.observer_data
         gcrs_position = observer_data.gcrs_position
+        bcrs_position = observer_data.bcrs_position
+        bcrs_velocity = observer_data.bcrs_velocity
+
+        # If a single observer position (3,) is observing an array of
+        # targets (3,n), then deflection and aberration will complain
+        # that "operands could not be broadcast together" unless we give
+        # the observer another dimension too.
+        if len(bcrs_position.shape) < len(target_au.shape):
+            shape = bcrs_position.shape + (1,)
+            bcrs_position = bcrs_position.reshape(shape)
+            bcrs_velocity = bcrs_velocity.reshape(shape)
+            if gcrs_position is not None:
+                gcrs_position = gcrs_position.reshape(shape)
 
         if gcrs_position is None:
             include_earth_deflection = array((False,))
         else:
             limb_angle, nadir_angle = compute_limb_angle(
-                position_au, gcrs_position)
+                target_au, gcrs_position)
             include_earth_deflection = nadir_angle >= 0.8
 
-        add_deflection(position_au, observer_data.bcrs_position,
+        add_deflection(target_au, bcrs_position,
                        observer_data.ephemeris, t, include_earth_deflection)
 
-        add_aberration(position_au, observer_data.bcrs_velocity,
-                       self.light_time)
+        add_aberration(target_au, bcrs_velocity, self.light_time)
 
-        return Apparent(position_au, t=t, observer_data=observer_data)
+        return Apparent(target_au, t=t,
+                        center=self.center, target=self.target,
+                        observer_data=observer_data)
 
 
 class Apparent(ICRF):
-    """An apparent (x, y, z) position relative to a particular observer.
+    """An apparent (x,y,z) position relative to a particular observer.
 
     The *apparent position* of a body is its position relative to an
     observer adjusted for light-time delay, deflection (light rays
@@ -440,17 +508,20 @@ class Apparent(ICRF):
     space).
 
     Included in aberration is the relativistic transformation that takes
-    the position out of the BCRS centered on the solar system barycenter
-    and into the reference frame of the observer.  In the case of an
-    Earth observer, the transform takes the coordinate into the GCRS.
+    the ``.position`` and ``.velocity`` (x,y,z) vectors out of the BCRS,
+    centered on the Solar System barycenter, and into the reference
+    frame of the observer.  In the case of an Earth observer, the
+    transform takes the coordinate into the GCRS.
 
     """
     def altaz(self, temperature_C=None, pressure_mbar='standard'):
         """Compute (alt, az, distance) relative to the observer's horizon
 
-        The altitude returned is an `Angle` in degrees above the
-        horizon, while the azimuth is the compass direction in degrees
-        with north being 0 degrees and east being 90 degrees.
+        The altitude returned is an :class:`~skyfield.units.Angle`
+        measured in degrees above the horizon, while the azimuth
+        :class:`~skyfield.units.Angle` measures east along the horizon
+        from geographic north (so 0 degrees means north, 90 is east, 180
+        is south, and 270 is west).
 
         """
         return _to_altaz(self.position.au, self.observer_data,
@@ -458,9 +529,42 @@ class Apparent(ICRF):
 
 
 class Geocentric(ICRF):
-    """An (x,y,z) position measured from the geocenter."""
+    """An (x,y,z) position measured from the center of the Earth.
 
+    A geocentric position is the difference between the position of the
+    Earth at a given instant and the position of a target body at the
+    same instant, without accounting for light-travel time or the effect
+    of relativity on the light itself.
+
+    Its ``.position`` and ``.velocity`` vectors have (x,y,z) axes that
+    are those of the International Terrestrial Reference Frame (ITRF),
+    an inertial system that is an update to J2000 and that does not
+    rotate with the Earth itself.
+
+    """
     _default_center = 399
+
+    def itrf_xyz(self):
+        """Return this position as an (x,y,z) vector in the ITRF frame.
+
+        Returns a :class:`~skyfield.units.Distance` object giving the
+        (x,y,z) of this coordinate in the International Terrestrial
+        Reference Frame (ITRF), an internationally agreed upon
+        Earth-centered Earth-fixed (ECEF) coordinate system that
+        rotates with the surface of the Earth itself.
+
+        """
+        if self.center != 399:
+            raise ValueError("you can only ask for an Earth-centered position"
+                             " to be converted into an ITRF coordinate")
+
+        t = self.t
+        au = einsum('ij...,j...->i...', t.M, self.position.au)
+
+        spin = rot_z(- t.gast * tau / 24.0)
+        au = einsum('ij...,j...->i...', spin, array(au))
+
+        return Distance(au)
 
     def subpoint(self):
         """Return the latitude and longitude directly beneath this position.
@@ -498,8 +602,9 @@ def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):
 
     if (elevation_m is None) or (R is None):
         raise ValueError('to compute an altazimuth position, you must'
-                         ' observe from a specific Earth location that'
-                         ' you specify using a Topos instance')
+                         ' observe from a specific Earth location or from'
+                         ' a position on another body loaded from a set'
+                         ' of planetary constants')
 
     # TODO: wobble
 

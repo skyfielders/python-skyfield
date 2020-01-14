@@ -1,6 +1,6 @@
 """Basic operations that are needed repeatedly throughout Skyfield."""
 
-from numpy import arcsin, arctan2, array, cos, load, sin, sqrt
+from numpy import arcsin, arctan2, array, cos, float_, load, sin, sqrt
 from pkgutil import get_data
 from skyfield.constants import tau
 
@@ -65,8 +65,8 @@ def from_polar(r, theta, phi):
     """Convert ``(r, theta, phi)`` to Cartesian coordinates ``[x y z]``.
 
     ``r`` - vector length
-    ``theta`` - angle above (+) or below (-) the xy-plane
-    ``phi`` - angle around the z-axis
+    ``theta`` - angle in radians above (+) or below (-) the xy-plane
+    ``phi`` - angle in radians around the z-axis
 
     The meaning and order of the three polar parameters is designed to
     match both ISO 31-11 and the traditional order used by physicists.
@@ -88,7 +88,9 @@ def rot_x(theta):
 def rot_y(theta):
     c = cos(theta)
     s = sin(theta)
-    return array([(c, 0.0, s), (0.0, 1.0, 0.0), (-s, 0.0, c)])
+    zero = theta * 0.0
+    one = zero + 1.0
+    return array(((c, zero, s), (zero, one, zero), (-s, zero, c)))
 
 def rot_z(theta):
     c = cos(theta)
@@ -96,6 +98,21 @@ def rot_z(theta):
     zero = theta * 0.0
     one = zero + 1.0
     return array(((c, -s, zero), (s, c, zero), (zero, zero, one)))
+
+def _to_array(value):
+    """Convert plain Python sequences into NumPy arrays.
+
+    This helps Skyfield endpoints convert caller-provided tuples and
+    lists into NumPy arrays.  If the ``value`` is not a sequence, then
+    it is coerced to a Numpy float object, but not an actual array.
+
+    """
+    if hasattr(value, 'shape'):
+        return value
+    elif hasattr(value, '__len__'):
+        return array(value)
+    else:
+        return float_(value)
 
 try:
     from io import BytesIO

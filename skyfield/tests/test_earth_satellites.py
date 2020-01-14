@@ -126,3 +126,7 @@ def test_epoch_date():
     lines = s.splitlines()
     sat = EarthSatellite(lines[1], lines[2], lines[0])
     assert sat.epoch.utc_jpl() == 'A.D. 1998-Jan-01 00:00:00.0000 UT'
+
+def test_target_number():
+    s = EarthSatellite(*iss_tle0.splitlines())
+    assert s.target == -125544

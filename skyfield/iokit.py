@@ -50,8 +50,12 @@ def _filename_of(url):
 
 _IERS = 'https://hpiers.obspm.fr/iers/bul/bulc/'
 _JPL = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/'
+_NAIF_KERNELS = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/'
 _NAIF = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
-_USNO = 'http://maia.usno.navy.mil/ser7/'
+_CDDIS = 'ftp://cddis.nasa.gov/products/iers/'
+
+def _open_binary(path):
+    return open(path, mode='rb')
 
 class Loader(object):
     """A tool for downloading and opening astronomical data files.
@@ -97,7 +101,7 @@ class Loader(object):
         try:
             os.makedirs(self.directory)
         except OSError as e:
-            if e.errno != errno.EEXIST:
+            if e.errno != errno.EEXIST and not os.path.isdir(self.directory):
                 raise
 
         # Each instance gets its own copy of these data structures,
@@ -105,9 +109,12 @@ class Loader(object):
         # without changing the behavior of other Loader objects:
 
         self.urls = {
-            'deltat.data': _USNO,
-            'deltat.preds': _USNO,
+            'deltat.data': _CDDIS,
+            'deltat.preds': _CDDIS,
             'Leap_Second.dat': _IERS,
+            'moon_080317.tf': _NAIF_KERNELS + 'fk/satellites/',
+            'moon_pa_de421_1900-2050.bpc': _NAIF_KERNELS + 'pck/',
+            'pck00008.tpc': _NAIF_KERNELS + 'pck/a_old_versions/',
             '.bsp': [
                 ('jup*.bsp', _NAIF),
                 ('*.bsp', _JPL),
@@ -119,12 +126,17 @@ class Loader(object):
             'Leap_Second.dat': parse_leap_seconds,
         }
         self.openers = {
+            # Old-fashioned: auto-create objects, leaving readers and
+            # code tools guessing what kind of object we have returned.
             '.bsp': [
                 ('*.bsp', SpiceKernel),
             ],
-            '.bpc': [
-                ('*.bpc', SpiceKernel),
-            ],
+            # New approach: just return open files, which callers can
+            # then pass to the right class, making the class visible in
+            # the code to both human readers and their IDEs.
+            '.bpc': [('*', _open_binary)],
+            '.tpc': [('*', _open_binary)],
+            '.tf': [('*', _open_binary)],
         }
 
     def path_to(self, filename):
@@ -298,8 +310,12 @@ class Loader(object):
         if delta_t is not None:
             delta_t_recent = np.array(((-1e99, 1e99), (delta_t, delta_t)))
         else:
-            data = self('deltat.data')
-            preds = self('deltat.preds')
+            try:
+                data = self('deltat.data')
+                preds = self('deltat.preds')
+            except IOError as e:
+                e.args = (e.args[0] + _TIMESCALE_IO_ADVICE,) + e.args[1:]
+                raise
             data_end_time = data[0, -1]
             i = np.searchsorted(preds[0], data_end_time, side='right')
             delta_t_recent = np.concatenate([data, preds[:,i:]], axis=1)
@@ -310,6 +326,11 @@ class Loader(object):
     def log(self):
         return '\n'.join(self.events)
 
+_TIMESCALE_IO_ADVICE = """
+
+Try opening the same URL in your browser to learn more about the problem.
+If you want to fall back on the timescale files that Skyfield ships with,
+try `.timescale(builtin=True)` instead."""
 
 def _search(mapping, filename):
     """Search a Loader data structure for a filename."""
@@ -502,7 +523,9 @@ def download(url, path, verbose=None, blocksize=128*1024):
     try:
         connection = urlopen(url)
     except Exception as e:
-        raise IOError('cannot get {0} because {1}'.format(url, e))
+        e2 = IOError('cannot get {0} because {1}'.format(url, e))
+        e2.__cause__ = None
+        raise e2
     if verbose is None:
         verbose = sys.stderr.isatty()
 

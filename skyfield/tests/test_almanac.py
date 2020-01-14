@@ -1,3 +1,4 @@
+import skyfield.almanac_east_asia
 from skyfield import api, almanac
 
 half_minute = 1.0 / 24.0 / 60.0 / 2.0
@@ -30,6 +31,31 @@ def test_seasons():
     assert (y == (2, 3)).all()
 
 # Compare with USNO:
+# http://aa.usno.navy.mil/cgi-bin/aa_phases.pl?year=2018&month=9&day=11&nump=50&format=p
+
+def test_moon_phases():
+    ts = api.load.timescale()
+    t0 = ts.utc(2018, 9, 11)
+    t1 = ts.utc(2018, 9, 30)
+    e = api.load('de421.bsp')
+    t, y = almanac.find_discrete(t0, t1, almanac.moon_phases(e))
+    t.tt += half_minute
+    strings = t.utc_strftime('%Y-%m-%d %H:%M')
+    assert strings == ['2018-09-16 23:15', '2018-09-25 02:52']
+    assert (y == (1, 2)).all()
+
+def test_oppositions_conjunctions():
+    ts = api.load.timescale(builtin=True)
+    t0 = ts.utc(2019, 1, 1)
+    t1 = ts.utc(2021, 1, 1)
+    e = api.load('de421.bsp')
+    f = almanac.oppositions_conjunctions(e, e['mars'])
+    t, y = almanac.find_discrete(t0, t1, f)
+    strings = t.utc_strftime('%Y-%m-%d %H:%M')
+    assert strings == ['2019-09-02 10:42', '2020-10-13 23:25']
+    assert (y == (0, 1)).all()
+
+# Compare with USNO:
 # http://aa.usno.navy.mil/rstt/onedaytable?ID=AA&year=2018&month=9&day=12&state=OH&place=Bluffton
 
 def test_sunrise_sunset():
@@ -44,19 +70,21 @@ def test_sunrise_sunset():
     assert strings == ['2018-09-12 11:13', '2018-09-12 23:50']
     assert (y == (1, 0)).all()
 
-# Compare with USNO:
-# http://aa.usno.navy.mil/cgi-bin/aa_phases.pl?year=2018&month=9&day=11&nump=50&format=p
-
-def test_moon_phases():
+def test_dark_twilight_day():
     ts = api.load.timescale()
-    t0 = ts.utc(2018, 9, 11)
-    t1 = ts.utc(2018, 9, 30)
+    t0 = ts.utc(2019, 11, 8, 4)
+    t1 = ts.utc(2019, 11, 9, 4)
     e = api.load('de421.bsp')
-    t, y = almanac.find_discrete(t0, t1, almanac.moon_phases(e))
+    defiance = api.Topos('41.281944 N', '84.362778 W')
+    t, y = almanac.find_discrete(t0, t1, almanac.dark_twilight_day(e, defiance))
     t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
-    assert strings == ['2018-09-16 23:15', '2018-09-25 02:52']
-    assert (y == (1, 2)).all()
+    assert strings == [
+        '2019-11-08 10:42', '2019-11-08 11:15', '2019-11-08 11:48',
+        '2019-11-08 12:17', '2019-11-08 22:25', '2019-11-08 22:54',
+        '2019-11-08 23:27', '2019-11-08 23:59',
+    ]
+    assert (y == (1, 2, 3, 4, 3, 2, 1, 0)).all()
 
 # Logic.
 

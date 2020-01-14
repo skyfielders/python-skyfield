@@ -49,7 +49,7 @@ Sum of 2 vectors:
 <VectorSum of 2 vectors 0 SOLAR SYSTEM BARYCENTER -> 399 EARTH>"
 
     assert str(v.at(t)) == "\
-<Barycentric position and velocity at date t center=0 target=399>"
+<Barycentric BCRS position and velocity at date t center=0 target=399>"
 
     v = earth - mars
 
@@ -64,7 +64,7 @@ Sum of 4 vectors:
 <VectorSum of 4 vectors 499 MARS -> 399 EARTH>"
 
     assert str(v.at(t)) == "\
-<Geometric position and velocity at date t center=499 target=399>"
+<Geometric ICRS position and velocity at date t center=499 target=399>"
 
     geocentric = Geocentric([0,0,0])
     assert geocentric.center == 399

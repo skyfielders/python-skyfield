@@ -5,11 +5,14 @@ from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
 
+from .almanac import _find_discrete, _find_maxima
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import ITRF_to_GCRS2
 from .timelib import Timescale
 from .vectorlib import VectorFunction
+
+_HALF_SECOND = 0.5 / DAY_S
 
 # important ones:
 # jdsatepoch
@@ -48,6 +51,14 @@ class EarthSatellite(VectorFunction):
     ``epoch``
         A Skyfield :class:`~skyfield.timelib.Time` giving the exact
         epoch moment for these satellite orbit parameters.
+
+    When building a satellite, use the arguments ``line1`` and ``line2``
+    to provide the two data lines from a TLE file as separate strings.
+    Optional ``name`` lets you give a name to the satellite, accessible
+    later through the ``name`` attribute.  ``ts`` is a
+    :class:`~skyfield.timelib.Timescale` object, used to generate the
+    ``epoch`` value; if it is not provided, the satellite will use a
+    built in ``Timescale`` object.
 
     If you are interested in the catalog entry details, the SGP4 model
     parameters for a particular satellite can be accessed through its
@@ -92,7 +103,7 @@ class EarthSatellite(VectorFunction):
         self.model = sat
         self.epoch = ts.utc(sat.epochyr, 1, sat.epochdays)
 
-        self.target = object()  # TODO: make this more interesting
+        self.target = -100000 - self.model.satnum
         self.target_name = 'Satellite{0} {1}'.format(
             self.model.satnum,
             ' ' + repr(self.name) if self.name else '',
@@ -154,6 +165,57 @@ class EarthSatellite(VectorFunction):
         rGCRS, vGCRS = ITRF_to_GCRS2(t, rITRF, vITRF)
         return rGCRS, vGCRS, rGCRS, error
 
+    def find_passes(self, topos, t0, t1, minimum_altitude_degrees=20.0):
+        """Return the times and altitudes the satellite passes over a location.
+
+        Searches between times ``t0`` and ``t1``, which should each be a
+        Skyfield :class:`~skyfield.timelib.Time` object, for passes of
+        this satellite above the location ``topos`` that reach at least
+        ``minimum_altitude_degrees`` above the horizon.  Returns a tuple
+        ``(t, altitude)`` giving a :class:`~skyfield.timelib.Time` array
+        of the moments of greatest altitude above the horizon, and the
+        altitudes themselves as a :class:`~skyfield.units.Distance`
+        array.
+
+        """
+        # First, we find the moments of maximum altitude over the time
+        # period.  Some of these maxima will be negative, meaning the
+        # satellite failed to crest the horizon.
+
+        at = (self - topos).at
+        orbits_per_minute = self.model.no / tau
+        orbits_per_day = 24 * 60 * orbits_per_minute
+        rough_period = 1 / orbits_per_day
+
+        def altitude_at(t):
+            return at(t).altaz()[0].degrees
+
+        altitude_at.rough_period = rough_period
+        t, altitude = _find_maxima(t0, t1, altitude_at, _HALF_SECOND)
+
+        # Next, filter out the maxima that are not high enough.
+
+        keepers = altitude >= minimum_altitude_degrees
+        t = t[keepers]
+        altitude = altitude[keepers]
+
+        # Finally, find the rising and setting that bracket each maximum
+        # altitude.  We desperately hope the satellite is below the
+        # horizon one-third of the way around before and after its
+        # maxima.
+
+        def above_horizon_at(t):
+            return at(t).altaz()[0].degrees > minimum_altitude_degrees
+
+        offset = rough_period / 3.0
+        jd = t.tt
+        jd = jd.reshape(jd.shape + (1,)) + array((-offset, 0.0, +offset))
+        jd = jd.flatten()
+
+        half_second = 0.5 / DAY_S
+        t2, _ = _find_discrete(t0.ts, jd, above_horizon_at, half_second, 12)
+
+        return t, t2, altitude
 
 _second = 1.0 / (24.0 * 60.0 * 60.0)
 

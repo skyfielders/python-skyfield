@@ -338,7 +338,7 @@ def output_geocentric_tests(dates):
             p = de405[{planet!r}]
 
             distance = length_of((e - p.at(t)).position.au)
-            compare(distance * OLD_AU, {distance1!r}, 0.01 * meter)
+            compare(distance * OLD_AU, {distance1!r}, 0.014 * meter)
 
             astrometric = e.observe(p)
             ra, dec, distance = astrometric.radec()

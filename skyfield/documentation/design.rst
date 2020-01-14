@@ -180,6 +180,82 @@ the hundreds of ``np.`` prefixes would add only noise.
 As a consequence, Skyfield’s modules themselves simply do a
 ``from`` ``numpy`` ``import`` of any names that they need.
 
+Skyfield strives to support old versions of both Python and of NumPy,
+because many users in industry and government
+cannot upgrade their supporting libraries whenever they want.
+So the unit tests in CI are run against NumPy 1.11.3
+to maintain compatibility with that older version.
+
+Rotation matrices or state transformation matrices?
+===================================================
+
+Instead of keeping position and velocity in separate 3-vectors of
+floats, the SPICE library from the JPL concatenates them both into a
+single 6-vector.  It can then express the transform of one reference
+frame into another by a single 6×6 matrix.  This is clever, because a
+transformed velocity is the sum of both the frame’s native velocity and
+also a contribution from the angle through which the position vector is
+swept.  This is very cleverly captured by the 6×6 matrix; the comments
+in ``frmchg`` illustrate its structure::
+
+           -               -
+          |                 |
+          |    R        0   |
+          |                 |
+          |                 |
+          |   dR            |
+          |   --        R   |
+          |   dt            |
+          |                 |
+           -               -
+
+The top rows say “the position is simply rotated, with no contribution
+from the velocity,” while the bottom rows say “the velocity is rotated,
+then added to the position × the rate the frame is rotating.”
+
+Since an aggregate frame transform can then be constructed by simply
+multiplying a series of these 6×6 matrices, a temptation arises: if
+Skyfield frame objects adopted the same convention, they would only have
+to carry a single transformation matrix.
+
+The answer is no.  Skyfield does not use this technique.
+
+To understand why, observe the waste that happens when using the above
+matrix: fully one-quarter of the multiplies and something like one-half
+the adds always create zeros.  The SPICE system corrects this by using a
+one-off implementation of matrix multiplication ``zzmsxf`` that in fact
+treats the operation as smaller 3×3 operations.  Its comments note::
+
+        -            -    -            -
+       |      |       |  |      |       |
+       |   R2 |   0   |  |   R1 |   0   |
+       |      |       |  |      |       |
+       | -----+------ |  | -----+------ |  =
+       |      |       |  |      |       |
+       |   D2 |   R2  |  |   D1 |   R1  |
+       |      |       |  |      |       |
+        -            -    -            -
+
+        -                              -
+       |                  |             |
+       |   R2*R1          |     0       |
+       |                  |             |
+       | -----------------+------------ |
+       |                  |             |
+       |   D2*R1 + R2*D1  |   R2*R1     |
+       |                  |             |
+        -                              -
+
+If the cost of efficiency is the additional cost and complication of
+breaking down the 6×6 so as to discard one-quarter of it and do pairwise
+operations between the remaining three quarters, then Skyfield chooses
+to not perform the aggregation in the first place.
+
+So in Skyfield let’s keep the matrices ``R`` and ``dR/dt`` in the first
+diagram always separate.  Then we can perform the exact 3×3 operations
+that SPICE does but without what in Skyfield would be a disaggregation
+step beforehand plus an aggregation step after.
+
 Cross products
 ==============
 

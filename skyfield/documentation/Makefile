@@ -161,11 +161,6 @@ doctest:
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
-diff:
-	colordiff -ur ~/Dropbox/rhodesmill.org/skyfield _build/html/ | grep -v 'Only in' | less
-
-DEST=wf-rhodesmill:Dropbox/rhodesmill.org/skyfield
-
 sync: html
 	rsync -r _build/html/ ~/rhodesmill.org/skyfield
 	,push

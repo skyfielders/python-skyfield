@@ -159,9 +159,6 @@ def _animate(projection, t, stars, observer, planet):
     saturn_color = '#f7dfae'
     #'#a69276'  # chroma('#d8c2a5').darken().hex()
 
-    planet_art = None
-    date_text = None
-
     # Somehow matplotlib is (a) drawing the date text twice which ruins
     # the anti-aliasing and makes it look blocky, and (b) also never
     # erasing that part of the figure so the month names all pile up on
@@ -172,19 +169,24 @@ def _animate(projection, t, stars, observer, planet):
         clip_on=False, facecolor='white',
     ))
 
+    items = []  # so update() can get the axes init() created
+
     def init():
-        nonlocal planet_art, date_text
         print('init()')
         planet_art = ax.scatter(x[100], y[100], color=saturn_color)
         #print(dir(planet_art))
         date_text = ax.text(text_x, text_y, '', ha='left', va='top')
+        items[:] = [planet_art, date_text]
         return planet_art, r, #date_text
 
     def update(i):
         #print('Frame {}'.format(i))
 
+        planet_art, date_text = items
+
         # planet_art.set_xdata(x[i])
         # planet_art.set_ydata(y[i])
+
         planet_art.set_offsets(((x[i], y[i]),))
         planet_art.set_sizes((mag_to_radius(mag[i]) ** 2.0,))
 
