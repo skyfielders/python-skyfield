@@ -1,6 +1,6 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
-from numpy import array, cross, einsum
+from numpy import array, concatenate, cross, einsum, ones_like
 from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
@@ -11,8 +11,6 @@ from .functions import rot_x, rot_y, rot_z
 from .positionlib import ITRF_to_GCRS2
 from .timelib import Timescale
 from .vectorlib import VectorFunction
-
-_HALF_SECOND = 0.5 / DAY_S
 
 # important ones:
 # jdsatepoch
@@ -182,40 +180,45 @@ class EarthSatellite(VectorFunction):
         # period.  Some of these maxima will be negative, meaning the
         # satellite failed to crest the horizon.
 
+        ts = t0.ts
         at = (self - topos).at
         orbits_per_minute = self.model.no / tau
         orbits_per_day = 24 * 60 * orbits_per_minute
         rough_period = 1 / orbits_per_day
+        half_second = 0.5 / DAY_S
 
         def altitude_at(t):
             return at(t).altaz()[0].degrees
 
         altitude_at.rough_period = rough_period
-        t, altitude = _find_maxima(t0, t1, altitude_at, _HALF_SECOND)
+        t1, altitude = _find_maxima(t0, t1, altitude_at, half_second)
 
         # Next, filter out the maxima that are not high enough.
 
         keepers = altitude >= minimum_altitude_degrees
-        t = t[keepers]
-        altitude = altitude[keepers]
+        jd1 = t1.tt[keepers]
+        ones = ones_like(jd1, 'uint8')
+        #altitude = altitude[keepers]
 
         # Finally, find the rising and setting that bracket each maximum
-        # altitude.  We desperately hope the satellite is below the
-        # horizon one-third of the way around before and after its
-        # maxima.
+        # altitude.  We guess that the satellite will be back below the
+        # horizon one-third of an orbit before and after its maxima.
 
-        def above_horizon_at(t):
-            return at(t).altaz()[0].degrees > minimum_altitude_degrees
+        def below_horizon_at(t):
+            return at(t).altaz()[0].degrees < minimum_altitude_degrees
 
         offset = rough_period / 3.0
-        jd = t.tt
-        jd = jd.reshape(jd.shape + (1,)) + array((-offset, 0.0, +offset))
-        jd = jd.flatten()
 
-        half_second = 0.5 / DAY_S
-        t2, _ = _find_discrete(t0.ts, jd, above_horizon_at, half_second, 12)
+        # Turn (t1, t2, ...) into (t1-offset, t1, t1+offset, t2-offset, ...).
+        jdo = jd1[:,None] + array((-offset, 0.0, +offset))
+        jdo = jdo.flatten()
 
-        return t, t2, altitude
+        t2, rs = _find_discrete(t0.ts, jdo, below_horizon_at, half_second, 12)
+
+        v = concatenate((ones, rs * 2))
+        jd = concatenate((jd1, t2.tt))
+        i = jd.argsort()
+        return ts.tt_jd(jd[i]), v[i]
 
 _second = 1.0 / (24.0 * 60.0 * 60.0)
 
