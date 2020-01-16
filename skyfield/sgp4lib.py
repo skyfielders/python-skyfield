@@ -1,6 +1,6 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
-from numpy import array, concatenate, cross, einsum, ones_like
+from numpy import array, concatenate, cross, einsum, ones_like, repeat
 from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from sgp4.propagation import sgp4
@@ -182,41 +182,56 @@ class EarthSatellite(VectorFunction):
 
         ts = t0.ts
         at = (self - topos).at
+        half_second = 0.5 / DAY_S
         orbits_per_minute = self.model.no / tau
         orbits_per_day = 24 * 60 * orbits_per_minute
         rough_period = 1 / orbits_per_day
-        half_second = 0.5 / DAY_S
+
+        # Long-period satellites might rise each day not because of
+        # their own motion, but because the Earth rotates under them, so
+        # check position at least each quarter-day.  We might need to
+        # tighten this even further if experience someday shows it
+        # missing a pass of a particular satellite.
+        if rough_period > 0.25:
+            rough_period = 0.25
 
         def altitude_at(t):
+            # print(at(t).altaz()[0].degrees)
             return at(t).altaz()[0].degrees
 
         altitude_at.rough_period = rough_period
-        t1, altitude = _find_maxima(t0, t1, altitude_at, half_second)
+        tmax, altitude = _find_maxima(t0, t1, altitude_at, half_second)
+        #print(t1.utc_jpl(), altitude)
+        if not tmax:
+            return tmax, ones_like(tmax)
 
         # Next, filter out the maxima that are not high enough.
 
         keepers = altitude >= minimum_altitude_degrees
-        jd1 = t1.tt[keepers]
-        ones = ones_like(jd1, 'uint8')
+        jdmax = tmax.tt[keepers]
+        ones = ones_like(jdmax, 'uint8')
         #altitude = altitude[keepers]
 
         # Finally, find the rising and setting that bracket each maximum
         # altitude.  We guess that the satellite will be back below the
-        # horizon one-third of an orbit before and after its maxima.
+        # horizon in between each pair of adjancent maxima.
 
         def below_horizon_at(t):
             return at(t).altaz()[0].degrees < minimum_altitude_degrees
 
-        offset = rough_period / 3.0
+        # The `jdo` array are the times of maxima, with their averages
+        # in between them.  The start and end times are thrown in too,
+        # in case a rising or setting is lingering out between a maxima
+        # and the ends of our range.  Could this perhaps still miss a
+        # stubborn rising or setting near the ends?
+        doublets = repeat(concatenate(((t0.tt,), jdmax, (t1.tt,))), 2)
+        jdo = (doublets[:-1] + doublets[1:]) / 2.0
 
-        # Turn (t1, t2, ...) into (t1-offset, t1, t1+offset, t2-offset, ...).
-        jdo = jd1[:,None] + array((-offset, 0.0, +offset))
-        jdo = jdo.flatten()
+        trs, rs = _find_discrete(t0.ts, jdo, below_horizon_at, half_second, 12)
 
-        t2, rs = _find_discrete(t0.ts, jdo, below_horizon_at, half_second, 12)
-
+        jd = concatenate((jdmax, trs.tt))
         v = concatenate((ones, rs * 2))
-        jd = concatenate((jd1, t2.tt))
+
         i = jd.argsort()
         return ts.tt_jd(jd[i]), v[i]
 

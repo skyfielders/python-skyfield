@@ -94,7 +94,8 @@ def _find_discrete(ts, jd, f, epsilon, num):
 
         indices = flatnonzero(diff(y))
         if not len(indices):
-            return indices, y[0:0]
+            ends = indices  # nothing found, return empty arrays
+            break
 
         starts = jd.take(indices)
         ends = jd.take(indices + 1)
@@ -113,11 +114,21 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
     ts = start_time.ts
     jd0 = start_time.tt
     jd1 = end_time.tt
+    rough_period = f.rough_period
+
     if jd0 >= jd1:
-        raise ValueError('your start_time {0} is later than your end_time {1}'
+        raise ValueError('start_time {0} is not earlier than end_time {1}'
                          .format(start_time, end_time))
 
-    jd = linspace(jd0, jd1, int((jd1 - jd0) / f.rough_period * num))
+    # We find maxima by investigating every point that is higher than
+    # both points next to it.  This presents a problem: if the initial
+    # heights are, for example, [1.7, 1.1, 0.3, ...], there might be a
+    # maximum 1.8 hidden between the first two heights, but it would not
+    # meet the criteria for further investigation.  To remedy this, we
+    # put an extra point out beyond each end of our range, then filter
+    # our final result to remove maxima that fall outside the range.
+    bump = rough_period / num
+    jd = linspace(jd0 - bump, jd1 + bump, int((jd1 - jd0) / bump) + 3)
 
     end_mask = linspace(0.0, 1.0, num)
     start_mask = end_mask[::-1]
@@ -129,7 +140,8 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
 
         indices = flatnonzero(diff(sign(diff(y))) == -2)
         if not len(indices):
-            raise ValueError('cannot find a maximum in that range')
+            ends = indices  # nothing found, return empty arrays
+            break
 
         starts = jd.take(indices)
         ends = jd.take(indices + 2)
@@ -138,6 +150,10 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
         # below epsilon at around the same time; so for efficiency we
         # only test the first pair.
         if ends[0] - starts[0] <= epsilon:
+            # TODO filter
+            # keepers = (ends >= jd0) & (ends <= jd1)
+            # ends = ends[keepers]
+            # indices = indices
             break
 
         jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()
