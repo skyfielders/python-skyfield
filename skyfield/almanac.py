@@ -3,8 +3,8 @@
 
 from __future__ import print_function, division
 
-from numpy import (cos, diff, flatnonzero, linspace, multiply, sign,
-                   zeros_like, pi, arange, ceil, argwhere)
+from numpy import (arange, argwhere, array, ceil, concatenate, cos, diff,
+                   flatnonzero, linspace, multiply, pi, sign, zeros_like)
 from scipy import optimize
 from .constants import DAY_S, tau
 from .nutationlib import iau2000b
@@ -82,6 +82,8 @@ def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
     jd = linspace(jd0, jd1, int(periods * num))
     return _find_discrete(ts, jd, f, epsilon, num)
 
+# TODO: pass in `y` so it can be precomputed?
+
 def _find_discrete(ts, jd, f, epsilon, num):
     """Algorithm core, for callers that already have a `jd` vector."""
     end_mask = linspace(0.0, 1.0, num)
@@ -140,6 +142,7 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
 
         indices = flatnonzero(diff(sign(diff(y))) == -2)
         if not len(indices):
+            y = y.take(indices)
             ends = indices  # nothing found, return empty arrays
             break
 
@@ -150,15 +153,23 @@ def _find_maxima(start_time, end_time, f, epsilon=EPSILON, num=12):
         # below epsilon at around the same time; so for efficiency we
         # only test the first pair.
         if ends[0] - starts[0] <= epsilon:
+            y = y.take(indices)
+
             # TODO filter
             # keepers = (ends >= jd0) & (ends <= jd1)
             # ends = ends[keepers]
             # indices = indices
+
+            # Keep only the first of several maxima that are separated
+            # by less than epsilon.
+            mask = concatenate(((True,), diff(ends) > epsilon))
+            ends = ends[mask]
+            y = y[mask]
             break
 
         jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()
 
-    return ts.tt_jd(ends), y.take(indices)
+    return ts.tt_jd(ends), y
 
 # Discrete circumstances to search.
 
