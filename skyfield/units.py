@@ -271,7 +271,7 @@ class Angle(object):
         return sign * units, sign * minutes, sign * seconds
 
     def signed_dms(self, warn=True):
-        """Convert to a tuple (degrees, hours, minutes, seconds).
+        """Convert to a tuple (sign, degrees, minutes, seconds).
 
         The ``sign`` will be either +1 or -1, and the other quantities
         will all be positive.
