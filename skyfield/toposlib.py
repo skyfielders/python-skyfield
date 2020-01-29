@@ -3,7 +3,7 @@ from numpy import einsum
 from .constants import ASEC2RAD, tau
 from .earthlib import terra
 from .functions import rot_x, rot_y, rot_z
-from .units import Distance, Angle, _interpret_ltude
+from .units import Distance, Angle, _interpret_ltude, _unsexagesimalize
 from .vectorlib import VectorFunction
 
 
@@ -28,26 +28,42 @@ class Topos(VectorFunction):
     def __init__(self, latitude=None, longitude=None, latitude_degrees=None,
                  longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
 
+        lookup = {'N': (1.0, 'latitude'), 'S': (-1.0, 'latitude'), 'E': (1.0, 'longitude'), 'W': (-1.0, 'longitude')}
+
+        """
+        The following code makes the assumption that:
+          1.  If latitude contains a string of the type '<float>[NS]' then it is a latitude and longitude will
+              contain a longitude of the type '<float>[EW]'.
+          2.  If latitude contains a string of the type '<float>[EW]' then reverse of the above is true.
+          3.  Whatever type is contained in latitude, same type will be contained in longitude.
+        """
+
         if latitude_degrees is not None:
             latitude = Angle(degrees=latitude_degrees)
-        elif isinstance(latitude, (str, float, tuple)):
-            latitude = _interpret_ltude(latitude, 'latitude', 'N', 'S')
-        elif not isinstance(latitude, Angle):
+            if longitude_degrees is not None:
+                longitude = Angle(degrees=longitude_degrees)
+
+        elif isinstance(latitude, str):
+            if lookup[latitude[-1]][1] == 'latitude':
+                self.latitude = Angle(degrees=float(latitude[:-1].strip()) * lookup[latitude[-1]][0])
+                self.longitude = Angle(degrees=float(longitude[:-1].strip()) * lookup[longitude[-1]][0])
+            elif lookup[latitude[-1]][1] == 'longitude':
+                self.latitude = Angle(degrees=float(longitude[:-1].strip()) * lookup[longitude[-1]][0])
+                self.longitude = Angle(degrees=float(latitude[:-1].strip()) * lookup[latitude[-1]][0])
+
+        elif isinstance(latitude, (float, tuple)):
+            self.latitude = latitude
+            self.longitude = longitude
+
+        elif isinstance(latitude, Angle):
+            self.latitude = latitude
+            self.longitude = longitude
+
+        else:
             raise TypeError('please provide either latitude_degrees=<float>'
                             ' or latitude=<skyfield.units.Angle object>'
                             ' with north being positive')
 
-        if longitude_degrees is not None:
-            longitude = Angle(degrees=longitude_degrees)
-        elif isinstance(longitude, (str, float, tuple)):
-            longitude = _interpret_ltude(longitude, 'longitude', 'E', 'W')
-        elif not isinstance(longitude, Angle):
-            raise TypeError('please provide either longitude_degrees=<float>'
-                            ' or longitude=<skyfield.units.Angle object>'
-                            ' with east being positive')
-
-        self.latitude = latitude
-        self.longitude = longitude
         self.elevation = Distance(m=elevation_m)
         self.x = x
         self.y = y
