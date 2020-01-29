@@ -54,8 +54,8 @@ class Topos(VectorFunction):
                 self.longitude = Angle(degrees=float(latitude[:-1].strip()) * lookup[latitude[-1]][0])
 
         elif isinstance(latitude, (float, tuple)):
-            self.latitude = _unsexagesimalize(latitude)
-            self.longitude = _unsexagesimalize(longitude)
+            self.latitude = Angle(_unsexagesimalize(latitude))
+            self.longitude = Angle(_unsexagesimalize(longitude))
 
         elif isinstance(latitude, Angle):
             self.latitude = latitude
