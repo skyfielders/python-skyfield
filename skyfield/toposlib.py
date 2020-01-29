@@ -36,12 +36,14 @@ class Topos(VectorFunction):
               contain a longitude of the type '<float>[EW]'.
           2.  If latitude contains a string of the type '<float>[EW]' then reverse of the above is true.
           3.  Whatever type is contained in latitude, same type will be contained in longitude.
+          
+        As an addition, the elifs could test both latitude and longitude for type as opposed to just latitude, then
+        raise a generic error.
         """
 
         if latitude_degrees is not None:
-            latitude = Angle(degrees=latitude_degrees)
-            if longitude_degrees is not None:
-                longitude = Angle(degrees=longitude_degrees)
+            self.latitude = Angle(degrees=latitude_degrees)
+            self.longitude = Angle(degrees=longitude_degrees)
 
         elif isinstance(latitude, str):
             if lookup[latitude[-1]][1] == 'latitude':
@@ -52,8 +54,8 @@ class Topos(VectorFunction):
                 self.longitude = Angle(degrees=float(latitude[:-1].strip()) * lookup[latitude[-1]][0])
 
         elif isinstance(latitude, (float, tuple)):
-            self.latitude = latitude
-            self.longitude = longitude
+            self.latitude = _unsexagesimalize(latitude)
+            self.longitude = _unsexagesimalize(longitude)
 
         elif isinstance(latitude, Angle):
             self.latitude = latitude
