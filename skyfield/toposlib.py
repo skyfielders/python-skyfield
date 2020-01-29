@@ -70,7 +70,7 @@ class Topos(VectorFunction):
         self.x = x
         self.y = y
 
-        self.R_lat = rot_y(latitude.radians)[::-1]
+        self.R_lat = rot_y(self.latitude.radians)[::-1]
 
         self.target = object()  # TODO: make this more interesting
         self.target_name = '{0} N {1} E'.format(self.latitude, self.longitude)
