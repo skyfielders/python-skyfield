@@ -12,16 +12,6 @@ from .positionlib import ITRF_to_GCRS2
 from .timelib import Timescale
 from .vectorlib import VectorFunction
 
-# important ones:
-# jdsatepoch
-# bstar
-# inclo - inclination
-# nodeo - right ascension of ascending node
-# ecco - eccentricity
-# argpo - argument of perigee
-# mo - mean anomaly
-# no - mean motion
-
 _minutes_per_day = 1440.
 
 # Since satellite calculations are done entirely in UTC, we can display
