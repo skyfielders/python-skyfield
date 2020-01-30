@@ -1,9 +1,7 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
 from numpy import array, concatenate, cross, einsum, ones_like, repeat
-from sgp4.earth_gravity import wgs72
-from sgp4.io import twoline2rv
-from sgp4.propagation import sgp4
+from sgp4.api import SGP4_ERRORS, Satrec
 
 from .almanac import _find_discrete, _find_maxima
 from .constants import AU_KM, DAY_S, T0, tau
@@ -87,9 +85,17 @@ class EarthSatellite(VectorFunction):
         ts = ts or _ts
 
         self.name = None if name is None else name.strip()
-        sat = twoline2rv(line1, line2, whichconst=wgs72)
+        sat = Satrec.twoline2rv(line1, line2)
         self.model = sat
-        self.epoch = ts.utc(sat.epochyr, 1, sat.epochdays)
+
+        # TODO: just use the Julian dates instead
+        two_digit_year = sat.epochyr
+        if two_digit_year < 57:
+            year = two_digit_year + 2000;
+        else:
+            year = two_digit_year + 1900;
+
+        self.epoch = ts.utc(year, 1, sat.epochdays)
 
         self.target = -100000 - self.model.satnum
         self.target_name = 'Satellite{0} {1}'.format(
@@ -117,20 +123,21 @@ class EarthSatellite(VectorFunction):
 
         """
         sat = self.model
-        minutes_past_epoch = (t._utc_float() - sat.jdsatepoch) * 1440.0
-        if getattr(minutes_past_epoch, 'shape', None):
+        jd = t._utc_float()
+        if getattr(jd, 'shape', None):
             position = []
             velocity = []
             error = []
-            for m in minutes_past_epoch:
-                p, v = sgp4(sat, m)
+            for jd_i in jd:
+                e, p, v = sat.sgp4(jd_i, 0.0)  # TODO: improve precision
                 position.append(p)
                 velocity.append(v)
-                error.append(sat.error_message)
+                error.append(SGP4_ERRORS[e] if e else None)
             return array(position).T, array(velocity).T, error
         else:
-            position, velocity = sgp4(sat, minutes_past_epoch)
-            return array(position), array(velocity), sat.error_message
+            error, position, velocity = sat.sgp4(jd, 0.0)
+            error_message = SGP4_ERRORS[error] if error else None
+            return array(position), array(velocity), error_message
 
     def ITRF_position_velocity_error(self, t):
         """Return the ITRF position, velocity, and error at time `t`.
