@@ -53,7 +53,7 @@ def test_sat_almanac_Tricky():
     expected = {'INTEGRAL': 36,
                 'ANIK F-1R': 14,
                 'PALAPA D': 0,
-                'Ariane 5B': 36,
+                'Ariane 5B': 37,
                 'Swift': 0,
                 'GRACE-FO 2': 90}
     for iline0 in range(0, len(tles)-3, 3):
@@ -67,8 +67,8 @@ def test_sat_almanac_Tricky():
         horizon = 20
         nexpected = expected[sat.name]
 
-        times, yis = almanac.find_satellite_events(t0, t1, sat, topos, horizon=20)
-        #times, yis = sat.find_passes(topos, t0, t1, 20.0)
+        # times, yis = almanac.find_satellite_events(t0, t1, sat, topos, horizon=20)
+        times, yis = sat.find_passes(topos, t0, t1, 20.0)
         assert(verify_sat_almanac(times, yis, sat, topos, horizon, nexpected))
 
 
@@ -79,8 +79,10 @@ def verify_sat_almanac(times, yis, sat, topos, horizon, nexpected):
         print("Number of satellite events expected for", sat.name," not specified.  Got ", len(times))
     else:
         if len(times) != nexpected or len(yis) != nexpected:
-            raise RuntimeError("Unexpected number of satellite events for {}"
-                               .format(sat.model.satnum))
+            raise RuntimeError("Expected {} events for satellite {}"
+                               " but got {} times and {} y values"
+                               .format(nexpected, sat.model.satnum,
+                                       len(times), len(yis)))
     if len(times) == 0:
         return True     # Nothing to check
     # Verify 1) rises/sets cross the horizon in the right direction
