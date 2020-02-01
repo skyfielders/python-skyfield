@@ -158,7 +158,7 @@ than those of the old J2000 system.)
 
 .. testoutput::
 
-   [-3918.87650111 -1887.64840113  5209.08801278]
+   [-3918.8765203  -1887.6483254   5209.08802574]
 
 .. would love to be able to do this someday - see the SPICE source file
    nearpt.f
@@ -232,7 +232,7 @@ just as you did for the position measured from the Earth’s center:
 
 .. testoutput::
 
-    [ 331.61885573  392.1846109  1049.76010007]
+    [ 331.61883654  392.18468664 1049.76011302]
 
 But the most popular approach is to ask the topocentric position
 for its altitude and azimuth coordinates,
@@ -254,7 +254,7 @@ which tell you whether the satellite is above or below the horizon:
     The ISS is above the horizon
     16deg 16' 32.6"
     350deg 15' 20.4"
-    1168.6642384388767
+    1168.6642700423652
 
 If you are interested
 in where among the stars the satellite will be positioned,
@@ -441,11 +441,11 @@ that are limiting this TLE set’s predictions:
 
     Before:
     [nan nan nan]
-    mean eccentricity -0.001416 not within range 0.0 <= e < 1.0
+    mean eccentricity is outside the range 0.0 to 1.0
 
     After:
-    [nan nan nan]
-    mrt 0.997178 is less than 1.0 indicating the satellite has decayed
+    [-5021.82658191   742.71506112  3831.57403957]
+    mrt is less than 1.0 which indicates the satellite has decayed
 
 If you use a ``Time`` array to ask about an entire range of dates,
 then ``sgp4_error`` will be a sequence filled in with ``None``
@@ -461,8 +461,8 @@ and otherwise recording the propagator error:
 
 .. testoutput::
 
-    ['mean eccentricity -0.001416 not within range 0.0 <= e < 1.0',
+    ['mean eccentricity is outside the range 0.0 to 1.0',
      None,
      None,
      None,
-     'mrt 0.997178 is less than 1.0 indicating the satellite has decayed']
+     'mrt is less than 1.0 which indicates the satellite has decayed']

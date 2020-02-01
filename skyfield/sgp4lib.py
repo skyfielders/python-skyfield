@@ -130,11 +130,12 @@ class EarthSatellite(VectorFunction):
         jd = t._utc_float()
         if getattr(jd, 'shape', None):
             e, r, v = sat.sgp4_array(jd, zeros_like(jd))
-            return r.T, v.T, e
+            messages = [SGP4_ERRORS[error] if error else None for error in e]
+            return r.T, v.T, messages
         else:
             error, position, velocity = sat.sgp4(jd, 0.0)
-            error_message = SGP4_ERRORS[error] if error else None
-            return array(position), array(velocity), error_message
+            message = SGP4_ERRORS[error] if error else None
+            return array(position), array(velocity), message
 
     def ITRF_position_velocity_error(self, t):
         """Return the ITRF position, velocity, and error at time `t`.
