@@ -1,6 +1,6 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
-from numpy import array, concatenate, cross, einsum, ones_like, repeat
+from numpy import array, concatenate, cross, einsum, identity, ones_like, repeat
 from sgp4.api import SGP4_ERRORS, Satrec
 
 from .almanac import _find_discrete, _find_maxima
@@ -19,6 +19,8 @@ _minutes_per_day = 1440.
 # we can make a more severe change to the satellite API to require a
 # Timescale when the user asks for the epoch as a Time.  (It was
 # probably a mistake to have an .epoch convenience attribute.)
+
+_identity = identity(3)
 _infs = array(('-inf', 'inf'), float)
 _ts = Timescale(array((_infs, (0.0, 0.0))), _infs, array((37.0, 37.0)))
 
@@ -125,6 +127,7 @@ class EarthSatellite(VectorFunction):
         sat = self.model
         jd = t._utc_float()
         if getattr(jd, 'shape', None):
+            # TODO: use vectorized version of call
             position = []
             velocity = []
             error = []
@@ -192,13 +195,17 @@ class EarthSatellite(VectorFunction):
         if rough_period > 0.25:
             rough_period = 0.25
 
+        def cheat(t):
+            """Avoid computing expensive values that cancel out anyway."""
+            t.gast = t.tt * 0.0
+            t.M = t.MT = _identity
+
         def altitude_at(t):
-            # print(at(t).altaz()[0].degrees)
+            cheat(t)
             return at(t).altaz()[0].degrees
 
         altitude_at.rough_period = rough_period
         tmax, altitude = _find_maxima(t0, t1, altitude_at, half_second)
-        #print(t1.utc_jpl(), altitude)
         if not tmax:
             return tmax, ones_like(tmax)
 
@@ -214,6 +221,7 @@ class EarthSatellite(VectorFunction):
         # horizon in between each pair of adjancent maxima.
 
         def below_horizon_at(t):
+            cheat(t)
             return at(t).altaz()[0].degrees < minimum_altitude_degrees
 
         # The `jdo` array are the times of maxima, with their averages
