@@ -199,7 +199,7 @@ class EarthSatellite(VectorFunction):
             return at(t).altaz()[0].degrees
 
         altitude_at.rough_period = rough_period
-        tmax, altitude = _find_maxima(t0, t1, altitude_at, half_second)
+        tmax, altitude = _find_maxima(t0, t1, altitude_at, half_second, 12)
         if not tmax:
             return tmax, ones_like(tmax)
 
@@ -226,7 +226,7 @@ class EarthSatellite(VectorFunction):
         doublets = repeat(concatenate(((t0.tt,), jdmax, (t1.tt,))), 2)
         jdo = (doublets[:-1] + doublets[1:]) / 2.0
 
-        trs, rs = _find_discrete(t0.ts, jdo, below_horizon_at, half_second, 12)
+        trs, rs = _find_discrete(t0.ts, jdo, below_horizon_at, half_second, 8)
 
         jd = concatenate((jdmax, trs.tt))
         v = concatenate((ones, rs * 2))
