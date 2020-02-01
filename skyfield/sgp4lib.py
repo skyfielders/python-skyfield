@@ -1,6 +1,8 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
-from numpy import array, concatenate, cross, einsum, identity, ones_like, repeat
+from numpy import (
+    array, concatenate, cross, einsum, identity, ones_like, repeat, zeros_like
+)
 from sgp4.api import SGP4_ERRORS, Satrec
 
 from .almanac import _find_discrete, _find_maxima
@@ -127,16 +129,8 @@ class EarthSatellite(VectorFunction):
         sat = self.model
         jd = t._utc_float()
         if getattr(jd, 'shape', None):
-            # TODO: use vectorized version of call
-            position = []
-            velocity = []
-            error = []
-            for jd_i in jd:
-                e, p, v = sat.sgp4(jd_i, 0.0)  # TODO: improve precision
-                position.append(p)
-                velocity.append(v)
-                error.append(SGP4_ERRORS[e] if e else None)
-            return array(position).T, array(velocity).T, error
+            e, r, v = sat.sgp4_array(jd, zeros_like(jd))
+            return r.T, v.T, e
         else:
             error, position, velocity = sat.sgp4(jd, 0.0)
             error_message = SGP4_ERRORS[error] if error else None
