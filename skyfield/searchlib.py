@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 
 from numpy import (
-    concatenate, diff, flatnonzero, linspace, multiply, sign, argsort
+    concatenate, diff, flatnonzero, linspace, multiply, sign, sort
 )
 from .constants import DAY_S
 EPSILON = 0.001 / DAY_S
@@ -127,13 +127,22 @@ def _find_maxima(start_time, end_time, f, epsilon, num):
         indices2 = flatnonzero(rising[:-1] & falling[1:])
         indices3 = flatnonzero(rising[:-2] & flat[1:-1] & falling[2:])
 
-        if not len(indices2) and not len(indices3):
-            # Nothing found, return empty arrays.
+        if len(indices3):
+            # The uncommon, artificial case, that requires a bit of
+            # extra effort to keep the resulting arrays sorted.
+            start_indices = concatenate((indices2, indices3 + 1))
+            end_indices = concatenate((indices2 + 2, indices3 + 2))
+            sort(start_indices)
+            sort(end_indices)
+        elif len(indices2):
+            # The common case: at least one maxima exists, and all
+            # maxima were simple peaks.
+            start_indices = indices2
+            end_indices = indices2 + 2
+        else:
+            # No maxima found.
             jd = y = y[0:0]
             break
-
-        start_indices = concatenate((indices2, indices3 + 1))
-        end_indices = concatenate((indices2 + 2, indices3 + 2))
 
         starts = jd.take(start_indices)
         ends = jd.take(end_indices)
@@ -142,23 +151,17 @@ def _find_maxima(start_time, end_time, f, epsilon, num):
         # below epsilon at around the same time; so for efficiency we
         # only test the first pair.
         if ends[0] - starts[0] <= epsilon:
+            jd = ends
             y = y.take(end_indices)
 
             # Filter out maxima that fell slightly outside our bounds.
-            keepers = (ends >= jd0) & (ends <= jd1)
-            jd = ends[keepers]
+            keepers = (jd >= jd0) & (jd <= jd1)
+            jd = jd[keepers]
             y = y[keepers]
-
-            # The separate handling of sharp vs flat patterns (above)
-            # might have gotten our maxima out of order.
-            i = argsort(jd)
-            jd = jd[i]
-            y = y[i]
 
             # Keep only the first of several maxima that are separated
             # by less than epsilon.
             if len(jd):
-                print(diff(jd) / epsilon)
                 mask = concatenate(((True,), diff(jd) > epsilon))
                 jd = jd[mask]
                 y = y[mask]
