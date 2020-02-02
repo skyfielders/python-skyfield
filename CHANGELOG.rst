@@ -3,6 +3,12 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.17 — 2020 February 2
+----------------------
+
+* Fix the :meth:`~skyfield.timelib.Time.utc_strftime()` method so it
+  does not report that every day, through all of history, is a Monday.
+
 1.16 — 2019 December 20
 -----------------------
 

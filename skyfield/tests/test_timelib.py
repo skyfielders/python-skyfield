@@ -207,11 +207,11 @@ def test_stftime_of_single_date(ts):
 
 def test_stftime_of_date_array(ts):
     t = ts.utc(1973, 12, 31, 23, 59, np.arange(59.0, 61.1, 1.0))
-    assert t.utc_strftime('%Y %m %d %H %M %S') == [
-        '1973 12 31 23 59 59',
-        '1973 12 31 23 59 60',
-        '1974 01 01 00 00 00',
-        ]
+    assert t.utc_strftime('%a %Y %m %d %H %M %S') == [
+        'Mon 1973 12 31 23 59 59',
+        'Mon 1973 12 31 23 59 60',
+        'Tue 1974 01 01 00 00 00',
+    ]
 
 def test_leap_second(ts):
 

@@ -535,8 +535,10 @@ class Time(object):
         tup = self._utc_tuple(_half_second)
         year, month, day, hour, minute, second = tup
         second = second.astype(int)
+        # TODO: _utc_float() repeats the same work as _utc_tuple() above
+        weekday = (self._utc_float() + 0.5).astype(int) % 7
         zero = zeros_like(year)
-        tup = (year, month, day, hour, minute, second, zero, zero, zero)
+        tup = (year, month, day, hour, minute, second, weekday, zero, zero)
         if self.shape:
             return [strftime(format, item) for item in zip(*tup)]
         else:
@@ -655,8 +657,7 @@ class Time(object):
 
     @reify
     def utc(self):
-        utc = self._utc_tuple()
-        return array(utc) if self.shape else utc
+        return self._utc_tuple()
 
     @reify
     def tdb(self):
