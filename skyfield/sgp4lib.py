@@ -158,7 +158,7 @@ class EarthSatellite(VectorFunction):
         rGCRS, vGCRS = ITRF_to_GCRS2(t, rITRF, vITRF)
         return rGCRS, vGCRS, rGCRS, error
 
-    def find_passes(self, topos, t0, t1, minimum_altitude_degrees=20.0):
+    def find_passes(self, topos, t0, t1, minimum_altitude_degrees=0.0):
         """Return the times and altitudes the satellite passes over a location.
 
         Searches between times ``t0`` and ``t1``, which should each be a
