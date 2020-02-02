@@ -65,11 +65,17 @@ def _find_discrete(ts, jd, f, epsilon, num):
         # below epsilon at around the same time; so for efficiency we
         # only test the first pair.
         if ends[0] - starts[0] <= epsilon:
+            y = y.take(indices + 1)
+            # Keep only the first of several zero crossings that might
+            # possibly be separated by less than epsilon.
+            mask = concatenate(((True,), diff(ends) > 3.0 * epsilon))
+            ends = ends[mask]
+            y = y[mask]
             break
 
         jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()
 
-    return ts.tt_jd(ends), y.take(indices + 1)
+    return ts.tt_jd(ends), y
 
 def _find_maxima(start_time, end_time, f, epsilon, num):
     ts = start_time.ts
