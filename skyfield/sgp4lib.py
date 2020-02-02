@@ -158,17 +158,25 @@ class EarthSatellite(VectorFunction):
         rGCRS, vGCRS = ITRF_to_GCRS2(t, rITRF, vITRF)
         return rGCRS, vGCRS, rGCRS, error
 
-    def find_passes(self, topos, t0, t1, minimum_altitude_degrees=0.0):
-        """Return the times and altitudes the satellite passes over a location.
+    def find_events(self, topos, t0, t1, minimum_altitude_degrees=0.0):
+        """Return the times at which the satellite rises, culminates, and sets.
 
-        Searches between times ``t0`` and ``t1``, which should each be a
+        Searches between ``t0`` and ``t1``, which should each be a
         Skyfield :class:`~skyfield.timelib.Time` object, for passes of
         this satellite above the location ``topos`` that reach at least
-        ``minimum_altitude_degrees`` above the horizon.  Returns a tuple
-        ``(t, altitude)`` giving a :class:`~skyfield.timelib.Time` array
-        of the moments of greatest altitude above the horizon, and the
-        altitudes themselves as a :class:`~skyfield.units.Distance`
-        array.
+        ``minimum_altitude_degrees`` above the horizon.
+
+        Returns a tuple ``(t, events)`` whose first element is a
+        :class:`~skyfield.timelib.Time` array and whose second element
+        is an array of events:
+
+        * 0 — Satellite rose above ``minimum_altitude_degrees``.
+        * 1 — Satellite culminated and started to descend again.
+        * 2 — Satellite fell below ``minimum_altitude_degrees``.
+
+        Note that multiple culminations in a row are possible when,
+        without setting, the satellite reaches a second peak altitude
+        after descending partway down the sky from the first one.
 
         """
         # First, we find the moments of maximum altitude over the time
@@ -209,7 +217,6 @@ class EarthSatellite(VectorFunction):
         keepers = altitude >= minimum_altitude_degrees
         jdmax = tmax.tt[keepers]
         ones = ones_like(jdmax, 'uint8')
-        #altitude = altitude[keepers]
 
         # Finally, find the rising and setting that bracket each maximum
         # altitude.  We guess that the satellite will be back below the
