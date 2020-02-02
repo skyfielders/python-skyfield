@@ -79,7 +79,7 @@ def _find_discrete(ts, jd, f, epsilon, num):
 
     return ts.tt_jd(ends), y
 
-def _find_maxima(start_time, end_time, f, epsilon, num):
+def find_maxima(start_time, end_time, f, epsilon, num):
     ts = start_time.ts
     jd0 = start_time.tt
     jd1 = end_time.tt

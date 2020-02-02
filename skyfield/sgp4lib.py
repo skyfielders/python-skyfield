@@ -8,7 +8,7 @@ from sgp4.api import SGP4_ERRORS, Satrec
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import ITRF_to_GCRS2
-from .searchlib import _find_discrete, _find_maxima
+from .searchlib import _find_discrete, find_maxima
 from .timelib import Timescale
 from .vectorlib import VectorFunction
 
@@ -208,7 +208,7 @@ class EarthSatellite(VectorFunction):
             return at(t).altaz()[0].degrees
 
         altitude_at.rough_period = rough_period
-        tmax, altitude = _find_maxima(t0, t1, altitude_at, half_second, 12)
+        tmax, altitude = find_maxima(t0, t1, altitude_at, half_second, 12)
         if not tmax:
             return tmax, ones_like(tmax)
 

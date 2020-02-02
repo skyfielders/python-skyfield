@@ -3,8 +3,7 @@
 import numpy as np
 
 from skyfield.api import load
-from skyfield.constants import tau
-from skyfield.searchlib import find_discrete, _find_maxima as find_maxima
+from skyfield.searchlib import find_discrete, find_maxima
 
 bump = 1e-5
 epsilon = 1e-10
