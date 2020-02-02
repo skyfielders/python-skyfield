@@ -78,7 +78,7 @@ class EarthSatellite(VectorFunction):
         Argument of perigee in radians.
     ``model.mo``
         Mean anomaly in radians.
-    ``model.no``
+    ``model.no_kozai``
         Mean motion in radians per minute.
 
     """
@@ -186,7 +186,7 @@ class EarthSatellite(VectorFunction):
         ts = t0.ts
         at = (self - topos).at
         half_second = 0.5 / DAY_S
-        orbits_per_minute = self.model.no / tau
+        orbits_per_minute = self.model.no_kozai / tau
         orbits_per_day = 24 * 60 * orbits_per_minute
         rough_period = 1 / orbits_per_day
 
