@@ -141,8 +141,53 @@ even if the file is already on disk.
 
     2.538 days away from epoch
 
+Finding when a satellite rises and sets
+---------------------------------------
+
+Skyfield can search between a start time and an end time
+for each occasion on which a satellite’s altitude
+exceeds a specified number of degrees above the horizon.
+For example,
+here is how to determine
+how many times our example satellite rises above 30° of altitude
+over the span of a single day:
+
+.. testcode::
+
+    bluffton = Topos('40.8939 N', '83.8917 W')
+    t0 = ts.utc(2014, 1, 23)
+    t1 = ts.utc(2014, 1, 24)
+    t, events = satellite.find_events(bluffton, t0, t1, altitude_degrees=30.0)
+    for ti, event in zip(t, events):
+        name = ('rise', 'culminate', 'set')[event]
+        print(ti.utc_jpl(), name)
+
+.. testoutput::
+
+    A.D. 2014-Jan-23 06:25:36.5356 UT rise
+    A.D. 2014-Jan-23 06:26:57.7442 UT culminate
+    A.D. 2014-Jan-23 06:28:19.1841 UT set
+    A.D. 2014-Jan-23 12:54:55.7886 UT rise
+    A.D. 2014-Jan-23 12:56:26.8625 UT culminate
+    A.D. 2014-Jan-23 12:57:57.7244 UT set
+
+The satellite’s altitude exceeded 30° twice.
+For each such occasion,
+the method :meth:`~skyfield.sgp4lib.EarthSatellite.find_events()`
+has determined not only the moment of greatest altitude —
+accurate to within a second or so —
+but also the time at which the satellite first crested 30°
+and the moment at which it dipped below it.
+
+Beware that events might not always be in the order rise-culminate-set.
+Some satellites culminate several times between rising and setting.
+
 Generating a satellite position
 -------------------------------
+
+Once Skyfield has identified the times
+at which a particular satellite is overhead,
+you will probably want to learn more about its position at those times.
 
 The simplest form in which you can generate a satellite position
 is to call its :meth:`~skyfield.sgp4lib.EarthSatellite.at()` method,
@@ -153,6 +198,7 @@ than those of the old J2000 system.)
 
 .. testcode::
 
+   t = ts.utc(2014, 1, 23, 11, 18, 7)
    geocentric = satellite.at(t)
    print(geocentric.position.km)
 
@@ -205,7 +251,6 @@ to ask “where will the satellite be *relative to* my location?”
 
 .. testcode::
 
-    bluffton = Topos('40.8939 N', '83.8917 W')
     difference = satellite - bluffton
     print(difference)
 

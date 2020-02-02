@@ -6,8 +6,21 @@ Changelog
 1.17 — 2020 February 2
 ----------------------
 
-* Fix the :meth:`~skyfield.timelib.Time.utc_strftime()` method so it
-  does not report that every day, through all of history, is a Monday.
+* Upgraded to a new version of the ``sgp4`` Python library that, when
+  possible, uses the fast official C++ implementation of SGP4.
+
+* Added a :meth:`~skyfield.sgp4lib.EarthSatellite.find_events()` Earth
+  satellite method that finds the times at which a satellite rises,
+  culminates, and sets.
+
+* Improved the logic behind the :doc:`almanac` routines to avoid rare
+  situations in which a cluster of nearly identical times would be
+  produced for what should really be considered a single event.
+  `#333 <https://github.com/skyfielders/python-skyfield/issues/333>`_
+
+* Fixed the :meth:`~skyfield.timelib.Time.utc_strftime()` method so it
+  does not report that every day in all of recorded history is a Monday.
+  `#335 <https://github.com/skyfielders/python-skyfield/issues/335>`_
 
 1.16 — 2019 December 20
 -----------------------

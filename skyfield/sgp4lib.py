@@ -158,21 +158,21 @@ class EarthSatellite(VectorFunction):
         rGCRS, vGCRS = ITRF_to_GCRS2(t, rITRF, vITRF)
         return rGCRS, vGCRS, rGCRS, error
 
-    def find_events(self, topos, t0, t1, minimum_altitude_degrees=0.0):
+    def find_events(self, topos, t0, t1, altitude_degrees=0.0):
         """Return the times at which the satellite rises, culminates, and sets.
 
         Searches between ``t0`` and ``t1``, which should each be a
         Skyfield :class:`~skyfield.timelib.Time` object, for passes of
         this satellite above the location ``topos`` that reach at least
-        ``minimum_altitude_degrees`` above the horizon.
+        ``altitude_degrees`` above the horizon.
 
         Returns a tuple ``(t, events)`` whose first element is a
         :class:`~skyfield.timelib.Time` array and whose second element
         is an array of events:
 
-        * 0 — Satellite rose above ``minimum_altitude_degrees``.
+        * 0 — Satellite rose above ``altitude_degrees``.
         * 1 — Satellite culminated and started to descend again.
-        * 2 — Satellite fell below ``minimum_altitude_degrees``.
+        * 2 — Satellite fell below ``altitude_degrees``.
 
         Note that multiple culminations in a row are possible when,
         without setting, the satellite reaches a second peak altitude
@@ -214,7 +214,7 @@ class EarthSatellite(VectorFunction):
 
         # Next, filter out the maxima that are not high enough.
 
-        keepers = altitude >= minimum_altitude_degrees
+        keepers = altitude >= altitude_degrees
         jdmax = tmax.tt[keepers]
         ones = ones_like(jdmax, 'uint8')
 
@@ -224,7 +224,7 @@ class EarthSatellite(VectorFunction):
 
         def below_horizon_at(t):
             cheat(t)
-            return at(t).altaz()[0].degrees < minimum_altitude_degrees
+            return at(t).altaz()[0].degrees < altitude_degrees
 
         # The `jdo` array are the times of maxima, with their averages
         # in between them.  The start and end times are thrown in too,
