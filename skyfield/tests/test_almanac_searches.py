@@ -84,6 +84,20 @@ def test_finding_maxima_near_edges():
     assert is_close(t.tt, (bump, 1.0 - bump))
     assert is_close(y, 0.0)
 
+def test_finding_no_maxima_at_all_but_having_near_misses():
+    t0, t1 = make_t()
+    f = make_mountain_range_f([-bump, 1.0 + bump])
+    t, y = find_maxima(t0, t1, f, epsilon, 12)
+    assert list(t.tt) == []
+    assert list(y) == []
+
+def test_finding_no_maxima_at_all_with_no_near_misses():
+    t0, t1 = make_t()
+    f = make_mountain_range_f([-100, 101])
+    t, y = find_maxima(t0, t1, f, epsilon, 12)
+    assert list(t.tt) == []
+    assert list(y) == []
+
 def test_that_we_ignore_maxima_slightly_beyond_range():
     t0, t1 = make_t()
     f = make_mountain_range_f([-bump, 1.0 + bump])
@@ -97,3 +111,11 @@ def test_we_only_get_one_result_for_a_jagged_maximum():
     f = make_mountain_range_f([0.5 - almost, 0.5 + almost])
     t, y = find_maxima(t0, t1, f, epsilon, 12)
     assert len(t.tt) == len(y) == 1
+
+def test_we_get_two_results_for_barely_separate_maxima():
+    t0, t1 = make_t()
+    almost = 1.51 * epsilon
+    f = make_mountain_range_f([0.5 - almost, 0.5 + almost])
+    t, y = find_maxima(t0, t1, f, epsilon, 12)
+    print(list(t.tt))
+    assert len(t.tt) == len(y) == 2

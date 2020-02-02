@@ -106,20 +106,41 @@ def _find_maxima(start_time, end_time, f, epsilon, num):
         t = ts.tt_jd(jd)
         y = f(t)
 
-        indices = flatnonzero(diff(sign(diff(y))) <= -1)
-        if not len(indices):
-            y = y.take(indices)
-            ends = indices  # nothing found, return empty arrays
+        # Because artifical functions, like those in our units tests and
+        # those that users might experiment with, might exhibit little
+        # plateaus around a maximum - where the sign of the difference
+        # drops to 0 before going negative - we do a little extra work
+        # here.  Naming a rising edge with "1", a plateau with "2", and
+        # a falling edge with "3", we look for the two patterns:
+        #
+        #  "13"    "123"
+        #   .       ._.
+        #  / \     /   \
+        # .   .   .     .
+
+        n = 2 - sign(diff(y)).astype(int)
+        two_digits = 10 * n[:-1] + n[1:]
+        three_digits = 100 * n[:-2] + 10 * n[1:-1] + n[2:]
+
+        indices2 = flatnonzero(two_digits == 13)
+        indices3 = flatnonzero(three_digits == 123)
+
+        if not len(indices2) and not len(indices3):
+            # Nothing found, return empty arrays.
+            y = ends = y[0:0]
             break
 
-        starts = jd.take(indices)
-        ends = jd.take(indices + 2)
+        start_indices = concatenate((indices2, indices3 + 1))
+        end_indices = concatenate((indices2 + 2, indices3 + 2))
+
+        starts = jd.take(start_indices)
+        ends = jd.take(end_indices)
 
         # Since we start with equal intervals, they all should fall
         # below epsilon at around the same time; so for efficiency we
         # only test the first pair.
         if ends[0] - starts[0] <= epsilon:
-            y = y.take(indices)
+            y = y.take(end_indices)
 
             # Filter out maxima that fell slightly outside our bounds.
             keepers = (ends >= jd0) & (ends <= jd1)
@@ -129,6 +150,7 @@ def _find_maxima(start_time, end_time, f, epsilon, num):
             # Keep only the first of several maxima that are separated
             # by less than epsilon.
             if len(ends):
+                print(diff(ends) / epsilon)
                 mask = concatenate(((True,), diff(ends) > epsilon))
                 ends = ends[mask]
                 y = y[mask]
