@@ -113,17 +113,17 @@ def _find_maxima(start_time, end_time, f, epsilon, num):
         # here.  Naming a rising edge with "1", a plateau with "2", and
         # a falling edge with "3", we look for the two patterns:
         #
-        #  "13"    "123"
+        # +1,-1   +1,0,-1
         #   .       ._.
         #  / \     /   \
         # .   .   .     .
 
-        n = 2 - sign(diff(y)).astype(int)
-        two_digits = 10 * n[:-1] + n[1:]
-        three_digits = 100 * n[:-2] + 10 * n[1:-1] + n[2:]
-
-        indices2 = flatnonzero(two_digits == 13)
-        indices3 = flatnonzero(three_digits == 123)
+        n = sign(diff(y))
+        rising = n == 1.0
+        flat = n == 0.0
+        falling = n == -1.0
+        indices2 = flatnonzero(rising[:-1] & falling[1:])
+        indices3 = flatnonzero(rising[:-2] & flat[1:-1] & falling[2:])
 
         if not len(indices2) and not len(indices3):
             # Nothing found, return empty arrays.
