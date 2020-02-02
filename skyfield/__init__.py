@@ -5,6 +5,5 @@ functions and classes there.  See the ``documentation`` directory inside
 the source code, as well as the http://rhodesmill.org/skyfield/ site!
 
 """
-VERSION = (1, 16)
+VERSION = (1, 17)
 __version__ = '.'.join(map(str, VERSION))
-
