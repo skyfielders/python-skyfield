@@ -15,7 +15,7 @@ def make_t():
     t1 = ts.tt_jd(1)
     return t0, t1
 
-def make_f(steps):
+def make_stairstep_f(steps):
     """Return a function that increases by one at each of several `steps`."""
     def f(t):
         # For each time, sum how many of the values in `steps` it surpasses.
@@ -28,28 +28,28 @@ def is_close(value, expected):
 
 def test_find_discrete_near_left_edge():
     t0, t1 = make_t()
-    f = make_f([bump, 0.5])
+    f = make_stairstep_f([bump, 0.5])
     t, y = find_discrete(t0, t1, f, epsilon)
     assert is_close(t.tt, (bump, 0.5))
     assert list(y) == [1, 2]
 
 def test_find_discrete_near_right_edge():
     t0, t1 = make_t()
-    f = make_f([0.5, 1.0 - bump])
+    f = make_stairstep_f([0.5, 1.0 - bump])
     t, y = find_discrete(t0, t1, f, epsilon)
     assert is_close(t.tt, (0.5, 1.0 - bump))
     assert list(y) == [1, 2]
 
 def test_find_discrete_with_a_barely_detectable_jag_right_at_zero():
     t0, t1 = make_t()
-    f = make_f([0.5, 0.5 + 3.1 * epsilon])
+    f = make_stairstep_f([0.5, 0.5 + 3.1 * epsilon])
     t, y = find_discrete(t0, t1, f, epsilon)
     assert is_close(t.tt, (0.5, 0.5 + 3.1 * epsilon))
     assert list(y) == [1, 2]
 
 def test_find_discrete_with_a_sub_epsilon_jag_right_at_zero():
     t0, t1 = make_t()
-    f = make_f([0.5, 0.5 + 0.99 * epsilon])
+    f = make_stairstep_f([0.5, 0.5 + 0.99 * epsilon])
 
     # We hard-code num=12, just in case the default ever changes to
     # another value that might not trigger the symptom.
@@ -60,3 +60,25 @@ def test_find_discrete_with_a_sub_epsilon_jag_right_at_zero():
     # flurry of changes is complete.
     assert is_close(t.tt, (0.5 + 0.99 * epsilon,))
     assert list(y) == [2]
+
+def make_mountain_range_f(peaks):
+    """Return a function with local maxima at each of a series of `peaks`."""
+    def f(t):
+        # For each time, sum how many of the values in `steps` it surpasses.
+        return -abs(np.subtract.outer(t.tt, peaks)).min(axis=1)
+    f.rough_period = 1.0
+    return f
+
+def test_finding_maxima_near_edges():
+    t0, t1 = make_t()
+    f = make_mountain_range_f([bump, 1.0 - bump])
+    t, y = find_maxima(t0, t1, f, epsilon, 12)
+    assert is_close(t.tt, (bump, 1.0 - bump))
+    assert is_close(y, 0.0)
+
+def test_not_finding_maxima_slightly_beyond_range():
+    t0, t1 = make_t()
+    f = make_mountain_range_f([-bump, 1.0 + bump])
+    t, y = find_maxima(t0, t1, f, epsilon, 12)
+    assert len(t.tt) == 0
+    assert len(y) == 0
