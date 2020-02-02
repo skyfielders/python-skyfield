@@ -338,19 +338,26 @@ def dark_twilight_day(ephemeris, topos):
     is_it_dark_twilight_day_at.rough_period = 0.5  # twice a day
     return is_it_dark_twilight_day_at
 
-def risings_and_settings(ephemeris, target, topos, horizon=-0.3333, radius=0):
+def risings_and_settings(ephemeris, target, topos,
+                         horizon_degrees=-34.0/60.0, radius_degrees=0):
     """Build a function of time that returns whether a body is up.
 
     This builds and returns a function taking a single argument
     :class:`~skyfield.timelib.Time` that returns ``True`` if the body is
     above the horizon, else ``False``.  It considers a body to be above
-    the horizon if its elevation plus the supplied ``radius`` is more
-    than ``horizon`` degrees, which by default is -0.3333 to account for
-    typical atmospheric refraction.
+    the horizon if its altitude plus the supplied ``radius_degrees`` is
+    more than ``horizon_degrees``, which by default is -34 minutes of
+    arc (negative meaning “below the horizon”) to account for typical
+    atmospheric refraction, which raises into view objects which are
+    slightly below the horizon.
+
+    (The specific value of -34 minutes of arc is official, from the
+    United States Naval Observatory’s *Explanatory Supplement to the
+    Astronomical Almanac*.)
 
     """
     topos_at = (ephemeris['earth'] + topos).at
-    h = horizon - radius
+    h = horizon_degrees - radius_degrees
 
     def is_body_up_at(t):
         """Return `True` if the target has risen by time `t`."""

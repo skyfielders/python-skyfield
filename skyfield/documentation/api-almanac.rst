@@ -23,3 +23,5 @@ times of sunrise, sunset, and the phases of the moon.
 .. autofunction:: sunrise_sunset
 
 .. autofunction:: dark_twilight_day
+
+.. autofunction:: risings_and_settings

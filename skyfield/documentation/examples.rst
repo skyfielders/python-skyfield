@@ -142,10 +142,10 @@ like the Sun, Moon, or one of the planets.
 
 .. testoutput::
 
-    Sat 19 05:53 MST rises
-    Sat 19 14:26 MST sets
-    Sun 20 05:49 MST rises
-    Sun 20 14:22 MST sets
+    Sat 19 05:51 MST rises
+    Sat 19 14:27 MST sets
+    Sun 20 05:47 MST rises
+    Sun 20 14:23 MST sets
 
 What is the right ascension and declination of a point in the sky?
 ==================================================================

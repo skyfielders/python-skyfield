@@ -243,6 +243,43 @@ of the phases of twilight using integers:
     1 2019-11-08T23:25:34Z  Start of Astronomical twilight
     0 2019-11-08T23:57:44Z  Start of Night
 
+Rising and Setting
+==================
+
+Skyfield can compute when a given body in the sky rises and sets.  The
+routine should work for the Moon or anything more distant, but might be
+caught off guard if you pass it an Earth satellite that rises several
+times a day; see the next section for handling satellites.
+
+If you are interested in finding the times when a fixed point in the sky
+rises and sets, simply create a star object with its coordinates (as
+explained in :doc:`stars`) and pass that as the target body.
+
+As with sunrise and sunset above, ``True`` means the moment of rising
+and ``False`` means the moment of setting.  Those moments are defined as
+when the body’s altitude is ``horizon_degrees`` above the horizon, whose
+default value is slightly negative to account for atmospheric
+refraction.
+
+If the body has an appreciable radius and you are interested in the
+moment when its limb, rather than center, reaches the horizon, then set
+the parameter ``radius_degrees``.
+
+.. testcode::
+
+    t0 = ts.utc(2020, 2, 1)
+    t1 = ts.utc(2020, 2, 2)
+    f = almanac.risings_and_settings(e, e['Mars'], bluffton)
+    t, y = almanac.find_discrete(t0, t1, f)
+
+    for ti, yi in zip(t, y):
+        print(ti.utc_iso(), 'Rise' if yi else 'Set')
+
+.. testoutput::
+
+    2020-02-01T09:29:17Z Rise
+    2020-02-01T18:42:57Z Set
+
 Satellite Events
 ================
 
