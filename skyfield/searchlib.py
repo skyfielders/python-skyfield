@@ -106,7 +106,7 @@ def _find_maxima(start_time, end_time, f, epsilon, num):
         t = ts.tt_jd(jd)
         y = f(t)
 
-        indices = flatnonzero(diff(sign(diff(y))) == -2)
+        indices = flatnonzero(diff(sign(diff(y))) <= -1)
         if not len(indices):
             y = y.take(indices)
             ends = indices  # nothing found, return empty arrays

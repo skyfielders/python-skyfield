@@ -84,9 +84,16 @@ def test_finding_maxima_near_edges():
     assert is_close(t.tt, (bump, 1.0 - bump))
     assert is_close(y, 0.0)
 
-def test_not_finding_maxima_slightly_beyond_range():
+def test_that_we_ignore_maxima_slightly_beyond_range():
     t0, t1 = make_t()
     f = make_mountain_range_f([-bump, 1.0 + bump])
     t, y = find_maxima(t0, t1, f, epsilon, 12)
     assert len(t.tt) == 0
     assert len(y) == 0
+
+def test_we_only_get_one_result_for_a_jagged_maximum():
+    t0, t1 = make_t()
+    almost = 0.49 * epsilon
+    f = make_mountain_range_f([0.5 - almost, 0.5 + almost])
+    t, y = find_maxima(t0, t1, f, epsilon, 12)
+    assert len(t.tt) == len(y) == 1
