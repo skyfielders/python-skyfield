@@ -21,6 +21,7 @@ install:
   - "ln ci/* tmp"
   - "cd tmp"
   - "pip install --upgrade pip"
+  - "pip install https://github.com/brandon-rhodes/python-sgp4/archive/master.zip"
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
   - "pip install pyflakes"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
