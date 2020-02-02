@@ -247,14 +247,14 @@ which tell you whether the satellite is above or below the horizon:
 
     print(alt)
     print(az)
-    print(distance.km)
+    print(int(distance.km), 'km')
 
 .. testoutput::
 
     The ISS is above the horizon
     16deg 16' 32.6"
     350deg 15' 20.4"
-    1168.6642700423652
+    1168 km
 
 If you are interested
 in where among the stars the satellite will be positioned,
