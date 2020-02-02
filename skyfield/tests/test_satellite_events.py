@@ -90,12 +90,16 @@ def verify_sat_almanac(times, yis, sat, topos, horizon, nexpected):
     # 3) No double rises or double sets
     time_tolerance = 5/(24 * 60 * 60)   # Times must be accurate within 5 seconds
     ts = times[0].ts     # Use the timescale passed by
-    altitudes_neartimes = [almanac.satellite_altitude(sat, topos, ts.tai(jd=times.tai + dt)).degrees
-                           for dt in (-time_tolerance, 0, time_tolerance)]
+    st = sat - topos
+    altitudes_neartimes = [
+        (sat - topos).at(ts.tai(jd=times.tai + dt)).altaz()[0].degrees
+        for dt in (-time_tolerance, 0, time_tolerance)
+    ]
     lastevent = None
+    event_dict = {0: 'rise', 1: 'culminate', 2: 'set'}
     for time, yi, (alt_before, alt_at, alt_after) in zip(
             times, yis, zip(*altitudes_neartimes)):
-        eventname = almanac.SATELLITE_EVENTS[yi]
+        eventname = event_dict[yi]
         if eventname == 'rise':
             assert(alt_before < alt_at < alt_after)  # It is going up
             assert(alt_before < horizon < alt_after) # It is crossing horizon altitude

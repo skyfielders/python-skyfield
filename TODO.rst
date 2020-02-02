@@ -101,21 +101,7 @@ Sprint Possibilities
   .hstr() called on it?  (And, those might not be those good method
   names.)  Make it return a list of strings.
 
-* The SciPy ``optimize`` module can find when a curve reaches zero,
-  which can be used to find various interesting astronomical
-  circumstances.  Examine how PyEphem uses its newton method (look in
-  its ``__init__.py`) for these kinds of solutions to find out how the
-  general approach works.  Write up an IPython Notebook that uses
-  Skyfield together with ``optimize`` to compute as many of the
-  following circumstances as possible; compare your results to the USNO
-  web site to see if you are getting good answers.
-
-  * Sunrise, local noon, and sunset.
-  * New moon, full moon, and the quarters in between.
-  * Solar and lunar eclipses.
-  * The vernal and autumnal equinoxes.
-
-  http://aa.usno.navy.mil/data/
+* Solar and lunar eclipses.
 
 * We should implement comets and asteroids using the standard formulae
   (can we find a good vector version, that will match the rest of our

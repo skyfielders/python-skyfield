@@ -9,7 +9,6 @@ pandas==0.23.3
 pyflakes==2.1.1
 python-dateutil>=2.5.0
 pytz
-scipy
 sphinx==1.7.2
 https://github.com/brandon-rhodes/assay/archive/master.zip
 -e .

@@ -280,50 +280,6 @@ the parameter ``radius_degrees``.
     2020-02-01T09:29:17Z Rise
     2020-02-01T18:42:57Z Set
 
-Satellite Events
-================
-
-The times when a satellite rises, culminates, and sets
-are based on the satellite, a location, and the horizon elevation.
-
-.. testcode::
-
-    satellite = api.EarthSatellite(
-            "1 25544U 98067A   20012.52707367  .00016717  00000-0  10270-3 0  9043",
-            "2 25544  51.6437  43.6359 0004998 123.7741 236.3886 15.49565134  7728",
-            name="Zarya")
-    bluffton = api.Topos('40.8939 N', '83.8917 W')
-    t0 = ts.utc(2020, 1, 15, 0)
-    t1 = ts.utc(2020, 1, 16, 0)
-    t, y = almanac.find_satellite_events(t0, t1,
-                satellite=satellite, topos=bluffton, horizon=10)
-    altitude, azimuth, distance = almanac.satellite_altitude(
-                satellite=satellite, topos=bluffton, time=t, and_azdist=True)
-
-    for ti, yi, alti, azi in zip(t, y, altitude.degrees, azimuth.degrees):
-        print("%1d. %-9s %s alt=%2d az=%3.0f deg" %
-                (yi, almanac.SATELLITE_EVENTS[yi], ti.utc_iso(' '), round(alti), round(azi)))
-
-.. testoutput::
-
-    0. rise      2020-01-15 02:44:35Z alt=10 az=228 deg
-    1. culminate 2020-01-15 02:47:55Z alt=78 az=142 deg
-    2. set       2020-01-15 02:51:17Z alt=10 az= 56 deg
-    0. rise      2020-01-15 04:22:23Z alt=10 az=289 deg
-    1. culminate 2020-01-15 04:25:01Z alt=21 az=340 deg
-    2. set       2020-01-15 04:27:39Z alt=10 az= 32 deg
-    0. rise      2020-01-15 06:01:04Z alt=10 az=330 deg
-    1. culminate 2020-01-15 06:02:45Z alt=13 az=  1 deg
-    2. set       2020-01-15 06:04:26Z alt=10 az= 31 deg
-    0. rise      2020-01-15 07:37:45Z alt=10 az=327 deg
-    1. culminate 2020-01-15 07:40:27Z alt=22 az= 21 deg
-    2. set       2020-01-15 07:43:10Z alt=10 az= 75 deg
-    0. rise      2020-01-15 09:14:10Z alt=10 az=302 deg
-    1. culminate 2020-01-15 09:17:29Z alt=67 az=219 deg
-    2. set       2020-01-15 09:20:48Z alt=10 az=136 deg
-
-
-
 Solar terms
 ===========
 
