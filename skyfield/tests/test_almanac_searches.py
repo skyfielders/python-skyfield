@@ -69,6 +69,14 @@ def make_mountain_range_f(peaks):
     f.rough_period = 1.0
     return f
 
+def test_finding_enough_maxima():
+    # If the rough period is close, no maxima should be skipped.
+    t0, t1 = make_t()
+    f = make_mountain_range_f(np.linspace(0.01, 0.99, 30))
+    f.rough_period = 1.0 / 30.0
+    t, y = find_maxima(t0, t1, f, epsilon, 12)
+    assert len(t) == len(y) == 30
+
 def test_finding_maxima_near_edges():
     t0, t1 = make_t()
     f = make_mountain_range_f([bump, 1.0 - bump])

@@ -95,7 +95,8 @@ def _find_maxima(start_time, end_time, f, epsilon, num):
     # put an extra point out beyond each end of our range, then filter
     # our final result to remove maxima that fall outside the range.
     bump = rough_period / num
-    jd = linspace(jd0 - bump, jd1 + bump, num + 2)
+    bumps = int((jd1 - jd0) / bump) + 3
+    jd = linspace(jd0 - bump, jd1 + bump, bumps)
 
     end_mask = linspace(0.0, 1.0, num)
     start_mask = end_mask[::-1]
