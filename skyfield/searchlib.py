@@ -2,7 +2,9 @@
 
 from __future__ import print_function, division
 
-from numpy import concatenate, diff, flatnonzero, linspace, multiply, sign
+from numpy import (
+    concatenate, diff, flatnonzero, linspace, multiply, sign, argsort
+)
 from .constants import DAY_S
 EPSILON = 0.001 / DAY_S
 
@@ -127,7 +129,7 @@ def _find_maxima(start_time, end_time, f, epsilon, num):
 
         if not len(indices2) and not len(indices3):
             # Nothing found, return empty arrays.
-            y = ends = y[0:0]
+            jd = y = y[0:0]
             break
 
         start_indices = concatenate((indices2, indices3 + 1))
@@ -144,21 +146,25 @@ def _find_maxima(start_time, end_time, f, epsilon, num):
 
             # Filter out maxima that fell slightly outside our bounds.
             keepers = (ends >= jd0) & (ends <= jd1)
-            ends = ends[keepers]
+            jd = ends[keepers]
             y = y[keepers]
+
+            # The separate handling of sharp vs flat patterns (above)
+            # might have gotten our maxima out of order.
+            i = argsort(jd)
+            jd = jd[i]
+            y = y[i]
 
             # Keep only the first of several maxima that are separated
             # by less than epsilon.
-            if len(ends):
-                print(diff(ends) / epsilon)
-                mask = concatenate(((True,), diff(ends) > epsilon))
-                ends = ends[mask]
+            if len(jd):
+                print(diff(jd) / epsilon)
+                mask = concatenate(((True,), diff(jd) > epsilon))
+                jd = jd[mask]
                 y = y[mask]
 
             break
 
         jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()
 
-    return ts.tt_jd(ends), y
-
-
+    return ts.tt_jd(jd), y
