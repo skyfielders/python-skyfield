@@ -66,9 +66,9 @@ def _find_discrete(ts, jd, f, epsilon, num):
         # only test the first pair.
         if ends[0] - starts[0] <= epsilon:
             y = y.take(indices + 1)
-            # Keep only the first of several zero crossings that might
+            # Keep only the last of several zero crossings that might
             # possibly be separated by less than epsilon.
-            mask = concatenate(((True,), diff(ends) > 3.0 * epsilon))
+            mask = concatenate(((diff(ends) > 3.0 * epsilon), (True,)))
             ends = ends[mask]
             y = y[mask]
             break

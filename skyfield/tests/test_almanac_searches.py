@@ -1,6 +1,6 @@
 """Low-level tests of the almanac search routines."""
 
-from numpy import where, sin
+import numpy as np
 
 from skyfield.api import load
 from skyfield.constants import tau
@@ -15,10 +15,11 @@ def make_t():
     t1 = ts.tt_jd(1)
     return t0, t1
 
-def make_f(offset):
-    """Make a sine wave from 0 to 1, with `t` offset by `offset` days."""
+def make_f(steps):
+    """Return a function that increases by one at each of several `steps`."""
     def f(t):
-        return sin((t.tt + offset) * tau) >= 0.0
+        # For each time, sum how many of the values in `steps` it surpasses.
+        return np.greater_equal.outer(t.tt, steps).sum(axis=1)
     f.rough_period = 1.0
     return f
 
@@ -27,40 +28,35 @@ def is_close(value, expected):
 
 def test_find_discrete_near_left_edge():
     t0, t1 = make_t()
-    f = make_f(-bump)  # cross zero barely past t0
+    f = make_f([bump, 0.5])
     t, y = find_discrete(t0, t1, f, epsilon)
-    assert is_close(t.tt, (bump, 0.5 + bump))
-    assert list(y) == [1, 0]
+    assert is_close(t.tt, (bump, 0.5))
+    assert list(y) == [1, 2]
 
 def test_find_discrete_near_right_edge():
     t0, t1 = make_t()
-    f = make_f(bump)  # cross zero almost at the end of the range
+    f = make_f([0.5, 1.0 - bump])
     t, y = find_discrete(t0, t1, f, epsilon)
-    assert is_close(t.tt, (0.5 - bump, 1.0 - bump))
-    assert list(y) == [0, 1]
+    assert is_close(t.tt, (0.5, 1.0 - bump))
+    assert list(y) == [1, 2]
 
 def test_find_discrete_with_a_barely_detectable_jag_right_at_zero():
     t0, t1 = make_t()
-    def f(t):
-        n = t.tt
-        n = where(n < 0.5, n + 3.1 * epsilon, n - 3.1 * epsilon)
-        return sin(n * tau) >= 0.0
-    f.rough_period = 1.0
+    f = make_f([0.5, 0.5 + 3.1 * epsilon])
     t, y = find_discrete(t0, t1, f, epsilon)
-    assert is_close(t.tt, (0.5 - 3.1 * epsilon, 0.5, 0.5 + 3.1 * epsilon))
-    assert list(y) == [0, 1, 0]
+    assert is_close(t.tt, (0.5, 0.5 + 3.1 * epsilon))
+    assert list(y) == [1, 2]
 
 def test_find_discrete_with_a_sub_epsilon_jag_right_at_zero():
     t0, t1 = make_t()
-    def f(t):
-        n = t.tt
-        n = where(n < 0.5, n + epsilon * 0.99, n - epsilon * 0.99)
-        return sin(n * tau) >= 0.0
-    f.rough_period = 1.0
+    f = make_f([0.5, 0.5 + 0.99 * epsilon])
 
     # We hard-code num=12, just in case the default ever changes to
     # another value that might not trigger the symptom.
     t, y = find_discrete(t0, t1, f, epsilon, 12)
 
-    assert is_close(t.tt, (0.5,))
-    assert list(y) == [0]
+    # Note that we always return the last of several close solutions, so
+    # that `y` correctly reflects the new state that persists after the
+    # flurry of changes is complete.
+    assert is_close(t.tt, (0.5 + 0.99 * epsilon,))
+    assert list(y) == [2]
