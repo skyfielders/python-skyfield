@@ -9,7 +9,6 @@ from scipy import optimize
 from .constants import DAY_S, tau
 from .nutationlib import iau2000b
 
-
 EPSILON = 0.001 / DAY_S
 
 # Simple facts.
@@ -252,7 +251,12 @@ CONJUNCTIONS = [
 ]
 
 def oppositions_conjunctions(ephemeris, target):
-    """Build a function to find oppositions and conjunctions with the Sun."""
+    """Build a function to find oppositions and conjunctions with the Sun.
+
+    See :ref:`oppositions-conjunctions` for how to call this routine and
+    interpret the results.
+
+    """
     earth_at = ephemeris['earth'].at
     sun = ephemeris['sun']
 

@@ -129,6 +129,8 @@ corresponding array of Moon phases with 0 for New Moon and 3 for Last
 Quarter.  You can use the array ``MOON_PHASES`` to retrieve names for
 each phase.
 
+.. _oppositions-conjunctions:
+
 Opposition and Conjunction
 ==========================
 
