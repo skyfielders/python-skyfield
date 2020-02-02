@@ -5,10 +5,10 @@ from numpy import (
 )
 from sgp4.api import SGP4_ERRORS, Satrec
 
-from .almanac import _find_discrete, _find_maxima
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import ITRF_to_GCRS2
+from .searchlib import _find_discrete, _find_maxima
 from .timelib import Timescale
 from .vectorlib import VectorFunction
 
