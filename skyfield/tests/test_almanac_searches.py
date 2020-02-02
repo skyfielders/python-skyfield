@@ -114,8 +114,8 @@ def test_we_only_get_one_result_for_a_jagged_maximum():
 
 def test_we_get_two_results_for_barely_separate_maxima():
     t0, t1 = make_t()
-    almost = 1.51 * epsilon
-    f = make_mountain_range_f([0.5 - almost, 0.5 + almost])
+    enough = 1.51 * epsilon
+    f = make_mountain_range_f([0.5 - enough, 0.5 + enough])
     t, y = find_maxima(t0, t1, f, epsilon, 12)
     print(list(t.tt))
     assert len(t.tt) == len(y) == 2
