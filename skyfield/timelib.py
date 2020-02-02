@@ -657,7 +657,8 @@ class Time(object):
 
     @reify
     def utc(self):
-        return self._utc_tuple()
+        utc = self._utc_tuple()
+        return array(utc) if self.shape else utc
 
     @reify
     def tdb(self):
