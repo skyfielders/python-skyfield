@@ -1,10 +1,10 @@
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
 import re
-from numpy import array, cos, einsum, nan, rollaxis, sin
+from numpy import array, cos, nan, sin
 from jplephem.pck import DAF, PCK
 from .constants import ASEC2RAD, AU_KM, DAY_S, tau
-from .functions import rot_x, rot_y, rot_z
+from .functions import _T, _mxv, _mxm, _mxmxm, rot_x, rot_y, rot_z
 from .units import Angle, Distance
 from .vectorlib import VectorFunction
 
@@ -12,18 +12,6 @@ _TEXT_MAGIC_NUMBERS = b'KPL/FK', b'KPL/PCK'
 _NAN3 = array((nan, nan, nan))
 _halftau = tau / 2.0
 _quartertau = tau / 4.0
-
-def _T(M):
-    return rollaxis(M, 1)
-
-def _mxv(M, v):
-    return einsum('ij...,j...->i...', M, v)
-
-def _mxm(M1, M2):
-    return einsum('ij...,jk...->ik...', M1, M2)
-
-def _mxmxm(M1, M2, M3):
-    return einsum('ij...,jk...,kl...->il...', M1, M2, M3)
 
 class PlanetaryConstants(object):
     """Planetary constants manager.

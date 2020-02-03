@@ -1,6 +1,8 @@
 """Basic operations that are needed repeatedly throughout Skyfield."""
 
-from numpy import arcsin, arctan2, array, cos, float_, load, sin, sqrt
+from numpy import (
+    arcsin, arctan2, array, cos, einsum, float_, load, rollaxis, sin, sqrt
+)
 from pkgutil import get_data
 from skyfield.constants import tau
 
@@ -13,6 +15,22 @@ def dots(v, u):
 
     """
     return (v * u).sum(axis=0)
+
+def _T(M):
+    """Swap the first two dimensions of an array."""
+    return rollaxis(M, 1)
+
+def _mxv(M, v):
+    """Multiply an NxN matrix by a vector."""
+    return einsum('ij...,j...->i...', M, v)
+
+def _mxm(M1, M2):
+    """Multiply two NxN matrices together."""
+    return einsum('ij...,jk...->ik...', M1, M2)
+
+def _mxmxm(M1, M2, M3):
+    """Multiply three NxN matrices together."""
+    return einsum('ij...,jk...,kl...->il...', M1, M2, M3)
 
 def length_of(xyz):
     """Given a 3-element array `[x y z]`, return its length.
