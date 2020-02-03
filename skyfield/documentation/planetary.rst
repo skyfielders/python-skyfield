@@ -115,6 +115,36 @@ or in altitude and azimuth measured against the astronaut’s horizon.
     32deg 27' 09.7" degrees above the horizon
     118deg 12' 55.9" degrees around the horizon from north
 
+Computing lunar libration
+=========================
+
+The Moon’s libration is expressed
+as the latitude and longitude of the Moon location
+that is currently nearest the Earth.
+The convention seems to be that the simple geometric difference
+between the Earth’s and Moon’s positions are used,
+rather than the light-delayed position.
+Thus:
+
+.. testcode::
+
+    p = (earth - moon).at(t)
+    lat, lon, distance = p.frame_latlon(frame)
+    lon_degrees = (lon.degrees - 180.0) % 360.0 - 180.0
+    print('Libration in latitude: {:.3f}'.format(lat.degrees))
+    print('Libration in longitude: {:.3f}'.format(lon_degrees))
+
+.. testoutput::
+
+    Libration in latitude: -6.749
+    Libration in longitude: 1.520
+
+The only subtlety is that the libration longitude
+is not expressed as a number between 0° and 360°,
+as would be more usual for longitude,
+but instead as an offset positive or negative from zero,
+which the above code accomplishes with some quick subtraction and modulo.
+
 Computing a raw rotation matrix
 ===============================
 

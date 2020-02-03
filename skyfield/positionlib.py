@@ -5,7 +5,7 @@ from .constants import ANGVEL, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
 from .functions import (
-    dots, from_polar, length_of, rot_x, rot_z, to_polar, _to_array,
+    _mxv, dots, from_polar, length_of, rot_x, rot_z, to_polar, _to_array,
 )
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
@@ -310,11 +310,16 @@ class ICRF(object):
     def frame_xyz(self, frame):
         """Express this position as an (x,y,z) vector in a particular frame."""
         R = frame.rotation_at(self.t)
-        # TODO: before documenting this routine, switch dot() to a real
-        # einsum multiply; and when doing so, make a central routine in
-        # functions.py for it instead of scattering yet more einsums
-        # everywhere.
-        return Distance(au=R.dot(self.position.au))
+        return Distance(au=_mxv(R, self.position.au))
+
+    def frame_latlon(self, frame):
+        """Return as longitude, latitude, and distance in the given frame."""
+        R = frame.rotation_at(self.t)
+        vector = _mxv(R, self.position.au)
+        d, lat, lon = to_polar(vector)
+        return (Angle(radians=lat, signed=True),
+                Angle(radians=lon),
+                Distance(au=d))
 
     # Aliases; maybe someday turn into deprecations with warnings?
     ecliptic_position = ecliptic_xyz
