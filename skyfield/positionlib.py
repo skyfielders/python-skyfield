@@ -112,6 +112,17 @@ class ICRF(object):
             #self.observer_data,
         )
 
+    def __neg__(self):
+        return type(self)(
+            -self.position.au,
+            -self.velocity.au_per_d,
+            self.t,
+            self.target,
+            self.center,
+            # TODO: figure out how to invert observer data
+            #self.observer_data,
+        )
+
     def distance(self):
         """Compute the distance from the origin to this position.
 
