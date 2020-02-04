@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Classes representing different kinds of astronomical position."""
 
 from numpy import arccos, array, clip, einsum, exp, full, nan
@@ -397,6 +398,18 @@ class Geometric(ICRF):
         from geographic north (so 0 degrees means north, 90 is east, 180
         is south, and 270 is west).
 
+        By default, Skyfield does not adjust the altitude for
+        atmospheric refraction.  If you want Skyfield to estimate how
+        high the atmosphere might lift the body's image, give the
+        argument ``temperature_C`` either the temperature in degrees
+        centigrade, or the string ``'standard'`` (in which case 10°C is
+        used).
+
+        When calculating refraction, Skyfield uses the observer’s
+        elevation above sea level to estimate the atmospheric pressure.
+        If you want to override that value, simply provide a number
+        through the ``pressure_mbar`` parameter.
+
         """
         return _to_altaz(self.position.au, self.observer_data,
                          temperature_C, pressure_mbar)
@@ -538,6 +551,18 @@ class Apparent(ICRF):
         :class:`~skyfield.units.Angle` measures east along the horizon
         from geographic north (so 0 degrees means north, 90 is east, 180
         is south, and 270 is west).
+
+        By default, Skyfield does not adjust the altitude for
+        atmospheric refraction.  If you want Skyfield to estimate how
+        high the atmosphere might lift the body's image, give the
+        argument ``temperature_C`` either the temperature in degrees
+        centigrade, or the string ``'standard'`` (in which case 10°C is
+        used).
+
+        When calculating refraction, Skyfield uses the observer’s
+        elevation above sea level to estimate the atmospheric pressure.
+        If you want to override that value, simply provide a number
+        through the ``pressure_mbar`` parameter.
 
         """
         return _to_altaz(self.position.au, self.observer_data,
