@@ -92,6 +92,12 @@ and can return results in native AstroPy units:
     [-2.19049548  0.71236701  0.36712443] AU
     25.465 deg
 
+Academics can cite Skyfield as
+`ascl:1907.024 <https://ascl.net/1907.024>`_
+or
+`2019ascl.soft07024R <https://ui.adsabs.harvard.edu/abs/2019ascl.soft07024R/abstract>`_
+:ref:`(more…) <citing-skyfield>`
+
 Documentation
 =============
 

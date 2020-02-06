@@ -61,6 +61,8 @@ simply create an issue on the project’s GitHub page:
 
 Good luck!
 
+.. _citing-skyfield:
+
 Citing Skyfield
 ===============
 
@@ -68,9 +70,17 @@ If Skyfield has proven useful in your research,
 the project welcomes your citation
 to bring it to the attention of other academics
 who might benefit from it.
-Here is Skyfield’s DOI:
 
-    http://rhodesmill.org/skyfield/
+* ASCL: `ascl:1907.024 <https://ascl.net/1907.024>`_
+
+* Bibcode: `2019ascl.soft07024R <https://ui.adsabs.harvard.edu/abs/2019ascl.soft07024R/abstract>`_
+
+* Current CITATION.cff file on GitHub: `CITATION.cff <https://raw.githubusercontent.com/skyfielders/python-skyfield/master/CITATION.cff>`_
+
+* Permanent URL, used by several papers to uniquely identify Skyfield
+  (and which is by now a redirect to ``https:`` but remains ``http:``
+  in this URL to match papers already using it as an identifier):
+  http://rhodesmill.org/skyfield/
 
 .. _changelog:
 
