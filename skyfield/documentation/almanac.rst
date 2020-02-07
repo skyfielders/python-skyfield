@@ -211,6 +211,28 @@ and for the average refraction of the atmosphere at the horizon.
 The result ``t`` will be an array of times, and ``y`` will be ``True``
 if the sun rises at the corresponding time and ``False`` if it sets.
 
+A location near one of the poles during polar summer or polar winter
+will not experience sunrise and sunset.  To learn whether the sun is up
+or down, call the sunrise-sunset function at the time that interests
+you, and the return value will indicate whether the sun is up.
+
+.. testcode::
+
+    far_north = api.Topos('89 N', '80 W')
+    f = almanac.sunrise_sunset(e, far_north)
+    t, y = almanac.find_discrete(t0, t1, f)
+
+    print(t.utc_iso())  # Empty list: no sunrise or sunset
+    print(f(t0))        # But we can ask if the sun is up
+
+    print('polar day' if f(t0) else 'polar night')
+
+.. testoutput::
+
+    []
+    True
+    polar day
+
 Twilight
 ========
 
