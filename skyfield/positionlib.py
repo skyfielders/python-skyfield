@@ -6,7 +6,7 @@ from .constants import ANGVEL, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
 from .functions import (
-    _mxv, dots, from_polar, length_of, rot_x, rot_z, to_polar, _to_array,
+    _mxv, dots, from_spherical, length_of, rot_x, rot_z, to_spherical, _to_array,
 )
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
@@ -38,7 +38,7 @@ def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
     """
     theta = _to_array(dec_degrees) * tau / 360.0
     phi = _to_array(ra_hours) * tau / 24.0
-    position_au = from_polar(distance, theta, phi)
+    position_au = from_spherical(distance, theta, phi)
     if epoch is not None:
         position_au = einsum('ij...,j...->i...', epoch.MT, position_au)
     return build_position(position_au, None, t, center, target, observer_data)
@@ -179,7 +179,7 @@ class ICRF(object):
                                  ' a floating point Terrestrial Time (TT),'
                                  ' or the string "date" for epoch-of-date')
             position_au = einsum('ij...,j...->i...', epoch.M, position_au)
-        r_au, dec, ra = to_polar(position_au)
+        r_au, dec, ra = to_spherical(position_au)
         return (Angle(radians=ra, preference='hours'),
                 Angle(radians=dec, signed=True),
                 Distance(r_au))
@@ -239,7 +239,7 @@ class ICRF(object):
         Intermediate Origin (CIO). As this is a dynamical system it must be
         calculated at a specific epoch.
         """
-        r_au, dec, ra = to_polar(self.cirs_xyz(epoch).au)
+        r_au, dec, ra = to_spherical(self.cirs_xyz(epoch).au)
 
         return (Angle(radians=ra, preference='hours'),
                 Angle(radians=dec, signed=True),
@@ -290,7 +290,7 @@ class ICRF(object):
 
         """
         vector = self.ecliptic_xyz(epoch)
-        d, lat, lon = to_polar(vector.au)
+        d, lat, lon = to_spherical(vector.au)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
                 Distance(au=d))
@@ -303,7 +303,7 @@ class ICRF(object):
     def galactic_latlon(self):
         """Compute galactic coordinates (lat, lon, distance)"""
         vector = _GALACTIC.dot(self.position.au)
-        d, lat, lon = to_polar(vector)
+        d, lat, lon = to_spherical(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
                 Distance(au=d))
@@ -317,7 +317,7 @@ class ICRF(object):
         """Return as longitude, latitude, and distance in the given frame."""
         R = frame.rotation_at(self.t)
         vector = _mxv(R, self.position.au)
-        d, lat, lon = to_polar(vector)
+        d, lat, lon = to_spherical(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
                 Distance(au=d))
@@ -336,7 +336,7 @@ class ICRF(object):
     def _to_spice_frame(self, name):
         vector = self.position.au
         vector = inertial_frames[name].dot(vector)
-        d, dec, ra = to_polar(vector)
+        d, dec, ra = to_spherical(vector)
         return (Angle(radians=ra, preference='hours', signed=True),
                 Angle(radians=dec),
                 Distance(au=d))
@@ -366,7 +366,7 @@ class ICRF(object):
         alt = _interpret_angle('alt', alt, alt_degrees)
         az = _interpret_angle('az', az, az_degrees)
         r = distance.au
-        p = from_polar(r, alt, az)
+        p = from_spherical(r, alt, az)
         p = einsum('ji...,j...->i...', R, p)
         return Apparent(p)
 
@@ -650,7 +650,7 @@ def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):
     # TODO: wobble
 
     position_au = einsum('ij...,j...->i...', R, position_au)
-    r_au, alt, az = to_polar(position_au)
+    r_au, alt, az = to_spherical(position_au)
 
     if temperature_C is None:
         alt = Angle(radians=alt)

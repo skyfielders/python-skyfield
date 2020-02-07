@@ -1,5 +1,5 @@
 import gzip
-from skyfield.functions import to_polar
+from skyfield.functions import to_spherical
 from skyfield.starlib import Star
 from skyfield.timelib import T0
 from skyfield.units import Angle
@@ -20,7 +20,7 @@ def parse(line):
         names=[('HIP', int(line[8:14]))],
         )
     star._position_au += star._velocity_au_per_d * days
-    distance, dec, ra = to_polar(star._position_au)
+    distance, dec, ra = to_spherical(star._position_au)
     star.ra = Angle(radians=ra, preference='hours')
     star.dec = Angle(radians=dec)
     return star

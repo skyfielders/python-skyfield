@@ -59,18 +59,16 @@ def angle_between(u_vec, v_vec):
     denom = v*u_vec + u*v_vec
     return 2*arctan2(length_of(num), length_of(denom))
 
-def to_polar(xyz):
-    """Convert ``[x y z]`` into spherical coordinates ``(r, theta, phi)``.
+def to_spherical(xyz):
+    """Convert ``[x y z]`` to spherical coordinates ``(r, theta, phi)``.
 
     ``r`` - vector length
     ``theta`` - angle above (+) or below (-) the xy-plane
     ``phi`` - angle around the z-axis
 
-    The meaning and order of the three return values is designed to
-    match both ISO 31-11 and the traditional order used by physicists.
-    Mathematicians usually define ``theta`` and ``phi`` the other way
-    around, and may need to use caution when using the return values.
-    See: https://en.wikipedia.org/wiki/Spherical_coordinate_system
+    Note that ``theta`` is an elevation angle measured up and down from
+    the xy-plane, not a polar angle measured from the z-axis, to match
+    the convention for both latitude and declination.
 
     """
     r = length_of(xyz)
@@ -79,22 +77,25 @@ def to_polar(xyz):
     phi = arctan2(y, x) % tau
     return r, theta, phi
 
-def from_polar(r, theta, phi):
+def from_spherical(r, theta, phi):
     """Convert ``(r, theta, phi)`` to Cartesian coordinates ``[x y z]``.
 
     ``r`` - vector length
     ``theta`` - angle in radians above (+) or below (-) the xy-plane
     ``phi`` - angle in radians around the z-axis
 
-    The meaning and order of the three polar parameters is designed to
-    match both ISO 31-11 and the traditional order used by physicists.
-    Mathematicians usually define ``theta`` and ``phi`` the other way
-    around, and may need to use caution when calling this function.
-    See: https://en.wikipedia.org/wiki/Spherical_coordinate_system
+    Note that ``theta`` is an elevation angle measured up and down from
+    the xy-plane, not a polar angle measured from the z-axis, to match
+    the convention for both latitude and declination.
 
     """
     rxy = r * cos(theta)
     return array((rxy * cos(phi), rxy * sin(phi), r * sin(theta)))
+
+# Support users who might have imported these under their old names.
+# I'm not sure why I called what are clearly spherical coordinates "polar".
+to_polar = to_spherical
+from_polar = from_spherical
 
 def rot_x(theta):
     c = cos(theta)
