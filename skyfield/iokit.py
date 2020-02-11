@@ -323,12 +323,12 @@ class Loader(object):
             delta_t_recent = np.concatenate([data, preds[:,i:]], axis=1)
         leap_dates, leap_offsets = self('Leap_Second.dat')
         return Timescale(delta_t_recent, leap_dates, leap_offsets)
-    
+
     def mpcorb(self, url, reload=False, filename=None):
         with self.open(url, reload=reload, filename=filename) as gzip_file:
             with gzip.open(gzip_file) as json_file:
                 df = pd.read_json(json_file)
-            
+
         for column in ['Critical_list_numbered_object_flag',
                        'NEO_flag',
                        'One_km_NEO_flag',
@@ -336,19 +336,19 @@ class Loader(object):
                        'PHA_flag']:
             if column in df:
                 df[column] = df[column].fillna(0).astype('bool')
-            
+
         for column in ['Orbit_type', 'U']:
             df[column] = df[column].astype('category')
-            
+
         return df
-    
+
     def mpc_comets(self, url, reload=False, filename=None):
         with self.open(url, reload=reload, filename=filename) as gzip_file:
             with gzip.open(gzip_file) as json_file:
                 df = pd.read_json(json_file)
-            
+
         df.Orbit_type = df.Orbit_type.astype('category')
-        
+
         return df
 
     @property
