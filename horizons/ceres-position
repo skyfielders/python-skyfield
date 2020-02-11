@@ -1,0 +1,88 @@
+*******************************************************************************
+Ephemeris / WWW_USER Mon Feb 10 19:05:30 2020 Pasadena, USA      / Horizons    
+*******************************************************************************
+Target body name: 1 Ceres                         {source: JPL#46}
+Center body name: Solar System Barycenter (0)     {source: DE431}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2020-Feb-07 00:00:00.0000 TDB
+Stop  time      : A.D. 2020-Feb-08 00:00:00.0000 TDB
+Step-size       : 1440 minutes
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : (undefined)                                                  
+Small perturbers: Yes                             {source: SB431-N16}
+Output units    : AU-D                                                         
+Output type     : GEOMETRIC cartesian states
+Output format   : 3 (position, velocity, LT, range, range-rate)
+Reference frame : ICRF/J2000.0                                                 
+Coordinate systm: Earth Mean Equator and Equinox of Reference Epoch            
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2454033.5 ! 2006-Oct-25.00 (TDB)         Residual RMS= .22345        
+   EC= .07987906346370539  QR= 2.544709153978707   TP= 2453193.6614275328      
+   OM= 80.40846590069125   W=  73.1893463033331    IN= 10.58671483589909       
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X= 2.626536679271237E+00  Y=-1.003038764756320E+00  Z=-1.007293591158815E+00
+  VX= 4.202952273775981E-03 VY= 8.054172339518143E-03 VZ= 2.938175156440994E-03
+Asteroid physical parameters (km, seconds, rotational period in hours):        
+   GM= 62.6284             RAD= 469.7              ROTPER= 9.07417             
+   H= 3.4                  G= .120                 B-V= .713                   
+                           ALBEDO= .090            STYP= C                     
+*******************************************************************************
+JDTDB
+   X     Y     Z
+   VX    VY    VZ
+   LT    RG    RR
+*******************************************************************************
+$$SOE
+2458886.500000000 = A.D. 2020-Feb-07 00:00:00.0000 TDB 
+ X = 1.334875927366032E+00 Y =-2.239607658161781E+00 Z =-1.328895183461897E+00
+ VX= 8.679572171334722E-03 VY= 4.382113869938210E-03 VZ= 2.971677617262620E-04
+ LT= 1.690136005998568E-02 RG= 2.926379779281297E+00 RR= 4.705579815071954E-04
+2458887.500000000 = A.D. 2020-Feb-08 00:00:00.0000 TDB 
+ X = 1.343547642236833E+00 Y =-2.235212425639781E+00 Z =-1.328590227231037E+00
+ VX= 8.663841902559810E-03 VY= 4.408340499258969E-03 VZ= 3.127428578537669E-04
+ LT= 1.690407180689197E-02 RG= 2.926849303703292E+00 RR= 4.684900565896618E-04
+$$EOE
+*******************************************************************************
+Coordinate system description:
+
+  NOTE:
+   The ICRF is quasar-based; the EME description below is given as a dynamical
+   explanation of the previous system to which the ICRF was closely aligned.
+
+  ICRF ("Earth Mean Equator and Equinox of Reference Epoch")
+
+    Reference epoch: J2000.0
+    XY-plane: plane of the Earth's mean equator at the reference epoch
+    X-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    Z-axis  : along the Earth mean north pole at the reference epoch
+
+  Symbol meaning [1 au= 149597870.700 km, 1 day= 86400.0 s]:
+
+    JDTDB    Julian Day Number, Barycentric Dynamical Time
+      X      X-component of position vector (au)                               
+      Y      Y-component of position vector (au)                               
+      Z      Z-component of position vector (au)                               
+      VX     X-component of velocity vector (au/day)                           
+      VY     Y-component of velocity vector (au/day)                           
+      VZ     Z-component of velocity vector (au/day)                           
+      LT     One-way down-leg Newtonian light-time (day)                       
+      RG     Range; distance from coordinate center (au)                       
+      RR     Range-rate; radial velocity wrt coord. center (au/day)            
+
+Geometric states/elements have no aberrations applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  http://ssd.jpl.nasa.gov/?horizons
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+*******************************************************************************

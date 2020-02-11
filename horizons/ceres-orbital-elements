@@ -1,0 +1,95 @@
+*******************************************************************************
+Ephemeris / WWW_USER Mon Feb 10 19:04:27 2020 Pasadena, USA      / Horizons    
+*******************************************************************************
+Target body name: 1 Ceres                         {source: JPL#46}
+Center body name: Sun (10)                        {source: DE431}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2020-Feb-07 00:00:00.0000 TDB
+Stop  time      : A.D. 2020-Feb-08 00:00:00.0000 TDB
+Step-size       : 1440 minutes
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : 696000.0 x 696000.0 x 696000.0 k{Equator, meridian, pole}    
+Keplerian GM    : 2.9591220828559093E-04 au^3/d^2
+Small perturbers: Yes                             {source: SB431-N16}
+Output units    : AU-D, deg, Julian Day Number (Tp)                            
+Output type     : GEOMETRIC osculating elements
+Output format   : 10
+Reference frame : ICRF/J2000.0                                                 
+Coordinate systm: Earth Mean Equator and Equinox of Reference Epoch            
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2454033.5 ! 2006-Oct-25.00 (TDB)         Residual RMS= .22345        
+   EC= .07987906346370539  QR= 2.544709153978707   TP= 2453193.6614275328      
+   OM= 80.40846590069125   W=  73.1893463033331    IN= 10.58671483589909       
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X= 2.626536679271237E+00  Y=-1.003038764756320E+00  Z=-1.007293591158815E+00
+  VX= 4.202952273775981E-03 VY= 8.054172339518143E-03 VZ= 2.938175156440994E-03
+Asteroid physical parameters (km, seconds, rotational period in hours):        
+   GM= 62.6284             RAD= 469.7              ROTPER= 9.07417             
+   H= 3.4                  G= .120                 B-V= .713                   
+                           ALBEDO= .090            STYP= C                     
+*******************************************************************************
+JDTDB
+   EC    QR   IN
+   OM    W    Tp
+   N     MA   TA
+   A     AD   PR
+*******************************************************************************
+$$SOE
+2458886.500000000 = A.D. 2020-Feb-07 00:00:00.0000 TDB 
+ EC= 7.705857791518426E-02 QR= 2.555508368946362E+00 IN= 2.718528770987308E+01
+ OM= 2.336112629072238E+01 W = 1.328964361683606E+02 Tp=  2458240.226649156772
+ N = 2.139189800548039E-01 MA= 1.382501360489816E+02 TA= 1.437265967168744E+02
+ A = 2.768873850275102E+00 AD= 2.982239331603843E+00 PR= 1.682880125493173E+03
+2458887.500000000 = A.D. 2020-Feb-08 00:00:00.0000 TDB 
+ EC= 7.706362113356967E-02 QR= 2.555483580957170E+00 IN= 2.718529068410986E+01
+ OM= 2.336107102326672E+01 W = 1.328956860565387E+02 Tp=  2458240.228299354203
+ N = 2.139203391624898E-01 MA= 1.384645817324433E+02 TA= 1.439172189716937E+02
+ A = 2.768862122539657E+00 AD= 2.982240664122145E+00 PR= 1.682869433591122E+03
+$$EOE
+*******************************************************************************
+Coordinate system description:
+
+  NOTE:
+   The ICRF is quasar-based; the EME description below is given as a dynamical
+   explanation of the previous system to which the ICRF was closely aligned.
+
+  ICRF ("Earth Mean Equator and Equinox of Reference Epoch")
+
+    Reference epoch: J2000.0
+    XY-plane: plane of the Earth's mean equator at the reference epoch
+    X-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    Z-axis  : along the Earth mean north pole at the reference epoch
+
+  Symbol meaning [1 au= 149597870.700 km, 1 day= 86400.0 s]:
+
+    JDTDB    Julian Day Number, Barycentric Dynamical Time
+      EC     Eccentricity, e                                                   
+      QR     Periapsis distance, q (au)                                        
+      IN     Inclination w.r.t XY-plane, i (degrees)                           
+      OM     Longitude of Ascending Node, OMEGA, (degrees)                     
+      W      Argument of Perifocus, w (degrees)                                
+      Tp     Time of periapsis (Julian Day Number)                             
+      N      Mean motion, n (degrees/day)                                      
+      MA     Mean anomaly, M (degrees)                                         
+      TA     True anomaly, nu (degrees)                                        
+      A      Semi-major axis, a (au)                                           
+      AD     Apoapsis distance (au)                                            
+      PR     Sidereal orbit period (day)                                       
+
+Geometric states/elements have no aberrations applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  http://ssd.jpl.nasa.gov/?horizons
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+*******************************************************************************
