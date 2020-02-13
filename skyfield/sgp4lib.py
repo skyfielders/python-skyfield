@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
 from numpy import (

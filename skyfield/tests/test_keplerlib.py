@@ -38,7 +38,7 @@ def test_against_horizons():
         center_name=None,
         target_name=None,
     )
-    r, v, *rest = k._at(t)
+    r, v = k._at(t)[:2]
     sun_au = [
         -0.004105894975783999, 0.006739680703224941, 0.002956344702049446,
     ]

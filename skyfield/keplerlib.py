@@ -1,3 +1,5 @@
+from __future__ import division
+
 import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh,
