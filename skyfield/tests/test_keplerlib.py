@@ -1,12 +1,53 @@
 from numpy import pi, seterr, linspace
-from skyfield.keplerlib import propagate
+from skyfield.keplerlib import KeplerOrbit, propagate
 from skyfield.elementslib import OsculatingElements
-from skyfield.units import Velocity, Distance
+from skyfield.units import Angle, Distance, Velocity
 from skyfield.tests.test_elementslib import compare, ele_to_vec
 from skyfield.api import load
 import os
 
 seterr(all='raise')
+
+# Test against HORIZONS.
+
+def test_against_horizons():
+    # See the following files in the Skyfield repository:
+    #
+    # horizons/ceres-orbital-elements
+    # horizons/ceres-position
+
+    ts = load.timescale(builtin=True)
+    t = ts.tdb_jd(2458886.500000000)
+
+    a = 2.768873850275102E+00 # A
+    e = 7.705857791518426E-02 # EC
+    p_au = a * (1 - e ** 2)  # Wikipedia
+
+    k = KeplerOrbit.from_mean_anomaly(
+        p=Distance(au=p_au),  # see above
+        e=e,
+        i=Angle(degrees=2.718528770987308E+01),
+        Om=Angle(degrees=2.336112629072238E+01),
+        w=Angle(degrees=1.328964361683606E+02),
+        M=Angle(degrees=1.382501360489816E+02),
+        epoch=t,  #?
+        mu_km_s=None,
+        mu_au_d=2.9591220828559093E-04,
+        center=None,
+        target=None,
+        center_name=None,
+        target_name=None,
+    )
+    r, v, *rest = k._at(t)
+    sun_au = [
+        -0.004105894975783999, 0.006739680703224941, 0.002956344702049446,
+    ]
+    horizons_au = [
+        1.334875927366032E+00, -2.239607658161781E+00, -1.328895183461897E+00,
+    ]
+    assert max(abs(r + sun_au - horizons_au)) < 2e-15
+
+# Test various round-trips through the kepler orbit object.
 
 def _data_path(filename):
     return os.path.join(os.path.dirname(__file__), 'data', filename)

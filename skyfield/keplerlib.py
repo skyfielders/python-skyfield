@@ -11,6 +11,7 @@ from skyfield.units import Distance, Velocity, Angle
 from skyfield.vectorlib import VectorFunction
 from skyfield.data.gravitational_parameters import GM_dict
 from skyfield.constants import AU_KM, DAY_S
+from .timelib import julian_day
 
 
 class KeplerOrbit(VectorFunction):
@@ -189,6 +190,55 @@ class KeplerOrbit(VectorFunction):
                    target_name=target_name,
         )
 
+    @classmethod
+    def from_dataframe(cls, df, ts):
+        # https://minorplanetcenter.net/iau/info/PackedDates.html
+
+        # if 'Number' in df:
+        #     target = int(df.Number.strip('()')) + 2000000
+        # else:
+
+        target = None
+        name = 'foo'
+
+        # if 'Name' not in df or df.Name == nan:
+        #     target_name = df.Principal_desig
+        # else:
+        #target_name = df.Name
+
+        p = df.semimajor_axis_au.values * (1.0 - df.eccentricity.values ** 2.0)
+
+        # TODO: rework the epoch conversion using arrays, if possible, as in
+        # https://stackoverflow.com/questions/49503173/
+
+        def n(c):
+            return ord(c) - 48 if c.isdigit() else ord(c) - 55
+
+        def d(s):
+            year = 100 * n(s[0]) + int(s[1:3])
+            month = n(s[3])
+            day = n(s[4])
+            return julian_day(year, month, day)
+
+        epoch_jd = [d(s) for s in df.epoch_packed.values]
+        t = ts.tt_jd(epoch_jd)
+
+        # TODO: vectorize
+
+        return cls.from_mean_anomaly(
+            p=Distance(au=p[0]),
+            e=df.eccentricity.values[0],
+            i=Angle(degrees=df.inclination_degrees.values[0]),
+            Om=Angle(degrees=df.longitude_of_ascending_node_degrees.values[0]),
+            w=Angle(degrees=df.argument_of_perihelion_degrees.values[0]),
+            M=Angle(degrees=df.mean_anomaly_degrees.values[0]),
+            epoch=t[0],
+            mu_km_s=GM_dict[10] + GM_dict.get(target, 0),
+            center=10,
+            target=target,
+            center_name='SUN',
+            target_name=name,
+        )
 
     @classmethod
     def from_mpcorb_dataframe(cls, df, ts):
@@ -277,7 +327,7 @@ class KeplerOrbit(VectorFunction):
             )
         else:
             ele = self.elements_at_epoch
-            string = 'KeplerOrbit {0} {1} -> q={2:.2}au, e={3:.1f}, i={4:.1f}°, Ω={5:.1f}°, ω={6:.1f}°'
+            string = 'KeplerOrbit {0} {1} -> q={2:.2}au e={3:.3f} i={4:.1f} Om={5:.1f} w={6:.1f}'
             return string.format(self.center,
                                  self.center_name,
                                  ele.periapsis_distance.au,

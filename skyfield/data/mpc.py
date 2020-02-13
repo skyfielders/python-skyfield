@@ -2,68 +2,57 @@
 
 import pandas as pd
 
-mpcorb_url = 'https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz'
+MPCORB_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz'
+
 _MPCORB_COLUMNS = [
-    (0, 7),
-    (8, 13),
-    (14, 19),
-    (20, 25),
-    (26, 35),
-    (37, 46),
-    (48, 57),
-    (59, 68),
-    (70, 79),
-    (80, 91),
-    (92, 103),
-    (105, 106),
-    (107, 116),
-    (117, 122),
-    (123, 126),
-    (127, 136),
-    (137, 141),
-    (142, 145),
-    (146, 149),
-    (150, 160),
+    ('designation', (0, 7)),
+    ('H', (8, 13)),
+    ('G', (14, 19)),
+    ('epoch_packed', (20, 25)),
+    ('mean_anomaly_degrees', (26, 35)),
+    ('argument_of_perihelion_degrees', (37, 46)),
+    ('longitude_of_ascending_node_degrees', (48, 57)),
+    ('inclination_degrees', (59, 68)),
+    ('eccentricity', (70, 79)),
+    ('mean_daily_motion_degrees', (80, 91)),
+    ('semimajor_axis_au', (92, 103)),
+    ('uncertainty', (105, 106)),
+    ('reference', (107, 116)),
+    ('observations', (117, 122)),
+    ('oppositions', (123, 126)),
+    ('observation_period', (127, 136)),
+    ('rms_residual_arcseconds', (137, 141)),
+    ('coarse_perturbers', (142, 145)),
+    ('precise_perturbers', (146, 149)),
+    ('computer_name', (150, 160)),
 ]
-_MPCORB_COLUMN_NAMES = [
-    'designation',
-    'H',
-    'G',
-    'epoch',
-    'M',
-    'Argument',
-    'Node',
-    'inclination',
-    'e',
-    'n',
-    'a',
-    'uncertainty',
-    'reference',
-    'observation_range',
-    'oppositions',
-    'observations',
-    'rms_residual',
-    'coarse_perturbers',
-    'precise_perturbers',
-    'computer_name',
-]
+_MPCORB_NECESSARY_COLUMNS = {
+    'designation', 'epoch_packed', 'mean_anomaly_degrees',
+    'argument_of_perihelion_degrees', 'longitude_of_ascending_node_degrees',
+    'inclination_degrees', 'eccentricity', 'mean_daily_motion_degrees',
+    'semimajor_axis_au',
+}
 _MPCORB_DTYPES = {
-    'epoch': 'category',
+    'epoch_packed': 'category',
     'uncertainty': 'category',
     'coarse_perturbers': 'category',
     'precise_perturbers': 'category',
     'computer_name': 'category',
 }
 
-def load_mpcorb_dataframe(fobj):
+def load_mpcorb_dataframe(fobj, full=False):
     """Parse a Minor Planet Center orbits file into a Pandas dataframe.
 
     The MPCORB file format is documented at:
     https://minorplanetcenter.net/iau/info/MPOrbitFormat.html
 
     """
-    df = pd.read_fwf(fobj, _MPCORB_COLUMNS, names=_MPCORB_COLUMN_NAMES,
-                     dtype=_MPCORB_DTYPES, skiprows=43, compression='gzip')
+    columns = _MPCORB_COLUMNS
+    if not full:
+        columns = [tup for tup in columns if tup[0] in _MPCORB_NECESSARY_COLUMNS]
+    names, colspecs = zip(*columns)
+    df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_MPCORB_DTYPES,
+                     skiprows=43, compression='gzip')
     return df
 
 def mpc_comets(self, url, reload=False, filename=None):
