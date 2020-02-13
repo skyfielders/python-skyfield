@@ -106,8 +106,30 @@ which is listed in their ``stations.txt`` file:
 
     EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
 
-The value shown for the “epoch” is the all-important date and time
-on which this set of elements is most accurate,
+If instead your program already has the two lines of TLE data,
+and does not need Skyfield to download and parse a Celestrak file,
+you can instantiate an :class:`~skyfield.sgp4lib.EarthSatellite` directly.
+Note that ``ts`` should be a timescale object:
+
+.. testcode::
+
+    # Alternative: build the satellite directly from strings.
+
+    from skyfield.api import EarthSatellite
+
+    ts = load.timescale()
+    line1 = '1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082'
+    line2 = '2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473'
+    satellite = EarthSatellite(line1, line2, 'ISS (ZARYA)', ts)
+    print(satellite)
+
+.. testoutput::
+
+    EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
+
+The “epoch” date of a satellite element set
+is the all-important date and time
+for which the set of elements is most accurate,
 and before or after which they go rapidly out of date.
 You can access this value as an attribute of the object
 in case your program wants to check how old the elements are:
@@ -127,7 +149,6 @@ even if the file is already on disk.
 
 .. testcode::
 
-   ts = load.timescale()
    t = ts.utc(2014, 1, 23, 11, 18, 7)
 
    days = t - satellite.epoch
@@ -198,7 +219,9 @@ than those of the old J2000 system.)
 
 .. testcode::
 
+   # You can instead use ts.now() for the current time
    t = ts.utc(2014, 1, 23, 11, 18, 7)
+
    geocentric = satellite.at(t)
    print(geocentric.position.km)
 
