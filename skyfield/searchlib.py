@@ -75,8 +75,6 @@ def _find_discrete(ts, jd, f, epsilon, num):
             mask = concatenate(((diff(ends) > 3.0 * epsilon), (True,)))
             ends = ends[mask]
             y = y[mask]
-            print('A', len(ends))
-            print('B', len(y))
             break
 
         jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()
