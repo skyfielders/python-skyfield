@@ -57,7 +57,9 @@ def _find_discrete(ts, jd, f, epsilon, num):
 
         indices = flatnonzero(diff(y))
         if not len(indices):
-            ends = indices  # nothing found, return empty arrays
+            # Nothing found, so immediately return empty arrays.
+            ends = jd.take(indices)
+            y = y.take(indices)
             break
 
         starts = jd.take(indices)
@@ -73,6 +75,8 @@ def _find_discrete(ts, jd, f, epsilon, num):
             mask = concatenate(((diff(ends) > 3.0 * epsilon), (True,)))
             ends = ends[mask]
             y = y[mask]
+            print('A', len(ends))
+            print('B', len(y))
             break
 
         jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()

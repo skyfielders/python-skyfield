@@ -25,6 +25,13 @@ def make_stairstep_f(steps):
 def is_close(value, expected):
     return (abs(value - expected) < epsilon).all()
 
+def test_find_discrete_that_finds_nothing():
+    t0, t1 = make_t()
+    f = make_stairstep_f([-0.1, +1.1])
+    t, y = find_discrete(t0, t1, f, epsilon)
+    assert not len(t.tt)
+    assert not len(y)
+
 def test_find_discrete_near_left_edge():
     t0, t1 = make_t()
     f = make_stairstep_f([bump, 0.5])
