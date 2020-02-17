@@ -7,6 +7,8 @@ from skyfield.api import load
 import os
 
 seterr(all='raise')
+#I encountered an underflow in keplerlib.stumpff where c3 is calculated using power series. I think it should be ignored.
+seterr(under='ignore') 
 
 # Test against HORIZONS.
 
