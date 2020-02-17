@@ -54,6 +54,10 @@ def test_ele_to_vec():
 def _data_path(filename):
     return os.path.join(os.path.dirname(__file__), 'data', filename)
 
+times = linspace(-1e11, 1e11, 1001) # -3170 years to +3170 years, including 0 (in seconds)
+mu = 403503.2355022598
+dummy_time = load.timescale().utc(2018)
+
 def check_orbit(p, e, i, Om, w, v,
                 p_eps=None, e_eps=None, i_eps=None, Om_eps=None, w_eps=None, v_eps=None):
     pos0, vel0 = ele_to_vec(p, e, i, Om, w, v, mu)
