@@ -12,7 +12,7 @@ seterr(under='ignore')
 
 # Test against HORIZONS.
 
-def test_against_horizons():
+def test_ele_to_vec():
     # See the following files in the Skyfield repository:
     #
     # horizons/ceres-orbital-elements
