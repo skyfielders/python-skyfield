@@ -54,7 +54,7 @@ class KeplerOrbit(VectorFunction):
         if mu_km_s:
             self._mu_km_s = mu_km_s
         elif mu_au_d:
-            self._mu_km_s =  mu_au_d / AU_KM**3 * DAY_S**2
+            self._mu_km_s =  mu_au_d * AU_KM**3 / DAY_S**2
 
         self.position_at_epoch = position
         self.velocity_at_epoch = velocity
@@ -107,7 +107,7 @@ class KeplerOrbit(VectorFunction):
             raise ValueError('Either mu_km_s or mu_au_d should be used, but not both')
 
         if mu_au_d:
-            mu_km_s = mu_au_d / AU_KM**3 * DAY_S**2
+            mu_km_s = mu_au_d * AU_KM**3 / DAY_S**2
 
         position, velocity = ele_to_vec(p.km,
                                         e,
@@ -170,7 +170,7 @@ class KeplerOrbit(VectorFunction):
             raise ValueError('Either mu_km_s or mu_au_d should be used, but not both')
 
         if mu_au_d:
-            mu_km_s = mu_au_d  / AU_KM**3 * DAY_S**2
+            mu_km_s = mu_au_d * AU_KM**3 / DAY_S**2
 
         E = eccentric_anomaly(e, M.radians)
         v = Angle(radians=true_anomaly(e, E))
