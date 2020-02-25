@@ -6,8 +6,8 @@ MPCORB_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz'
 
 _MPCORB_COLUMNS = [
     ('designation', (0, 7)),
-    ('H', (8, 13)),
-    ('G', (14, 19)),
+    ('magnitude_H', (8, 13)),
+    ('magnitude_G', (14, 19)),
     ('epoch_packed', (20, 25)),
     ('mean_anomaly_degrees', (26, 35)),
     ('argument_of_perihelion_degrees', (37, 46)),
