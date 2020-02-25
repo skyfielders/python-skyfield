@@ -271,7 +271,8 @@ class KeplerOrbit(VectorFunction):
 
 
     @classmethod
-    def from_comet_dataframe(cls, df, ts):
+    def _from_comet_dataframe(cls, df, ts):
+        # TODO: rewrite this once skyfield.mpc._mpc_comets() goes live.
         mu_km_s = GM_dict[10]
         mu_au_d = mu_km_s / (AU_KM**3) * (DAY_S**2)
         e = df.e

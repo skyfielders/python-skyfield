@@ -55,7 +55,8 @@ def load_mpcorb_dataframe(fobj, full=False):
                      skiprows=43, compression='gzip')
     return df
 
-def mpc_comets(self, url, reload=False, filename=None):
+def _mpc_comets(self, url, reload=False, filename=None):
+    # TODO: switch from the expensive JSON format to parsing "CometEls.txt".
     with self.open(url, reload=reload, filename=filename) as gzip_file:
         with gzip.open(gzip_file) as json_file:
             df = pd.read_json(json_file)
