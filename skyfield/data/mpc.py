@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Routines for interpreting data from the IAU Minor Planet Center."""
 
 import pandas as pd
@@ -57,7 +58,7 @@ def load_mpcorb_dataframe(fobj, full=False):
 
 COMET_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt'
 
-_COMET_COLUMNS = [
+_COMET_SLOW_COLUMNS = [
     ('number', (0, 4)),
     ('orbit_type', (4, 5)),
     ('packed_designation', (5, 12)),
@@ -77,15 +78,23 @@ _COMET_COLUMNS = [
     ('designation', (102, 158)),
     ('reference', (159, 168)),
 ]
-# _COMET_NECESSARY_COLUMNS = {
-#     'designation', 'epoch_packed', 'mean_anomaly_degrees',
-#     'argument_of_perihelion_degrees', 'longitude_of_ascending_node_degrees',
-#     'inclination_degrees', 'eccentricity', 'mean_daily_motion_degrees',
-#     'semimajor_axis_au',
-# }
+_COMET_FAST_COLUMN_NAMES, _COMET_FAST_COLUMN_NUMBERS = zip(
+    ('designation', 0),
+    ('perihelion_year', 1),
+    ('perihelion_month', 2),
+    ('perihelion_day', 3),
+    ('perihelion_distance_au', 4),
+    ('eccentricity', 5),
+    ('argument_of_perihelion_degrees', 6),
+    ('longitude_of_ascending_node_degrees', 7),
+    ('inclination_degrees', 8),
+    # ('perturbed_epoch', 9),
+    ('H', 10),
+    ('G', 11),
+)
 _COMET_DTYPES = {
     'number': 'float',  # since older Pandas does not support NaN for integers
-    # 'orbit_type': 'category',
+    'orbit_type': 'category',
 }
 
 def load_comets_dataframe(fobj):
@@ -94,10 +103,33 @@ def load_comets_dataframe(fobj):
     The comet file format is documented at:
     https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
 
+    This uses a fast Pandas import routine on only the data fields
+    essential for computing comet orbits, speeding up the import by a
+    factor of 2 or 3.  But in return, each comet’s full name will be
+    missing; only its packed designation is included as an identifier.
+
+    See :func:`~skyfield.data.mpc.load_comets_dataframe_slow()` for a
+    slower routine that includes every comet data field.
+
     """
-    columns = _COMET_COLUMNS
-    # if not full:
-    #     columns = [tup for tup in columns if tup[0] in _MPCORB_NECESSARY_COLUMNS]
-    names, colspecs = zip(*columns)
+    df = pd.read_csv(
+        fobj, sep=r'\s+', header=None,
+        names=_COMET_FAST_COLUMN_NAMES,
+        usecols=_COMET_FAST_COLUMN_NUMBERS,
+    )
+    return df
+
+def load_comets_dataframe_slow(fobj):
+    """Parse a Minor Planet Center comets file into a Pandas dataframe.
+
+    The comet file format is documented at:
+    https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
+
+    This routine reads in every single field from the comets data file.
+    See :func:`~skyfield.data.mpc.load_comets_dataframe()` for a faster
+    routine that omits some of the more expensive comet fields.
+
+    """
+    names, colspecs = zip(*_COMET_SLOW_COLUMNS)
     df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_COMET_DTYPES)
     return df
