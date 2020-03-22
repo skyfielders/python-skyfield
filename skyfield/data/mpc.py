@@ -55,12 +55,49 @@ def load_mpcorb_dataframe(fobj, full=False):
                      skiprows=43, compression='gzip')
     return df
 
-def _mpc_comets(self, url, reload=False, filename=None):
-    # TODO: switch from the expensive JSON format to parsing "CometEls.txt".
-    with self.open(url, reload=reload, filename=filename) as gzip_file:
-        with gzip.open(gzip_file) as json_file:
-            df = pd.read_json(json_file)
+COMET_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt'
 
-    df.Orbit_type = df.Orbit_type.astype('category')
+_COMET_COLUMNS = [
+    ('number', (0, 4)),
+    ('orbit_type', (4, 5)),
+    ('packed_designation', (5, 12)),
+    ('perihelion_year', (14, 18)),
+    ('perihelion_month', (19, 21)),
+    ('perihelion_day', (22, 29)),
+    ('perihelion_distance_au', (30, 39)),
+    ('eccentricity', (41, 49)),
+    ('argument_of_perihelion_degrees', (51, 59)),
+    ('longitude_of_ascending_node_degrees', (61, 69)),
+    ('inclination_degrees', (71, 79)),
+    ('perturbed_epoch_year', (81, 85)),
+    ('perturbed_epoch_month', (85, 87)),
+    ('perturbed_epoch_day', (87, 89)),
+    ('absolute_magnitude', (91, 95)),
+    ('slope_parameter', (96, 100)),
+    ('designation', (102, 158)),
+    ('reference', (159, 168)),
+]
+# _COMET_NECESSARY_COLUMNS = {
+#     'designation', 'epoch_packed', 'mean_anomaly_degrees',
+#     'argument_of_perihelion_degrees', 'longitude_of_ascending_node_degrees',
+#     'inclination_degrees', 'eccentricity', 'mean_daily_motion_degrees',
+#     'semimajor_axis_au',
+# }
+_COMET_DTYPES = {
+    'number': 'float',  # since older Pandas does not support NaN for integers
+    # 'orbit_type': 'category',
+}
 
+def load_comets_dataframe(fobj):
+    """Parse a Minor Planet Center comets file into a Pandas dataframe.
+
+    The comet file format is documented at:
+    https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
+
+    """
+    columns = _COMET_COLUMNS
+    # if not full:
+    #     columns = [tup for tup in columns if tup[0] in _MPCORB_NECESSARY_COLUMNS]
+    names, colspecs = zip(*columns)
+    df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_COMET_DTYPES)
     return df
