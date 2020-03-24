@@ -1,0 +1,78 @@
+*******************************************************************************
+Ephemeris / WWW_USER Tue Mar 24 10:51:53 2020 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: Hale-Bopp (C/1995 O1)           {source: JPL#J971B/1}
+Center body name: Solar System Barycenter (0)     {source: DE431}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 1997-Mar-30 22:30:30.0910 TDB
+Stop  time      : A.D. 1997-Mar-30 22:30:30.1536 TDB
+Step-size       : 1440 minutes
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : (undefined)
+Small perturbers: Yes                             {source: SB431-N16}
+Output units    : AU-D
+Output type     : GEOMETRIC cartesian states
+Output format   : 2 (position and velocity)
+Reference frame : ICRF/J2000.0
+Coordinate systm: Earth Mean Equator and Equinox of Reference Epoch
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2454724.5 ! 2008-Sep-15.0000000 (TDB)    RMSW= n.a.
+   EC= .9949607008417696   QR= .9174143409263262   TP= 2450538.4378482755
+   OM= 282.9487539423989   W= 130.662020526416     IN= 89.21708989130315
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X= 1.777310651689592E+00  Y= 1.638390146876578E+00  Z=-2.712743223120575E+01
+  VX= 4.707733989610805E-04 VY=-5.688697324947830E-04 VZ=-4.422633506777067E-03
+Comet physical (GM= km^3/s^2; RAD= km):
+   GM= n.a.                RAD= 30.
+   M1=  4.       M2=  n.a.     k1=  8.     k2= n.a.     PHCOF= n.a.
+*******************************************************************************
+JDTDB
+   X     Y     Z
+   VX    VY    VZ
+*******************************************************************************
+$$SOE
+2450538.437848276 = A.D. 1997-Mar-30 22:30:30.0910 TDB
+ X =-1.232674024434804E-01 Y = 2.349174352473917E-01 Z = 8.796973894528012E-01
+ VX=-4.387926446563824E-03 VY= 2.393800286856415E-02 VZ=-7.291132333297985E-03
+$$EOE
+*******************************************************************************
+Coordinate system description:
+
+  NOTE:
+   The ICRF is quasar-based; the EME description below is given as a dynamical
+   explanation of the previous system to which the ICRF was closely aligned.
+
+  ICRF ("Earth Mean Equator and Equinox of Reference Epoch")
+
+    Reference epoch: J2000.0
+    XY-plane: plane of the Earth's mean equator at the reference epoch
+    X-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    Z-axis  : along the Earth mean north pole at the reference epoch
+
+  Symbol meaning [1 au= 149597870.700 km, 1 day= 86400.0 s]:
+
+    JDTDB    Julian Day Number, Barycentric Dynamical Time
+      X      X-component of position vector (au)
+      Y      Y-component of position vector (au)
+      Z      Z-component of position vector (au)
+      VX     X-component of velocity vector (au/day)
+      VY     Y-component of velocity vector (au/day)
+      VZ     Z-component of velocity vector (au/day)
+
+Geometric states/elements have no aberrations applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  http://ssd.jpl.nasa.gov/?horizons
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+*******************************************************************************
