@@ -64,6 +64,7 @@ class KeplerOrbit(VectorFunction):
         self.center_name = center_name
         self.target_name = target_name
 
+        self._rotation = None  # TODO: make argument?
 
     @classmethod
     def from_true_anomaly(cls, p, e, i, Om, w, v,
@@ -308,6 +309,9 @@ class KeplerOrbit(VectorFunction):
                              time.tt * DAY_S,
                              self._mu_km_s,
         )
+        if self._rotation is not None:
+            pos = self._rotation.dot(pos)
+        # TODO: vel
         return pos / AU_KM, vel / AU_KM * DAY_S, None, None
 
 
