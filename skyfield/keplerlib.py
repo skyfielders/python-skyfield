@@ -304,8 +304,8 @@ class KeplerOrbit(VectorFunction):
         """
         pos, vel = propagate(self.position_at_epoch.km,
                              self.velocity_at_epoch.km_per_s,
-                             self.epoch.tt,
-                             time.tt,
+                             self.epoch.tt * DAY_S,
+                             time.tt * DAY_S,
                              self._mu_km_s,
         )
         return pos / AU_KM, vel / AU_KM * DAY_S, None, None
