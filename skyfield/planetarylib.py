@@ -47,7 +47,15 @@ class PlanetaryConstants(object):
                 raise ValueError('file must start with one of the patterns:'
                                  ' {0}'.format(_TEXT_MAGIC_NUMBERS))
             file.seek(0)
-            self.assignments.update(parse_text_pck(file))
+            assignments = self.assignments
+            for name, equals, value in parse_text_pck(file):
+                if equals == b'=':
+                    assignments[name] = value
+                elif equals == b'+=':
+                    previous = assignments.get(name)
+                    if previous is None:
+                        previous = assignments[name] = []
+                    previous.extend(value)
         finally:
             file.close()
 
@@ -242,12 +250,17 @@ class PlanetTopos(VectorFunction):
         observer_data.elevation_m = 'not None, yet not an Earth elevation'
 
 def parse_text_pck(lines):
-    """Yield ``(name, value)`` tuples parsed from a PCK text kernel."""
+    """Yield ``(name, equals, value)`` tuples parsed from a PCK text kernel.
+
+    The byte string ``equals`` will be ``b'='`` for a normal assignment,
+    or ``b'+='`` for an append.
+
+    """
     tokens = iter(_parse_text_pck_tokens(lines))
     for token in tokens:
         name = token.decode('ascii')
         equals = next(tokens)
-        if equals != b'=':
+        if equals not in (b'=', b'+='):
             raise ValueError('was expecting an equals sign after %r' % name)
         value = next(tokens)
         if value == b'(':
@@ -258,7 +271,7 @@ def parse_text_pck(lines):
                 value.append(_evaluate(token2))
         else:
             value = _evaluate(value)
-        yield name, value
+        yield name, equals, value
 
 def _evaluate(token):
     """Return a string, integer, or float parsed from a PCK text kernel."""
