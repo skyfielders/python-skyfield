@@ -36,7 +36,7 @@ Opening files
    Loader
    Loader.path_to
    Loader.timescale
-   Loader.tle
+   Loader.tle_file
 
 Time scales
 ===========
@@ -187,6 +187,7 @@ Earth Satellites
 By downloading TLE satellite element sets,
 Skyfield users can build vector functions
 that predict their positions.
+See :doc:`earth-satellites`.
 
 .. autosummary::
 

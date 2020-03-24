@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 import itertools
 import os
@@ -217,20 +218,17 @@ class Loader(object):
     def tle(self, url, reload=False, filename=None):
         """Load and parse a satellite TLE file.
 
-        Given a URL or a local path, this loads a file of three-line records in
-        the common Celestrak file format, or two-line records like those from
-        space-track.org. For a three-line element set, each first line gives
-        the name of a satellite and the following two lines are the TLE orbital
-        elements. A two-line element set comprises only these last two lines.
+        DEPRECATED: in a misguided attempt to be overly convenient, this
+        routine builds an unweildy dictionary of satellites with keys of
+        two different Python types: integer keys for satellite numbers,
+        and string keys for satellite names. It even lists satellites
+        like ``ISS (ZARYA)`` twice, in case the user wants to look them
+        up by a single name like ``ZARYA``.  What a mess.  Users should
+        instead call the simple ``tle_file()`` method, and themselves
+        build any dictionaries they need.
 
         See the :meth:`~skyfield.iokit.Loader.open()` documentation for
         the meaning of the ``reload`` and ``filename`` parameters.
-
-        Returns a dictionary whose keys are satellite names and numbers,
-        and whose values are :class:`~skyfield.sgp4lib.EarthSatellite`
-        objects.  If you want to build a list in which each satellite
-        appears only once, simply run ``sats = set(d.values())`` on the
-        returned dictionary.
 
         """
         d = {}
@@ -240,6 +238,21 @@ class Loader(object):
                 for name in names:
                     d[name] = sat
         return d
+
+    def tle_file(self, url, reload=False, filename=None):
+        """Load and parse a TLE file, returning a list of Earth satellites.
+
+        Given a URL or local path to an ASCII text file, this loads a
+        series of TLE “Two-Line Element” sets and returns a list of
+        :class:`~skyfield.sgp4lib.EarthSatellite` objects for them.
+        See :doc:`earth-satellites`.
+
+        See the :meth:`~skyfield.iokit.Loader.open()` documentation for
+        the meaning of the ``reload`` and ``filename`` parameters.
+
+        """
+        with self.open(url, reload=reload, filename=filename) as f:
+            return list(parse_tle_file(f))
 
     def open(self, url, mode='rb', reload=False, filename=None):
         """Open a file, downloading it first if it does not yet exist.
@@ -462,15 +475,11 @@ def parse_leap_seconds(fileobj):
 def parse_tle(fileobj):
     """Parse a file of TLE satellite element sets.
 
-    Builds an Earth satellite from each pair of adjacent lines in the
-    file that start with "1 " and "2 " and have 69 or more characters
-    each.  If the preceding line is exactly 24 characters long, then it
-    is parsed as the satellite's name.  For each satellite found, yields
-    a tuple `(names, sat)` giving the name(s) on the preceding line (or
-    `None` if no name was found) and the satellite object itself.
+    DEPRECATED: this routine is overly complicated, doing extra work to
+    try to guess several ways in which the user might want to look up
+    satellites by name.  Use ``parse_tle_file()`` instead.
 
-    An exception is raised if the attempt to parse a pair of candidate
-    lines as TLE elements fails.
+    TODO: convert this into a wrapper around ``parse_tle_file()``.
 
     """
     b0 = b1 = b''
@@ -507,6 +516,39 @@ def parse_tle(fileobj):
         b0 = b1
         b1 = b2
 
+def parse_tle_file(lines):
+    """Parse TLE satellite elements, yielding a sequence of satellites.
+
+    Given a sequence ``lines`` of byte strings that contain TLE
+    “Two-Line Element” sets of satellite orbital elements, yields an
+    :class:`~skyfield.sgp4lib.EarthSatellite` for each pair of adjacent
+    lines that start with ``b"1 "`` and ``b"2 "`` and have 69 or more
+    characters each.  If the preceding line looks like a name, it is set
+    as the satellite’s ``.name``.  See :doc:`earth-satellites`.
+
+    An exception is raised if the attempt to parse a pair of candidate
+    lines as TLE elements fails.
+
+    """
+    b0 = b1 = b''
+    for b2 in lines:
+        if (b1.startswith(b'1 ') and len(b1) >= 69 and
+            b2.startswith(b'2 ') and len(b2) >= 69):
+
+            b0 = b0.rstrip(b'\n\r')
+            if len(b0) == 24:   # Celestrak
+                name = b0.decode('ascii').rstrip()
+            elif b0.startswith(b'0 '): # Spacetrack 3-line format
+                name = b0[2:].decode('ascii').rstrip()
+            else:
+                name = None
+
+            line1 = b1.decode('ascii')
+            line2 = b2.decode('ascii')
+            yield EarthSatellite(line1, line2, name)
+
+        b0 = b1
+        b1 = b2
 
 def download(url, path, verbose=None, blocksize=128*1024):
     """Download a file from a URL, possibly displaying a progress bar.

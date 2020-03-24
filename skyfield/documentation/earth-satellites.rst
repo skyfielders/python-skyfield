@@ -78,12 +78,12 @@ is based on its exact offset from the beginning of the line.
 You must download and use the element set’s text
 without making any change to its whitespace.
 
-Skyfield loader objects offer a :meth:`~skyfield.iokit.Loader.tle()`
+Skyfield loader objects offer a :meth:`~skyfield.iokit.Loader.tle_file()`
 method that can download and cache a file full of satellite elements
 from a site like Celestrak.
 A popular observing target for satellite observers
 is the International Space Station,
-which is listed in their ``stations.txt`` file:
+which is listed in Celestrak’s ``stations.txt`` file:
 
 .. testsetup::
 
@@ -91,15 +91,38 @@ which is listed in their ``stations.txt`` file:
     ISS (ZARYA)             \n\
     1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082
     2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
-    """)
+    """ * 60)
 
 .. testcode::
 
     from skyfield.api import Topos, load
 
     stations_url = 'http://celestrak.com/NORAD/elements/stations.txt'
-    satellites = load.tle(stations_url)
-    satellite = satellites['ISS (ZARYA)']
+    satellites = load.tle_file(stations_url)
+    print('Loaded', len(satellites), 'satellites')
+
+.. testoutput::
+
+    Loaded 60 satellites
+
+If you want to operate on every satellite in the list, simply loop over it.
+To instead select individual satellites by name or number,
+build lookup dictionaries using Python’s dictionary comprehension syntax:
+
+.. testcode::
+
+    by_name = {sat.name: sat for sat in satellites}
+    satellite = by_name['ISS (ZARYA)']
+    print(satellite)
+
+.. testoutput::
+
+    EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
+
+.. testcode::
+
+    by_number = {sat.model.satnum: sat for sat in satellites}
+    satellite = by_number[25544]
     print(satellite)
 
 .. testoutput::
@@ -143,9 +166,14 @@ in case your program wants to check how old the elements are:
     A.D. 2014-Jan-20 22:23:04.0004 UT
 
 If the epoch is too far in the past,
-you can provide :meth:`~skyfield.iokit.Loader.tle()`
+you can provide :meth:`~skyfield.iokit.Loader.tle_file()`
 with the ``reload`` option to force it to download new elements
 even if the file is already on disk.
+(Note, though, that there is no guarantee that the new elements
+will be up-to-date if the source file is not frequently updated
+for the satellite you are interested in —
+so this pattern might make you download a new file on each run
+until the satellite’s elements are finally updated.)
 
 .. testcode::
 
@@ -155,12 +183,16 @@ even if the file is already on disk.
    print('{:.3f} days away from epoch'.format(days))
 
    if abs(days) > 14:
-       satellites = load.tle(stations_url, reload=True)
-       satellite = satellites['ISS (ZARYA)']
+       satellites = load.tle_file(stations_url, reload=True)
 
 .. testoutput::
 
     2.538 days away from epoch
+
+You can read `T.S. Kelso <https://twitter.com/TSKelso>`_ on Twitter
+to follow along with the drama
+as various satellite element sets go out-of-date each month
+and await updates from their respective organizations.
 
 Finding when a satellite rises and sets
 ---------------------------------------
