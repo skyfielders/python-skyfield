@@ -3,6 +3,23 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.18 — 2020 March 26
+--------------------
+
+* Deprecated the old hybrid-key satellite dictionary returned by
+  ``load.tle()`` in favor of a simple list returned by the new
+  :meth:`~skyfield.iokit.Loader.tle_file()` routine.
+  `#345 <https://github.com/skyfielders/python-skyfield/issues/345>`_
+
+* The almanac :func:`~skyfield.searchlib.find_discrete()` routine no
+  longer returns extraneous values in its second return value if no
+  changes of state were found.
+  `#339 <https://github.com/skyfielders/python-skyfield/issues/339>`_
+  `#351 <https://github.com/skyfielders/python-skyfield/issues/351>`_
+
+* Added documentation and support for computing lunar libration.
+  `#80 <https://github.com/skyfielders/python-skyfield/issues/80>`_
+
 1.17 — 2020 February 2
 ----------------------
 
