@@ -7,12 +7,6 @@ from skyfield.api import Topos
 def ts():
     yield api.load.timescale()
 
-def test_whether_planets_have_radii():
-    return # TODO: how will we support this again?
-    assert api.mercury.radius.km == 2440.0
-    for planet in api.nine_planets:
-        assert planet.radius.km > 0.0
-
 def test_sending_jd_that_is_not_a_julian_date():
     earth = api.load('de421.bsp')['earth']
     with assert_raises(ValueError, r"please provide the at\(\) method"
