@@ -4,6 +4,18 @@ Planetary routines adapted from:
 
 https://arxiv.org/pdf/1808.01973.pdf
 
+Which links to:
+
+https://sourceforge.net/projects/planetary-magnitudes/
+
+Which has directories with three successive versions of their magnitude
+computation, the most recent of which provides the files on which this
+Python code is based:
+
+Ap_Mag_V3.f90
+Ap_Mag_Output_V3.txt
+Ap_Mag_Input_V3.txt
+
 """
 from numpy import log10
 
