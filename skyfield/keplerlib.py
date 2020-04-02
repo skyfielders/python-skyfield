@@ -506,8 +506,10 @@ def stumpff(x):
     odd_denominators = tile(odd_factorials, [n, 1])
     even_denominators = tile(even_factorials, [n, 1])
     numerators = repeat(x[mid][newaxis].T, trunc-1, axis=1)
-    c3[mid] = sum(power(numerators, exponents)/odd_denominators, axis=1)
-    c2[mid] = sum(power(numerators, exponents)/even_denominators, axis=1)
+    c3[mid] = (sum(power(numerators[:, ::2], exponents[:, ::2])/odd_denominators[:, ::2], axis=1)
+        - sum(power(numerators[:, 1::2], exponents[:, 1::2])/odd_denominators[:, 1::2], axis=1))
+    c2[mid] = (sum(power(numerators[:, ::2], exponents[:, ::2])/even_denominators[:, ::2], axis=1)
+        - sum(power(numerators[:, 1::2], exponents[:, 1::2])/even_denominators[:, 1::2], axis=1))
     c1[mid] = 1 - x[mid]*c3[mid]
     c0[mid] = 1 - x[mid]*c2[mid]
 
