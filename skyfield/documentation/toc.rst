@@ -12,6 +12,7 @@ that is accelerated using NumPy vector math!
 
    installation
    examples
+   example-plots
    files
    almanac
    positions
