@@ -3,6 +3,13 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.19 — 2020 ?
+-------------
+
+* Gave topos objects a new :meth:`~skyfield.toposlib.Topos.itrf_xyz()`
+  method that returns their raw ITRF coordinates.
+  `#354 <https://github.com/skyfielders/python-skyfield/issues/354>`_
+
 1.18 — 2020 March 26
 --------------------
 
