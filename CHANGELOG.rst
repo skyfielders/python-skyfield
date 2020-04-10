@@ -10,6 +10,10 @@ Changelog
   method that returns their raw ITRF coordinates.
   `#354 <https://github.com/skyfielders/python-skyfield/issues/354>`_
 
+* Fixed the sign of the velocity vector when two vectors are directly
+  geometrically subtracted.
+  `#355 <https://github.com/skyfielders/python-skyfield/issues/355>`_
+
 1.18 — 2020 March 26
 --------------------
 

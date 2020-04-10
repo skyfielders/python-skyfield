@@ -5,6 +5,13 @@ from skyfield.functions import length_of
 from skyfield.positionlib import ICRF
 from skyfield.starlib import Star
 
+def test_subtraction():
+    p0 = ICRF((10,20,30), (40,50,60))
+    p1 = ICRF((1,2,3), (4,5,6))
+    p = p0 - p1
+    assert tuple(p.position.au) == (9, 18, 27)
+    assert tuple(p.velocity.au_per_d) == (36, 45, 54)
+
 def test_J2000_ecliptic_coordinates_with_and_without_a_time_array():
     p0 = ICRF((1,0,0))
     p1 = ICRF((0,1,0))

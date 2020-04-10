@@ -99,7 +99,7 @@ class ICRF(object):
         if self.velocity is None or body.velocity is None:
             v = None
         else:
-            v = body.velocity.au_per_d - self.velocity.au_per_d
+            v = self.velocity.au_per_d - body.velocity.au_per_d
         return ICRF(p, v, self.t)
 
     def __getitem__(self, i):
