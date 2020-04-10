@@ -87,3 +87,10 @@ class Topos(VectorFunction):
         # TODO: also rotate velocity
 
         return pos, vel, pos, None
+
+    def itrf_xyz(self):
+        """Compute the ITRF position and velocity of this Topos."""
+        gast = 0.0
+        pos, vel = terra(self.latitude.radians, self.longitude.radians,
+                         self.elevation.au, gast)
+        return Distance(pos)
