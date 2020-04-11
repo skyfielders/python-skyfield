@@ -89,7 +89,11 @@ class Topos(VectorFunction):
         return pos, vel, pos, None
 
     def itrf_xyz(self):
-        """Compute the ITRF position and velocity of this Topos."""
+        """Return this location as an (x,y,z) vector in the ITRF frame.
+
+        Returns a 3-element :class:`~skyfield.units.Distance` object.
+
+        """
         gast = 0.0
         pos, vel = terra(self.latitude.radians, self.longitude.radians,
                          self.elevation.au, gast)
