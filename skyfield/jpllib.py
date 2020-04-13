@@ -3,10 +3,12 @@
 import os
 from collections import defaultdict
 
+from jplephem.exceptions import OutOfRangeError
 from jplephem.spk import SPK
 from jplephem.names import target_name_pairs, target_names as _names
 
 from .constants import AU_KM, DAY_S
+from .errors import OutOfRangeTimeError
 from .timelib import calendar_date
 from .vectorlib import VectorFunction, VectorSum
 
@@ -204,8 +206,21 @@ class SPICESegment(VectorFunction):
 
 class ChebyshevPosition(SPICESegment):
     def _at(self, t):
-        position, velocity = self.spk_segment.compute_and_differentiate(t.tdb)
-        return position / AU_KM, velocity / AU_KM, None, None
+        try:
+            position, velocity = self.spk_segment.compute_and_differentiate(t.tdb)
+            return position / AU_KM, velocity / AU_KM, None, None
+        except OutOfRangeError as e:
+            start_time = t.ts.tdb(jd=self.spk_segment.start_jd)
+            end_time = t.ts.tdb(jd=self.spk_segment.end_jd)
+            out_of_range_times = []
+
+            for i, time in enumerate(t):
+                if e.out_of_range_times[i]:
+                    out_of_range_times.append(time)
+
+            raise OutOfRangeTimeError('out of range times: must be between %s and %s' % (start_time.utc_iso(),
+                                                                                         end_time.utc_iso()),
+                                      start_time, end_time, out_of_range_times)
 
 
 class ChebyshevPositionVelocity(SPICESegment):

@@ -5,6 +5,22 @@ from functools import wraps
 class DeprecationError(Exception):
     """Explain that a Skyfield feature has been removed."""
 
+class OutOfRangeTimeError(ValueError):
+    """
+    This exception is thrown is the given time is out of tange of the supported times.
+    It has two extra attributes:
+
+    - `first_valid_time`: the first supported time
+    - `last_valid_time`: the last supported time
+    - `out_of_range_times`: a list of the out of range Time objects
+    """
+
+    def __init__(self, message, first_valid_time, last_valid_time, out_of_range_times):
+        self.args = message,
+        self.first_valid_time = first_valid_time
+        self.last_valid_time = last_valid_time
+        self.out_of_range_times = out_of_range_times
+
 def raise_error_for_deprecated_time_arguments(method):
     @wraps(method)
     def wrapper(self, jd=None, utc=None, tai=None, tt=None, tdb=None):
