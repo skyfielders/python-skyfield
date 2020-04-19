@@ -150,9 +150,13 @@ combined with their magnitude to produce a plot.
 .. testcode::
 
    from matplotlib import pyplot as plt
+
+   plt.figure()
+   plt.title('The brightest stars in Orion')
    plt.scatter(ra.hours, dec.degrees, 8 - df['magnitude'], 'k')
    plt.xlim(7.0, 4.0)
    plt.ylim(-20, 20)
+   plt.axes().grid(True)
    plt.savefig('bright_stars.png')
 
 The result of the simple filtering and plotting is an (admittedly

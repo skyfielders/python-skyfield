@@ -3,6 +3,12 @@
  Example Plots
 ===============
 
+This section of the documentation
+will gradually accumulate example scripts
+for producing images from Skyfield computations.
+For the moment there’s only example so far,
+for plotting the elevation of a satellite over time:
+
 .. testsetup::
 
     import matplotlib
@@ -39,6 +45,10 @@
     reentry = ts.utc(2013, 11, 11, 0, 16)
     earth_radius_km = 6371.
 
+    # Start a new figure.
+
+    plt.figure()
+
     # Draw the blue curve.
 
     x = t.toordinal()
@@ -64,9 +74,7 @@
 
     plt.savefig('goce-reentry.png')
 
-
 .. image:: _static/goce-reentry.png
-
 
 .. testcleanup::
 
