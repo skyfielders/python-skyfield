@@ -254,8 +254,8 @@ class Angle(object):
         if shape and shape != (1,):
             return "{0} values from {1} to {2}".format(
                 len(hours),
-                _hstr(min(hours), places),
-                _hstr(max(hours), places),
+                _hstr(hours[0], places),
+                _hstr(hours[-1], places),
                 )
         return _hstr(hours, places)
 
@@ -293,8 +293,8 @@ class Angle(object):
         if shape and shape != (1,):
             return "{0} values from {1} to {2}".format(
                 len(degrees),
-                _dstr(min(degrees), places, signed),
-                _dstr(max(degrees), places, signed),
+                _dstr(degrees[0], places, signed),
+                _dstr(degrees[-1], places, signed),
                 )
         return _dstr(degrees, places, signed)
 
