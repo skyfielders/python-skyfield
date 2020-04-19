@@ -12,6 +12,58 @@ to solve a general problem,
 that should provide readers with a basis
 for solving other similar problems of their own.
 
+When will it get dark tonight?
+==============================
+
+Sunrise, sunset, and the several varieties of twilight
+are all available through the :doc:`almanac` module.
+Here’s the script I use when I want to know when it will be dark enough
+to see the stars —
+or how early I need to rise to see the morning sky:
+
+.. TODO Figure out how to use the timezone itself to find day start/end.
+
+.. testsetup::
+
+   __import__('skyfield.tests.fixes').tests.fixes.setup(
+       (2020, 4, 19, 17, 58))
+
+.. testcode::
+
+    import datetime as dt
+    from pytz import timezone
+    from skyfield import almanac
+    from skyfield.api import Topos, load
+
+    # Figure out local midnight.
+    zone = timezone('US/Eastern')
+    now = zone.localize(dt.datetime.now())
+    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    next_midnight = midnight + dt.timedelta(days=1)
+
+    ts = load.timescale(builtin=True)
+    t0 = ts.utc(midnight)
+    t1 = ts.utc(next_midnight)
+    eph = load('de421.bsp')
+    bluffton = Topos('40.8939 N', '83.8917 W')
+    f = almanac.dark_twilight_day(eph, bluffton)
+    times, events = almanac.find_discrete(t0, t1, f)
+
+    for t, e in zip(times, events):
+        tstr = str(t.astimezone(zone))[:16]
+        print(tstr, ' ', almanac.TWILIGHTS[e], 'starts')
+
+.. testoutput::
+
+    2020-04-19 05:09   Astronomical twilight starts
+    2020-04-19 05:46   Nautical twilight starts
+    2020-04-19 06:21   Civil twilight starts
+    2020-04-19 06:49   Day starts
+    2020-04-19 20:20   Civil twilight starts
+    2020-04-19 20:48   Nautical twilight starts
+    2020-04-19 21:23   Astronomical twilight starts
+    2020-04-19 22:00   Night starts
+
 What phase is the Moon tonight?
 ===============================
 
@@ -267,3 +319,7 @@ to both Accra, Ghana, and the top of Mount Bierstadt in Colorado.
     I was 4211 meters farther from the Earth's center
     when I visited Accra, at nearly sea level, than atop
     Mt. Bierstadt in Colorado.
+
+.. testcleanup::
+
+   __import__('skyfield.tests.fixes').tests.fixes.teardown()
