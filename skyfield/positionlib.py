@@ -187,14 +187,23 @@ class ICRF(object):
     def separation_from(self, another_icrf):
         """Return the angle between this position and another.
 
-        >>> print(ICRF([1,0,0]).separation_from(ICRF([1,1,0])))
-        45deg 00' 00.0"
+        >>> from skyfield.api import load
+        >>> ts = load.timescale(builtin=True)
+        >>> t = ts.utc(2020, 4, 18)
+        >>> eph = load('de421.bsp')
+        >>> sun, venus, earth = eph['sun'], eph['venus'], eph['earth']
+        >>> e = earth.at(t)
+        >>> s = e.observe(sun)
+        >>> v = e.observe(venus)
+        >>> print(s.separation_from(v))
+        43deg 23' 23.1"
 
         You can also compute separations across an array of positions.
 
-        >>> directions = ICRF([[1,0,-1,0], [0,1,0,-1], [0,0,0,0]])
-        >>> directions.separation_from(ICRF([0,1,0])).degrees
-        array([ 90.,   0.,  90., 180.])
+        >>> t = ts.utc(2020, 4, [18, 19, 20])
+        >>> e = earth.at(t)
+        >>> print(e.observe(sun).separation_from(e.observe(venus)))
+        3 values from 43deg 23' 23.1" to 42deg 49' 46.6"
 
         """
         p1 = self.position.au
