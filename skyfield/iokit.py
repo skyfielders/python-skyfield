@@ -290,19 +290,23 @@ class Loader(object):
         """Open or download three time scale files, returning a `Timescale`.
 
         This method is how most Skyfield users build a `Timescale`
-        object, which is necessary for building specific `Time` objects
-        that name specific moments.
+        object, which is necessary for building `Time` objects.  The
+        safest approach is::
 
-        This will open or download the three files that Skyfield needs
-        to measure time.  UT1 is tabulated by the United States Naval
-        Observatory files ``deltat.data`` and ``deltat.preds``, while
-        UTC is defined by ``Leap_Second.dat`` from the International
-        Earth Rotation Service.
+            ts = load.timescale(builtin=True)
 
-        If ``builtin`` is ``True`` then instead of downloading the
-        files, Skyfield will load a version of each file that it ships
-        internally.  Beware that these files will gradually fall out of
-        date as you use one particular version of Skyfield.
+        This avoids downloading any files by using built-in copies of
+        them instead.  The problem is that the files distributed with
+        any particular version of Skyfield will go gradually out of date
+        and you will start missing leap seconds.  To instead download
+        current files, omit the ``builtin`` option::
+
+            ts = load.timescale()
+
+        UT1 is tabulated by the United States Naval Observatory files
+        ``deltat.data`` and ``deltat.preds``, while UTC is defined by
+        ``Leap_Second.dat`` from the International Earth Rotation
+        Service.
 
         """
         if builtin:
