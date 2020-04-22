@@ -336,7 +336,11 @@ class Loader(object):
             data_end_time = data[0, -1]
             i = np.searchsorted(preds[0], data_end_time, side='right')
             delta_t_recent = np.concatenate([data, preds[:,i:]], axis=1)
-        leap_dates, leap_offsets = self('Leap_Second.dat')
+        try:
+            leap_dates, leap_offsets = self('Leap_Second.dat')
+        except IOError as e:
+            e.args = (e.args[0] + _TIMESCALE_IO_ADVICE,) + e.args[1:]
+            raise
         return Timescale(delta_t_recent, leap_dates, leap_offsets)
 
     @property
@@ -345,9 +349,10 @@ class Loader(object):
 
 _TIMESCALE_IO_ADVICE = """
 
-Try opening the same URL in your browser to learn more about the problem.
-If you want to fall back on the timescale files that Skyfield ships with,
-try `.timescale(builtin=True)` instead."""
+You can avoid this error by passing `timescale(builtin=True)` which
+makes Skyfield use built-in copies of the timescale files instead of
+downloading new ones.  The built-in leap second and Earth rotation files
+will gradually go out of date unless you periodically upgrade Skyfield."""
 
 def _search(mapping, filename):
     """Search a Loader data structure for a filename."""
