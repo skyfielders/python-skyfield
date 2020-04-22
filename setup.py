@@ -43,7 +43,7 @@ setup(
         'skyfield.tests': ['data/*'],
         },
     install_requires=[
-        'certifi',
+        'certifi>=2017.4.17',
         'jplephem>=2.11',
         'numpy',
         'sgp4>=2.2',
