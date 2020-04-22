@@ -135,7 +135,7 @@ and 270° if the Sun is to the right of the Moon.
 
 .. testoutput::
 
-    238deg 55' 57.0"
+    238deg 55' 55.3"
 
 The :func:`~skyfield.trigonometry.position_angle_of()` routine
 will not only accept the output of :meth:`~skyfield.positionlib.Apparent.altaz()`,
@@ -224,7 +224,7 @@ then Skyfield can return its right ascension and declination.
 
 .. testoutput::
 
-    13h 41m 14.49s
+    13h 41m 14.65s
     +42deg 05' 50.0"
 
 What latitude and longitude is beneath this right ascension and declination?
@@ -265,7 +265,7 @@ creating the position directly.
 .. testoutput::
 
     Latitude: 24deg 10' 33.5"
-    Longitude: 123deg 17' 01.6"
+    Longitude: 123deg 16' 53.9"
 
 Which geographic location is farther from Earth’s center?
 =========================================================

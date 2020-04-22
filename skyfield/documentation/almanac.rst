@@ -256,12 +256,12 @@ of the phases of twilight using integers:
 
 .. testoutput::
 
-    1 2019-11-08T10:40:20Z  Start of Astronomical twilight
+    1 2019-11-08T10:40:19Z  Start of Astronomical twilight
     2 2019-11-08T11:12:31Z  Start of Nautical twilight
     3 2019-11-08T11:45:18Z  Start of Civil twilight
     4 2019-11-08T12:14:15Z  Start of Day
     3 2019-11-08T22:23:52Z  Start of Civil twilight
-    2 2019-11-08T22:52:49Z  Start of Nautical twilight
+    2 2019-11-08T22:52:48Z  Start of Nautical twilight
     1 2019-11-08T23:25:34Z  Start of Astronomical twilight
     0 2019-11-08T23:57:44Z  Start of Night
 
@@ -299,7 +299,7 @@ the parameter ``radius_degrees``.
 
 .. testoutput::
 
-    2020-02-01T09:29:17Z Rise
+    2020-02-01T09:29:16Z Rise
     2020-02-01T18:42:57Z Set
 
 Solar terms
