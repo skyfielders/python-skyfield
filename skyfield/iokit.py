@@ -12,6 +12,8 @@ from pkgutil import get_data
 from threading import Lock
 from time import time
 
+import certifi
+
 from .jpllib import SpiceKernel
 from .sgp4lib import EarthSatellite
 from .timelib import Timescale, julian_date
@@ -572,7 +574,7 @@ def download(url, path, verbose=None, blocksize=128*1024):
     """
     tempname = path + '.download'
     try:
-        connection = urlopen(url)
+        connection = urlopen(url, cafile=certifi.where())
     except Exception as e:
         e2 = IOError('cannot get {0} because {1}'.format(url, e))
         e2.__cause__ = None

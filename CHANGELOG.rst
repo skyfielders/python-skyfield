@@ -3,8 +3,14 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-1.19 — 2020 ?
--------------
+1.19 — 2020 April 22
+--------------------
+
+* To hopefully fix the ``SSL: CERTIFICATE_VERIFY_FAILED`` errors that
+  some users encounter when downloading timescale files, took the risk
+  of switching away from Python’s default SSL certificates to the
+  certificate bundle in the `certifi` package.
+  `#317 <https://github.com/skyfielders/python-skyfield/issues/317>`_
 
 * Gave topos objects a new :meth:`~skyfield.toposlib.Topos.itrf_xyz()`
   method that returns their raw ITRF coordinates.
