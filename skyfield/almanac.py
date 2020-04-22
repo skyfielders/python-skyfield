@@ -120,6 +120,31 @@ def moon_phases(ephemeris):
     moon_phase_at.rough_period = 7.0  # one lunar phase per week
     return moon_phase_at
 
+MOON_NODES = [
+    'descending',
+    'ascending',
+]
+
+def moon_nodes(ephemeris):
+    """Build a function of time that identifies lunar nodes.
+
+    This returns a function taking a :class:`~skyfield.timelib.Time` and
+    returning ``True`` if the Moon is above the ecliptic else ``False``.
+    See :ref:`lunar-nodes` for how to use this routine.
+
+    """
+    earth = ephemeris['earth']
+    moon = ephemeris['moon']
+
+    def moon_node_at(t):
+        """Return the phase of the moon 0 through 3 at time `t`."""
+        e = earth.at(t)
+        lat, _, _ = e.observe(moon).apparent().ecliptic_latlon('date')
+        return lat.radians > 0.0
+
+    moon_node_at.rough_period = 14.0  # one node each half lunar month
+    return moon_node_at
+
 CONJUNCTIONS = [
     'conjunction',
     'opposition',

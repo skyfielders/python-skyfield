@@ -129,6 +129,31 @@ corresponding array of Moon phases with 0 for New Moon and 3 for Last
 Quarter.  You can use the array ``MOON_PHASES`` to retrieve names for
 each phase.
 
+.. _lunar-nodes:
+
+Lunar Nodes
+===========
+
+The Moon’s ascending node and descending node are the moments each lunar
+month when the Moon crosses the plane of Earth’s orbit and eclipses are
+possible.
+
+.. testcode::
+
+    t0 = ts.utc(2020, 4, 22)
+    t1 = ts.utc(2020, 5, 22)
+    t, y = almanac.find_discrete(t0, t1, almanac.moon_nodes(e))
+
+    print(t.utc_iso())
+    print(y)
+    print([almanac.MOON_NODES[yi] for yi in y])
+
+.. testoutput::
+
+    ['2020-04-27T17:54:17Z', '2020-05-10T09:01:42Z']
+    [ True False]
+    ['ascending', 'descending']
+
 .. _oppositions-conjunctions:
 
 Opposition and Conjunction
