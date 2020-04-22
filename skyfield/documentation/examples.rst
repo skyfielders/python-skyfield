@@ -270,17 +270,17 @@ creating the position directly.
 Which geographic location is farther from Earth’s center?
 =========================================================
 
-After my hike of Mount Bierstadt in Colorado,
+After I hiked Mount Bierstadt in Colorado,
 a friend suggested that its 14,000 feet of elevation
 might have carried me farther from the Earth’s center
 than I had ever traveled before.
 It was a romantic thought:
 that under my own power
 I had hiked farther from my home planet’s core
-than ever I had stood before.
+than ever before.
 
-But there was a problem:
-I knew that I had once visited a location
+But there was a problem.
+I knew that I had once visited a city
 only a few degrees away from the Earth’s equator,
 and that the Earth’s equatorial bulge
 might push even modest elevations at that latitude
