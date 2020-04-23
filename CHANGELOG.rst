@@ -3,6 +3,12 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.20 — 2020 ?
+-------------
+
+* Added an ``elevation_m`` argument to
+  :meth:`~skyfield.planetarylib.PlanetaryConstants.build_latlon_degrees()`.
+
 1.19 — 2020 April 23
 --------------------
 

@@ -126,7 +126,8 @@ class PlanetaryConstants(object):
         assert segment.frame == 1  # base frame should be ITRF/J2000
         return Frame(center, segment, matrix)
 
-    def build_latlon_degrees(self, frame, latitude_degrees, longitude_degrees):
+    def build_latlon_degrees(self, frame, latitude_degrees, longitude_degrees,
+                             elevation_m=0.0):
         """Build an object representing a location on a body's surface."""
         lat = Angle.from_degrees(latitude_degrees)
         lon = Angle.from_degrees(longitude_degrees)
@@ -134,7 +135,8 @@ class PlanetaryConstants(object):
         if not radii[0] == radii[1] == radii[2]:
             raise ValueError('only spherical bodies are supported,'
                              ' but the radii of this body are: %s' % radii)
-        distance = Distance(au=radii[0] / AU_KM)
+        au = (radii[0] + elevation_m * 1e-3) / AU_KM
+        distance = Distance(au)
         return PlanetTopos.from_latlon_distance(frame, lat, lon, distance)
 
 _rotations = None, rot_x, rot_y, rot_z

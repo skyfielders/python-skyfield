@@ -71,6 +71,11 @@ in this example, the famous Aristarchus crater.
     13h 02m 22.50s
     -00deg 49' 09.2"
 
+If your Moon location has a nonzero elevation
+placing it above or below the Moon’s “sea level”,
+you can provide ``build_latlon_degrees()``
+with an extra ``elevation_m`` argument.
+
 Observing from a Moon location
 ==============================
 
