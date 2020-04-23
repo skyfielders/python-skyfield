@@ -3,13 +3,13 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-1.19 — 2020 April 22
+1.19 — 2020 April 23
 --------------------
 
 * To hopefully fix the ``SSL: CERTIFICATE_VERIFY_FAILED`` errors that
-  some users encounter when downloading timescale files, took the risk
-  of switching away from Python’s default SSL certificates to the
-  certificate bundle in the ``certifi`` package.
+  some users encounter when downloading timescale files, Skyfield has
+  taken the risk of switching away from your system’s SSL certificates
+  to the certificate bundle from the ``certifi`` package.
   `#317 <https://github.com/skyfielders/python-skyfield/issues/317>`_
 
 * Added a new almanac routine for finding :ref:`lunar-nodes`.
