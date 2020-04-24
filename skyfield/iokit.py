@@ -42,6 +42,7 @@ try:
 except:
     from urlparse import urlparse
     from urllib2 import urlopen
+from ssl import create_default_context
 
 # If we are running under the built-in IDLE development environment, we
 # cannot use '\r' to keep repainting the current line as a progress bar:
@@ -574,7 +575,8 @@ def download(url, path, verbose=None, blocksize=128*1024):
     """
     tempname = path + '.download'
     try:
-        connection = urlopen(url, cafile=certifi.where())
+        ssl_context = create_default_context(cafile=certifi.where())
+        connection = urlopen(url, context=ssl_context)
     except Exception as e:
         e2 = IOError('cannot get {0} because {1}'.format(url, e))
         e2.__cause__ = None
