@@ -3,8 +3,14 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-1.20 — 2020 ?
--------------
+1.20 — 2020 April 24
+--------------------
+
+* Erik Tollerud contributed a fix for a deprecation warning about SSL
+  from the most recent versions of Python (“cafile, cpath and cadefault
+  are deprecated, use a custom context instead”).  The file download
+  routine now auto-detects which mechanism your Python supports.
+  `#363 <https://github.com/skyfielders/python-skyfield/pull/363>`_
 
 * Added an ``elevation_m`` argument to
   :meth:`~skyfield.planetarylib.PlanetaryConstants.build_latlon_degrees()`.
