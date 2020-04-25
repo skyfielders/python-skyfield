@@ -5,21 +5,22 @@ from functools import wraps
 class DeprecationError(Exception):
     """Explain that a Skyfield feature has been removed."""
 
-class OutOfRangeTimeError(ValueError):
-    """
-    This exception is thrown is the given time is out of tange of the supported times.
-    It has two extra attributes:
+class EphemerisRangeError(ValueError):
+    """An ephemeris has been asked about positions outside its time range.
 
-    - `first_valid_time`: the first supported time
-    - `last_valid_time`: the last supported time
-    - `out_of_range_times`: a list of booleans expressing which of the given times were out of range
-    """
+    Attributes:
 
-    def __init__(self, message, first_valid_time, last_valid_time, out_of_range_times):
+    - `start_time`, `end_time`: the range of times supported by the segment
+    - `time_mask`: Boolean array where ``True`` marks out-of-range times
+    - `segment`: the ephemeris segment that was asked for positions
+
+    """
+    def __init__(self, message, start_time, end_time, time_mask, segment):
         self.args = message,
-        self.first_valid_time = first_valid_time
-        self.last_valid_time = last_valid_time
-        self.out_of_range_times = out_of_range_times
+        self.start_time = start_time
+        self.end_time = start_time
+        self.time_mask = time_mask
+        self.segment = segment
 
 def raise_error_for_deprecated_time_arguments(method):
     @wraps(method)

@@ -8,7 +8,7 @@ from jplephem.spk import SPK
 from jplephem.names import target_name_pairs, target_names as _names
 
 from .constants import AU_KM, DAY_S
-from .errors import OutOfRangeTimeError
+from .errors import EphemerisRangeError
 from .timelib import calendar_date
 from .vectorlib import VectorFunction, VectorSum
 
@@ -206,15 +206,19 @@ class SPICESegment(VectorFunction):
 
 class ChebyshevPosition(SPICESegment):
     def _at(self, t):
+        segment = self.spk_segment
         try:
-            position, velocity = self.spk_segment.compute_and_differentiate(t.tdb)
+            position, velocity = segment.compute_and_differentiate(t.tdb)
         except OutOfRangeError as e:
-            first_valid = t.ts.tdb(jd=self.spk_segment.start_jd)
-            last_valid = t.ts.tdb(jd=self.spk_segment.end_jd)
-
-            raise OutOfRangeTimeError('out of range times: must be between %s and %s' % (first_valid.utc_iso(),
-                                                                                         last_valid.utc_iso()),
-                                      first_valid, last_valid, e.out_of_range_times)
+            start_time = t.ts.tdb(jd=segment.start_jd)
+            end_time = t.ts.tdb(jd=segment.end_jd)
+            # TODO: switch to calendar dates in TDB to produce round numbers?
+            text = ('ephemeris segment only covers dates %s through %s UT'
+                    % (start_time.utc_iso(' '), end_time.utc_iso(' ')))
+            mask = e.out_of_range_times
+            segment = self.spk_segment
+            e = EphemerisRangeError(text, start_time, end_time, mask, segment)
+            raise e
 
         return position / AU_KM, velocity / AU_KM, None, None
 

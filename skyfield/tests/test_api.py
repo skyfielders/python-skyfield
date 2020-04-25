@@ -3,6 +3,7 @@
 from assay import assert_raises
 from skyfield import api, positionlib
 from skyfield.api import Topos
+from skyfield.errors import EphemerisRangeError
 
 def ts():
     yield api.load.timescale()
@@ -32,6 +33,22 @@ def test_ephemeris_contains_method(ts):
     assert ('Earth' in e) is True
     assert ('EARTH' in e) is True
     assert ('ceres' in e) is False
+
+def test_exception_raised_for_dates_outside_ephemeris(ts):
+    eph = api.load('de421.bsp')
+    message = (
+        'ephemeris segment only covers dates 1899-07-28 23:59:18Z'
+        ' through 2053-10-08 23:58:51Z UT'
+    )
+    with assert_raises(EphemerisRangeError, message) as a:
+        eph['earth'].at(ts.tt(4096))
+
+    e = a.exception
+    assert e.args == (message,)
+    assert e.start_time.tdb == 2414864.5
+    assert e.end_time.tdb == 2414864.5
+    assert e.time_mask == [True]
+    assert e.segment is eph['earth'].positives[0].spk_segment
 
 def test_planet_position_class(ts):
     e = api.load('de421.bsp')
