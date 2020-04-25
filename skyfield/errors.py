@@ -12,7 +12,7 @@ class OutOfRangeTimeError(ValueError):
 
     - `first_valid_time`: the first supported time
     - `last_valid_time`: the last supported time
-    - `out_of_range_times`: a list of the out of range Time objects
+    - `out_of_range_times`: a list of booleans expressing which of the given times were out of range
     """
 
     def __init__(self, message, first_valid_time, last_valid_time, out_of_range_times):

@@ -208,19 +208,15 @@ class ChebyshevPosition(SPICESegment):
     def _at(self, t):
         try:
             position, velocity = self.spk_segment.compute_and_differentiate(t.tdb)
-            return position / AU_KM, velocity / AU_KM, None, None
         except OutOfRangeError as e:
-            start_time = t.ts.tdb(jd=self.spk_segment.start_jd)
-            end_time = t.ts.tdb(jd=self.spk_segment.end_jd)
-            out_of_range_times = []
+            first_valid = t.ts.tdb(jd=self.spk_segment.start_jd)
+            last_valid = t.ts.tdb(jd=self.spk_segment.end_jd)
 
-            for i, time in enumerate(t):
-                if e.out_of_range_times[i]:
-                    out_of_range_times.append(time)
+            raise OutOfRangeTimeError('out of range times: must be between %s and %s' % (first_valid.utc_iso(),
+                                                                                         last_valid.utc_iso()),
+                                      first_valid, last_valid, e.out_of_range_times)
 
-            raise OutOfRangeTimeError('out of range times: must be between %s and %s' % (start_time.utc_iso(),
-                                                                                         end_time.utc_iso()),
-                                      start_time, end_time, out_of_range_times)
+        return position / AU_KM, velocity / AU_KM, None, None
 
 
 class ChebyshevPositionVelocity(SPICESegment):
