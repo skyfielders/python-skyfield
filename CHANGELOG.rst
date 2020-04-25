@@ -3,6 +3,14 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+Next
+----
+
+* Thanks to Jérôme Deuchnord, the exception raised when asking for a
+  position out-of-range of a JPL ephemeris now shows the calendar dates
+  for which the ephemeris is valid and carries several useful attributes.
+  `#356 <https://github.com/skyfielders/python-skyfield/pull/356>`_
+
 1.20 — 2020 April 24
 --------------------
 
