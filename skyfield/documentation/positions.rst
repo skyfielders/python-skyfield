@@ -17,16 +17,17 @@ together with all of the attributes and methods that they support:
 
 .. parsed-literal::
 
-    Three positions
+    Creating 3 kinds of position
 
-    obj.at(time)        →  Barycentric position (BCRS)
-     └─ observe(obj2)   →  Astrometric position (ΔBCRS)
-         └─ apparent()  →  Apparent position (GCRS)
+    obj1.at(time)        →  Barycentric position (BCRS)
+        .observe(obj2)   →  Astrometric position (ΔBCRS)
+        .apparent()      →  Apparent position (GCRS)
 
-    ICRF, Barycentric, Astrometric, or Apparent position
+    Position methods
      │
      ├── `position <api.html#skyfield.positionlib.ICRF.position>`_.au         →   x, y, z
      ├── `position <api.html#skyfield.positionlib.ICRF.position>`_.km         →   x, y, z
+     ├── `position <api.html#skyfield.positionlib.ICRF.position>`_.m          →   x, y, z
      ├── `position.to(unit) <api.html#Distance.to>`_   →   x, y, z
      │
      ├── `velocity <api.html#skyfield.positionlib.ICRF.velocity>`_.au_per_d   →   xdot, ydot, zdot
@@ -36,12 +37,14 @@ together with all of the attributes and methods that they support:
      ├── `radec(epoch=t) <api.html#skyfield.positionlib.ICRF.radec>`_      →   ra, dec, distance
      ├── `radec() <api.html#skyfield.positionlib.ICRF.radec>`_             →   ra, dec, distance
      ├── `distance() <api.html#skyfield.positionlib.ICRF.distance>`_          →   distance
+     ├── `separation_from(p2) <api-position.html#skyfield.positionlib.ICRF.separation_from>`_ →   angle
      │
      ├── `ecliptic_position() <api.html#skyfield.positionlib.ICRF.ecliptic_position>`_ →   x, y, z
      ├── `ecliptic_velocity() <api.html#skyfield.positionlib.ICRF.ecliptic_velocity>`_ →   xdot, ydot, zdot
      ├── `ecliptic_latlon() <api.html#skyfield.positionlib.ICRF.ecliptic_latlon>`_   →   lat, lon, distance
      ├── `galactic_position() <api.html#skyfield.positionlib.ICRF.galactic_position>`_ →   x, y, z
      └── `galactic_latlon() <api.html#skyfield.positionlib.ICRF.galactic_latlon>`_   →   lat, lon, distance
+
 
     Apparent position only
      │
@@ -90,7 +93,6 @@ or else by generating a whole series of positions.
   oriented along the ICRF axes,
   then you can directly instantiate any of the position classes
   by providing those coordinates as a vector of length 3.
-  Here, for example, is how to instantiate the `ICRF` class:
 
   .. testcode::
 
@@ -577,6 +579,49 @@ with its many layers of heat and cold and wind and weather,
 cannot be predicted to high precision.
 And note that refraction is only applied to objects above the horizon.
 Objects below −1.0° altitude are not adjusted for refraction.
+
+Comparing positions
+===================
+
+If you want to know the angle between two positions in the sky,
+call the
+:meth:`~skyfield.positionlib.ICRF.separation_from()`
+method of one of the positions
+and pass it the other position as its argument.
+The result will be an :class:`~Angle` object.
+
+If instead you want to know the distance between two positions,
+subtract the position you want to use as the starting point
+from the other position.
+The result of this vector math will also itself be a position vector:
+
+.. testcode::
+
+    v = planets['moon'].at(t) - planets['earth'].at(t)
+    print('The Moon is %d km away' % v.distance().km)
+
+.. testoutput::
+
+    The Moon is 385010 km away
+
+Two vectors do not need to have the same date and time to be subtracted.
+By comparing two positions with different times,
+you can measure how far an object has moved:
+
+.. testcode::
+
+    t1 = ts.utc(2015, 10, 11, 10, 30)
+    t2 = ts.utc(2015, 10, 11, 10, 31)
+
+    p1 = satellite.at(t1)
+    p2 = satellite.at(t2)
+
+    km = (p2 - p1).distance().km
+    print('In one minute the ISS moved %d km' % km)
+
+.. testoutput::
+
+    In one minute the ISS moved 461 km
 
 .. testcleanup::
 
