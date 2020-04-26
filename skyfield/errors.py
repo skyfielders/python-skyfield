@@ -18,7 +18,7 @@ class EphemerisRangeError(ValueError):
     def __init__(self, message, start_time, end_time, time_mask, segment):
         self.args = message,
         self.start_time = start_time
-        self.end_time = start_time
+        self.end_time = end_time
         self.time_mask = time_mask
         self.segment = segment
 

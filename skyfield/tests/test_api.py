@@ -46,7 +46,7 @@ def test_exception_raised_for_dates_outside_ephemeris(ts):
     e = a.exception
     assert e.args == (message,)
     assert e.start_time.tdb == 2414864.5
-    assert e.end_time.tdb == 2414864.5
+    assert e.end_time.tdb == 2471184.5
     assert e.time_mask == [True]
     assert e.segment is eph['earth'].positives[0].spk_segment
 
