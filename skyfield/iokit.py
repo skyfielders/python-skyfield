@@ -259,7 +259,7 @@ class Loader(object):
 
         """
         with self.open(url, reload=reload, filename=filename) as f:
-            return list(parse_tle_file(f, ts=ts))
+            return list(parse_tle_file(f, ts))
 
     def open(self, url, mode='rb', reload=False, filename=None):
         """Open a file, downloading it first if it does not yet exist.
@@ -561,7 +561,7 @@ def parse_tle_file(lines, ts=None):
 
             line1 = b1.decode('ascii')
             line2 = b2.decode('ascii')
-            yield EarthSatellite(line1, line2, name=name, ts=ts)
+            yield EarthSatellite(line1, line2, name, ts)
 
         b0 = b1
         b1 = b2
