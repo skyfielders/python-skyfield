@@ -246,7 +246,7 @@ class Loader(object):
                     d[name] = sat
         return d
 
-    def tle_file(self, url, reload=False, filename=None):
+    def tle_file(self, url, reload=False, filename=None, ts=None):
         """Load and parse a TLE file, returning a list of Earth satellites.
 
         Given a URL or local path to an ASCII text file, this loads a
@@ -259,7 +259,7 @@ class Loader(object):
 
         """
         with self.open(url, reload=reload, filename=filename) as f:
-            return list(parse_tle_file(f))
+            return list(parse_tle_file(f, ts))
 
     def open(self, url, mode='rb', reload=False, filename=None):
         """Open a file, downloading it first if it does not yet exist.
@@ -532,7 +532,7 @@ def parse_tle(fileobj):
         b0 = b1
         b1 = b2
 
-def parse_tle_file(lines):
+def parse_tle_file(lines, ts=None):
     """Parse TLE satellite elements, yielding a sequence of satellites.
 
     Given a sequence ``lines`` of byte strings that contain TLE
@@ -561,7 +561,7 @@ def parse_tle_file(lines):
 
             line1 = b1.decode('ascii')
             line2 = b2.decode('ascii')
-            yield EarthSatellite(line1, line2, name)
+            yield EarthSatellite(line1, line2, name, ts)
 
         b0 = b1
         b1 = b2
