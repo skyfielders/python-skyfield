@@ -138,7 +138,7 @@ class EarthSatellite(VectorFunction):
             message = SGP4_ERRORS[error] if error else None
             return array(position), array(velocity), message
 
-    def ITRF_position_velocity_error(self, t):
+    def ITRF_position_velocity_error(self, t, xp=0.0, yp=0.0):
         """Return the ITRF position, velocity, and error at time `t`.
 
         The position is an x,y,z vector measured in au, the velocity is
@@ -150,7 +150,7 @@ class EarthSatellite(VectorFunction):
         rTEME /= AU_KM
         vTEME /= AU_KM
         vTEME *= DAY_S
-        rITRF, vITRF = TEME_to_ITRF(t.ut1, rTEME, vTEME)
+        rITRF, vITRF = TEME_to_ITRF(t.ut1, rTEME, vTEME, xp, yp)
         return rITRF, vITRF, error
 
     def _at(self, t):
