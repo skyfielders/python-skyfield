@@ -427,8 +427,8 @@ times you desire (when the TLE is still accurate):
 .. testcode::
 
   # Define the times you are interested in
-  time = datetime(2020, 4, 29, tzinfo=timezone.utc)
-  times = ts.utc([time + timedelta(minutes=step) for step in range(0, 90, 10)])
+  start_time = datetime(2020, 4, 29, tzinfo=timezone.utc)
+  times = ts.utc([start_time + timedelta(minutes=step) for step in range(0, 90, 10)])
 
   # Calculate the sunlit vector
   sunlit = satellite.is_sunlit(ephemeris=ephemeris, times=times)
