@@ -410,7 +410,7 @@ and will require providing ephemeris data.
 
 .. testsetup::
 
-  from datetime import datetime, timezone
+  from datetime import datetime, timezone, timedelta
   from skyfield.api import load, EarthSatellite
 
   # Set up the ISS as an example and load ephemeris.
