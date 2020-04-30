@@ -8,6 +8,7 @@ import sys
 from numpy import abs, array, copysign, isnan
 from .constants import AU_KM, AU_M, DAY_S, tau
 from .descriptorlib import reify
+from .functions import length_of
 
 def _to_array(value):
     """As a convenience, turn Python lists and tuples into NumPy arrays."""
@@ -76,6 +77,20 @@ class Distance(object):
         raise UnpackingError(_iter_message % {
             'class': self.__class__.__name__, 'values': 'x, y, z',
             'attr1': 'au', 'attr2': 'km'})
+
+    def length(self):
+        """Compute the length when this is an x,y,z vector.
+
+        The Euclidean vector length of this vector is returned as a new
+        :class:`~skyfield.units.Distance` object.
+
+        >>> from skyfield.api import Distance
+        >>> d = Distance(au=[1, 1, 0])
+        >>> d.length()
+        <Distance 1.41421 au>
+
+        """
+        return Distance(au=length_of(self.au))
 
     def to(self, unit):
         """Convert this distance to the given AstroPy unit."""
