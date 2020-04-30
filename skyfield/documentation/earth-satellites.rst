@@ -410,10 +410,10 @@ and will require providing ephemeris data.
 
 .. testsetup::
 
-      from datetime import datetime, timezone
-      from skyfield.api import load, EarthSatellite
-  
-      # Set up the ISS as an example and load ephemeris.
+  from datetime import datetime, timezone
+  from skyfield.api import load, EarthSatellite
+
+  # Set up the ISS as an example and load ephemeris.
   TLE = """ISS (ZARYA)
   1 25544U 98067A   20120.54828704  .00001508  00000-0  35122-4 0  9994
   2 25544  51.6452 229.1987 0001494 205.5139 329.7843 15.49330212224471"""
