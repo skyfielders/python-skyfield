@@ -27,7 +27,6 @@ _identity = identity(3)
 _infs = array(('-inf', 'inf'), float)
 _ts = Timescale(array((_infs, (0.0, 0.0))), _infs, array((37.0, 37.0)))
 
-
 class EarthSatellite(VectorFunction):
     """An Earth satellite loaded from a TLE file and propagated with SGP4.
 
@@ -268,9 +267,7 @@ class EarthSatellite(VectorFunction):
         i = jd.argsort()
         return ts.tt_jd(jd[i]), v[i]
 
-
 _second = 1.0 / (24.0 * 60.0 * 60.0)
-
 
 def theta_GMST1982(jd_ut1):
     """Return the angle of Greenwich Mean Standard Time 1982 given the JD.
@@ -288,7 +285,6 @@ def theta_GMST1982(jd_ut1):
     theta = (jd_ut1 % 1.0 + g * _second % 1.0) * tau
     theta_dot = (1.0 + dg * _second / 36525.0) * tau
     return theta, theta_dot
-
 
 def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
     """Convert TEME position and velocity into standard ITRS coordinates.
