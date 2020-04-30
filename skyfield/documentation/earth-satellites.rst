@@ -406,35 +406,21 @@ with the :meth:`~skyfield.sgp4lib.EarthSatellite.is_sunlit()` method,
 which provides a boolean response for each corresponding time provided.
 This requires knowledge of the earth and sun,
 and will require providing ephemeris data.
-
-
-.. testsetup::
-
-  from datetime import datetime, timezone, timedelta
-  from skyfield.api import load, EarthSatellite
-
-  # Set up the ISS as an example and load ephemeris.
-  TLE = """ISS (ZARYA)
-  1 25544U 98067A   20120.54828704  .00001508  00000-0  35122-4 0  9994
-  2 25544  51.6452 229.1987 0001494 205.5139 329.7843 15.49330212224471"""
-
-  name, tle_1, tle_2 = TLE.splitlines()
-  ts = load.timescale()
-  satellite = EarthSatellite(tle_1, tle_2, name=name, ts=ts)
-  ephemeris = load('de421.bsp')
-
-Once you have the above defined, you can check
-if the satellite will be illuminated at whatever
+You can check if the satellite will be illuminated at whatever
 times you desire (when the TLE is still accurate):
 
 .. testcode::
 
+  from skyfield.api import load
+  satellite = by_name['ISS (ZARYA)']
+  de421.bsp = load('de421.bsp')
+
   # Define the times you are interested in
-  start_time = datetime(2020, 4, 29, tzinfo=timezone.utc)
-  times = ts.utc([start_time + timedelta(minutes=step) for step in range(0, 90, 10)])
+  minutes = range(0, 90, 10)
+  times = ts.utc(2020, 4, 29, 0, minutes)
 
   # Calculate the sunlit vector
-  sunlit = satellite.is_sunlit(ephemeris=ephemeris, times=times)
+  sunlit = satellite.is_sunlit(ephemeris=de421.bsp, times=times)
   for idx, time in enumerate(times):
       print(time.utc_jpl(), "{} is sunlit: {}".format(satellite.name,sunlit[idx]))
 
@@ -442,15 +428,15 @@ This produces a `sunlit` vector of booleans you can reference alongside your tim
 
 .. testoutput::
 
-  A.D. 2020-Apr-29 00:00:00.0000 UT ISS (ZARYA) is sunlit: False
-  A.D. 2020-Apr-29 00:10:00.0000 UT ISS (ZARYA) is sunlit: False
-  A.D. 2020-Apr-29 00:20:00.0000 UT ISS (ZARYA) is sunlit: True
-  A.D. 2020-Apr-29 00:30:00.0000 UT ISS (ZARYA) is sunlit: True
-  A.D. 2020-Apr-29 00:40:00.0000 UT ISS (ZARYA) is sunlit: True
-  A.D. 2020-Apr-29 00:50:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 00:00:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 00:10:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 00:20:00.0000 UT ISS (ZARYA) is sunlit: False
+  A.D. 2020-Apr-29 00:30:00.0000 UT ISS (ZARYA) is sunlit: False
+  A.D. 2020-Apr-29 00:40:00.0000 UT ISS (ZARYA) is sunlit: False
+  A.D. 2020-Apr-29 00:50:00.0000 UT ISS (ZARYA) is sunlit: False
   A.D. 2020-Apr-29 01:00:00.0000 UT ISS (ZARYA) is sunlit: True
   A.D. 2020-Apr-29 01:10:00.0000 UT ISS (ZARYA) is sunlit: True
-  A.D. 2020-Apr-29 01:20:00.0000 UT ISS (ZARYA) is sunlit: False
+  A.D. 2020-Apr-29 01:20:00.0000 UT ISS (ZARYA) is sunlit: True
 
 You can see when it is sunlit at the given times!
 

@@ -97,9 +97,9 @@ class EarthSatellite(VectorFunction):
         # TODO: just use the Julian dates instead
         two_digit_year = sat.epochyr
         if two_digit_year < 57:
-            year = two_digit_year + 2000
+            year = two_digit_year + 2000;
         else:
-            year = two_digit_year + 1900
+            year = two_digit_year + 1900;
 
         self.epoch = ts.utc(year, 1, sat.epochdays)
 
