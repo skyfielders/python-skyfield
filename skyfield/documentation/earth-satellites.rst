@@ -536,7 +536,7 @@ so it supports all of the standard Skyfield date methods:
     from skyfield.api import EarthSatellite
 
     text = """
-    GOCE
+    GOCE                    
     1 34602U 09013A   13314.96046236  .14220718  20669-5  50412-4 0   930
     2 34602 096.5717 344.5256 0009826 296.2811 064.0942 16.58673376272979
     """
