@@ -2,7 +2,7 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
 from numpy import (
-    array, concatenate, cross, einsum, identity, ones_like, repeat, zeros_like
+    array, concatenate, cross, einsum, identity, ones_like, repeat, zeros_like, sqrt, arccos, arctan2
 )
 from sgp4.api import SGP4_ERRORS, Satrec
 
@@ -26,6 +26,7 @@ _minutes_per_day = 1440.
 _identity = identity(3)
 _infs = array(('-inf', 'inf'), float)
 _ts = Timescale(array((_infs, (0.0, 0.0))), _infs, array((37.0, 37.0)))
+
 
 class EarthSatellite(VectorFunction):
     """An Earth satellite loaded from a TLE file and propagated with SGP4.
@@ -96,9 +97,9 @@ class EarthSatellite(VectorFunction):
         # TODO: just use the Julian dates instead
         two_digit_year = sat.epochyr
         if two_digit_year < 57:
-            year = two_digit_year + 2000;
+            year = two_digit_year + 2000
         else:
-            year = two_digit_year + 1900;
+            year = two_digit_year + 1900
 
         self.epoch = ts.utc(year, 1, sat.epochdays)
 
@@ -152,6 +153,30 @@ class EarthSatellite(VectorFunction):
         vTEME *= DAY_S
         rITRF, vITRF = TEME_to_ITRF(t.ut1, rTEME, vTEME)
         return rITRF, vITRF, error
+
+    def is_sunlit(self, ephemeris, times):
+        """Calculates if the satellite is currently sunlit (True/False) at each time in times. Returns an array of booleans."""
+        Re = 6378.137  # Equatorial radius of the Earth in km
+        earth = ephemeris['earth']
+        sun = ephemeris['sun']
+        sat = earth + self
+
+        sunpos, earthpos, satpos = [
+            thing.at(times).position.km for thing in (sun, earth, sat)
+        ]
+        sunearth, sunsat = earthpos-sunpos, satpos-sunpos
+        sunearthnorm, sunsatnorm = [
+            vec/sqrt((vec**2).sum(axis=0)) for vec in (sunearth, sunsat)
+        ]
+        angle = arccos((sunearthnorm * sunsatnorm).sum(axis=0))
+        sunearthdistance = sqrt((sunearth**2).sum(axis=0))
+        sunsatdistance = sqrt((sunsat**2).sum(axis=0))
+        limbangle = arctan2(Re, sunearthdistance)
+        sunlit = []
+        for idx, value in enumerate(angle):
+            sunlit.append(((angle[idx] > limbangle[idx]) or (
+                sunsatdistance[idx] < sunearthdistance[idx])))
+        return sunlit
 
     def _at(self, t):
         """Compute this satellite's GCRS position and velocity at time `t`."""
@@ -243,7 +268,9 @@ class EarthSatellite(VectorFunction):
         i = jd.argsort()
         return ts.tt_jd(jd[i]), v[i]
 
+
 _second = 1.0 / (24.0 * 60.0 * 60.0)
+
 
 def theta_GMST1982(jd_ut1):
     """Return the angle of Greenwich Mean Standard Time 1982 given the JD.
@@ -261,6 +288,7 @@ def theta_GMST1982(jd_ut1):
     theta = (jd_ut1 % 1.0 + g * _second % 1.0) * tau
     theta_dot = (1.0 + dg * _second / 36525.0) * tau
     return theta, theta_dot
+
 
 def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
     """Convert TEME position and velocity into standard ITRS coordinates.

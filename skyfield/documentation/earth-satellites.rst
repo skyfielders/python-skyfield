@@ -389,6 +389,68 @@ or else in dynamical coordinates of the date you specify.
 
 See :doc:`positions` to learn more about these possibilities.
 
+Finding when a satellite will be illuminated
+--------------------------------------------
+
+It is sometimes important to understand if the sun is
+currently illuminating the satellite.
+For instance, if it's after sundown in your location,
+and the satellite is still illuminated by the sun,
+you might be able to see that sunlight reflected with the naked eye.
+Additionally, this can be helpful when understanding
+satellite power and thermal cycles as it goes in and
+out of eclipse.
+
+Skyfield provides a simple geometric estimation for this
+with the :meth:`~skyfield.sgp4lib.EarthSatellite.is_sunlit()` method,
+which provides a boolean response for each corresponding time provided.
+This requires knowledge of the earth and sun,
+and will require providing ephemeris data.
+
+
+.. testsetup::
+
+  # Set up the ISS as an example and load ephemeris.
+  TLE = """ISS (ZARYA)
+  1 25544U 98067A   20120.54828704  .00001508  00000-0  35122-4 0  9994
+  2 25544  51.6452 229.1987 0001494 205.5139 329.7843 15.49330212224471"""
+
+  name, tle_1, tle_2 = TLE.splitlines()
+  ts = load.timescale()
+  satellite = EarthSatellite(tle_1, tle_2, name=name, ts=ts)
+  ephemeris = load('de421.bsp')
+
+Once you have the above defined, you can check
+if the satellite will be illuminated at whatever
+times you desire (when the TLE is still accurate):
+
+.. testcode::
+
+  # Define the times you are interested in
+  time = datetime(2020, 4, 29, tzinfo=timezone.utc)
+  times = ts.utc([time + timedelta(minutes=step) for step in range(0, 90, 10)])
+
+  # Calculate the sunlit vector
+  sunlit = satellite.is_sunlit(ephemeris=ephemeris, times=times)
+  for idx, time in enumerate(times):
+      print(time.utc_jpl(), "{} is sunlit: {}".format(satellite.name,sunlit[idx]))
+
+This produces a `sunlit` vector of booleans you can reference alongside your times:
+
+.. testoutput::
+
+  A.D. 2020-Apr-29 00:00:00.0000 UT ISS (ZARYA) is sunlit: False
+  A.D. 2020-Apr-29 00:10:00.0000 UT ISS (ZARYA) is sunlit: False
+  A.D. 2020-Apr-29 00:20:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 00:30:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 00:40:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 00:50:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 01:00:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 01:10:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 01:20:00.0000 UT ISS (ZARYA) is sunlit: False
+
+You can see when it is sunlit at the given times!
+
 Avoid calling the observe method
 --------------------------------
 
@@ -485,7 +547,7 @@ so it supports all of the standard Skyfield date methods:
     from skyfield.api import EarthSatellite
 
     text = """
-    GOCE                    
+    GOCE
     1 34602U 09013A   13314.96046236  .14220718  20669-5  50412-4 0   930
     2 34602 096.5717 344.5256 0009826 296.2811 064.0942 16.58673376272979
     """
