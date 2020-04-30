@@ -413,14 +413,14 @@ times you desire (when the TLE is still accurate):
 
   from skyfield.api import load
   satellite = by_name['ISS (ZARYA)']
-  de421.bsp = load('de421.bsp')
+  de421 = load('de421.bsp')
 
   # Define the times you are interested in
   minutes = range(0, 90, 10)
   times = ts.utc(2020, 4, 29, 0, minutes)
 
   # Calculate the sunlit vector
-  sunlit = satellite.is_sunlit(ephemeris=de421.bsp, times=times)
+  sunlit = satellite.is_sunlit(ephemeris=de421, times=times)
   for idx, time in enumerate(times):
       print(time.utc_jpl(), "{} is sunlit: {}".format(satellite.name,sunlit[idx]))
 
@@ -536,7 +536,7 @@ so it supports all of the standard Skyfield date methods:
     from skyfield.api import EarthSatellite
 
     text = """
-    GOCE                    
+    GOCE
     1 34602U 09013A   13314.96046236  .14220718  20669-5  50412-4 0   930
     2 34602 096.5717 344.5256 0009826 296.2811 064.0942 16.58673376272979
     """
