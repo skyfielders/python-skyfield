@@ -18,7 +18,7 @@
       An :class:`~skyfield.units.Angle` object
       specifying the longitude of the topocentric position.
 
-   .. attribute:: longitude
+   .. attribute:: elevation
 
       A :class:`~skyfield.units.Distance` object
       specifying the elevation of the topocentric position
