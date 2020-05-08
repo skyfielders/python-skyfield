@@ -42,13 +42,13 @@ def test_iss_against_horizons():
 
     t = ts.tdb(2018, 7, 4)
     p = s.at(t)
-    assert (abs(p.position.au - hp[:,0]) < two_meters).all()
-    assert (abs(p.velocity.au_per_d - hv[:,0]) < three_km_per_hour).all()
+    assert max(abs(p.position.au - hp[:,0])) < two_meters
+    assert max(abs(p.velocity.au_per_d - hv[:,0])) < three_km_per_hour
 
     t = ts.tdb(2018, 7, [4, 5])
     p = s.at(t)
-    assert (abs(p.position.au - hp) < two_meters).all()
-    assert (abs(p.velocity.au_per_d - hv) < three_km_per_hour).all()
+    assert max(abs(p.position.au - hp)) < two_meters
+    assert max(abs(p.velocity.au_per_d - hv)) < three_km_per_hour
 
 # The following tests are based on the text of
 # http://www.celestrak.com/publications/AIAA/2006-6753/AIAA-2006-6753-Rev2.pdf
