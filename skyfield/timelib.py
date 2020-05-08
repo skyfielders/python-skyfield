@@ -1,12 +1,12 @@
 from datetime import date, datetime, timedelta, tzinfo
-from numpy import (array, concatenate, einsum, float_, interp, isnan, nan, pi,
+from numpy import (array, concatenate, float_, interp, isnan, nan, pi,
                    rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime
 from .constants import B1950, DAY_S, T0
 from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
-from .functions import load_bundled_npy, rot_z, _to_array
+from .functions import _mxm, _mxmxm, _to_array, load_bundled_npy, rot_z
 from .nutationlib import compute_nutation, earth_tilt, iau2000a
 from .precessionlib import compute_precession
 
@@ -627,7 +627,7 @@ class Time(object):
 
     @reify
     def M(self):
-        return einsum('ij...,jk...,kl...->il...', self.N, self.P, B)
+        return _mxmxm(self.N, self.P, B)
 
     @reify
     def MT(self):
@@ -638,7 +638,7 @@ class Time(object):
         # Calculate the Equation of Origins in cycles
         eq_origins = (earth_rotation_angle(self.ut1) - self.gast / 24.0)
         R = rot_z(2 * pi * eq_origins)
-        return einsum('ij...,jk...->ik...', R, self.M)
+        return _mxm(R, self.M)
 
     @reify
     def CT(self):

@@ -2,7 +2,7 @@ from numpy import einsum
 
 from .constants import ASEC2RAD, tau
 from .earthlib import terra
-from .functions import rot_x, rot_y, rot_z
+from .functions import _mxmxm, rot_x, rot_y, rot_z
 from .units import Distance, Angle, _interpret_ltude
 from .vectorlib import VectorFunction
 
@@ -70,7 +70,7 @@ class Topos(VectorFunction):
     def _altaz_rotation(self, t):
         """Compute the rotation from the ICRF into the alt-az system."""
         R_lon = rot_z(- self.longitude.radians - t.gast * tau / 24.0)
-        return einsum('ij...,jk...,kl...->il...', self.R_lat, R_lon, t.M)
+        return _mxmxm(self.R_lat, R_lon, t.M)
 
     def _at(self, t):
         """Compute the GCRS position and velocity of this Topos at time `t`."""

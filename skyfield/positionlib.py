@@ -6,7 +6,8 @@ from .constants import ANGVEL, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
 from .functions import (
-    _mxv, dots, from_spherical, length_of, rot_x, rot_z, to_spherical, _to_array,
+    _mxv, _mxm, dots, from_spherical, length_of, rot_x, rot_z,
+    to_spherical, _to_array,
 )
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
@@ -281,8 +282,8 @@ class ICRF(object):
 
         oblm, oblt, eqeq, psi, eps = epoch._earth_tilt
         e = oblt * DEG2RAD
-        rotation = einsum('ij...,jk...->ik...', rot_x(-e), epoch.M)
-        position_au = einsum('ij...,j...->i...', rotation, position_au)
+        rotation = _mxm(rot_x(-e), epoch.M)
+        position_au = _mxv(rotation, position_au)
         return Distance(position_au)
 
     def ecliptic_velocity(self):
