@@ -16,6 +16,7 @@
 /deltat.preds
 /dist/
 /skyfield/documentation/_build/
+/tmp*
 CometEls.txt
 MANIFEST
 MPCORB.DAT*
@@ -23,4 +24,3 @@ Untitled*.ipynb
 build
 htmlcov/
 stations.txt
-tmp*.py
