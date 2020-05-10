@@ -67,6 +67,7 @@ class Timescale(object):
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
         self.delta_t_table = build_delta_t_table(delta_t_recent)
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
+        self._leap_reverse_dates = leap_dates + leap_offsets / DAY_S
         self.J2000 = Time(self, float_(T0))
         self.B1950 = Time(self, float_(B1950))
 
@@ -590,29 +591,25 @@ class Time(object):
         throw away the seconds; and so forth.
 
         """
+        ts = self.ts
         tai = self.tai + offset
-        leap_dates = self.ts.leap_dates
-        leap_offsets = self.ts.leap_offsets
-        leap_reverse_dates = leap_dates + leap_offsets / DAY_S
-        i = searchsorted(leap_reverse_dates, tai, 'right')
-        j = tai - leap_offsets[i] / DAY_S
+        i = searchsorted(ts._leap_reverse_dates, tai, 'right')
+        j = tai - ts.leap_offsets[i] / DAY_S
         whole, fraction = divmod(j + 0.5, 1.0)
         whole = whole.astype(int)
         year, month, day = calendar_date(whole)
         hour, hfrac = divmod(fraction * 24.0, 1.0)
         minute, second = divmod(hfrac * 3600.0, 60.0)
-        is_leap_second = j < leap_dates[i-1]
+        is_leap_second = j < ts.leap_dates[i-1]
         second += is_leap_second
         return year, month, day, hour.astype(int), minute.astype(int), second
 
     def _utc_float(self):
         """Return UTC as a floating point Julian date."""
         tai = self.tai
-        leap_dates = self.ts.leap_dates
-        leap_offsets = self.ts.leap_offsets
-        leap_reverse_dates = leap_dates + leap_offsets / DAY_S
-        i = searchsorted(leap_reverse_dates, tai, 'right')
-        return tai - leap_offsets[i] / DAY_S
+        ts = self.ts
+        i = searchsorted(ts._leap_reverse_dates, tai, 'right')
+        return tai - ts.leap_offsets[i] / DAY_S
 
     def tai_calendar(self):
         """Return TAI as a tuple (year, month, day, hour, minute, second)."""
