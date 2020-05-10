@@ -1,3 +1,4 @@
+import re
 from datetime import date, datetime, timedelta, tzinfo
 from numpy import (array, concatenate, float_, interp, isnan, nan, pi,
                    rollaxis, searchsorted, sin, where, zeros_like)
@@ -31,6 +32,7 @@ except ImportError:
 
 # Much of the following code is adapted from the USNO's "novas.c".
 
+_half_minute = 30.0 / DAY_S
 _half_second = 0.5 / DAY_S
 _half_millisecond = 0.5e-3 / DAY_S
 _half_microsecond = 0.5e-6 / DAY_S
@@ -531,8 +533,21 @@ class Time(object):
         an array of times, then a sequence of strings is returned
         instead of a single string.
 
+        If the smallest time unit in your format is minutes or seconds,
+        then the time is rounded to the nearest minute or second.
+        Otherwise the value is truncated rather than rounded.
+
         """
-        tup = self._utc_tuple(_half_second)
+        if _format_uses_milliseconds(format):
+            rounding = 0.0
+        elif _format_uses_seconds(format):
+            rounding = _half_second
+        elif _format_uses_minutes(format):
+            rounding = _half_minute
+        else:
+            rounding = 0.0
+
+        tup = self._utc_tuple(rounding)
         year, month, day, hour, minute, second = tup
         second = second.astype(int)
         # TODO: _utc_float() repeats the same work as _utc_tuple() above
@@ -847,6 +862,10 @@ def build_delta_t_table(delta_t_recent):
     end = table[0,-2] + century
     table[:,-1] = end, delta_t_formula_morrison_and_stephenson_2004(end)
     return table
+
+_format_uses_milliseconds = re.compile(r'%[-_0^#EO]*f').search
+_format_uses_seconds = re.compile(r'%[-_0^#EO]*[STXc]').search
+_format_uses_minutes = re.compile(r'%[-_0^#EO]*[MR]').search
 
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
     if dt.tzinfo is None:

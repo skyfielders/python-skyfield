@@ -1,7 +1,4 @@
-import skyfield.almanac_east_asia
 from skyfield import api, almanac
-
-half_minute = 1.0 / 24.0 / 60.0 / 2.0
 
 # Compare with USNO:
 # http://aa.usno.navy.mil/cgi-bin/aa_moonill2.pl?form=1&year=2018&task=00&tz=-05
@@ -24,7 +21,6 @@ def test_seasons():
     t1 = ts.utc(2018, 12, 31)
     e = api.load('de421.bsp')
     t, y = almanac.find_discrete(t0, t1, almanac.seasons(e))
-    t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     print(strings)
     assert strings == ['2018-09-23 01:54', '2018-12-21 22:23']
@@ -39,7 +35,6 @@ def test_moon_phases():
     t1 = ts.utc(2018, 9, 30)
     e = api.load('de421.bsp')
     t, y = almanac.find_discrete(t0, t1, almanac.moon_phases(e))
-    t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     assert strings == ['2018-09-16 23:15', '2018-09-25 02:52']
     assert (y == (1, 2)).all()
@@ -52,7 +47,7 @@ def test_oppositions_conjunctions():
     f = almanac.oppositions_conjunctions(e, e['mars'])
     t, y = almanac.find_discrete(t0, t1, f)
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
-    assert strings == ['2019-09-02 10:42', '2020-10-13 23:25']
+    assert strings == ['2019-09-02 10:42', '2020-10-13 23:26']
     assert (y == (0, 1)).all()
 
 # Compare with USNO:
@@ -65,7 +60,6 @@ def test_sunrise_sunset():
     e = api.load('de421.bsp')
     bluffton = api.Topos('40.8939 N', '83.8917 W')
     t, y = almanac.find_discrete(t0, t1, almanac.sunrise_sunset(e, bluffton))
-    t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     assert strings == ['2018-09-12 11:13', '2018-09-12 23:50']
     assert (y == (1, 0)).all()
@@ -77,7 +71,6 @@ def test_dark_twilight_day():
     e = api.load('de421.bsp')
     defiance = api.Topos('41.281944 N', '84.362778 W')
     t, y = almanac.find_discrete(t0, t1, almanac.dark_twilight_day(e, defiance))
-    t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     assert strings == [
         '2019-11-08 10:42', '2019-11-08 11:15', '2019-11-08 11:48',
@@ -94,6 +87,5 @@ def test_close_start_and_end():
     t1 = ts.utc(2018, 9, 23, 2)
     e = api.load('de421.bsp')
     t, y = almanac.find_discrete(t0, t1, almanac.seasons(e))
-    t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     assert strings == ['2018-09-23 01:54']
