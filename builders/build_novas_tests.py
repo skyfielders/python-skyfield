@@ -109,7 +109,7 @@ def output_subroutine_tests(dates):
         angles = novas.e_tilt(jd)
         output(locals(), """\
             def test_earth_tilt_date{i}(ts):
-                compare(nutationlib.earth_tilt(ts.tdb(jd={jd!r})),
+                compare(nutationlib.earth_tilt(ts.tdb_jd({jd!r})),
                         array({angles}), 0.00001 * arcsecond)
             """)
 
@@ -189,7 +189,7 @@ def output_subroutine_tests(dates):
         result = nutation_function(jd, vector)
         output(locals(), """\
             def test_nutation_date{i}(ts):
-                matrix = nutationlib.compute_nutation(ts.tdb(jd={jd!r}))
+                matrix = nutationlib.compute_nutation(ts.tdb_jd({jd!r}))
                 result = einsum('ij...,j...->i...', matrix, [1.1, 1.2, 1.3])
                 compare({result},
                         result, 1e-14)
@@ -211,11 +211,11 @@ def output_subroutine_tests(dates):
         result2 = novas.sidereal_time(jd, 0.0, 99.9, False, True)
         output(locals(), """\
             def test_sidereal_time_on_date{i}():
-                jd = load.timescale(delta_t=0.0).tt(jd={jd!r})
+                jd = load.timescale(delta_t=0.0).tt_jd({jd!r})
                 compare(earthlib.sidereal_time(jd), {result1!r}, 1e-13)
 
             def test_sidereal_time_with_nonzero_delta_t_on_date{i}():
-                jd = load.timescale(delta_t=99.9).tt(jd={jd!r} + 99.9 * one_second)
+                jd = load.timescale(delta_t=99.9).tt_jd({jd!r} + 99.9 * one_second)
                 compare(earthlib.sidereal_time(jd), {result2!r}, 1e-13)
             """)
 
@@ -265,7 +265,7 @@ def output_subroutine_tests(dates):
         alt, az = altaz_maneuver(tt, usno, ra, dec, ref=0)
         output(locals(), """\
             def test_from_altaz_{i}(earth):
-                jd = load.timescale(delta_t=0.0).tt(jd={tt!r})
+                jd = load.timescale(delta_t=0.0).tt_jd({tt!r})
                 usno = earth + Topos(
                     '38.9215 N', '77.0669 W', elevation_m=92.0)
                 a = usno.at(jd).from_altaz(alt_degrees={alt!r}, az_degrees={az!r})
@@ -281,7 +281,7 @@ def output_subroutine_tests(dates):
         result = novas.ter2cel(ut1, jd_low, delta_t, xp, yp, vector)
         output(locals(), """\
             def test_ITRF_to_GCRS_conversion_on_date{i}():
-                jd = load.timescale(delta_t={delta_t!r}).tt(jd={tt!r})
+                jd = load.timescale(delta_t={delta_t!r}).tt_jd({tt!r})
                 position = positionlib.ITRF_to_GCRS(jd, {vector!r})
                 compare(position, {result!r}, 1e-13)
             """)
@@ -312,7 +312,7 @@ def output_ephemeris_tests():
     output(locals(), """\
 
     def test_position_and_velocity(de405, ts):
-        t = ts.tt(jd={jd!r})
+        t = ts.tt_jd({jd!r})
         e = de405['earth'].at(t)
         compare(e.position.au, {pos!r}, 10 * meter)
         compare(e.velocity.au_per_d, {vel!r}, 1e-5 * meter / one_second)
@@ -333,7 +333,7 @@ def output_geocentric_tests(dates):
         output(locals(), """\
 
         def test_{slug}_geocentric_date{i}(de405, ts):
-            t = ts.tt(jd={jd!r})
+            t = ts.tt_jd({jd!r})
             e = de405['earth'].at(t)
             p = de405[{planet!r}]
 
@@ -373,7 +373,7 @@ def output_geocentric_tests(dates):
         output(locals(), """\
 
         def test_{name}_geocentric_date{i}(earth):
-            e = earth.at(load.timescale().tt(jd={jd!r}))
+            e = earth.at(load.timescale().tt_jd({jd!r}))
             star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
                                 ra_mas_per_year=44.22, dec_mas_per_year=-11.75,
                                 parallax_mas=7.56, radial_km_per_s=-17.4)
@@ -411,7 +411,7 @@ def output_topocentric_tests(dates):
         output(locals(), """\
 
         def test_{slug}_topocentric_date{i}(de405):
-            t = load.timescale(delta_t=0.0).tt(jd={jd!r})
+            t = load.timescale(delta_t=0.0).tt_jd({jd!r})
             earth = de405['earth']
             usno = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
 
@@ -454,7 +454,7 @@ def output_catalog_tests(dates):
             star = hipparcos.parse(line)
             compare(star.ra.hours, {polaris.ra!r}, 0.001 * ra_arcsecond)
             compare(star.dec.degrees, {polaris.dec!r}, 0.001 * arcsecond)
-            ra, dec, distance = earth.at(load.timescale().tt(jd={jd})).observe(star).radec()
+            ra, dec, distance = earth.at(load.timescale().tt_jd({jd})).observe(star).radec()
             compare(ra.hours, {ra!r}, 0.00001 * ra_arcsecond)
             compare(dec.degrees, {dec!r}, 0.00001 * arcsecond)
 
