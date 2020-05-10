@@ -34,7 +34,6 @@ except ImportError:
 
 _half_minute = 30.0 / DAY_S
 _half_second = 0.5 / DAY_S
-_half_millisecond = 0.5e-3 / DAY_S
 _half_microsecond = 0.5e-6 / DAY_S
 _months = array(['Month zero', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
@@ -101,23 +100,26 @@ class Timescale(object):
         """
         if isinstance(year, datetime):
             dt = year
-            tai = _utc_datetime_to_tai(self.leap_dates, self.leap_offsets, dt)
+            tai1, tai2 = _utc_datetime_to_tai(self.leap_dates,
+                                              self.leap_offsets, dt)
         elif isinstance(year, date):
             d = year
-            tai = _utc_date_to_tai(self.leap_dates, self.leap_offsets, d)
+            tai1, tai2 = _utc_date_to_tai(self.leap_dates, self.leap_offsets, d)
         elif hasattr(year, '__len__') and isinstance(year[0], datetime):
             # TODO: clean this up and better document the possibilities.
             list_of_datetimes = year
-            tai = array([
+            tai1, tai2 = array([
                 _utc_datetime_to_tai(self.leap_dates, self.leap_offsets, dt)
-                for dt in list_of_datetimes])
+                for dt in list_of_datetimes
+            ]).T
         else:
-            tai = _utc_to_tai(self.leap_dates, self.leap_offsets,
-                              _to_array(year), _to_array(month),
-                              _to_array(day), _to_array(hour),
-                              _to_array(minute), _to_array(second))
-        t = Time(self, tai + tt_minus_tai)
-        t.tai = tai
+            tai1, tai2 = _utc_to_tai(
+                self.leap_dates, self.leap_offsets, _to_array(year),
+                _to_array(month), _to_array(day), _to_array(hour),
+                _to_array(minute), _to_array(second),
+            )
+        t = Time(self, tai1, tai2 + tt_minus_tai)
+        t.tai = tai1 + tai2
         return t
 
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
@@ -303,7 +305,7 @@ class Time(object):
 
     >>> ts = load.timescale()
     >>> print(ts.utc(1980, 1, 1))
-    <Time tt=2444239.500592408>
+    <Time tt=2444239.5005924073>
 
     Times are represented internally by floating point Julian dates, but
     can be converted to other formats by using the many methods that
@@ -313,9 +315,10 @@ class Time(object):
     psi_correction = 0.0
     eps_correction = 0.0
 
-    def __init__(self, ts, tt):
+    def __init__(self, ts, tt, tt2=0.0):
         self.ts = ts
-        self.tt = tt
+        self.tt1, fraction = divmod(tt, 1.0)
+        self.tt2 = fraction + tt2
         self.shape = getattr(tt, 'shape', ())
 
     def __len__(self):
@@ -406,12 +409,6 @@ class Time(object):
     def utc_datetime(self):
         """Convert to a Python ``datetime`` in UTC.
 
-        The result is rounded to the nearest millisecond.  While
-        Skyfield's 64-bit floating-point Julian dates often supply at
-        least one more digit of precision, milliseconds provide a safe
-        stopping point that prevents times like 16:18:00 from being
-        displayed as 16:18:00.000512.
-
         If the third-party `pytz`_ package is available, then its
         ``utc`` timezone will be used as the timezone of the returned
         `datetime`_.  Otherwise, an equivalent Skyfield ``utc`` timezone
@@ -431,12 +428,6 @@ class Time(object):
 
             dt, leap_second = t.utc_datetime_and_leap_second()
 
-        The result is rounded to the nearest millisecond.  While
-        Skyfield's 64-bit floating-point Julian dates often supply at
-        least one more digit of precision, milliseconds provide a safe
-        stopping point that prevents times like 16:18:00 from being
-        displayed as 16:18:00.000512.
-
         If the third-party `pytz`_ package is available, then its
         ``utc`` timezone will be used as the timezone of the return
         value.  Otherwise, Skyfield uses its own ``utc`` timezone.
@@ -455,12 +446,12 @@ class Time(object):
 
         """
         year, month, day, hour, minute, second = self._utc_tuple(
-            _half_millisecond)
+            _half_microsecond)
         second, fraction = divmod(second, 1.0)
         second = second.astype(int)
         leap_second = second // 60
-        second -= leap_second
-        micro = (fraction * 1000).astype(int) * 1000
+        second -= leap_second  # fit within limited bounds of Python datetime
+        micro = (fraction * 1e6).astype(int)
         if self.shape:
             utcs = [utc] * self.shape[0]
             argsets = zip(year, month, day, hour, minute, second, micro, utcs)
@@ -576,8 +567,12 @@ class Time(object):
         tai = self.tai + offset
         i = searchsorted(ts._leap_reverse_dates, tai, 'right')
         j = tai - ts.leap_offsets[i] / DAY_S
-        whole, fraction = divmod(j + 0.5, 1.0)
-        whole = whole.astype(int)
+
+        whole1, fraction = divmod(self.tt1, 1.0)
+        whole2, fraction = divmod(offset - tt_minus_tai + fraction + self.tt2
+                                  - ts.leap_offsets[i] / DAY_S + 0.5, 1.0)
+        whole = (whole1 + whole2).astype(int)
+
         year, month, day = calendar_date(whole)
         hour, hfrac = divmod(fraction * 24.0, 1.0)
         minute, second = divmod(hfrac * 3600.0, 60.0)
@@ -599,6 +594,12 @@ class Time(object):
     def tt_calendar(self):
         """Return TT as a tuple (year, month, day, hour, minute, second)."""
         return calendar_tuple(self.tt)
+
+    # Low-precision floats generated from internal float pairs.
+
+    @property
+    def tt(self):
+        return self.tt1 + self.tt2
 
     # Convenient caching of several expensive functions of time.
 
@@ -848,22 +849,23 @@ _format_uses_minutes = re.compile(r'%[-_0^#EO]*[MR]').search
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
     if dt.tzinfo is None:
         raise ValueError(_naive_complaint)
-    utc_datetime = dt.astimezone(utc)
-    tup = utc_datetime.utctimetuple()
-    year, month, day, hour, minute, second, wday, yday, dst = tup
-    return _utc_to_tai(leap_dates, leap_offsets, year, month, day,
-                       hour, minute, second + dt.microsecond / 1000000.00)
+    dt = dt.astimezone(utc)
+    return _utc_to_tai(leap_dates, leap_offsets,
+                       dt.year, dt.month, dt.day,
+                       dt.hour, dt.minute, dt.second + dt.microsecond * 1e-6)
 
 def _utc_date_to_tai(leap_dates, leap_offsets, d):
-    return _utc_to_tai(leap_dates, leap_offsets, d.year, d.month, d.day)
+    return _utc_to_tai(leap_dates, leap_offsets,
+                       d.year, d.month, d.day, 0.0, 0.0, 0.0)
 
-def _utc_to_tai(leap_dates, leap_offsets, year, month=1, day=1,
-                hour=0, minute=0, second=0.0):
+def _utc_to_tai(leap_dates, leap_offsets,
+                year, month, day, hour, minute, second):
     j = julian_day(year, month, day) - 0.5
     i = searchsorted(leap_dates, j, 'right')
-    return j + (second + leap_offsets[i]
-                + minute * 60.0
-                + hour * 3600.0) / DAY_S
+    seconds = leap_offsets[i] + second + minute * 60.0 + hour * 3600.0
+    # TODO: Is there a more efficient way to force two arrays to the same shape?
+    zeros = zeros_like(j) + zeros_like(seconds)
+    return zeros + j, zeros + seconds / DAY_S
 
 _JulianDate_deprecation_message = """Skyfield no longer supports direct\
  instantiation of JulianDate objects (which are now called Time objects)

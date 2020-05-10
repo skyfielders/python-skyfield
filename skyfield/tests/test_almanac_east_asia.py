@@ -1,8 +1,6 @@
 import skyfield.almanac_east_asia
 from skyfield import api, almanac
 
-half_minute = 1.0 / 24.0 / 60.0 / 2.0
-
 # Compare with Hong Kong Observatory:
 # https://www.hko.gov.hk/tc/gts/astronomy/Solar_Term.htm access at 2019-12-14
 
@@ -16,9 +14,8 @@ def test_solar_terms():
     t0 = ts.utc(2019, 2, 2)
     t1 = ts.utc(2019, 2, 5)
     t, y = almanac.find_discrete(t0, t1, f)
-    t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
-    assert strings == ['2019-02-04 03:15']
+    assert strings == ['2019-02-04 03:14']
     assert (y == (21)).all()
 
     # https://en.wikipedia.org/wiki/Lixia
@@ -26,7 +23,6 @@ def test_solar_terms():
     t0 = ts.utc(2019, 5, 4)
     t1 = ts.utc(2019, 5, 6)
     t, y = almanac.find_discrete(t0, t1, f)
-    t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     assert strings == ['2019-05-05 19:03']
     assert (y == (3)).all()
@@ -36,9 +32,8 @@ def test_solar_terms():
     t0 = ts.utc(2019, 8, 6)
     t1 = ts.utc(2019, 8, 8)
     t, y = almanac.find_discrete(t0, t1, f)
-    t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
-    assert strings == ['2019-08-07 19:14']
+    assert strings == ['2019-08-07 19:13']
     assert (y == (9)).all()
 
     # https://en.wikipedia.org/wiki/Lidong
@@ -46,7 +41,6 @@ def test_solar_terms():
     t0 = ts.utc(2019, 11, 7)
     t1 = ts.utc(2019, 11, 9)
     t, y = almanac.find_discrete(t0, t1, f)
-    t.tt += half_minute
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
-    assert strings == ['2019-11-07 17:25']
+    assert strings == ['2019-11-07 17:24']
     assert (y == (15)).all()

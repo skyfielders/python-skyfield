@@ -542,8 +542,8 @@ so modern dates tend to be rather large numbers:
 .. testoutput::
 
     TAI = 2456658.5004050927
-    TT  = 2456658.500777593
-    TDB = 2456658.500777592
+    TT  = 2456658.5007775924
+    TDB = 2456658.5007775915
 
 What are these three different uniform time scales?
 
@@ -711,7 +711,7 @@ that you’ll see the limit of the precision:
 
 .. testoutput::
 
-    (2014, 1, 18, 1, 35, 36.999982595443726)
+    (2014, 1, 18, 1, 35, 36.999999999991815)
 
 To avoid ugly output like this,
 you should use Skyfield’s own time display methods

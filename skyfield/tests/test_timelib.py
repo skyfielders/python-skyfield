@@ -59,6 +59,13 @@ def test_building_time_from_single_utc_datetime(ts):
     t = ts.utc(datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc))
     assert t.tai == 2442046.5
 
+def test_building_time_from_single_utc_datetime_with_timezone(ts):
+    tz = timezone('US/Eastern')
+    t = ts.utc(tz.localize(datetime(2020, 5, 10, 12, 44, 13, 797865)))
+    dt, leap_second = t.utc_datetime_and_leap_second()
+    assert dt == datetime(2020, 5, 10, 16, 44, 13, 797865, tzinfo=utc)
+    assert leap_second == 0
+
 def test_building_time_from_list_of_utc_datetimes(ts):
     t = ts.utc([
         datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc),
@@ -67,10 +74,10 @@ def test_building_time_from_list_of_utc_datetimes(ts):
         datetime(1974, 1, 1, 23, 59, 47, tzinfo=utc),
         datetime(1974, 1, 2, 23, 59, 47, tzinfo=utc),
         datetime(1974, 1, 3, 23, 59, 47, tzinfo=utc),
-        ])
-    assert (t.tai == [
+    ])
+    assert list(t.tai) == [
         2442046.5, 2442047.5, 2442048.5, 2442049.5, 2442050.5, 2442051.5,
-        ]).all()
+    ]
 
 def test_converting_ut1_to_tt(ts):
     ten_thousand_years = 365 * 10000
@@ -129,12 +136,19 @@ def test_astimezone_and_leap_second(ts):
 def test_utc_datetime(ts):
     t = ts.utc(1969, 7, 20, 20, 18, 42.186479)
     dt = t.utc_datetime()
-    assert dt == datetime(1969, 7, 20, 20, 18, 42, 186000, utc)
+    assert dt == datetime(1969, 7, 20, 20, 18, 42, 186479, utc)
 
 def test_utc_datetime_and_leap_second(ts):
     t = ts.utc(1969, 7, 20, 20, 18)
     dt, leap_second = t.utc_datetime_and_leap_second()
     assert dt == datetime(1969, 7, 20, 20, 18, 0, 0, utc)
+    assert leap_second == 0
+
+def test_utc_datetime_microseconds_round_trip(ts):
+    dt = datetime(2020, 5, 10, 11, 50, 9, 727799, tzinfo=utc)
+    t = ts.utc(dt)
+    dt2, leap_second = t.utc_datetime_and_leap_second()
+    assert dt2 == dt
     assert leap_second == 0
 
 def test_iso_of_decimal_that_rounds_up(ts):
@@ -187,7 +201,7 @@ def test_iso_of_array_showing_fractions(ts):
         '1974-01-01T00:00:00.75Z',
         '1974-01-01T00:00:01.25Z',
         '1974-01-01T00:00:01.75Z',
-        ]
+    ]
 
 def test_jpl_format(ts):
     t = ts.utc(range(-300, 301, 100), 7, 1)
@@ -237,7 +251,7 @@ def test_leap_second(ts):
 
     assert abs(t4 - t2 - 2.0 * one_second) < epsilon
 
-    # Thus, the five dates given above are all one second apart:
+    # Otherwise, the five dates given above are all one second apart:
 
     assert abs(t2 - t1 - one_second) < epsilon
     assert abs(t3 - t2 - one_second) < epsilon
@@ -283,10 +297,10 @@ def test_time_repr(ts):
 
     assert repr(ts.tt_jd(1)) == '<Time tt=1.0>'
     assert repr(ts.tt_jd([])) == '<Time tt=[]>'
-    assert repr(ts.tt_jd([1])) == '<Time tt=[1]>'
-    assert repr(ts.tt_jd([1, 2])) == '<Time tt=[1 2]>'
-    assert repr(ts.tt_jd([1, 2, 3])) == '<Time tt=[1 2 3]>'
-    assert repr(ts.tt_jd([1, 2, 3, 4])) == '<Time tt=[1 ... 4] len=4>'
+    assert repr(ts.tt_jd([1])) == '<Time tt=[1.]>'
+    assert repr(ts.tt_jd([1, 2])) == '<Time tt=[1. 2.]>'
+    assert repr(ts.tt_jd([1, 2, 3])) == '<Time tt=[1. 2. 3.]>'
+    assert repr(ts.tt_jd([1, 2, 3, 4])) == '<Time tt=[1.0 ... 4.0] len=4>'
 
 def test_jd_calendar():
 
