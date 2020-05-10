@@ -87,7 +87,7 @@ def test_callisto_astrometric(ts):
     ra, dec, distance = a.radec()
     compare(ra._degrees, 217.1839292, 0.001 * arcsecond)
     compare(dec.degrees, -13.6892791, 0.001 * arcsecond)
-    compare(distance.au, 6.31079291776184, 0.1 * meter)
+    compare(distance.au, 6.31079291776184, 0.2 * meter)
 
 def test_boston_geometry():
     e = api.load_file(_data_path('jup310-2015-03-02.bsp'))

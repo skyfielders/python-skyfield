@@ -66,6 +66,12 @@ def main():
             eph = load('de405.bsp')
             yield eph[399]
 
+        def reduce_precision(t):
+            # The NOVAS library uses only 64-bit precision for Julian dates.
+            # Some of these tests are so sensitive they can see the difference!
+            t.tdb1 = t.tdb1 + t.tdb2
+            t.tdb2 = 0.0
+
         """)
 
     moon_landing = novas.julian_date(1969, 7, 20, 20.0 + 18.0/60.0)
@@ -334,6 +340,8 @@ def output_geocentric_tests(dates):
 
         def test_{slug}_geocentric_date{i}(de405, ts):
             t = ts.tt_jd({jd!r})
+            reduce_precision(t)
+
             e = de405['earth'].at(t)
             p = de405[{planet!r}]
 

@@ -223,7 +223,7 @@ class Timescale(object):
         tdb = _to_array(tdb)
         tt = tdb - tdb_minus_tt(tdb) / DAY_S
         t = Time(self, tt)
-        t.tdb = tdb
+        t.tdb1, t.tdb2 = tdb, 0.0
         return t
 
     def tdb_jd(self, jd):
@@ -239,7 +239,7 @@ class Timescale(object):
         tdb = _to_array(jd)
         tt = tdb - tdb_minus_tt(tdb) / DAY_S
         t = Time(self, tt)
-        t.tdb = tdb
+        t.tdb1, t.tdb2 = tdb, 0.0
         return t
 
     def ut1(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
@@ -319,6 +319,7 @@ class Time(object):
         self.ts = ts
         self.tt1, fraction = divmod(tt, 1.0)
         self.tt2 = fraction + tt2
+        self.tdb1 = self.tt1
         self.shape = getattr(tt, 'shape', ())
 
     def __len__(self):
@@ -338,8 +339,8 @@ class Time(object):
         # TODO: also copy cached matrices?
         # TODO: raise non-IndexError exception if this Time is not an array;
         # otherwise, a `for` loop over it will not raise an error.
-        t = Time(self.ts, self.tt[index])
-        for name in 'tai', 'tdb', 'ut1', 'delta_t':
+        t = Time(self.ts, self.tt1[index], self.tt2[index])
+        for name in 'tai', 'tdb1', 'tdb2', 'ut1', 'delta_t':
             value = getattr(self, name, None)
             if value is not None:
                 if getattr(value, 'shape', None):
@@ -595,12 +596,6 @@ class Time(object):
         """Return TT as a tuple (year, month, day, hour, minute, second)."""
         return calendar_tuple(self.tt)
 
-    # Low-precision floats generated from internal float pairs.
-
-    @property
-    def tt(self):
-        return self.tt1 + self.tt2
-
     # Convenient caching of several expensive functions of time.
 
     @reify
@@ -655,9 +650,9 @@ class Time(object):
         return array(utc) if self.shape else utc
 
     @reify
-    def tdb(self):
-        tt = self.tt
-        return tt + tdb_minus_tt(tt) / DAY_S
+    def tdb2(self):
+        tt2 = self.tt2
+        return tt2 + tdb_minus_tt(self.tt1 + tt2) / DAY_S
 
     @reify
     def ut1(self):
@@ -687,6 +682,18 @@ class Time(object):
     @reify
     def _nutation_angles(self):
         return iau2000a(self.tt)
+
+    # Low-precision floats generated from internal float pairs.
+
+    @property
+    def tt(self):
+        return self.tt1 + self.tt2
+
+    @property
+    def tdb(self):
+        return self.tdb1 + self.tdb2
+
+    # Various dunders.
 
     def __eq__(self, other_time):
         if not isinstance(other_time, Time):

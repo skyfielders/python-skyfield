@@ -208,7 +208,8 @@ class ChebyshevPosition(SPICESegment):
     def _at(self, t):
         segment = self.spk_segment
         try:
-            position, velocity = segment.compute_and_differentiate(t.tdb)
+            position, velocity = segment.compute_and_differentiate(
+                t.tdb1, t.tdb2)
         except OutOfRangeError as e:
             start_time = t.ts.tdb(jd=segment.start_jd)
             end_time = t.ts.tdb(jd=segment.end_jd)
@@ -225,7 +226,7 @@ class ChebyshevPosition(SPICESegment):
 
 class ChebyshevPositionVelocity(SPICESegment):
     def _at(self, t):
-        pv = self.spk_segment.compute(t.tdb)
+        pv = self.spk_segment.compute(t.tdb1, t.tdb2)
         return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM, None, None
 
 

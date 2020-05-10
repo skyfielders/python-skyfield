@@ -543,7 +543,7 @@ so modern dates tend to be rather large numbers:
 
     TAI = 2456658.5004050927
     TT  = 2456658.5007775924
-    TDB = 2456658.5007775915
+    TDB = 2456658.500777592
 
 What are these three different uniform time scales?
 

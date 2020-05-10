@@ -32,6 +32,12 @@ def earth():
     eph = load('de405.bsp')
     yield eph[399]
 
+def reduce_precision(t):
+    # The NOVAS library uses only 64-bit precision for Julian dates.
+    # Some of these tests are so sensitive they can see the difference!
+    t.tdb1 = t.tdb1 + t.tdb2
+    t.tdb2 = 0.0
+
 def test_calendar_date_0():
     compare(timelib.calendar_date(2440423.345833333), array((1969, 7, 20.345833333209157)), 0.0)
 
@@ -488,6 +494,8 @@ def test_position_and_velocity(de405, ts):
 
 def test_mercury_geocentric_date0(de405, ts):
     t = ts.tt_jd(2440423.345833333)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['mercury']
 
@@ -510,6 +518,8 @@ def test_mercury_geocentric_date0(de405, ts):
 
 def test_mercury_geocentric_date1(de405, ts):
     t = ts.tt_jd(2448031.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['mercury']
 
@@ -532,6 +542,8 @@ def test_mercury_geocentric_date1(de405, ts):
 
 def test_mercury_geocentric_date2(de405, ts):
     t = ts.tt_jd(2451545.0)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['mercury']
 
@@ -554,6 +566,8 @@ def test_mercury_geocentric_date2(de405, ts):
 
 def test_mercury_geocentric_date3(de405, ts):
     t = ts.tt_jd(2456164.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['mercury']
 
@@ -576,6 +590,8 @@ def test_mercury_geocentric_date3(de405, ts):
 
 def test_mercury_geocentric_date4(de405, ts):
     t = ts.tt_jd([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['mercury']
 
@@ -598,6 +614,8 @@ def test_mercury_geocentric_date4(de405, ts):
 
 def test_venus_geocentric_date0(de405, ts):
     t = ts.tt_jd(2440423.345833333)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['venus']
 
@@ -620,6 +638,8 @@ def test_venus_geocentric_date0(de405, ts):
 
 def test_venus_geocentric_date1(de405, ts):
     t = ts.tt_jd(2448031.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['venus']
 
@@ -642,6 +662,8 @@ def test_venus_geocentric_date1(de405, ts):
 
 def test_venus_geocentric_date2(de405, ts):
     t = ts.tt_jd(2451545.0)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['venus']
 
@@ -664,6 +686,8 @@ def test_venus_geocentric_date2(de405, ts):
 
 def test_venus_geocentric_date3(de405, ts):
     t = ts.tt_jd(2456164.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['venus']
 
@@ -686,6 +710,8 @@ def test_venus_geocentric_date3(de405, ts):
 
 def test_venus_geocentric_date4(de405, ts):
     t = ts.tt_jd([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['venus']
 
@@ -708,6 +734,8 @@ def test_venus_geocentric_date4(de405, ts):
 
 def test_mars_geocentric_date0(de405, ts):
     t = ts.tt_jd(2440423.345833333)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['mars']
 
@@ -730,6 +758,8 @@ def test_mars_geocentric_date0(de405, ts):
 
 def test_mars_geocentric_date1(de405, ts):
     t = ts.tt_jd(2448031.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['mars']
 
@@ -752,6 +782,8 @@ def test_mars_geocentric_date1(de405, ts):
 
 def test_mars_geocentric_date2(de405, ts):
     t = ts.tt_jd(2451545.0)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['mars']
 
@@ -774,6 +806,8 @@ def test_mars_geocentric_date2(de405, ts):
 
 def test_mars_geocentric_date3(de405, ts):
     t = ts.tt_jd(2456164.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['mars']
 
@@ -796,6 +830,8 @@ def test_mars_geocentric_date3(de405, ts):
 
 def test_mars_geocentric_date4(de405, ts):
     t = ts.tt_jd([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['mars']
 
@@ -818,6 +854,8 @@ def test_mars_geocentric_date4(de405, ts):
 
 def test_jupiter_barycenter_geocentric_date0(de405, ts):
     t = ts.tt_jd(2440423.345833333)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['jupiter barycenter']
 
@@ -840,6 +878,8 @@ def test_jupiter_barycenter_geocentric_date0(de405, ts):
 
 def test_jupiter_barycenter_geocentric_date1(de405, ts):
     t = ts.tt_jd(2448031.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['jupiter barycenter']
 
@@ -862,6 +902,8 @@ def test_jupiter_barycenter_geocentric_date1(de405, ts):
 
 def test_jupiter_barycenter_geocentric_date2(de405, ts):
     t = ts.tt_jd(2451545.0)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['jupiter barycenter']
 
@@ -884,6 +926,8 @@ def test_jupiter_barycenter_geocentric_date2(de405, ts):
 
 def test_jupiter_barycenter_geocentric_date3(de405, ts):
     t = ts.tt_jd(2456164.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['jupiter barycenter']
 
@@ -906,6 +950,8 @@ def test_jupiter_barycenter_geocentric_date3(de405, ts):
 
 def test_jupiter_barycenter_geocentric_date4(de405, ts):
     t = ts.tt_jd([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['jupiter barycenter']
 
@@ -928,6 +974,8 @@ def test_jupiter_barycenter_geocentric_date4(de405, ts):
 
 def test_saturn_barycenter_geocentric_date0(de405, ts):
     t = ts.tt_jd(2440423.345833333)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['saturn barycenter']
 
@@ -950,6 +998,8 @@ def test_saturn_barycenter_geocentric_date0(de405, ts):
 
 def test_saturn_barycenter_geocentric_date1(de405, ts):
     t = ts.tt_jd(2448031.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['saturn barycenter']
 
@@ -972,6 +1022,8 @@ def test_saturn_barycenter_geocentric_date1(de405, ts):
 
 def test_saturn_barycenter_geocentric_date2(de405, ts):
     t = ts.tt_jd(2451545.0)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['saturn barycenter']
 
@@ -994,6 +1046,8 @@ def test_saturn_barycenter_geocentric_date2(de405, ts):
 
 def test_saturn_barycenter_geocentric_date3(de405, ts):
     t = ts.tt_jd(2456164.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['saturn barycenter']
 
@@ -1016,6 +1070,8 @@ def test_saturn_barycenter_geocentric_date3(de405, ts):
 
 def test_saturn_barycenter_geocentric_date4(de405, ts):
     t = ts.tt_jd([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['saturn barycenter']
 
@@ -1038,6 +1094,8 @@ def test_saturn_barycenter_geocentric_date4(de405, ts):
 
 def test_uranus_barycenter_geocentric_date0(de405, ts):
     t = ts.tt_jd(2440423.345833333)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['uranus barycenter']
 
@@ -1060,6 +1118,8 @@ def test_uranus_barycenter_geocentric_date0(de405, ts):
 
 def test_uranus_barycenter_geocentric_date1(de405, ts):
     t = ts.tt_jd(2448031.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['uranus barycenter']
 
@@ -1082,6 +1142,8 @@ def test_uranus_barycenter_geocentric_date1(de405, ts):
 
 def test_uranus_barycenter_geocentric_date2(de405, ts):
     t = ts.tt_jd(2451545.0)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['uranus barycenter']
 
@@ -1104,6 +1166,8 @@ def test_uranus_barycenter_geocentric_date2(de405, ts):
 
 def test_uranus_barycenter_geocentric_date3(de405, ts):
     t = ts.tt_jd(2456164.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['uranus barycenter']
 
@@ -1126,6 +1190,8 @@ def test_uranus_barycenter_geocentric_date3(de405, ts):
 
 def test_uranus_barycenter_geocentric_date4(de405, ts):
     t = ts.tt_jd([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['uranus barycenter']
 
@@ -1148,6 +1214,8 @@ def test_uranus_barycenter_geocentric_date4(de405, ts):
 
 def test_neptune_barycenter_geocentric_date0(de405, ts):
     t = ts.tt_jd(2440423.345833333)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['neptune barycenter']
 
@@ -1170,6 +1238,8 @@ def test_neptune_barycenter_geocentric_date0(de405, ts):
 
 def test_neptune_barycenter_geocentric_date1(de405, ts):
     t = ts.tt_jd(2448031.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['neptune barycenter']
 
@@ -1192,6 +1262,8 @@ def test_neptune_barycenter_geocentric_date1(de405, ts):
 
 def test_neptune_barycenter_geocentric_date2(de405, ts):
     t = ts.tt_jd(2451545.0)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['neptune barycenter']
 
@@ -1214,6 +1286,8 @@ def test_neptune_barycenter_geocentric_date2(de405, ts):
 
 def test_neptune_barycenter_geocentric_date3(de405, ts):
     t = ts.tt_jd(2456164.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['neptune barycenter']
 
@@ -1236,6 +1310,8 @@ def test_neptune_barycenter_geocentric_date3(de405, ts):
 
 def test_neptune_barycenter_geocentric_date4(de405, ts):
     t = ts.tt_jd([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['neptune barycenter']
 
@@ -1258,6 +1334,8 @@ def test_neptune_barycenter_geocentric_date4(de405, ts):
 
 def test_pluto_barycenter_geocentric_date0(de405, ts):
     t = ts.tt_jd(2440423.345833333)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['pluto barycenter']
 
@@ -1280,6 +1358,8 @@ def test_pluto_barycenter_geocentric_date0(de405, ts):
 
 def test_pluto_barycenter_geocentric_date1(de405, ts):
     t = ts.tt_jd(2448031.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['pluto barycenter']
 
@@ -1302,6 +1382,8 @@ def test_pluto_barycenter_geocentric_date1(de405, ts):
 
 def test_pluto_barycenter_geocentric_date2(de405, ts):
     t = ts.tt_jd(2451545.0)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['pluto barycenter']
 
@@ -1324,6 +1406,8 @@ def test_pluto_barycenter_geocentric_date2(de405, ts):
 
 def test_pluto_barycenter_geocentric_date3(de405, ts):
     t = ts.tt_jd(2456164.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['pluto barycenter']
 
@@ -1346,6 +1430,8 @@ def test_pluto_barycenter_geocentric_date3(de405, ts):
 
 def test_pluto_barycenter_geocentric_date4(de405, ts):
     t = ts.tt_jd([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['pluto barycenter']
 
@@ -1368,6 +1454,8 @@ def test_pluto_barycenter_geocentric_date4(de405, ts):
 
 def test_sun_geocentric_date0(de405, ts):
     t = ts.tt_jd(2440423.345833333)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['sun']
 
@@ -1390,6 +1478,8 @@ def test_sun_geocentric_date0(de405, ts):
 
 def test_sun_geocentric_date1(de405, ts):
     t = ts.tt_jd(2448031.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['sun']
 
@@ -1412,6 +1502,8 @@ def test_sun_geocentric_date1(de405, ts):
 
 def test_sun_geocentric_date2(de405, ts):
     t = ts.tt_jd(2451545.0)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['sun']
 
@@ -1434,6 +1526,8 @@ def test_sun_geocentric_date2(de405, ts):
 
 def test_sun_geocentric_date3(de405, ts):
     t = ts.tt_jd(2456164.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['sun']
 
@@ -1456,6 +1550,8 @@ def test_sun_geocentric_date3(de405, ts):
 
 def test_sun_geocentric_date4(de405, ts):
     t = ts.tt_jd([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['sun']
 
@@ -1478,6 +1574,8 @@ def test_sun_geocentric_date4(de405, ts):
 
 def test_moon_geocentric_date0(de405, ts):
     t = ts.tt_jd(2440423.345833333)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['moon']
 
@@ -1500,6 +1598,8 @@ def test_moon_geocentric_date0(de405, ts):
 
 def test_moon_geocentric_date1(de405, ts):
     t = ts.tt_jd(2448031.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['moon']
 
@@ -1522,6 +1622,8 @@ def test_moon_geocentric_date1(de405, ts):
 
 def test_moon_geocentric_date2(de405, ts):
     t = ts.tt_jd(2451545.0)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['moon']
 
@@ -1544,6 +1646,8 @@ def test_moon_geocentric_date2(de405, ts):
 
 def test_moon_geocentric_date3(de405, ts):
     t = ts.tt_jd(2456164.5)
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['moon']
 
@@ -1566,6 +1670,8 @@ def test_moon_geocentric_date3(de405, ts):
 
 def test_moon_geocentric_date4(de405, ts):
     t = ts.tt_jd([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])
+    reduce_precision(t)
+
     e = de405['earth'].at(t)
     p = de405['moon']
 
