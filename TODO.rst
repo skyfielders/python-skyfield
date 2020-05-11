@@ -7,8 +7,10 @@ are appropriate for sprints and collaboration, and longer-term goals
 that the code base is not quite ready for yet but that we do not want to
 forget.
 
-Promises for next version
-=========================
+Sprint Possibilities
+====================
+
+* Add a light travel time method to the Distance object.
 
 * For #145, skip deflections of planets that can’t affect an observation.
 
@@ -16,9 +18,6 @@ Promises for next version
 
 * Expand a bit on the documentation for stars, now that they can have an
   epoch for their position.
-
-Sprint Possibilities
-====================
 
 * If we are going to allow times like TT to be submitted using
   calendar dates, then we should probably provide methods that would
@@ -33,11 +32,6 @@ Sprint Possibilities
   stated, but the actual entries excerpted so that only the first few
   and the last few are shown.  Maybe the ``repr()`` should use calendar
   dates too instead of just showing the JD numbers?
-
-* We should rename ``ecliptic_position()`` to ``ecliptic_xyz()``.
-
-* Make JD give a sensible error if the first argument is a number or
-  something.
 
 * Load and use the various offsets between UTC and TAI that were in
   effect before 1972.
@@ -66,10 +60,6 @@ Sprint Possibilities
 
 * Iterating across an ephemeris should probably give you object names.
 
-* Update the earth satellite IPython Notebook to the new API, or remove
-  it in favor of keeping notebooks in the separate astronomy notebook
-  repository.
-
 * The ``Timescale`` object does not currently know where its data comes
   from, so its ``repr()`` is pretty uninformative.  Should it someday be
   put in charge of loading its data from the data files specified, so
@@ -79,52 +69,14 @@ Sprint Possibilities
   the expiration date of all of its data, so that it can print it out as
   part of its ``repr()``.
 
-
-
 * In `stars.rst`, document the other alternatives for how to set the RA
   and dec of a new Star object.
-
-* What happens if an angle that's a vector of values has .dstr() or
-  .hstr() called on it?  (And, those might not be those good method
-  names.)  Make it return a list of strings.
 
 * Solar and lunar eclipses.
 
 * We should implement comets and asteroids using the standard formulae
   (can we find a good vector version, that will match the rest of our
   approach?) for a Keplerian orbit.
-
-* There should be routines for downloading current astronomical data.
-  Each routine should take an optional filename but should also have a
-  default that the corresponding "load" routine uses by default.  All
-  such routines, because they are likely be called later with the same
-  filename as last time, should by default just skip the download if the
-  file is present (and perhaps recent enough, if a ``days_old=``
-  parameter is provided?) unless an ``overwrite=False`` standard
-  parameter is overridden to give it the value ``True``.  (Or does the
-  possibility of ``days_old=0`` give us "overwrite" for free?)  Nice
-  data would be:
-
-  * Comet orbital elements
-  * Asteroid orbital elements
-  * Earth-satellite orbital elements
-  * (What others can we think of?)
-
-* If anyone is a NumPy expert, I would love comments on whether my code
-  is at all idiomatic, or whether I'm doing things inefficiently and in
-  such a quirky way that no one else will ever understand it.
-
-* If one of the parameters of nutationlib or precessionlib was
-  incorrect, would our tests detect it?  It would be nice to have an
-  automated method of determining which particular constants in the code
-  base our tests are not sensitive to.
-
-* Should a simple "print position.radec()" print something prettier?
-
-* We should maybe support light seconds or minutes (or both?) as ways to
-  express and to set a distance.  As we keep adding them, should we
-  really keep adding more named parameters to the constructor?  Maybe we
-  should instead start using class method constructors instead?
 
 Adding more smarts to ephemeris handling
 ========================================
@@ -142,11 +94,6 @@ Adding more smarts to ephemeris handling
 
 * And additionally: the error when not enough bodies are available for
   deflection maybe someday needs to be more helpful.
-
-Reading List for Brandon
-========================
-
-* https://naif.jpl.nasa.gov/pub/naif/FIDO/misc/njb/src/geom.c
 
 For 2.0
 =======
@@ -170,19 +117,3 @@ Longer-term goals
   the resulting position object, as promised in PyEphem GitHub issue:
 
   https://github.com/brandon-rhodes/pyephem/issues/15
-
-
-.. documentation
-     writing up SkyField solutions to PyEphem questions on Stack Overflow
-     section on accuracy of each algorithm involved
-     logo?
-   performance
-     Is all this vectorization worth it?
-       Run a loop to compute N planet positions.
-       Do the same computation using a vector of N jd's.
-       Compare the runtimes under both C Python and PyPy.
-       Might have to do numpypy thing; do it in skyfield/__init__.py.
-       If they both show a difference, then YES it is worth it.
-       Could Star() become a whole catalog of stars processed in parallel?
-     What routines are taking the most time when the tests are run?
-     Try to take advantage of jplephem's ability to use bundles
