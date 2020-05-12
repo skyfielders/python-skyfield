@@ -69,8 +69,11 @@ def main():
         def reduce_precision(t):
             # The NOVAS library uses only 64-bit precision for Julian dates.
             # Some of these tests are so sensitive they can see the difference!
-            t.tdb1 = t.tdb1 + t.tdb2
-            t.tdb2 = 0.0
+            # So we need to collapse the Julian dates back into single floats.
+            delta = t.tdb - t.tt
+            t.whole = t.tdb
+            t.tt_fraction = delta
+            t.tdb_fraction = 0.0
 
         """)
 

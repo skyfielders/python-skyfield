@@ -221,9 +221,7 @@ class Timescale(object):
                 _to_array(hour), _to_array(minute), _to_array(second),
             )
         tdb = _to_array(tdb)
-        tt = tdb - tdb_minus_tt(tdb) / DAY_S
-        t = Time(self, tt)
-        t.tdb1, t.tdb2 = tdb, 0.0
+        t = Time(self, tdb, - tdb_minus_tt(tdb) / DAY_S)
         return t
 
     def tdb_jd(self, jd):
@@ -237,9 +235,7 @@ class Timescale(object):
 
         """
         tdb = _to_array(jd)
-        tt = tdb - tdb_minus_tt(tdb) / DAY_S
-        t = Time(self, tt)
-        t.tdb1, t.tdb2 = tdb, 0.0
+        t = Time(self, tdb, - tdb_minus_tt(tdb) / DAY_S)
         return t
 
     def ut1(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
@@ -315,11 +311,10 @@ class Time(object):
     psi_correction = 0.0
     eps_correction = 0.0
 
-    def __init__(self, ts, tt, tt2=0.0):
+    def __init__(self, ts, tt, tt_fraction=0.0):
         self.ts = ts
-        self.tt1, fraction = divmod(tt, 1.0)
-        self.tt2 = fraction + tt2
-        self.tdb1 = self.tt1
+        self.whole, fraction = divmod(tt, 1.0)
+        self.tt_fraction = fraction + tt_fraction
         self.shape = getattr(tt, 'shape', ())
 
     def __len__(self):
@@ -339,8 +334,8 @@ class Time(object):
         # TODO: also copy cached matrices?
         # TODO: raise non-IndexError exception if this Time is not an array;
         # otherwise, a `for` loop over it will not raise an error.
-        t = Time(self.ts, self.tt1[index], self.tt2[index])
-        for name in 'tai', 'tdb1', 'tdb2', 'ut1', 'delta_t':
+        t = Time(self.ts, self.whole[index], self.tt_fraction[index])
+        for name in 'tai', 'tdb_fraction', 'ut1', 'delta_t':
             value = getattr(self, name, None)
             if value is not None:
                 if getattr(value, 'shape', None):
@@ -569,8 +564,9 @@ class Time(object):
         i = searchsorted(ts._leap_reverse_dates, tai, 'right')
         j = tai - ts.leap_offsets[i] / DAY_S
 
-        whole1, fraction = divmod(self.tt1, 1.0)
-        whole2, fraction = divmod(offset - tt_minus_tai + fraction + self.tt2
+        whole1, fraction = divmod(self.whole, 1.0)
+        whole2, fraction = divmod(offset - tt_minus_tai
+                                  + fraction + self.tt_fraction
                                   - ts.leap_offsets[i] / DAY_S + 0.5, 1.0)
         whole = (whole1 + whole2).astype(int)
 
@@ -650,9 +646,9 @@ class Time(object):
         return array(utc) if self.shape else utc
 
     @reify
-    def tdb2(self):
-        tt2 = self.tt2
-        return tt2 + tdb_minus_tt(self.tt1 + tt2) / DAY_S
+    def tdb_fraction(self):
+        fraction = self.tt_fraction
+        return fraction + tdb_minus_tt(self.whole + fraction) / DAY_S
 
     @reify
     def ut1(self):
@@ -665,6 +661,7 @@ class Time(object):
 
     @reify
     def dut1(self):
+        # TODO: add test, and then streamline this computation.
         return (self.tt - self._utc_float()) * DAY_S - self.delta_t
 
     @reify
@@ -687,11 +684,11 @@ class Time(object):
 
     @property
     def tt(self):
-        return self.tt1 + self.tt2
+        return self.whole + self.tt_fraction
 
     @property
     def tdb(self):
-        return self.tdb1 + self.tdb2
+        return self.whole + self.tdb_fraction
 
     # Various dunders.
 

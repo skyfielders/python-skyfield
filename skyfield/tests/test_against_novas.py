@@ -35,8 +35,11 @@ def earth():
 def reduce_precision(t):
     # The NOVAS library uses only 64-bit precision for Julian dates.
     # Some of these tests are so sensitive they can see the difference!
-    t.tdb1 = t.tdb1 + t.tdb2
-    t.tdb2 = 0.0
+    # So we need to collapse the Julian dates back into single floats.
+    delta = t.tdb - t.tt
+    t.whole = t.tdb
+    t.tt_fraction = delta
+    t.tdb_fraction = 0.0
 
 def test_calendar_date_0():
     compare(timelib.calendar_date(2440423.345833333), array((1969, 7, 20.345833333209157)), 0.0)
