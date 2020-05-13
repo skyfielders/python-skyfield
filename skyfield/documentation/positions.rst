@@ -421,7 +421,7 @@ is typically expressed as the angles
     # Apparent GCRS ("J2000.0") coordinates
 
     apparent = astrometric.apparent()
-    ra, dec, distance = apparent.radec()
+    ra, dec, distance = apparent.radec()  # unusual: see next script
 
     print(ra.hstr())
     print(dec.dstr())

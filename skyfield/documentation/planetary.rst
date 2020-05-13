@@ -62,14 +62,15 @@ in this example, the famous Aristarchus crater.
     frame = pc.build_frame_named('MOON_ME_DE421')
     aristarchus = moon + pc.build_latlon_degrees(frame, 26.3, -46.8)
 
-    ra, dec, distance = earth.at(t).observe(aristarchus).apparent().radec()
+    apparent = earth.at(t).observe(aristarchus).apparent()
+    ra, dec, distance = apparent.radec(epoch='date')
     print(ra)
     print(dec)
 
 .. testoutput::
 
-    13h 02m 22.50s
-    -00deg 49' 09.2"
+    13h 03m 22.96s
+    -00deg 55' 27.3"
 
 If your Moon location has a nonzero elevation
 placing it above or below the Moon’s “sea level”,
@@ -105,7 +106,7 @@ or in altitude and azimuth measured against the astronaut’s horizon.
     aristarchus = moon + pc.build_latlon_degrees(frame, 26.3, -46.8)
 
     apparent = aristarchus.at(t).observe(earth).apparent()
-    ra, dec, distance = apparent.radec()
+    ra, dec, distance = apparent.radec(epoch='date')
     print(ra)
     print(dec)
 
@@ -115,8 +116,8 @@ or in altitude and azimuth measured against the astronaut’s horizon.
 
 .. testoutput::
 
-    01h 02m 22.50s
-    +00deg 49' 09.2"
+    01h 03m 22.96s
+    +00deg 55' 27.3"
     32deg 27' 09.7" degrees above the horizon
     118deg 12' 55.9" degrees around the horizon from north
 

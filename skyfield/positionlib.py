@@ -151,20 +151,26 @@ class ICRF(object):
         When called without a parameter, this returns standard ICRF
         right ascension and declination:
 
-        >>> ra, dec, distance = ICRF([1, 2, 3]).radec()
-        >>> print(ra, dec, distance, sep='\n')
-        04h 13m 44.39s
-        +53deg 18' 02.8"
-        3.74166 au
+        >>> from skyfield.api import load
+        >>> ts = load.timescale(builtin=True)
+        >>> t = ts.utc(2020, 5, 13, 10, 32)
+        >>> eph = load('de421.bsp')
+        >>> astrometric = eph['earth'].at(t).observe(eph['sun'])
+        >>> ra, dec, distance = astrometric.radec()
+        >>> print(ra, dec, sep='\n')
+        03h 21m 47.67s
+        +18deg 28' 55.3"
 
         If you instead want the coordinates referenced to the dynamical
         system defined by the Earth's mean equator and equinox, provide
-        an epoch time.  To get J2000.0 coordinates, for example:
+        a specific epoch time.
 
-        >>> ra, dec, distance = ICRF([1, 2, 3]).radec(ts.J2000)
+        >>> ra, dec, distance = astrometric.apparent().radec(epoch='date')
         >>> print(ra, dec, sep='\n')
-        04h 13m 43.32s
-        +53deg 17' 55.1"
+        03h 22m 54.73s
+        +18deg 33' 04.5"
+
+        To get J2000.0 coordinates, simply pass ``ts.J2000``.
 
         """
         position_au = self.position.au
