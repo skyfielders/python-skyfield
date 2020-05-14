@@ -189,7 +189,12 @@ class EarthSatellite(VectorFunction):
         half_second = 0.5 / DAY_S
         orbits_per_minute = self.model.no_kozai / tau
         orbits_per_day = 24 * 60 * orbits_per_minute
-        rough_period = 1 / orbits_per_day
+
+        # Note the protection against zero orbits_per_day.  I have not
+        # yet learned with which satellite caused a user to run into a
+        # ZeroDivisionError here, and without a concrete example I have
+        # little sense of whether 1.0 is a good fallback value or not.
+        rough_period = 1.0 / orbits_per_day if orbits_per_day else 1.0
 
         # Long-period satellites might rise each day not because of
         # their own motion, but because the Earth rotates under them, so
