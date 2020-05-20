@@ -248,7 +248,7 @@ creating the position directly.
 .. testcode::
 
     from skyfield.api import load
-    from skyfield.positionlib import position_from_radec
+    from skyfield.positionlib import position_of_radec
 
     ts = load.timescale(builtin=True)
     t = ts.utc(2020, 1, 3, 12, 45)
@@ -256,7 +256,7 @@ creating the position directly.
     earth = 399  # NAIF code for the Earth center of mass
     ra_hours = 3.79
     dec_degrees = 24.1167
-    pleiades = position_from_radec(ra_hours, dec_degrees, t=t, center=earth)
+    pleiades = position_of_radec(ra_hours, dec_degrees, t=t, center=earth)
     subpoint = pleiades.subpoint()
 
     print('Latitude:', subpoint.latitude)

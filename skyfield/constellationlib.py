@@ -35,9 +35,9 @@ def load_constellation_map():
     quick position lookup.  Call this function to load the map and
     return a function mapping position to constellation name.
 
-    >>> from skyfield.api import position_from_radec, load_constellation_map
+    >>> from skyfield.api import position_of_radec, load_constellation_map
     >>> constellation_at = load_constellation_map()
-    >>> north_pole = position_from_radec(0, 90)
+    >>> north_pole = position_of_radec(0, 90)
     >>> constellation_at(north_pole)
     'UMi'
 

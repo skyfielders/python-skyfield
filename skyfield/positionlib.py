@@ -15,6 +15,7 @@ from .units import Angle, Distance, Velocity, _interpret_angle
 
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GALACTIC = inertial_frames['GALACTIC']
+_GIGAPARSEC_AU = 206264806247096.38  # 1e9 * 360 * 3600 / tau
 
 def build_position(position_au, velocity_au_per_d=None, t=None,
                    center=None, target=None, observer_data=None):
@@ -28,21 +29,48 @@ def build_position(position_au, velocity_au_per_d=None, t=None,
         cls = ICRF
     return cls(position_au, velocity_au_per_d, t, center, target, observer_data)
 
-def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
-                   t=None, center=None, target=None, observer_data=None):
+def position_of_radec(ra_hours, dec_degrees, distance_au=_GIGAPARSEC_AU,
+                      epoch=None, t=None, center=None, target=None,
+                      observer_data=None):
     """Build a position object from a right ascension and declination.
 
+    If a specific ``distance_au`` is not provided, Skyfield returns a
+    position vector a gigaparsec in length.  This puts the position at a
+    great enough distance that it will stand at the same right ascension
+    and declination from any viewing position in the Solar System, to
+    very high precision (within a few hundredths of a microarcsecond).
+
     If an ``epoch`` is specified, the input coordinates are understood
-    to be in the dynamical system of that particular date; otherwise
+    to be in the dynamical system of that particular date.  Otherwise,
     they will be assumed to be ICRS (the modern replacement for J2000).
 
     """
-    theta = _to_array(dec_degrees) * tau / 360.0
-    phi = _to_array(ra_hours) * tau / 24.0
-    position_au = from_spherical(distance, theta, phi)
+    theta = _to_array(dec_degrees) / 360.0 * tau
+    phi = _to_array(ra_hours) / 24.0 * tau
+    position_au = from_spherical(distance_au, theta, phi)
     if epoch is not None:
         position_au = einsum('ij...,j...->i...', epoch.MT, position_au)
     return build_position(position_au, None, t, center, target, observer_data)
+
+def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
+                        t=None, center=None, target=None, observer_data=None):
+    """DEPRECATED version of ``position_of_radec()``.
+
+    Problems:
+
+    * The ``distance`` parameter specifies no unit, contrary to Skyfield
+      best practices.  I have no idea what I was thinking.
+
+    * The default ``distance`` is far too small, since most objects for
+      which users specify an RA and declination are out on the celestial
+      sphere.  The hope was that users would see the length 1.0 and
+      think, “ah, yes, that’s obviously a fake placeholder value.”  But
+      it’s more likely that users will not even check the distance, or
+      maybe not even realize that a distance is involved.
+
+    """
+    return position_of_radec(ra_hours, dec_degrees, distance, epoch,
+                             t, center, target, observer_data)
 
 class ICRF(object):
     """An (x,y,z) position and velocity oriented to the ICRF axes.

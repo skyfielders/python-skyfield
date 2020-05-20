@@ -90,4 +90,4 @@ Geometric instantaneous position between two objects
 Building a position from right ascension and declination
 ========================================================
 
-.. autofunction:: position_from_radec
+.. autofunction:: position_of_radec

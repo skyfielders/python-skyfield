@@ -6,6 +6,9 @@ Changelog
 Next
 ----
 
+* Added :func:`~skyfield.positionlib.position_of_radec()` to replace the
+  poorly designed :func:`~skyfield.positionlib.position_from_radec()`.
+
 * Thanks to Jérôme Deuchnord, the exception raised when asking for a
   position out-of-range of a JPL ephemeris now shows the calendar dates
   for which the ephemeris is valid and carries several useful attributes.

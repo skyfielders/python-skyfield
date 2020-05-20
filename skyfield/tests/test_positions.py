@@ -2,7 +2,7 @@ import numpy as np
 from skyfield import api, constants
 from skyfield.earthlib import earth_rotation_angle
 from skyfield.functions import length_of
-from skyfield.positionlib import ICRF
+from skyfield.positionlib import ICRF, _GIGAPARSEC_AU
 from skyfield.starlib import Star
 
 def test_subtraction():
@@ -55,24 +55,39 @@ def test_dynamic_ecliptic_coordinates_with_and_without_a_time_array():
     assert distance2.au[0] == distance0.au
     assert distance2.au[1] == distance1.au
 
-def test_position_from_radec():
-    p = api.position_from_radec(0, 0)
-    assert length_of(p.position.au - [1, 0, 0]) < 1e-16
+def test_position_of_radec():
+    epsilon = _GIGAPARSEC_AU * 1e-16
 
-    p = api.position_from_radec(6, 0)
-    assert length_of(p.position.au - [0, 1, 0]) < 1e-16
+    p = api.position_of_radec(0, 0)
+    assert length_of(p.position.au - [_GIGAPARSEC_AU, 0, 0]) < epsilon
 
-    p = api.position_from_radec(12, 90, 2)
-    assert length_of(p.position.au - [0, 0, 2]) < 2e-16
+    p = api.position_of_radec(6, 0)
+    assert length_of(p.position.au - [0, _GIGAPARSEC_AU, 0]) < epsilon
+
+    epsilon = 2e-16
+
+    p = api.position_of_radec(12, 90, 2)
+    assert length_of(p.position.au - [0, 0, 2]) < epsilon
+
+    p = api.position_of_radec(12, 90, distance_au=2)
+    assert length_of(p.position.au - [0, 0, 2]) < epsilon
 
     ts = api.load.timescale(builtin=True)
     epoch = ts.tt_jd(api.B1950)
-    p = api.position_from_radec(0, 0, epoch=epoch)
+    p = api.position_of_radec(0, 0, 1, epoch=epoch)
     assert length_of(p.position.au - [1, 0, 0]) > 1e-16
     ra, dec, distance = p.radec(epoch=epoch)
     assert abs(ra.hours) < 1e-12
     assert abs(dec.degrees) < 1e-12
     assert abs(distance.au - 1) < 1e-16
+
+def test_position_from_radec():
+    # Only a couple of minimal tests, since the routine is deprecated.
+    p = api.position_from_radec(0, 0)
+    assert length_of(p.position.au - [1, 0, 0]) < 1e-16
+
+    p = api.position_from_radec(6, 0)
+    assert length_of(p.position.au - [0, 1, 0]) < 1e-16
 
 def test_itrf_vector():
     ts = api.load.timescale(builtin=True)

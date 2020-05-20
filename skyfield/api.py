@@ -12,7 +12,7 @@ from .constellationlib import load_constellation_map
 from .errors import DeprecationError
 from .iokit import Loader, load_file
 from .planetarylib import PlanetaryConstants
-from .positionlib import position_from_radec
+from .positionlib import position_from_radec, position_of_radec
 from .starlib import Star
 from .sgp4lib import EarthSatellite
 from .timelib import T0, Time, Timescale, utc
@@ -25,7 +25,8 @@ load = Loader('.')
 __all__ = ['Angle', 'B1950', 'Distance', 'EarthSatellite', 'Loader',
            'NamedStar', 'PlanetaryConstants', 'Star', 'T0', 'Time',
            'Timescale', 'Topos', 'datetime', 'load', 'load_constellation_map',
-           'load_file', 'position_from_radec', 'utc', 'pi', 'tau']
+           'load_file', 'position_from_radec', 'position_of_radec',
+           'utc', 'pi', 'tau']
 
 # An attempt at friendliest-possible deprecations:
 
