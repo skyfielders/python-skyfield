@@ -324,11 +324,9 @@ class Time(object):
         size = getattr(self.tt, 'size', -1)
         if size > 3:
             rstr = '<Time tt=[{0} ... {1}] len={2}>'
-            return rstr.format(self.tt.min(), self.tt.max(), size)
-        elif size >= 0:
-            return '<Time tt={0}>'.format(self.tt)
+            return rstr.format(self.tt[0], self.tt[-1], size)
         else:
-            return '<Time tt={0}>'.format(self.tt)
+            return '<Time tt={0}>'.format(self.tt).replace('[ ', '[')
 
     def __getitem__(self, index):
         # TODO: also copy cached matrices?
