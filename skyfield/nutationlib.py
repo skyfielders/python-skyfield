@@ -288,7 +288,9 @@ def iau2000b(jd_tt):
 
     t = (jd_tt - T0) / 36525.0
 
-    a = (fa0 + fa1 * t)[:,0] % ASEC360 * ASEC2RAD
+    a = (fa0 + fa1 * t) % ASEC360 * ASEC2RAD
+    if not getattr(t, 'shape', None):
+        a = a[:,0]
 
     arg = nals_t[:77].dot(a)
     fmod(arg, tau, out=arg)
