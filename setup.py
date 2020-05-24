@@ -1,4 +1,7 @@
+import os
 from distutils.core import setup
+from distutils.command.sdist import sdist
+
 import skyfield  # safe, because __init__.py contains no import statements
 
 extras = {
@@ -8,7 +11,15 @@ extras = {
     ],
 }
 
+class my_sdist(sdist):
+    def make_distribution(self):
+        # See https://github.com/skyfielders/python-skyfield/issues/378
+        for path in self.filelist.files:
+            os.chmod(path, 0o644)
+        sdist.make_distribution(self)
+
 setup(
+    cmdclass={'sdist': my_sdist},
     name='skyfield',
     version=skyfield.__version__,
     description=skyfield.__doc__.split('\n', 1)[0],
