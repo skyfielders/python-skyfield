@@ -241,7 +241,6 @@ def iau2000a(jd_tt):
     # Summation of luni-solar nutation series (in reverse order).
 
     arg = nals_t.dot(a)
-    fmod(arg, tau, out=arg)
 
     sarg = sin(arg)
     carg = cos(arg)
@@ -260,9 +259,7 @@ def iau2000a(jd_tt):
         a = (outer(anomaly_coefficient, t).T + anomaly_constant).T
     a[-1] *= t
 
-    fmod(a, tau, out=a)
     arg = napl_t.dot(a)
-    fmod(arg, tau, out=arg)
     sc = array((sin(arg), cos(arg))).T
 
     dpsi += tensordot(sc, nutation_coefficients_longitude)
@@ -293,7 +290,6 @@ def iau2000b(jd_tt):
         a = a[:,0]
 
     arg = nals_t[:77].dot(a)
-    fmod(arg, tau, out=arg)
 
     sarg = sin(arg)
     carg = cos(arg)
