@@ -1,5 +1,5 @@
 """Routines that compute Earth nutation."""
-from numpy import array, cos, einsum, fmod, sin, outer, tensordot, zeros
+from numpy import array, cos, einsum, fmod, sin, outer, zeros
 from .constants import ASEC2RAD, ASEC360, DEG2RAD, tau, T0
 from .functions import load_bundled_npy
 
@@ -248,8 +248,9 @@ def iau2000a(jd_tt):
     stsc = array((sarg, t * sarg, carg)).T
     ctcs = array((carg, t * carg, sarg)).T
 
-    dpsi = tensordot(stsc, lunisolar_longitude_coefficients)
-    deps = tensordot(ctcs, lunisolar_obliquity_coefficients)
+    subscripts = 'ijk,jk->i' if len(stsc.shape) == 3 else 'ij,ij->'
+    dpsi = einsum(subscripts, stsc, lunisolar_longitude_coefficients)
+    deps = einsum(subscripts, ctcs, lunisolar_obliquity_coefficients)
 
     # Compute and add in planetary components.
 
@@ -262,8 +263,8 @@ def iau2000a(jd_tt):
     arg = napl_t.dot(a)
     sc = array((sin(arg), cos(arg))).T
 
-    dpsi += tensordot(sc, nutation_coefficients_longitude)
-    deps += tensordot(sc, nutation_coefficients_obliquity)
+    dpsi += einsum(subscripts, sc, nutation_coefficients_longitude)
+    deps += einsum(subscripts, sc, nutation_coefficients_obliquity)
 
     return dpsi, deps
 
