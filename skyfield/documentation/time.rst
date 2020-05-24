@@ -139,7 +139,7 @@ For example:
 
     # Several ways to print a time as UTC.
 
-    print(t1.utc)
+    print(tuple(t1.utc))
     print(t1.utc_iso())
     print(t1.utc_jpl())
     print(t1.utc_strftime('Date %Y-%m-%d and time %H:%M:%S'))
@@ -150,6 +150,20 @@ For example:
     2014-01-18T01:35:38Z
     A.D. 2014-Jan-18 01:35:37.5000 UT
     Date 2014-01-18 and time 01:35:38
+
+The 6 values returned by ``utc()``
+can also be accessed as the attributes
+``year``, ``month``, ``day``, ``hour``, ``minute``,  and ``second``.
+
+.. testcode::
+
+    print(t1.utc.year, '/', t2.utc.month, '/', t2.utc.day)
+    print(t2.utc.hour, ':', t2.utc.minute, ':', t2.utc.second)
+
+.. testoutput::
+
+    2014 / 1 / 18
+    1 : 35 : 37.5
 
 And by scraping together the minimal support for UTC
 that exists in the Python Standard Library,
@@ -450,17 +464,16 @@ being as deep as the array itself:
 
 .. testcode::
 
-    from pprint import pprint
-    pprint(t.utc)
+    print(t.utc)
 
 .. testoutput::
 
-    array([[2014., 2014., 2014., 2014.],
-           [   1.,    1.,    1.,    1.],
-           [   1.,    2.,    3.,    4.],
-           [   0.,    0.,    0.,    0.],
-           [   0.,    0.,    0.,    0.],
-           [   0.,    0.,    0.,    0.]])
+    [[2014. 2014. 2014. 2014.]
+     [   1.    1.    1.    1.]
+     [   1.    2.    3.    4.]
+     [   0.    0.    0.    0.]
+     [   0.    0.    0.    0.]
+     [   0.    0.    0.    0.]]
 
 Again, simply slice across the second dimension of the array
 to pull a particular calendar tuple out of the larger result:
@@ -472,6 +485,24 @@ to pull a particular calendar tuple out of the larger result:
 .. testoutput::
 
     [2014.    1.    3.    0.    0.    0.]
+
+The rows can be fetched not only by index
+but also through the attribute names ``year``, ``month``, ``day``,
+``hour``, ``minute``,  and ``second``.
+
+.. testcode::
+
+    print(t.utc.year)
+    print(t.utc.month)
+    print(t.utc.day)
+    print(t.utc.hour)
+
+.. testoutput::
+
+    [2014. 2014. 2014. 2014.]
+    [1. 1. 1. 1.]
+    [1. 2. 3. 4.]
+    [0. 0. 0. 0.]
 
 .. _tai-tt-tdb:
 
@@ -707,11 +738,11 @@ that you’ll see the limit of the precision:
 
 .. testcode::
 
-    print(t.utc)
+    print(t.utc.hour, t.utc.minute, t.utc.second)
 
 .. testoutput::
 
-    (2014, 1, 18, 1, 35, 36.999999999991815)
+    1 35 36.999999999991815
 
 To avoid ugly output like this,
 you should use Skyfield’s own time display methods

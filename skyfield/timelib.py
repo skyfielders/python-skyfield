@@ -1,6 +1,7 @@
 import re
+from collections import namedtuple
 from datetime import date, datetime, timedelta, tzinfo
-from numpy import (array, concatenate, float_, interp, isnan, nan, pi,
+from numpy import (array, concatenate, float_, interp, isnan, nan, ndarray, pi,
                    rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime
 from .constants import B1950, DAY_S, T0
@@ -10,6 +11,22 @@ from .framelib import ICRS_to_J2000 as B
 from .functions import _mxm, _mxmxm, _to_array, load_bundled_npy, rot_z
 from .nutationlib import compute_nutation, earth_tilt, iau2000a
 from .precessionlib import compute_precession
+
+CalendarTuple = namedtuple('CalendarTuple', 'year month day hour minute second')
+
+class CalendarArray(ndarray):
+    @property
+    def year(self): return self[0]
+    @property
+    def month(self): return self[1]
+    @property
+    def day(self): return self[2]
+    @property
+    def hour(self): return self[3]
+    @property
+    def minute(self): return self[4]
+    @property
+    def second(self): return self[5]
 
 try:
     from pytz import utc
@@ -642,7 +659,7 @@ class Time(object):
     @reify
     def utc(self):
         utc = self._utc_tuple()
-        return array(utc) if self.shape else utc
+        return array(utc).view(CalendarArray) if self.shape else CalendarTuple(*utc)
 
     @reify
     def tdb_fraction(self):

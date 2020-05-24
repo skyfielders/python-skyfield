@@ -6,6 +6,10 @@ Changelog
 Next
 ----
 
+* The 6 numbers in the sequence ``t.utc`` can now be accessed by the
+  attribute names ``year``, ``month``, ``day``, ``hour``, ``minute``,
+  and ``second``.
+
 * Added :func:`~skyfield.positionlib.position_of_radec()` to replace the
   poorly designed :func:`~skyfield.positionlib.position_from_radec()`.
 
