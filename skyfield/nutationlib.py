@@ -1,5 +1,5 @@
 """Routines that compute Earth nutation."""
-from numpy import array, cos, fmod, sin, outer, tensordot, zeros
+from numpy import array, cos, einsum, fmod, sin, outer, tensordot, zeros
 from .constants import ASEC2RAD, ASEC360, DEG2RAD, tau, T0
 from .functions import load_bundled_npy
 
@@ -280,8 +280,8 @@ def iau2000b(jd_tt):
     years 1995 and 2020.
 
     """
-    dpplan = -0.000135 * 1e7
-    deplan =  0.000388 * 1e7
+    dpplan = -0.000135e7
+    deplan =  0.000388e7
 
     t = (jd_tt - T0) / 36525.0
 
@@ -297,8 +297,9 @@ def iau2000b(jd_tt):
     stsc = array((sarg, t * sarg, carg)).T
     ctcs = array((carg, t * carg, sarg)).T
 
-    dp = tensordot(stsc, lunisolar_longitude_coefficients[:77,])
-    de = tensordot(ctcs, lunisolar_obliquity_coefficients[:77,])
+    subscripts = 'ijk,jk->i' if len(stsc.shape) == 3 else 'ij,ij->'
+    dp = einsum(subscripts, stsc, lunisolar_longitude_coefficients[:77,])
+    de = einsum(subscripts, ctcs, lunisolar_obliquity_coefficients[:77,])
 
     dpsi = dpplan + dp
     deps = deplan + de
