@@ -288,24 +288,7 @@ def iau2000b(jd_tt):
 
     t = (jd_tt - T0) / 36525.0
 
-    # TODO: can these be replaced with fa0 and f1?
-
-    el  = fmod (485868.249036 +
-          t * 1717915923.2178, ASEC360) * ASEC2RAD;
-
-    elp = fmod (1287104.79305 +
-             t * 129596581.0481, ASEC360) * ASEC2RAD;
-
-    f   = fmod (335779.526232 +
-             t * 1739527262.8478, ASEC360) * ASEC2RAD;
-
-    d   = fmod (1072260.70369 +
-             t * 1602961601.2090, ASEC360) * ASEC2RAD;
-
-    om  = fmod (450160.398036 -
-             t * 6962890.5431, ASEC360) * ASEC2RAD;
-
-    a = array((el, elp, f, d, om))
+    a = (fa0 + fa1 * t)[:,0] % ASEC360 * ASEC2RAD
 
     arg = nals_t[:77].dot(a)
     fmod(arg, tau, out=arg)
