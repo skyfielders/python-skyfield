@@ -26,7 +26,7 @@ class Distance(object):
     """A distance, stored internally as au and available in other units.
 
     You can initialize a ``Distance`` by providing a single float or a
-    float array as either an ``au=`` parameter or a ``km=`` parameter.
+    float array as either an ``au=``, ``km=``, or ``m=`` parameter.
 
     """
     _warned = False
