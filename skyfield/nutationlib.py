@@ -245,10 +245,10 @@ def iau2000a(jd_tt):
     sarg = sin(arg)
     carg = cos(arg)
 
-    stsc = array((sarg, t * sarg, carg)).T
-    ctcs = array((carg, t * carg, sarg)).T
+    stsc = array((sarg, t * sarg, carg))
+    ctcs = array((carg, t * carg, sarg))
 
-    subscripts = 'ijk,jk->i' if len(stsc.shape) == 3 else 'ij,ij->'
+    subscripts = 'ijk,ji->k' if len(stsc.shape) == 3 else 'ij,ji->'
     dpsi = einsum(subscripts, stsc, lunisolar_longitude_coefficients)
     deps = einsum(subscripts, ctcs, lunisolar_obliquity_coefficients)
 
@@ -261,7 +261,7 @@ def iau2000a(jd_tt):
     a[-1] *= t
 
     arg = napl_t.dot(a)
-    sc = array((sin(arg), cos(arg))).T
+    sc = array((sin(arg), cos(arg)))
 
     dpsi += einsum(subscripts, sc, nutation_coefficients_longitude)
     deps += einsum(subscripts, sc, nutation_coefficients_obliquity)
@@ -295,10 +295,10 @@ def iau2000b(jd_tt):
     sarg = sin(arg)
     carg = cos(arg)
 
-    stsc = array((sarg, t * sarg, carg)).T
-    ctcs = array((carg, t * carg, sarg)).T
+    stsc = array((sarg, t * sarg, carg))
+    ctcs = array((carg, t * carg, sarg))
 
-    subscripts = 'ijk,jk->i' if len(stsc.shape) == 3 else 'ij,ij->'
+    subscripts = 'ijk,ji->k' if len(stsc.shape) == 3 else 'ij,ji->'
     dp = einsum(subscripts, stsc, lunisolar_longitude_coefficients[:77,])
     de = einsum(subscripts, ctcs, lunisolar_obliquity_coefficients[:77,])
 
