@@ -1,5 +1,5 @@
 """Routines that compute Earth nutation."""
-from numpy import array, cos, dot, einsum, fmod, sin, outer, zeros
+from numpy import array, cos, dot, fmod, sin, outer, zeros
 from .constants import ASEC2RAD, ASEC360, DEG2RAD, tau, T0
 from .functions import load_bundled_npy
 
@@ -261,12 +261,15 @@ def iau2000a(jd_tt):
         a = (outer(anomaly_coefficient, t).T + anomaly_constant).T
     a[-1] *= t
 
-    arg = napl_t.dot(a)
-    sc = array((sin(arg), cos(arg)))
+    arg = napl_t.dot(a).T
+    sarg = sin(arg)
+    carg = cos(arg)
 
-    subscripts = 'ijk,ji->k' if len(sc.shape) == 3 else 'ij,ji->'
-    dpsi += einsum(subscripts, sc, nutation_coefficients_longitude)
-    deps += einsum(subscripts, sc, nutation_coefficients_obliquity)
+    dpsi += dot(sarg, nutation_coefficients_longitude[:,0])
+    dpsi += dot(carg, nutation_coefficients_longitude[:,1])
+
+    deps += dot(sarg, nutation_coefficients_obliquity[:,0])
+    deps += dot(carg, nutation_coefficients_obliquity[:,1])
 
     return dpsi, deps
 
@@ -297,12 +300,13 @@ def iau2000b(jd_tt):
     sarg = sin(arg)
     carg = cos(arg)
 
-    stsc = array((sarg, t * sarg, carg))
-    ctcs = array((carg, t * carg, sarg))
+    dp = dot(sarg.T, lunisolar_longitude_coefficients[:77,0])
+    dp += dot(sarg.T, lunisolar_longitude_coefficients[:77,1]) * t
+    dp += dot(carg.T, lunisolar_longitude_coefficients[:77,2])
 
-    subscripts = 'ijk,ji->k' if len(stsc.shape) == 3 else 'ij,ji->'
-    dp = einsum(subscripts, stsc, lunisolar_longitude_coefficients[:77,])
-    de = einsum(subscripts, ctcs, lunisolar_obliquity_coefficients[:77,])
+    de = dot(carg.T, lunisolar_obliquity_coefficients[:77,0])
+    de += dot(carg.T, lunisolar_obliquity_coefficients[:77,1]) * t
+    de += dot(sarg.T, lunisolar_obliquity_coefficients[:77,2])
 
     dpsi = dpplan + dp
     deps = deplan + de
