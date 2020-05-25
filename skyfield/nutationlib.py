@@ -178,13 +178,15 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
 
     # Evaluate the complementary terms.
 
-    a = ke0_t.dot(fa)
-    s0 = se0_t_0.dot(sin(a)) + se0_t_1.dot(cos(a))
-
     a = ke1.dot(fa)
-    s1 = se1_0 * sin(a) + se1_1 * cos(a)
+    c_terms = se1_0 * sin(a)
+    c_terms += se1_1 * cos(a)
+    c_terms *= t
 
-    c_terms = s0 + s1 * t
+    a = ke0_t.dot(fa)
+    c_terms += se0_t_0.dot(sin(a))
+    c_terms += se0_t_1.dot(cos(a))
+
     c_terms *= ASEC2RAD
     return c_terms
 
@@ -334,7 +336,6 @@ fa0, fa1, fa2, fa3, fa4 = array((
     )).T[:,:,None]
 
 def fundamental_arguments(t):
-
     """Compute the fundamental arguments (mean elements) of Sun and Moon.
 
     `t` - TDB time in Julian centuries since J2000.0, as float or NumPy array
