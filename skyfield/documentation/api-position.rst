@@ -33,11 +33,12 @@ Generic ICRF position
 
    .. attribute:: position
 
-      The `Distance` coordinate as an (x, y, z) array.
+      A `Distance` object offering the position’s (\ *x,y,z*\ ) coordinates.
 
    .. attribute:: velocity
 
-      The `Velocity` coordinate as an (x, y, z) array.
+      A `Velocity` object
+      offering the velocity’s (\ *dx/dt,dy/dt,dz/dt*\ ) coordinates.
 
       This attribute will have the value ``None`` if no velocity was
       specified for this position.

@@ -23,32 +23,32 @@ together with all of the attributes and methods that they support:
         .observe(obj2)   →  Astrometric position (ΔBCRS)
         .apparent()      →  Apparent position (GCRS)
 
-    Position methods
+    Position attributes and methods
      │
-     ├── `position <api.html#skyfield.positionlib.ICRF.position>`_.au         →   x, y, z
-     ├── `position <api.html#skyfield.positionlib.ICRF.position>`_.km         →   x, y, z
-     ├── `position <api.html#skyfield.positionlib.ICRF.position>`_.m          →   x, y, z
-     ├── `position.to(unit) <api.html#Distance.to>`_   →   x, y, z
+     ├── `position <api-position.html#skyfield.positionlib.ICRF.position>`_.au         →   x, y, z
+     ├── `position <api-position.html#skyfield.positionlib.ICRF.position>`_.km         →   x, y, z
+     ├── `position <api-position.html#skyfield.positionlib.ICRF.position>`_.m          →   x, y, z
+     ├── `position <api-position.html#skyfield.positionlib.ICRF.position>`_.to(unit)   →   AstroPy distance units
      │
-     ├── `velocity <api.html#skyfield.positionlib.ICRF.velocity>`_.au_per_d   →   xdot, ydot, zdot
-     ├── `velocity <api.html#skyfield.positionlib.ICRF.velocity>`_.km_per_s   →   xdot, ydot, zdot
-     ├── `velocity.to(unit) <api.html#Distance.to>`_   →   xdot, ydot, zdot
+     ├── `velocity <api-position.html#skyfield.positionlib.ICRF.velocity>`_.au_per_d   →   xdot, ydot, zdot
+     ├── `velocity <api-position.html#skyfield.positionlib.ICRF.velocity>`_.km_per_s   →   xdot, ydot, zdot
+     ├── `velocity <api-position.html#skyfield.positionlib.ICRF.velocity>`_.to(unit)   →   xdot, ydot, zdot
      │
-     ├── `radec(epoch=t) <api.html#skyfield.positionlib.ICRF.radec>`_      →   ra, dec, distance
-     ├── `radec() <api.html#skyfield.positionlib.ICRF.radec>`_             →   ra, dec, distance
-     ├── `distance() <api.html#skyfield.positionlib.ICRF.distance>`_          →   distance
+     ├── `radec() <api-position.html#skyfield.positionlib.ICRF.radec>`_             →   ra, dec, distance (ICRF = J2000)
+     ├── `radec(epoch=t) <api-position.html#skyfield.positionlib.ICRF.radec>`_      →   ra, dec, distance (Equinox of time t)
+     ├── `distance() <api-position.html#skyfield.positionlib.ICRF.distance>`_          →   distance
      ├── `separation_from(p2) <api-position.html#skyfield.positionlib.ICRF.separation_from>`_ →   angle
      │
-     ├── `ecliptic_position() <api.html#skyfield.positionlib.ICRF.ecliptic_position>`_ →   x, y, z
-     ├── `ecliptic_velocity() <api.html#skyfield.positionlib.ICRF.ecliptic_velocity>`_ →   xdot, ydot, zdot
-     ├── `ecliptic_latlon() <api.html#skyfield.positionlib.ICRF.ecliptic_latlon>`_   →   lat, lon, distance
-     ├── `galactic_position() <api.html#skyfield.positionlib.ICRF.galactic_position>`_ →   x, y, z
-     └── `galactic_latlon() <api.html#skyfield.positionlib.ICRF.galactic_latlon>`_   →   lat, lon, distance
+     ├── `ecliptic_xyz() <api-position.html#skyfield.positionlib.ICRF.ecliptic_xyz>`_     →   x, y, z
+     ├── `ecliptic_velocity() <api-position.html#skyfield.positionlib.ICRF.ecliptic_velocity>`_ →   xdot, ydot, zdot
+     ├── `ecliptic_latlon() <api-position.html#skyfield.positionlib.ICRF.ecliptic_latlon>`_   →   lat, lon, distance
+     ├── `galactic_xyz() <api-position.html#skyfield.positionlib.ICRF.galactic_xyz>`_     →   x, y, z
+     └── `galactic_latlon() <api-position.html#skyfield.positionlib.ICRF.galactic_latlon>`_   →   lat, lon, distance
 
 
     Apparent position only
      │
-     └── `altaz(…) <api.html#skyfield.positionlib.Apparent.altaz>`_            →   alt, az, distance
+     └── `altaz(…) <api-position.html#skyfield.positionlib.Apparent.altaz>`_            →   alt, az, distance
 
     Angle like ra, dec, alt, and az
      │
