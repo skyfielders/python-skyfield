@@ -179,9 +179,15 @@ def sunrise_sunset(ephemeris, topos):
 
     Skyfield uses the same definition as the United States Naval
     Observatory: the Sun is up when its center is 0.8333 degrees below
-    the horizon, which accounts for both its radius of 0.5 degrees, and
-    also for the 0.3333 degrees by which atmospheric refraction on
-    average lifts the image of the Sun.
+    the horizon, which accounts for both its apparent radius of around
+    16 arcminutes and also for the 34 arcminutes by which atmospheric
+    refraction on average lifts the image of the Sun.
+
+    If you need to provide a custom value for refraction, adjust the
+    estimate of the Sun’s radius, or account for a vantage point above
+    the Earth’s surface, see :ref:`risings-and-settings` to learn about
+    the more versatile :func:`~skyfield.almanac.risings_and_settings()`
+    routine.
 
     """
     sun = ephemeris['sun']
@@ -239,21 +245,15 @@ def dark_twilight_day(ephemeris, topos):
     return is_it_dark_twilight_day_at
 
 def risings_and_settings(ephemeris, target, topos,
-                         horizon_degrees=-34.0/60.0, radius_degrees=0):
+                         horizon_degrees=-34.0/60.0, radius_degrees=0): #?
     """Build a function of time that returns whether a body is up.
 
-    This builds and returns a function taking a single argument
-    :class:`~skyfield.timelib.Time` that returns ``True`` if the body is
-    above the horizon, else ``False``.  It considers a body to be above
-    the horizon if its altitude plus the supplied ``radius_degrees`` is
-    more than ``horizon_degrees``, which by default is -34 minutes of
-    arc (negative meaning “below the horizon”) to account for typical
-    atmospheric refraction, which raises into view objects which are
-    slightly below the horizon.
-
-    (The specific value of -34 minutes of arc is official, from the
-    United States Naval Observatory’s *Explanatory Supplement to the
-    Astronomical Almanac*.)
+    This returns a function taking a :class:`~skyfield.timelib.Time`
+    argument returning ``True`` if the body’s altazimuth altitude angle
+    plus ``radius_degrees`` is greater than ``horizon_degrees``, else
+    ``False``.  See :ref:`risings-and-settings` to learn about how to
+    search for risings and settings, and to see more about using the
+    parameters ``horizon_degrees`` and ``radius_degrees``.
 
     """
     topos_at = (ephemeris['earth'] + topos).at
