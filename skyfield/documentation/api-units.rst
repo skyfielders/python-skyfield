@@ -45,4 +45,5 @@ they return instances of the following classes.
       The angle in hours (24 hours in a circle).
 
    .. attribute:: radians
-      The angle in radians (2p in a circle)
+
+      The angle in radians (𝜏 = 2𝜋 in a circle)

@@ -52,18 +52,19 @@ together with all of the attributes and methods that they support:
 
     Angle like ra, dec, alt, and az
      │
-     ├── `radians <api.html#Angle.radians>`_             →   6.266029488577352
+     ├── `radians <api-units.html#skyfield.units.Angle.radians>`_             →   6.266029488577352
      │
-     ├── `hours <api.html#Angle.hours>`_               →   23.934469599999996
-     ├── `hstr() <api.html#Angle.hstr>`_              →   '23h 56m 04.09s'
-     ├── `hstr(places=4) <api.html#Angle.hstr>`_      →   '23h 56m 04.0906s'
-     ├── `hms() <api.html#Angle.hms>`_               →   (23.0, 56.0, 4.0)
-     ├── `signed_hms() <api.html#Angle.hms>`_        →   (1.0, 23.0, 56.0, 4.0)
+     ├── `hours <api-units.html#skyfield.units.Angle.hours>`_               →   23.934469599999996
+     ├── `hstr() <api-units.html#skyfield.units.Angle.hstr>`_              →   '23h 56m 04.09s'
+     ├── `hstr(places=4) <api-units.html#skyfield.units.Angle.hstr>`_      →   '23h 56m 04.0906s'
+     ├── `hms() <api-units.html#skyfield.units.Angle.hms>`_               →   (23.0, 56.0, 4.0)
+     ├── `signed_hms() <api-units.html#skyfield.units.Angle.hms>`_        →   (1.0, 23.0, 56.0, 4.0)
      │
-     ├── `degrees <api.html#Angle.degrees>`_             →   359.017044
-     ├── `dstr() <api.html#Angle.dstr>`_              →   '359deg 01\' 01.4"'
-     ├── `dstr(places=3) <api.html#Angle.dstr>`_      →   '359deg 01\' 01.358"'
-     └── `signed_dms() <api.html#Angle.dms>`_        →   (1.0, 359.0, 1.0, 1.0)
+     ├── `degrees <api-units.html#skyfield.units.Angle.degrees>`_             →   359.017044
+     ├── `dstr() <api-units.html#skyfield.units.Angle.dstr>`_              →   '359deg 01\' 01.4"'
+     ├── `dstr(places=3) <api-units.html#skyfield.units.Angle.dstr>`_      →   '359deg 01\' 01.358"'
+     ├── `dms() <api-units.html#skyfield.units.Angle.dms>`_               →   (359.0, 1.0, 1.3584)
+     └── `signed_dms() <api-units.html#skyfield.units.Angle.signed_dms>`_        →   (1.0, 359.0, 1.0, 1.3584)
 
 The rest of this page is designed to explain
 all of the features outlined in the quick reference above.
