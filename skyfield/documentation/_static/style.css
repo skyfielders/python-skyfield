@@ -187,7 +187,7 @@ tr:last-child td {
     margin-left: 1em;
     color: #888;
 }
-:target {
+dt:target {
    background-color: #f1d592;
 }
 @media screen and (min-width: 480px) {body {font-size: 1.125em;}}
