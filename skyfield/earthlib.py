@@ -182,7 +182,7 @@ def refract(alt_degrees, temperature_C, pressure_mbar):
     while True:
         alt1 = alt
         alt = alt_degrees + refraction(alt, temperature_C, pressure_mbar)
-        converged = abs(alt - alt1) <= 3.0e-5
-        if converged.all():
+        converged = abs(alt - alt1).max() <= 3.0e-5
+        if converged:
             break
     return alt
