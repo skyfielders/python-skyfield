@@ -391,6 +391,57 @@ or else in dynamical coordinates of the date you specify.
 
 See :doc:`positions` to learn more about these possibilities.
 
+Finding when a satellite will be illuminated
+--------------------------------------------
+
+It is sometimes important to understand if the sun is
+currently illuminating the satellite.
+For instance, if it's after sundown in your location,
+and the satellite is still illuminated by the sun,
+you might be able to see that sunlight reflected with the naked eye.
+Additionally, this can be helpful when understanding
+satellite power and thermal cycles as it goes in and
+out of eclipse.
+
+Skyfield provides a simple geometric estimation for this
+with the :meth:`~skyfield.sgp4lib.EarthSatellite.is_sunlit()` method,
+which provides a boolean response for each corresponding time provided.
+This requires knowledge of the earth and sun,
+and will require providing ephemeris data.
+You can check if the satellite will be illuminated at whatever
+times you desire (when the TLE is still accurate):
+
+.. testcode::
+
+  from skyfield.api import load
+  satellite = by_name['ISS (ZARYA)']
+  de421 = load('de421.bsp')
+
+  # Define the times you are interested in
+  minutes = range(0, 90, 10)
+  times = ts.utc(2020, 4, 29, 0, minutes)
+
+  # Calculate the sunlit vector
+  sunlit = satellite.is_sunlit(ephemeris=de421, times=times)
+  for idx, time in enumerate(times):
+      print(time.utc_jpl(), "{} is sunlit: {}".format(satellite.name,sunlit[idx]))
+
+This produces a `sunlit` vector of booleans you can reference alongside your times:
+
+.. testoutput::
+
+  A.D. 2020-Apr-29 00:00:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 00:10:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 00:20:00.0000 UT ISS (ZARYA) is sunlit: False
+  A.D. 2020-Apr-29 00:30:00.0000 UT ISS (ZARYA) is sunlit: False
+  A.D. 2020-Apr-29 00:40:00.0000 UT ISS (ZARYA) is sunlit: False
+  A.D. 2020-Apr-29 00:50:00.0000 UT ISS (ZARYA) is sunlit: False
+  A.D. 2020-Apr-29 01:00:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 01:10:00.0000 UT ISS (ZARYA) is sunlit: True
+  A.D. 2020-Apr-29 01:20:00.0000 UT ISS (ZARYA) is sunlit: True
+
+You can see when it is sunlit at the given times!
+
 Avoid calling the observe method
 --------------------------------
 

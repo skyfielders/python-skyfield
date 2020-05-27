@@ -2,7 +2,7 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
 from numpy import (
-    array, concatenate, cross, einsum, identity, ones_like, repeat, zeros_like
+    array, concatenate, cross, einsum, identity, ones_like, repeat, zeros_like, sqrt, arccos, arctan2
 )
 from sgp4.api import SGP4_ERRORS, Satrec
 
@@ -152,6 +152,30 @@ class EarthSatellite(VectorFunction):
         vTEME *= DAY_S
         rITRF, vITRF = TEME_to_ITRF(t.ut1, rTEME, vTEME)
         return rITRF, vITRF, error
+
+    def is_sunlit(self, ephemeris, times):
+        """Calculates if the satellite is currently sunlit (True/False) at each time in times. Returns an array of booleans."""
+        Re = 6378.137  # Equatorial radius of the Earth in km
+        earth = ephemeris['earth']
+        sun = ephemeris['sun']
+        sat = earth + self
+
+        sunpos, earthpos, satpos = [
+            thing.at(times).position.km for thing in (sun, earth, sat)
+        ]
+        sunearth, sunsat = earthpos-sunpos, satpos-sunpos
+        sunearthnorm, sunsatnorm = [
+            vec/sqrt((vec**2).sum(axis=0)) for vec in (sunearth, sunsat)
+        ]
+        angle = arccos((sunearthnorm * sunsatnorm).sum(axis=0))
+        sunearthdistance = sqrt((sunearth**2).sum(axis=0))
+        sunsatdistance = sqrt((sunsat**2).sum(axis=0))
+        limbangle = arctan2(Re, sunearthdistance)
+        sunlit = []
+        for idx, value in enumerate(angle):
+            sunlit.append(((angle[idx] > limbangle[idx]) or (
+                sunsatdistance[idx] < sunearthdistance[idx])))
+        return sunlit
 
     def _at(self, t):
         """Compute this satellite's GCRS position and velocity at time `t`."""
