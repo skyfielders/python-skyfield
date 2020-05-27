@@ -201,11 +201,11 @@ class Angle(object):
 
     @reify
     def _hours(self):
-        return self.radians / tau * 24.0
+        return self.radians * 24.0 / tau
 
     @reify
     def _degrees(self):
-        return self.radians / tau * 360.0
+        return self.radians * 360.0 / tau
 
     @reify
     def hours(self):
@@ -221,15 +221,15 @@ class Angle(object):
 
     def arcminutes(self):
         """Return the angle in arcminutes."""
-        return self.radians / tau * 21600.0
+        return self.degrees * 60.0
 
     def arcseconds(self):
         """Return the angle in arcseconds."""
-        return self.radians / tau * 1296000.0
+        return self.degrees * 3600.0
 
     def mas(self):
         """Return the angle in milliarcseconds."""
-        return self.radians / tau * 1296000000.0
+        return self.degrees * 3600000.0
 
     def __str__(self):
         if self.radians.size == 0:
