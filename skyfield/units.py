@@ -156,12 +156,6 @@ value in specific units through an attribute or method:
 
 # Angle units.
 
-_to_degrees = 360.0 / tau
-_from_degrees = tau / 360.0
-
-_to_hours = 24.0 / tau
-_from_hours = tau / 24.0
-
 _instantiation_instructions = """to instantiate an Angle, try one of:
 
 Angle(angle=another_angle)
@@ -185,10 +179,10 @@ class Angle(object):
             self.radians = _to_array(radians)
         elif degrees is not None:
             self._degrees = degrees = _to_array(_unsexagesimalize(degrees))
-            self.radians = degrees * _from_degrees
+            self.radians = degrees / 360.0 * tau
         elif hours is not None:
             self._hours = hours = _to_array(_unsexagesimalize(hours))
-            self.radians = hours * _from_hours
+            self.radians = hours / 24.0 * tau
 
         self.preference = (preference if preference is not None
                            else 'hours' if hours is not None
@@ -200,18 +194,18 @@ class Angle(object):
         degrees = _to_array(_unsexagesimalize(degrees))
         self = cls.__new__(cls)
         self.degrees = degrees
-        self.radians = degrees * _from_degrees
+        self.radians = degrees / 360.0 * tau
         self.preference = 'degrees'
         self.signed = signed
         return self
 
     @reify
     def _hours(self):
-        return self.radians * _to_hours
+        return self.radians / tau * 24.0
 
     @reify
     def _degrees(self):
-        return self.radians * _to_degrees
+        return self.radians / tau * 360.0
 
     @reify
     def hours(self):
@@ -224,6 +218,18 @@ class Angle(object):
         if self.preference != 'degrees':
             raise WrongUnitError('degrees')
         return self._degrees
+
+    def arcminutes(self):
+        """Return the angle in arcminutes."""
+        return self.radians / tau * 21600.0
+
+    def arcseconds(self):
+        """Return the angle in arcseconds."""
+        return self.radians / tau * 1296000.0
+
+    def mas(self):
+        """Return the angle in milliarcseconds."""
+        return self.radians / tau * 1296000000.0
 
     def __str__(self):
         if self.radians.size == 0:
@@ -463,7 +469,7 @@ def _interpret_angle(name, angle_object, angle_float, unit='degrees'):
         if isinstance(angle_object, Angle):
             return angle_object.radians
     elif angle_float is not None:
-        return _unsexagesimalize(angle_float) * _from_degrees
+        return _unsexagesimalize(angle_float) / 360.0 * tau
     raise ValueError('you must either provide the {0}= parameter with'
                      ' an Angle argument or supply the {0}_{1}= parameter'
                      ' with a numeric argument'.format(name, unit))

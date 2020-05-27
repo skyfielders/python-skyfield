@@ -13,6 +13,12 @@ def needs_astropy(test):
     """Skip `test` if AstroPy is not available."""
     return None if (u is None) else test
 
+def test_arcminutes_and_arcseconds_and_mas():
+    angle = units.Angle(degrees=1.0)
+    assert angle.arcminutes() == 60
+    assert angle.arcseconds() == 60 * 60
+    assert angle.mas() == 60 * 60 * 1000
+
 def test_velocity_input_units():
     v1 = units.Velocity(au_per_d=2.0)
     v2 = units.Velocity(km_per_s=3462.9137)

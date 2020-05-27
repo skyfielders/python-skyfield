@@ -349,6 +349,9 @@ All three kinds of quantity support one or more methods.
 
    Distance.to
    Velocity.to
+   Angle.arcminutes
+   Angle.arcseconds
+   Angle.mas
    Angle.to
    Angle.hms
    Angle.signed_hms
