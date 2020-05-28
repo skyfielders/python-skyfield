@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """Classes representing different kinds of astronomical position."""
 
-from numpy import arccos, array, clip, einsum, exp, full, nan
-from .constants import ANGVEL, DAY_S, DEG2RAD, RAD2DEG, tau
+from numpy import arccos, array, clip, einsum, exp, full, nan, nan_to_num
+from .constants import ANGVEL, ERAD, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
+from .geometry import intersect_line_and_sphere
 from .functions import (
     _mxv, _mxm, dots, from_spherical, length_of, rot_x, rot_z,
     to_spherical, _to_array,
@@ -676,6 +677,14 @@ class Geocentric(ICRF):
         return Topos(latitude=Angle(radians=lat),
                      longitude=Angle(radians=lon),
                      elevation_m=elevation_m)
+
+    def is_sunlit(self, ephemeris):
+        """Return whether a position in Earth orbit is in sunlight."""
+        sun_m = (ephemeris['sun'] - ephemeris['earth']).at(self.t).position.m
+        earth_m = - self.position.m
+        near, far = intersect_line_and_sphere(sun_m + earth_m, earth_m, ERAD)
+        return nan_to_num(far) <= 0
+        # BUT: what about normal satellite positions relative to an observer?
 
 
 def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):
