@@ -2,7 +2,7 @@
 
 from numpy import array
 from skyfield import api
-from skyfield.api import EarthSatellite
+from skyfield.api import EarthSatellite, load
 from skyfield.constants import AU_KM, AU_M
 from skyfield.sgp4lib import TEME_to_ITRF
 
@@ -137,3 +137,16 @@ def test_epoch_date():
 def test_target_number():
     s = EarthSatellite(*iss_tle0.splitlines())
     assert s.target == -125544
+
+def test_is_sunlit():
+    # Yes, a positionlib method; but it made sense to test it here.
+    ts = api.load.timescale()
+    t = ts.utc(2018, 7, 3, 0, range(0, 60, 10))
+    s = EarthSatellite(*iss_tle0.splitlines())
+    eph = load('de421.bsp')
+    expected = [True, False, False, False, True, True]
+    assert list(s.at(t).is_sunlit(eph)) == expected
+
+    # What if we observe from a topos rather than the geocenter?
+    topos = api.Topos('40.8939 N', '83.8917 W')
+    assert list((s - topos).at(t).is_sunlit(eph)) == expected

@@ -2,7 +2,7 @@
 """Classes representing different kinds of astronomical position."""
 
 from numpy import arccos, array, clip, einsum, exp, full, nan, nan_to_num
-from .constants import ANGVEL, ERAD, DAY_S, DEG2RAD, RAD2DEG, tau
+from .constants import ANGVEL, AU_M, ERAD, DAY_S, DEG2RAD, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
 from .geometry import intersect_line_and_sphere
@@ -386,6 +386,22 @@ class ICRF(object):
                 Angle(radians=dec),
                 Distance(au=d))
 
+    def is_sunlit(self, ephemeris):
+        """Return whether a position in Earth orbit is in sunlight."""
+        if self.center == 399:
+            earth_m = - self.position.m
+        else:
+            o = self.observer_data
+            if (o is not None) and (o.gcrs_position is not None):
+                earth_m = - self.position.m - o.gcrs_position * AU_M
+            else:
+                raise ValueError('cannot tell whether this position is sunlit')
+
+        sun_m = (ephemeris['sun'] - ephemeris['earth']).at(self.t).position.m
+        near, far = intersect_line_and_sphere(sun_m + earth_m, earth_m, ERAD)
+        return nan_to_num(far) <= 0
+        # BUT: what about normal satellite positions relative to an observer?
+
     def from_altaz(self, alt=None, az=None, alt_degrees=None, az_degrees=None,
                    distance=Distance(au=0.1)):
         """Generate an Apparent position from an altitude and azimuth.
@@ -677,14 +693,6 @@ class Geocentric(ICRF):
         return Topos(latitude=Angle(radians=lat),
                      longitude=Angle(radians=lon),
                      elevation_m=elevation_m)
-
-    def is_sunlit(self, ephemeris):
-        """Return whether a position in Earth orbit is in sunlight."""
-        sun_m = (ephemeris['sun'] - ephemeris['earth']).at(self.t).position.m
-        earth_m = - self.position.m
-        near, far = intersect_line_and_sphere(sun_m + earth_m, earth_m, ERAD)
-        return nan_to_num(far) <= 0
-        # BUT: what about normal satellite positions relative to an observer?
 
 
 def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):
