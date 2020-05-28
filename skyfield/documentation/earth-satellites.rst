@@ -391,8 +391,10 @@ or else in dynamical coordinates of the date you specify.
 
 See :doc:`positions` to learn more about these possibilities.
 
-Finding when a satellite will be illuminated
---------------------------------------------
+.. _satellite-is-sunlit:
+
+Finding when a satellite is in sunlight
+---------------------------------------
 
 A satellite is generally only visible to a ground observer
 when there is still sunlight up at its altitude.
@@ -407,7 +409,7 @@ is also helpful when modeling satellite power and thermal cycles
 as it goes in and out of eclipse.
 
 Skyfield provides a simple geometric estimate for this
-through the :meth:`~skyfield.sgp4lib.EarthSatellite.is_sunlit()` method.
+through the :meth:`~skyfield.positionlib.ICRF.is_sunlit()` method.
 Given an ephemeris with which it can compute the Sun’s position,
 it will return ``True`` when the satellite is in sunlight
 and ``False`` otherwise.
@@ -418,26 +420,33 @@ and ``False`` otherwise.
     satellite = by_name['ISS (ZARYA)']
 
     two_hours = ts.utc(2014, 1, 20, 0, range(0, 120, 20))
+    sunlit = satellite.at(two_hours).is_sunlit(eph)
+    print(sunlit)
 
-    sunlit1 = satellite.is_sunlit(ephemeris=eph, times=two_hours)
-    sunlit2 = satellite.at(two_hours).is_sunlit(eph)
+.. testoutput::
 
-    for ti, sunlit1_i, sunlit2_i in zip(two_hours, sunlit1, sunlit2):
-        print('{}  {} is in {}  {}'.format(
+    [ True  True False False  True  True]
+
+As usual, you can use Python’s ``zip()`` builtin
+if you want to loop across the times and corresponding values.
+
+.. testcode::
+
+    for ti, sunlit_i in zip(two_hours, sunlit):
+        print('{}  {} is in {}'.format(
             ti.utc_strftime('%Y-%m-%d %H:%M'),
             satellite.name,
-            'sunlight' if sunlit1_i else 'shadow',
-            'sunlight' if sunlit2_i else 'shadow',
+            'sunlight' if sunlit_i else 'shadow',
         ))
 
 .. testoutput::
 
-    2014-01-20 00:00  ISS (ZARYA) is in sunlight  sunlight
-    2014-01-20 00:20  ISS (ZARYA) is in sunlight  sunlight
-    2014-01-20 00:40  ISS (ZARYA) is in shadow  shadow
-    2014-01-20 01:00  ISS (ZARYA) is in shadow  shadow
-    2014-01-20 01:20  ISS (ZARYA) is in sunlight  sunlight
-    2014-01-20 01:40  ISS (ZARYA) is in sunlight  sunlight
+    2014-01-20 00:00  ISS (ZARYA) is in sunlight
+    2014-01-20 00:20  ISS (ZARYA) is in sunlight
+    2014-01-20 00:40  ISS (ZARYA) is in shadow
+    2014-01-20 01:00  ISS (ZARYA) is in shadow
+    2014-01-20 01:20  ISS (ZARYA) is in sunlight
+    2014-01-20 01:40  ISS (ZARYA) is in sunlight
 
 Avoid calling the observe method
 --------------------------------

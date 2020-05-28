@@ -6,12 +6,20 @@ Changelog
 Next
 ----
 
+* Added :func:`~skyfield.positionlib.ICRF.is_sunlit()` to determine
+  whether Earth satellites in orbit are in Earth’s shadow or not, thanks
+  to a pull request from Jesse Coffey.
+
+* Added :func:`~skyfield.positionlib.position_of_radec()` to replace the
+  poorly designed :func:`~skyfield.positionlib.position_from_radec()`.
+
 * The 6 numbers in the sequence ``t.utc`` can now be accessed by the
   attribute names ``year``, ``month``, ``day``, ``hour``, ``minute``,
   and ``second``.
 
-* Added :func:`~skyfield.positionlib.position_of_radec()` to replace the
-  poorly designed :func:`~skyfield.positionlib.position_from_radec()`.
+* Nutation routines should now be faster and have a smaller memory
+  footprint, thanks to a rewrite that uses more optimized NumPy calls.
+  `#373 <https://github.com/skyfielders/python-skyfield/issues/373>`_
 
 * Thanks to Jérôme Deuchnord, the exception raised when asking for a
   position out-of-range of a JPL ephemeris now shows the calendar dates

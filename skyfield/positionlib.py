@@ -387,7 +387,17 @@ class ICRF(object):
                 Distance(au=d))
 
     def is_sunlit(self, ephemeris):
-        """Return whether a position in Earth orbit is in sunlight."""
+        """Return whether a position in Earth orbit is in sunlight.
+
+        Returns ``True`` or ``False``, or an array of such values, to
+        indicate whether this position is in sunlight or is blocked by
+        the Earth’s shadow.  It should work with positions produced
+        either by calling ``at()`` on a satellite object, or by calling
+        ``at()`` on the relative position ``sat - topos`` of a satellite
+        with respect to an Earth observer’s position.  See
+        :ref:`satellite-is-sunlit`.
+
+        """
         if self.center == 399:
             earth_m = - self.position.m
         else:

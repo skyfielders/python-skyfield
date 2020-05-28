@@ -272,6 +272,7 @@ All positions support a basic set of methods:
    ICRF.ecliptic_latlon
    ICRF.galactic_xyz
    ICRF.galactic_latlon
+   ICRF.is_sunlit
    ICRF.from_altaz
 
 Position methods specific to one class
