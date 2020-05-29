@@ -9,8 +9,6 @@ Next
 * Added :func:`~skyfield.positionlib.ICRF.is_sunlit()` to determine
   whether Earth satellites in orbit are in Earth’s shadow or not, thanks
   to a pull request from Jesse Coffey.
-  Also added optional sun and shadow awareness
-  to the Earth satellite event finder.
 
 * Added :func:`~skyfield.positionlib.position_of_radec()` to replace the
   poorly designed :func:`~skyfield.positionlib.position_from_radec()`.
