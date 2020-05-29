@@ -1,3 +1,4 @@
+:orphan:
 
 ===================
  Table of Contents
@@ -37,6 +38,5 @@ that is accelerated using NumPy vector math!
    api-elements
    api-units
    api-trigonometry
-   toc
    design
    bibliography
