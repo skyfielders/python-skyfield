@@ -531,7 +531,7 @@ so you should neglect it and simply subtract
 GCRS-centered vectors instead as detailed above.
 
 Detecting Propagation Errors
-============================
+----------------------------
 
 After building a satellite object,
 you can examine the *epoch* date and time
