@@ -3,8 +3,8 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-Next
-----
+1.21 — 2020 May 29
+------------------
 
 * Added :func:`~skyfield.positionlib.ICRF.is_sunlit()` to determine
   whether Earth satellites in orbit are in Earth’s shadow or not, thanks
@@ -12,6 +12,14 @@ Next
 
 * Added :func:`~skyfield.positionlib.position_of_radec()` to replace the
   poorly designed :func:`~skyfield.positionlib.position_from_radec()`.
+
+* Skyfield :class:`~skyfield.timelib.Time` objects now have microsecond
+  internal accuracy, so round trips to and from Python datetimes should
+  now preserve all the microsecond digits.
+
+* The :meth:`~skyfield.timelib.Time.utc_strftime()` method now rounds to
+  the nearest minute or second if it sees that either minutes or seconds
+  are the smallest unit of time in the format string.
 
 * The 6 numbers in the sequence ``t.utc`` can now be accessed by the
   attribute names ``year``, ``month``, ``day``, ``hour``, ``minute``,
