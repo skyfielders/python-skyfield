@@ -213,8 +213,11 @@ over the span of a single day:
     t0 = ts.utc(2014, 1, 23)
     t1 = ts.utc(2014, 1, 24)
     t, events = satellite.find_events(bluffton, t0, t1, altitude_degrees=30.0)
+
+    event_names = ['rise above 30°', 'culminate', 'set below 30°']
+
     for ti, event in zip(t, events):
-        name = ('rise above 30°', 'culminate', 'set below 30°')[event]
+        name = event_names[event]
         print(ti.utc_jpl(), name)
 
 .. testoutput::
@@ -236,6 +239,103 @@ and the moment at which it dipped below it.
 
 Beware that events might not always be in the order rise-culminate-set.
 Some satellites culminate several times between rising and setting.
+
+You can also provide an ``ephemeris`` argument to ``find_events()``
+that enables a fourth event type:
+event number 3 will indicate that the satellite is above the horizon
+but in the Earth’s shadow.
+
+.. testcode::
+
+    eph = load('de421.bsp')
+    t, events = satellite.find_events(
+        bluffton, t0, t1, altitude_degrees=30.0, ephemeris=eph)
+
+    event_names[0] = 'above 30° in sunlight'
+    event_names.append('above 30° but in shadow')
+
+    for ti, event in zip(t, events):
+        name = event_names[event]
+        print(ti.utc_jpl(), name)
+
+.. testoutput::
+
+    A.D. 2014-Jan-23 06:25:36.5356 UT above 30° but in shadow
+    A.D. 2014-Jan-23 06:26:57.7442 UT culminate
+    A.D. 2014-Jan-23 06:28:19.1841 UT set below 30°
+    A.D. 2014-Jan-23 12:54:55.7886 UT above 30° in sunlight
+    A.D. 2014-Jan-23 12:56:26.8624 UT culminate
+    A.D. 2014-Jan-23 12:57:57.7244 UT set below 30°
+
+If the sun rises in shadow then enters sunlight,
+its pass will begin with event 3
+but have an event 0 later in the pass.
+The opposite kind of pass
+— where it rises in sunlight but then enters shadow —
+will start with an event 0 then have an event 3 somewhere mid-pass.
+
+See the next section for more about satellites and sunlight.
+
+.. _satellite-is-sunlit:
+
+Finding when a satellite is in sunlight
+---------------------------------------
+
+A satellite is generally only visible to a ground observer
+when there is still sunlight up at its altitude.
+The satellite will visually disappear
+when it enters the Earth’s shadow
+and reappear when it comes out of eclipse.
+If you are planning to observe a satellite visually,
+rather than with radar or radio,
+you will want to know which satellite passes are in sunlight.
+Knowing a satellite’s sunlit periods
+is also helpful when modeling satellite power and thermal cycles
+as it goes in and out of eclipse.
+
+Skyfield provides a simple geometric estimate for this
+through the :meth:`~skyfield.positionlib.ICRF.is_sunlit()` method.
+Given an ephemeris with which it can compute the Sun’s position,
+it will return ``True`` when the satellite is in sunlight
+and ``False`` otherwise.
+
+.. testcode::
+
+    eph = load('de421.bsp')
+    satellite = by_name['ISS (ZARYA)']
+
+    two_hours = ts.utc(2014, 1, 20, 0, range(0, 120, 20))
+    sunlit = satellite.at(two_hours).is_sunlit(eph)
+    print(sunlit)
+
+.. testoutput::
+
+    [ True  True False False  True  True]
+
+As usual, you can use Python’s ``zip()`` builtin
+if you want to loop across the times and corresponding values.
+
+.. testcode::
+
+    for ti, sunlit_i in zip(two_hours, sunlit):
+        print('{}  {} is in {}'.format(
+            ti.utc_strftime('%Y-%m-%d %H:%M'),
+            satellite.name,
+            'sunlight' if sunlit_i else 'shadow',
+        ))
+
+.. testoutput::
+
+    2014-01-20 00:00  ISS (ZARYA) is in sunlight
+    2014-01-20 00:20  ISS (ZARYA) is in sunlight
+    2014-01-20 00:40  ISS (ZARYA) is in shadow
+    2014-01-20 01:00  ISS (ZARYA) is in shadow
+    2014-01-20 01:20  ISS (ZARYA) is in sunlight
+    2014-01-20 01:40  ISS (ZARYA) is in sunlight
+
+See the previous section
+for how this feature is also integrated
+as an option of the satellite ``find_events()`` method.
 
 Generating a satellite position
 -------------------------------
@@ -390,63 +490,6 @@ or else in dynamical coordinates of the date you specify.
     +63deg 58' 45.3"
 
 See :doc:`positions` to learn more about these possibilities.
-
-.. _satellite-is-sunlit:
-
-Finding when a satellite is in sunlight
----------------------------------------
-
-A satellite is generally only visible to a ground observer
-when there is still sunlight up at its altitude.
-The satellite will visually disappear
-when it enters the Earth’s shadow
-and reappear when it comes out of eclipse.
-If you are planning to observe a satellite visually,
-rather than with radar or radio,
-you will want to know which satellite passes are in sunlight.
-Knowing a satellite’s sunlit periods
-is also helpful when modeling satellite power and thermal cycles
-as it goes in and out of eclipse.
-
-Skyfield provides a simple geometric estimate for this
-through the :meth:`~skyfield.positionlib.ICRF.is_sunlit()` method.
-Given an ephemeris with which it can compute the Sun’s position,
-it will return ``True`` when the satellite is in sunlight
-and ``False`` otherwise.
-
-.. testcode::
-
-    eph = load('de421.bsp')
-    satellite = by_name['ISS (ZARYA)']
-
-    two_hours = ts.utc(2014, 1, 20, 0, range(0, 120, 20))
-    sunlit = satellite.at(two_hours).is_sunlit(eph)
-    print(sunlit)
-
-.. testoutput::
-
-    [ True  True False False  True  True]
-
-As usual, you can use Python’s ``zip()`` builtin
-if you want to loop across the times and corresponding values.
-
-.. testcode::
-
-    for ti, sunlit_i in zip(two_hours, sunlit):
-        print('{}  {} is in {}'.format(
-            ti.utc_strftime('%Y-%m-%d %H:%M'),
-            satellite.name,
-            'sunlight' if sunlit_i else 'shadow',
-        ))
-
-.. testoutput::
-
-    2014-01-20 00:00  ISS (ZARYA) is in sunlight
-    2014-01-20 00:20  ISS (ZARYA) is in sunlight
-    2014-01-20 00:40  ISS (ZARYA) is in shadow
-    2014-01-20 01:00  ISS (ZARYA) is in shadow
-    2014-01-20 01:20  ISS (ZARYA) is in sunlight
-    2014-01-20 01:40  ISS (ZARYA) is in sunlight
 
 Avoid calling the observe method
 --------------------------------

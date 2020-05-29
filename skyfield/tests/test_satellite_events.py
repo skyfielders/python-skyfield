@@ -1,28 +1,48 @@
-from __future__ import print_function, division
-from skyfield import api, almanac
+from skyfield import api
 
 def test_sat_almanac_LEO():
-    # Testcase from
+    # Testcase TIANGONG 1 from
     # https://github.com/skyfielders/astronomy-notebooks/blob/master/Solvers/Earth-Satellite-Passes.ipynb
     # with elevated horizon
 
-    tle = ["TIANGONG 1",
-           "1 37820U 11053A   14314.79851609  .00064249  00000-0  44961-3 0  5637",
-           "2 37820  42.7687 147.7173 0010686 283.6368 148.1694 15.73279710179072"]
-    sat = api.EarthSatellite(*tle[1:3], name=tle[0])
+    sat = api.EarthSatellite(
+        '1 37820U 11053A   14314.79851609  .00064249  00000-0  44961-3 0  5637',
+        '2 37820  42.7687 147.7173 0010686 283.6368 148.1694 15.73279710179072',
+    )
     topos = api.Topos('42.3581 N', '71.0636 W')
-    timescale = api.load.timescale()
-    t0 = timescale.tai(2014, 11, 10)
-    t1 = timescale.tai(2014, 11, 11)
+    ts = api.load.timescale(builtin=True)
+    t0 = ts.tai(2014, 11, 10)
+    t1 = ts.tai(2014, 11, 11)
     horizon = 20
     nexpected = 12
 
-    #times, yis = almanac.find_satellite_events(t0, t1, sat, topos, horizon=20)
     times, yis = sat.find_events(topos, t0, t1, 20.0)
     assert(verify_sat_almanac(times, yis, sat, topos, horizon, nexpected))
 
+def test_iss_entering_shadow():
+    ts = api.load.timescale(builtin=True)
+    eph = api.load('de421.bsp')
+    topos = api.Topos('40.8934 N', '83.8918 W')
+    sat = api.EarthSatellite(
+        '1 25544U 98067A   20149.87174847  .00000715  00000-0  20865-4 0  9990',
+        '2 25544  51.6450  84.0707 0001897   8.7970  32.5061 15.49398379229025',
+    )
 
-def test_sat_almanac_Tricky():
+    t0 = ts.tai(2020, 5, 30, 2, 0)
+    t1 = ts.tai(2020, 5, 30, 3, 0)
+    t, y = sat.find_events(topos, t0, t1, ephemeris=eph)
+    report = '\n'.join('%s %s' % (ti.utc_strftime('%Y-%m-%d %H:%M:%S'), yi)
+                       for ti, yi in zip(t, y))
+
+    # Each of these times is within 1 second of the times given for the
+    # same pass by heavens-above.com.
+    assert report == '''\
+2020-05-30 02:34:04 0
+2020-05-30 02:39:26 1
+2020-05-30 02:41:07 3
+2020-05-30 02:44:47 2'''
+
+def test_sat_almanac_tricky():
     # Various tricky satellites
     # Integral: 3 days high eccentricity.
     # ANIK-F1R  Geo always visible from Boston

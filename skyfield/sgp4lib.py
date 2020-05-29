@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
-from numpy import (
-    array, concatenate, cross, einsum, identity, ones_like, repeat, zeros_like, sqrt, arccos, arctan2
-)
+from numpy import (array, concatenate, cross, einsum, identity, ones_like,
+                   repeat, zeros_like, where)
 from sgp4.api import SGP4_ERRORS, Satrec
 
 from .constants import AU_KM, DAY_S, T0, tau
@@ -159,7 +158,7 @@ class EarthSatellite(VectorFunction):
         rGCRS, vGCRS = ITRF_to_GCRS2(t, rITRF, vITRF)
         return rGCRS, vGCRS, rGCRS, error
 
-    def find_events(self, topos, t0, t1, altitude_degrees=0.0):
+    def find_events(self, topos, t0, t1, altitude_degrees=0.0, ephemeris=None):
         """Return the times at which the satellite rises, culminates, and sets.
 
         Searches between ``t0`` and ``t1``, which should each be a
@@ -178,6 +177,18 @@ class EarthSatellite(VectorFunction):
         Note that multiple culminations in a row are possible when,
         without setting, the satellite reaches a second peak altitude
         after descending partway down the sky from the first one.
+
+        If you pass an ``ephemeris``, then an additional event is
+        supported:
+
+        * 3 — Satellite is above ``altitude_degrees`` but in shadow.
+
+        This event indicates that satellite is in the Earth’s shadow.
+        A satellite that is still in shadow as it rises will start its
+        pass with event 3, and only show an event 0 if during the pass
+        it enters sunlight.  Or a satellite might start with an event 0
+        as usual, then have an event 3 during its pass indicating the
+        moment it entered shadow.
 
         """
         # First, we find the moments of maximum altitude over the time
@@ -229,8 +240,17 @@ class EarthSatellite(VectorFunction):
         # horizon in between each pair of adjancent maxima.
 
         def below_horizon_at(t):
-            cheat(t)
-            return at(t).altaz()[0].degrees < altitude_degrees
+            if ephemeris is None:  # avoid ruining is_sunlit() computation
+                cheat(t)
+
+            p = at(t)
+            is_below_horizon = p.altaz()[0].degrees < altitude_degrees
+
+            if ephemeris is None:
+                return is_below_horizon * 2
+
+            is_sunlit = p.is_sunlit(ephemeris)
+            return where(is_below_horizon, 2, 3 * ~is_sunlit)
 
         # The `jdo` array are the times of maxima, with their averages
         # in between them.  The start and end times are thrown in too,
@@ -243,7 +263,7 @@ class EarthSatellite(VectorFunction):
         trs, rs = _find_discrete(t0.ts, jdo, below_horizon_at, half_second, 8)
 
         jd = concatenate((jdmax, trs.tt))
-        v = concatenate((ones, rs * 2))
+        v = concatenate((ones, rs))
 
         i = jd.argsort()
         return ts.tt_jd(jd[i]), v[i]
