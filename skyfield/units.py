@@ -249,6 +249,16 @@ class Angle(object):
         else:
             return '<{0} {1}>'.format(type(self).__name__, self)
 
+    def __iter__(self):
+        raise ValueError(
+            '''choose a specific Angle unit to iterate over
+
+Instead of iterating over this Angle object, try iterating over one of
+its unit-specific arrays like .degrees, .hours, or .radians, or else over
+the output of one of its methods like .hstr(), .dstr(), .arcminutes(),
+.arcseconds(), or .mas().  For all of the possibilities see:
+https://rhodesmill.org/skyfield/api-units.html#skyfield.units.Angle''')
+
     def hms(self, warn=True):
         """Convert to a tuple (hours, minutes, seconds).
 

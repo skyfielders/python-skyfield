@@ -111,6 +111,18 @@ value in specific units through an attribute or method:
     xdot, ydot, zdot = velocity.to(astropy_unit)
 '''
 
+def test_iterating_over_raw_angle():
+    angle = Angle(degrees=4.5)
+    with assert_raises(ValueError) as a:
+        iter(angle)
+    assert str(a.exception) == '''choose a specific Angle unit to iterate over
+
+Instead of iterating over this Angle object, try iterating over one of
+its unit-specific arrays like .degrees, .hours, or .radians, or else over
+the output of one of its methods like .hstr(), .dstr(), .arcminutes(),
+.arcseconds(), or .mas().  For all of the possibilities see:
+https://rhodesmill.org/skyfield/api-units.html#skyfield.units.Angle'''
+
 def test_converting_from_km_to_m():
     distance = Distance(km=1.234)
     assert abs(distance.m - 1234.0) < 1e-15
