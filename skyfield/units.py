@@ -74,9 +74,11 @@ class Distance(object):
         return '<{0} {1}>'.format(type(self).__name__, self)
 
     def __iter__(self):
-        raise UnpackingError(_iter_message % {
-            'class': self.__class__.__name__, 'values': 'x, y, z',
-            'attr1': 'au', 'attr2': 'km'})
+        cn = self.__class__.__name__
+        raise UnpackingError(_iter_message.format(
+            cls=cn, object=cn.lower(), values='x, y, z',
+            attr1='au', attr2='km',
+        ))
 
     def length(self):
         """Compute the length when this is an x,y,z vector.
@@ -137,9 +139,11 @@ class Velocity(object):
         return '<{0} {1}>'.format(type(self).__name__, self)
 
     def __iter__(self):
-        raise UnpackingError(_iter_message % {
-            'class': self.__class__.__name__, 'values': 'xdot, ydot, zdot',
-            'attr1': 'au_per_d', 'attr2': 'km_per_s'})
+        cn = self.__class__.__name__
+        raise UnpackingError(_iter_message.format(
+            cls=cn, object=cn.lower(), values='xdot, ydot, zdot',
+            attr1='au_per_d', attr2='km_per_s',
+        ))
 
     def to(self, unit):
         """Convert this velocity to the given AstroPy unit."""
@@ -147,14 +151,14 @@ class Velocity(object):
         return (self.au_per_d * au / d).to(unit)
 
 _iter_message = """\
-cannot directly unpack a %(class)s into several values
+cannot directly unpack a {cls} into several values
 
-To unpack a %(class)s into three components, you need to ask for its
+To unpack a {cls} into three components, you need to ask for its
 value in specific units through an attribute or method:
 
-    %(values)s = velocity.%(attr1)s
-    %(values)s = velocity.%(attr2)s
-    %(values)s = velocity.to(astropy_unit)
+    {values} = {object}.{attr1}
+    {values} = {object}.{attr2}
+    {values} = {object}.to(astropy_unit)
 """
 
 # Angle units.

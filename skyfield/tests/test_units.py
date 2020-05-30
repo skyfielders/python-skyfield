@@ -83,13 +83,33 @@ def test_stringifying_vector_distance():
 
 def test_iterating_over_raw_measurement():
     distance = Distance(au=1.234)
-    with assert_raises(UnpackingError):
+    with assert_raises(UnpackingError) as a:
         x, y, z = distance
+    assert str(a.exception) == '''\
+cannot directly unpack a Distance into several values
+
+To unpack a Distance into three components, you need to ask for its
+value in specific units through an attribute or method:
+
+    x, y, z = distance.au
+    x, y, z = distance.km
+    x, y, z = distance.to(astropy_unit)
+'''
 
 def test_iterating_over_raw_velocity():
     velocity = Velocity(au_per_d=1.234)
-    with assert_raises(UnpackingError):
+    with assert_raises(UnpackingError) as a:
         x, y, z = velocity
+    assert str(a.exception) == '''\
+cannot directly unpack a Velocity into several values
+
+To unpack a Velocity into three components, you need to ask for its
+value in specific units through an attribute or method:
+
+    xdot, ydot, zdot = velocity.au_per_d
+    xdot, ydot, zdot = velocity.km_per_s
+    xdot, ydot, zdot = velocity.to(astropy_unit)
+'''
 
 def test_converting_from_km_to_m():
     distance = Distance(km=1.234)
