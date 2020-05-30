@@ -348,6 +348,8 @@ All three kinds of quantity support one or more methods.
 
 .. autosummary::
 
+   Distance.length
+   Distance.light_seconds
    Distance.to
    Velocity.to
    Angle.arcminutes

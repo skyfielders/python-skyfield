@@ -6,7 +6,7 @@ from __future__ import print_function
 import numpy as np
 import sys
 from numpy import abs, array, copysign, isnan
-from .constants import AU_KM, AU_M, DAY_S, tau
+from .constants import AU_KM, AU_M, C, DAY_S, tau
 from .descriptorlib import reify
 from .functions import length_of
 
@@ -91,6 +91,9 @@ class Distance(object):
 
         """
         return Distance(au=length_of(self.au))
+
+    def light_seconds(self):
+        return self.m / C
 
     def to(self, unit):
         """Convert this distance to the given AstroPy unit."""
