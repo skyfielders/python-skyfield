@@ -1,3 +1,12 @@
+"""
+On my laptop, this script shows that simply computing the positions and
+the sunlit-ness of the ISS for each of the 381 seconds of this pass
+takes roughly the same amount of time as mounting a full search for the
+moment it passes into shadow.  But the benefit is far greater, because
+with almost no additional expense all altitudes and azimuths can also
+be computed.
+
+"""
 import numpy as np
 from skyfield import almanac, api
 from skyfield.nutationlib import iau2000b
@@ -62,11 +71,4 @@ DT = time() - T0
 
 print(DT, 'to re-use the positions to compute altitude and azimuth')
 
-print('''
-On my laptop, this script shows that simply computing the positions and
-the sunlit-ness of the ISS for each of the 381 seconds of this pass
-takes roughly the same amount of time as mounting a full search for the
-moment it passes into shadow.  But the benefit is far greater, because
-with almost no additional expense all altitudes and azimuths can also
-be computed.
-''')
+print(__doc__.rstrip())
