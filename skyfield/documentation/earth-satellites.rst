@@ -196,6 +196,37 @@ and await updates from their respective organizations.
 
 .. _satellite-rising-and-setting:
 
+Historical satellite element sets
+---------------------------------
+
+To repeat the warning in the previous section:
+any particular satellite TLE set
+is only valid for a couple of weeks to either side of that TLE’s epoch.
+
+That limitation unfortunately applies to the past as well as to the future.
+Just as today’s TLE for a satellite
+can only help you predict its position for a few weeks into the future,
+it will also be accurate for only a few weeks into the past.
+Whether the satellite has been performing active maneuvers,
+or merely coasting amidst the unpredictable magnetic fields
+and atmospheric drag of the near-Earth environment,
+a current TLE cannot predict the satellite’s position
+on a date in the distant past.
+
+If you lack access to an archive of old TLE files,
+try searching the Internet Archive’s “Wayback Machine”:
+
+https://archive.org/web/
+
+Supply the URL of the current satellite catalog you downloaded
+and click “Browse History”
+and the Archive will display a calendar
+indicating whether any earlier versions of that same satellite catalog
+are in their archive.
+If so, then you should be able to download them to your machine
+and use them when you need historic satellite positions
+close to the old TLE’s epoch date.
+
 Finding when a satellite rises and sets
 ---------------------------------------
 
