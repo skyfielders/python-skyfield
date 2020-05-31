@@ -54,6 +54,11 @@ def on(load, year, month, day):
 
 # The tests.
 
+def test_build_url(load):
+    url = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de421.bsp'
+    assert load.build_url('de421.bsp') == url
+    assert load.build_url('unknown.kind.of.file') is None
+
 def test_open_in_main_directory(load):
     with open(os.path.join(load.directory, 'file.tle'), 'wb') as f:
         f.write(b'example text\n')

@@ -34,6 +34,7 @@ Opening files
 .. autosummary::
 
    Loader
+   Loader.build_url
    Loader.path_to
    Loader.timescale
    Loader.tle_file

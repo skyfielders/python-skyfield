@@ -3,6 +3,13 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+Future
+------
+
+* Added :meth:`~skyfield.iokit.Loader.build_url()` that returns the URL
+  from which Skyfield will download a file.
+  `#382 <https://github.com/skyfielders/python-skyfield/issues/382>`_
+
 1.21 — 2020 May 29
 ------------------
 

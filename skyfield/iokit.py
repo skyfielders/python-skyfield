@@ -222,6 +222,11 @@ class Loader(object):
     def _log(self, message, *args):
         self.events.append(message.format(*args))
 
+    def build_url(self, filename):
+        """Return the URL Skyfield will try downloading for a given filename."""
+        base = _search(self.urls, filename)
+        return None if (base is None) else base + filename
+
     def tle(self, url, reload=False, filename=None):
         """Load and parse a satellite TLE file.
 
