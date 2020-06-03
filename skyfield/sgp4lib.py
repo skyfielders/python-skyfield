@@ -10,7 +10,7 @@ from .constants import AU_KM, DAY_S, T0, tau
 from .functions import rot_x, rot_y, rot_z
 from .positionlib import ITRF_to_GCRS2
 from .searchlib import _find_discrete, find_maxima
-from .timelib import Timescale
+from .timelib import Timescale, calendar_date
 from .vectorlib import VectorFunction
 
 _minutes_per_day = 1440.
@@ -90,23 +90,45 @@ class EarthSatellite(VectorFunction):
         ts = ts or _ts
 
         self.name = None if name is None else name.strip()
-        sat = Satrec.twoline2rv(line1, line2)
-        self.model = sat
+        satrec = Satrec.twoline2rv(line1, line2)
+        self.model = satrec
 
-        # TODO: just use the Julian dates instead
-        two_digit_year = sat.epochyr
+        two_digit_year = satrec.epochyr
         if two_digit_year < 57:
-            year = two_digit_year + 2000;
+            year = two_digit_year + 2000
         else:
-            year = two_digit_year + 1900;
+            year = two_digit_year + 1900
 
-        self.epoch = ts.utc(year, 1, sat.epochdays)
+        self.epoch = ts.utc(year, 1, satrec.epochdays)
 
-        self.target = -100000 - self.model.satnum
+        self._setup(satrec, ts)
+
+    def _setup(self, satrec, ts):
+        # If only I had not made __init__() specific to TLE lines, but
+        # had put them in an alternate construtor instead, this would
+        # simply have lived in __init__().  Alas!  I was so young then.
+
+        self.target = -100000 - satrec.satnum
         self.target_name = 'Satellite{0} {1}'.format(
-            self.model.satnum,
+            satrec.satnum,
             ' ' + repr(self.name) if self.name else '',
         )
+
+    @classmethod
+    def from_satrec(cls, satrec, ts):
+        """Build an EarthSatellite from a raw sgp4 Satrec object."""
+        self = cls.__new__(cls)
+        self.model = satrec
+        self.name = None
+
+        # TODO: once sgp4 starts filling in epochyr and epochdays in
+        # sgp4init(), the separate epoch code here and in __init__() can
+        # be unified to always use epochyr and epochdays.
+        year, month, day = calendar_date(satrec.jdsatepoch)
+        self.epoch = ts.utc(year, month, day + satrec.jdsatepochF)
+
+        self._setup(satrec, ts)
+        return self
 
     def __str__(self):
         sat = self.model

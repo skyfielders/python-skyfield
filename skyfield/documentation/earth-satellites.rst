@@ -656,3 +656,59 @@ and otherwise recording the propagator error:
      None,
      None,
      'mrt is less than 1.0 which indicates the satellite has decayed']
+
+Building a satellite from orbital elements
+------------------------------------------
+
+If you are starting with raw satellite orbital parameters
+instead of TLE text,
+you will want to interact directly
+with the `sgp4 <https://github.com/brandon-rhodes/python-sgp4>`_ library
+that Skyfield uses for its low-level satellite calculations.
+
+The underlying library provides access to a low-level constructor
+that builds a satellite model directly from numeric orbital parameters:
+
+.. testcode::
+
+    from sgp4.api import Satrec, WGS72
+
+    satrec = Satrec()
+    satrec.sgp4init(
+        WGS72,           # gravity model
+        'i',             # 'a' = old AFSPC mode, 'i' = improved mode
+        5,               # satnum: Satellite number
+        18441.785,       # epoch: days since 1949 December 31 00:00 UT
+        2.8098e-05,      # bstar: drag coefficient (/earth radii)
+        6.969196665e-13, # ndot: ballistic coefficient (revs/day)
+        0.0,             # nddot: second derivative of mean motion (revs/day^3)
+        0.1859667,       # ecco: eccentricity
+        5.7904160274885, # argpo: argument of perigee (radians)
+        0.5980929187319, # inclo: inclination (radians)
+        0.3373093125574, # mo: mean anomaly (radians)
+        0.0472294454407, # no_kozai: mean motion (radians/minute)
+        6.0863854713832, # nodeo: right ascension of ascending node (radians)
+    )
+
+If you need any more details,
+this ``sgp4init`` constructor
+is documented in the
+`Providing your own elements <https://pypi.org/project/sgp4/#providing-your-own-elements>`_
+section of the sgp4 library’s documentation on the Python Packaging Index.
+
+To wrap this low-level satellite model in a Skyfield object,
+call this special constructor:
+
+.. testcode::
+
+    sat = EarthSatellite.from_satrec(satrec, ts)
+    print('Satellite number:', sat.model.satnum)
+    print('Epoch:', sat.epoch.utc_jpl())
+
+.. testoutput::
+
+    Satellite number: 5
+    Epoch: A.D. 2000-Jun-27 06:50:24.0000 UT
+
+The result should be a satellite object that behaves
+exactly as though it had been loaded from TLE lines.
