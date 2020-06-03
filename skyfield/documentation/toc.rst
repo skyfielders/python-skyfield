@@ -22,6 +22,7 @@ that is accelerated using NumPy vector math!
    stars
    planetary
    earth-satellites
+   searches
    elements
    astropy
    api
