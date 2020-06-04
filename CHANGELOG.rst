@@ -10,6 +10,11 @@ Future
   from which Skyfield will download a file.
   `#382 <https://github.com/skyfielders/python-skyfield/issues/382>`_
 
+* Added :meth:`~skyfield.jpllib.SpiceKernel.close()` to support
+  applications that need to do fine-grained resource management or that
+  need to run tests that check for dangling open files.
+  `#374 <https://github.com/skyfielders/python-skyfield/issues/374>`_
+
 1.21 — 2020 May 29
 ------------------
 

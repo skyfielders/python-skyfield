@@ -87,6 +87,10 @@ class SpiceKernel(object):
             lines.append(_format_segment(s))
         return '\n'.join(lines)
 
+    def close(self):
+        """Close this ephemeris file."""
+        self.spk.close()
+
     def comments(self):
         """Return the comments string of this kernel.
 

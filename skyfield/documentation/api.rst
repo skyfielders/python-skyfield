@@ -142,10 +142,12 @@ Planetary Ephemerides
 By downloading a `SpiceKernel` file,
 Skyfield users can build vector functions
 predicting the positions of the Moon, Sun, and planets.
+See :doc:`planets`.
 
 .. autosummary::
 
    SpiceKernel
+   SpiceKernel.close
    SpiceKernel.comments
    SpiceKernel.names
    SpiceKernel.decode

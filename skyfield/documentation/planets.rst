@@ -181,6 +181,39 @@ Each time you ask this ``earth`` object for its position at a given time,
 Skyfield will compute both of these underlying vectors
 and add them together to generate the position.
 
+Closing the file automatically
+==============================
+
+If you need to close files as you finish using them
+instead of waiting until the application exits,
+each Skyfield ephemeris offers a
+:meth:`~skyfield.jpllib.SpiceKernel.close()` method.
+It can either be called manually when you are done with an ephemeris,
+or you can use Python’s |closing|_ context manager
+to call the method automatically
+at the completion of a ``with`` statement:
+
+.. |closing| replace:: ``closing()``
+.. _closing: https://docs.python.org/3/library/contextlib.html#contextlib.closing
+
+.. testcode::
+
+    from contextlib import closing
+
+    ts = load.timescale(builtin=True)
+    t = ts.J2000
+
+    with closing(planets):
+        planets['venus'].at(t)  # Ephemeris can be used here
+
+    planets['venus'].at(t)  # But it’s closed outside the “with”
+
+.. testoutput::
+
+    Traceback (most recent call last):
+      ...
+    ValueError: seek of closed file
+
 .. testcleanup::
 
    __import__('skyfield.tests.fixes').tests.fixes.teardown()
