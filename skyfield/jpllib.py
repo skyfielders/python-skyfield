@@ -223,6 +223,7 @@ class ChebyshevPosition(SPICESegment):
             mask = e.out_of_range_times
             segment = self.spk_segment
             e = EphemerisRangeError(text, start_time, end_time, mask, segment)
+            e.__cause__ = None  # avoid exception chaining in Python 3
             raise e
 
         return position / AU_KM, velocity / AU_KM, None, None
