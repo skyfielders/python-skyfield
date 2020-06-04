@@ -51,7 +51,7 @@ and then the angle between those positions:
 
     from skyfield import api
 
-    ts = api.load.timescale()
+    ts = api.load.timescale(builtin=True)
     t = ts.utc(2020, 6, 2)
 
     eph = api.load('de421.bsp')

@@ -64,7 +64,7 @@ the star:
     planets = load('de421.bsp')
     earth = planets['earth']
 
-    ts = load.timescale()
+    ts = load.timescale(builtin=True)
     t = ts.now()
     astrometric = earth.at(t).observe(barnards_star)
     ra, dec, distance = astrometric.radec()
@@ -187,7 +187,7 @@ pass tuples instead of floats:
     barnard = Star(ra_hours=(17, 57, 48.49803),
                    dec_degrees=(4, 41, 36.2072))
 
-    ts = load.timescale()
+    ts = load.timescale(builtin=True)
     t = ts.now()
     astrometric = earth.at(t).observe(barnard)
     ra, dec, distance = astrometric.radec()

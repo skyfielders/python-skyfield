@@ -80,7 +80,7 @@ and 270° at the Last Quarter.
 
     from skyfield.api import load
 
-    ts = load.timescale()
+    ts = load.timescale(builtin=True)
     t = ts.utc(2019, 12, 9, 15, 36)
 
     eph = load('de421.bsp')
@@ -121,7 +121,7 @@ and 270° if the Sun is to the right of the Moon.
     from skyfield.api import load, Topos
     from skyfield.trigonometry import position_angle_of
 
-    ts = load.timescale()
+    ts = load.timescale(builtin=True)
     t = ts.utc(2019, 9, 30, 23)
 
     eph = load('de421.bsp')
@@ -177,7 +177,7 @@ like the Sun, Moon, or one of the planets.
     from skyfield.almanac import find_discrete, risings_and_settings
     from pytz import timezone
 
-    ts = load.timescale()
+    ts = load.timescale(builtin=True)
     t0 = ts.utc(2019, 1, 19)
     t1 = ts.utc(2019, 1, 21)
 
@@ -212,7 +212,7 @@ then Skyfield can return its right ascension and declination.
 
     from skyfield import api
 
-    ts = api.load.timescale()
+    ts = api.load.timescale(builtin=True)
     t = ts.utc(2019, 9, 13, 20)
     topos = api.Topos(latitude_degrees=42, longitude_degrees=-87)
     observer = topos.at(t)
@@ -296,7 +296,7 @@ to both Accra, Ghana, and the top of Mount Bierstadt in Colorado.
    from skyfield.api import Topos, load
    from skyfield.functions import length_of
 
-   ts = load.timescale()
+   ts = load.timescale(builtin=True)
    t = ts.utc(2019, 1, 1)
 
    bierstadt = Topos('39.5828 N', '105.6686 W', elevation_m=4287.012)

@@ -37,7 +37,7 @@ Computing the position of Mars in the sky is as easy as:
     planets = load('de421.bsp')
     earth, mars = planets['earth'], planets['mars']
 
-    ts = load.timescale()
+    ts = load.timescale(builtin=True)
     t = ts.now()
     astrometric = earth.at(t).observe(mars)
     ra, dec, distance = astrometric.radec()

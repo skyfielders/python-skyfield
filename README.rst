@@ -15,7 +15,7 @@ positions for planets and Earth satellites.
    planets = load('de421.bsp')
    earth, mars = planets['earth'], planets['mars']
 
-   ts = load.timescale()
+   ts = load.timescale(builtin=True)
    t = ts.now()
    position = earth.at(t).observe(mars)
    ra, dec, distance = position.radec()

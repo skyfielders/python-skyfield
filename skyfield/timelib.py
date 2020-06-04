@@ -316,7 +316,7 @@ class Time(object):
     You will typically not instantiate this class yourself, but will
     rely on a Skyfield ``Timescale`` object to build dates for you:
 
-    >>> ts = load.timescale()
+    >>> ts = load.timescale(builtin=True)
     >>> print(ts.utc(1980, 1, 1))
     <Time tt=2444239.5005924073>
 
@@ -908,7 +908,7 @@ using its methods, which let you either specify a calendar date or else
 supply a raw Julian date value with the "jd" keyword:
 
         from skyfield.api import load
-        ts = load.timescale()
+        ts = load.timescale(builtin=True)
         t = ts.utc(1980, 4, 20)       # the new way
 
         t = ts.tt(jd=2444349.500592)  # jd is also supported for tai, tt, tdb

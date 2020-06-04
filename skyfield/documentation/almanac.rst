@@ -14,7 +14,7 @@ an ephemeris file that provides positions from the planets:
 
     from skyfield import api
 
-    ts = api.load.timescale()
+    ts = api.load.timescale(builtin=True)
     eph = api.load('de421.bsp')
 
 Then, load the “almanac” module.
