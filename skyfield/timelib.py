@@ -241,7 +241,7 @@ class Timescale(object):
         t = Time(self, tdb, - tdb_minus_tt(tdb) / DAY_S)
         return t
 
-    def tdb_jd(self, jd):
+    def tdb_jd(self, jd, fraction=0.0):
         """Build a `Time` from a TDB Julian date.
 
         Supply the Barycentric Dynamical Time (TDB) as a Julian date:
@@ -251,8 +251,9 @@ class Timescale(object):
         2456675.56640625
 
         """
-        tdb = _to_array(jd)
-        t = Time(self, tdb, - tdb_minus_tt(tdb) / DAY_S)
+        jd = _to_array(jd)
+        t = Time(self, jd, fraction - tdb_minus_tt(jd + fraction) / DAY_S)
+        # TODO: copy in original values?
         return t
 
     def ut1(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,

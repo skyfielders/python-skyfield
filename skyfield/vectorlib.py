@@ -210,18 +210,27 @@ def _correct_for_light_travel_time(observer, target):
     """
     t = observer.t
     ts = t.ts
+    whole = t.whole
+    tdb_fraction = t.tdb_fraction
+
     cposition = observer.position.au
     cvelocity = observer.velocity.au_per_d
+
     tposition, tvelocity, gcrs_position, message = target._at(t)
+
     distance = length_of(tposition - cposition)
     light_time0 = 0.0
-    t_tdb = t.tdb
     for i in range(10):
         light_time = distance / C_AUDAY
         delta = light_time - light_time0
-        if -1e-12 < min(delta) and max(delta) < 1e-12:
+        if abs(max(delta)) < 1e-12:
             break
-        t2 = ts.tdb(jd=t_tdb - light_time)
+
+        # We assume a light travel time of at most a couple of days.  A
+        # longer light travel time would best be split into a whole and
+        # fraction, for adding to the whole and fraction of TDB.
+        t2 = ts.tdb_jd(whole, tdb_fraction - light_time)
+
         tposition, tvelocity, gcrs_position, message = target._at(t2)
         distance = length_of(tposition - cposition)
         light_time0 = light_time

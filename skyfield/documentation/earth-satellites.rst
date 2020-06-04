@@ -546,7 +546,7 @@ to find out the distance between them:
 .. testoutput::
 
     Difference between the two positions:
-    0.086 km
+    0.087 km
     Angle between the two positions in the sky:
     00deg 00' 04.6"
 
