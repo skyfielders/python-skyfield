@@ -221,14 +221,19 @@ anomaly_constant, anomaly_coefficient = array([
     (0.02438175, 0.00000538691),
     ]).T
 
-def iau2000a(jd_tt):
+def iau2000a(jd_tt, fundamental_argument_terms=5, lunisolar_terms=687,
+             planetary_terms=687):
     """Compute Earth nutation based on the IAU 2000A nutation model.
 
-    `jd_tt` - Terrestrial Time: Julian date float, or NumPy array of floats
+    ``jd_tt`` - Terrestrial Time: Julian date float, or NumPy array of floats
 
     Returns a tuple ``(delta_psi, delta_epsilon)`` measured in tenths of
     a micro-arcsecond.  Each value is either a float, or a NumPy array
     with the same dimensions as the input argument.
+
+    Supply smaller integer values for ``fundamental_argument_terms``,
+    ``lunisolar_terms``, and ``planetary_terms`` to trade off accuraccy
+    for speed.
 
     """
     # Interval between fundamental epoch J2000.0 and given date.
@@ -237,25 +242,29 @@ def iau2000a(jd_tt):
 
     # Compute fundamental arguments from Simon et al. (1994), in radians.
 
-    a = fundamental_arguments(t)
+    a = fundamental_arguments(t, fundamental_argument_terms)
 
     # ** Luni-solar nutation **
-    # Summation of luni-solar nutation series (in reverse order).
+    # Summation of luni-solar nutation series.
 
-    arg = nals_t.dot(a).T
+    cutoff = lunisolar_terms
+    arg = nals_t[:cutoff].dot(a).T
 
     sarg = sin(arg)
     carg = cos(arg)
 
-    dpsi = dot(sarg, lunisolar_longitude_coefficients[:,0])
-    dpsi += dot(sarg, lunisolar_longitude_coefficients[:,1]) * t
-    dpsi += dot(carg, lunisolar_longitude_coefficients[:,2])
+    dpsi = dot(sarg, lunisolar_longitude_coefficients[:cutoff,0])
+    dpsi += dot(sarg, lunisolar_longitude_coefficients[:cutoff,1]) * t
+    dpsi += dot(carg, lunisolar_longitude_coefficients[:cutoff,2])
 
-    deps = dot(carg, lunisolar_obliquity_coefficients[:,0])
-    deps += dot(carg, lunisolar_obliquity_coefficients[:,1]) * t
-    deps += dot(sarg, lunisolar_obliquity_coefficients[:,2])
+    deps = dot(carg, lunisolar_obliquity_coefficients[:cutoff,0])
+    deps += dot(carg, lunisolar_obliquity_coefficients[:cutoff,1]) * t
+    deps += dot(sarg, lunisolar_obliquity_coefficients[:cutoff,2])
 
     # Compute and add in planetary components.
+
+    if not planetary_terms:
+        return dpsi, deps
 
     if getattr(t, 'shape', ()) == ():
         a = t * anomaly_coefficient + anomaly_constant
@@ -263,15 +272,17 @@ def iau2000a(jd_tt):
         a = (outer(anomaly_coefficient, t).T + anomaly_constant).T
     a[-1] *= t
 
-    arg = napl_t.dot(a).T
+    cutoff = planetary_terms
+    arg = napl_t[:cutoff].dot(a).T
+
     sarg = sin(arg)
     carg = cos(arg)
 
-    dpsi += dot(sarg, nutation_coefficients_longitude[:,0])
-    dpsi += dot(carg, nutation_coefficients_longitude[:,1])
+    dpsi += dot(sarg, nutation_coefficients_longitude[:cutoff,0])
+    dpsi += dot(carg, nutation_coefficients_longitude[:cutoff,1])
 
-    deps += dot(sarg, nutation_coefficients_obliquity[:,0])
-    deps += dot(carg, nutation_coefficients_obliquity[:,1])
+    deps += dot(sarg, nutation_coefficients_obliquity[:cutoff,0])
+    deps += dot(carg, nutation_coefficients_obliquity[:cutoff,1])
 
     return dpsi, deps
 
@@ -288,28 +299,9 @@ def iau2000b(jd_tt):
     years 1995 and 2020.
 
     """
-    dpplan = -0.000135e7
-    deplan =  0.000388e7
-
-    t = (jd_tt - T0) / 36525.0
-
-    a = fundamental_arguments(t, 2)
-    arg = nals_t[:77].dot(a)
-
-    sarg = sin(arg)
-    carg = cos(arg)
-
-    dp = dot(sarg.T, lunisolar_longitude_coefficients[:77,0])
-    dp += dot(sarg.T, lunisolar_longitude_coefficients[:77,1]) * t
-    dp += dot(carg.T, lunisolar_longitude_coefficients[:77,2])
-
-    de = dot(carg.T, lunisolar_obliquity_coefficients[:77,0])
-    de += dot(carg.T, lunisolar_obliquity_coefficients[:77,1]) * t
-    de += dot(sarg.T, lunisolar_obliquity_coefficients[:77,2])
-
-    dpsi = dpplan + dp
-    deps = deplan + de
-
+    dpsi, deps = iau2000a(jd_tt, 2, 77, 0)
+    dpsi += -0.000135e7
+    deps +=  0.000388e7
     return dpsi, deps
 
 fa0, fa1, fa2, fa3, fa4 = array((
@@ -332,7 +324,7 @@ fa0, fa1, fa2, fa3, fa4 = array((
 
     )).T[:,:,None]
 
-def fundamental_arguments(t, coefficients=5):
+def fundamental_arguments(t, terms=5):
     """Compute the fundamental arguments (mean elements) of Sun and Moon.
 
     ``t`` - TDB time in Julian centuries since J2000.0, as float or NumPy array
@@ -346,11 +338,11 @@ def fundamental_arguments(t, coefficients=5):
                  from Simon section 3.4(b.3),
                  precession = 5028.8200 arcsec/cy)
 
-    Pass a smaller value for the number of polynomial ``coefficients``
-    if you want to trade accuracy for speed.
+    Pass a smaller value for the number of polynomial ``terms`` if you
+    want to trade accuracy for speed.
 
     """
-    fa = iter((fa4, fa3, fa2, fa1)[-coefficients+1:])
+    fa = iter((fa4, fa3, fa2, fa1)[-terms+1:])
     a = next(fa) * t
     for fa_i in fa:
         a += fa_i
