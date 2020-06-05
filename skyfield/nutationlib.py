@@ -293,10 +293,7 @@ def iau2000b(jd_tt):
 
     t = (jd_tt - T0) / 36525.0
 
-    a = (fa0 + fa1 * t) % ASEC360 * ASEC2RAD
-    if not getattr(t, 'shape', None):
-        a = a[:,0]
-
+    a = fundamental_arguments(t, 2)
     arg = nals_t[:77].dot(a)
 
     sarg = sin(arg)
@@ -335,10 +332,10 @@ fa0, fa1, fa2, fa3, fa4 = array((
 
     )).T[:,:,None]
 
-def fundamental_arguments(t):
+def fundamental_arguments(t, coefficients=5):
     """Compute the fundamental arguments (mean elements) of Sun and Moon.
 
-    `t` - TDB time in Julian centuries since J2000.0, as float or NumPy array
+    ``t`` - TDB time in Julian centuries since J2000.0, as float or NumPy array
 
     Outputs fundamental arguments, in radians:
           a[0] = l (mean anomaly of the Moon)
@@ -349,14 +346,15 @@ def fundamental_arguments(t):
                  from Simon section 3.4(b.3),
                  precession = 5028.8200 arcsec/cy)
 
+    Pass a smaller value for the number of polynomial ``coefficients``
+    if you want to trade accuracy for speed.
+
     """
-    a = fa4 * t
-    a += fa3
-    a *= t
-    a += fa2
-    a *= t
-    a += fa1
-    a *= t
+    fa = iter((fa4, fa3, fa2, fa1)[-coefficients+1:])
+    a = next(fa) * t
+    for fa_i in fa:
+        a += fa_i
+        a *= t
     a += fa0
     fmod(a, ASEC360, out=a)
     a *= ASEC2RAD
