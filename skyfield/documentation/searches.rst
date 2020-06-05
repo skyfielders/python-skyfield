@@ -427,18 +427,19 @@ and set the search routine to work.
     os.rename('venus-elongation.png', '_static/venus-elongation.png')
 
 
-.. testcode::
+..
+   .. testcode::
 
-    for ti, vi in zip(t, values):
-        print(ti.utc_strftime('%Y-%m-%d %H:%M:%S '), '%.2f' % vi)
+       for ti, vi in zip(t, values):
+           print(ti.utc_strftime('%Y-%m-%d %H:%M:%S '), '%.2f' % vi)
 
-.. testoutput::
+   .. testoutput::
 
-    2018-08-17 17:31:17  45.93
-    2019-01-06 04:53:35  46.96
-    2020-08-13 00:14:12  45.79
-    2021-10-29 20:51:56  47.05
-    2022-03-20 09:25:07  46.59
+       2018-08-17 17:31:17  45.93
+       2019-01-06 04:53:35  46.96
+       2020-08-13 00:14:12  45.79
+       2021-10-29 20:51:56  47.05
+       2022-03-20 09:25:07  46.59
 
 (TODO)
 
