@@ -1,6 +1,6 @@
 """Vector functions and their composition."""
 
-from numpy import max, min
+from numpy import max
 from .constants import C_AUDAY
 from .errors import DeprecationError, raise_error_for_deprecated_time_arguments
 from .functions import length_of

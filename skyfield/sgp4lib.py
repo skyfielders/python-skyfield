@@ -2,7 +2,7 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
 from numpy import (
-    array, concatenate, cross, einsum, identity, ones_like, repeat, zeros_like, sqrt, arccos, arctan2
+    array, concatenate, cross, einsum, identity, ones_like, repeat, zeros_like
 )
 from sgp4.api import SGP4_ERRORS, Satrec
 
