@@ -330,8 +330,8 @@ class Time(object):
     time objects make available.
 
     """
-    psi_correction = 0.0
-    eps_correction = 0.0
+    psi_correction = 0.0  # TODO: temporarily unsupported
+    eps_correction = 0.0  # TODO: temporarily unsupported
 
     def __init__(self, ts, tt, tt_fraction=0.0):
         self.ts = ts
@@ -653,6 +653,32 @@ class Time(object):
     def CT(self):
         return rollaxis(self.C, 1)
 
+    @reify
+    def nutation_angles_radians(self):
+        # TODO: add psi and eps corrections support back in here, rather
+        # than at points of use.
+        return iau2000a_radians(self)
+
+    def _nutation_angles(self, angles):
+        # Before the public attribute `nutation_angles_radians` was
+        # added in version 1.22, nutation angles were cached in a
+        # private attribute in raw tenths of a microarcsecond.  Sample
+        # code shared with early adopters set the attribute manually to
+        # avoid the expense of IAU 2000A, a pattern which this setter
+        # continues to support.
+
+        d_psi, d_eps = angles
+        self.nutation_angles_radians = (
+            d_psi / 1e7 * ASEC2RAD,
+            d_eps / 1e7 * ASEC2RAD,
+        )
+
+    _nutation_angles = property(None, _nutation_angles)
+
+    @reify
+    def _mean_obliquity_radians(self):
+        return mean_obliquity(self.tdb) * ASEC2RAD
+
     # Conversion between timescales.
 
     @reify
@@ -700,32 +726,6 @@ class Time(object):
         c_terms = equation_of_the_equinoxes_complimentary_terms(tt)
         eq_eq = d_psi * cos(self._mean_obliquity_radians) + c_terms
         return self.gmst + eq_eq / tau * 24.0
-
-    @reify
-    def nutation_angles_radians(self):
-        # TODO: add psi and eps corrections support back in here, rather
-        # than at points of use.
-        return iau2000a_radians(self)
-
-    def _nutation_angles(self, angles):
-        # Before the public attribute `nutation_angles_radians` was
-        # added in version 1.22, nutation angles were cached in a
-        # private attribute in raw tenths of a microarcsecond.  Sample
-        # code shared with early adopters set the attribute manually to
-        # avoid the expense of IAU 2000A, a pattern which this setter
-        # continues to support.
-
-        d_psi, d_eps = angles
-        self.nutation_angles_radians = (
-            d_psi / 1e7 * ASEC2RAD,
-            d_eps / 1e7 * ASEC2RAD,
-        )
-
-    _nutation_angles = property(None, _nutation_angles)
-
-    @reify
-    def _mean_obliquity_radians(self):
-        return mean_obliquity(self.tdb) * ASEC2RAD
 
     # Low-precision floats generated from internal float pairs.
 
