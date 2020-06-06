@@ -68,28 +68,6 @@ def build_nutation_matrix(mean_obliquity_radians,
                    cpsi * cobm * sobt - sobm * cobt,
                    cpsi * sobm * sobt + cobm * cobt)))
 
-def earth_tilt(t):
-    """Return a tuple of information about the earth's axis and position.
-
-    `t` - A Time object.
-
-    The returned tuple contains five items:
-
-    ``mean_ob`` - Mean obliquity of the ecliptic in degrees.
-    ``true_ob`` - True obliquity of the ecliptic in degrees.
-    ``eq_eq`` - Equation of the equinoxes in seconds of time.
-    ``d_psi`` - Nutation in longitude in arcseconds.
-    ``d_eps`` - Nutation in obliquity in arcseconds.
-
-    """
-    d_psi, d_eps = t.nutation_angles_radians
-    c_terms = equation_of_the_equinoxes_complimentary_terms(t.tt)
-    mean_ob = t._mean_obliquity_radians
-    true_ob = mean_ob + d_eps
-    eq_eq = d_psi * cos(mean_ob) + c_terms
-    return (mean_ob / DEG2RAD, true_ob / DEG2RAD, eq_eq / ASEC2RAD / 15.0,
-            d_psi / ASEC2RAD, d_eps / ASEC2RAD)
-
 def mean_obliquity(jd_tdb):
     """Return the mean obliquity of the ecliptic in arcseconds.
 
@@ -373,7 +351,17 @@ def fundamental_arguments(t, terms=5):
 se1_0 = -0.87e-6
 se1_1 = +0.00e-6
 
-# Deprecated functions that other code might still call, and that
-# several of our tests still call (which helps keep them working).
+# Deprecated functions that third-party code might still call; several
+# of our tests also still call them, to help keep them working.
 
-def compute_nutation(t): return t.N
+def compute_nutation(t):
+    return t.N
+
+def earth_tilt(t):
+    d_psi, d_eps = t.nutation_angles_radians
+    mean_ob = t._mean_obliquity_radians
+    true_ob = mean_ob + d_eps
+    c_terms = equation_of_the_equinoxes_complimentary_terms(t.tt)
+    eq_eq = d_psi * cos(mean_ob) + c_terms
+    return (mean_ob / DEG2RAD, true_ob / DEG2RAD, eq_eq / ASEC2RAD / 15.0,
+            d_psi / ASEC2RAD, d_eps / ASEC2RAD)

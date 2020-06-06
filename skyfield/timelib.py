@@ -724,10 +724,6 @@ class Time(object):
     _nutation_angles = property(None, _nutation_angles)
 
     @reify
-    def _earth_tilt(self):
-        return earth_tilt(self)
-
-    @reify
     def _mean_obliquity_radians(self):
         return mean_obliquity(self.tdb) * ASEC2RAD
 
