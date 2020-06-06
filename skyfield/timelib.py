@@ -10,7 +10,7 @@ from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
 from .functions import _mxm, _mxmxm, _to_array, load_bundled_npy, rot_z
 from .nutationlib import (
-    compute_nutation, earth_tilt,
+    build_nutation_matrix, earth_tilt,
     equation_of_the_equinoxes_complimentary_terms, iau2000a,
     mean_obliquity,
 )
@@ -625,7 +625,16 @@ class Time(object):
 
     @reify
     def N(self):
-        return compute_nutation(self)
+        dp, de = self._nutation_angles
+        d_psi = dp * 1e-7
+        d_eps = de * 1e-7
+        mean_obliquity_arcseconds = self._mean_obliquity
+        true_obliquity_arcseconds = mean_obliquity_arcseconds + d_eps
+        return build_nutation_matrix(
+            mean_obliquity_arcseconds,
+            true_obliquity_arcseconds,
+            d_psi,
+        )
 
     @reify
     def NT(self):
@@ -693,6 +702,7 @@ class Time(object):
     def gast(self):
         dp, de = self._nutation_angles
         tt = self.tt
+        # TODO: move this into an eqeq function?
         c_terms = equation_of_the_equinoxes_complimentary_terms(tt) / ASEC2RAD
         eq_eq = dp * 1e-7 * cos(self._mean_obliquity * ASEC2RAD) + c_terms
         return self.gmst + eq_eq / 54000.0
@@ -702,7 +712,7 @@ class Time(object):
         return earth_tilt(self)
 
     @reify
-    def _mean_obliquity(self):
+    def _mean_obliquity(self):  # arcseconds
         return mean_obliquity(self.tdb)
 
     @reify

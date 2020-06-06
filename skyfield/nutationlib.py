@@ -16,22 +16,22 @@ nutation_coefficients_obliquity = _arrays['nutation_coefficients_obliquity']
 se0_t_0 = _arrays['se0_t_0']
 se0_t_1 = _arrays['se0_t_1']
 
-def compute_nutation(t):
-    """Generate the nutation rotations for Time `t`.
+def build_nutation_matrix(mean_obliquity_arcseconds,
+                          true_obliquity_arcseconds,
+                          psi_arcseconds):
+    """Generate the nutation rotation matrix, given three nutation parameters.
 
-    If the Julian date is scalar, a simple ``(3, 3)`` matrix is
-    returned; if the date is an array of length ``n``, then an array of
-    matrices is returned with dimensions ``(3, 3, n)``.
+    The inputs can either be simple scalars, or else arrays of the same
+    length in which case the output matrix will have an extra dimension
+    of that length providing *n* rotation matrices.
 
     """
-    oblm, oblt, eqeq, psi, eps = t._earth_tilt
-
-    cobm = cos(oblm * DEG2RAD)
-    sobm = sin(oblm * DEG2RAD)
-    cobt = cos(oblt * DEG2RAD)
-    sobt = sin(oblt * DEG2RAD)
-    cpsi = cos(psi * ASEC2RAD)
-    spsi = sin(psi * ASEC2RAD)
+    cobm = cos(mean_obliquity_arcseconds * ASEC2RAD)
+    sobm = sin(mean_obliquity_arcseconds * ASEC2RAD)
+    cobt = cos(true_obliquity_arcseconds * ASEC2RAD)
+    sobt = sin(true_obliquity_arcseconds * ASEC2RAD)
+    cpsi = cos(psi_arcseconds * ASEC2RAD)
+    spsi = sin(psi_arcseconds * ASEC2RAD)
 
     return array(((cpsi,
                   -spsi * cobm,
@@ -358,3 +358,8 @@ def fundamental_arguments(t, terms=5):
 
 se1_0 = -0.87e-6
 se1_1 = +0.00e-6
+
+# Deprecated functions that other code might still call, and that
+# several of our tests still call (which helps keep them working).
+
+def compute_nutation(t): return t.N
