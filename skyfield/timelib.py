@@ -625,7 +625,9 @@ class Time(object):
 
     @reify
     def N(self):
-        d_psi, d_eps = self.nutation_angles_arcseconds
+        d_psi, d_eps = self.nutation_angles_radians
+        d_psi = d_psi / ASEC2RAD  # TODO
+        d_eps = d_eps / ASEC2RAD  # TODO
         mean_obliquity_arcseconds = self._mean_obliquity_radians / ASEC2RAD
         true_obliquity_arcseconds = mean_obliquity_arcseconds + d_eps
         return build_nutation_matrix(
@@ -698,7 +700,8 @@ class Time(object):
 
     @reify
     def gast(self):
-        d_psi, _ = self.nutation_angles_arcseconds
+        d_psi, _ = self.nutation_angles_radians
+        d_psi = d_psi / ASEC2RAD
         tt = self.tt
         # TODO: move this into an eqeq function?
         c_terms = equation_of_the_equinoxes_complimentary_terms(tt) / ASEC2RAD
@@ -706,10 +709,10 @@ class Time(object):
         return self.gmst + eq_eq / 54000.0
 
     @reify
-    def nutation_angles_arcseconds(self):
+    def nutation_angles_radians(self):
         # TODO: add corrections back in here, rather than at points of use
         dpsi, deps = iau2000a(self.tt)
-        return dpsi / 1e7, deps / 1e7
+        return dpsi / 1e7 * ASEC2RAD, deps / 1e7 * ASEC2RAD
 
     @reify
     def _earth_tilt(self):

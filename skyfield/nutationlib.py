@@ -57,7 +57,9 @@ def earth_tilt(t):
     ``d_eps`` - Nutation in obliquity in arcseconds.
 
     """
-    d_psi, d_eps = t.nutation_angles_arcseconds
+    d_psi, d_eps = t.nutation_angles_radians
+    d_psi = d_psi / ASEC2RAD  # TODO
+    d_eps = d_eps / ASEC2RAD  # TODO
     c_terms = equation_of_the_equinoxes_complimentary_terms(t.tt) / ASEC2RAD
 
     mean_ob = t._mean_obliquity_radians / ASEC2RAD
