@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta, tzinfo
 from numpy import (array, concatenate, cos, float_, interp, isnan, nan,
                    ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime
-from .constants import ASEC2RAD, B1950, DAY_S, T0
+from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
@@ -695,12 +695,11 @@ class Time(object):
     @reify
     def gast(self):
         d_psi, _ = self.nutation_angles_radians
-        d_psi = d_psi / ASEC2RAD
         tt = self.tt
         # TODO: move this into an eqeq function?
-        c_terms = equation_of_the_equinoxes_complimentary_terms(tt) / ASEC2RAD
+        c_terms = equation_of_the_equinoxes_complimentary_terms(tt)
         eq_eq = d_psi * cos(self._mean_obliquity_radians) + c_terms
-        return self.gmst + eq_eq / 54000.0
+        return self.gmst + eq_eq / tau * 24.0
 
     @reify
     def nutation_angles_radians(self):
