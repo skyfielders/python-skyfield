@@ -228,15 +228,15 @@ class Angle(object):
 
     def arcminutes(self):
         """Return the angle in arcminutes."""
-        return self.degrees * 60.0
+        return self._degrees * 60.0
 
     def arcseconds(self):
         """Return the angle in arcseconds."""
-        return self.degrees * 3600.0
+        return self._degrees * 3600.0
 
     def mas(self):
         """Return the angle in milliarcseconds."""
-        return self.degrees * 3600000.0
+        return self._degrees * 3600000.0
 
     def __str__(self):
         if self.radians.size == 0:
