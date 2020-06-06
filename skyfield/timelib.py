@@ -626,7 +626,7 @@ class Time(object):
     @reify
     def N(self):
         d_psi, d_eps = self.nutation_angles_arcseconds
-        mean_obliquity_arcseconds = self._mean_obliquity
+        mean_obliquity_arcseconds = self._mean_obliquity_radians / ASEC2RAD
         true_obliquity_arcseconds = mean_obliquity_arcseconds + d_eps
         return build_nutation_matrix(
             mean_obliquity_arcseconds,
@@ -702,7 +702,7 @@ class Time(object):
         tt = self.tt
         # TODO: move this into an eqeq function?
         c_terms = equation_of_the_equinoxes_complimentary_terms(tt) / ASEC2RAD
-        eq_eq = d_psi * cos(self._mean_obliquity * ASEC2RAD) + c_terms
+        eq_eq = d_psi * cos(self._mean_obliquity_radians) + c_terms
         return self.gmst + eq_eq / 54000.0
 
     @reify
@@ -716,8 +716,8 @@ class Time(object):
         return earth_tilt(self)
 
     @reify
-    def _mean_obliquity(self):  # arcseconds
-        return mean_obliquity(self.tdb)
+    def _mean_obliquity_radians(self):
+        return mean_obliquity(self.tdb) * ASEC2RAD
 
     @reify
     def _nutation_angles(self):  # tenths of microarcseconds

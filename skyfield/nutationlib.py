@@ -60,7 +60,7 @@ def earth_tilt(t):
     d_psi, d_eps = t.nutation_angles_arcseconds
     c_terms = equation_of_the_equinoxes_complimentary_terms(t.tt) / ASEC2RAD
 
-    mean_ob = t._mean_obliquity
+    mean_ob = t._mean_obliquity_radians / ASEC2RAD
     true_ob = mean_ob + d_eps
 
     mean_ob /= 3600.0

@@ -316,7 +316,7 @@ class ICRF(object):
                              ' or the string "date" for epoch-of-date')
 
         _, d_eps = epoch.nutation_angles_arcseconds
-        true_obliquity = epoch._mean_obliquity + d_eps
+        true_obliquity = epoch._mean_obliquity_radians / ASEC2RAD + d_eps
         rotation = _mxm(rot_x(- true_obliquity * ASEC2RAD), epoch.M)
         position_au = _mxv(rotation, position_au)
         return Distance(position_au)
