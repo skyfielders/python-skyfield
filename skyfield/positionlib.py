@@ -2,7 +2,7 @@
 """Classes representing different kinds of astronomical position."""
 
 from numpy import arccos, array, clip, einsum, exp, full, nan, nan_to_num
-from .constants import ANGVEL, AU_M, ERAD, DAY_S, DEG2RAD, RAD2DEG, tau
+from .constants import ANGVEL, ASEC2RAD, AU_M, ERAD, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
 from .geometry import intersect_line_and_sphere
@@ -315,9 +315,9 @@ class ICRF(object):
                              ' a floating point Terrestrial Time (TT),'
                              ' or the string "date" for epoch-of-date')
 
-        oblm, oblt, eqeq, psi, eps = epoch._earth_tilt
-        e = oblt * DEG2RAD
-        rotation = _mxm(rot_x(-e), epoch.M)
+        dp, de = epoch._nutation_angles
+        true_obliquity = epoch._mean_obliquity + de * 1e-7
+        rotation = _mxm(rot_x(- true_obliquity * ASEC2RAD), epoch.M)
         position_au = _mxv(rotation, position_au)
         return Distance(position_au)
 

@@ -707,6 +707,7 @@ class Time(object):
 
     @reify
     def _nutation_angles(self):
+        # TODO: add corrections back in here, rather than at points of use
         return iau2000a(self.tt)
 
     # Low-precision floats generated from internal float pairs.
