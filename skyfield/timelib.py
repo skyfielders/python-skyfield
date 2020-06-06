@@ -625,9 +625,7 @@ class Time(object):
 
     @reify
     def N(self):
-        dp, de = self._nutation_angles
-        d_psi = dp * 1e-7
-        d_eps = de * 1e-7
+        d_psi, d_eps = self.nutation_angles_arcseconds
         mean_obliquity_arcseconds = self._mean_obliquity
         true_obliquity_arcseconds = mean_obliquity_arcseconds + d_eps
         return build_nutation_matrix(
@@ -700,12 +698,18 @@ class Time(object):
 
     @reify
     def gast(self):
-        dp, de = self._nutation_angles
+        d_psi, _ = self.nutation_angles_arcseconds
         tt = self.tt
         # TODO: move this into an eqeq function?
         c_terms = equation_of_the_equinoxes_complimentary_terms(tt) / ASEC2RAD
-        eq_eq = dp * 1e-7 * cos(self._mean_obliquity * ASEC2RAD) + c_terms
+        eq_eq = d_psi * cos(self._mean_obliquity * ASEC2RAD) + c_terms
         return self.gmst + eq_eq / 54000.0
+
+    @reify
+    def nutation_angles_arcseconds(self):
+        # TODO: add corrections back in here, rather than at points of use
+        dpsi, deps = iau2000a(self.tt)
+        return dpsi / 1e7, deps / 1e7
 
     @reify
     def _earth_tilt(self):
@@ -716,8 +720,7 @@ class Time(object):
         return mean_obliquity(self.tdb)
 
     @reify
-    def _nutation_angles(self):
-        # TODO: add corrections back in here, rather than at points of use
+    def _nutation_angles(self):  # tenths of microarcseconds
         return iau2000a(self.tt)
 
     # Low-precision floats generated from internal float pairs.

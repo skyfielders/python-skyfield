@@ -57,13 +57,10 @@ def earth_tilt(t):
     ``d_eps`` - Nutation in obliquity in arcseconds.
 
     """
-    dp, de = t._nutation_angles
+    d_psi, d_eps = t.nutation_angles_arcseconds
     c_terms = equation_of_the_equinoxes_complimentary_terms(t.tt) / ASEC2RAD
 
-    d_psi = dp * 1e-7 + t.psi_correction
-    d_eps = de * 1e-7 + t.eps_correction
-
-    mean_ob = mean_obliquity(t.tdb)
+    mean_ob = t._mean_obliquity
     true_ob = mean_ob + d_eps
 
     mean_ob /= 3600.0
@@ -73,8 +70,6 @@ def earth_tilt(t):
     eq_eq /= 15.0
 
     return mean_ob, true_ob, eq_eq, d_psi, d_eps
-
-#
 
 def mean_obliquity(jd_tdb):
     """Return the mean obliquity of the ecliptic in arcseconds.
