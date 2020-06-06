@@ -626,15 +626,9 @@ class Time(object):
     @reify
     def N(self):
         d_psi, d_eps = self.nutation_angles_radians
-        d_psi = d_psi / ASEC2RAD  # TODO
-        d_eps = d_eps / ASEC2RAD  # TODO
-        mean_obliquity_arcseconds = self._mean_obliquity_radians / ASEC2RAD
-        true_obliquity_arcseconds = mean_obliquity_arcseconds + d_eps
-        return build_nutation_matrix(
-            mean_obliquity_arcseconds,
-            true_obliquity_arcseconds,
-            d_psi,
-        )
+        mean_obliquity = self._mean_obliquity_radians
+        true_obliquity = mean_obliquity + d_eps
+        return build_nutation_matrix(mean_obliquity, true_obliquity, d_psi)
 
     @reify
     def NT(self):

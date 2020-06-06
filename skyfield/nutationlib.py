@@ -16,9 +16,9 @@ nutation_coefficients_obliquity = _arrays['nutation_coefficients_obliquity']
 se0_t_0 = _arrays['se0_t_0']
 se0_t_1 = _arrays['se0_t_1']
 
-def build_nutation_matrix(mean_obliquity_arcseconds,
-                          true_obliquity_arcseconds,
-                          psi_arcseconds):
+def build_nutation_matrix(mean_obliquity_radians,
+                          true_obliquity_radians,
+                          psi_radians):
     """Generate the nutation rotation matrix, given three nutation parameters.
 
     The inputs can either be simple scalars, or else arrays of the same
@@ -26,12 +26,12 @@ def build_nutation_matrix(mean_obliquity_arcseconds,
     of that length providing *n* rotation matrices.
 
     """
-    cobm = cos(mean_obliquity_arcseconds * ASEC2RAD)
-    sobm = sin(mean_obliquity_arcseconds * ASEC2RAD)
-    cobt = cos(true_obliquity_arcseconds * ASEC2RAD)
-    sobt = sin(true_obliquity_arcseconds * ASEC2RAD)
-    cpsi = cos(psi_arcseconds * ASEC2RAD)
-    spsi = sin(psi_arcseconds * ASEC2RAD)
+    cobm = cos(mean_obliquity_radians)
+    sobm = sin(mean_obliquity_radians)
+    cobt = cos(true_obliquity_radians)
+    sobt = sin(true_obliquity_radians)
+    cpsi = cos(psi_radians)
+    spsi = sin(psi_radians)
 
     return array(((cpsi,
                   -spsi * cobm,
