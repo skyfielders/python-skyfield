@@ -1,15 +1,19 @@
 import re
 from collections import namedtuple
 from datetime import date, datetime, timedelta, tzinfo
-from numpy import (array, concatenate, float_, interp, isnan, nan, ndarray, pi,
-                   rollaxis, searchsorted, sin, where, zeros_like)
+from numpy import (array, concatenate, cos, float_, interp, isnan, nan,
+                   ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime
-from .constants import B1950, DAY_S, T0
+from .constants import ASEC2RAD, B1950, DAY_S, T0
 from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
 from .functions import _mxm, _mxmxm, _to_array, load_bundled_npy, rot_z
-from .nutationlib import compute_nutation, earth_tilt, iau2000a
+from .nutationlib import (
+    compute_nutation, earth_tilt,
+    equation_of_the_equinoxes_complimentary_terms, iau2000a,
+    mean_obliquity,
+)
 from .precessionlib import compute_precession
 
 CalendarTuple = namedtuple('CalendarTuple', 'year month day hour minute second')
@@ -687,11 +691,19 @@ class Time(object):
 
     @reify
     def gast(self):
-        return self.gmst + self._earth_tilt[2] / 3600.0
+        dp, de = self._nutation_angles
+        tt = self.tt
+        c_terms = equation_of_the_equinoxes_complimentary_terms(tt) / ASEC2RAD
+        eq_eq = dp * 1e-7 * cos(self._mean_obliquity * ASEC2RAD) + c_terms
+        return self.gmst + eq_eq / 54000.0
 
     @reify
     def _earth_tilt(self):
         return earth_tilt(self)
+
+    @reify
+    def _mean_obliquity(self):
+        return mean_obliquity(self.tdb)
 
     @reify
     def _nutation_angles(self):
