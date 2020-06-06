@@ -3,6 +3,7 @@ from numpy import array, cos, dot, fmod, sin, outer, zeros
 from .constants import ASEC2RAD, ASEC360, DEG2RAD, tau, T0
 from .functions import load_bundled_npy
 
+_TENTH_USEC_2_RAD = ASEC2RAD / 1e7
 _arrays = load_bundled_npy('nutation.npz')
 
 ke0_t = _arrays['ke0_t']
@@ -16,14 +17,38 @@ nutation_coefficients_obliquity = _arrays['nutation_coefficients_obliquity']
 se0_t_0 = _arrays['se0_t_0']
 se0_t_1 = _arrays['se0_t_1']
 
+# These wrappers return nutation angles in radians as expected by the
+# Time object.  We can't change the units returned by the underlying
+# routines without breaking any applications that discovered them at
+# some point in the past few years (though they are officially
+# undocumented) and started calling them directly.
+
+def iau2000a_radians(t, fundamental_argument_terms=5, lunisolar_terms=687,
+                     planetary_terms=687):
+    """Return the IAU 2000A angles delta-psi and delta-epsilon in radians."""
+    d_psi, d_eps = iau2000a(t.tt, fundamental_argument_terms, lunisolar_terms,
+                            planetary_terms)
+    d_psi *= _TENTH_USEC_2_RAD
+    d_eps *= _TENTH_USEC_2_RAD
+    return d_psi, d_eps
+
+def iau2000b_radians(t):
+    """Return the IAU 2000B angles delta-psi and delta-epsilon in radians."""
+    d_psi, d_eps = iau2000b(t.tt)
+    d_psi *= _TENTH_USEC_2_RAD
+    d_eps *= _TENTH_USEC_2_RAD
+    return d_psi, d_eps
+
+# Lower-level routines.
+
 def build_nutation_matrix(mean_obliquity_radians,
                           true_obliquity_radians,
                           psi_radians):
     """Generate the nutation rotation matrix, given three nutation parameters.
 
-    The inputs can either be simple scalars, or else arrays of the same
-    length in which case the output matrix will have an extra dimension
-    of that length providing *n* rotation matrices.
+    The input angles can be simple floats.  Or, they can be arrays of
+    the same length, in which case the output matrix will have an extra
+    dimension of that same length providing *n* rotation matrices.
 
     """
     cobm = cos(mean_obliquity_radians)

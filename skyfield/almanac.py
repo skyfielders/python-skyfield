@@ -6,7 +6,7 @@ from __future__ import print_function, division
 from numpy import cos, pi, zeros_like
 from .constants import tau
 from .searchlib import find_discrete
-from .nutationlib import iau2000b
+from .nutationlib import iau2000b_radians
 
 # Not only to support historic code but also for future convenience, let
 # folks import the search routine alongside the almanac routines.
@@ -81,7 +81,7 @@ def seasons(ephemeris):
 
     def season_at(t):
         """Return season 0 (Spring) through 3 (Winter) at time `t`."""
-        t._nutation_angles = iau2000b(t.tt)
+        t.nutation_angles_radians = iau2000b_radians(t)
         e = earth.at(t)
         _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
         return (slon.radians // (tau / 4) % 4).astype(int)
@@ -111,7 +111,7 @@ def moon_phases(ephemeris):
 
     def moon_phase_at(t):
         """Return the phase of the moon 0 through 3 at time `t`."""
-        t._nutation_angles = iau2000b(t.tt)
+        t.nutation_angles_radians = iau2000b_radians(t)
         e = earth.at(t)
         _, mlon, _ = e.observe(moon).apparent().ecliptic_latlon('date')
         _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
@@ -200,7 +200,7 @@ def sunrise_sunset(ephemeris, topos):
         than -0.8333 degrees.
 
         """
-        t._nutation_angles = iau2000b(t.tt)
+        t.nutation_angles_radians = iau2000b_radians(t)
         return topos_at(t).observe(sun).apparent().altaz()[0].degrees >= -0.8333
 
     is_sun_up_at.rough_period = 0.5  # twice a day
@@ -232,7 +232,7 @@ def dark_twilight_day(ephemeris, topos):
 
     def is_it_dark_twilight_day_at(t):
         """Return whether the sun is up, down, or whether there is twilight."""
-        t._nutation_angles = iau2000b(t.tt)
+        t.nutation_angles_radians = iau2000b_radians(t)
         degrees = topos_at(t).observe(sun).apparent().altaz()[0].degrees
         r = zeros_like(degrees, int)
         r[degrees >= -18.0] = 1
@@ -261,7 +261,7 @@ def risings_and_settings(ephemeris, target, topos,
 
     def is_body_up_at(t):
         """Return `True` if the target has risen by time `t`."""
-        t._nutation_angles = iau2000b(t.tt)
+        t.nutation_angles_radians = iau2000b_radians(t)
         return topos_at(t).observe(target).apparent().altaz()[0].degrees > h
 
     is_body_up_at.rough_period = 0.5  # twice a day
@@ -269,7 +269,7 @@ def risings_and_settings(ephemeris, target, topos,
 
 def _distance_to(center, target):
     def distance_at(t):
-        t._nutation_angles = iau2000b(t.tt)
+        t.nutation_angles_radians = iau2000b_radians(t)
         distance = center.at(t).observe(target).distance().au
         return distance
     return distance_at

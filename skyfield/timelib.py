@@ -11,7 +11,7 @@ from .framelib import ICRS_to_J2000 as B
 from .functions import _mxm, _mxmxm, _to_array, load_bundled_npy, rot_z
 from .nutationlib import (
     build_nutation_matrix, earth_tilt,
-    equation_of_the_equinoxes_complimentary_terms, iau2000a,
+    equation_of_the_equinoxes_complimentary_terms, iau2000a_radians,
     mean_obliquity,
 )
 from .precessionlib import compute_precession
@@ -703,9 +703,25 @@ class Time(object):
 
     @reify
     def nutation_angles_radians(self):
-        # TODO: add corrections back in here, rather than at points of use
-        dpsi, deps = iau2000a(self.tt)
-        return dpsi / 1e7 * ASEC2RAD, deps / 1e7 * ASEC2RAD
+        # TODO: add psi and eps corrections support back in here, rather
+        # than at points of use.
+        return iau2000a_radians(self)
+
+    def _nutation_angles(self, angles):
+        # Before the public attribute `nutation_angles_radians` was
+        # added in version 1.22, nutation angles were cached in a
+        # private attribute in raw tenths of a microarcsecond.  Sample
+        # code shared with early adopters set the attribute manually to
+        # avoid the expense of IAU 2000A, a pattern which this setter
+        # continues to support.
+
+        d_psi, d_eps = angles
+        self.nutation_angles_radians = (
+            d_psi / 1e7 * ASEC2RAD,
+            d_eps / 1e7 * ASEC2RAD,
+        )
+
+    _nutation_angles = property(None, _nutation_angles)
 
     @reify
     def _earth_tilt(self):
@@ -714,10 +730,6 @@ class Time(object):
     @reify
     def _mean_obliquity_radians(self):
         return mean_obliquity(self.tdb) * ASEC2RAD
-
-    @reify
-    def _nutation_angles(self):  # tenths of microarcseconds
-        return iau2000a(self.tt)
 
     # Low-precision floats generated from internal float pairs.
 
