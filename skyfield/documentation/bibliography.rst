@@ -51,13 +51,13 @@ by George H. Kaplan, October 2005
     starting point, as it collects several of the PDFs together in one
     place.
 
-*Historical values of the Earth's clock error ΔT and the calculation of
+*Historical values of the Earth's clock error ∆T and the calculation of
 eclipses* by Morrison & Stephenson, 2004
 
     | http://adsabs.harvard.edu/full/2004JHA....35..327M
     | `Full PDF <http://articles.adsabs.harvard.edu/cgi-bin/nph-iarticle_query?2004JHA....35..327M&data_type=PDF_HIGH&type=PRINTER&filetype=.pdf>`_
 
-    Detailed discussion of the fact that ΔT has the shape of a parabola
+    Detailed discussion of the fact that ∆T has the shape of a parabola
     over history because, omitting short-term variations, the shortening
     length of Earth’s day makes the difference between modern clock time
     and actual sunrise and sunset skew ever longer over the centuries as
@@ -69,9 +69,9 @@ eclipses* by Morrison & Stephenson, 2004
 
     http://asa.usno.navy.mil/SecK/DeltaT.html
 
-    A few well-presented plots of ΔT and its behavior over the past few
+    A few well-presented plots of ∆T and its behavior over the past few
     centuries.  I tended to have this page always open in another tab
-    while reading about ΔT on other sites, so that I could correlate the
+    while reading about ∆T on other sites, so that I could correlate the
     descriptions of each text against the visuals here.
 
 *IERS Rapid Service/Prediction Center*
@@ -88,14 +88,14 @@ links at the United States Naval Observatory
 
     but found the USNO site to always be the better starting point.
 
-*The ΔT pages at the NASA Eclipse Web Site*
+*The ∆T pages at the NASA Eclipse Web Site*
 
     | http://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html
 
-    While most of the pages about ΔT at the Eclipse Web Site are a basic
+    While most of the pages about ∆T at the Eclipse Web Site are a basic
     introduction to the concept, the “Polynomial Expressions” page
     provides something new: the polynomials that Espenak and Meeus used
-    as their fit to ΔT when building their *Five Millennium Canon of
+    as their fit to ∆T when building their *Five Millennium Canon of
     Solar Eclipses: −1999 to +3000.*
 
     When the day comes that I implement eclipse logic in Skyfield, I

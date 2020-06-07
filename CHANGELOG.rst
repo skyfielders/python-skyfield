@@ -201,7 +201,7 @@ Future
 1.10 — 2019 February 2
 ----------------------
 
-* Fix: teach Skyfield the new format of the Naval Observatory ΔT data
+* Fix: teach Skyfield the new format of the Naval Observatory ∆T data
   file ``deltat.preds``, whose change in format caused Skyfield to start
   throwing an exception for new users.
   `#236 <https://github.com/skyfielders/python-skyfield/issues/236>`_
@@ -436,7 +436,7 @@ Future
 * Introduced the ``Timescale`` object with methods ``utc()``, ``tai()``,
   ``tt()``, and ``tdb()`` for building time objects, along with a
   ``load.timescale()`` method for building a new ``Timescale``.  The
-  load method downloads ΔT and leap second data from official data
+  load method downloads ∆T and leap second data from official data
   sources and makes sure the files are kept up to date.  This replaces
   all former techniques for building and specifying dates and times.
 

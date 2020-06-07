@@ -8,8 +8,8 @@
 Your Skyfield programs will typically download two kinds of data file.
 
 First, Skyfield will need up-to-date tables about time —
-files providing recently measured values for ΔT,
-future predictions of ΔT, and a table of recent leap seconds.
+files providing recently measured values for ∆T,
+future predictions of ∆T, and a table of recent leap seconds.
 See :doc:`time` for an introduction to these concepts.
 
 Second, Skyfield will need data
@@ -77,7 +77,7 @@ Using built-in timescale files
 ==============================
 
 Some computers have difficulty downloading
-the official time scale files for ΔT and leap seconds,
+the official time scale files for ∆T and leap seconds,
 so Skyfield carries an extra copy of each file.
 You can use these built-in time scale files with:
 

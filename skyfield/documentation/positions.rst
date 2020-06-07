@@ -20,7 +20,7 @@ together with all of the attributes and methods that they support:
     Creating 3 kinds of position
 
     obj1.at(time)        →  Barycentric position (BCRS)
-        .observe(obj2)   →  Astrometric position (ΔBCRS)
+        .observe(obj2)   →  Astrometric position (∆BCRS)
         .apparent()      →  Apparent position (GCRS)
 
     Position attributes and methods

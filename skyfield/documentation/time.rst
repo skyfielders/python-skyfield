@@ -610,7 +610,7 @@ which is continuous with the *T*\ :sub:`eph` time scale
 traditionally used for Solar System and spacecraft simulations
 at the Jet Propulsion Laboratory.
 
-UT1 and ΔT
+UT1 and ∆T
 ==========
 
 Finally, UT1 is the least uniform time scale of all
@@ -643,36 +643,36 @@ You will find graphs and tables
 showing how the length of Earth’s day
 expands and contracts by milliseconds over the decades.
 The accumulated error at any given moment
-is provided as ΔT,
+is provided as ∆T,
 the evolving difference between TT and UT1
 that dropped below zero in 1871 but then rose past it in 1902
 and now stands at more than +67.2 seconds.
 
 The task of governing leap seconds can be stated, then,
 as the task of keeping the difference between TT and UTC
-close to the natural value ΔT out in the wild.
+close to the natural value ∆T out in the wild.
 The standards bodies promise, in fact,
 that the difference between these two artificial time scales
-will always be within 0.9 seconds of the observed ΔT value.
+will always be within 0.9 seconds of the observed ∆T value.
 
 In calculations that do not involve Earth’s rotation,
-ΔT never arises.
+∆T never arises.
 The positions of planets,
 the distance to the Moon,
 and the movement of a comet or asteroid
-all ignore ΔT completely.
-When, then, does ΔT come into play?
+all ignore ∆T completely.
+When, then, does ∆T come into play?
 
-* ΔT is used when you specify your geographic location
+* ∆T is used when you specify your geographic location
   as a :class:`~skyfield.toposlib.Topos`
   and Skyfield needs to compute its location at a given date and time.
 
-* ΔT is needed to determine directions
+* ∆T is needed to determine directions
   like “up,” “north,” and “east” when you want Skyfield
   to compute the altitude and azimuth of an object
   in your local sky.
 
-* ΔT determines the Earth orientation for Skyfield
+* ∆T determines the Earth orientation for Skyfield
   when an Earth satellite position generated from TLE elements
   gets translated into a full Solar System position.
 
@@ -690,10 +690,10 @@ Skyfield will run off the end of its tables
 and will instead use the formula of Morrison and Stephenson (2004)
 to estimate when day and night might have occurred in that era.
 
-Setting a Custom Value For ΔT
+Setting a Custom Value For ∆T
 =============================
 
-If you ever want to specify your own value for ΔT,
+If you ever want to specify your own value for ∆T,
 then provide a ``delta_t`` keyword argument
 when creating your timescale:
 
