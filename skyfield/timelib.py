@@ -209,7 +209,7 @@ class Timescale(object):
         tt = _to_array(tt)
         return Time(self, tt)
 
-    def tt_jd(self, jd):
+    def tt_jd(self, jd, fraction=0.0):
         """Build a `Time` from a TT Julian date.
 
         Supply the Terrestrial Time (TT) as a Julian date:
@@ -221,8 +221,7 @@ class Timescale(object):
         (2014, 1, 18, 1, 35, 37.5)
 
         """
-        tt = _to_array(jd)
-        return Time(self, tt)
+        return Time(self, _to_array(jd), fraction)
 
     def tdb(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
@@ -248,9 +247,7 @@ class Timescale(object):
         return t
 
     def tdb_jd(self, jd, fraction=0.0):
-        """Build a `Time` from a TDB Julian date.
-
-        Supply the Barycentric Dynamical Time (TDB) as a Julian date:
+        """Build a `Time` from a Barycentric Dynamical Time (TDB) Julian date.
 
         >>> t = ts.tdb_jd(2456675.56640625)
         >>> t.tdb
@@ -259,7 +256,7 @@ class Timescale(object):
         """
         jd = _to_array(jd)
         t = Time(self, jd, fraction - tdb_minus_tt(jd + fraction) / DAY_S)
-        # TODO: copy in original values?
+        t.tdb_fraction = fraction
         return t
 
     def ut1(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
@@ -337,8 +334,10 @@ class Time(object):
 
     def __init__(self, ts, tt, tt_fraction=0.0):
         self.ts = ts
-        self.whole, fraction = divmod(tt, 1.0)
-        self.tt_fraction = fraction + tt_fraction
+        self.whole = tt
+        self.tt_fraction = tt_fraction
+        # self.whole, fraction = divmod(tt, 1.0)
+        # self.tt_fraction = fraction + tt_fraction
         self.shape = getattr(tt, 'shape', ())
 
     def __len__(self):
@@ -688,8 +687,7 @@ class Time(object):
     @reify
     def J(self):
         """Decimal Julian years centered on J2000.0 = TT 2000 January 1 12h."""
-        # TODO: use pair of floats to boost precision.
-        return (self.tt - 1721045.0) / 365.25
+        return (self.whole - 1721045.0 + self.tt_fraction) / 365.25
 
     @reify
     def tai(self):
@@ -760,16 +758,13 @@ class Time(object):
     # Various dunders.
 
     def __eq__(self, other_time):
-        if not isinstance(other_time, Time):
-            return NotImplemented
-        # TODO: precision
-        return self.tt == other_time.tt
+        return self - other_time == 0.0
 
     def __sub__(self, other_time):
         if not isinstance(other_time, Time):
             return NotImplemented
-        # TODO: precision
-        return self.tt - other_time.tt
+        return (self.whole - other_time.whole
+                + self.tt_fraction - other_time.tt_fraction)
 
     # Deprecated attributes that were once used internally, consuming
     # memory with matrices that are never used again by Skyfield once
@@ -831,6 +826,7 @@ def calendar_tuple(jd_float, offset=0.0):
     throw away the seconds; and so forth.
 
     """
+    # TODO: "offset" is completely unused; fix.
     jd_float = _to_array(jd_float)
     whole, fraction = divmod(jd_float + 0.5, 1.0)
     whole = whole.astype(int)

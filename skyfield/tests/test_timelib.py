@@ -23,11 +23,10 @@ def test_time_creation_methods(ts, time_parameter, time_value):
         t = method(jd=time_value) # TODO: deprecate
     assert getattr(t, time_parameter) == 2441700.56640625
 
-def test_time_creation_from_julian_day(ts, time_parameter):
-    # Test methods like "tt_jd()" and "tai_jd()".
-    method = getattr(ts, time_parameter + '_jd')
-    t = method(2441700.56640625)
-    assert getattr(t, time_parameter) == 2441700.56640625
+def test_tdb_fraction_loses_no_precision(ts):
+    t = ts.tdb_jd(2459008.0, 0.0123456789)
+    assert t.whole == 2459008.0
+    assert t.tdb_fraction == 0.0123456789
 
 time_scale_name = ['utc', 'tai', 'tt', 'tdb']
 time_params_with_array = [
@@ -340,3 +339,9 @@ def test_jd_calendar():
 
     # Check reversal of array
     assert (julian_date(*cal_array) == jd_array).all()
+
+def test_time_equality(ts):
+    t0 = ts.tt_jd(2459008.5, 0.125)
+    t1 = ts.tt_jd(2459008.0, 0.625)
+    assert t0 == t1
+    assert t1 - t0 == 0.0
