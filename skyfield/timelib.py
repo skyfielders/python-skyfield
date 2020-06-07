@@ -220,7 +220,9 @@ class Timescale(object):
         (2014, 1, 18, 1, 35, 37.5)
 
         """
-        return Time(self, _to_array(jd), fraction)
+        whole, fraction2 = divmod(_to_array(jd), 1.0)
+        fraction2 += fraction
+        return Time(self, whole, fraction2)
 
     def tdb(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
@@ -253,9 +255,11 @@ class Timescale(object):
         2456675.56640625
 
         """
-        jd = _to_array(jd)
-        t = Time(self, jd, fraction - tdb_minus_tt(jd + fraction) / DAY_S)
-        t.tdb_fraction = jd - t.whole + fraction  # restore precision
+        offset = tdb_minus_tt(jd + fraction) / DAY_S
+        whole, fraction2 = divmod(jd, 1.0)
+        fraction2 += fraction
+        t = Time(self, whole, fraction2 - offset)
+        t.tdb_fraction = fraction2
         return t
 
     def ut1(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
@@ -333,10 +337,8 @@ class Time(object):
 
     def __init__(self, ts, tt, tt_fraction=0.0):
         self.ts = ts
-        # self.whole = tt
-        # self.tt_fraction = tt_fraction
-        self.whole, fraction = divmod(tt, 1.0)
-        self.tt_fraction = fraction + tt_fraction
+        self.whole = tt
+        self.tt_fraction = tt_fraction
         self.shape = getattr(tt, 'shape', ())
 
     def __len__(self):
