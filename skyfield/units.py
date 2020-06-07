@@ -245,7 +245,7 @@ class Angle(object):
 
     def __repr__(self):
         if self.radians.size == 0:
-            return '<{0} []>'.format(type(self).__name__, self)
+            return '<{0} []>'.format(type(self).__name__)
         else:
             return '<{0} {1}>'.format(type(self).__name__, self)
 
