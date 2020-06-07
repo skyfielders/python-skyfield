@@ -758,7 +758,7 @@ class Time(object):
     # Various dunders.
 
     def __eq__(self, other_time):
-        return self - other_time == 0.0
+        return self.__sub__(other_time) == 0.0
 
     def __sub__(self, other_time):
         if not isinstance(other_time, Time):
