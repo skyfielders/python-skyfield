@@ -625,10 +625,7 @@ class Time(object):
 
     @reify
     def N(self):
-        d_psi, d_eps = self.nutation_angles_radians
-        mean_obliquity = self._mean_obliquity_radians
-        true_obliquity = mean_obliquity + d_eps
-        return build_nutation_matrix(mean_obliquity, true_obliquity, d_psi)
+        return _compute_nutation(self)
 
     @reify
     def NT(self):
@@ -636,7 +633,22 @@ class Time(object):
 
     @reify
     def M(self):
-        return _mxmxm(self.N, self.P, B)
+        # We compute P and N ourselves instead of asking for self.P and
+        # self.N to avoid keeping copies of them, since Skyfield itself
+        # never uses them again once M has been computed.  But we do
+        # check in case a user has forced them to be built already.
+
+        d = self.__dict__
+
+        P = d.get('P')
+        if P is None:
+            P = compute_precession(self.tdb)
+
+        N = d.get('N')
+        if N is None:
+            N = _compute_nutation(self)
+
+        return _mxmxm(N, P, B)
 
     @reify
     def MT(self):
@@ -748,6 +760,12 @@ class Time(object):
         if not isinstance(other_time, Time):
             return NotImplemented
         return self.tt - other_time.tt
+
+def _compute_nutation(t):
+    d_psi, d_eps = t.nutation_angles_radians
+    mean_obliquity = t._mean_obliquity_radians
+    true_obliquity = mean_obliquity + d_eps
+    return build_nutation_matrix(mean_obliquity, true_obliquity, d_psi)
 
 def julian_day(year, month=1, day=1):
     """Given a proleptic Gregorian calendar date, return a Julian day int."""
