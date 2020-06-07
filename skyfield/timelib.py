@@ -4,7 +4,6 @@ from collections import namedtuple
 from datetime import date, datetime, timedelta, tzinfo
 from numpy import (array, concatenate, cos, float_, interp, isnan, nan,
                    ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like)
-from sgp4.api import jday
 from time import strftime
 from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .descriptorlib import reify
@@ -147,7 +146,7 @@ class Timescale(object):
 
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
-        """Build a `Time` from a TAI calendar date.
+        """Build a `Time` from a TAI proleptic Gregorian date.
 
         Supply the International Atomic Time (TAI) as a proleptic
         Gregorian calendar date:
@@ -160,13 +159,13 @@ class Timescale(object):
 
         """
         if jd is not None:
-            tai = jd
-        else:
-            tai = julian_date(
-                _to_array(year), _to_array(month), _to_array(day),
-                _to_array(hour), _to_array(minute), _to_array(second),
-            )
-        return self.tai_jd(tai)
+            return self.tai_jd(jd)  # deprecate someday
+        a = _to_array
+        whole = julian_day(a(year), a(month), a(day)) - 0.5
+        fraction = (a(second) + a(minute) * 60.0 + a(hour) * 3600.0) / DAY_S
+        t = Time(self, whole, fraction + tt_minus_tai)
+        t.tai_fraction = fraction
+        return t
 
     def tai_jd(self, jd, fraction=0.0):
         """Build a `Time` from a TAI Julian date."""
@@ -191,14 +190,11 @@ class Timescale(object):
 
         """
         if jd is not None:
-            tt = jd
-        else:
-            tt = julian_date(
-                _to_array(year), _to_array(month), _to_array(day),
-                _to_array(hour), _to_array(minute), _to_array(second),
-            )
-        tt = _to_array(tt)
-        return Time(self, tt)
+            return self.tt_jd(jd)  # deprecate someday
+        a = _to_array
+        whole = julian_day(a(year), a(month), a(day)) - 0.5
+        fraction = (a(second) + a(minute) * 60.0 + a(hour) * 3600.0) / DAY_S
+        return Time(self, whole, fraction)
 
     def tt_jd(self, jd, fraction=0.0):
         """Build a `Time` from a TT Julian date."""
@@ -576,13 +572,11 @@ class Time(object):
 
     def tai_calendar(self):
         """Return TAI as a tuple (year, month, day, hour, minute, second)."""
-        # TODO: use pair of floats to boost precision.
-        return calendar_tuple(self.tai)
+        return calendar_tuple(self.whole, self.tai_fraction)
 
     def tt_calendar(self):
         """Return TT as a tuple (year, month, day, hour, minute, second)."""
-        # TODO: use pair of floats to boost precision.
-        return calendar_tuple(self.tt)
+        return calendar_tuple(self.whole, self.tt_fraction)
 
     # Convenient caching of several expensive functions of time.
 
@@ -782,24 +776,14 @@ def calendar_date(jd_integer):
 
     return year, month, day
 
-def calendar_tuple(jd_float, offset=0.0):
-    """Return a (year, month, day, hour, minute, second.fraction) tuple.
-
-    The `offset` is added to the time before it is split into its
-    components.  This is useful if the user is going to round the
-    result before displaying it.  If the result is going to be
-    displayed as seconds, for example, set `offset` to half a second
-    and then throw away the fraction; if the result is going to be
-    displayed as minutes, set `offset` to thirty seconds and then
-    throw away the seconds; and so forth.
-
-    """
-    # TODO: "offset" is completely unused; fix.
+def calendar_tuple(jd_float, fraction=0.0):
+    """Return a (year, month, day, hour, minute, second.fraction) tuple."""
     jd_float = _to_array(jd_float)
-    whole, fraction = divmod(jd_float + 0.5, 1.0)
-    whole = whole.astype(int)
+    whole1, fraction1 = divmod(jd_float, 1.0)
+    whole2, fraction = divmod(fraction1 + fraction + 0.5, 1.0)
+    whole = (whole1 + whole2).astype(int)
     year, month, day = calendar_date(whole)
-    hour, hfrac = divmod(fraction * 24.0, 1.0)
+    hour, hfrac = divmod(fraction * 24.0, 1.0)  # TODO
     minute, second = divmod(hfrac * 3600.0, 60.0)
     return year, month, day, hour.astype(int), minute.astype(int), second
 

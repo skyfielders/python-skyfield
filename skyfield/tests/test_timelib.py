@@ -33,6 +33,18 @@ def test_tdb_fraction_loses_no_precision(ts):
     assert t.whole == 2459008.0
     assert t.tdb_fraction == 0.0123456789
 
+def test_tai_seconds_preserve_10_decimal_places_in_calendar_seconds(ts):
+    t = ts.tai(2020, 6, 7, 2, 2, 12.0123456789)
+    c = t.tai_calendar()
+    assert c[:5] == (2020, 6, 7, 2, 2)
+    assert '%.10f' % c[5] == '12.0123456789'
+
+def test_tt_seconds_preserve_10_decimal_places_in_calendar_seconds(ts):
+    t = ts.tt(2020, 6, 7, 2, 2, 12.0123456789)
+    c = t.tt_calendar()
+    assert c[:5] == (2020, 6, 7, 2, 2)
+    assert '%.10f' % c[5] == '12.0123456789'
+
 time_scale_name = ['utc', 'tai', 'tt', 'tdb']
 time_params_with_array = [
     ((2018, 2019, 2020), 3, 25, 13, 1, 10),
