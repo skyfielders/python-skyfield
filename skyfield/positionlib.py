@@ -315,7 +315,7 @@ class ICRF(object):
                              ' a floating point Terrestrial Time (TT),'
                              ' or the string "date" for epoch-of-date')
 
-        _, d_eps = epoch.nutation_angles_radians
+        _, d_eps = epoch._nutation_angles_radians
         true_obliquity = epoch._mean_obliquity_radians + d_eps
         rotation = _mxm(rot_x(- true_obliquity), epoch.M)
         position_au = _mxv(rotation, position_au)

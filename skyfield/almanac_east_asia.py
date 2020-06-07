@@ -137,7 +137,7 @@ def solar_terms(ephemeris):
 
     def solar_term_at(t):
         """Return season 0 through 23 at time `t`."""
-        t.nutation_angles_radians = iau2000b_radians(t)
+        t._nutation_angles_radians = iau2000b_radians(t)
         e = earth.at(t)
         _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
         return (slon.radians // (tau / 24) % 24).astype(int)

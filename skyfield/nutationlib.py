@@ -355,10 +355,12 @@ se1_1 = +0.00e-6
 # of our tests also still call them, to help keep them working.
 
 def compute_nutation(t):
+    """Deprecated: this is now a method on the Time object."""
     return t.N
 
 def earth_tilt(t):
-    d_psi, d_eps = t.nutation_angles_radians
+    """Deprecated: these are now computed separately on the Time object."""
+    d_psi, d_eps = t._nutation_angles_radians
     mean_ob = t._mean_obliquity_radians
     true_ob = mean_ob + d_eps
     c_terms = equation_of_the_equinoxes_complimentary_terms(t.tt)

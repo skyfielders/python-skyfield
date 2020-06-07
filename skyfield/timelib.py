@@ -618,7 +618,7 @@ class Time(object):
         return rollaxis(self.C, 1)
 
     @reify
-    def nutation_angles_radians(self):
+    def _nutation_angles_radians(self):
         # TODO: add psi and eps corrections support back in here, rather
         # than at points of use.
         return iau2000a_radians(self)
@@ -632,7 +632,7 @@ class Time(object):
         # continues to support.
 
         d_psi, d_eps = angles
-        self.nutation_angles_radians = (
+        self._nutation_angles_radians = (
             d_psi / 1e7 * ASEC2RAD,
             d_eps / 1e7 * ASEC2RAD,
         )
@@ -687,7 +687,7 @@ class Time(object):
     @reify
     def gast(self):
         """Greenwich Apparent Sidereal Time as decimal hours."""
-        d_psi, _ = self.nutation_angles_radians
+        d_psi, _ = self._nutation_angles_radians
         tt = self.tt
         # TODO: move this into an eqeq function?
         c_terms = equation_of_the_equinoxes_complimentary_terms(tt)
@@ -708,7 +708,7 @@ class Time(object):
 
     def nutation_matrix(self):
         """Compute the 3×3 nutation matrix N for this date."""
-        d_psi, d_eps = self.nutation_angles_radians
+        d_psi, d_eps = self._nutation_angles_radians
         mean_obliquity = self._mean_obliquity_radians
         true_obliquity = mean_obliquity + d_eps
         return build_nutation_matrix(mean_obliquity, true_obliquity, d_psi)
