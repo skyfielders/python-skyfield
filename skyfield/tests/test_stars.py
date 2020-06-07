@@ -2,7 +2,6 @@ from skyfield import api
 from skyfield.data.hipparcos import load_dataframe
 
 def test_dataframe():
-    ts = api.load.timescale(builtin=True)
     with api.load.open('hip_main.dat.gz') as f:
         df = load_dataframe(f)
     star = api.Star.from_dataframe(df)

@@ -1,5 +1,5 @@
 from __future__ import print_function, division
-from skyfield import api, almanac
+from skyfield import api
 
 def test_sat_almanac_LEO():
     # Testcase from
@@ -90,7 +90,6 @@ def verify_sat_almanac(times, yis, sat, topos, horizon, nexpected):
     # 3) No double rises or double sets
     time_tolerance = 5/(24 * 60 * 60)   # Times must be accurate within 5 seconds
     ts = times[0].ts     # Use the timescale passed by
-    st = sat - topos
     altitudes_neartimes = [
         (sat - topos).at(ts.tai(jd=times.tai + dt)).altaz()[0].degrees
         for dt in (-time_tolerance, 0, time_tolerance)

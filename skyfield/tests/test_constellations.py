@@ -1,10 +1,6 @@
-from skyfield.api import (
-    Star, load, load_constellation_map, position_of_radec,
-)
+from skyfield.api import load_constellation_map, position_of_radec
 
 def test_constellations():
-    ts = load.timescale(builtin=True)
-    t = ts.utc(2000)
     lookup = load_constellation_map()
 
     assert lookup(position_of_radec(0, 0)) == 'Psc'
@@ -15,5 +11,6 @@ def test_constellations():
     assert lookup(position_of_radec(4.75, 0.3)) == 'Ori'
 
     # Test vectorization.
-    assert (lookup(position_of_radec([4.65, 4.75], [0, 0.3]))
-            == ['Eri', 'Ori']).all()
+    assert list(
+        lookup(position_of_radec([4.65, 4.75], [0, 0.3]))
+    ) == ['Eri', 'Ori']

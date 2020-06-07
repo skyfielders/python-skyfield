@@ -1,7 +1,7 @@
 # Test the behavior of all combinations of vector.
 
 from assay import assert_raises
-from skyfield.api import T0, Topos, load
+from skyfield.api import Topos, load
 from skyfield.positionlib import Geocentric
 
 def test_bad_addition():

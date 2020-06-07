@@ -143,3 +143,4 @@ class KeplerianOrbit:
         y_eq = cos(e) * ecliptic.y - sin(e) * ecliptic.z
         z_eq = sin(e) * ecliptic.y + cos(e) * ecliptic.z
 
+        x_eq, y_eq, z_eq

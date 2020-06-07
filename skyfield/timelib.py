@@ -11,9 +11,8 @@ from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
 from .functions import _mxm, _mxmxm, _to_array, load_bundled_npy, rot_z
 from .nutationlib import (
-    build_nutation_matrix, earth_tilt,
-    equation_of_the_equinoxes_complimentary_terms, iau2000a_radians,
-    mean_obliquity,
+    build_nutation_matrix, equation_of_the_equinoxes_complimentary_terms,
+    iau2000a_radians, mean_obliquity,
 )
 from .precessionlib import compute_precession
 

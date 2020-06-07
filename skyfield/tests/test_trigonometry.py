@@ -1,4 +1,4 @@
-from skyfield.api import Angle, Topos, load, load_file
+from skyfield.api import Angle
 from skyfield.trigonometry import position_angle_of
 
 def test_position_angle():
