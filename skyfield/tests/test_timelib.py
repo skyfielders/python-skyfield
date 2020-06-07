@@ -23,6 +23,11 @@ def test_time_creation_methods(ts, time_parameter, time_value):
         t = method(jd=time_value) # TODO: deprecate
     assert getattr(t, time_parameter) == 2441700.56640625
 
+def test_tai_fraction_loses_no_precision(ts):
+    t = ts.tai_jd(2459008.0, 0.0123456789)
+    assert t.whole == 2459008.0
+    assert t.tai_fraction == 0.0123456789
+
 def test_tdb_fraction_loses_no_precision(ts):
     t = ts.tdb_jd(2459008.0, 0.0123456789)
     assert t.whole == 2459008.0

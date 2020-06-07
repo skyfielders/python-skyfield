@@ -4,6 +4,7 @@ from collections import namedtuple
 from datetime import date, datetime, timedelta, tzinfo
 from numpy import (array, concatenate, cos, float_, interp, isnan, nan,
                    ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like)
+from sgp4.api import jday
 from time import strftime
 from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .descriptorlib import reify
@@ -167,21 +168,12 @@ class Timescale(object):
             )
         return self.tai_jd(tai)
 
-    def tai_jd(self, jd):
-        """Build a `Time` from a TAI Julian date.
-
-        Supply the International Atomic Time (TAI) as a Julian date:
-
-        >>> t = ts.tai_jd(2456675.56640625)
-        >>> t.tai
-        2456675.56640625
-        >>> t.tai_calendar()
-        (2014, 1, 18, 1, 35, 37.5)
-
-        """
-        tai = _to_array(jd)
-        t = Time(self, tai + tt_minus_tai)
-        t.tai = tai
+    def tai_jd(self, jd, fraction=0.0):
+        """Build a `Time` from a TAI Julian date."""
+        whole, fraction2 = divmod(_to_array(jd), 1.0)
+        fraction2 += fraction
+        t = Time(self, whole, fraction2 + tt_minus_tai)
+        t.tai_fraction = fraction2
         return t
 
     def tt(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
@@ -209,17 +201,7 @@ class Timescale(object):
         return Time(self, tt)
 
     def tt_jd(self, jd, fraction=0.0):
-        """Build a `Time` from a TT Julian date.
-
-        Supply the Terrestrial Time (TT) as a Julian date:
-
-        >>> t = ts.tt_jd(2456675.56640625)
-        >>> t.tt
-        2456675.56640625
-        >>> t.tt_calendar()
-        (2014, 1, 18, 1, 35, 37.5)
-
-        """
+        """Build a `Time` from a TT Julian date."""
         whole, fraction2 = divmod(_to_array(jd), 1.0)
         fraction2 += fraction
         return Time(self, whole, fraction2)
@@ -248,17 +230,10 @@ class Timescale(object):
         return t
 
     def tdb_jd(self, jd, fraction=0.0):
-        """Build a `Time` from a Barycentric Dynamical Time (TDB) Julian date.
-
-        >>> t = ts.tdb_jd(2456675.56640625)
-        >>> t.tdb
-        2456675.56640625
-
-        """
-        offset = tdb_minus_tt(jd + fraction) / DAY_S
+        """Build `Time` from a Barycentric Dynamical Time (TDB) Julian date."""
         whole, fraction2 = divmod(jd, 1.0)
         fraction2 += fraction
-        t = Time(self, whole, fraction2 - offset)
+        t = Time(self, whole, fraction2 - tdb_minus_tt(jd, fraction) / DAY_S)
         t.tdb_fraction = fraction2
         return t
 
@@ -283,16 +258,8 @@ class Timescale(object):
             )
         return self.ut1_jd(ut1)
 
-    def ut1_jd(self, jd):
-        """Build a `Time` from UT1 a Julian date.
-
-        Supply the Universal Time (UT1) as a Julian date:
-
-        >>> t = ts.ut1_jd(2456675.56640625)
-        >>> t.ut1
-        2456675.56640625
-
-        """
+    def ut1_jd(self, jd, fraction=0.0):
+        """Build a `Time` from a UT1 Julian date."""
         ut1 = _to_array(jd)
 
         # Estimate TT = UT1, to get a rough Delta T estimate.
@@ -701,8 +668,8 @@ class Time(object):
 
     @reify
     def tdb_fraction(self):
-        fraction = self.tt_fraction
-        return fraction + tdb_minus_tt(self.whole + fraction) / DAY_S
+        fr = self.tt_fraction
+        return fr + tdb_minus_tt(self.whole, fr) / DAY_S
 
     @reify
     def ut1(self):
@@ -836,7 +803,7 @@ def calendar_tuple(jd_float, offset=0.0):
     minute, second = divmod(hfrac * 3600.0, 60.0)
     return year, month, day, hour.astype(int), minute.astype(int), second
 
-def tdb_minus_tt(jd_tdb):
+def tdb_minus_tt(jd_tdb, fraction_tdb=0.0):
     """Computes how far TDB is in advance of TT, given TDB.
 
     Given that the two time scales never diverge by more than 2ms, TT
@@ -844,7 +811,7 @@ def tdb_minus_tt(jd_tdb):
     other direction.
 
     """
-    t = (jd_tdb - T0) / 36525.0
+    t = (jd_tdb - T0 + fraction_tdb) / 36525.0
 
     # USNO Circular 179, eq. 2.6.
     return (0.001657 * sin ( 628.3076 * t + 6.2401)
