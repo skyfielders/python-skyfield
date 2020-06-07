@@ -87,8 +87,7 @@ Time objects
 
 The `Time` class is Skyfield's way of representing
 either a single time, or a whole array of times.
-Each object has four floating point attributes
-that present the time in several basic time scales.
+The same time can be represented in several different time scales.
 
 ========= ==================================================
 ``t.tai`` International Atomic Time (TAI) as a Julian date.
@@ -119,6 +118,12 @@ Other time scales and conversions are available through its methods.
    Time.toordinal
    Time.tai_calendar
    Time.tt_calendar
+   Time.M
+   Time.MT
+   Time.gmst
+   Time.gast
+   Time.nutation_matrix
+   Time.precession_matrix
 
 Vector Functions
 ================

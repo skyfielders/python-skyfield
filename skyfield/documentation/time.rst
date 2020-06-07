@@ -3,7 +3,7 @@
  Dates and Time
 ================
 
-.. currentmodule:: skyfield.api
+.. currentmodule:: skyfield.timelib
 
 Astronomers use several different numerical scales for measuring time.
 Skyfield often has to use several timescales
@@ -526,8 +526,8 @@ uniform time scales can express dates
 as a simple floating-point count of days elapsed.
 To make all historical dates come out as positive numbers,
 astronomers traditionally assign each date a “Julian day” number
-that starts counting at B.C. 4713 January 1 in the old Julian calendar —
-the same date as B.C. 4714 November 24 in our Gregorian calendar.
+that starts counting at 4713 BC January 1 in the old Julian calendar —
+the same date as 4714 BC November 24 in our Gregorian calendar.
 Following a tradition going back to the Greeks and Ptolemy,
 the count starts at noon,
 since the sun’s transit is an observable event
@@ -551,7 +551,7 @@ Did you notice how negative years work?
 People still counted by starting at one, not zero,
 when the scholar Dionysius Exiguus created the eras BC and AD
 in around the year AD 500.
-So his scheme has 1 BC followed immediately by 1 AD without a break.
+So his scheme has 1 BC followed immediately by AD 1 without a break.
 To avoid an off-by-one error,
 astronomers usually ignore BC and count backwards through a year zero
 and on into negative years.
@@ -622,9 +622,9 @@ whose “hand” is the rotation of the Earth itself!
 The UT1 time is derived from the direction
 that the Earth happens to be pointing at any given moment.
 And the Earth is a young world
-with a still-molten iron core, and viscous mantle,
+with a still-molten iron core, a viscous mantle,
 and continents that rise and fall
-as each passing ice age weighs down upon them and then melts away.
+as each passing ice age weighs them down with ice and then melts away.
 We think that we can predict, with high accuracy,
 where the planets will be in their orbits
 thousands of years from now.
@@ -664,8 +664,8 @@ all ignore ΔT completely.
 When, then, does ΔT come into play?
 
 * ΔT is used when you specify your geographic location
-  as a :class:`Topos` and Skyfield needs to determine
-  where in space that location is facing at a given date and time.
+  as a :class:`~skyfield.toposlib.Topos`
+  and Skyfield needs to compute its location at a given date and time.
 
 * ΔT is needed to determine directions
   like “up,” “north,” and “east” when you want Skyfield
@@ -754,8 +754,8 @@ when printing dates to the screen.
 
 .. _date-cache:
 
-The Julian date object as cache
-===============================
+Values cached on the Time object
+================================
 
 When you create a :class:`Time`
 it goes ahead and computes its ``tt`` Terrestrial Time attribute
@@ -773,10 +773,11 @@ think of the ``()`` parentheses after a method name
 as your reminder that “this will do a fresh computation every time.”
 
 In addition to time scales,
-there are several more functions of time
-that live on Julian date objects
-since they are often needed repeatedly during a calculation.
-In case you are curious what they are, here is a list:
+each :class:`Time` object caches several other quantities
+that are often needed in astronomy.
+Skyfield only computes these attributes on-demand,
+the first time the user tries to access them
+or invokes a computation that needs their value:
 
 ``gmst``
     Greenwich Mean Sidereal Time in hours,
@@ -786,36 +787,24 @@ In case you are curious what they are, here is a list:
     Greenwich Apparent Sidereal Time in hours,
     in the range 0.0 ≤ ``gast`` < 24.0.
 
-``P``
-    The precession matrix **P** for rotating an *x,y,z* vector
-    to the true equator and equinox — the “epoch” — of this Julian date.
+``M``, ``MT``
+    This 3×3 matrix and its inverse
+    perform the complete rotation between a vector in the ICRF
+    and a vector in the dynamical reference system of this Julian date.
 
-``N``
-    The even more expensive nutation matrix **N**
-    for rotating an *x,y,z* vector to this epoch of this Julian date.
-
-``M``
-    The product **NPB** that performs the complete rotation
-    between a vector in the ICRF
-    and a vector in the dynamical reference system of this Julian date,
-    where **B** is the frame tie between the two systems.
-
-``C``
-    The matrix that performs a complete rotation between a vector in the ICRF
+``C``, ``CT``
+    This 3×3 matrix and its inverse
+    perform the complete rotation between a vector in the ICRF
     and a vector in the celestial intermediate reference system (CIRS) of
     this Julian date.
-
-``MT``, ``NT``, ``PT``, ``CT``
-    The four matrices **M**\ :sup:`T`, **N**\ :sup:`T`, **P**\ :sup:`T`
-    and **C**\ :sup:`T` that are the transposes of the four previous
-    matrices, and that rotate back the other direction from the dynamical
-    reference system back to the ICRF frame.
 
 You will typically never need to access these matrices yourself,
 as they are used automatically by the :meth:`Position.radec()`
 method when you use its  ``epoch=`` parameter
 to ask for a right ascension and declination
-in the dynamical reference system.
+in the dynamical reference system,
+and when you ask a :class:`~skyfield.toposlib.Topos` object
+for its position.
 
 .. _matplotlib: http://matplotlib.org/
 .. _pytz: http://pytz.sourceforge.net/

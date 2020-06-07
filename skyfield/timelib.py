@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 from collections import namedtuple
 from datetime import date, datetime, timedelta, tzinfo
@@ -71,15 +72,16 @@ class Timescale(object):
     generate a specific `Time`:
 
     >>> from skyfield.api import load
-    >>> ts = load.timescale()
+    >>> ts = load.timescale(builtin=True)
     >>> t = ts.utc(1980, 3, 1, 9, 30)
     >>> t
     <Time tt=2444299.896425741>
 
-    Loading a timescale downloads tables from the United States Naval
-    Observatory and the International Earth Rotation Service.  These
-    files go out of date, and Skyfield will fetch updated copies once
-    your copy of the files are too old.
+    Loading a timescale without specifying ``builtin=True`` downloads
+    fresh data tables from the United States Naval Observatory and the
+    International Earth Rotation Service.  These files go out of date,
+    and Skyfield will fetch updated copies once your copy of the files
+    are too old.
 
     """
     _utcnow = datetime.utcnow
@@ -318,16 +320,16 @@ class Timescale(object):
 class Time(object):
     """A single moment in history, or an array of several moments.
 
-    You will typically not instantiate this class yourself, but will
+    You will not typically instantiate this class yourself, but will
     rely on a Skyfield ``Timescale`` object to build dates for you:
 
-    >>> ts = load.timescale(builtin=True)
-    >>> print(ts.utc(1980, 1, 1))
+    >>> t = ts.utc(1980, 1, 1)
+    >>> print(t)
     <Time tt=2444239.5005924073>
 
-    Times are represented internally by floating point Julian dates, but
-    can be converted to other formats by using the many methods that
-    time objects make available.
+    Times are represented internally by a pair of floating point Julian
+    dates, but can be converted to other formats by using the many
+    methods that time objects make available.
 
     """
     psi_correction = 0.0  # TODO: temporarily unsupported
@@ -510,7 +512,7 @@ class Time(object):
             return format % args
 
     def utc_jpl(self):
-        """Convert to an ``A.D. 2014-Jan-18 01:35:37.5000 UT`` string.
+        """Convert to a string like ``A.D. 2014-Jan-18 01:35:37.5000 UT``.
 
         Returns a string for this date and time in UTC, in the format
         used by the JPL HORIZONS system.  If this time is an array of
@@ -534,7 +536,7 @@ class Time(object):
             return format % args
 
     def utc_strftime(self, format):
-        """Format the UTC time using a Python date formatting string.
+        """Format the UTC time using a Python datetime formatting string.
 
         This internally calls the Python ``strftime()`` routine from the
         Standard Library ``time()`` module, for which you can find a
@@ -607,51 +609,40 @@ class Time(object):
 
     def tai_calendar(self):
         """Return TAI as a tuple (year, month, day, hour, minute, second)."""
+        # TODO: use pair of floats to boost precision.
         return calendar_tuple(self.tai)
 
     def tt_calendar(self):
         """Return TT as a tuple (year, month, day, hour, minute, second)."""
+        # TODO: use pair of floats to boost precision.
         return calendar_tuple(self.tt)
 
     # Convenient caching of several expensive functions of time.
 
     @reify
-    def P(self):
-        return compute_precession(self.tdb)
-
-    @reify
-    def PT(self):
-        return rollaxis(self.P, 1)
-
-    @reify
-    def N(self):
-        return _compute_nutation(self)
-
-    @reify
-    def NT(self):
-        return rollaxis(self.N, 1)
-
-    @reify
     def M(self):
-        # We compute P and N ourselves instead of asking for self.P and
-        # self.N to avoid keeping copies of them, since Skyfield itself
-        # never uses them again once M has been computed.  But we do
-        # check in case a user has forced them to be built already.
+        """3×3 rotation matrix: ICRS → equinox of this date."""
+
+        # Compute N and P instead of asking for self.N and self.P to
+        # avoid keeping copies of them, since Skyfield itself never uses
+        # them again once M has been computed.  But we do check in case
+        # a user has forced them to be built already.
 
         d = self.__dict__
 
         P = d.get('P')
         if P is None:
-            P = compute_precession(self.tdb)
+            P = self.precession_matrix()
 
         N = d.get('N')
         if N is None:
-            N = _compute_nutation(self)
+            N = self.nutation_matrix()
 
         return _mxmxm(N, P, B)
 
     @reify
     def MT(self):
+        """3×3 rotation matrix: equinox of this date → ICRS."""
         return rollaxis(self.M, 1)
 
     @reify
@@ -689,6 +680,7 @@ class Time(object):
 
     @reify
     def _mean_obliquity_radians(self):
+        # Cached because it is used to compute both gast and N.
         return mean_obliquity(self.tdb) * ASEC2RAD
 
     # Conversion between timescales.
@@ -696,6 +688,7 @@ class Time(object):
     @reify
     def J(self):
         """Decimal Julian years centered on J2000.0 = TT 2000 January 1 12h."""
+        # TODO: use pair of floats to boost precision.
         return (self.tt - 1721045.0) / 365.25
 
     @reify
@@ -728,10 +721,12 @@ class Time(object):
 
     @reify
     def gmst(self):
+        """Greenwich Mean Sidereal Time as decimal hours."""
         return sidereal_time(self)
 
     @reify
     def gast(self):
+        """Greenwich Apparent Sidereal Time as decimal hours."""
         d_psi, _ = self.nutation_angles_radians
         tt = self.tt
         # TODO: move this into an eqeq function?
@@ -749,23 +744,45 @@ class Time(object):
     def tdb(self):
         return self.whole + self.tdb_fraction
 
+    # Crucial functions of time.
+
+    def nutation_matrix(self):
+        """Compute the 3×3 nutation matrix N for this date."""
+        d_psi, d_eps = self.nutation_angles_radians
+        mean_obliquity = self._mean_obliquity_radians
+        true_obliquity = mean_obliquity + d_eps
+        return build_nutation_matrix(mean_obliquity, true_obliquity, d_psi)
+
+    def precession_matrix(self):
+        """Compute the 3×3 precession matrix P for this date."""
+        return compute_precession(self.tdb)
+
     # Various dunders.
 
     def __eq__(self, other_time):
         if not isinstance(other_time, Time):
             return NotImplemented
+        # TODO: precision
         return self.tt == other_time.tt
 
     def __sub__(self, other_time):
         if not isinstance(other_time, Time):
             return NotImplemented
+        # TODO: precision
         return self.tt - other_time.tt
 
-def _compute_nutation(t):
-    d_psi, d_eps = t.nutation_angles_radians
-    mean_obliquity = t._mean_obliquity_radians
-    true_obliquity = mean_obliquity + d_eps
-    return build_nutation_matrix(mean_obliquity, true_obliquity, d_psi)
+    # Deprecated attributes that were once used internally, consuming
+    # memory with matrices that are never used again by Skyfield once
+    # t.M has been computed.
+
+    P = reify(precession_matrix)
+    N = reify(nutation_matrix)
+    P.__doc__ = N.__doc__ = None  # omit from Sphinx documentation
+
+    @reify
+    def PT(self): return rollaxis(self.P, 1)
+    @reify
+    def NT(self): return rollaxis(self.N, 1)
 
 def julian_day(year, month=1, day=1):
     """Given a proleptic Gregorian calendar date, return a Julian day int."""
