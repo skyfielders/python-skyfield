@@ -1,7 +1,9 @@
-from numpy import add, array, diff, flatnonzero, reshape, sign
+from numpy import add, append, array, diff, flatnonzero, reshape, sign
 
 def _remove_adjacent_duplicates(indices):
-    return indices[diff(indices, prepend=-1) != 0]
+    mask = diff(indices) != 0
+    mask = append(mask, [True])
+    return indices[mask]
 
 def _choose_brackets(y):
     dsd = diff(sign(diff(y)))
