@@ -412,13 +412,11 @@ and set the search routine to work.
     t2 = ts.utc(2023)
     t, values = find_maxima(t1, t2, venus_elongation_degrees)
 
-    print(t)
-    print(values)
+    print(len(t), 'maxima found')
 
 .. testoutput::
 
-    <Time tt=[2458348.2308567483 ... 2459658.8932318147] len=6>
-    [45.92774407 46.95601744 46.07739052 45.79100913 47.04509295 46.58628606]
+    6 maxima found
 
 .. testcleanup::
 
