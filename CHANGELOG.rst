@@ -3,17 +3,43 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-Future
-------
+1.22 — 2020 Jun 8
+-----------------
+
+* Skyfield’s improved time precision (stored internally as two floats)
+  is now used in computing ephemeris positions, Earth orientation, and
+  light-travel time, producing position angles which change much more
+  smoothly over time on a sub-milliarcsecond scale.
+
+* :doc:`searches` is now documented for custom events that users define
+  themselves, instead of only being documented for the official
+  pre-written :doc:`almanac` functions.  Not only discrete events but
+  also maxima and minima are now officially supported and documented,
+  thanks to a rewrite of the underlying code.
+
+* Time objects no longer cache the nutation and precession matrices,
+  since they are never used again after being multiplied together to
+  create the equinox-of-date rotation matrix.  This should save 144
+  bytes for each time in a :class:`~skyfield.timelib.Time` array.
+
+* It is now possible to :ref:`from-satrec` thanks to a new Earth
+  satellite constructor method.
+  `#384 <https://github.com/skyfielders/python-skyfield/issues/384>`_
 
 * Added :meth:`~skyfield.iokit.Loader.build_url()` that returns the URL
   from which Skyfield will download a file.
   `#382 <https://github.com/skyfielders/python-skyfield/issues/382>`_
 
 * Added :meth:`~skyfield.jpllib.SpiceKernel.close()` to support
-  applications that need to do fine-grained resource management or that
-  need to run tests that check for dangling open files.
+  applications that need to do fine-grained resource management or whose
+  testing framework check for dangling open files.
   `#374 <https://github.com/skyfielders/python-skyfield/issues/374>`_
+
+* Skyfield’s dependency list now asks for “jplephem” version 2.13 or
+  later.  Skyfield 1.21, alas, could incur a ``Module not found`` error
+  when importing ``jplephem.exceptions`` if a user had an old “jplephem”
+  version already installed.
+  `#386 <https://github.com/skyfielders/python-skyfield/issues/386>`_
 
 1.21 — 2020 May 29
 ------------------

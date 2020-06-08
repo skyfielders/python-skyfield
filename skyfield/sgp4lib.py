@@ -116,7 +116,12 @@ class EarthSatellite(VectorFunction):
 
     @classmethod
     def from_satrec(cls, satrec, ts):
-        """Build an EarthSatellite from a raw sgp4 Satrec object."""
+        """Build an EarthSatellite from a raw sgp4 Satrec object.
+
+        This lets you provide raw numeric orbital elements instead of
+        the text of a TLE set.  See :ref:`from-satrec` for detais.
+
+        """
         self = cls.__new__(cls)
         self.model = satrec
         self.name = None

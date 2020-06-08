@@ -624,12 +624,9 @@ class Time(object):
         return iau2000a_radians(self)
 
     def _nutation_angles(self, angles):
-        # Before the public attribute `nutation_angles_radians` was
-        # added in version 1.22, nutation angles were cached in a
-        # private attribute in raw tenths of a microarcsecond.  Sample
-        # code shared with early adopters set the attribute manually to
-        # avoid the expense of IAU 2000A, a pattern which this setter
-        # continues to support.
+        # Sample code shared with early adopters suggested that setting
+        # this attribute manually could avoid the expense of IAU 2000A,
+        # so this setter continues to support the pattern.
 
         d_psi, d_eps = angles
         self._nutation_angles_radians = (

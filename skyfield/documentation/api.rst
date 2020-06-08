@@ -200,6 +200,7 @@ See :doc:`earth-satellites`.
 .. autosummary::
 
    EarthSatellite
+   EarthSatellite.from_satrec
 
 Stars and other distant objects
 ===============================

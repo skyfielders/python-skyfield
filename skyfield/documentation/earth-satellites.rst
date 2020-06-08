@@ -657,8 +657,10 @@ and otherwise recording the propagator error:
      None,
      'mrt is less than 1.0 which indicates the satellite has decayed']
 
-Building a satellite from orbital elements
-------------------------------------------
+.. _from-satrec:
+
+Build a satellite from orbital elements
+---------------------------------------
 
 If you are starting with raw satellite orbital parameters
 instead of TLE text,
