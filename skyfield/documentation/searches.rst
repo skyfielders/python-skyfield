@@ -406,44 +406,68 @@ and set the search routine to work.
 
     from skyfield.searchlib import find_maxima
 
-    venus_elongation_degrees.rough_period = 180.0
+    venus_elongation_degrees.rough_period = 1.0
 
     t1 = ts.utc(2018)
     t2 = ts.utc(2023)
     t, values = find_maxima(t1, t2, venus_elongation_degrees)
 
-    #print(t)
-    #print(values)
+    print(t)
+    print(values)
 
-..
-   .. testoutput::
+.. testoutput::
 
-       <Time tt=[2458202.1729387585 ... 2459818.728224116] len=5>
-       [ True False  True False  True]
+    <Time tt=[2458348.2308567483 ... 2459658.8932318147] len=6>
+    [45.92774407 46.95601744 46.07739052 45.79100913 47.04509295 46.58628606]
 
 .. testcleanup::
 
     import os
     os.rename('venus-elongation.png', '_static/venus-elongation.png')
 
+By using Python’s built-in
+`zip() <https://docs.python.org/3/library/functions.html#zip>`_
+you can loop across both arrays,
+printing the time and angle of each maximum elongation:
 
-..
-   .. testcode::
+.. testcode::
 
-       for ti, vi in zip(t, values):
-           print(ti.utc_strftime('%Y-%m-%d %H:%M:%S '), '%.2f' % vi)
+    for ti, vi in zip(t, values):
+        print(ti.utc_strftime('%Y-%m-%d %H:%M:%S '), '%.2f' % vi,
+              'degrees elongation')
 
-   .. testoutput::
+.. testoutput::
 
-       2018-08-17 17:31:17  45.93
-       2019-01-06 04:53:35  46.96
-       2020-08-13 00:14:12  45.79
-       2021-10-29 20:51:56  47.05
-       2022-03-20 09:25:07  46.59
-
-(TODO)
+    2018-08-17 17:31:17  45.93 degrees elongation
+    2019-01-06 04:53:35  46.96 degrees elongation
+    2020-03-24 22:13:32  46.08 degrees elongation
+    2020-08-13 00:14:11  45.79 degrees elongation
+    2021-10-29 20:51:56  47.05 degrees elongation
+    2022-03-20 09:25:06  46.59 degrees elongation
 
 Finding minima
 --------------
 
-(TODO)
+Skyfield provides a :func:`~skyfield.searchlib.find_minima()` routine
+which is symmetric with the :func:`~skyfield.searchlib.find_maxima()`
+function described in the previous section.
+To find when Venus is closest to the sun:
+
+.. testcode::
+
+    from skyfield.searchlib import find_minima
+    t, values = find_minima(t1, t2, venus_elongation_degrees)
+
+    for ti, vi in zip(t, values):
+        print(ti.utc_strftime('%Y-%m-%d %H:%M:%S '), '%.2f' % vi,
+              'degrees elongation')
+
+.. testoutput::
+
+    2018-01-08 20:15:14  0.76 degrees elongation
+    2018-10-27 00:48:08  6.22 degrees elongation
+    2019-08-13 23:03:20  1.27 degrees elongation
+    2020-06-03 18:48:01  0.48 degrees elongation
+    2021-03-26 13:47:02  1.35 degrees elongation
+    2022-01-08 15:16:27  4.81 degrees elongation
+    2022-10-23 07:32:47  1.05 degrees elongation

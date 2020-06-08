@@ -1,45 +1,5 @@
-from numpy import (add, append, argsort, array, concatenate, diff,
-                   flatnonzero, reshape, sign)
-
-def _remove_adjacent_duplicates(indices):
-    mask = diff(indices) != 0
-    mask = append(mask, [True])
-    return indices[mask]
-
-def _choose_brackets(y):
-    """Return the indices between which we should search for maxima of `y`."""
-    dsd = diff(sign(diff(y)))
-    indices = flatnonzero(dsd < 0)
-    left = reshape(add.outer(indices, [0, 1]), -1)
-    left = _remove_adjacent_duplicates(left)
-    right = left + 1
-    return left, right
-
-def _identify_maxima(x, y):
-    dsd = diff(sign(diff(y)))
-
-    # Choose every point that is higher than the two adjacent points.
-    indices = flatnonzero(dsd == -2) + 1
-    peak_x = x.take(indices)
-    peak_y = y.take(indices)
-
-    # Also choose the midpoint between the edges of a plateau, if both
-    # edges are in view.  First we eliminate runs of zeroes, then look
-    # for adjacent -1 values, then map those back to the main array.
-    indices = flatnonzero(dsd)
-    dsd2 = dsd.take(indices)
-    minus_ones = dsd2 == -1
-    plateau_indices = flatnonzero(minus_ones[:-1] & minus_ones[1:])
-    plateau_left_indices = indices.take(plateau_indices)
-    plateau_right_indices = indices.take(plateau_indices + 1) + 2
-    plateau_x = x.take(plateau_left_indices) + x.take(plateau_right_indices)
-    plateau_x /= 2.0
-    plateau_y = y.take(plateau_left_indices + 1)
-
-    x = concatenate((peak_x, plateau_x))
-    y = concatenate((peak_y, plateau_y))
-    indices = argsort(x)
-    return x[indices], y[indices]
+from numpy import array
+from skyfield.searchlib import _choose_brackets, _identify_maxima
 
 def test_brackets_of_simple_peak():
     y = array((10, 11, 12, 11, 10))

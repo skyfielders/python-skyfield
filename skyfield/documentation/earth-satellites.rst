@@ -246,16 +246,16 @@ over the span of a single day:
     t, events = satellite.find_events(bluffton, t0, t1, altitude_degrees=30.0)
     for ti, event in zip(t, events):
         name = ('rise above 30°', 'culminate', 'set below 30°')[event]
-        print(ti.utc_jpl(), name)
+        print(ti.utc_strftime('%Y %b %d %H:%M:%S'), name)
 
 .. testoutput::
 
-    A.D. 2014-Jan-23 06:25:36.5356 UT rise above 30°
-    A.D. 2014-Jan-23 06:26:57.7442 UT culminate
-    A.D. 2014-Jan-23 06:28:19.1841 UT set below 30°
-    A.D. 2014-Jan-23 12:54:55.7886 UT rise above 30°
-    A.D. 2014-Jan-23 12:56:26.8624 UT culminate
-    A.D. 2014-Jan-23 12:57:57.7244 UT set below 30°
+    2014 Jan 23 06:25:37 rise above 30°
+    2014 Jan 23 06:26:58 culminate
+    2014 Jan 23 06:28:19 set below 30°
+    2014 Jan 23 12:54:56 rise above 30°
+    2014 Jan 23 12:56:27 culminate
+    2014 Jan 23 12:57:58 set below 30°
 
 The satellite’s altitude exceeded 30° twice.
 For each such occasion,

@@ -2,9 +2,8 @@
 
 from __future__ import print_function, division
 
-from numpy import (
-    concatenate, diff, flatnonzero, linspace, multiply, sign, sort
-)
+from numpy import (add, append, argsort, concatenate, diff, flatnonzero,
+                   linspace, multiply, reshape, sign, sort)
 from .constants import DAY_S
 EPSILON = 0.001 / DAY_S
 
@@ -81,7 +80,19 @@ def _find_discrete(ts, jd, f, epsilon, num):
 
     return ts.tt_jd(ends), y
 
+def find_minima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
+    def g(t): return -f(t)
+    g.rough_period = f.rough_period
+    t, y = find_maxima(start_time, end_time, g, epsilon=1.0 / DAY_S, num=12)
+    return t, -y
+
 def find_maxima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
+    #    @@       @@_@@       @@_@@_@@_@@
+    #   /  \     /     \     /           \
+    # @@    @@ @@       @@ @@             @@
+    # +1 -1    +1  0 -1    +1  0  0  0 -1    sd = sign(diff(y))
+    # -2       -1 -1       -1  0  0 -1       diff(sign(diff(y))
+
     ts = start_time.ts
     jd0 = start_time.tt
     jd1 = end_time.tt
@@ -95,66 +106,28 @@ def find_maxima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
     # both points next to it.  This presents a problem: if the initial
     # heights are, for example, [1.7, 1.1, 0.3, ...], there might be a
     # maximum 1.8 hidden between the first two heights, but it would not
-    # meet the criteria for further investigation.  To remedy this, we
-    # put an extra point out beyond each end of our range, then filter
-    # our final result to remove maxima that fall outside the range.
+    # meet the criteria for further investigation because we can't see
+    # whether the curve is on its way up or down to the left of 1.7.  So
+    # we put an extra point out beyond each end of our range, then
+    # filter our final result to remove maxima that fall outside the
+    # range.
     bump = rough_period / num
     bumps = int((jd1 - jd0) / bump) + 3
     jd = linspace(jd0 - bump, jd1 + bump, bumps)
 
-    end_mask = linspace(0.0, 1.0, num)
-    start_mask = end_mask[::-1]
+    end_alpha = linspace(0.0, 1.0, num)
+    start_alpha = end_alpha[::-1]
     o = multiply.outer
 
     while True:
         t = ts.tt_jd(jd)
         y = f(t)
 
-        # Because artifical functions, like those in our units tests and
-        # those that users might experiment with, might exhibit little
-        # plateaus around a maximum - where the sign of the difference
-        # drops to 0 before going negative - we do a little extra work
-        # here.  Naming a rising edge with "1", a plateau with "2", and
-        # a falling edge with "3", we look for the two patterns:
-        #
-        # +1,-1   +1,0,-1
-        #   .       ._.
-        #  / \     /   \
-        # .   .   .     .
-
-        n = sign(diff(y))
-        rising = n == 1.0
-        flat = n == 0.0
-        falling = n == -1.0
-        indices2 = flatnonzero(rising[:-1] & falling[1:])
-        indices3 = flatnonzero(rising[:-2] & flat[1:-1] & falling[2:])
-
-        if len(indices3):
-            # The uncommon, artificial case, that requires a bit of
-            # extra effort to keep the resulting arrays sorted.
-            start_indices = concatenate((indices2, indices3 + 1))
-            end_indices = concatenate((indices2 + 2, indices3 + 2))
-            sort(start_indices)
-            sort(end_indices)
-        elif len(indices2):
-            # The common case: at least one maxima exists, and all
-            # maxima were simple peaks.
-            start_indices = indices2
-            end_indices = indices2 + 2
-        else:
-            # No maxima found.
-            jd = y = y[0:0]
-            break
-
-        starts = jd.take(start_indices)
-        ends = jd.take(end_indices)
-
         # Since we start with equal intervals, they all should fall
         # below epsilon at around the same time; so for efficiency we
         # only test the first pair.
-        if ends[0] - starts[0] <= epsilon:
-            jd = ends
-            y = y.take(end_indices)
+        if t[1] - t[0] <= epsilon:
+            jd, y = _identify_maxima(jd, y)
 
             # Filter out maxima that fell slightly outside our bounds.
             keepers = (jd >= jd0) & (jd <= jd1)
@@ -170,6 +143,60 @@ def find_maxima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
 
             break
 
-        jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()
+        left, right = _choose_brackets(y)
+
+        if not len(left):
+            # No maxima found.
+            jd = y = y[0:0]
+            break
+
+        starts = jd.take(left)
+        ends = jd.take(right)
+
+        jd = o(starts, start_alpha).flatten() + o(ends, end_alpha).flatten()
+        jd = _remove_adjacent_duplicates(jd)
 
     return ts.tt_jd(jd), y
+
+def _choose_brackets(y):
+    """Return the indices between which we should search for maxima of `y`."""
+    dsd = diff(sign(diff(y)))
+    indices = flatnonzero(dsd < 0)
+    left = reshape(add.outer(indices, [0, 1]), -1)
+    left = _remove_adjacent_duplicates(left)
+    right = left + 1
+    return left, right
+
+def _identify_maxima(x, y):
+    """Return the maxima we can see in the series y as simple points."""
+    dsd = diff(sign(diff(y)))
+
+    # Choose every point that is higher than the two adjacent points.
+    indices = flatnonzero(dsd == -2) + 1
+    peak_x = x.take(indices)
+    peak_y = y.take(indices)
+
+    # Also choose the midpoint between the edges of a plateau, if both
+    # edges are in view.  First we eliminate runs of zeroes, then look
+    # for adjacent -1 values, then map those back to the main array.
+    indices = flatnonzero(dsd)
+    dsd2 = dsd.take(indices)
+    minus_ones = dsd2 == -1
+    plateau_indices = flatnonzero(minus_ones[:-1] & minus_ones[1:])
+    plateau_left_indices = indices.take(plateau_indices)
+    plateau_right_indices = indices.take(plateau_indices + 1) + 2
+    plateau_x = x.take(plateau_left_indices) + x.take(plateau_right_indices)
+    plateau_x /= 2.0
+    plateau_y = y.take(plateau_left_indices + 1)
+
+    x = concatenate((peak_x, plateau_x))
+    y = concatenate((peak_y, plateau_y))
+    indices = argsort(x)
+    return x[indices], y[indices]
+
+def _remove_adjacent_duplicates(a):
+    if not len(a):
+        return a
+    mask = diff(a) != 0
+    mask = append(mask, [True])
+    return a[mask]
