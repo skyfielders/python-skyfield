@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 
 from numpy import (add, append, argsort, concatenate, diff, flatnonzero,
-                   linspace, multiply, reshape, sign, sort)
+                   linspace, multiply, reshape, sign)
 from .constants import DAY_S
 EPSILON = 0.001 / DAY_S
 
