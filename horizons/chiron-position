@@ -1,0 +1,152 @@
+*******************************************************************************
+Ephemeris / WWW_USER Mon Jun  8 12:58:18 2020 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: 2060 Chiron (1977 UB)           {source: JPL#128}
+Center body name: Earth (399)                     {source: DE431}
+Center-site name: GEOCENTRIC
+*******************************************************************************
+Start time      : A.D. 2020-Jun-09 00:00:00.0000 UT
+Stop  time      : A.D. 2020-Jun-10 00:00:00.0000 UT
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : No model available
+Target radii    : 83.0 km
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : High-precision EOP model        {East-longitude positive}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: DE431}
+Rel. light bend : Sun, EARTH                      {source: DE431}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
+Small-body perts: Yes                             {source: SB431-N16}
+Atmos refraction: NO (AIRLESS)
+RA format       : HMS
+Time format     : CAL
+EOP file        : eop.200605.p200827
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2020-JUN-05. PREDICTS-> 2020-AUG-26
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2455274.5 ! 2010-Mar-19.00 (TDB)         Residual RMS= .33913
+   EC= .3786646057739819   QR= 8.513334175773098   TP= 2450117.3602233306
+   OM= 209.3482682368766   W=  339.861292518647    IN= 6.929093418484631
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X= 1.343299729888507E+01  Y=-8.896940452392883E+00  Z=-1.953060693764759E+00
+  VX= 3.100234627773191E-03 VY= 2.125946884890467E-03 VZ= 8.583534523235937E-04
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= 83.                ROTPER= 5.918
+   H= 5.8                  G= .150                 B-V= .704
+                           ALBEDO= .150            STYP= Cb
+**************************************************************************************************************
+ Date__(UT)__HR:MN     R.A._____(ICRF)_____DEC  APmag  S-brt            delta      deldot    S-O-T /r    S-T-O
+**************************************************************************************************************
+$$SOE
+ 2020-Jun-09 00:00     00 27 38.99 +05 57 08.9  18.89   9.01 19.1778447428680 -26.9234624  69.6737 /L   2.8939
+ 2020-Jun-10 00:00     00 27 44.81 +05 57 51.0  18.89   9.01 19.1622473929048 -27.0877843  70.6015 /L   2.9113
+$$EOE
+**************************************************************************************************************
+Column meaning:
+
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion from TDB on Earth
+regardless of observer location within the solar system, although clock
+rates may differ due to the local gravity field and no analog to "UT"
+may be defined for that location.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+
+ R.A._____(ICRF)_____DEC =
+  Astrometric right ascension and declination of the target center with
+respect to the observing site (coordinate origin) in the reference frame of
+the planetary ephemeris (ICRF). Compensated for down-leg light-time delay
+aberration.
+
+  Units: RA  in hours-minutes-seconds of time   (HH MM SS.ff)
+         DEC in degrees-minutes-seconds of arc  (sDD MN SC.f)
+
+ APmag S-brt =
+   Asteroid's approximate apparent visual magnitude & surface brightness:
+   APmag = H + 5*log10(delta) + 5*log10(r) - 2.5*log10((1-G)*phi1 + G*phi2)
+For solar phase angles > 90 deg, the error could exceed 1 magnitude. For
+phase angles > 120 degrees, output values are rounded to the nearest integer
+to indicate the errors could be large and unknown.
+   Units: NONE & VISUAL MAGNITUDES PER SQUARE ARCSECOND
+
+ delta  deldot =
+   Range ("delta") and range-rate ("delta-dot") of target center with respect
+to the observer at the instant light seen by the observer at print-time would
+have left the target center (print-time minus down-leg light-time); the
+distance traveled by a light ray emanating from the center of the target and
+recorded by the observer at print-time. "deldot" is a projection of the
+velocity vector along this ray, the light-time-corrected line-of-sight from
+the coordinate center, and indicates relative motion. A positive "deldot"
+means the target center is moving away from the observer (coordinate center).
+A negative "deldot" means the target center is moving toward the observer.
+Units: AU and KM/S
+
+ S-O-T /r =
+    Sun-Observer-Target angle; target's apparent SOLAR ELONGATION seen from
+the observer location at print-time. Angular units: DEGREES
+
+    The '/r' column indicates the target's apparent position relative to
+the Sun in the observer's sky, as described below:
+
+    For an observing location on the surface of a rotating body
+(considering its rotational sense):
+
+    /T indicates target TRAILS Sun (evening sky; rises and sets AFTER Sun)
+    /L indicates target LEADS Sun  (morning sky; rises and sets BEFORE Sun)
+
+For an observing point NOT on a rotating body (such as a spacecraft), the
+"leading" and "trailing" condition is defined by the observer's
+heliocentric orbital motion: if continuing in the observer's current
+direction of heliocentric motion would encounter the target's apparent
+longitude first, followed by the Sun's, the target LEADS the Sun as seen by
+the observer. If the Sun's apparent longitude would be encountered first,
+followed by the target's, the target TRAILS the Sun.
+
+NOTE: The S-O-T solar elongation angle is numerically the minimum
+separation angle of the Sun and target in the sky in any direction. It
+does NOT indicate the amount of separation in the leading or trailing
+directions, which are defined in the equator of a spherical coordinate
+system.
+
+ S-T-O =
+   "S-T-O" is the Sun->Target->Observer angle; the interior vertex angle at
+target center formed by a vector to the apparent center of the Sun at
+reflection time on the target and the apparent vector to the observer at
+print-time. Slightly different from true PHASE ANGLE (requestable separately)
+at the few arcsecond level in that it includes stellar aberration on the
+down-leg from target to observer.  Units: DEGREES
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+
+**************************************************************************************************************
