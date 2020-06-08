@@ -7,7 +7,7 @@ way for most users to use Skyfield's main features.
 
 """
 from datetime import datetime
-from .constants import B1950, pi, tau
+from .constants import B1950, T0, pi, tau
 from .constellationlib import load_constellation_map
 from .errors import DeprecationError
 from .iokit import Loader, load_file
@@ -15,7 +15,7 @@ from .planetarylib import PlanetaryConstants
 from .positionlib import position_from_radec, position_of_radec
 from .starlib import Star
 from .sgp4lib import EarthSatellite
-from .timelib import T0, Time, Timescale, utc
+from .timelib import Time, Timescale, utc
 from .toposlib import Topos
 from .units import Angle, Distance
 from .named_stars import NamedStar
