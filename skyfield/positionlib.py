@@ -410,7 +410,6 @@ class ICRF(object):
         sun_m = (ephemeris['sun'] - ephemeris['earth']).at(self.t).position.m
         near, far = intersect_line_and_sphere(sun_m + earth_m, earth_m, ERAD)
         return nan_to_num(far) <= 0
-        # BUT: what about normal satellite positions relative to an observer?
 
     def from_altaz(self, alt=None, az=None, alt_degrees=None, az_degrees=None,
                    distance=Distance(au=0.1)):
