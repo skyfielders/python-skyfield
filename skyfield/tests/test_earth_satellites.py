@@ -150,3 +150,15 @@ def test_is_sunlit():
     # What if we observe from a topos rather than the geocenter?
     topos = api.Topos('40.8939 N', '83.8917 W')
     assert list((s - topos).at(t).is_sunlit(eph)) == expected
+
+def test_is_behind_earth():
+    # Like the previous test: a satellite-focused positionlib method.
+    # Just for fun, we ask whether the Sun is behind the earth, so this
+    # measures the same celestial circumstance as the previous test.
+    ts = api.load.timescale()
+    t = ts.utc(2018, 7, 3, 0, range(0, 60, 10))
+    s = EarthSatellite(*iss_tle0.splitlines())
+    eph = load('de421.bsp')
+    expected = [False, True, True, True, False, False]
+    p = (eph['earth'] + s).at(t).observe(eph['sun']).apparent()
+    assert list(p.is_behind_earth()) == expected

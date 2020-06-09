@@ -3,6 +3,13 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.23 — Future
+-------------
+
+* Added :func:`~skyfield.positionlib.ICRF.is_behind_earth()` to
+  determine whether a celestial object is blocked from an Earth
+  satellite’s view by the Earth itself.
+
 1.22 — 2020 Jun 8
 -----------------
 

@@ -411,6 +411,23 @@ class ICRF(object):
         near, far = intersect_line_and_sphere(sun_m + earth_m, earth_m, ERAD)
         return nan_to_num(far) <= 0
 
+    def is_behind_earth(self):
+        """Return whether the Earth blocks the view of this object.
+
+        For a position centered on an Earth-orbiting satellite, return
+        whether the target is in eclipse behind the disc of the Earth.
+        See :ref:`is-behind-earth`.
+
+        """
+        o = self.observer_data
+        if (o is None) or (o.gcrs_position is None):
+            raise ValueError('can only compute Earth occultation for'
+                             'positions observed from an Earth satellite')
+        earth_m = - o.gcrs_position * AU_M
+        vector_m = self.position.m
+        near, far = intersect_line_and_sphere(vector_m, earth_m, ERAD)
+        return nan_to_num(far) > 0
+
     def from_altaz(self, alt=None, az=None, alt_degrees=None, az_degrees=None,
                    distance=Distance(au=0.1)):
         """Generate an Apparent position from an altitude and azimuth.

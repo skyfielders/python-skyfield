@@ -424,8 +424,8 @@ See :doc:`positions` to learn more about these possibilities.
 
 .. _satellite-is-sunlit:
 
-Finding when a satellite is in sunlight
----------------------------------------
+Find when a satellite is in sunlight
+------------------------------------
 
 A satellite is generally only visible to a ground observer
 when there is still sunlight up at its altitude.
@@ -478,6 +478,37 @@ if you want to loop across the times and corresponding values.
     2014-01-20 01:00  ISS (ZARYA) is in shadow
     2014-01-20 01:20  ISS (ZARYA) is in sunlight
     2014-01-20 01:40  ISS (ZARYA) is in sunlight
+
+.. _is-behind-earth:
+
+Find whether the Earth blocks a satellite’s view
+------------------------------------------------
+
+The Earth looms large in the sky of an Earth-orbiting satellite.
+To plan an observation you may want to know
+when a given celestial object is blocked by the Earth
+and not visible from your satellite.
+Skyfield provides a simple geometric estimate for this
+through the :meth:`~skyfield.positionlib.ICRF.is_behind_earth()` method.
+
+.. testcode::
+
+    eph = load('de421.bsp')
+    earth, venus = eph['earth'], eph['venus']
+    satellite = by_name['ISS (ZARYA)']
+
+    two_hours = ts.utc(2014, 1, 20, 0, range(0, 120, 20))
+    p = (earth + satellite).at(two_hours).observe(venus).apparent()
+    sunlit = p.is_behind_earth()
+    print(sunlit)
+
+.. testoutput::
+
+    [False False  True  True False False]
+
+See the previous section for how to associate
+each of these ``True`` and ``False`` values
+with their corresponding time.
 
 Avoid calling the observe method
 --------------------------------
