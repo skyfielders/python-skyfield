@@ -1,5 +1,6 @@
 """Vector functions and their composition."""
 
+from jplephem.names import target_names as _jpl_code_name_dict
 from numpy import max
 from .constants import C_AUDAY
 from .errors import DeprecationError, raise_error_for_deprecated_time_arguments
@@ -11,6 +12,19 @@ class VectorFunction(object):
     """Given a time, computes a corresponding position."""
 
     ephemeris = None
+
+    @property
+    def center_name(self):
+        center = self.center
+        if isinstance(center, int):
+            name = _jpl_code_name_dict.get(center)
+            if name is not None:
+                return '{0} {1}'.format(center, name)
+        return str(center)
+
+    # @property
+    # def target_name(self):
+    #     return repr(self.center)
 
     def __add__(self, other):
         if self.target != other.center:
@@ -154,7 +168,6 @@ class VectorSum(VectorFunction):
                  positives, negatives):
         self.center = center
         self.target = target
-        self.center_name = center_name
         self.target_name = target_name
         self.positives = positives
         self.negatives = negatives

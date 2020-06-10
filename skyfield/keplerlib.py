@@ -61,7 +61,6 @@ class KeplerOrbit(VectorFunction):
         self.epoch = epoch
         self.center = center
         self.target = target
-        self.center_name = center_name
         self.target_name = target_name
 
         self._rotation = None  # TODO: make argument?

@@ -23,7 +23,6 @@ class Topos(VectorFunction):
 
     """
     center = 399
-    center_name = '399 EARTH'
 
     def __init__(self, latitude=None, longitude=None, latitude_degrees=None,
                  longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):

@@ -5,15 +5,16 @@ from collections import defaultdict
 
 from jplephem.exceptions import OutOfRangeError
 from jplephem.spk import SPK
-from jplephem.names import target_name_pairs, target_names as _names
+from jplephem.names import target_name_pairs
 
 from .constants import AU_KM, DAY_S
 from .errors import EphemerisRangeError
 from .timelib import calendar_date
-from .vectorlib import VectorFunction, VectorSum
+from .vectorlib import VectorFunction, VectorSum, _jpl_code_name_dict
 
-_targets = dict((name, target) for (target, name) in target_name_pairs)
-
+_jpl_name_code_dict = dict(
+    (name, target) for (target, name) in target_name_pairs
+)
 
 class SpiceKernel(object):
     """Ephemeris file in NASA .bsp format.
@@ -147,7 +148,7 @@ class SpiceKernel(object):
             code = name
         else:
             name = name.upper()
-            code = _targets.get(name)
+            code = _jpl_name_code_dict.get(name)
             if code is None:
                 raise ValueError('unknown SPICE target {0!r}'.format(name))
         if code not in self.codes:
@@ -168,15 +169,14 @@ class SpiceKernel(object):
         chain = chain[::-1]
         center = chain[0].center
         target = chain[-1].target
-        center_name = _format_code_and_name(center)
         target_name = _format_code_and_name(target)
-        return VectorSum(center, target, center_name, target_name, chain, ())
+        return VectorSum(center, target, None, target_name, chain, ())
 
     def __contains__(self, name_or_code):
         if isinstance(name_or_code, int):
             code = name_or_code
         else:
-            code = _targets.get(name_or_code.upper())
+            code = _jpl_name_code_dict.get(name_or_code.upper())
         return code in self.codes
 
 
@@ -194,7 +194,6 @@ class SPICESegment(VectorFunction):
         self.ephemeris = ephemeris
         self.center = spk_segment.center
         self.target = spk_segment.target
-        self.center_name = _format_code_and_name(self.center)
         self.target_name = _format_code_and_name(self.target)
         self.spk_segment = spk_segment
 
@@ -242,22 +241,21 @@ def _center(code, segment_dict):
         yield segment
         code = segment.center
 
-
 def _format_code_and_name(code):
-    name = _names.get(code, None)
+    name = _jpl_code_name_dict.get(code, None)
     if name is None:
         return str(code)
     return '{0} {1}'.format(code, name)
 
 def _format_segment(segment):
-    cname = _names.get(segment.center, 'unknown')
-    tname = _names.get(segment.target, 'unknown')
+    cname = _jpl_code_name_dict.get(segment.center, 'unknown')
+    tname = _jpl_code_name_dict.get(segment.target, 'unknown')
     return '    {0:3} -> {1:<3}  {2} -> {3}'.format(
         segment.center, segment.target, cname, tname)
 
 def _format_segment_brief(segment):
-    cname = _names.get(segment.center)
-    tname = _names.get(segment.target)
+    cname = _jpl_code_name_dict.get(segment.center)
+    tname = _jpl_code_name_dict.get(segment.target)
     return '{0}{1}{2} -> {3}{4}{5}'.format(
         segment.center,
         ' ' if cname else '',

@@ -84,7 +84,6 @@ class EarthSatellite(VectorFunction):
 
     """
     center = 399
-    center_name = '399 EARTH'
 
     def __init__(self, line1, line2, name=None, ts=None):
         ts = ts or _ts
