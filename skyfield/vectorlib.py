@@ -15,16 +15,11 @@ class VectorFunction(object):
 
     @property
     def center_name(self):
-        center = self.center
-        if isinstance(center, int):
-            name = _jpl_code_name_dict.get(center)
-            if name is not None:
-                return '{0} {1}'.format(center, name)
-        return str(center)
+        return _jpl_name(self.center)
 
-    # @property
-    # def target_name(self):
-    #     return repr(self.center)
+    @property
+    def target_name(self):
+        return _jpl_name(self.target)
 
     def __add__(self, other):
         if self.target != other.center:
@@ -168,7 +163,6 @@ class VectorSum(VectorFunction):
                  positives, negatives):
         self.center = center
         self.target = target
-        self.target_name = target_name
         self.positives = positives
         self.negatives = negatives
 
@@ -270,3 +264,10 @@ class ObserverData(object):
         self.gcrs_position = None
         self.bcrs_position = None
         self.bcrs_velocity = None
+
+def _jpl_name(code_or_string):
+    if isinstance(code_or_string, int):
+        name = _jpl_code_name_dict.get(code_or_string)
+        if name is not None:
+            return '{0} {1}'.format(code_or_string, name)
+    return str(code_or_string)

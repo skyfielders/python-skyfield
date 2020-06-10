@@ -108,10 +108,6 @@ class EarthSatellite(VectorFunction):
         # simply have lived in __init__().  Alas!  I was so young then.
 
         self.target = -100000 - satrec.satnum
-        self.target_name = 'Satellite{0} {1}'.format(
-            satrec.satnum,
-            ' ' + repr(self.name) if self.name else '',
-        )
 
     @classmethod
     def from_satrec(cls, satrec, ts):

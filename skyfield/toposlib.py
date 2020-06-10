@@ -53,11 +53,10 @@ class Topos(VectorFunction):
 
         self.R_lat = rot_y(latitude.radians)[::-1]
 
-        self.target = object()  # TODO: make this more interesting
-        self.target_name = '{0} N {1} E'.format(self.latitude, self.longitude)
+        self.target = str(self)
 
     def __str__(self):
-        return 'Topos {0}'.format(self.target_name)
+        return 'Topos {0} N {1} E'.format(self.latitude, self.longitude)
 
     def __repr__(self):
         return '<{0}>'.format(self)

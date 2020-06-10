@@ -60,10 +60,12 @@ Sum of 3 vectors:
  + Topos 38deg 55' 17.4" N -77deg 04' 00.8" E"""
 
     assert repr(v) == """\
-<VectorSum of 3 vectors 0 SOLAR SYSTEM BARYCENTER -> 38deg 55' 17.4" N -77deg 04' 00.8" E>"""
+<VectorSum of 3 vectors 0 SOLAR SYSTEM BARYCENTER -> Topos 38deg 55' 17.4" N -77deg 04' 00.8" E>"""
 
-    assert str(v.at(t)).startswith("\
-<Barycentric BCRS position and velocity at date t center=0 target=<object object at")
+    print(str(v.at(t)))
+    assert str(v.at(t)) == """\
+<Barycentric BCRS position and velocity at date t center=0 \
+target=Topos 38deg 55' 17.4" N -77deg 04' 00.8" E>"""
 
     v = earth - mars
 

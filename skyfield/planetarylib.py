@@ -208,8 +208,7 @@ class PlanetTopos(VectorFunction):
     """
     def __init__(self, frame, position_au):
         self.center = frame.center
-        self.target = object()  # TODO: make more interesting
-        self.target_name = None
+        self.target = self # TODO: make more interesting
         self._frame = frame
         self._position_au = position_au
 

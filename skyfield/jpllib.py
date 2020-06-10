@@ -169,8 +169,7 @@ class SpiceKernel(object):
         chain = chain[::-1]
         center = chain[0].center
         target = chain[-1].target
-        target_name = _format_code_and_name(target)
-        return VectorSum(center, target, None, target_name, chain, ())
+        return VectorSum(center, target, None, None, chain, ())
 
     def __contains__(self, name_or_code):
         if isinstance(name_or_code, int):
@@ -194,7 +193,6 @@ class SPICESegment(VectorFunction):
         self.ephemeris = ephemeris
         self.center = spk_segment.center
         self.target = spk_segment.target
-        self.target_name = _format_code_and_name(self.target)
         self.spk_segment = spk_segment
 
     def __str__(self):
