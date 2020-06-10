@@ -37,7 +37,7 @@ df['mean_anomaly_degrees'] = (
 
 comet = df.iloc[0:1]
 
-k = KeplerOrbit.from_dataframe(comet, ts)
+k = KeplerOrbit.from_comet_dataframe(ts, comet.ix[0])
 
 from skyfield.data.spice import inertial_frames
 
@@ -48,8 +48,7 @@ t = ts.utc(2020, 5, 31)
 
 k._rotation = inertial_frames['ECLIPJ2000'].T
 
-p = eph['earth'].at(t).observe(k)
-p.position.au += eph['sun'].at(t).position.au
+p = eph['earth'].at(t).observe(eph['sun'] + k)
 ra, dec, distance = p.radec()
 
 print(t.utc_iso(' '))

@@ -275,36 +275,29 @@ class KeplerOrbit(VectorFunction):
 
 
     @classmethod
-    def _from_comet_dataframe(cls, df, ts):
-        # TODO: rewrite this once skyfield.mpc._mpc_comets() goes live.
+    def from_comet_dataframe(cls, ts, df):
         mu_km_s = GM_dict[10]
-        mu_au_d = mu_km_s / (AU_KM**3) * (DAY_S**2)  # ok
+        mu_au_d = mu_km_s / (AU_KM**3) * (DAY_S**2)
         e = df.eccentricity
         a = df.perihelion_distance_au / (1 - e)
         p = a * (1 - e*e)
-        n = sqrt(mu_au_d/a**3)
-        peri_day = ts.tt(df.perihelion_year, df.perihelion_month,
-                         df.perihelion_day)
-        epoch = ts.J2000
-        M = n * (epoch - peri_day)
-        #print('p', p)
-        print('M:', M)
-        asdf
+        t_perihelion = ts.tt(df.perihelion_year, df.perihelion_month,
+                             df.perihelion_day)
+
         return cls.from_mean_anomaly(
             p=Distance(au=p),
             e=e,
             i=Angle(degrees=df.inclination_degrees),
             Om=Angle(degrees=df.longitude_of_ascending_node_degrees),
             w=Angle(degrees=df.argument_of_perihelion_degrees),
-            M=Angle(radians=M),
-            epoch=epoch,
+            M=Angle(radians=0.0),
+            epoch=t_perihelion,
             mu_km_s=mu_km_s,
-            center=0,
+            center=10,
             # TODO: infer target SPK-ID from info in dataframe
-            center_name='barycenter',
+            center_name='Sun',
             target_name=df.designation,
         )
-
 
     def _at(self, time):
         """Propagate the KeplerOrbit to the given Time object
