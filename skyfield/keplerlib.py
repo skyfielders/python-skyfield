@@ -275,7 +275,7 @@ class KeplerOrbit(VectorFunction):
     @classmethod
     def from_comet_dataframe(cls, ts, df):
         mu_km_s = GM_dict[10]
-        mu_au_d = mu_km_s / (AU_KM**3) * (DAY_S**2)
+        #mu_au_d = mu_km_s / (AU_KM**3) * (DAY_S**2)
         e = df.eccentricity
         a = df.perihelion_distance_au / (1 - e)
         p = a * (1 - e*e)
