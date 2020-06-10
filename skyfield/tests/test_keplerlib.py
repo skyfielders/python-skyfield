@@ -35,8 +35,6 @@ def test_against_horizons():
         mu_au_d=2.9591220828559093E-04,
         center=None,
         target=None,
-        center_name=None,
-        target_name=None,
     )
     r, v = k._at(t)[:2]
     sun_au = [

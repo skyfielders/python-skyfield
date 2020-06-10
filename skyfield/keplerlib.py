@@ -25,8 +25,6 @@ class KeplerOrbit(VectorFunction):
                  mu_au_d=None,
                  center=None,
                  target=None,
-                 center_name=None,
-                 target_name=None
         ):
         """ Calculates the position of an object using 2 body propagation
 
@@ -71,8 +69,6 @@ class KeplerOrbit(VectorFunction):
                           mu_au_d=None,
                           center=None,
                           target=None,
-                          center_name=None,
-                          target_name=None,
         ):
         """ Creates a `KeplerOrbit` object from elements using true anomaly
 
@@ -122,8 +118,6 @@ class KeplerOrbit(VectorFunction):
                    mu_km_s,
                    center=center,
                    target=target,
-                   center_name=center_name,
-                   target_name=target_name,
         )
 
 
@@ -134,8 +128,6 @@ class KeplerOrbit(VectorFunction):
                           mu_au_d=None,
                           center=None,
                           target=None,
-                          center_name=None,
-                          target_name=None,
         ):
         """ Creates a `KeplerOrbit` object from elements using mean anomaly
 
@@ -187,8 +179,6 @@ class KeplerOrbit(VectorFunction):
                    mu_km_s,
                    center=center,
                    target=target,
-                   center_name=center_name,
-                   target_name=target_name,
         )
 
     @classmethod
@@ -240,8 +230,6 @@ class KeplerOrbit(VectorFunction):
             mu_km_s=GM_dict[10] + GM_dict.get(target, 0),
             center=0,
             target=target,
-            center_name='SUN',
-            target_name=name,
         )
 
     @classmethod
@@ -256,6 +244,8 @@ class KeplerOrbit(VectorFunction):
         else:
             target_name = df.Name
 
+        target_name   # todo
+
         p = df.a * (1 - df.e**2)
         return cls.from_mean_anomaly(p=Distance(au=p),
                                      e=df.e,
@@ -267,8 +257,6 @@ class KeplerOrbit(VectorFunction):
                                      mu_km_s=GM_dict[10] + GM_dict.get(target, 0),
                                      center=10,
                                      target=target,
-                                     center_name='SUN',
-                                     target_name=target_name,
         )
 
 
@@ -293,8 +281,7 @@ class KeplerOrbit(VectorFunction):
             mu_km_s=mu_km_s,
             center=10,
             # TODO: infer target SPK-ID from info in dataframe
-            center_name='Sun',
-            target_name=df.designation,
+            # TODO: target?
         )
 
     def _at(self, time):
