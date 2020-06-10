@@ -51,6 +51,20 @@ Sum of 2 vectors:
     assert str(v.at(t)) == "\
 <Barycentric BCRS position and velocity at date t center=0 target=399>"
 
+    v = earth + Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+
+    assert str(v) == """\
+Sum of 3 vectors:
+ + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+ + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH
+ + Topos 38deg 55' 17.4" N -77deg 04' 00.8" E"""
+
+    assert repr(v) == """\
+<VectorSum of 3 vectors 0 SOLAR SYSTEM BARYCENTER -> 38deg 55' 17.4" N -77deg 04' 00.8" E>"""
+
+    assert str(v.at(t)).startswith("\
+<Barycentric BCRS position and velocity at date t center=0 target=<object object at")
+
     v = earth - mars
 
     assert str(v) == """\
