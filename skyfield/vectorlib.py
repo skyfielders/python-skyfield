@@ -39,7 +39,6 @@ class VectorFunction(object):
         othern = getattr(other, 'negatives', ())
 
         return VectorSum(self.center, other.target,
-                         self.center_name, other.target_name,
                          selfp + otherp, selfn + othern)
 
     def __sub__(self, other):
@@ -56,7 +55,6 @@ class VectorFunction(object):
         othern = getattr(other, 'negatives', ())
 
         return VectorSum(other.target, self.target,
-                         other.target_name, self.target_name,
                          selfp + othern, selfn + otherp)
 
     @raise_error_for_deprecated_time_arguments
@@ -159,8 +157,7 @@ previously hiding inside the old method:
 
 
 class VectorSum(VectorFunction):
-    def __init__(self, center, target, center_name, target_name,
-                 positives, negatives):
+    def __init__(self, center, target, positives, negatives):
         self.center = center
         self.target = target
         self.positives = positives
