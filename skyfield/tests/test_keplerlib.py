@@ -21,16 +21,16 @@ def test_against_horizons():
 
     a = 2.768873850275102E+00 # A
     e = 7.705857791518426E-02 # EC
-    p_au = a * (1 - e ** 2)  # Wikipedia
+    p_au = a * (1 - e*e)   # Wikipedia
 
     k = KeplerOrbit.from_mean_anomaly(
-        p=Distance(au=p_au),  # see above
+        p=Distance(au=p_au),
         e=e,
         i=Angle(degrees=2.718528770987308E+01),
         Om=Angle(degrees=2.336112629072238E+01),
         w=Angle(degrees=1.328964361683606E+02),
         M=Angle(degrees=1.382501360489816E+02),
-        epoch=t,  #?
+        epoch=t,
         mu_km_s=None,
         mu_au_d=2.9591220828559093E-04,
         center=None,
@@ -45,7 +45,8 @@ def test_against_horizons():
     horizons_au = [
         1.334875927366032E+00, -2.239607658161781E+00, -1.328895183461897E+00,
     ]
-    assert max(abs(r + sun_au - horizons_au)) < 2e-15
+    epsilon = Distance(m=0.001).au
+    assert abs(r + sun_au - horizons_au).max() < epsilon
 
 # Test various round-trips through the kepler orbit object.
 
