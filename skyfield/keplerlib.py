@@ -190,7 +190,6 @@ class KeplerOrbit(VectorFunction):
         # else:
 
         target = None
-        name = 'foo'
 
         # if 'Name' not in df or df.Name == nan:
         #     target_name = df.Principal_desig
