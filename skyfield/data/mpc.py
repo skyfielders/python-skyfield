@@ -95,7 +95,12 @@ _COMET_FAST_COLUMN_NAMES, _COMET_FAST_COLUMN_NUMBERS = zip(
 _COMET_DTYPES = {
     'number': 'float',  # since older Pandas does not support NaN for integers
     'orbit_type': 'category',
+    'perihelion_year': 'int',
 }
+
+import re
+_pat = re.compile(br'^([^ ]*) +([a-z])', flags=re.M)
+import io
 
 def load_comets_dataframe(fobj):
     """Parse a Minor Planet Center comets file into a Pandas dataframe.
@@ -112,8 +117,10 @@ def load_comets_dataframe(fobj):
     slower routine that includes every comet data field.
 
     """
+    text = fobj.read()
+    text = _pat.sub(br'\1\2', text)
     df = pd.read_csv(
-        fobj, sep=r'\s+', header=None,
+        io.BytesIO(text), sep=r'\s+', header=None,
         names=_COMET_FAST_COLUMN_NAMES,
         usecols=_COMET_FAST_COLUMN_NUMBERS,
     )
@@ -130,6 +137,7 @@ def load_comets_dataframe_slow(fobj):
     routine that omits some of the more expensive comet fields.
 
     """
+    fobj = io.StringIO(fobj.read().decode('ascii'))
     names, colspecs = zip(*_COMET_SLOW_COLUMNS)
     df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_COMET_DTYPES)
     return df

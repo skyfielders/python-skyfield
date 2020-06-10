@@ -223,10 +223,13 @@ class KeplerOrbit(VectorFunction):
             day = n(s[4])
             return julian_day(year, month, day)
 
-        epoch_jd = [d(s) for s in df.epoch_packed.values]
-        t = ts.tt_jd(epoch_jd)
+        #epoch_jd = [d(s) for s in df.epoch_packed.values]
+        #t = ts.tt_jd(epoch_jd)
 
         # TODO: vectorize
+
+        M = df.mean_anomaly_degrees.values[0]
+        print('M:', M)
 
         return cls.from_mean_anomaly(
             p=Distance(au=p[0]),
@@ -234,10 +237,10 @@ class KeplerOrbit(VectorFunction):
             i=Angle(degrees=df.inclination_degrees.values[0]),
             Om=Angle(degrees=df.longitude_of_ascending_node_degrees.values[0]),
             w=Angle(degrees=df.argument_of_perihelion_degrees.values[0]),
-            M=Angle(degrees=df.mean_anomaly_degrees.values[0]),
-            epoch=t[0],
+            M=Angle(degrees=M),
+            epoch=ts.J2000,
             mu_km_s=GM_dict[10] + GM_dict.get(target, 0),
-            center=10,
+            center=0,
             target=target,
             center_name='SUN',
             target_name=name,
@@ -275,26 +278,31 @@ class KeplerOrbit(VectorFunction):
     def _from_comet_dataframe(cls, df, ts):
         # TODO: rewrite this once skyfield.mpc._mpc_comets() goes live.
         mu_km_s = GM_dict[10]
-        mu_au_d = mu_km_s / (AU_KM**3) * (DAY_S**2)
-        e = df.e
-        a = df.Perihelion_dist / (1 - e)
-        p = a * (1 - e**2)
+        mu_au_d = mu_km_s / (AU_KM**3) * (DAY_S**2)  # ok
+        e = df.eccentricity
+        a = df.perihelion_distance_au / (1 - e)
+        p = a * (1 - e*e)
         n = sqrt(mu_au_d/a**3)
-        peri_day = ts.tt(df.Year_of_perihelion, 0, df.Day_of_perihelion)
-        epoch = ts.tt(df.Epoch_year, df.Epoch_month, df.Epoch_day)
+        peri_day = ts.tt(df.perihelion_year, df.perihelion_month,
+                         df.perihelion_day)
+        epoch = ts.J2000
         M = n * (epoch - peri_day)
-        return cls.from_mean_anomaly(p=Distance(au=p),
-                                     e=e,
-                                     i=Angle(degrees=df.i),
-                                     Om=Angle(degrees=df.Node),
-                                     w=Angle(degrees=df.Peri),
-                                     M=Angle(radians=M),
-                                     epoch=epoch,
-                                     mu_km_s=mu_km_s,
-                                     center=10,
-                                     # TODO: infer target SPK-ID from info in dataframe
-                                     center_name='SUN',
-                                     target_name=df.Designation_and_name,
+        #print('p', p)
+        print('M:', M)
+        asdf
+        return cls.from_mean_anomaly(
+            p=Distance(au=p),
+            e=e,
+            i=Angle(degrees=df.inclination_degrees),
+            Om=Angle(degrees=df.longitude_of_ascending_node_degrees),
+            w=Angle(degrees=df.argument_of_perihelion_degrees),
+            M=Angle(radians=M),
+            epoch=epoch,
+            mu_km_s=mu_km_s,
+            center=0,
+            # TODO: infer target SPK-ID from info in dataframe
+            center_name='barycenter',
+            target_name=df.designation,
         )
 
 
