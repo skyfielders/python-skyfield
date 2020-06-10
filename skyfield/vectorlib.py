@@ -85,7 +85,11 @@ class VectorFunction(object):
         pass
 
     def _observe_from_bcrs(self, observer):
-        assert self.center == 0
+        if self.center != 0:
+            raise ValueError('you can only observe() a body whose vector'
+                             ' center is the Solar System Barycenter,'
+                             ' but this vector has the center {0}'
+                             .format(self.center_name))
         return _correct_for_light_travel_time(observer, self)
 
     def geometry_of(self, other):
