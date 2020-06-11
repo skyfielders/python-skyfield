@@ -41,23 +41,21 @@ def length_of(xyz):
     """
     return sqrt((xyz * xyz).sum(axis=0))
 
-def angle_between(u_vec, v_vec):
-    """Given 2 vectors in `v` and `u`, return the angle separating them.
+def angle_between(u, v):
+    """Given two vectors `v` and `u`, return the radian angle separating them.
 
     This works whether `v` and `u` each have the shape ``(3,)``, or
     whether they are each whole arrays of corresponding x, y, and z
-    coordinates and have shape ``(3, N)``. The returned angle will be
-    between 0 and 180 degrees.
+    coordinates with shape ``(3, N)``. The returned angle will be
+    between 0 and tau/2.
 
     This formula is from Section 12 of:
     https://people.eecs.berkeley.edu/~wkahan/Mindless.pdf
 
     """
-    u = length_of(u_vec)
-    v = length_of(v_vec)
-    num = v*u_vec - u*v_vec
-    denom = v*u_vec + u*v_vec
-    return 2*arctan2(length_of(num), length_of(denom))
+    a = u * length_of(v)
+    b = v * length_of(u)
+    return 2.0 * arctan2(length_of(a - b), length_of(a + b))
 
 def to_spherical(xyz):
     """Convert ``[x y z]`` to spherical coordinates ``(r, theta, phi)``.

@@ -7,8 +7,8 @@ from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
 from .geometry import intersect_line_and_sphere
 from .functions import (
-    _mxv, _mxm, dots, from_spherical, length_of, rot_x, rot_z,
-    to_spherical, _to_array,
+    _mxv, _mxm, _to_array, angle_between, dots, from_spherical,
+    length_of, rot_x, rot_z, to_spherical,
 )
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
@@ -242,17 +242,8 @@ class ICRF(object):
         3 values from 43deg 23' 23.1" to 42deg 49' 46.6"
 
         """
-        p1 = self.position.au
-        p2 = another_icrf.position.au
-        u1 = p1 / length_of(p1)
-        u2 = p2 / length_of(p2)
-        if u2.ndim > 1:
-            if u1.ndim == 1:
-                u1 = u1[:,None]
-        elif u1.ndim > 1:
-            u2 = u2[:,None]
-        c = dots(u1, u2)
-        return Angle(radians=arccos(clip(c, -1.0, 1.0)))
+        return Angle(radians=angle_between(self.position.au,
+                                           another_icrf.position.au))
 
     def cirs_xyz(self, epoch):
         """Compute cartesian CIRS coordinates at a given epoch (x,y,z).
