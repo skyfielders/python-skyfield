@@ -2,12 +2,12 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
 from numpy import (
-    array, concatenate, cross, einsum, identity, ones_like, repeat, zeros_like
+    array, concatenate, identity, multiply, ones_like, repeat, zeros_like
 )
 from sgp4.api import SGP4_ERRORS, Satrec
 
 from .constants import AU_KM, DAY_S, T0, tau
-from .functions import rot_x, rot_y, rot_z
+from .functions import _mxv, rot_x, rot_y, rot_z
 from .positionlib import ITRF_to_GCRS2
 from .searchlib import _find_discrete, find_maxima
 from .timelib import Timescale, calendar_date
@@ -289,6 +289,14 @@ def theta_GMST1982(jd_ut1):
     theta_dot = (1.0 + dg * _second / 36525.0) * tau
     return theta, theta_dot
 
+_zero_zero_minus_one = array((0.0, 0.0, -1.0))
+_cross120 = array((1,2,0))
+_cross201 = array((2,0,1))
+
+def _cross(a, b):
+    # Nearly 4x speedup over numpy cross(). TODO: Maybe move to .functions?
+    return a[_cross120] * b[_cross201] - a[_cross201] * b[_cross120]
+
 def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
     """Convert TEME position and velocity into standard ITRS coordinates.
 
@@ -300,18 +308,20 @@ def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
     From AIAA 2006-6753 Appendix C.
 
     """
+    # TODO: are xp and yp the values from the IERS?  Or from general
+    # nutation theory?
+
     theta, theta_dot = theta_GMST1982(jd_ut1)
-    zero = theta_dot * 0.0
-    angular_velocity = array([zero, zero, -theta_dot])
+    angular_velocity = multiply.outer(_zero_zero_minus_one, theta_dot)
+
     R = rot_z(-theta)
 
     if len(rTEME.shape) == 1:
         rPEF = (R).dot(rTEME)
-        vPEF = (R).dot(vTEME) + cross(angular_velocity, rPEF)
+        vPEF = (R).dot(vTEME) + _cross(angular_velocity, rPEF)
     else:
-        rPEF = einsum('ij...,j...->i...', R, rTEME)
-        vPEF = einsum('ij...,j...->i...', R, vTEME) + cross(
-            angular_velocity, rPEF, 0, 0).T
+        rPEF = _mxv(R, rTEME)
+        vPEF = _mxv(R, vTEME) + _cross(angular_velocity, rPEF)
 
     if xp == 0.0 and yp == 0.0:
         rITRF = rPEF
