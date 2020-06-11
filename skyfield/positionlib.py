@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """Classes representing different kinds of astronomical position."""
 
-from numpy import arccos, array, clip, einsum, exp, full, nan, nan_to_num
+from numpy import array, einsum, exp, full, nan, nan_to_num
 from .constants import ANGVEL, AU_M, ERAD, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
 from .geometry import intersect_line_and_sphere
 from .functions import (
-    _mxv, _mxm, _to_array, angle_between, dots, from_spherical,
+    _mxv, _mxm, _to_array, angle_between, from_spherical,
     length_of, rot_x, rot_z, to_spherical,
 )
 from .relativity import add_aberration, add_deflection
