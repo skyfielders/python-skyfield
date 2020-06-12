@@ -50,7 +50,7 @@ def position_of_radec(ra_hours, dec_degrees, distance_au=_GIGAPARSEC_AU,
     phi = _to_array(ra_hours) / 24.0 * tau
     position_au = from_spherical(distance_au, theta, phi)
     if epoch is not None:
-        position_au = einsum('ij...,j...->i...', epoch.MT, position_au)
+        position_au = mxv(epoch.MT, position_au)
     return build_position(position_au, None, t, center, target, observer_data)
 
 def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
@@ -214,7 +214,7 @@ class ICRF(object):
                 raise ValueError('the epoch= must be a Time object,'
                                  ' a floating point Terrestrial Time (TT),'
                                  ' or the string "date" for epoch-of-date')
-            position_au = einsum('ij...,j...->i...', epoch.M, position_au)
+            position_au = mxv(epoch.M, position_au)
         r_au, dec, ra = to_spherical(position_au)
         return (Angle(radians=ra, preference='hours'),
                 Angle(radians=dec, signed=True),
@@ -264,7 +264,7 @@ class ICRF(object):
                              ' a floating point Terrestrial Time (TT),'
                              ' or the string "date" for epoch-of-date')
 
-        vector = einsum('ij...,j...->i...', epoch.C, self.position.au)
+        vector = mxv(epoch.C, self.position.au)
         return Distance(vector)
 
     def cirs_radec(self, epoch):
@@ -678,10 +678,10 @@ class Geocentric(ICRF):
                              " to be converted into an ITRF coordinate")
 
         t = self.t
-        au = einsum('ij...,j...->i...', t.M, self.position.au)
+        au = mxv(t.M, self.position.au)
 
         spin = rot_z(- t.gast * tau / 24.0)
-        au = einsum('ij...,j...->i...', spin, array(au))
+        au = mxv(spin, array(au))
 
         return Distance(au)
 
@@ -698,7 +698,7 @@ class Geocentric(ICRF):
             raise ValueError("you can only ask for the geographic subpoint"
                              " of a position measured from Earth's center")
         t = self.t
-        xyz_au = einsum('ij...,j...->i...', t.M, self.position.au)
+        xyz_au = mxv(t.M, self.position.au)
         lat, lon, elevation_m = reverse_terra(xyz_au, t.gast)
 
         # TODO. Move VectorFunction and Topos into this file, since the
@@ -727,7 +727,7 @@ def _to_altaz(position_au, observer_data, temperature_C, pressure_mbar):
 
     # TODO: wobble
 
-    position_au = einsum('ij...,j...->i...', R, position_au)
+    position_au = mxv(R, position_au)
     r_au, alt, az = to_spherical(position_au)
 
     if temperature_C is None:
@@ -747,8 +747,8 @@ def ITRF_to_GCRS(t, rITRF):
     # Todo: wobble
 
     spin = rot_z(t.gast * tau / 24.0)
-    position = einsum('ij...,j...->i...', spin, array(rITRF))
-    return einsum('ij...,j...->i...', t.MT, position)
+    position = mxv(spin, array(rITRF))
+    return mxv(t.MT, position)
 
 def ITRF_to_GCRS2(t, rITRF, vITRF):
 
@@ -756,11 +756,11 @@ def ITRF_to_GCRS2(t, rITRF, vITRF):
 
     spin = rot_z(t.gast * tau / 24.0)
 
-    position = einsum('ij...,j...->i...', spin, array(rITRF))
-    position = einsum('ij...,j...->i...', t.MT, position)
+    position = mxv(spin, array(rITRF))
+    position = mxv(t.MT, position)
 
-    velocity = einsum('ij...,j...->i...', spin, array(vITRF))
-    velocity = einsum('ij...,j...->i...', t.MT, velocity)
+    velocity = mxv(spin, array(vITRF))
+    velocity = mxv(t.MT, velocity)
     velocity[0] += DAY_S * ANGVEL * - position[1]
     velocity[1] += DAY_S * ANGVEL * position[0]
 

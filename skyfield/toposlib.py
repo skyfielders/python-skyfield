@@ -1,8 +1,6 @@
-from numpy import einsum
-
 from .constants import ASEC2RAD, tau
 from .earthlib import terra
-from .functions import mxmxm, rot_x, rot_y, rot_z
+from .functions import mxmxm, mxv, rot_x, rot_y, rot_z
 from .units import Distance, Angle, _interpret_ltude
 from .vectorlib import VectorFunction
 
@@ -74,14 +72,14 @@ class Topos(VectorFunction):
         """Compute the GCRS position and velocity of this Topos at time `t`."""
         pos, vel = terra(self.latitude.radians, self.longitude.radians,
                          self.elevation.au, t.gast)
-        pos = einsum('ij...,j...->i...', t.MT, pos)
-        vel = einsum('ij...,j...->i...', t.MT, vel)
+        pos = mxv(t.MT, pos)
+        vel = mxv(t.MT, vel)
         if self.x:
             R = rot_y(self.x * ASEC2RAD)
-            pos = einsum('ij...,j...->i...', R, pos)
+            pos = mxv(R, pos)
         if self.y:
             R = rot_x(self.y * ASEC2RAD)
-            pos = einsum('ij...,j...->i...', R, pos)
+            pos = mxv(R, pos)
         # TODO: also rotate velocity
 
         return pos, vel, pos, None
