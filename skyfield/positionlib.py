@@ -290,7 +290,7 @@ class ICRF(object):
 
         """
         if epoch is None:
-            vector = _ECLIPJ2000.dot(self.position.au)
+            vector = _mxv(_ECLIPJ2000, self.position.au)
             return Distance(vector)
 
         position_au = self.position.au
