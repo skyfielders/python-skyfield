@@ -11,7 +11,7 @@ from .functions import _mxv, rot_x, rot_y, rot_z
 from .io_timescale import _build_builtin_timescale
 from .positionlib import ITRF_to_GCRS2
 from .searchlib import _find_discrete, find_maxima
-from .timelib import Timescale, calendar_date
+from .timelib import calendar_date
 from .vectorlib import VectorFunction
 
 _identity = identity(3)
