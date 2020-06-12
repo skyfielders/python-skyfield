@@ -8,24 +8,13 @@ from sgp4.api import SGP4_ERRORS, Satrec
 
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import _mxv, rot_x, rot_y, rot_z
+from .io_timescale import _build_builtin_timescale
 from .positionlib import ITRF_to_GCRS2
 from .searchlib import _find_discrete, find_maxima
 from .timelib import Timescale, calendar_date
 from .vectorlib import VectorFunction
 
-_minutes_per_day = 1440.
-
-# Since satellite calculations are done entirely in UTC, we can display
-# and return their epoch using a null Timescale.  Let's just hope that
-# no one ever pulls the .epoch off of an EarthSatellite and tries to
-# generate high precision positions with it.  If that becomes a problem,
-# we can make a more severe change to the satellite API to require a
-# Timescale when the user asks for the epoch as a Time.  (It was
-# probably a mistake to have an .epoch convenience attribute.)
-
 _identity = identity(3)
-_infs = array(('-inf', 'inf'), float)
-_ts = Timescale(array((_infs, (0.0, 0.0))), _infs, array((37.0, 37.0)))
 
 class EarthSatellite(VectorFunction):
     """An Earth satellite loaded from a TLE file and propagated with SGP4.
@@ -84,9 +73,13 @@ class EarthSatellite(VectorFunction):
 
     """
     center = 399
+    ts = None  # see __init__()
 
     def __init__(self, line1, line2, name=None, ts=None):
-        ts = ts or _ts
+        if ts is None:
+            ts = self.ts
+            if ts is None:
+                ts = EarthSatellite.ts = _build_builtin_timescale()
 
         self.name = None if name is None else name.strip()
         satrec = Satrec.twoline2rv(line1, line2)
@@ -100,9 +93,9 @@ class EarthSatellite(VectorFunction):
 
         self.epoch = ts.utc(year, 1, satrec.epochdays)
 
-        self._setup(satrec, ts)
+        self._setup(satrec)
 
-    def _setup(self, satrec, ts):
+    def _setup(self, satrec):
         # If only I had not made __init__() specific to TLE lines, but
         # had put them in an alternate construtor instead, this would
         # simply have lived in __init__().  Alas!  I was so young then.
@@ -127,7 +120,7 @@ class EarthSatellite(VectorFunction):
         year, month, day = calendar_date(satrec.jdsatepoch)
         self.epoch = ts.utc(year, month, day + satrec.jdsatepochF)
 
-        self._setup(satrec, ts)
+        self._setup(satrec)
         return self
 
     def __str__(self):
