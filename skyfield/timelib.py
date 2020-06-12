@@ -9,7 +9,7 @@ from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
-from .functions import _mxm, _mxmxm, _to_array, load_bundled_npy, rot_z
+from .functions import mxm, mxmxm, _to_array, load_bundled_npy, rot_z
 from .nutationlib import (
     build_nutation_matrix, equation_of_the_equinoxes_complimentary_terms,
     iau2000a_radians, mean_obliquity,
@@ -599,7 +599,7 @@ class Time(object):
         if N is None:
             N = self.nutation_matrix()
 
-        return _mxmxm(N, P, B)
+        return mxmxm(N, P, B)
 
     @reify
     def MT(self):
@@ -611,7 +611,7 @@ class Time(object):
         # Calculate the Equation of Origins in cycles
         eq_origins = (earth_rotation_angle(self.ut1) - self.gast / 24.0)
         R = rot_z(2 * pi * eq_origins)
-        return _mxm(R, self.M)
+        return mxm(R, self.M)
 
     @reify
     def CT(self):

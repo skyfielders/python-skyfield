@@ -4,7 +4,7 @@ import re
 from numpy import array, cos, nan, sin
 from jplephem.pck import DAF, PCK
 from .constants import ASEC2RAD, AU_KM, DAY_S, tau
-from .functions import _T, _mxv, _mxm, _mxmxm, rot_x, rot_y, rot_z
+from .functions import _T, mxv, mxm, mxmxm, rot_x, rot_y, rot_z
 from .units import Angle, Distance
 from .vectorlib import VectorFunction
 
@@ -105,7 +105,7 @@ class PlanetaryConstants(object):
                 matrix.shape = 3, 3
                 for angle, axis in list(zip(angles, axes)):
                     rot = _rotations[axis]
-                    matrix = _mxm(rot(angle * scale), matrix)
+                    matrix = mxm(rot(angle * scale), matrix)
             elif spec == 'MATRIX':
                 matrix = self.assignments['TKFRAME_{0}_MATRIX'.format(integer)]
                 matrix = array(matrix)
@@ -159,16 +159,16 @@ class Frame(object):
     def rotation_at(self, t):
         """Return the rotation matrix for this frame at time ``t``."""
         ra, dec, w = self._segment.compute(t.tdb, 0.0, False)
-        R = _mxm(rot_z(-w), _mxm(rot_x(-dec), rot_z(-ra)))
+        R = mxm(rot_z(-w), mxm(rot_x(-dec), rot_z(-ra)))
         if self._matrix is not None:
-            R = _mxm(self._matrix, R)
+            R = mxm(self._matrix, R)
         return R
 
     def rotation_and_rate_at(self, t):
         """Return rotation and rate matrices for this frame at time ``t``."""
         components, rates = self._segment.compute(t.tdb, 0.0, True)
         ra, dec, w = components
-        R = _mxm(rot_z(-w), _mxm(rot_x(-dec), rot_z(-ra)))
+        R = mxm(rot_z(-w), mxm(rot_x(-dec), rot_z(-ra)))
 
         zero = w * 0.0
         one = 1.0 + zero
@@ -183,7 +183,7 @@ class Frame(object):
             (zero, sa, ca * v),
         ))
 
-        domega = _mxv(solutn, rates[::-1])
+        domega = mxv(solutn, rates[::-1])
 
         drdtrt = array((
             (zero, domega[0], domega[2]),
@@ -191,11 +191,11 @@ class Frame(object):
             (-domega[2], -domega[1], zero),
         ))
 
-        dRdt = _mxm(drdtrt, R)
+        dRdt = mxm(drdtrt, R)
 
         if self._matrix is not None:
-            R = _mxm(self._matrix, R)
-            dRdt = _mxm(self._matrix, dRdt)
+            R = mxm(self._matrix, R)
+            dRdt = mxm(self._matrix, dRdt)
 
         return R, dRdt
 
@@ -215,7 +215,7 @@ class PlanetTopos(VectorFunction):
     @classmethod
     def from_latlon_distance(cls, frame, latitude, longitude, distance):
         r = array((distance.au, 0.0, 0.0))
-        r = _mxv(rot_z(longitude.radians), _mxv(rot_y(-latitude.radians), r))
+        r = mxv(rot_z(longitude.radians), mxv(rot_y(-latitude.radians), r))
 
         self = cls(frame, r)
         self.latitude = latitude
@@ -224,13 +224,13 @@ class PlanetTopos(VectorFunction):
 
     def _at(self, t):
         R, dRdt = self._frame.rotation_and_rate_at(t)
-        r = _mxv(_T(R), self._position_au)
-        v = _mxv(_T(dRdt), self._position_au) * DAY_S
+        r = mxv(_T(R), self._position_au)
+        v = mxv(_T(dRdt), self._position_au) * DAY_S
         return r, v, None, None
 
     def _snag_observer_data(self, observer_data, t):
         R = self._frame.rotation_at(t)
-        observer_data.altaz_rotation = _mxmxm(
+        observer_data.altaz_rotation = mxmxm(
             # TODO: Figure out how to produce this rotation directly
             # from _position_au, to support situations where we were not
             # given a latitude and longitude.  If that is not feasible,

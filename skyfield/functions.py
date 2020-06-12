@@ -20,17 +20,19 @@ def _T(M):
     """Swap the first two dimensions of an array."""
     return rollaxis(M, 1)
 
-def _mxv(M, v):
-    """Multiply an NxN matrix by a vector."""
+def mxv(M, v):
+    """Matrix times vector: multiply an NxN matrix by a vector."""
     return einsum('ij...,j...->i...', M, v)
 
-def _mxm(M1, M2):
-    """Multiply two NxN matrices together."""
+def mxm(M1, M2):
+    """Matrix times matrix: multiply two NxN matrices."""
     return einsum('ij...,jk...->ik...', M1, M2)
 
-def _mxmxm(M1, M2, M3):
-    """Multiply three NxN matrices together."""
+def mxmxm(M1, M2, M3):
+    """Matrix times matrix times matrix: multiply 3 NxN matrices together."""
     return einsum('ij...,jk...,kl...->il...', M1, M2, M3)
+
+_mxv, _mxm, _mxmxm = mxv, mxm, mxmxm  # In case anyone imported old name
 
 def length_of(xyz):
     """Given a 3-element array `[x y z]`, return its length.

@@ -7,7 +7,7 @@ from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
 from .geometry import intersect_line_and_sphere
 from .functions import (
-    _mxv, _mxm, _to_array, angle_between, from_spherical,
+    mxv, mxm, _to_array, angle_between, from_spherical,
     length_of, rot_x, rot_z, to_spherical,
 )
 from .relativity import add_aberration, add_deflection
@@ -290,7 +290,7 @@ class ICRF(object):
 
         """
         if epoch is None:
-            vector = _mxv(_ECLIPJ2000, self.position.au)
+            vector = mxv(_ECLIPJ2000, self.position.au)
             return Distance(vector)
 
         position_au = self.position.au
@@ -308,8 +308,8 @@ class ICRF(object):
 
         _, d_eps = epoch._nutation_angles_radians
         true_obliquity = epoch._mean_obliquity_radians + d_eps
-        rotation = _mxm(rot_x(- true_obliquity), epoch.M)
-        position_au = _mxv(rotation, position_au)
+        rotation = mxm(rot_x(- true_obliquity), epoch.M)
+        position_au = mxv(rotation, position_au)
         return Distance(position_au)
 
     def ecliptic_velocity(self):
@@ -347,12 +347,12 @@ class ICRF(object):
     def frame_xyz(self, frame):
         """Express this position as an (x,y,z) vector in a particular frame."""
         R = frame.rotation_at(self.t)
-        return Distance(au=_mxv(R, self.position.au))
+        return Distance(au=mxv(R, self.position.au))
 
     def frame_latlon(self, frame):
         """Return as longitude, latitude, and distance in the given frame."""
         R = frame.rotation_at(self.t)
-        vector = _mxv(R, self.position.au)
+        vector = mxv(R, self.position.au)
         d, lat, lon = to_spherical(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),

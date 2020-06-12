@@ -7,7 +7,7 @@ from numpy import (
 from sgp4.api import SGP4_ERRORS, Satrec
 
 from .constants import AU_KM, DAY_S, T0, tau
-from .functions import _mxv, rot_x, rot_y, rot_z
+from .functions import mxv, rot_x, rot_y, rot_z
 from .io_timescale import _build_builtin_timescale
 from .positionlib import ITRF_to_GCRS2
 from .searchlib import _find_discrete, find_maxima
@@ -313,8 +313,8 @@ def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
         rPEF = (R).dot(rTEME)
         vPEF = (R).dot(vTEME) + _cross(angular_velocity, rPEF)
     else:
-        rPEF = _mxv(R, rTEME)
-        vPEF = _mxv(R, vTEME) + _cross(angular_velocity, rPEF)
+        rPEF = mxv(R, rTEME)
+        vPEF = mxv(R, vTEME) + _cross(angular_velocity, rPEF)
 
     if xp == 0.0 and yp == 0.0:
         rITRF = rPEF
