@@ -505,17 +505,17 @@ printing the time and angle of each maximum elongation:
 .. testcode::
 
     for ti, vi in zip(t, values):
-        print(ti.utc_strftime('%Y-%m-%d %H:%M:%S '), '%.2f' % vi,
+        print(ti.utc_strftime('%Y-%m-%d %H:%M '), '%.2f' % vi,
               'degrees elongation')
 
 .. testoutput::
 
-    2018-08-17 17:31:17  45.93 degrees elongation
-    2019-01-06 04:53:35  46.96 degrees elongation
-    2020-03-24 22:13:32  46.08 degrees elongation
-    2020-08-13 00:14:11  45.79 degrees elongation
-    2021-10-29 20:51:56  47.05 degrees elongation
-    2022-03-20 09:25:06  46.59 degrees elongation
+    2018-08-17 17:31  45.93 degrees elongation
+    2019-01-06 04:54  46.96 degrees elongation
+    2020-03-24 22:14  46.08 degrees elongation
+    2020-08-13 00:14  45.79 degrees elongation
+    2021-10-29 20:52  47.05 degrees elongation
+    2022-03-20 09:25  46.59 degrees elongation
 
 Finding minima
 --------------
