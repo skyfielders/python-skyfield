@@ -10,6 +10,10 @@ Changelog
   determine whether a celestial object is blocked from an Earth
   satellite’s view by the Earth itself.
 
+* Replaced the awkward and hard-to-explain ``rough_period`` search
+  parameter with the conceptually simpler ``step_days`` parameter, and
+  updated the instructions in :doc:`searches` to match.
+
 1.22 — 2020 Jun 8
 -----------------
 
