@@ -32,17 +32,17 @@ together with all of the attributes and methods that they support:
      │
      ├── `velocity <api-position.html#skyfield.positionlib.ICRF.velocity>`_.au_per_d   →   xdot, ydot, zdot
      ├── `velocity <api-position.html#skyfield.positionlib.ICRF.velocity>`_.km_per_s   →   xdot, ydot, zdot
-     ├── `velocity <api-position.html#skyfield.positionlib.ICRF.velocity>`_.to(unit)   →   xdot, ydot, zdot
+     ├── `velocity <api-position.html#skyfield.positionlib.ICRF.velocity>`_.to(unit)   →   AstroPy velocity units
      │
      ├── `radec() <api-position.html#skyfield.positionlib.ICRF.radec>`_             →   ra, dec, distance (ICRF = J2000)
      ├── `radec(epoch=t) <api-position.html#skyfield.positionlib.ICRF.radec>`_      →   ra, dec, distance (Equinox of time t)
      ├── `distance() <api-position.html#skyfield.positionlib.ICRF.distance>`_          →   distance
      ├── `separation_from(p2) <api-position.html#skyfield.positionlib.ICRF.separation_from>`_ →   angle
      │
-     ├── `ecliptic_xyz() <api-position.html#skyfield.positionlib.ICRF.ecliptic_xyz>`_     →   x, y, z
+     ├── `ecliptic_xyz() <api-position.html#skyfield.positionlib.ICRF.ecliptic_xyz>`_      →   x, y, z
      ├── `ecliptic_velocity() <api-position.html#skyfield.positionlib.ICRF.ecliptic_velocity>`_ →   xdot, ydot, zdot
      ├── `ecliptic_latlon() <api-position.html#skyfield.positionlib.ICRF.ecliptic_latlon>`_   →   lat, lon, distance
-     ├── `galactic_xyz() <api-position.html#skyfield.positionlib.ICRF.galactic_xyz>`_     →   x, y, z
+     ├── `galactic_xyz() <api-position.html#skyfield.positionlib.ICRF.galactic_xyz>`_      →   x, y, z
      └── `galactic_latlon() <api-position.html#skyfield.positionlib.ICRF.galactic_latlon>`_   →   lat, lon, distance
 
 
@@ -280,13 +280,14 @@ by asking Skyfield for their :attr:`~Barycentric.position` attribute:
     [-1.09202418  1.10723168  0.53739021]
 
 The coordinates shown above are measured
-using the Astronomical Unit (au),
+using the Astronomical Unit (“au”),
 which is the average distance from the Earth to the Sun.
 You can, if you want, ask for these coordinates
-in kilometers with the :attr:`~Position.km` attribute.
+in kilometers with the :attr:`~skyfield.units.Distance.km` attribute
+or in meters with the :attr:`~skyfield.units.Distance.m` attribute.
 And if you have the third-party AstroPy package installed,
 then you can convert these coordinates
-into any length unit with the :meth:`~Position.to` method.
+into any length unit with the :meth:`~skyfield.units.Distance.to()` method.
 
 Astrometric position
 ====================
@@ -314,7 +315,8 @@ we do not get pulled in the direction of the “real” Mars —
 we get tugged in the direction of its time-delayed image
 hanging in the sky above us!
 
-So Skyfield offers a :meth:`~Position.observe()` method
+So Skyfield offers
+an :meth:`~skyfield.positionlib.Barycentric.observe()` method
 that carefully backdates the position of another object
 to determine where it was when it generated the image
 that we see in our sky:
@@ -388,7 +390,7 @@ To determine the position of an object in the night sky
 with even greater accuracy,
 two further effects must be taken into account:
 
-*Deflection*
+* **Deflection** —
   The object’s light is bent,
   and thus its image displaced,
   if the light passes close to another large mass
@@ -398,7 +400,7 @@ two further effects must be taken into account:
   The effect is small,
   but must be taken into account for research-grade results.
 
-*Aberration*
+* **Aberration** —
   The velocity of the Earth itself through space
   adds a very slight slant to light arriving at our planet,
   in the same way that rain or snow
@@ -411,7 +413,7 @@ two further effects must be taken into account:
   that the Earth is indeed in motion in an orbit around the Sun.
 
 Skyfield lets you apply both of these effects
-by invoking the :meth:`~Astrometric.apparent()` method
+by invoking the :meth:`~skyfield.positionlib.Astrometric.apparent()` method
 on an astrometric position.
 Like an astrometric position, an apparent position
 is typically expressed as the angles
@@ -422,10 +424,10 @@ is typically expressed as the angles
     # Apparent GCRS ("J2000.0") coordinates
 
     apparent = astrometric.apparent()
-    ra, dec, distance = apparent.radec()  # unusual: see next script
+    ra, dec, distance = apparent.radec()
 
-    print(ra.hstr())
-    print(dec.dstr())
+    print(ra.hstr())   # Unusual choice: usually apparent positions
+    print(dec.dstr())  # are not expressed as ICRF/J2000 coordinates
     print(distance)
 
 .. testoutput::
@@ -434,9 +436,9 @@ is typically expressed as the angles
     +09deg 05' 04.7"
     0.96678 au
 
-But it is actually unusual to print apparent coordinates
-in a permanent unchanging reference frame like the ICRF,
-so you are unlikely to find the two values above
+But printing apparent coordinates in ICRF coordinates like this
+is an unusual choice.
+You are unlikely to find the two values above
 if you look up the position of Mars on 1980 January 1
 in an almanac or by using other astronomy software.
 
@@ -516,7 +518,8 @@ that we have been generating so far:
 Instead, you have to give Skyfield your geographic location.
 Astronomers use the term *topocentric*
 for a position measured relative to a specific location on Earth,
-so Skyfield represents Earth locations using :class:`Topos` objects
+so Skyfield represents Earth locations
+using :class:`~skyfield.toposlib.Topos` objects
 that you can add to an Earth object
 to generate a position relative to the center of the Solar System:
 
