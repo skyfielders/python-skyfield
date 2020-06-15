@@ -8,24 +8,11 @@ from .constants import DAY_S
 EPSILON = 0.001 / DAY_S
 
 def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
-    """Find the times when a function changes value.
+    """Find the times at which a discrete function of time changes value.
 
-    Search between ``start_time`` and ``end_time``, which should both be
-    :class:`~skyfield.timelib.Time` objects, for the occasions where the
-    function ``f`` changes from one value to another.  Use this to
-    search for events like sunrise or moon phases.
-
-    A tuple of two arrays is returned. The first array gives the times
-    at which the input function changes, and the second array specifies
-    the new value of the function at each corresponding time.
-
-    This is an expensive operation as it needs to repeatedly call the
-    function to narrow down the times that it changes.  It continues
-    searching until it knows each time to at least an accuracy of
-    ``epsilon`` Julian days.  At each step, it creates an array of
-    ``num`` new points between the lower and upper bound that it has
-    established for each transition.  These two values can be changed to
-    tune the behavior of the search.
+    This routine is used to find instantaneous events like sunrise,
+    transits, and the seasons.  See :doc:`searches` for how to use it
+    yourself.
 
     """
     ts = start_time.ts
@@ -89,6 +76,12 @@ def _find_discrete(ts, jd, f, epsilon, num):
     return ts.tt_jd(ends), y
 
 def find_minima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
+    """Find the local minima in the values returned by a function of time.
+
+    This routine is used to find events like minimum elongation.  See
+    :doc:`searches` for how to use it yourself.
+
+    """
     def g(t): return -f(t)
     g.rough_period = getattr(f, 'rough_period', None)
     g.step_days = getattr(f, 'step_days', None)
@@ -96,6 +89,12 @@ def find_minima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
     return t, -y
 
 def find_maxima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
+    """Find the local maxima in the values returned by a function of time.
+
+    This routine is used to find events like highest altitude and
+    maximum elongation.  See :doc:`searches` for how to use it yourself.
+
+    """
     #    @@       @@_@@       @@_@@_@@_@@
     #   /  \     /     \     /           \
     # @@    @@ @@       @@ @@             @@

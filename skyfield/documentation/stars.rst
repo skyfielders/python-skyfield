@@ -3,7 +3,7 @@
  Stars and Distant Objects
 ===========================
 
-.. currentmodule:: skyfield.api
+.. currentmodule:: skyfield.starlib
 
 Skyfield can generate positions for stars or and other distant objects
 that you either load from a star catalog, or else for which you can

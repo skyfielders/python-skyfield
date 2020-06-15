@@ -3,7 +3,7 @@
  Positions and Coordinates
 ===========================
 
-.. currentmodule:: skyfield.api
+.. currentmodule:: skyfield.positionlib
 
 Skyfield is careful to distinguish the *position* of an object
 from the several choices of *coordinate*
@@ -258,7 +258,7 @@ Instead of using an acronym,
 Skyfield uses the class name :class:`Barycentric`
 for coordinates expressed in the ICRS.
 You can view the raw *x*, *y*, and *z* coordinates
-by asking Skyfield for their :attr:`~Barycentric.position` attribute:
+by asking Skyfield for their ``position`` attribute:
 
 .. testcode::
 
@@ -335,9 +335,9 @@ that we see in our sky:
 This light-delayed position is called the *astrometric* position,
 and is traditionally mapped on a star chart
 by the angles *right ascension* and *declination*
-that you can compute using the :meth:`~Position.radec()` method
-and display using their :meth:`~Angle.hstr()`
-and :meth:`~Angle.dstr()` methods:
+that you can compute using the :meth:`~ICRF.radec()` method
+and display using their :meth:`~skyfield.units.Angle.hstr()`
+and :meth:`~skyfield.units.Angle.dstr()` methods:
 
 .. testcode::
 
@@ -592,7 +592,7 @@ call the
 :meth:`~skyfield.positionlib.ICRF.separation_from()`
 method of one of the positions
 and pass it the other position as its argument.
-The result will be an :class:`~Angle` object.
+The result will be an :class:`~skyfield.units.Angle` object.
 
 If instead you want to know the distance between two positions,
 subtract the position you want to use as the starting point

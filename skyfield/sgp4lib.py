@@ -19,10 +19,10 @@ _identity = identity(3)
 class EarthSatellite(VectorFunction):
     """An Earth satellite loaded from a TLE file and propagated with SGP4.
 
-    An earth satellite object is a Skyfield vector function, so call its
-    :meth:`~skyfield.vectorlib.VectorSum.at()` method to generate its
-    position in the sky, or use addition and subtraction to combine it
-    with other vectors.
+    An earth satellite object is a Skyfield vector function, so you can
+    either call its ``at()`` method to generate its position in the sky
+    or else use addition and subtraction to combine it with other
+    vectors.
 
     Satellite parameters are generally only accurate for a week or two
     around the *epoch* of the parameters, the date for which they were

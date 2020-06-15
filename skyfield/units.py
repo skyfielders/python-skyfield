@@ -95,6 +95,7 @@ class Distance(object):
         return Distance(au=length_of(self.au))
 
     def light_seconds(self):
+        """Return the length of this vector in light seconds."""
         return self.m / C
 
     def to(self, unit):

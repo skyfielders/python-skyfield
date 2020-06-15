@@ -59,8 +59,8 @@ Changelog
   whether Earth satellites in orbit are in Earth’s shadow or not, thanks
   to a pull request from Jesse Coffey.
 
-* Added :func:`~skyfield.positionlib.position_of_radec()` to replace the
-  poorly designed :func:`~skyfield.positionlib.position_from_radec()`.
+* Added :func:`~skyfield.positionlib.position_of_radec()`
+  to replace the poorly designed ``position_from_radec()``.
 
 * Skyfield :class:`~skyfield.timelib.Time` objects now have microsecond
   internal accuracy, so round trips to and from Python datetimes should
@@ -187,7 +187,7 @@ Changelog
   `#296 <https://github.com/skyfielders/python-skyfield/issues/296>`_
   `#297 <https://github.com/skyfielders/python-skyfield/issues/297>`_
 
-* Added a :func:`~skyfield.almanac.rising_setting()` function for
+* Added a :func:`~skyfield.almanac.risings_and_settings()` function for
   computing rising and setting times.
   `#271 <https://github.com/skyfielders/python-skyfield/issues/271>`_
 
@@ -197,7 +197,7 @@ Changelog
 * Provided a constellation lookup routine through
   :func:`~skyfield.api.load_constellation_map()`.
 
-* Added :func:`~skyfield.positionlib.position_from_radec()`.
+* Added a ``position_from_radec()`` function.
 
 * Fixed the ``apparent()`` method in the case where a single observer
   position is observing an entire vector of target positions.
@@ -291,7 +291,7 @@ Changelog
 1.6 — 2018 July 25
 ------------------
 
-* Both of the loader methods :meth:`~skyfield.iokit.Loader.load()` and
+* Both of the loader methods :meth:`~skyfield.iokit.Loader.open()` and
   :meth:`~skyfield.iokit.Loader.tle()` now accept not just URLs but also
   plain local file paths; they correctly re-download a remote file if
   “reload=True” is specified; and they allow specifying a different local
@@ -540,12 +540,13 @@ Changelog
 0.4
 ---
 
-* To prevent confusion, the :meth:`~Time.astimezone()`
-  and :meth:`~Time.utc_datetime()` methods
+* To prevent confusion, the :meth:`~skyfield.timelib.Time.astimezone()`
+  and :meth:`~skyfield.timelib.Time.utc_datetime()` methods
   have been changed to return only a ``datetime`` object.
   If you also need a leap second flag returned,
-  call the new methods :meth:`~Time.astimezone_and_leap_second()`
-  and :meth:`~Time.utc_datetime_and_leap_second()`.
+  call the new methods
+  :meth:`~skyfield.timelib.Time.astimezone_and_leap_second()`
+  and :meth:`~skyfield.timelib.Time.utc_datetime_and_leap_second()`.
 
 0.3
 ---

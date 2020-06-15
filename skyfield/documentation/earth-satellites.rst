@@ -3,8 +3,6 @@
  Earth Satellites
 ==================
 
-.. currentmodule:: skyfield
-
 Skyfield is able to predict the positions of Earth satellites
 from the Two-Line Element (TLE) files published
 by organizations like `CelesTrak`_.
@@ -276,7 +274,7 @@ at which a particular satellite is overhead,
 you will probably want to learn more about its position at those times.
 
 The simplest form in which you can generate a satellite position
-is to call its :meth:`~skyfield.sgp4lib.EarthSatellite.at()` method,
+is to call its ``at()`` method,
 which will return an *x, y, z* position relative to the Earth’s center
 in the Geocentric Celestial Reference System.
 (GCRS coordinates are based on even more precise axes
@@ -598,7 +596,7 @@ Detecting Propagation Errors
 After building a satellite object,
 you can examine the *epoch* date and time
 when the TLE element set’s predictions are most accurate.
-The ``epoch`` attribute is a :class:`Time`,
+The ``epoch`` attribute is a :class:`~skyfield.timelib.Time`,
 so it supports all of the standard Skyfield date methods:
 
 .. testcode::

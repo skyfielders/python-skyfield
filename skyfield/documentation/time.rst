@@ -26,7 +26,7 @@ The supported time scales are:
 
 To specify a time,
 first build a :class:`Timescale` object
-by calling Skyfield’s :meth:`load.timescale()` routine.
+by calling Skyfield’s ``load.timescale()`` routine.
 This downloads several data files from international authorities —
 the United States Naval Observatory
 and the International Earth Rotation Service —
@@ -799,7 +799,8 @@ or invokes a computation that needs their value:
     this Julian date.
 
 You will typically never need to access these matrices yourself,
-as they are used automatically by the :meth:`Position.radec()`
+as they are used automatically
+by the :meth:`~skyfield.positionlib.ICRF.radec()`
 method when you use its  ``epoch=`` parameter
 to ask for a right ascension and declination
 in the dynamical reference system,

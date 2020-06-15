@@ -14,10 +14,6 @@ that looks for a moment of position or alignment
 that fits some definition that you are looking for.
 The other is an “extremum” search
 where you want to know when a value reaches its maximum or minimum value.
-For the moment,
-this documentation page only discusses searching for events;
-check out the ``find_maxima()`` routine in the ``searchlib.py`` source code
-for how Skyfield searches for maximum or minimum values.
 
 Finding discrete events
 =======================

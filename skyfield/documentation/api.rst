@@ -135,9 +135,11 @@ The common API shared by planets, Earth locations, and Earth satellites.
 .. autosummary::
 
    VectorFunction
-   VectorFunction.__add__
-   VectorFunction.__sub__
    VectorFunction.at
+
+Either adding two vector functions ``v1 + v2`` or subtracting them ``v1 - v2``
+produces a new function of time that, when invoked with ``.at(t)``,
+returns the sum or difference of the vectors returned by the two functions.
 
 Planetary Ephemerides
 =====================
@@ -156,7 +158,10 @@ See :doc:`planets`.
    SpiceKernel.comments
    SpiceKernel.names
    SpiceKernel.decode
-   SpiceKernel.__getitem__
+
+Kernels also support lookup using the Python ``kernel['Mars']`` syntax,
+in which case they return a function of time
+that returns vectors from the Solar System barycenter to the named body.
 
 Almanac
 =======
@@ -169,7 +174,6 @@ Routines to search for events like sunrise, sunset, and Moon phase.
 
    phase_angle
    fraction_illuminated
-   find_discrete
    seasons
    sunrise_sunset
    dark_twilight_day
@@ -298,6 +302,15 @@ Constellations
 ==============
 
 .. autofunction:: skyfield.api.load_constellation_map
+
+Searching
+=========
+
+.. currentmodule:: skyfield.searchlib
+
+.. autofunction:: find_discrete()
+.. autofunction:: find_maxima()
+.. autofunction:: find_minima()
 
 Osculating Orbital Elements
 ===========================

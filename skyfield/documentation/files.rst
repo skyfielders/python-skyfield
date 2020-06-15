@@ -3,8 +3,6 @@
  Downloading and Using Data Files
 ==================================
 
-.. currentmodule:: skyfield.api
-
 Your Skyfield programs will typically download two kinds of data file.
 
 First, Skyfield will need up-to-date tables about time —
@@ -67,7 +65,7 @@ and can start up without needing to access the network:
    Ready
 
 Most programs will run just fine using the default ``load()`` object
-provided in the :mod:`skyfield.api` module.
+provided in the ``skyfield.api`` module.
 But other programs may want to build their own loader
 so that they have the chance to specify non-default behavior.
 

@@ -2,8 +2,6 @@
  Planets, and Choosing an Ephemeris
 ====================================
 
-.. currentmodule:: skyfield.api
-
 If you are interested in observing the planets,
 the Jet Propulsion Laboratory (JPL)
 has prepared long tables that predict the positions of the planets
@@ -12,7 +10,7 @@ A table of positions is called an *ephemeris*
 and those supplied by the JPL are of very high accuracy.
 
 You can ask Skyfield to download an ephemeris from the JPL
-by giving :func:`~skyfield.iokit.load()` a filename.
+by giving ``load()`` a filename.
 Or you can load an ephemeris that you’ve already saved to disk
 with :func:`~skyfield.iokit.load_file()`.
 
