@@ -28,5 +28,5 @@ install:
 
 script:
   - "../test-code.sh"
-  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 matplotlib==2.2.3 numpy==1.14.2 scipy==1.2.2 sphinx==1.7.2 ; cd .. ; ./test-docs.sh ; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 matplotlib==2.2.3 numpy==1.14.2 scipy==1.2.2 sphinx==1.7.2 spktype21 ; cd .. ; ./test-docs.sh ; fi"
   - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install pyflakes ; pyflakes $(find skyfield/ -name '*.py') ; fi"
