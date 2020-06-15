@@ -215,3 +215,98 @@ at the completion of a ``with`` statement:
 .. testcleanup::
 
    __import__('skyfield.tests.fixes').tests.fixes.teardown()
+
+.. _third-party-ephemerides:
+
+Third-party libraries for other ephemeris formats
+=================================================
+
+If you generate an ephemeris with a tool like NASA’s
+`HORIZONS <https://ssd.jpl.nasa.gov/horizons.cgi>`_ system,
+it might be in a format not yet natively supported by Skyfield.
+The first obstacle to opening the ephemeris
+might be its lack of a recognized suffix:
+
+.. testcode::
+
+    load('wld23593.15')
+
+.. testoutput::
+
+    Traceback (most recent call last):
+      ...
+    ValueError: Skyfield does not know how to open a file named 'wld23593.15'
+
+A workaround for the unusual filename extension
+is to open the file manually using Skyfield’s JPL ephemeris support.
+The next obstacle, however, will be a lack of support
+for Type 21 ephemerides in Skyfield:
+
+.. testcode::
+
+    from skyfield.jpllib import SpiceKernel
+    kernel = SpiceKernel('wld23593.15')
+
+.. testoutput::
+
+    Traceback (most recent call last):
+      ...
+    ValueError: SPK data type 21 not yet supported
+
+Older files with a similar format
+might instead generate the complaint
+“SPK data type 1 not yet supported.”
+
+Happily, thanks to Shushi Uetsuki,
+a pair of third-party libraries exist
+that offer preliminary support for Type 1 and Type 21 ephemerides!
+
+* https://pypi.org/project/spktype01/
+* https://pypi.org/project/spktype21/
+
+Their documentation already includes examples of generating raw coordinates,
+but many Skyfield users will want to use them
+in conjunction with standard Skyfield methods like ``observe()``.
+To integrate them with the rest of Skyfield,
+you will want to define a new vector function class
+that calls the third-party module to generate coordinates:
+
+.. testcode::
+
+    from skyfield.constants import AU_KM
+    from skyfield.vectorlib import VectorFunction
+    from spktype21 import SPKType21
+
+    t = ts.utc(2020, 6, 9)
+
+    eph = load('de421.bsp')
+    earth = eph['earth']
+
+    class Type21Object(VectorFunction):
+        def __init__(self, kernel, target):
+            self.kernel = kernel
+            self.center = 0
+            self.target = target
+
+        def _at(self, t):
+            k = self.kernel
+            r, v = k.compute_type21(0, self.target, t.whole, t.tdb_fraction)
+            return r / AU_KM, v / AU_KM, None, None
+
+    kernel = SPKType21.open('wld23593.15')
+    chiron = Type21Object(kernel, 2002060)
+
+    ra, dec, distance = earth.at(t).observe(chiron).radec()
+    print(ra)
+    print(dec)
+
+.. testoutput::
+
+    00h 27m 38.99s
+    +05deg 57' 08.9"
+
+Hopefully this third-party support
+for Type 1 and Type 23 SPK ephemeris segments
+will be sufficient for projects that need them,
+until there is time for a Skyfield contributor
+to integrate such support into Skyfield itself.

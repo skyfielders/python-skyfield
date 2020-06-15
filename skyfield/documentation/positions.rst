@@ -111,8 +111,8 @@ or else by generating a whole series of positions.
 
 **The planets**
   The eight planets and Pluto are all supported,
-  thanks to the excellent work of the Jet Propulsion Laboratory (JPL)
-  and Skyfield’s support for their major solar system ephemerides.
+  thanks to the excellent work of the Jet Propulsion Laboratory (JPL).
+  Skyfield supports their major solar system ephemerides.
   :doc:`Read more <planets>`
 
   .. testcode::
@@ -145,6 +145,14 @@ or else by generating a whole series of positions.
     boston = earth + Topos('42.3583 N', '71.0603 W')
     astrometric = boston.at(t).observe(mars)
     apparent = boston.at(t).observe(mars).apparent()
+
+**Small Solar System objects**
+  Work is underway to support comets and asteroids.
+  In the meantime,
+  any Type 1 or Type 21 ephemerides you generate
+  using NASA’s `HORIZONS <https://ssd.jpl.nasa.gov/horizons.cgi>`_ system
+  are supported through third-party libraries;
+  for details, see :ref:`third-party-ephemerides`.
 
 **The stars**
   Stars and other fixed objects with catalog coordinates

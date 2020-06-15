@@ -186,7 +186,7 @@ class SPICESegment(VectorFunction):
             return object.__new__(ChebyshevPosition)
         if spk_segment.data_type == 3:
             return object.__new__(ChebyshevPositionVelocity)
-        raise ValueError('SPK data type {0} not yet supported segment'
+        raise ValueError('SPK data type {0} not yet supported'
                          .format(spk_segment.data_type))
 
     def __init__(self, ephemeris, spk_segment):

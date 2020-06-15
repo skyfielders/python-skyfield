@@ -11,4 +11,5 @@ python-dateutil>=2.5.0
 pytz
 sphinx==1.7.2
 https://github.com/brandon-rhodes/assay/archive/master.zip
+https://github.com/whiskie14142/spktype21/archive/master.zip
 -e .
