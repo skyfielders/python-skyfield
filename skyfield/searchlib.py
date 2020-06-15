@@ -105,7 +105,6 @@ def find_maxima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
     ts = start_time.ts
     jd0 = start_time.tt
     jd1 = end_time.tt
-    rough_period = f.rough_period
 
     if jd0 >= jd1:
         raise ValueError('start_time {0} is not earlier than end_time {1}'
@@ -120,9 +119,17 @@ def find_maxima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
     # we put an extra point out beyond each end of our range, then
     # filter our final result to remove maxima that fall outside the
     # range.
-    bump = rough_period / num
-    bumps = int((jd1 - jd0) / bump) + 3
-    jd = linspace(jd0 - bump, jd1 + bump, bumps)
+    step_days = getattr(f, 'step_days', None)
+    if step_days is None:
+        bump = f.rough_period / num
+        bumps = int((jd1 - jd0) / bump) + 3
+        jd = linspace(jd0 - bump, jd1 + bump, bumps)
+    else:
+        # Insist on at least 3 samples, even for very close dates; and
+        # add 2 more to stand outside the range.
+        steps = int((jd1 - jd0) / step_days) + 3
+        real_step = (jd1 - jd0) / steps
+        jd = linspace(jd0 - real_step, jd1 + real_step, steps + 2)
 
     end_alpha = linspace(0.0, 1.0, num)
     start_alpha = end_alpha[::-1]

@@ -411,8 +411,6 @@ which will also give us a sense for how Venus’s elongation behaves.
 
 .. testcode::
 
-    from matplotlib import pyplot as plt
-
     plt.figure(figsize=(5, 2))
     plt.title('Elongation of Venus (degrees)')
     plt.xlabel('Year')
@@ -426,29 +424,68 @@ which will also give us a sense for how Venus’s elongation behaves.
 
 .. image:: _static/venus-elongation.png
 
+.. testcleanup::
+
+    import os
+    os.rename('venus-elongation.png', '_static/venus-elongation.png')
+
 You might be surprised by the asymmetry between alternate minima —
 between, say, the wide gradual minimum reached in mid-2019
 versus the sharp quick minimum that comes next in mid-2020.
-But if you investigate further,
-in particular plotting Venus and the Earth in their orbits,
+But if you investigate further and plot Venus and the Earth in their orbits,
 the reason will become clear:
 Venus, on its faster orbit,
 spends most of its time out on the other side of the Sun
 gradually catching up with us,
-then finally catches up and —
-like a racecar zooming past us on the inside of a curve —
+creating wide minima like that in mid-2019.
+Then Venus finally catches up and —
+like a racecar zooming past on the inside of a curve —
 passes very quickly between our planet and the Sun,
 generating the sharper “v” in our plot.
 
-It looks like the maxima come no more often than each half-year,
-so we can set the rough period to 180 days
-and set the search routine to work.
+As with Mars quadrature,
+an infrequent sample — for example, once a year —
+will not provide the search routine with enough data:
+
+.. testcode::
+
+    plt.figure(figsize=(5, 2))
+    plt.title('Elongation of Venus (degrees)')
+    plt.xlabel('Year')
+    plt.axes().grid(True)
+
+    t = ts.utc(range(2018, 2024))
+    plt.plot(t.J, venus_elongation_degrees(t), 'ro')
+
+    plt.tight_layout()
+    plt.savefig('venus-elongation-undersampled.png')
+
+.. image:: _static/venus-elongation-undersampled.png
+
+.. testcleanup::
+
+    import os
+    os.rename('venus-elongation-undersampled.png', '_static/venus-elongation-undersampled.png')
+
+Given these samples,
+the search routine would entirely miss the two maxima of 2020
+because these samples happen to catch the function at two moments
+that make it look like the entire year of 2020 is spent
+declining from a maximum in 2019 towards a minimum in 2022.
+The search routine only investigates a sample
+that is higher than the samples to either side.
+
+If you experiment with samples placed more closely together,
+you will find that the overall shape of the function —
+including both its maxima and minima —
+are clear once the samples are about a month apart.
+This step size can then be used to launch a search:
 
 .. testcode::
 
     from skyfield.searchlib import find_maxima
 
-    venus_elongation_degrees.rough_period = 1.0
+    venus_elongation_degrees.step_days = 30  # about a month
 
     t1 = ts.utc(2018)
     t2 = ts.utc(2023)
@@ -459,11 +496,6 @@ and set the search routine to work.
 .. testoutput::
 
     6 maxima found
-
-.. testcleanup::
-
-    import os
-    os.rename('venus-elongation.png', '_static/venus-elongation.png')
 
 By using Python’s built-in
 `zip() <https://docs.python.org/3/library/functions.html#zip>`_
