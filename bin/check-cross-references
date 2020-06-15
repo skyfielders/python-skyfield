@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+from lxml import etree
+
+def main(argv):
+    d = 'skyfield/documentation/_build/html'
+    for dirpath, dirnames, filenames in os.walk(d):
+        dirnames.sort()
+        for filename in sorted(filenames):
+            if filename.endswith('.html'):
+                check(os.path.join(dirpath, filename))
+
+def check(path):
+    is_path_printed = False
+    with open(path) as f:
+        text = f.read()
+    root = etree.HTML(text)
+    for code_element in root.findall('.//code'):
+        is_crossref = 'xref' in code_element.attrib['class']
+        if not is_crossref:
+            continue
+        parent_element = code_element.getparent()
+        if parent_element.tag == 'a':
+            continue
+        if not is_path_printed:
+            print(path)
+            is_path_printed = True
+        print(' ', ''.join(code_element.itertext()))
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
