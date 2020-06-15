@@ -116,6 +116,7 @@ So that’s the difference!
 We computed the angle between the *astrometric* positions of the Sun and Mars,
 whereas the elongation is more properly an angular difference
 between *apparent* positions.
+(The :doc:`positions` page explains the difference.)
 Thus:
 
 .. testcode::
@@ -135,7 +136,7 @@ which gives us high confidence that we are computing the elongation correctly.
 
 Next let’s search for a moment of quadrature.
 I did not deliberately plan the example this way,
-but it looks like Mars is very nearly near quadrature as I type this!
+but it looks like Mars is very close to quadrature as I type this!
 To determine whether quadrature was just reached
 or is a few days in the future,
 let’s compute the value over a few days
@@ -214,7 +215,8 @@ and spends only a few months at a greater elongation.
 
 Once we have learned to compute the value we are interested in
 and have plotted its behavior,
-there are three steps to solving for the dates on which it occurs:
+there are only three tasks involved
+in launching a search for the dates on which it occurs:
 
 1. Define a function of time returning an integer
    that changes each time the circumstance occurs.
@@ -222,7 +224,7 @@ there are three steps to solving for the dates on which it occurs:
    you can simply use the values ``False`` and ``True``
    because in Python those are the integers zero and one.
 
-2. Give the function a ``rough_period`` attribute
+2. Give the function a ``step_days`` attribute
    telling the search routine how far apart to space its test dates
    when it first searches for where your function switches values.
 
@@ -230,7 +232,7 @@ there are three steps to solving for the dates on which it occurs:
    to the same :func:`~skyfield.searchlib.find_discrete()` routine
    that you would use for a search with the standard almanac functions.
 
-The first step is quite easy in this case.
+The first task is quite easy in this case.
 We simply need to compare the elongation with 90°.
 This transforms the continuous angle measurement
 into a discrete function
@@ -267,16 +269,56 @@ as we can verify by comparing this plot with our earlier plot.
     import os
     os.rename('mars-quadrature.png', '_static/mars-quadrature.png')
 
-The second step is to identify the ``rough_period``
-over which our phenomenon cycles between true and false,
-as measured in days.
-Our plots suggest that the Mars elongation cycle
-takes more than 2 years but less than 3 years.
-Let’s use a round guess of 700 days.
+The second task is to specify the ``step_days`` interval
+over which the search routine should sample our function.
+If the samples are too far apart,
+some events could be skipped.
+But generating too many samples will waste time and memory.
+
+In this example,
+it is clearly not sufficient to sample our quadrature routine once a year,
+because the samples would be so far apart
+that they might skip an entire cycle.
+Here’s our function sampled at the beginning of each calendar year:
 
 .. testcode::
 
-    mars_quadrature.rough_period = 700.0
+    t_annual = ts.utc(range(2018, 2024))
+    plt.figure(figsize=(5, 1.5))
+    plt.plot(t_annual.J, mars_quadrature(t_annual), 'ro')
+    plt.tight_layout()
+    plt.savefig('mars-quadrature-undersampled.png')
+
+.. image:: _static/mars-quadrature-undersampled.png
+
+.. testcleanup::
+
+    import os
+    os.rename('mars-quadrature-undersampled.png', '_static/mars-quadrature-undersampled.png')
+
+If you compare this with the previous plot,
+you will recognize this as our square wave
+sampled on January 1st of each year.
+
+While a search launched with these data points
+would find the quadratures of 2021 and 2022,
+it would entirely miss the Mars opposition of 2018 —
+because the search routine does not dive in
+to search between data points
+that have the same value,
+as the points for 2018 and 2019 do here.
+So ``step_days`` must always be a smaller time period
+than the briefest of the events you are trying to detect.
+(If you have ever studied signal processing,
+you will recognize that this is the same problem
+as undersampling an audio signal.)
+
+Mars quadrature events appear to be separated by at least a half-year.
+For safety let’s ask for data points twice as often as that:
+
+.. testcode::
+
+    mars_quadrature.step_days = 90  # Every ninety days
 
 Finally,
 we are ready to unleash :func:`~skyfield.searchlib.find_discrete()`:
@@ -294,7 +336,7 @@ we are ready to unleash :func:`~skyfield.searchlib.find_discrete()`:
 
 .. testoutput::
 
-    <Time tt=[2458202.1729387585 ... 2459818.728224116] len=5>
+    <Time tt=[2458202.1729387594 ... 2459818.7282241164] len=5>
     [ True False  True False  True]
 
 The result is a pair of arrays.
@@ -396,7 +438,7 @@ gradually catching up with us,
 then finally catches up and —
 like a racecar zooming past us on the inside of a curve —
 passes very quickly between our planet and the Sun,
-generating the sharper “v” in our graph.
+generating the sharper “v” in our plot.
 
 It looks like the maxima come no more often than each half-year,
 so we can set the rough period to 180 days

@@ -35,11 +35,19 @@ def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
         raise ValueError('your start_time {0} is later than your end_time {1}'
                          .format(start_time, end_time))
 
-    periods = (jd1 - jd0) / f.rough_period
-    if periods < 1.0:
-        periods = 1.0
+    step_days = getattr(f, 'step_days', None)
+    if step_days is None:
+        # Legacy "rough_period" attribute.
+        periods = (jd1 - jd0) / f.rough_period
+        if periods < 1.0:
+            periods = 1.0
+        sample_count = int(periods * num)
+    else:
+        # Insist on at least 2 samples even if the dates are less than
+        # step_days apart, so the range at least has endpoints.
+        sample_count = int((jd1 - jd0) / step_days) + 2
 
-    jd = linspace(jd0, jd1, int(periods * num))
+    jd = linspace(jd0, jd1, sample_count)
     return _find_discrete(ts, jd, f, epsilon, num)
 
 # TODO: pass in `y` so it can be precomputed?
@@ -82,7 +90,8 @@ def _find_discrete(ts, jd, f, epsilon, num):
 
 def find_minima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
     def g(t): return -f(t)
-    g.rough_period = f.rough_period
+    g.rough_period = getattr(f, 'rough_period', None)
+    g.step_days = getattr(f, 'step_days', None)
     t, y = find_maxima(start_time, end_time, g, epsilon=1.0 / DAY_S, num=12)
     return t, -y
 
