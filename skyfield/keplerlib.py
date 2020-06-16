@@ -7,6 +7,7 @@ from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh,
                   repeat, sin, sinh, sqrt, sum, tan, tile, zeros_like)
 
 from skyfield.functions import length_of, dots
+from skyfield.data.spice import inertial_frames
 from skyfield.descriptorlib import reify
 from skyfield.elementslib import OsculatingElements, normpi
 from skyfield.units import Distance, Velocity, Angle
@@ -21,8 +22,7 @@ class KeplerOrbit(VectorFunction):
                  position,
                  velocity,
                  epoch,
-                 mu_km_s=None,
-                 mu_au_d=None,
+                 mu_au3_d2,
                  center=None,
                  target=None,
         ):
@@ -36,8 +36,6 @@ class KeplerOrbit(VectorFunction):
             Velocity vector at epoch with shape (3,)
         epoch : Time
             Time corresponding to `position` and `velocity`
-        mu_km_s : float
-            Value of mu (G * M) in km^3/s^2
         mu_au_d : float
             Value of mu (G * M) in au^3/d^2
         center : int
@@ -46,17 +44,10 @@ class KeplerOrbit(VectorFunction):
         target : int
             NAIF ID of the secondary body
         """
-        if (mu_km_s and mu_au_d) or (not mu_km_s and not mu_au_d):
-            raise ValueError('Either mu_km_s or mu_au_d should be used, but not both')
-
-        if mu_km_s:
-            self._mu_km_s = mu_km_s
-        elif mu_au_d:
-            self._mu_km_s =  mu_au_d * AU_KM**3 / DAY_S**2
-
         self.position_at_epoch = position
         self.velocity_at_epoch = velocity
         self.epoch = epoch
+        self.mu_au3_d2 = mu_au3_d2
         self.center = center
         self.target = target
 
@@ -66,7 +57,7 @@ class KeplerOrbit(VectorFunction):
     def from_true_anomaly(cls, p, e, i, Om, w, v,
                           epoch,
                           mu_km_s=None,
-                          mu_au_d=None,
+                          mu_au3_d2=None,
                           center=None,
                           target=None,
         ):
@@ -90,7 +81,7 @@ class KeplerOrbit(VectorFunction):
             Time corresponding to `position` and `velocity`
         mu_km_s : float
             Value of mu (G * M) in km^3/s^2
-        mu_au_d : float
+        mu_au3_d2 : float
             Value of mu (G * M) in au^3/d^2
         center : int
             NAIF ID of the primary body, 399 for geocentric orbits, 10 for
@@ -98,11 +89,11 @@ class KeplerOrbit(VectorFunction):
         target : int
             NAIF ID of the secondary body
         """
-        if (mu_km_s and mu_au_d) or (not mu_km_s and not mu_au_d):
-            raise ValueError('Either mu_km_s or mu_au_d should be used, but not both')
+        if (mu_km_s and mu_au3_d2) or (not mu_km_s and not mu_au3_d2):
+            raise ValueError('Either mu_km_s or mu_au3_d2 should be used, but not both')
 
-        if mu_au_d:
-            mu_km_s = mu_au_d * AU_KM**3 / DAY_S**2
+        if mu_au3_d2:
+            mu_km_s = mu_au3_d2 * AU_KM**3 / DAY_S**2
 
         position, velocity = ele_to_vec(p.km,
                                         e,
@@ -124,8 +115,7 @@ class KeplerOrbit(VectorFunction):
     @classmethod
     def from_mean_anomaly(cls, p, e, i, Om, w, M,
                           epoch,
-                          mu_km_s=None,
-                          mu_au_d=None,
+                          mu_au3_d2=None,
                           center=None,
                           target=None,
         ):
@@ -149,7 +139,7 @@ class KeplerOrbit(VectorFunction):
             Time corresponding to `position` and `velocity`
         mu_km_s : float
             Value of mu (G * M) in km^3/s^2
-        mu_au_d : float
+        mu_au3_d2 : float
             Value of mu (G * M) in au^3/d^2
         center : int
             NAIF ID of the primary body, 399 for geocentric orbits, 10 for
@@ -157,26 +147,20 @@ class KeplerOrbit(VectorFunction):
         target : int
             NAIF ID of the secondary body
         """
-        if (mu_km_s and mu_au_d) or (not mu_km_s and not mu_au_d):
-            raise ValueError('Either mu_km_s or mu_au_d should be used, but not both')
-
-        if mu_au_d:
-            mu_km_s = mu_au_d * AU_KM**3 / DAY_S**2
-
         E = eccentric_anomaly(e, M.radians)
         v = Angle(radians=true_anomaly(e, E))
-        pos, vel = ele_to_vec(p.km,
+        pos, vel = ele_to_vec(p.au,
                               e,
                               i.radians,
                               Om.radians,
                               w.radians,
                               v.radians,
-                              mu_km_s,
+                              mu_au3_d2,
         )
-        return cls(Distance(km=pos),
-                   Velocity(km_per_s=vel),
+        return cls(Distance(au=pos),
+                   Velocity(au_per_d=vel),
                    epoch,
-                   mu_km_s,
+                   mu_au3_d2=mu_au3_d2,
                    center=center,
                    target=target,
         )
@@ -258,46 +242,48 @@ class KeplerOrbit(VectorFunction):
                                      target=target,
         )
 
-
     @classmethod
-    def from_comet_dataframe(cls, ts, df):
+    def from_comet_row(cls, ts, row):
         mu_km_s = GM_dict[10]
-        #mu_au_d = mu_km_s / (AU_KM**3) * (DAY_S**2)
-        e = df.eccentricity
-        a = df.perihelion_distance_au / (1 - e)
+        mu_au3_d2 = mu_km_s / (AU_KM**3) * (DAY_S**2)
+        e = row.eccentricity
+        a = row.perihelion_distance_au / (1 - e)
         p = a * (1 - e*e)
-        t_perihelion = ts.tt(df.perihelion_year, df.perihelion_month,
-                             df.perihelion_day)
+        t_perihelion = ts.tt(row.perihelion_year, row.perihelion_month,
+                             row.perihelion_day)
 
-        return cls.from_mean_anomaly(
+        comet = cls.from_mean_anomaly(
             p=Distance(au=p),
             e=e,
-            i=Angle(degrees=df.inclination_degrees),
-            Om=Angle(degrees=df.longitude_of_ascending_node_degrees),
-            w=Angle(degrees=df.argument_of_perihelion_degrees),
+            i=Angle(degrees=row.inclination_degrees),
+            Om=Angle(degrees=row.longitude_of_ascending_node_degrees),
+            w=Angle(degrees=row.argument_of_perihelion_degrees),
             M=Angle(radians=0.0),
             epoch=t_perihelion,
-            mu_km_s=mu_km_s,
+            mu_au3_d2=mu_au3_d2,
             center=10,
             # TODO: infer target SPK-ID from info in dataframe
             # TODO: target?
         )
+        comet._rotation = inertial_frames['ECLIPJ2000'].T
+        return comet
 
     def _at(self, time):
         """Propagate the KeplerOrbit to the given Time object
 
         The Time object can contain one time, or an array of times
         """
-        pos, vel = propagate(self.position_at_epoch.km,
-                             self.velocity_at_epoch.km_per_s,
-                             self.epoch.tt * DAY_S,
-                             time.tt * DAY_S,
-                             self._mu_km_s,
+        pos, vel = propagate(
+            self.position_at_epoch.au,
+            self.velocity_at_epoch.au_per_d,
+            self.epoch.tt,
+            time.tt,
+            self.mu_au3_d2,
         )
         if self._rotation is not None:
             pos = self._rotation.dot(pos)
         # TODO: vel
-        return pos / AU_KM, vel / AU_KM * DAY_S, None, None
+        return pos, vel, None, None
 
 
     @reify

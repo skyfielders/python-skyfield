@@ -1,10 +1,17 @@
-from numpy import pi, seterr, linspace
-from skyfield.keplerlib import KeplerOrbit, propagate
-from skyfield.elementslib import OsculatingElements
-from skyfield.units import Angle, Distance, Velocity
-from skyfield.tests.test_elementslib import compare, ele_to_vec
-from skyfield.api import load
 import os
+from numpy import pi, seterr, linspace
+
+from skyfield.api import load
+from skyfield.data.mpc import load_comets_dataframe
+from skyfield.elementslib import OsculatingElements
+from skyfield.keplerlib import KeplerOrbit, propagate
+from skyfield.tests.test_elementslib import compare, ele_to_vec
+from skyfield.units import Angle, Distance, Velocity
+
+try:
+    from io import BytesIO
+except:
+    from StringIO import StringIO as BytesIO
 
 seterr(all='raise')
 
@@ -31,8 +38,7 @@ def test_against_horizons():
         w=Angle(degrees=1.328964361683606E+02),
         M=Angle(degrees=1.382501360489816E+02),
         epoch=t,
-        mu_km_s=None,
-        mu_au_d=2.9591220828559093E-04,
+        mu_au3_d2=2.9591220828559093E-04,
         center=None,
         target=None,
     )
@@ -45,6 +51,30 @@ def test_against_horizons():
     ]
     epsilon = Distance(m=0.001).au
     assert abs(r + sun_au - horizons_au).max() < epsilon
+
+def test_comet():
+    text = (b'    CJ95O010  1997 03 29.6333  0.916241  0.994928  130.6448'
+            b'  283.3593   88.9908  20200224  -2.0  4.0  C/1995 O1 (Hale-Bopp)'
+            b'                                    MPC106342\n')
+    df = load_comets_dataframe(BytesIO(text))
+    row = df.ix[0]
+
+    ts = load.timescale(builtin=True)
+    eph = load('de421.bsp')
+    k = KeplerOrbit.from_comet_row(ts, row)
+
+    t = ts.utc(2020, 5, 31)
+    p = eph['earth'].at(t).observe(eph['sun'] + k)
+    ra, dec, distance = p.radec()
+
+    # The file authorities/mpc-hale-bopp in the repository is the source
+    # of these angles.  TODO: can we tighten this bound and drive it to
+    # fractions of an arcsecond?
+
+    ra_want = Angle(hours=(23, 59, 16.6))
+    dec_want = Angle(degrees=(-84, 46, 58))
+    assert abs(ra_want.arcseconds() - ra.arcseconds()) < 2.0
+    assert abs(dec_want.arcseconds() - dec.arcseconds()) < 0.2
 
 # Test various round-trips through the kepler orbit object.
 
