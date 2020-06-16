@@ -18,3 +18,5 @@ to download and open the data files they need in order to operate.
 
       The directory where this loader looks when trying to open a file,
       and where it downloads files that have not been downloaded yet.
+
+.. autofunction:: parse_tle_file

@@ -244,7 +244,8 @@ class Loader(object):
                     d[name] = sat
         return d
 
-    def tle_file(self, url, reload=False, filename=None, ts=None):
+    def tle_file(self, url, reload=False, filename=None,
+                 ts=None, skip_names=False):
         """Load and parse a TLE file, returning a list of Earth satellites.
 
         Given a URL or local path to an ASCII text file, this loads a
@@ -252,12 +253,15 @@ class Loader(object):
         :class:`~skyfield.sgp4lib.EarthSatellite` objects for them.
         See :doc:`earth-satellites`.
 
-        See the :meth:`~skyfield.iokit.Loader.open()` documentation for
-        the meaning of the ``reload`` and ``filename`` parameters.
+        See the :meth:`~skyfield.iokit.Loader.open()` method for the
+        meaning of the ``reload`` and ``filename`` parameters.
+
+        See the :meth:`parse_tle_file()` function for the meaning of the
+        ``ts`` and ``skip_names`` parameters.
 
         """
         with self.open(url, reload=reload, filename=filename) as f:
-            return list(parse_tle_file(f, ts))
+            return list(parse_tle_file(f, ts, skip_names))
 
     def open(self, url, mode='rb', reload=False, filename=None):
         """Open a file, downloading it first if it does not yet exist.
@@ -421,30 +425,38 @@ def parse_tle(fileobj):
         b0 = b1
         b1 = b2
 
-def parse_tle_file(lines, ts=None):
-    """Parse TLE satellite elements, yielding a sequence of satellites.
+def parse_tle_file(lines, ts=None, skip_names=False):
+    """Parse lines of TLE satellite data, yielding a sequence of satellites.
 
-    Given a sequence ``lines`` of byte strings that contain TLE
-    “Two-Line Element” sets of satellite orbital elements, yields an
-    :class:`~skyfield.sgp4lib.EarthSatellite` for each pair of adjacent
-    lines that start with ``b"1 "`` and ``b"2 "`` and have 69 or more
-    characters each.  If the preceding line looks like a name, it is set
-    as the satellite’s ``.name``.  See :doc:`earth-satellites`.
+    Given a sequence ``lines`` of byte strings (which can be an open
+    binary file, which acts like a sequence of lines in Python), this
+    routine yields an :class:`~skyfield.sgp4lib.EarthSatellite` for each
+    pair of adjacent lines that start with ``"1 "`` and ``"2 "`` and
+    have 69 or more characters each.  If the line preceding a TLE is not
+    part of another TLE, it is used as the satellite’s ``.name``.
 
-    An exception is raised if the attempt to parse a pair of candidate
-    lines as TLE elements fails.
+    If you pass a ``ts`` timescale, Skyfield will use it to build the
+    ``.epoch`` date attribute on each satellite; otherwise a timescale
+    derived from Skyfield’s built-in leap second files will be used.
+
+    If for a particular file you see random lines of text being
+    interpreted as satellite names, set ``skip_names`` to ``True`` and
+    Skyfield will not try to store satellite names.
+
+    See :doc:`earth-satellites` for details.  An exception is raised if
+    the attempt to parse a pair of candidate lines as TLE lines fails.
 
     """
     b0 = b1 = b''
     for b2 in lines:
-        if (b1.startswith(b'1 ') and len(b1) >= 69 and
-            b2.startswith(b'2 ') and len(b2) >= 69):
+        if (b2.startswith(b'2 ') and len(b2) >= 69 and
+            b1.startswith(b'1 ') and len(b1) >= 69):
 
-            b0 = b0.rstrip(b'\n\r')
-            if len(b0) == 24:   # Celestrak
-                name = b0.decode('ascii').rstrip()
-            elif b0.startswith(b'0 '): # Spacetrack 3-line format
-                name = b0[2:].decode('ascii').rstrip()
+            if not skip_names and b0:
+                b0 = b0.rstrip(b' \n\r')
+                if b0.startswith(b'0 '):
+                    b0 = b0[2:]  # Spacetrack 3-line format
+                name = b0.decode('ascii')
             else:
                 name = None
 
@@ -452,8 +464,10 @@ def parse_tle_file(lines, ts=None):
             line2 = b2.decode('ascii')
             yield EarthSatellite(line1, line2, name, ts)
 
-        b0 = b1
-        b1 = b2
+            b0 = b1 = b''
+        else:
+            b0 = b1
+            b1 = b2
 
 def download(url, path, verbose=None, blocksize=128*1024):
     """Download a file from a URL, possibly displaying a progress bar.

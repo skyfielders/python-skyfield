@@ -37,9 +37,11 @@ for artificial satellites in Earth orbit:
    the date on which an element set is most accurate —
    of every TLE element set you use.
    Elements are only useful for a week or two
-   on either side of the epoch date,
-   and for dates outside of that range
+   on either side of the epoch date.
+   For later dates,
    you will want to download a fresh set of elements.
+   For earlier dates,
+   you will want to pull an old TLE from the archives.
 
 4. Expect a satellite’s orbit to constantly change
    as the SGP4 propagation routine models effects
