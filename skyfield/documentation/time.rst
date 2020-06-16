@@ -482,13 +482,38 @@ when we computed the January 1st position by itself:
     [-0.17461758  0.88567056  0.38384886]
 
 You can combine a Python ``for`` loop with Python’s ``zip()`` builtin
-to print each time alongside its coordinates.
+to print each time alongside the corresponding coordinates.
+There are two techniques,
+one of which is less efficient and the other more efficient.
 
 .. testcode::
 
+    # Less efficient: loop over `t`, forcing the creation of
+    # a separate `Time` object for each iteration of the loop.
+
     for ti, xi, yi, zi in zip(t, x, y, z):
-        print(ti.utc_strftime('%Y-%m-%d'),
-              ' x = %.2f y = %.2f z = %.2f' % (xi, yi, zi))
+        print('{}  x = {:.2f} y = {:.2f} z = {:.2f}'.format(
+            ti.utc_strftime('%Y-%m-%d'), xi, yi, zi,
+        ))
+
+.. testoutput::
+
+    2014-01-01  x = -0.17 y = 0.89 z = 0.38
+    2014-01-02  x = -0.19 y = 0.88 z = 0.38
+    2014-01-03  x = -0.21 y = 0.88 z = 0.38
+    2014-01-04  x = -0.23 y = 0.88 z = 0.38
+
+.. testcode::
+
+    # More efficient: loop over the output of a `Time` method,
+    # which returns an array of the same length as `t`.
+
+    t_strings = t.utc_strftime('%Y-%m-%d')
+
+    for tstr, xi, yi, zi in zip(t_strings, x, y, z):
+        print('{}  x = {:.2f} y = {:.2f} z = {:.2f}'.format(
+            tstr, xi, yi, zi,
+        ))
 
 .. testoutput::
 
