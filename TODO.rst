@@ -10,28 +10,12 @@ forget.
 Sprint Possibilities
 ====================
 
-* Add a light travel time method to the Distance object.
-
 * For #145, skip deflections of planets that can’t affect an observation.
 
 * For #145, create a good syntax for combining two ephemerides.
 
 * Expand a bit on the documentation for stars, now that they can have an
   epoch for their position.
-
-* If we are going to allow times like TT to be submitted using
-  calendar dates, then we should probably provide methods that would
-  fetch them back as calendar dates.
-
-* After running a line like:
-
-    dates = Time(utc=(1980, 1, range(1000)))
-
-  displaying ``dates`` on the screen shows way too much output.  The
-  ``repr()`` should be re-crafted so that the length of the array is
-  stated, but the actual entries excerpted so that only the first few
-  and the last few are shown.  Maybe the ``repr()`` should use calendar
-  dates too instead of just showing the JD numbers?
 
 * Load and use the various offsets between UTC and TAI that were in
   effect before 1972.
@@ -58,7 +42,7 @@ Sprint Possibilities
   surface, plotted against a blue atmosphere fading out into the black
   of space as the plot goes upwards towards the top.
 
-* Iterating across an ephemeris should probably give you object names.
+* How can users find out what’s in an ephemeris?
 
 * The ``Timescale`` object does not currently know where its data comes
   from, so its ``repr()`` is pretty uninformative.  Should it someday be
