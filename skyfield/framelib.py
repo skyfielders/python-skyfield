@@ -2,6 +2,7 @@
 
 from numpy import array
 from .constants import ASEC2RAD
+from .functions import mxm, rot_x
 
 def build_matrix():
     # 'xi0', 'eta0', and 'da0' are ICRS frame biases in arcseconds taken
@@ -30,3 +31,9 @@ def build_matrix():
 
 ICRS_to_J2000 = build_matrix()
 del build_matrix
+
+def build_ecliptic_matrix(t):
+    """Build the matrix to rotate an ICRF vector into ecliptic coordinates."""
+    _, d_eps = t._nutation_angles_radians
+    true_obliquity = t._mean_obliquity_radians + d_eps
+    return mxm(rot_x(- true_obliquity), t.M)

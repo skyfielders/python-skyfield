@@ -5,11 +5,12 @@ from numpy import array, einsum, exp, full, nan, nan_to_num
 from .constants import ANGVEL, AU_M, ERAD, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
-from .geometry import intersect_line_and_sphere
+from .framelib import build_ecliptic_matrix
 from .functions import (
-    mxv, mxm, _to_array, angle_between, from_spherical,
-    length_of, rot_x, rot_z, to_spherical,
+    mxv, _to_array, angle_between, from_spherical,
+    length_of, rot_z, to_spherical,
 )
+from .geometry import intersect_line_and_sphere
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Angle, Distance, Velocity, _interpret_angle
@@ -293,8 +294,6 @@ class ICRF(object):
             vector = mxv(_ECLIPJ2000, self.position.au)
             return Distance(vector)
 
-        position_au = self.position.au
-
         if isinstance(epoch, Time):
             pass
         elif isinstance(epoch, float):
@@ -306,10 +305,8 @@ class ICRF(object):
                              ' a floating point Terrestrial Time (TT),'
                              ' or the string "date" for epoch-of-date')
 
-        _, d_eps = epoch._nutation_angles_radians
-        true_obliquity = epoch._mean_obliquity_radians + d_eps
-        rotation = mxm(rot_x(- true_obliquity), epoch.M)
-        position_au = mxv(rotation, position_au)
+        rotation = build_ecliptic_matrix(epoch)
+        position_au = mxv(rotation, self.position.au)
         return Distance(position_au)
 
     def ecliptic_velocity(self):
