@@ -393,7 +393,7 @@ And you are free to provide out-of-range values
 and leave it to Skyfield to work out the correct result.
 Here are some examples::
 
-    ts.utc(range(1900, 1950))     # Fifty years
+    ts.utc(range(1900, 1950))     # Fifty years 1900–1949
     ts.utc(1980, range(1, 25))    # Twenty-four months
     ts.utc(2005, 5, [1, 10, 20])  # 1st, 10th, and 20th of May
 
@@ -402,9 +402,26 @@ Here are some examples::
 
 The resulting :class:`Time` object will hold an array of times
 instead of just a single scalar value.
-When you provide it as input to a Skyfield calculation,
-the resulting array will have an extra dimension,
-expanding what would normally be a single result
+As illustrated in the previous section (on leap seconds),
+you can use a Python ``for`` to print each time separately:
+
+.. testcode::
+
+    t = ts.utc(2020, 6, 16, 7, range(4))
+
+    for ti in t:
+        print(ti.utc_strftime('%Y-%m-%d %H:%M'))
+
+.. testoutput::
+
+    2020-06-16 07:00
+    2020-06-16 07:01
+    2020-06-16 07:02
+    2020-06-16 07:03
+
+When you provide a time array as input to a Skyfield calculation,
+the output array will have an extra dimension
+that expands what would normally be a single result
 into as many results as you provided dates.
 We can compute the position of the Earth as an example:
 
@@ -440,10 +457,16 @@ If you unpack this array into three names,
 then you get three four-element arrays
 corresponding to the four dates.
 These four-element arrays are ready to be submitted to `matplotlib`_
-and other scientific Python tools::
+and other scientific Python tools:
+
+.. testsetup::
+
+    def plot(*args): pass
+
+.. testcode::
 
     x, y, z = pos    # four values each
-    plot(x, y)
+    plot(x, y)       # example matplotlib call
 
 If you instead slice along the second axis,
 then you can retrieve an individual position for a particular date —
@@ -457,6 +480,22 @@ when we computed the January 1st position by itself:
 .. testoutput::
 
     [-0.17461758  0.88567056  0.38384886]
+
+You can combine a Python ``for`` loop with Python’s ``zip()`` builtin
+to print each time alongside its coordinates.
+
+.. testcode::
+
+    for ti, xi, yi, zi in zip(t, x, y, z):
+        print(ti.utc_strftime('%Y-%m-%d'),
+              ' x = %.2f y = %.2f z = %.2f' % (xi, yi, zi))
+
+.. testoutput::
+
+    2014-01-01  x = -0.17 y = 0.89 z = 0.38
+    2014-01-02  x = -0.19 y = 0.88 z = 0.38
+    2014-01-03  x = -0.21 y = 0.88 z = 0.38
+    2014-01-04  x = -0.23 y = 0.88 z = 0.38
 
 Finally, converting an array Julian date back into a calendar tuple
 results in the year, month, and all of the other values
