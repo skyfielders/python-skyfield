@@ -57,7 +57,7 @@ def test_comet():
             b'  283.3593   88.9908  20200224  -2.0  4.0  C/1995 O1 (Hale-Bopp)'
             b'                                    MPC106342\n')
     df = load_comets_dataframe(BytesIO(text))
-    row = df.ix[0]
+    row = df.iloc[0]
 
     ts = load.timescale(builtin=True)
     eph = load('de421.bsp')
