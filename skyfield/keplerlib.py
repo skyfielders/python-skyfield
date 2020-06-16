@@ -6,7 +6,7 @@ from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh,
                   cross, exp, log, nan, ndarray, newaxis, ones_like, pi, power,
                   repeat, sin, sinh, sqrt, sum, tan, tile, zeros_like)
 
-from skyfield.functions import length_of, dots
+from skyfield.functions import dots, length_of, mxv
 from skyfield.data.spice import inertial_frames
 from skyfield.descriptorlib import reify
 from skyfield.elementslib import OsculatingElements, normpi
@@ -281,8 +281,8 @@ class KeplerOrbit(VectorFunction):
             self.mu_au3_d2,
         )
         if self._rotation is not None:
-            pos = self._rotation.dot(pos)
-        # TODO: vel
+            pos = mxv(self._rotation, pos)
+            vel = mxv(self._rotation, vel)
         return pos, vel, None, None
 
 
