@@ -2,7 +2,7 @@ import os
 from numpy import pi, seterr, linspace
 
 from skyfield.api import load
-from skyfield.data.mpc import load_comets_dataframe
+from skyfield.data import mpc
 from skyfield.elementslib import OsculatingElements
 from skyfield.keplerlib import KeplerOrbit, propagate
 from skyfield.tests.test_elementslib import compare, ele_to_vec
@@ -56,26 +56,33 @@ def test_comet():
     text = (b'    CJ95O010  1997 03 29.6333  0.916241  0.994928  130.6448'
             b'  283.3593   88.9908  20200224  -2.0  4.0  C/1995 O1 (Hale-Bopp)'
             b'                                    MPC106342\n')
-    df = load_comets_dataframe(BytesIO(text))
-    row = df.iloc[0]
 
     ts = load.timescale(builtin=True)
-    eph = load('de421.bsp')
-    k = KeplerOrbit.from_comet_row(ts, row)
-
     t = ts.utc(2020, 5, 31)
-    p = eph['earth'].at(t).observe(eph['sun'] + k)
-    ra, dec, distance = p.radec()
+    eph = load('de421.bsp')
+    e = eph['earth'].at(t)
 
-    # The file authorities/mpc-hale-bopp in the repository is the source
-    # of these angles.  TODO: can we tighten this bound and drive it to
-    # fractions of an arcsecond?
+    for loader in mpc.load_comets_dataframe, mpc.load_comets_dataframe_slow:
+        df = loader(BytesIO(text))
+        row = df.iloc[0]
+        k = KeplerOrbit.from_comet_row(ts, row)
+        p = e.observe(eph['sun'] + k)
+        ra, dec, distance = p.radec()
 
-    ra_want = Angle(hours=(23, 59, 16.6))
-    dec_want = Angle(degrees=(-84, 46, 58))
-    assert abs(ra_want.arcseconds() - ra.arcseconds()) < 2.0
-    assert abs(dec_want.arcseconds() - dec.arcseconds()) < 0.2
-    assert abs(distance.au - 43.266) < 0.0005
+        # The file authorities/mpc-hale-bopp in the repository is the
+        # source of these angles.  TODO: can we tighten this bound and
+        # drive it to fractions of an arcsecond?
+
+        ra_want = Angle(hours=(23, 59, 16.6))
+        dec_want = Angle(degrees=(-84, 46, 58))
+        assert abs(ra_want.arcseconds() - ra.arcseconds()) < 2.0
+        assert abs(dec_want.arcseconds() - dec.arcseconds()) < 0.2
+        assert abs(distance.au - 43.266) < 0.0005
+
+        # print(p.observer_data.bcrs_position)
+        # b = p.observer_data.bcrs_position
+        # from skyfield.functions import angle_between, tau
+        # print(angle_between(p.position.au-b, p.position.au) / tau * 360.0)
 
 # Test various round-trips through the kepler orbit object.
 

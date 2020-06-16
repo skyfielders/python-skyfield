@@ -73,8 +73,8 @@ _COMET_SLOW_COLUMNS = [
     ('perturbed_epoch_year', (81, 85)),
     ('perturbed_epoch_month', (85, 87)),
     ('perturbed_epoch_day', (87, 89)),
-    ('absolute_magnitude', (91, 95)),
-    ('slope_parameter', (96, 100)),
+    ('magnitude_H', (91, 95)),
+    ('magnitude_G', (96, 100)),
     ('designation', (102, 158)),
     ('reference', (159, 168)),
 ]
@@ -88,9 +88,8 @@ _COMET_FAST_COLUMN_NAMES, _COMET_FAST_COLUMN_NUMBERS = zip(
     ('argument_of_perihelion_degrees', 6),
     ('longitude_of_ascending_node_degrees', 7),
     ('inclination_degrees', 8),
-    # ('perturbed_epoch', 9),
-    ('H', 10),
-    ('G', 11),
+    ('magnitude_H', 10),
+    ('magnitude_G', 11),
 )
 _COMET_DTYPES = {
     'number': 'float',  # since older Pandas does not support NaN for integers
