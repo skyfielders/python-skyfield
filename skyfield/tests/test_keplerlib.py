@@ -75,6 +75,7 @@ def test_comet():
     dec_want = Angle(degrees=(-84, 46, 58))
     assert abs(ra_want.arcseconds() - ra.arcseconds()) < 2.0
     assert abs(dec_want.arcseconds() - dec.arcseconds()) < 0.2
+    assert abs(distance.au - 43.266) < 0.0005
 
 # Test various round-trips through the kepler orbit object.
 
