@@ -3,7 +3,7 @@ from __future__ import division
 import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh,
-                  cross, exp, log, nan, ndarray, newaxis, ones_like, pi, power,
+                  cross, exp, log, ndarray, newaxis, ones_like, pi, power,
                   repeat, sin, sinh, sqrt, sum, tan, tile, zeros_like)
 
 from skyfield.functions import dots, length_of, mxv
