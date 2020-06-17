@@ -61,10 +61,29 @@ def test_minor_planet():
     ts = load.timescale(builtin=True)
     t = ts.utc(2020, 6, 17)
     eph = load('de421.bsp')
-    df = mpc.load_mpcorb_dataframe(BytesIO(text))
+    df = mpc.load_mpcorb_dataframe(BytesIO(text), slow=True)
     row = df.iloc[0]
+
+    assert row.designation_packed == '00001'
+    assert row.designation == '(1) Ceres'
+
     ceres = KeplerOrbit.from_mpcorb_row(row, ts)
     ra, dec, distance = eph['earth'].at(t).observe(eph['sun'] + ceres).radec()
+
+    assert ceres.target == '(1) Ceres'
+    assert abs(ra.hours - 23.1437) < 0.00005
+    assert abs(dec.degrees - -17.323) < 0.0005
+
+    df = mpc.load_mpcorb_dataframe(BytesIO(text), slow=False)
+    row = df.iloc[0]
+
+    assert row.designation_packed == '00001'
+    assert 'designation' not in row
+
+    ceres = KeplerOrbit.from_mpcorb_row(row, ts)
+    ra, dec, distance = eph['earth'].at(t).observe(eph['sun'] + ceres).radec()
+
+    assert ceres.target == 'Minor planet 00001'
     assert abs(ra.hours - 23.1437) < 0.00005
     assert abs(dec.degrees - -17.323) < 0.0005
 

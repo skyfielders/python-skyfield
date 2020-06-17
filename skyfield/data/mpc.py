@@ -6,7 +6,7 @@ import pandas as pd
 MPCORB_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz'
 
 _MPCORB_COLUMNS = [
-    ('designation', (0, 7)),
+    ('designation_packed', (0, 7)),
     ('magnitude_H', (8, 13)),
     ('magnitude_G', (14, 19)),
     ('epoch_packed', (20, 25)),
@@ -26,19 +26,27 @@ _MPCORB_COLUMNS = [
     ('coarse_perturbers', (142, 145)),
     ('precise_perturbers', (146, 149)),
     ('computer_name', (150, 160)),
+    ('hex_flags', (161, 165)),
+    ('designation', (166, 194)),
+    ('last_observation_date', (194, 202)),
 ]
 _MPCORB_NECESSARY_COLUMNS = {
-    'designation', 'epoch_packed', 'mean_anomaly_degrees',
+    'designation_packed', 'epoch_packed', 'mean_anomaly_degrees',
     'argument_of_perihelion_degrees', 'longitude_of_ascending_node_degrees',
     'inclination_degrees', 'eccentricity', 'mean_daily_motion_degrees',
     'semimajor_axis_au',
 }
 _MPCORB_DTYPES = {
+    # These seem to be ignored by read_fwf()?
     'epoch_packed': 'category',
     'uncertainty': 'category',
     'coarse_perturbers': 'category',
     'precise_perturbers': 'category',
     'computer_name': 'category',
+}
+_MPCORB_CONVERTERS = {
+    'designation_packed': str,
+    'hex_flags': str,
 }
 
 def load_mpcorb_dataframe(fobj, slow=False):
@@ -54,7 +62,8 @@ def load_mpcorb_dataframe(fobj, slow=False):
         columns = [tup for tup in columns
                    if tup[0] in _MPCORB_NECESSARY_COLUMNS]
     names, colspecs = zip(*columns)
-    df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_MPCORB_DTYPES)
+    df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_MPCORB_DTYPES,
+                     converters=_MPCORB_CONVERTERS)
     #skiprows=43)
     return df
 

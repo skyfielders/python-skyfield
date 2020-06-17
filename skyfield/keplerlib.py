@@ -166,21 +166,8 @@ class KeplerOrbit(VectorFunction):
         )
 
     @classmethod
-    def from_mpcorb_row(cls, row, ts, center=10):
-        # TODO: make "ts" optional? or at least swap args?
-
-        # https://minorplanetcenter.net/iau/info/PackedDates.html
-
-        # if 'Number' in df:
-        #     target = int(df.Number.strip('()')) + 2000000
-        # else:
-
-        target = None  # TODO
-
-        # if 'Name' not in df or df.Name == nan:
-        #     target_name = df.Principal_desig
-        # else:
-        #target_name = df.Name
+    def from_mpcorb_row(cls, row, ts):
+        # TODO: should "ts" be optional?
 
         a = row.semimajor_axis_au
         e = row.eccentricity
@@ -195,17 +182,14 @@ class KeplerOrbit(VectorFunction):
             day = n(s[4])
             return julian_day(year, month, day) - 0.5
 
+        mu_au3_d2 = GM_dict[10] / (AU_KM**3) * (DAY_S**2)
         epoch_jd = d(row.epoch_packed)
         t_epoch = ts.tt_jd(epoch_jd)
 
-        # TODO: vectorize
-
-        M = row.mean_anomaly_degrees
-
-        mu_au3_d2 = GM_dict[10] / (AU_KM**3) * (DAY_S**2)
-
-        # print('==== M', M)
-        # print('=== MA from HORIZONS: 138.2501360489816')
+        target = (
+            row.get('designation', None)
+            or 'Minor planet ' + row['designation_packed']
+        )
 
         minor_planet = cls.from_mean_anomaly(
             p=Distance(au=p),
@@ -213,10 +197,10 @@ class KeplerOrbit(VectorFunction):
             i=Angle(degrees=row.inclination_degrees),
             Om=Angle(degrees=row.longitude_of_ascending_node_degrees),
             w=Angle(degrees=row.argument_of_perihelion_degrees),
-            M=Angle(degrees=M),
+            M=Angle(degrees=row.mean_anomaly_degrees),
             epoch=t_epoch,
             mu_au3_d2=mu_au3_d2,
-            center=center,
+            center=10,
             target=target,
         )
         minor_planet._rotation = inertial_frames['ECLIPJ2000'].T
