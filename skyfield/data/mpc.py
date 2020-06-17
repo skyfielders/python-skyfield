@@ -151,3 +151,13 @@ def load_comets_dataframe_slow(fobj):
     names, colspecs = zip(*_COMET_SLOW_COLUMNS)
     df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_COMET_DTYPES)
     return df
+
+def unpack(designation_packed):
+    def n(c):
+        return ord(c) - (48 if c.isdigit() else 55)
+    s = designation_packed
+    s1 = s[1]
+    if s1 == '/':
+        return s
+    return '{0[0]}/{1}{0[2]}{0[3]} {0[4]}{2}{3}'.format(
+        s, n(s1), int(s[5:7]), s[7].lstrip('0'))
