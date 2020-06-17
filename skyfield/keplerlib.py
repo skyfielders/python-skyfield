@@ -215,10 +215,13 @@ class KeplerOrbit(VectorFunction):
         t_perihelion = ts.tt(row.perihelion_year, row.perihelion_month,
                              row.perihelion_day)
 
-        target = (
-            row.get('designation', None)
-            or 'Comet ' + row['designation_packed']
-        )
+        target = row.get('designation', None)
+        if target is None:
+            def n(c):
+                return ord(c) - (48 if c.isdigit() else 55)
+            pack = row['designation_packed']
+            target = '{0[0]}/{1}{0[2]}{0[3]} {0[4]}{2}{3}'.format(
+                pack, n(pack[1]), int(pack[5:7]), pack[7].lstrip('0'))
 
         comet = cls.from_mean_anomaly(
             p=Distance(au=p),

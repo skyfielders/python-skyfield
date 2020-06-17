@@ -117,7 +117,7 @@ def test_comet():
 
         targets.append(k.target)
 
-    assert targets == ['Comet CJ95O010', 'C/1995 O1 (Hale-Bopp)']
+    assert targets == ['C/1995 O1', 'C/1995 O1 (Hale-Bopp)']
 
 # Test various round-trips through the kepler orbit object.
 
