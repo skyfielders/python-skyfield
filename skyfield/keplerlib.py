@@ -166,89 +166,68 @@ class KeplerOrbit(VectorFunction):
         )
 
     @classmethod
-    def from_dataframe(cls, df, ts):
+    def from_mpcorb_row(cls, row, ts, center=10):
+        # TODO: make "ts" optional? or at least swap args?
+
         # https://minorplanetcenter.net/iau/info/PackedDates.html
 
         # if 'Number' in df:
         #     target = int(df.Number.strip('()')) + 2000000
         # else:
 
-        target = None
+        target = None  # TODO
 
         # if 'Name' not in df or df.Name == nan:
         #     target_name = df.Principal_desig
         # else:
         #target_name = df.Name
 
-        p = df.semimajor_axis_au.values * (1.0 - df.eccentricity.values ** 2.0)
-
-        # TODO: rework the epoch conversion using arrays, if possible, as in
-        # https://stackoverflow.com/questions/49503173/
+        a = row.semimajor_axis_au
+        e = row.eccentricity
+        p = a * (1.0 - e*e)
 
         def n(c):
-            return ord(c) - 48 if c.isdigit() else ord(c) - 55
+            return ord(c) - (48 if c.isdigit() else 55)
 
         def d(s):
             year = 100 * n(s[0]) + int(s[1:3])
             month = n(s[3])
             day = n(s[4])
-            return julian_day(year, month, day)
+            return julian_day(year, month, day) - 0.5
 
-        #epoch_jd = [d(s) for s in df.epoch_packed.values]
-        #t = ts.tt_jd(epoch_jd)
+        epoch_jd = d(row.epoch_packed)
+        t_epoch = ts.tt_jd(epoch_jd)
 
         # TODO: vectorize
 
-        M = df.mean_anomaly_degrees.values[0]
-        print('M:', M)
+        M = row.mean_anomaly_degrees
 
-        return cls.from_mean_anomaly(
-            p=Distance(au=p[0]),
-            e=df.eccentricity.values[0],
-            i=Angle(degrees=df.inclination_degrees.values[0]),
-            Om=Angle(degrees=df.longitude_of_ascending_node_degrees.values[0]),
-            w=Angle(degrees=df.argument_of_perihelion_degrees.values[0]),
+        mu_au3_d2 = GM_dict[10] / (AU_KM**3) * (DAY_S**2)
+
+        # print('==== M', M)
+        # print('=== MA from HORIZONS: 138.2501360489816')
+
+        minor_planet = cls.from_mean_anomaly(
+            p=Distance(au=p),
+            e=e,
+            i=Angle(degrees=row.inclination_degrees),
+            Om=Angle(degrees=row.longitude_of_ascending_node_degrees),
+            w=Angle(degrees=row.argument_of_perihelion_degrees),
             M=Angle(degrees=M),
-            epoch=ts.J2000,
-            mu_km_s=GM_dict[10] + GM_dict.get(target, 0),
-            center=0,
+            epoch=t_epoch,
+            mu_au3_d2=mu_au3_d2,
+            center=center,
             target=target,
         )
-
-    @classmethod
-    def from_mpcorb_dataframe(cls, df, ts):
-        if 'Number' in df:
-            target = int(df.Number.strip('()')) + 2000000
-        else:
-            target = None
-
-        if 'Name' not in df or df.Name == nan:
-            target_name = df.Principal_desig
-        else:
-            target_name = df.Name
-
-        target_name   # todo
-
-        p = df.a * (1 - df.e**2)
-        return cls.from_mean_anomaly(p=Distance(au=p),
-                                     e=df.e,
-                                     i=Angle(degrees=df.i),
-                                     Om=Angle(degrees=df.Node),
-                                     w=Angle(degrees=df.Peri),
-                                     M=Angle(degrees=df.M),
-                                     epoch=ts.tdb_jd(df.Epoch),
-                                     mu_km_s=GM_dict[10] + GM_dict.get(target, 0),
-                                     center=10,
-                                     target=target,
-        )
+        minor_planet._rotation = inertial_frames['ECLIPJ2000'].T
+        return minor_planet
 
     @classmethod
     def from_comet_row(cls, ts, row):
-        mu_km_s = GM_dict[10]
-        mu_au3_d2 = mu_km_s / (AU_KM**3) * (DAY_S**2)
+        mu_au3_d2 = GM_dict[10] / (AU_KM**3) * (DAY_S**2)
         e = row.eccentricity
-        a = row.perihelion_distance_au / (1 - e)
-        p = a * (1 - e*e)
+        a = row.perihelion_distance_au / (1.0 - e)
+        p = a * (1.0 - e*e)
         t_perihelion = ts.tt(row.perihelion_year, row.perihelion_month,
                              row.perihelion_day)
 

@@ -41,19 +41,21 @@ _MPCORB_DTYPES = {
     'computer_name': 'category',
 }
 
-def load_mpcorb_dataframe(fobj, full=False):
+def load_mpcorb_dataframe(fobj, slow=False):
     """Parse a Minor Planet Center orbits file into a Pandas dataframe.
 
     The MPCORB file format is documented at:
     https://minorplanetcenter.net/iau/info/MPOrbitFormat.html
 
     """
+    # TODO: should iokit handle decompression in open()?
     columns = _MPCORB_COLUMNS
-    if not full:
-        columns = [tup for tup in columns if tup[0] in _MPCORB_NECESSARY_COLUMNS]
+    if not slow:
+        columns = [tup for tup in columns
+                   if tup[0] in _MPCORB_NECESSARY_COLUMNS]
     names, colspecs = zip(*columns)
-    df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_MPCORB_DTYPES,
-                     skiprows=43, compression='gzip')
+    df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_MPCORB_DTYPES)
+    #skiprows=43)
     return df
 
 COMET_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt'

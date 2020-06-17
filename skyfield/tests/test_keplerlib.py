@@ -52,6 +52,22 @@ def test_against_horizons():
     epsilon = Distance(m=0.001).au
     assert abs(r + sun_au - horizons_au).max() < epsilon
 
+def test_minor_planet():
+    text = (b'00001    3.4   0.15 K205V 162.68631   73.73161   80.28698'
+            b'   10.58862  0.0775571  0.21406009   2.7676569  0 MPO492748'
+            b'  6751 115 1801-2019 0.60 M-v 30h Williams   0000      '
+            b'(1) Ceres              20190915\n')
+
+    ts = load.timescale(builtin=True)
+    t = ts.utc(2020, 6, 17)
+    eph = load('de421.bsp')
+    df = mpc.load_mpcorb_dataframe(BytesIO(text))
+    row = df.iloc[0]
+    ceres = KeplerOrbit.from_mpcorb_row(row, ts)
+    ra, dec, distance = eph['earth'].at(t).observe(eph['sun'] + ceres).radec()
+    assert abs(ra.hours - 23.1437) < 0.00005
+    assert abs(dec.degrees - -17.323) < 0.0005
+
 def test_comet():
     text = (b'    CJ95O010  1997 03 29.6333  0.916241  0.994928  130.6448'
             b'  283.3593   88.9908  20200224  -2.0  4.0  C/1995 O1 (Hale-Bopp)'
