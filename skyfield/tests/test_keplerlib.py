@@ -83,7 +83,7 @@ def test_minor_planet():
     ceres = KeplerOrbit.from_mpcorb_row(row, ts)
     ra, dec, distance = eph['earth'].at(t).observe(eph['sun'] + ceres).radec()
 
-    assert ceres.target == 'Minor planet 00001'
+    assert ceres.target == '00001'
     assert abs(ra.hours - 23.1437) < 0.00005
     assert abs(dec.degrees - -17.323) < 0.0005
 

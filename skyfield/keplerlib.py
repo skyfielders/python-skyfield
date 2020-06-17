@@ -186,10 +186,7 @@ class KeplerOrbit(VectorFunction):
         epoch_jd = d(row.epoch_packed)
         t_epoch = ts.tt_jd(epoch_jd)
 
-        target = (
-            row.get('designation', None)
-            or 'Minor planet ' + row['designation_packed']
-        )
+        target = row.get('designation', None) or row['designation_packed']
 
         minor_planet = cls.from_mean_anomaly(
             p=Distance(au=p),
