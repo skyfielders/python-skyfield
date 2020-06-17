@@ -72,7 +72,7 @@ COMET_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt'
 _COMET_SLOW_COLUMNS = [
     ('number', (0, 4)),
     ('orbit_type', (4, 5)),
-    ('packed_designation', (5, 12)),
+    ('designation_packed', (5, 12)),
     ('perihelion_year', (14, 18)),
     ('perihelion_month', (19, 21)),
     ('perihelion_day', (22, 29)),
@@ -90,7 +90,7 @@ _COMET_SLOW_COLUMNS = [
     ('reference', (159, 168)),
 ]
 _COMET_FAST_COLUMN_NAMES, _COMET_FAST_COLUMN_NUMBERS = zip(
-    ('designation', 0),
+    ('designation_packed', 0),
     ('perihelion_year', 1),
     ('perihelion_month', 2),
     ('perihelion_day', 3),
