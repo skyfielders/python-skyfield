@@ -653,9 +653,9 @@ class Geocentric(ICRF):
     of relativity on the light itself.
 
     Its ``.position`` and ``.velocity`` vectors have (x,y,z) axes that
-    are those of the International Terrestrial Reference Frame (ITRF),
-    an inertial system that is an update to J2000 and that does not
-    rotate with the Earth itself.
+    are those of the Geocentric Celestial Reference System (GCRS), an
+    inertial system that is an update to J2000 and that does not rotate
+    with the Earth itself.
 
     """
     _default_center = 399
