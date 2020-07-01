@@ -10,6 +10,19 @@ forget.
 Sprint Possibilities
 ====================
 
+* Several interesting API questions arise because of
+  `this Stack Overflow question <https://stackoverflow.com/questions/62654081/path-between-two-topos-locations-determine-latitude-and-longitude-where-a-giv>`_.
+  Should I finally go through with renaming ``.position`` to ``.xyz``?
+  Should ``.from_altaz()`` retain observer data
+  so that a follow-up ``.altaz()`` returns the same coordinates?
+  Should positions fully support math,
+  so the computation of the Topos position can only be computed once?
+  Should the result of ``.from_altaz()`` be somehow possible to connect
+  with ``subpoint()``,
+  which is currently stranded over on the ``Geocentric`` class —
+  maybe ``subpoint()`` really should be a constructor on the Topos class
+  that can take any kind of position that’s geocentered?
+
 * For #145, skip deflections of planets that can’t affect an observation.
 
 * For #145, create a good syntax for combining two ephemerides.
