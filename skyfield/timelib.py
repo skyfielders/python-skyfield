@@ -722,8 +722,15 @@ class Time(object):
     def __sub__(self, other_time):
         if not isinstance(other_time, Time):
             return NotImplemented
-        return (self.whole - other_time.whole
-                + self.tt_fraction - other_time.tt_fraction)
+        return ((self.whole - other_time.whole)
+                + (self.tt_fraction - other_time.tt_fraction))
+
+    def __hash__(self):
+        # Someone wanted to use Time objects with functools.lru_cache so
+        # we make this attempt to support hashability; beware that it
+        # will return the same hash for very closely spaced times that
+        # all round to the same floating point TT.
+        return hash(self.tt)
 
     # Deprecated attributes that were once used internally, consuming
     # memory with matrices that are never used again by Skyfield once

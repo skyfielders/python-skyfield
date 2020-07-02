@@ -362,3 +362,9 @@ def test_time_equality(ts):
     t1 = ts.tt_jd(2459008.0, 0.625)
     assert t0 == t1
     assert t1 - t0 == 0.0
+    assert hash(t0) == hash(t1)
+
+    t2 = ts.tt_jd(2459008.0, 0.6251)
+    assert t2 != t0
+    assert t2 - t0 > 0
+    assert hash(t0) != hash(t2)
