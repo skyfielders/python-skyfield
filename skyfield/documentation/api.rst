@@ -191,6 +191,12 @@ that computes the location of any position on the Earth’s surface.
 
    Topos
 
+Kepler Orbits
+=============
+
+See :doc:`kepler-orbits`
+for computing the positions of comets, asteroids, and other minor planets.
+
 Earth Satellites
 ================
 

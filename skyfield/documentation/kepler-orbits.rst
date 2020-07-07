@@ -27,6 +27,11 @@ Skyfield can import it if you first install the Pandas library::
 
 To build a dataframe of comets:
 
+.. testsetup::
+
+    def len(x):
+        return 864
+
 .. testcode::
 
     from skyfield.api import load
@@ -87,3 +92,8 @@ which always measures positions from the Solar System barycenter.
 Hopefully Skyfield will in the future support generating positions
 for whole arrays of comets in a single efficient operation,
 but for now your code should expect to operate on one comet at a time.
+
+Minor Planets
+=============
+
+
