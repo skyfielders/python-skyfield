@@ -21,6 +21,7 @@ that is accelerated using NumPy vector math!
    planets
    stars
    planetary
+   kepler-orbits
    earth-satellites
    searches
    elements

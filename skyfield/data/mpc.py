@@ -89,7 +89,7 @@ _COMET_COLUMNS = [
     ('perturbed_epoch_day', (87, 89)),
     ('magnitude_H', (91, 95)),
     ('magnitude_G', (96, 100)),
-    ('designation', (102, 158)),
+    ('name', (102, 158)),
     ('reference', (159, 168)),
 ]
 _COMET_FAST_COLUMNS = (
@@ -97,7 +97,7 @@ _COMET_FAST_COLUMNS = (
     'perihelion_distance_au', 'eccentricity', 'argument_of_perihelion_degrees',
     'longitude_of_ascending_node_degrees', 'inclination_degrees',
     'magnitude_H', 'magnitude_G',
-    'designation',
+    'name',
 )
 
 _fast_comet_re = None
@@ -129,7 +129,7 @@ def load_comets_dataframe(fobj):
             if previous_end is not None:
                 pat.append(' ' * (start - previous_end))
             keep = name in keepers
-            if name == 'designation':
+            if name == 'name':
                 pat.append('(.*?)  .*')
                 break
             else:

@@ -212,8 +212,6 @@ class KeplerOrbit(VectorFunction):
         t_perihelion = ts.tt(row.perihelion_year, row.perihelion_month,
                              row.perihelion_day)
 
-        target = row.get('designation', None) or row['designation_packed']
-
         comet = cls.from_mean_anomaly(
             p=Distance(au=p),
             e=e,
@@ -224,7 +222,7 @@ class KeplerOrbit(VectorFunction):
             epoch=t_perihelion,
             mu_au3_d2=mu_au3_d2,
             center=10,
-            target=target,
+            target=row['name'],
         )
         comet._rotation = inertial_frames['ECLIPJ2000'].T
         return comet
