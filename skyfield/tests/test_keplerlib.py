@@ -96,8 +96,6 @@ def test_comet():
     t = ts.utc(2020, 5, 31)
     eph = load('de421.bsp')
     e = eph['earth'].at(t)
-    targets = []
-    unpacked_targets = []
 
     for loader in mpc.load_comets_dataframe, mpc.load_comets_dataframe_slow:
         df = loader(BytesIO(text))
@@ -116,11 +114,7 @@ def test_comet():
         assert abs(dec_want.arcseconds() - dec.arcseconds()) < 0.2
         assert abs(distance.au - 43.266) < 0.0005
 
-        targets.append(k.target)
-        unpacked_targets.append(mpc.unpack(k.target))
-
-    assert targets == ['CJ95O010', 'C/1995 O1 (Hale-Bopp)']
-    assert unpacked_targets == ['C/1995 O1', 'C/1995 O1 (Hale-Bopp)']
+        assert k.target == 'C/1995 O1 (Hale-Bopp)'
 
 # Test various round-trips through the kepler orbit object.
 

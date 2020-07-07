@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """Routines for interpreting data from the IAU Minor Planet Center."""
 
+import io
+import re
+
 import pandas as pd
 
 MPCORB_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz'
@@ -69,7 +72,7 @@ def load_mpcorb_dataframe(fobj, slow=False):
 
 COMET_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt'
 
-_COMET_SLOW_COLUMNS = [
+_COMET_COLUMNS = [
     ('number', (0, 4)),
     ('orbit_type', (4, 5)),
     ('designation_packed', (5, 12)),
@@ -89,51 +92,62 @@ _COMET_SLOW_COLUMNS = [
     ('designation', (102, 158)),
     ('reference', (159, 168)),
 ]
-_COMET_FAST_COLUMN_NAMES, _COMET_FAST_COLUMN_NUMBERS = zip(
-    ('designation_packed', 0),
-    ('perihelion_year', 1),
-    ('perihelion_month', 2),
-    ('perihelion_day', 3),
-    ('perihelion_distance_au', 4),
-    ('eccentricity', 5),
-    ('argument_of_perihelion_degrees', 6),
-    ('longitude_of_ascending_node_degrees', 7),
-    ('inclination_degrees', 8),
-    ('magnitude_H', 10),
-    ('magnitude_G', 11),
+_COMET_FAST_COLUMNS = (
+    'perihelion_year', 'perihelion_month', 'perihelion_day',
+    'perihelion_distance_au', 'eccentricity', 'argument_of_perihelion_degrees',
+    'longitude_of_ascending_node_degrees', 'inclination_degrees',
+    'magnitude_H', 'magnitude_G',
+    'designation',
 )
-_COMET_DTYPES = {
-    'number': 'float',  # since older Pandas does not support NaN for integers
-    'orbit_type': 'category',
-    'perihelion_year': 'int',
-}
 
-import re
-_pat = re.compile(br'^([^ ]*) +([a-z])', flags=re.M)
-import io
+_fast_comet_re = None
+_fast_comet_sub = None
 
 def load_comets_dataframe(fobj):
     """Parse a Minor Planet Center comets file into a Pandas dataframe.
 
-    The comet file format is documented at:
-    https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
-
-    This uses a fast Pandas import routine on only the data fields
-    essential for computing comet orbits, speeding up the import by a
-    factor of 2 or 3.  But in return, each comet’s full name will be
-    missing; only its packed designation is included as an identifier.
-
+    This imports only the fields essential for computing comet orbits.
     See :func:`~skyfield.data.mpc.load_comets_dataframe_slow()` for a
     slower routine that includes every comet data field.
 
+    The comet file format is documented at:
+    https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
+
     """
+    global _fast_comet_re, _fast_comet_sub
+
     text = fobj.read()
-    text = _pat.sub(br'\1\2', text)
-    df = pd.read_csv(
-        io.BytesIO(text), sep=r'\s+', header=None,
-        names=_COMET_FAST_COLUMN_NAMES,
-        usecols=_COMET_FAST_COLUMN_NUMBERS,
-    )
+
+    if _fast_comet_re is None:
+        # Build a regular expression that will turn the fixed-width
+        # comet file into a CSV that Pandas can import efficiently.
+
+        keepers = set(_COMET_FAST_COLUMNS)
+        pat = ['^']
+        previous_end = None
+        for name, (start, end) in _COMET_COLUMNS:
+            if previous_end is not None:
+                pat.append(' ' * (start - previous_end))
+            keep = name in keepers
+            if name == 'designation':
+                pat.append('(.*?)  .*')
+                break
+            else:
+                if keep:
+                    pat.append('(')
+                pat.append('.' * (end - start))
+                if keep:
+                    pat.append(')')
+            previous_end = end
+
+        pat = ''.join(pat)
+        sub = ','.join('\\{}'.format(i + 1) for i in range(len(keepers)))
+
+        _fast_comet_re = re.compile(pat.encode('ascii'), re.M)
+        _fast_comet_sub = sub.encode('ascii')
+
+    text = _fast_comet_re.sub(_fast_comet_sub, text)
+    df = pd.read_csv(io.BytesIO(text), header=None, names=_COMET_FAST_COLUMNS)
     return df
 
 def load_comets_dataframe_slow(fobj):
@@ -148,8 +162,8 @@ def load_comets_dataframe_slow(fobj):
 
     """
     fobj = io.StringIO(fobj.read().decode('ascii'))
-    names, colspecs = zip(*_COMET_SLOW_COLUMNS)
-    df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_COMET_DTYPES)
+    names, colspecs = zip(*_COMET_COLUMNS)
+    df = pd.read_fwf(fobj, colspecs, names=names)
     return df
 
 def unpack(designation_packed):
