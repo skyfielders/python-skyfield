@@ -52,22 +52,23 @@ _MPCORB_CONVERTERS = {
     'hex_flags': str,
 }
 
-def load_mpcorb_dataframe(fobj, slow=False):
+def load_mpcorb_dataframe(fobj):
     """Parse a Minor Planet Center orbits file into a Pandas dataframe.
 
-    The MPCORB file format is documented at:
-    https://minorplanetcenter.net/iau/info/MPOrbitFormat.html
+    See :doc:`kepler-orbits.rst`.  The MPCORB file format is documented
+    at: https://minorplanetcenter.net/iau/info/MPOrbitFormat.html
 
     """
-    # TODO: should iokit handle decompression in open()?
+    # https://github.com/pandas-dev/pandas/issues/18035
+    fobj = io.TextIOWrapper(fobj)
+
     columns = _MPCORB_COLUMNS
-    if not slow:
-        columns = [tup for tup in columns
-                   if tup[0] in _MPCORB_NECESSARY_COLUMNS]
+    # if not slow:
+    #     keepers = _MPCORB_NECESSARY_COLUMNS
+    #     columns = [tup for tup in columns if tup[0] in keepers]
     names, colspecs = zip(*columns)
     df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_MPCORB_DTYPES,
                      converters=_MPCORB_CONVERTERS)
-    #skiprows=43)
     return df
 
 COMET_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt'
@@ -89,7 +90,7 @@ _COMET_COLUMNS = [
     ('perturbed_epoch_day', (87, 89)),
     ('magnitude_H', (91, 95)),
     ('magnitude_G', (96, 100)),
-    ('name', (102, 158)),
+    ('designation', (102, 158)),
     ('reference', (159, 168)),
 ]
 _COMET_FAST_COLUMNS = (
@@ -97,7 +98,7 @@ _COMET_FAST_COLUMNS = (
     'perihelion_distance_au', 'eccentricity', 'argument_of_perihelion_degrees',
     'longitude_of_ascending_node_degrees', 'inclination_degrees',
     'magnitude_H', 'magnitude_G',
-    'name',
+    'designation',
 )
 
 _fast_comet_re = None
@@ -110,8 +111,8 @@ def load_comets_dataframe(fobj):
     See :func:`~skyfield.data.mpc.load_comets_dataframe_slow()` for a
     slower routine that includes every comet data field.
 
-    The comet file format is documented at:
-    https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
+    See :doc:`kepler-orbits.rst`.  The comet file format is documented
+    at: https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
 
     """
     global _fast_comet_re, _fast_comet_sub
@@ -129,7 +130,7 @@ def load_comets_dataframe(fobj):
             if previous_end is not None:
                 pat.append(' ' * (start - previous_end))
             keep = name in keepers
-            if name == 'name':
+            if name == 'designation':
                 pat.append('(.*?)  .*')
                 break
             else:
@@ -153,12 +154,12 @@ def load_comets_dataframe(fobj):
 def load_comets_dataframe_slow(fobj):
     """Parse a Minor Planet Center comets file into a Pandas dataframe.
 
-    The comet file format is documented at:
-    https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
-
     This routine reads in every single field from the comets data file.
     See :func:`~skyfield.data.mpc.load_comets_dataframe()` for a faster
     routine that omits some of the more expensive comet fields.
+
+    See :doc:`kepler-orbits.rst`.  The comet file format is documented
+    at: https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
 
     """
     fobj = io.StringIO(fobj.read().decode('ascii'))

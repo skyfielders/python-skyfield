@@ -167,8 +167,6 @@ class KeplerOrbit(VectorFunction):
 
     @classmethod
     def from_mpcorb_row(cls, row, ts):
-        # TODO: should "ts" be optional?
-
         a = row.semimajor_axis_au
         e = row.eccentricity
         p = a * (1.0 - e*e)
@@ -204,7 +202,7 @@ class KeplerOrbit(VectorFunction):
         return minor_planet
 
     @classmethod
-    def from_comet_row(cls, ts, row):
+    def from_comet_row(cls, row, ts):
         mu_au3_d2 = GM_dict[10] / (AU_KM**3) * (DAY_S**2)
         e = row.eccentricity
         a = row.perihelion_distance_au / (1.0 - e)
@@ -222,7 +220,7 @@ class KeplerOrbit(VectorFunction):
             epoch=t_perihelion,
             mu_au3_d2=mu_au3_d2,
             center=10,
-            target=row['name'],
+            target=row['designation'],
         )
         comet._rotation = inertial_frames['ECLIPJ2000'].T
         return comet
