@@ -3,8 +3,12 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
-1.23 — Future
--------------
+1.23 — 2020 July 9
+------------------
+
+* Added :doc:`kepler-orbits.rst` support
+  for generating the positions of comets and asteroids
+  from Minor Planet Center data files.
 
 * Added :func:`~skyfield.positionlib.ICRF.is_behind_earth()` to
   determine whether a celestial object is blocked from an Earth
