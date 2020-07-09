@@ -9,7 +9,6 @@ import pandas as pd
 from ..data.spice import inertial_frames
 from ..keplerlib import _KeplerOrbit
 from ..timelib import julian_day
-from ..units import Angle, Distance
 
 MPCORB_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz'
 
