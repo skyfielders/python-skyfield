@@ -6,7 +6,7 @@ Changelog
 1.23 — 2020 July 9
 ------------------
 
-* Added :doc:`kepler-orbits.rst` support
+* Added :doc:`kepler-orbits` support
   for generating the positions of comets and asteroids
   from Minor Planet Center data files.
 
