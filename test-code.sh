@@ -16,9 +16,9 @@ to install all of the tools and libraries for Skyfield development.
 EOF
     exit 2
 fi
-if python --version | grep -q 'Python 3.6'
+if python --version | grep -q 'Python 3.6' && command -v pyflakes >/dev/null
 then
     d=$(python -c 'import skyfield as s; print(s.__file__.rsplit("/", 1)[0])')
-    pyflakes "$d"/*.py "$d"/data/*.py
+    pyflakes $(find "$d" -name '*.py')
 fi
 exec assay --batch skyfield.tests
