@@ -7,17 +7,13 @@ from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh,
                   repeat, sin, sinh, sqrt, sum, tan, tile, zeros_like)
 
 from skyfield.functions import dots, length_of, mxv
-from skyfield.data.spice import inertial_frames
 from skyfield.descriptorlib import reify
 from skyfield.elementslib import OsculatingElements, normpi
 from skyfield.units import Distance, Velocity, Angle
 from skyfield.vectorlib import VectorFunction
-from skyfield.data.gravitational_parameters import GM_dict
 from skyfield.constants import AU_KM, DAY_S
-from .timelib import julian_day
 
-
-class KeplerOrbit(VectorFunction):
+class _KeplerOrbit(VectorFunction):
     def __init__(self,
                  position,
                  velocity,
@@ -54,7 +50,7 @@ class KeplerOrbit(VectorFunction):
         self._rotation = None  # TODO: make argument?
 
     @classmethod
-    def from_true_anomaly(cls, p, e, i, Om, w, v,
+    def _from_true_anomaly(cls, p, e, i, Om, w, v,
                           epoch,
                           mu_km_s=None,
                           mu_au3_d2=None,
@@ -113,7 +109,7 @@ class KeplerOrbit(VectorFunction):
 
 
     @classmethod
-    def from_mean_anomaly(cls, p, e, i, Om, w, M,
+    def _from_mean_anomaly(cls, p, e, i, Om, w, M,
                           epoch,
                           mu_au3_d2=None,
                           center=None,
@@ -164,66 +160,6 @@ class KeplerOrbit(VectorFunction):
                    center=center,
                    target=target,
         )
-
-    @classmethod
-    def from_mpcorb_row(cls, row, ts):
-        a = row.semimajor_axis_au
-        e = row.eccentricity
-        p = a * (1.0 - e*e)
-
-        def n(c):
-            return ord(c) - (48 if c.isdigit() else 55)
-
-        def d(s):
-            year = 100 * n(s[0]) + int(s[1:3])
-            month = n(s[3])
-            day = n(s[4])
-            return julian_day(year, month, day) - 0.5
-
-        mu_au3_d2 = GM_dict[10] / (AU_KM**3) * (DAY_S**2)
-        epoch_jd = d(row.epoch_packed)
-        t_epoch = ts.tt_jd(epoch_jd)
-
-        target = row.get('designation', None) or row['designation_packed']
-
-        minor_planet = cls.from_mean_anomaly(
-            p=Distance(au=p),
-            e=e,
-            i=Angle(degrees=row.inclination_degrees),
-            Om=Angle(degrees=row.longitude_of_ascending_node_degrees),
-            w=Angle(degrees=row.argument_of_perihelion_degrees),
-            M=Angle(degrees=row.mean_anomaly_degrees),
-            epoch=t_epoch,
-            mu_au3_d2=mu_au3_d2,
-            center=10,
-            target=target,
-        )
-        minor_planet._rotation = inertial_frames['ECLIPJ2000'].T
-        return minor_planet
-
-    @classmethod
-    def from_comet_row(cls, row, ts):
-        mu_au3_d2 = GM_dict[10] / (AU_KM**3) * (DAY_S**2)
-        e = row.eccentricity
-        a = row.perihelion_distance_au / (1.0 - e)
-        p = a * (1.0 - e*e)
-        t_perihelion = ts.tt(row.perihelion_year, row.perihelion_month,
-                             row.perihelion_day)
-
-        comet = cls.from_mean_anomaly(
-            p=Distance(au=p),
-            e=e,
-            i=Angle(degrees=row.inclination_degrees),
-            Om=Angle(degrees=row.longitude_of_ascending_node_degrees),
-            w=Angle(degrees=row.argument_of_perihelion_degrees),
-            M=Angle(radians=0.0),
-            epoch=t_perihelion,
-            mu_au3_d2=mu_au3_d2,
-            center=10,
-            target=row['designation'],
-        )
-        comet._rotation = inertial_frames['ECLIPJ2000'].T
-        return comet
 
     def _at(self, time):
         """Propagate the KeplerOrbit to the given Time object

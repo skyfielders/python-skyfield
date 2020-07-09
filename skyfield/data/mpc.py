@@ -6,6 +6,13 @@ import re
 
 import pandas as pd
 
+from ..constants import AU_KM, DAY_S
+from ..data.gravitational_parameters import GM_dict
+from ..data.spice import inertial_frames
+from ..keplerlib import _KeplerOrbit
+from ..timelib import julian_day
+from ..units import Angle, Distance
+
 MPCORB_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz'
 
 _MPCORB_COLUMNS = [
@@ -59,9 +66,8 @@ def load_mpcorb_dataframe(fobj):
     at: https://minorplanetcenter.net/iau/info/MPOrbitFormat.html
 
     """
-    # https://github.com/pandas-dev/pandas/issues/18035
+    # See https://github.com/pandas-dev/pandas/issues/18035
     fobj = io.TextIOWrapper(fobj)
-
     columns = _MPCORB_COLUMNS
     # if not slow:
     #     keepers = _MPCORB_NECESSARY_COLUMNS
@@ -70,6 +76,39 @@ def load_mpcorb_dataframe(fobj):
     df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_MPCORB_DTYPES,
                      converters=_MPCORB_CONVERTERS)
     return df
+
+def mpcorb_orbit(row, ts):
+    a = row.semimajor_axis_au
+    e = row.eccentricity
+    p = a * (1.0 - e*e)
+
+    def n(c):
+        return ord(c) - (48 if c.isdigit() else 55)
+
+    def d(s):
+        year = 100 * n(s[0]) + int(s[1:3])
+        month = n(s[3])
+        day = n(s[4])
+        return julian_day(year, month, day) - 0.5
+
+    mu_au3_d2 = GM_dict[10] / (AU_KM**3) * (DAY_S**2)
+    epoch_jd = d(row.epoch_packed)
+    t_epoch = ts.tt_jd(epoch_jd)
+
+    minor_planet = _KeplerOrbit._from_mean_anomaly(
+        Distance(au=p),
+        e,
+        Angle(degrees=row.inclination_degrees),
+        Angle(degrees=row.longitude_of_ascending_node_degrees),
+        Angle(degrees=row.argument_of_perihelion_degrees),
+        Angle(degrees=row.mean_anomaly_degrees),
+        t_epoch,
+        mu_au3_d2,
+        10,
+        row.designation,
+    )
+    minor_planet._rotation = inertial_frames['ECLIPJ2000'].T
+    return minor_planet
 
 COMET_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt'
 
@@ -166,6 +205,29 @@ def load_comets_dataframe_slow(fobj):
     names, colspecs = zip(*_COMET_COLUMNS)
     df = pd.read_fwf(fobj, colspecs, names=names)
     return df
+
+def comet_orbit(row, ts):
+    mu_au3_d2 = GM_dict[10] / (AU_KM**3) * (DAY_S**2)
+    e = row.eccentricity
+    a = row.perihelion_distance_au / (1.0 - e)
+    p = a * (1.0 - e*e)
+    t_perihelion = ts.tt(row.perihelion_year, row.perihelion_month,
+                         row.perihelion_day)
+
+    comet = _KeplerOrbit._from_mean_anomaly(
+        Distance(au=p),
+        e,
+        Angle(degrees=row.inclination_degrees),
+        Angle(degrees=row.longitude_of_ascending_node_degrees),
+        Angle(degrees=row.argument_of_perihelion_degrees),
+        Angle(radians=0.0),
+        t_perihelion,
+        mu_au3_d2,
+        10,
+        row['designation'],
+    )
+    comet._rotation = inertial_frames['ECLIPJ2000'].T
+    return comet
 
 def unpack(designation_packed):
     def n(c):

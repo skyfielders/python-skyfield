@@ -75,13 +75,11 @@ which always measures positions from the Solar System barycenter.
 
     # Generating a position.
 
-    from skyfield.keplerlib import KeplerOrbit
-
     ts = load.timescale(builtin=True)
     eph = load('de421.bsp')
     sun, earth = eph['sun'], eph['earth']
 
-    comet = sun + KeplerOrbit.from_comet_row(row, ts)
+    comet = sun + mpc.comet_orbit(row, ts)
 
     t = ts.utc(2020, 5, 31)
     ra, dec, distance = earth.at(t).observe(comet).radec()
@@ -193,7 +191,7 @@ to build a complete position.
 
 .. testcode::
 
-    ceres = sun + KeplerOrbit.from_mpcorb_row(row, ts)
+    ceres = sun + mpc.mpcorb_orbit(row, ts)
     ra, dec, distance = earth.at(t).observe(ceres).radec()
     print(ra)
     print(dec)

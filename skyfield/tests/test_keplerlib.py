@@ -4,7 +4,7 @@ from numpy import pi, seterr, linspace
 from skyfield.api import load
 from skyfield.data import mpc
 from skyfield.elementslib import OsculatingElements
-from skyfield.keplerlib import KeplerOrbit, propagate
+from skyfield.keplerlib import _KeplerOrbit as KeplerOrbit, propagate
 from skyfield.tests.test_elementslib import compare, ele_to_vec
 from skyfield.units import Angle, Distance, Velocity
 
@@ -30,7 +30,7 @@ def test_against_horizons():
     e = 7.705857791518426E-02 # EC
     p_au = a * (1 - e*e)   # Wikipedia
 
-    k = KeplerOrbit.from_mean_anomaly(
+    k = KeplerOrbit._from_mean_anomaly(
         p=Distance(au=p_au),
         e=e,
         i=Angle(degrees=2.718528770987308E+01),
@@ -67,7 +67,7 @@ def test_minor_planet():
     assert row.designation_packed == '00001'
     assert row.designation == '(1) Ceres'
 
-    ceres = KeplerOrbit.from_mpcorb_row(row, ts)
+    ceres = mpc.mpcorb_orbit(row, ts)
     ra, dec, distance = eph['earth'].at(t).observe(eph['sun'] + ceres).radec()
 
     assert ceres.target == '(1) Ceres'
@@ -87,7 +87,7 @@ def test_comet():
     for loader in mpc.load_comets_dataframe, mpc.load_comets_dataframe_slow:
         df = loader(BytesIO(text))
         row = df.iloc[0]
-        k = KeplerOrbit.from_comet_row(row, ts)
+        k = mpc.comet_orbit(row, ts)
         p = e.observe(eph['sun'] + k)
         ra, dec, distance = p.radec()
 
