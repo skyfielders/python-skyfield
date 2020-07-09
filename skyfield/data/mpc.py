@@ -93,12 +93,12 @@ def mpcorb_orbit(row, ts, gm_km3_s2):
     t_epoch = ts.tt_jd(epoch_jd)
 
     minor_planet = _KeplerOrbit._from_mean_anomaly(
-        Distance(au=p),
+        p,
         e,
-        Angle(degrees=row.inclination_degrees),
-        Angle(degrees=row.longitude_of_ascending_node_degrees),
-        Angle(degrees=row.argument_of_perihelion_degrees),
-        Angle(degrees=row.mean_anomaly_degrees),
+        row.inclination_degrees,
+        row.longitude_of_ascending_node_degrees,
+        row.argument_of_perihelion_degrees,
+        row.mean_anomaly_degrees,
         t_epoch,
         gm_km3_s2,
         10,
@@ -211,12 +211,12 @@ def comet_orbit(row, ts, gm_km3_s2):
                          row.perihelion_day)
 
     comet = _KeplerOrbit._from_mean_anomaly(
-        Distance(au=p),
+        p,
         e,
-        Angle(degrees=row.inclination_degrees),
-        Angle(degrees=row.longitude_of_ascending_node_degrees),
-        Angle(degrees=row.argument_of_perihelion_degrees),
-        Angle(radians=0.0),
+        row.inclination_degrees,
+        row.longitude_of_ascending_node_degrees,
+        row.argument_of_perihelion_degrees,
+        0.0,
         t_perihelion,
         gm_km3_s2,
         10,

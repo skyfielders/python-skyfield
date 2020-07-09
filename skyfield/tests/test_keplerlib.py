@@ -32,12 +32,12 @@ def test_against_horizons():
     p_au = a * (1 - e*e)   # Wikipedia
 
     k = KeplerOrbit._from_mean_anomaly(
-        p=Distance(au=p_au),
-        e=e,
-        i=Angle(degrees=2.718528770987308E+01),
-        Om=Angle(degrees=2.336112629072238E+01),
-        w=Angle(degrees=1.328964361683606E+02),
-        M=Angle(degrees=1.382501360489816E+02),
+        semilatus_rectum_au=p_au,
+        eccentricity=e,
+        inclination_degrees=2.718528770987308E+01,
+        longitude_of_ascending_node_degrees=2.336112629072238E+01,
+        argument_of_perihelion_degrees=1.328964361683606E+02,
+        mean_anomaly_degrees=1.382501360489816E+02,
         epoch=t,
         gm_km3_s2=GM_SUN,
         center=None,

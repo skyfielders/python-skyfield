@@ -6,12 +6,12 @@ from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh,
                   cross, exp, log, ndarray, newaxis, ones_like, pi, power,
                   repeat, sin, sinh, sqrt, sum, tan, tile, zeros_like)
 
+from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
 from skyfield.descriptorlib import reify
 from skyfield.elementslib import OsculatingElements, normpi
-from skyfield.units import Distance, Velocity, Angle
+from skyfield.units import Distance, Velocity
 from skyfield.vectorlib import VectorFunction
-from skyfield.constants import AU_KM, DAY_S
 
 _CONVERT_GM = DAY_S * DAY_S / AU_KM / AU_KM / AU_KM
 
@@ -111,11 +111,18 @@ class _KeplerOrbit(VectorFunction):
 
 
     @classmethod
-    def _from_mean_anomaly(cls, p, e, i, Om, w, M,
-                          epoch,
-                          gm_km3_s2,
-                          center=None,
-                          target=None,
+    def _from_mean_anomaly(
+            cls,
+            semilatus_rectum_au,
+            eccentricity,
+            inclination_degrees,
+            longitude_of_ascending_node_degrees,
+            argument_of_perihelion_degrees,
+            mean_anomaly_degrees,
+            epoch,
+            gm_km3_s2,
+            center=None,
+            target=None,
         ):
         """ Creates a `KeplerOrbit` object from elements using mean anomaly
 
@@ -145,23 +152,26 @@ class _KeplerOrbit(VectorFunction):
         target : int
             NAIF ID of the secondary body
         """
-        E = eccentric_anomaly(e, M.radians)
-        v = Angle(radians=true_anomaly(e, E))
+        M = DEG2RAD * mean_anomaly_degrees
+        E = eccentric_anomaly(eccentricity, M)
+        v = true_anomaly(eccentricity, E)
         gm_au3_d2 = gm_km3_s2 * _CONVERT_GM
-        pos, vel = ele_to_vec(p.au,
-                              e,
-                              i.radians,
-                              Om.radians,
-                              w.radians,
-                              v.radians,
-                              gm_au3_d2,
+        pos, vel = ele_to_vec(
+            semilatus_rectum_au,
+            eccentricity,
+            DEG2RAD * inclination_degrees,
+            DEG2RAD * longitude_of_ascending_node_degrees,
+            DEG2RAD * argument_of_perihelion_degrees,
+            v,
+            gm_au3_d2,
         )
-        return cls(Distance(au=pos),
-                   Velocity(au_per_d=vel),
-                   epoch,
-                   gm_au3_d2,
-                   center,
-                   target,
+        return cls(
+            Distance(pos),
+            Velocity(vel),
+            epoch,
+            gm_au3_d2,
+            center,
+            target,
         )
 
     def _at(self, time):
