@@ -6,8 +6,6 @@ import re
 
 import pandas as pd
 
-from ..constants import AU_KM, DAY_S
-from ..data.gravitational_parameters import GM_dict
 from ..data.spice import inertial_frames
 from ..keplerlib import _KeplerOrbit
 from ..timelib import julian_day
@@ -77,7 +75,7 @@ def load_mpcorb_dataframe(fobj):
                      converters=_MPCORB_CONVERTERS)
     return df
 
-def mpcorb_orbit(row, ts):
+def mpcorb_orbit(row, ts, gm_km3_s2):
     a = row.semimajor_axis_au
     e = row.eccentricity
     p = a * (1.0 - e*e)
@@ -91,7 +89,6 @@ def mpcorb_orbit(row, ts):
         day = n(s[4])
         return julian_day(year, month, day) - 0.5
 
-    mu_au3_d2 = GM_dict[10] / (AU_KM**3) * (DAY_S**2)
     epoch_jd = d(row.epoch_packed)
     t_epoch = ts.tt_jd(epoch_jd)
 
@@ -103,7 +100,7 @@ def mpcorb_orbit(row, ts):
         Angle(degrees=row.argument_of_perihelion_degrees),
         Angle(degrees=row.mean_anomaly_degrees),
         t_epoch,
-        mu_au3_d2,
+        gm_km3_s2,
         10,
         row.designation,
     )
@@ -206,8 +203,7 @@ def load_comets_dataframe_slow(fobj):
     df = pd.read_fwf(fobj, colspecs, names=names)
     return df
 
-def comet_orbit(row, ts):
-    mu_au3_d2 = GM_dict[10] / (AU_KM**3) * (DAY_S**2)
+def comet_orbit(row, ts, gm_km3_s2):
     e = row.eccentricity
     a = row.perihelion_distance_au / (1.0 - e)
     p = a * (1.0 - e*e)
@@ -222,7 +218,7 @@ def comet_orbit(row, ts):
         Angle(degrees=row.argument_of_perihelion_degrees),
         Angle(radians=0.0),
         t_perihelion,
-        mu_au3_d2,
+        gm_km3_s2,
         10,
         row['designation'],
     )

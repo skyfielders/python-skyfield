@@ -13,6 +13,8 @@ from skyfield.units import Distance, Velocity, Angle
 from skyfield.vectorlib import VectorFunction
 from skyfield.constants import AU_KM, DAY_S
 
+_CONVERT_GM = DAY_S * DAY_S / AU_KM / AU_KM / AU_KM
+
 class _KeplerOrbit(VectorFunction):
     def __init__(self,
                  position,
@@ -111,7 +113,7 @@ class _KeplerOrbit(VectorFunction):
     @classmethod
     def _from_mean_anomaly(cls, p, e, i, Om, w, M,
                           epoch,
-                          mu_au3_d2=None,
+                          gm_km3_s2,
                           center=None,
                           target=None,
         ):
@@ -145,20 +147,21 @@ class _KeplerOrbit(VectorFunction):
         """
         E = eccentric_anomaly(e, M.radians)
         v = Angle(radians=true_anomaly(e, E))
+        gm_au3_d2 = gm_km3_s2 * _CONVERT_GM
         pos, vel = ele_to_vec(p.au,
                               e,
                               i.radians,
                               Om.radians,
                               w.radians,
                               v.radians,
-                              mu_au3_d2,
+                              gm_au3_d2,
         )
         return cls(Distance(au=pos),
                    Velocity(au_per_d=vel),
                    epoch,
-                   mu_au3_d2=mu_au3_d2,
-                   center=center,
-                   target=target,
+                   gm_au3_d2,
+                   center,
+                   target,
         )
 
     def _at(self, time):

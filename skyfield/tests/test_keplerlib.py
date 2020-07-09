@@ -2,6 +2,7 @@ import os
 from numpy import pi, seterr, linspace
 
 from skyfield.api import load
+from skyfield.constants import GM_SUN_Pitjeva_2005_km3_s2 as GM_SUN
 from skyfield.data import mpc
 from skyfield.elementslib import OsculatingElements
 from skyfield.keplerlib import _KeplerOrbit as KeplerOrbit, propagate
@@ -38,7 +39,7 @@ def test_against_horizons():
         w=Angle(degrees=1.328964361683606E+02),
         M=Angle(degrees=1.382501360489816E+02),
         epoch=t,
-        mu_au3_d2=2.9591220828559093E-04,
+        gm_km3_s2=GM_SUN,
         center=None,
         target=None,
     )
@@ -67,7 +68,7 @@ def test_minor_planet():
     assert row.designation_packed == '00001'
     assert row.designation == '(1) Ceres'
 
-    ceres = mpc.mpcorb_orbit(row, ts)
+    ceres = mpc.mpcorb_orbit(row, ts, GM_SUN)
     ra, dec, distance = eph['earth'].at(t).observe(eph['sun'] + ceres).radec()
 
     assert ceres.target == '(1) Ceres'
@@ -87,7 +88,7 @@ def test_comet():
     for loader in mpc.load_comets_dataframe, mpc.load_comets_dataframe_slow:
         df = loader(BytesIO(text))
         row = df.iloc[0]
-        k = mpc.comet_orbit(row, ts)
+        k = mpc.comet_orbit(row, ts, GM_SUN)
         p = e.observe(eph['sun'] + k)
         ra, dec, distance = p.radec()
 

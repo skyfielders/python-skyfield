@@ -75,11 +75,13 @@ which always measures positions from the Solar System barycenter.
 
     # Generating a position.
 
+    from skyfield.constants import GM_SUN_Pitjeva_2005_km3_s2 as GM_SUN
+
     ts = load.timescale(builtin=True)
     eph = load('de421.bsp')
     sun, earth = eph['sun'], eph['earth']
 
-    comet = sun + mpc.comet_orbit(row, ts)
+    comet = sun + mpc.comet_orbit(row, ts, GM_SUN)
 
     t = ts.utc(2020, 5, 31)
     ra, dec, distance = earth.at(t).observe(comet).radec()
@@ -191,7 +193,7 @@ to build a complete position.
 
 .. testcode::
 
-    ceres = sun + mpc.mpcorb_orbit(row, ts)
+    ceres = sun + mpc.mpcorb_orbit(row, ts, GM_SUN)
     ra, dec, distance = earth.at(t).observe(ceres).radec()
     print(ra)
     print(dec)

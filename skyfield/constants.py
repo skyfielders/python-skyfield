@@ -15,6 +15,7 @@ tau = 6.283185307179586476925287  # lower case, for symmetry with math.pi
 
 # Physics.
 C = 299792458.0
+GM_SUN_Pitjeva_2005_km3_s2 = 132712440042  # Elena Pitjeva, 2015JPCRD..44c1210P
 
 # Earth and its orbit.
 ANGVEL = 7.2921150e-5
