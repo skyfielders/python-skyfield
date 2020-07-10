@@ -1,8 +1,42 @@
 import numpy as np
-from numpy.testing import assert_allclose
+import os
 from skyfield.api import PlanetaryConstants, T0, load
 from skyfield.constants import AU_KM, AU_M
 from skyfield.positionlib import ICRF
+
+
+def assert_floatsareclose(a, b, atol=None):
+    """compare a list of floats as tight as possible
+
+    https://github.com/skyfielders/python-skyfield/pull/404
+
+    Parameters
+    ----------
+    a, b : array_like float
+        Arrays to compare
+    atol : float, optional
+        maximum absolute difference
+
+    Raises
+    ------
+    AssertionError
+        if the difference of any element in `a` and `b` is too large
+        or the shapes don't match
+    """
+    if not atol:
+        atol = float(os.getenv("SKYFIELD_TEST_DEFAULT_ATOL", "1e-25"))
+    assert np.shape(a) == np.shape(b)
+    difference = np.asarray(a) - np.asarray(b)
+    if not np.all(np.abs(difference) < atol):
+        imax = np.argmax(difference)
+        maxe = np.max(difference)
+        raise AssertionError("The difference between\n"
+                             "{} and \n"
+                             "{}\n"
+                             "is larger than the allowed {:.3g}.\n"
+                             "Maximum difference at element {}: {:.7g}"
+                             "".format(a, b, atol, imax, maxe))
+
 
 def test_frame_rotation_matrices():
     # To produce the following matrices:
@@ -44,11 +78,11 @@ def test_frame_rotation_matrices():
     ]
 
     R = frame.rotation_at(ts.tdb_jd(tdb))
-    assert_allclose(R, desired_rotation)
+    assert_floatsareclose(R, desired_rotation)
 
     R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
-    assert_allclose(R, R2)
-    assert_allclose(Rv, desired_rate)
+    assert_floatsareclose(R, R2)
+    assert_floatsareclose(Rv, desired_rate)
 
     # Second, a moment when the angle W is more than 2500 radians.
 
@@ -94,11 +128,11 @@ def test_frame_rotation_matrices():
     frame = pc.build_frame_named('MOON_ME_DE421')
     R = frame.rotation_at(ts.tdb_jd(tdb))
     delta = abs(R - desired_rotation)
-    assert_allclose(R, desired_rotation)
+    assert_floatsareclose(R, desired_rotation)
 
     R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
-    assert_allclose(R, R2)
-    assert_allclose(Rv, desired_rate)
+    assert_floatsareclose(R, R2)
+    assert_floatsareclose(Rv, desired_rate)
 
 def test_rotating_vector_into_frame():
     et_seconds = 259056665.1855896
