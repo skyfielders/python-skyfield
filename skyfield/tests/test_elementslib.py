@@ -1,4 +1,4 @@
-from skyfield.api import load, Time, load_file
+from skyfield.api import Time, load_file
 from skyfield.data.spice import inertial_frames
 from skyfield.units import Distance, Angle, Velocity
 from skyfield.constants import DAY_S
@@ -13,8 +13,6 @@ from numpy import (
 )
 import os
 
-def ts():
-    yield load.timescale()
 
 def _data_path(filename):
     return os.path.join(os.path.dirname(__file__), 'data', filename)

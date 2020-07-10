@@ -35,6 +35,8 @@ def main():
         'Auto-generated accuracy tests vs NOVAS (see build_novas_tests.py).'
 
         from numpy import abs, array, einsum, max
+        import pytest
+
         from skyfield import (earthlib, framelib, nutationlib, positionlib,
                               precessionlib, starlib, timelib)
         from skyfield.api import Topos, load
@@ -50,8 +52,6 @@ def main():
         ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
         meter = 1.0 / AU_M
 
-        def ts():
-            yield load.timescale()
 
         def compare(value, expected_value, epsilon):
             if hasattr(value, 'shape') or hasattr(expected_value, 'shape'):
@@ -59,9 +59,12 @@ def main():
             else:
                 assert abs(value - expected_value) <= epsilon
 
+
+        @pytest.fixture(scope='module')
         def de405():
             yield load('de405.bsp')
 
+        @pytest.fixture(scope='module')
         def earth():
             eph = load('de405.bsp')
             yield eph[399]

@@ -5,8 +5,6 @@ from skyfield import api, positionlib
 from skyfield.api import Topos
 from skyfield.errors import EphemerisRangeError
 
-def ts():
-    yield api.load.timescale()
 
 def test_sending_jd_that_is_not_a_julian_date():
     earth = api.load('de421.bsp')['earth']

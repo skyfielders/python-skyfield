@@ -15,8 +15,6 @@ arcsecond = 1.0 / 60.0 / 60.0
 ra_arcsecond = 24.0 / 360.0 / 60.0 / 60.0
 meter = 1.0 / AU_M
 
-def ts():
-    yield api.load.timescale(builtin=True)
 
 def compare(value, expected_value, epsilon):
     if hasattr(value, 'shape') or hasattr(expected_value, 'shape'):
