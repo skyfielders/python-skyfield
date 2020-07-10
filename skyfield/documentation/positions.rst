@@ -236,33 +236,28 @@ a permanent frame of reference
 that is a high-precision replacement
 for the old J2000.0 system
 that was popular at the end of the 20th century.
+The orientation of the axes is roughly:
 
-The ICRS is one of three related concepts
-that you will often see mentioned together
-in technical publications:
+* *x-axis* — points at the Vernal Equinox:
+  the position of the Sun in our sky
+  at the moment the Sun’s annual journey along the ecliptic
+  carries it from south to north across the celestial equator
+  and Spring begins in the Northern Hemisphere.
+  To express the same thing more technically,
+  this axis points towards
+  the “ascending node of the ecliptic on the celestial equator”
+  as of the beginning of the year 2000.
+  In ancient times this point in the sky was called “the first point of Ares.”
 
-* | *Barycentric Celestial Reference System* (BCRS) —
-    a coordinate origin whose relativistic frame of reference
-    is the one that was carefully defined in IAU 2000 Resolution B1.3
-    which puts the coordinate origin
-    at the gravitational center of the Solar System.
-    The direction in which the coordinate axes might point
-    is left unspecified.
+* *y-axis* — is aimed at the point 90° east of the Vernal Equinox
+  on the celestial equator.
+  It can be hard to remember which way is east in the sky, so:
+  if you were standing at the center of the celestial sphere
+  with the north pole above your head
+  and the x-axis in front of you,
+  this axis would be 90° to your *left.*
 
-* *International Celestial Reference Frame* (ICRF) —
-  a precision reference frame
-  that radio astronomers have helped us define,
-  that will become forever more exact
-  as we measure better and better positions
-  for a list of very distant radio sources.
-  Wherever the origin of your coordinate system might lie,
-  you can use the ICRF to define
-  where your *x*-axis, *y*-axis, and *z*-axis should point.
-
-* *International Celestial Reference System* (ICRS) —
-  A coordinate system whose origin is defined by the BCRS
-  and whose axis directions are defined by the ICRF.
-  In essence, the ICRS = ICRF + BCRS.
+* *z-axis* — points towards the celestial North Pole.
 
 Instead of using an acronym,
 Skyfield uses the class name :class:`Barycentric`
