@@ -146,10 +146,12 @@ or else by generating a whole series of positions.
     astrometric = boston.at(t).observe(mars)
     apparent = boston.at(t).observe(mars).apparent()
 
-**Small Solar System objects**
-  Work is underway to support comets and asteroids.
-  In the meantime,
-  any Type 1 or Type 21 ephemerides you generate
+**Comets and Minor Planets Asteroids**
+  Comet, asteroid, and other minor planet positions
+  can be generated through Skyfield’s :doc:`kepler-orbits` support
+  of data files downloaded from the Minor Planet Center.
+
+  And any Type 1 or Type 21 ephemerides you generate
   using NASA’s `HORIZONS <https://ssd.jpl.nasa.gov/horizons.cgi>`_ system
   are supported through third-party libraries;
   for details, see :ref:`third-party-ephemerides`.
