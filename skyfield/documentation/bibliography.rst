@@ -8,7 +8,7 @@ Further reading on the concepts and technology behind Skyfield.
 *USNO Circular 179*
 by George H. Kaplan, October 2005
 
-    http://aa.usno.navy.mil/publications/docs/Circular_179.php
+    https://www.usno.navy.mil/USNO/astronomical-applications/publications/Circular_179.pdf/at_download/file
 
     My favorite introduction to how the International Astronomical Union
     responded in 1997 and 2000 to the problems with the old J2000 system
