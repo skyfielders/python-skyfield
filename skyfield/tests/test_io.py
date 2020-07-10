@@ -5,7 +5,11 @@ import shutil
 import tempfile
 from contextlib import contextmanager
 from datetime import date
-from mock import patch
+try:
+    from mock import patch
+except ImportError:
+    from unittest.mock import patch
+import pytest
 
 from skyfield import api
 
@@ -28,6 +32,7 @@ old_content = (b' 2015 10  1  67.9546\n'
 new_content = (old_content +
                b' 2016  2  1  68.1577\n')
 
+@pytest.fixture
 def load():
     path = tempfile.mkdtemp()
     try:

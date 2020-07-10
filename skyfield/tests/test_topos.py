@@ -1,13 +1,12 @@
 from numpy import abs
+import pytest
 
-from skyfield.api import load
 from skyfield.toposlib import Topos
 
 angle = (-15, 15, 35, 45)
 
-def ts():
-    yield load.timescale()
 
+@pytest.mark.parametrize("angle", angle)
 def test_beneath(ts, angle):
     t = ts.utc(2018, 1, 19, 14, 37, 55)
     # An elevation of 0 is more difficult for the routine's accuracy

@@ -1,6 +1,6 @@
 """Tests of whether units behave."""
 
-from assay import assert_raises
+from pytest import raises
 from numpy import array
 from skyfield.units import Angle, Distance, Velocity, UnpackingError
 
@@ -83,9 +83,9 @@ def test_stringifying_vector_distance():
 
 def test_iterating_over_raw_measurement():
     distance = Distance(au=1.234)
-    with assert_raises(UnpackingError) as a:
+    with raises(UnpackingError) as a:
         x, y, z = distance
-    assert str(a.exception) == '''\
+    assert str(a.value) == '''\
 cannot directly unpack a Distance into several values
 
 To unpack a Distance into three components, you need to ask for its
@@ -98,9 +98,9 @@ value in specific units through an attribute or method:
 
 def test_iterating_over_raw_velocity():
     velocity = Velocity(au_per_d=1.234)
-    with assert_raises(UnpackingError) as a:
+    with raises(UnpackingError) as a:
         x, y, z = velocity
-    assert str(a.exception) == '''\
+    assert str(a.value) == '''\
 cannot directly unpack a Velocity into several values
 
 To unpack a Velocity into three components, you need to ask for its
@@ -113,9 +113,9 @@ value in specific units through an attribute or method:
 
 def test_iterating_over_raw_angle():
     angle = Angle(degrees=4.5)
-    with assert_raises(ValueError) as a:
+    with raises(ValueError) as a:
         iter(angle)
-    assert str(a.exception) == '''choose a specific Angle unit to iterate over
+    assert str(a.value) == '''choose a specific Angle unit to iterate over
 
 Instead of iterating over this Angle object, try iterating over one of
 its unit-specific arrays like .degrees, .hours, or .radians, or else over

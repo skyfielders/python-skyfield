@@ -1,3 +1,4 @@
+import pytest
 import textwrap
 from ..api import Topos, load
 from ..sgp4lib import EarthSatellite
@@ -5,6 +6,7 @@ from ..sgp4lib import EarthSatellite
 def dedent(s):
     return textwrap.dedent(s.rstrip())
 
+@pytest.fixture
 def eph():
     yield load('de421.bsp')
 

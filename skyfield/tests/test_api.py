@@ -1,6 +1,6 @@
 """Basic tests of the Skyfield API module and its contents."""
 
-from assay import assert_raises
+from pytest import raises
 from skyfield import api, positionlib
 from skyfield.api import Topos
 from skyfield.errors import EphemerisRangeError
@@ -10,7 +10,7 @@ def ts():
 
 def test_sending_jd_that_is_not_a_julian_date():
     earth = api.load('de421.bsp')['earth']
-    with assert_raises(ValueError, r"please provide the at\(\) method"
+    with raises(ValueError, match=r"please provide the at\(\) method"
                        " with a Time instance as its argument,"
                        " instead of the value 'blah'"):
         earth.at('blah')
@@ -40,10 +40,10 @@ def test_exception_raised_for_dates_outside_ephemeris(ts):
         'ephemeris segment only covers dates 1899-07-28 23:59:18Z'
         ' through 2053-10-08 23:58:51Z UT'
     )
-    with assert_raises(EphemerisRangeError, message) as a:
+    with raises(EphemerisRangeError, match=message) as a:
         eph['earth'].at(ts.tt(4096))
 
-    e = a.exception
+    e = a.value
     assert e.args == (message,)
     assert e.start_time.tdb == 2414864.5
     assert e.end_time.tdb == 2471184.5
@@ -102,12 +102,12 @@ def test_altaz_needs_topos(ts):
     e = api.load('de421.bsp')
     earth = e['earth']
     moon = e['moon']
-    with assert_raises(ValueError, 'from a specific Earth location'):
+    with raises(ValueError, match='from a specific Earth location'):
         earth.at(ts.utc(2016)).observe(moon).apparent().altaz()
 
 def test_from_altaz_needs_topos():
     p = positionlib.ICRF([0.0, 0.0, 0.0])
-    with assert_raises(ValueError, 'the orientation of the horizon'):
+    with raises(ValueError, match='the orientation of the horizon'):
         p.from_altaz(alt_degrees=0, az_degrees=0)
 
 def test_from_altaz_parameters(ts):
@@ -116,9 +116,9 @@ def test_from_altaz_parameters(ts):
     p = usno.at(t)
     a = api.Angle(degrees=10.0)
     d = api.Distance(au=0.234)
-    with assert_raises(ValueError, 'the alt= parameter with an Angle'):
+    with raises(ValueError, match='the alt= parameter with an Angle'):
         p.from_altaz(alt='Bad value', alt_degrees=0, az_degrees=0)
-    with assert_raises(ValueError, 'the az= parameter with an Angle'):
+    with raises(ValueError, match='the az= parameter with an Angle'):
         p.from_altaz(az='Bad value', alt_degrees=0, az_degrees=0)
     p.from_altaz(alt=a, alt_degrees='bad', az_degrees=0)
     p.from_altaz(az=a, alt_degrees=0, az_degrees='bad')
@@ -126,7 +126,7 @@ def test_from_altaz_parameters(ts):
     assert str(p.from_altaz(alt=a, az=a, distance=d).distance()) == '0.234 au'
 
 def test_named_star_throws_valueerror():
-    with assert_raises(ValueError, 'No star named foo known to skyfield'):
+    with raises(ValueError, match='No star named foo known to skyfield'):
         api.NamedStar('foo')
 
 def test_named_star_returns_star():

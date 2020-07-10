@@ -1,5 +1,5 @@
 import numpy as np
-from assay import assert_raises
+import pytest
 from pytz import timezone
 from skyfield import api
 from skyfield.constants import DAY_S
@@ -12,9 +12,9 @@ epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
 time_parameter = ['tai', 'tt', 'tdb', 'ut1']
 time_value = [(1973, 1, 18, 1, 35, 37.5), 2441700.56640625]
 
-def ts():
-    yield api.load.timescale()
 
+@pytest.mark.parametrize("time_parameter", time_parameter)
+@pytest.mark.parametrize("time_value", time_value)
 def test_time_creation_methods(ts, time_parameter, time_value):
     method = getattr(ts, time_parameter)
     if isinstance(time_value, tuple):
@@ -55,6 +55,9 @@ time_params_with_array = [
     (2018, 3, 25, 13, 1, (10, 11, 12)),
 ]
 
+
+@pytest.mark.parametrize("time_scale_name", time_scale_name)
+@pytest.mark.parametrize("time_params_with_array", time_params_with_array)
 def test_time_creation_with_arrays(time_scale_name, time_params_with_array):
     ts = api.load.timescale()
     getattr(ts, time_scale_name)(*time_params_with_array)
@@ -67,9 +70,8 @@ def test_timescale_utc_method_with_array_inside(ts):
         assert t.tai[i] == ts.utc(1973, 12, 29, 23, 59, second).tai
 
 def test_that_building_time_from_naive_datetime_raises_exception(ts):
-    with assert_raises(ValueError) as info:
+    with pytest.raises(ValueError, match='import timezone'):
         ts.utc(datetime(1973, 12, 29, 23, 59, 48))
-    assert 'import timezone' in str(info.exception)
 
 def test_building_time_from_single_utc_datetime(ts):
     t = ts.utc(datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc))

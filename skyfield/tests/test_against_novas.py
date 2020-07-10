@@ -1,6 +1,8 @@
 'Auto-generated accuracy tests vs NOVAS (see build_novas_tests.py).'
 
 from numpy import abs, array, einsum, max
+import pytest
+
 from skyfield import (earthlib, framelib, nutationlib, positionlib,
                       precessionlib, starlib, timelib)
 from skyfield.api import Topos, load
@@ -25,9 +27,13 @@ def compare(value, expected_value, epsilon):
     else:
         assert abs(value - expected_value) <= epsilon
 
+
+@pytest.fixture(scope='module')
 def de405():
     yield load('de405.bsp')
 
+
+@pytest.fixture(scope='module')
 def earth():
     eph = load('de405.bsp')
     yield eph[399]
