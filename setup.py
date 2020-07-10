@@ -6,7 +6,7 @@ import skyfield  # safe, because __init__.py contains no import statements
 
 extras = {
     'tests': [
-        # TODO: add assay
+        'pytest',
         'pytz',
     ],
 }
