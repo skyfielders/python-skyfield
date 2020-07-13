@@ -9,18 +9,6 @@ from mock import patch
 
 from skyfield import api
 
-#http://maia.usno.navy.mil/ser7/tai-utc.dat
-
-'''
-need files that contain internal state
-too great a chance user will move files etc and ruin date
-
-http://maia.usno.navy.mil/ser7/deltat.data - 1 year?
-http://maia.usno.navy.mil/ser7/deltat.preds - 1 year?
-
-https://hpiers.obspm.fr/iers/bul/bulc/Leap_Second.dat - "expires" message
-'''
-
 old_content = (b' 2015 10  1  67.9546\n'
                b' 2015 11  1  68.0055\n'
                b' 2015 12  1  68.0514\n'
