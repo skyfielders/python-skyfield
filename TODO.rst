@@ -10,6 +10,9 @@ forget.
 Sprint Possibilities
 ====================
 
+* Trying to index a unit class should print help suggesting a unit be
+  specified, similar to trying to iterate across one.
+
 * Several interesting API questions arise because of
   `this Stack Overflow question <https://stackoverflow.com/questions/62654081/path-between-two-topos-locations-determine-latitude-and-longitude-where-a-giv>`_.
   Should I finally go through with renaming ``.position`` to ``.xyz``?
