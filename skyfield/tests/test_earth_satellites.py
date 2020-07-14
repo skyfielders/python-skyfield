@@ -5,6 +5,7 @@ from skyfield import api
 from skyfield.api import EarthSatellite, load
 from skyfield.constants import AU_KM, AU_M
 from skyfield.sgp4lib import TEME_to_ITRF
+from skyfield.timelib import julian_date
 
 iss_tle0 = """\
 1 25544U 98067A   18184.80969102  .00001614  00000-0  31745-4 0  9993
@@ -63,7 +64,7 @@ from ..constants import DEG2RAD
 
 arcminute = DEG2RAD / 60.0
 arcsecond = arcminute / 60.0
-second = 1.0 / (24.0 * 60.0 * 60.0)
+seconds_per_day = 86400.0
 
 # Note that the following test is based specifically on Revision 2 of
 # "Revisiting Spacetrack Report #3" AIAA 2006-6753 (earlier versions of
@@ -76,25 +77,28 @@ def test_appendix_c_conversion_from_TEME_to_ITRF():
     vTEME = array([-4.746131487, 0.785818041, 5.531931288])
     vTEME = vTEME * 24.0 * 60.0 * 60.0  # km/s to km/day
 
-    ts = api.load.timescale()
-    jd_ut1 = ts.tt(2004, 4, 6, 7, 51, 28.386 - 0.439961).tt
+    jd_utc = julian_date(2004, 4, 6, 7, 51, 28.386)
+    d_ut1 = -0.439961
+    jd_ut1 = jd_utc + d_ut1 / 86400.0
 
     xp = -0.140682 * arcsecond
     yp = 0.333309 * arcsecond
 
     rITRF, vITRF = TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp, yp)
 
-    meter = 1e-3
+    epsilon = 5e-8  # Why not 1e-8, which would match all of their digits?
 
-    assert abs(-1033.47938300 - rITRF[0]) < 0.1 * meter
-    assert abs(+7901.29527540 - rITRF[1]) < 0.1 * meter
-    assert abs(+6380.35659580 - rITRF[2]) < 0.1 * meter
+    assert abs(-1033.47938300 - rITRF[0]) < epsilon
+    assert abs(+7901.29527540 - rITRF[1]) < epsilon
+    assert abs(+6380.35659580 - rITRF[2]) < epsilon
 
-    vITRF_per_second = vITRF * second
+    vITRF_per_second = vITRF / seconds_per_day
 
-    assert abs(-3.225636520 - vITRF_per_second[0]) < 1e-4 * meter
-    assert abs(-2.872451450 - vITRF_per_second[1]) < 1e-4 * meter
-    assert abs(+5.531924446 - vITRF_per_second[2]) < 1e-4 * meter
+    epsilon = 7e-8  # Why not 1e-9, which would match all of their digits?
+
+    assert abs(-3.225636520 - vITRF_per_second[0]) < epsilon
+    assert abs(-2.872451450 - vITRF_per_second[1]) < epsilon
+    assert abs(+5.531924446 - vITRF_per_second[2]) < epsilon
 
 def test_appendix_c_satellite():
     ts = api.load.timescale(builtin=True)

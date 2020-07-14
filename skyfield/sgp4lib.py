@@ -263,8 +263,6 @@ class EarthSatellite(VectorFunction):
         i = jd.argsort()
         return ts.tt_jd(jd[i]), v[i]
 
-_second = 1.0 / (24.0 * 60.0 * 60.0)
-
 def theta_GMST1982(jd_ut1):
     """Return the angle of Greenwich Mean Standard Time 1982 given the JD.
 
@@ -278,8 +276,8 @@ def theta_GMST1982(jd_ut1):
     t = (jd_ut1 - T0) / 36525.0
     g = 67310.54841 + (8640184.812866 + (0.093104 + (-6.2e-6) * t) * t) * t
     dg = 8640184.812866 + (0.093104 * 2.0 + (-6.2e-6 * 3.0) * t) * t
-    theta = (jd_ut1 % 1.0 + g * _second % 1.0) * tau
-    theta_dot = (1.0 + dg * _second / 36525.0) * tau
+    theta = (jd_ut1 % 1.0 + g / DAY_S % 1.0) % 1.0 * tau
+    theta_dot = (1.0 + dg / (DAY_S * 36525.0)) * tau
     return theta, theta_dot
 
 _zero_zero_minus_one = array((0.0, 0.0, -1.0))
