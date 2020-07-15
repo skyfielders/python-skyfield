@@ -254,7 +254,7 @@ class Timescale(object):
             )
         return self.ut1_jd(ut1)
 
-    def ut1_jd(self, jd, fraction=0.0):
+    def ut1_jd(self, jd):
         """Build a `Time` from a UT1 Julian date."""
         ut1 = _to_array(jd)
 
@@ -271,9 +271,9 @@ class Timescale(object):
         # 10 centuries of either side of the present; for details, see:
         # https://github.com/skyfielders/astronomy-notebooks
         # and look for the notebook "error-in-timescale-ut1.ipynb".
-        tt = ut1 + delta_t_approx / DAY_S
-        t = Time(self, tt)
-        t.ut1 = ut1
+        delta_t_approx /= DAY_S
+        t = Time(self, ut1, delta_t_approx)
+        t.ut1_fraction = 0.0
         return t
 
     def from_astropy(self, t):
@@ -321,7 +321,7 @@ class Time(object):
         # TODO: raise non-IndexError exception if this Time is not an array;
         # otherwise, a `for` loop over it will not raise an error.
         t = Time(self.ts, self.whole[index], self.tt_fraction[index])
-        for name in 'tai', 'tdb_fraction', 'ut1', 'delta_t':
+        for name in 'tai', 'tdb_fraction', 'ut1_fraction':
             value = getattr(self, name, None)
             if value is not None:
                 if getattr(value, 'shape', None):
@@ -663,8 +663,11 @@ class Time(object):
         return fr + tdb_minus_tt(self.whole, fr) / DAY_S
 
     @reify
-    def ut1(self):
-        return self.tt - self.delta_t / DAY_S
+    def ut1_fraction(self):
+        # Calling "self.delta_t" would cache a useless intermediate value, so:
+        table = self.ts.delta_t_table
+        delta_t = interpolate_delta_t(table, self.tt)
+        return self.tt_fraction - delta_t / DAY_S
 
     @reify
     def delta_t(self):
@@ -700,6 +703,10 @@ class Time(object):
     @property
     def tdb(self):
         return self.whole + self.tdb_fraction
+
+    @property
+    def ut1(self):
+        return self.whole + self.ut1_fraction
 
     # Crucial functions of time.
 

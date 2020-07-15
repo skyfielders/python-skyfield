@@ -100,13 +100,13 @@ def test_converting_ut1_to_tt(ts):
 
     jd = api.T0 - ten_thousand_years
     t = ts.ut1(jd=jd)
-    del t.ut1                   # force re-computation of UT1
+    del t.ut1_fraction          # force re-computation of UT1
     print(jd - t.ut1)
     assert abs(jd - t.ut1) < 1e-10
 
     jd = api.T0 + ten_thousand_years
     t = ts.ut1(jd=jd)
-    del t.ut1                   # force re-computation of UT1
+    del t.ut1_fraction          # force re-computation of UT1
     print(jd - t.ut1)
     assert abs(jd - t.ut1) < 1e-10
 
