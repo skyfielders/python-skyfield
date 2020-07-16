@@ -165,7 +165,8 @@ class EarthSatellite(VectorFunction):
         rTEME /= AU_KM
         vTEME /= AU_KM
         vTEME *= DAY_S
-        rITRF, vITRF = TEME_to_ITRF(t.ut1, rTEME, vTEME)
+        rITRF, vITRF = TEME_to_ITRF(t.whole, rTEME, vTEME, 0.0, 0.0,
+                                    t.ut1_fraction)
         return rITRF, vITRF, error
 
     def _at(self, t):
@@ -263,20 +264,22 @@ class EarthSatellite(VectorFunction):
         i = jd.argsort()
         return ts.tt_jd(jd[i]), v[i]
 
-def theta_GMST1982(jd_ut1):
+def theta_GMST1982(jd_ut1, fraction_ut1=0.0):
     """Return the angle of Greenwich Mean Standard Time 1982 given the JD.
 
     This angle defines the difference between the idiosyncratic True
     Equator Mean Equinox (TEME) frame of reference used by SGP4 and the
-    more standard Pseudo Earth Fixed (PEF) frame of reference.
+    more standard Pseudo Earth Fixed (PEF) frame of reference.  The UT1
+    time should be provided as a Julian date.  Theta is returned in
+    radians, and its velocity in radians per day of UT1 time.
 
     From AIAA 2006-6753 Appendix C.
 
     """
-    t = (jd_ut1 - T0) / 36525.0
+    t = (jd_ut1 - T0 + fraction_ut1) / 36525.0
     g = 67310.54841 + (8640184.812866 + (0.093104 + (-6.2e-6) * t) * t) * t
     dg = 8640184.812866 + (0.093104 * 2.0 + (-6.2e-6 * 3.0) * t) * t
-    theta = (jd_ut1 % 1.0 + g / DAY_S % 1.0) % 1.0 * tau
+    theta = (jd_ut1 % 1.0 + fraction_ut1 + g / DAY_S % 1.0) % 1.0 * tau
     theta_dot = (1.0 + dg / (DAY_S * 36525.0)) * tau
     return theta, theta_dot
 
@@ -288,7 +291,7 @@ def _cross(a, b):
     # Nearly 4x speedup over numpy cross(). TODO: Maybe move to .functions?
     return a[_cross120] * b[_cross201] - a[_cross201] * b[_cross120]
 
-def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
+def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0, fraction_ut1=0.0):
     """Convert TEME position and velocity into standard ITRS coordinates.
 
     This converts a position and velocity vector in the idiosyncratic
@@ -302,7 +305,7 @@ def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0):
     # TODO: are xp and yp the values from the IERS?  Or from general
     # nutation theory?
 
-    theta, theta_dot = theta_GMST1982(jd_ut1)
+    theta, theta_dot = theta_GMST1982(jd_ut1, fraction_ut1)
     angular_velocity = multiply.outer(_zero_zero_minus_one, theta_dot)
 
     R = rot_z(-theta)
