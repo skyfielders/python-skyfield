@@ -748,17 +748,18 @@ def ITRF_to_GCRS(t, rITRF):
     return mxv(t.MT, position)
 
 def ITRF_to_GCRS2(t, rITRF, vITRF):
+    # TODO: wobble
 
-    # Todo: wobble
-
-    spin = rot_z(t.gast * tau / 24.0)
-
+    spin = rot_z(t.gast / 24.0 * tau)
     position = mxv(spin, array(rITRF))
-    position = mxv(t.MT, position)
-
     velocity = mxv(spin, array(vITRF))
-    velocity = mxv(t.MT, velocity)
+
+    # TODO: Would it increase accuracy to use the actual rate of spin
+    # for this date, instead of the average ANGVEL?
     velocity[0] += DAY_S * ANGVEL * - position[1]
     velocity[1] += DAY_S * ANGVEL * position[0]
+
+    position = mxv(t.MT, position)
+    velocity = mxv(t.MT, velocity)
 
     return position, velocity
