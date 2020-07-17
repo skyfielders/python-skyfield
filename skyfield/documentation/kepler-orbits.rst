@@ -48,6 +48,12 @@ To build a dataframe of comets:
 
     864 comets loaded
 
+Since the comets file has no explicit expiration date,
+``load.open()`` will only download the file once.
+Subsequent calls re-open the copy of the file already on your filesystem.
+To force a fresh download and receive updated orbits and new comets,
+pass ``reload=True``.
+
 To generate a comet’s position,
 first select its row from dataframe.
 There are several Pandas techniques for selecting rows,
@@ -156,6 +162,12 @@ as the ``zgrep`` command shown above:
 The same four asteroid orbits could then be extracted with::
 
     python mpc_make_excerpt.py 00001 00002 00003 00004 > MPCORB.excerpt.DAT
+
+Note that the minor planets file has no explicit expiration date,
+so ``load.open()`` in the above script
+will only download the file once.
+Subsequent calls re-open the copy of the file already on your filesystem.
+To force a fresh download, pass ``reload=True``.
 
 In either case, the resulting file — shorn of its text header,
 and containing only minor planet orbits —
