@@ -1,8 +1,9 @@
 import numpy as np
-from skyfield import api, constants
+from skyfield import api
+from skyfield.constants import DAY_S
 from skyfield.earthlib import earth_rotation_angle
 from skyfield.functions import length_of
-from skyfield.positionlib import ICRF, _GIGAPARSEC_AU
+from skyfield.positionlib import ICRF, ITRF_to_GCRS2, _GIGAPARSEC_AU
 from skyfield.starlib import Star
 
 def test_subtraction():
@@ -89,15 +90,17 @@ def test_position_from_radec():
     p = api.position_from_radec(6, 0)
     assert length_of(p.position.au - [0, 1, 0]) < 1e-16
 
-def test_itrf_vector():
+def test_velocity_in_ITRF_to_GCRS2():
     ts = api.load.timescale(builtin=True)
-    t = ts.utc(2019, 11, 2, 3, 53)
-    top = api.Topos(latitude_degrees=45, longitude_degrees=0,
-                    elevation_m=constants.AU_M - constants.ERAD)
-    x, y, z = top.at(t).itrf_xyz().au
-    assert abs(x - 0.7071) < 1e-4
-    assert abs(y - 0.0) < 1e-14
-    assert abs(z - 0.7071) < 1e-4
+    t = ts.utc(2020, 7, 17, 8, 51, [0, 1])
+    r = np.array([(1, 0, 0), (1, 1.0 / DAY_S, 0)]).T
+    v = np.array([(0, 1, 0), (0, 1, 0)]).T
+    r, v = ITRF_to_GCRS2(t, r, v)
+    r0, r1 = r.T
+    v0 = v[:,0]
+    actual_velocity = r1 - r0
+    stated_velocity = v0 / DAY_S
+    assert length_of(actual_velocity - stated_velocity) < 4e-9
 
 # Test that the CIRS coordinate of the TIO is consistent with the Earth Rotation Angle
 # This is mostly an internal consistency check

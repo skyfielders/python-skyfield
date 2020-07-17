@@ -3,6 +3,14 @@ Changelog
 
 .. currentmodule:: skyfield.positionlib
 
+1.24 — The future
+-----------------
+
+* Fix: improved the accuracy with which velocity is converted between
+  the Earth-fixed ITRF frame that rotates with the Earth and the
+  inertial GCRS frame that does not.  In particular, this should make
+  Earth satellite velocities more accurate.
+
 1.23 — 2020 July 9
 ------------------
 
