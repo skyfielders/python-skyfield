@@ -235,7 +235,7 @@ and pass the result to Skyfield:
 
     d = datetime(2014, 1, 16, 1, 32, 9)
     e = eastern.localize(d)
-    t = ts.utc(e)
+    t = ts.from_datetime(e)
 
 And if Skyfield returns a Julian date at the end of a calculation,
 you can ask the Julian date object to build a ``datetime`` object

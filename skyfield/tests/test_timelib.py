@@ -68,29 +68,36 @@ def test_timescale_utc_method_with_array_inside(ts):
 
 def test_that_building_time_from_naive_datetime_raises_exception(ts):
     with assert_raises(ValueError) as info:
-        ts.utc(datetime(1973, 12, 29, 23, 59, 48))
+        ts.from_datetime(datetime(1973, 12, 29, 23, 59, 48))
     assert 'import timezone' in str(info.exception)
 
 def test_building_time_from_single_utc_datetime(ts):
+    t = ts.from_datetime(datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc))
+    assert t.tai == 2442046.5
     t = ts.utc(datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc))
     assert t.tai == 2442046.5
 
 def test_building_time_from_single_utc_datetime_with_timezone(ts):
     tz = timezone('US/Eastern')
-    t = ts.utc(tz.localize(datetime(2020, 5, 10, 12, 44, 13, 797865)))
+    t = ts.from_datetime(tz.localize(datetime(2020, 5, 10, 12, 44, 13, 797865)))
     dt, leap_second = t.utc_datetime_and_leap_second()
     assert dt == datetime(2020, 5, 10, 16, 44, 13, 797865, tzinfo=utc)
     assert leap_second == 0
 
 def test_building_time_from_list_of_utc_datetimes(ts):
-    t = ts.utc([
+    datetimes = [
         datetime(1973, 12, 29, 23, 59, 48, tzinfo=utc),
         datetime(1973, 12, 30, 23, 59, 48, tzinfo=utc),
         datetime(1973, 12, 31, 23, 59, 48, tzinfo=utc),
         datetime(1974, 1, 1, 23, 59, 47, tzinfo=utc),
         datetime(1974, 1, 2, 23, 59, 47, tzinfo=utc),
         datetime(1974, 1, 3, 23, 59, 47, tzinfo=utc),
-    ])
+    ]
+    t = ts.from_datetimes(datetimes)
+    assert list(t.tai) == [
+        2442046.5, 2442047.5, 2442048.5, 2442049.5, 2442050.5, 2442051.5,
+    ]
+    t = ts.utc(datetimes)
     assert list(t.tai) == [
         2442046.5, 2442047.5, 2442048.5, 2442049.5, 2442050.5, 2442051.5,
     ]
@@ -162,7 +169,7 @@ def test_utc_datetime_and_leap_second(ts):
 
 def test_utc_datetime_microseconds_round_trip(ts):
     dt = datetime(2020, 5, 10, 11, 50, 9, 727799, tzinfo=utc)
-    t = ts.utc(dt)
+    t = ts.from_datetime(dt)
     dt2, leap_second = t.utc_datetime_and_leap_second()
     assert dt2 == dt
     assert leap_second == 0

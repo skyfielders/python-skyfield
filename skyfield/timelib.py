@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime as dt
 import re
 from collections import namedtuple
 from datetime import date, datetime
@@ -32,21 +33,18 @@ class CalendarArray(ndarray):
     @property
     def second(self): return self[5]
 
-try:
-    from datetime import timezone
-    utc = timezone.utc
-except ImportError:
+if hasattr(dt, 'timezone'):
+    utc = dt.timezone.utc
+else:
     try:
         from pytz import utc
     except ImportError:
         # Lacking a full suite of timezones from pytz, we at least need a
         # time zone object for UTC.
 
-        from datetime import timedelta, tzinfo
-
-        class UTC(tzinfo):
+        class UTC(dt.tzinfo):
             'UTC'
-            zero = timedelta(0)
+            zero = dt.timedelta(0)
             def utcoffset(self, dt):
                 return self.zero
             def tzname(self, dt):
@@ -58,6 +56,7 @@ except ImportError:
 
 # Much of the following code is adapted from the USNO's "novas.c".
 
+_time_zero = dt.time()
 _half_minute = 30.0 / DAY_S
 _half_second = 0.5 / DAY_S
 _half_microsecond = 0.5e-6 / DAY_S
@@ -106,47 +105,62 @@ class Timescale(object):
         correct UTC date and time.
 
         """
-        return self.utc(self._utcnow().replace(tzinfo=utc))
+        return self.from_datetime(self._utcnow().replace(tzinfo=utc))
+
+    def from_datetime(self, datetime):
+        """Return a `Time` for a Python ``datetime``.
+
+        The ``datetime`` must be “timezone-aware”: it must have a time
+        zone object as its ``tzinfo`` attribute instead of ``None``.
+
+        """
+        jd, fr = _utc_datetime_to_tai(
+            self.leap_dates, self.leap_offsets, datetime)
+        t = Time(self, jd, fr + tt_minus_tai)
+        t.tai_fraction = fr
+        return t
+
+    def from_datetimes(self, datetime_list):
+        """Return a `Time` for a Python ``datetime`` list.
+
+        The ``datetime`` objects must each be “timezone-aware”: they
+        must each have a time zone object as their ``tzinfo`` attribute
+        instead of ``None``.
+
+        """
+        leap_dates = self.leap_dates
+        leap_offsets = self.leap_offsets
+        pairs = [_utc_datetime_to_tai(leap_dates, leap_offsets, d)
+                 for d in datetime_list]
+        jd, fr = zip(*pairs)
+        t = Time(self, _to_array(jd), fr + tt_minus_tai)
+        t.tai_fraction = fr
+        return t
 
     def utc(self, year, month=1, day=1, hour=0, minute=0, second=0.0):
         """Build a `Time` from a UTC calendar date.
 
-        You can either specify the date as separate components, or
-        provide a time zone aware Python datetime.  The following two
-        calls are equivalent (the ``utc`` time zone object can be
-        imported from the ``skyfield.api`` module, or from ``pytz`` if
-        you have it)::
-
-            ts.utc(2014, 1, 18, 1, 35, 37.5)
-            ts.utc(datetime(2014, 1, 18, 1, 35, 37, 500000, tzinfo=utc))
-
-        Note that only by passing the components separately can you
-        specify a leap second, because a Python datetime will not allow
-        the value 60 in its seconds field.
+        Specify the date as a numeric year, month, day, hour, minute,
+        and second.  Any argument may be an array in which case the
+        return value is a ``Time`` representing a whole array of times.
 
         """
+        # TODO: someday deprecate passing datetime objects here, as
+        # there are now separate constructors for them.
         if isinstance(year, datetime):
-            dt = year
-            tai1, tai2 = _utc_datetime_to_tai(self.leap_dates,
-                                              self.leap_offsets, dt)
-        elif isinstance(year, date):
-            d = year
-            tai1, tai2 = _utc_date_to_tai(self.leap_dates, self.leap_offsets, d)
-        elif hasattr(year, '__len__') and isinstance(year[0], datetime):
-            # TODO: clean this up and better document the possibilities.
-            list_of_datetimes = year
-            tai1, tai2 = array([
-                _utc_datetime_to_tai(self.leap_dates, self.leap_offsets, dt)
-                for dt in list_of_datetimes
-            ]).T
-        else:
-            tai1, tai2 = _utc_to_tai(
-                self.leap_dates, self.leap_offsets, _to_array(year),
-                _to_array(month), _to_array(day), _to_array(hour),
-                _to_array(minute), _to_array(second),
-            )
+            return self.from_datetime(year)
+        if isinstance(year, date):
+            return self.from_datetime(dt.combine(year, _time_zero))
+        if hasattr(year, '__len__') and isinstance(year[0], datetime):
+            return self.from_datetimes(year)
+
+        tai1, tai2 = _utc_to_tai(
+            self.leap_dates, self.leap_offsets, _to_array(year),
+            _to_array(month), _to_array(day), _to_array(hour),
+            _to_array(minute), _to_array(second),
+        )
         t = Time(self, tai1, tai2 + tt_minus_tai)
-        t.tai = tai1 + tai2
+        t.tai_fraction = tai2
         return t
 
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
@@ -326,7 +340,7 @@ class Time(object):
         # TODO: raise non-IndexError exception if this Time is not an array;
         # otherwise, a `for` loop over it will not raise an error.
         t = Time(self.ts, self.whole[index], self.tt_fraction[index])
-        for name in 'tai', 'tdb_fraction', 'ut1_fraction':
+        for name in 'tai_fraction', 'tdb_fraction', 'ut1_fraction':
             value = getattr(self, name, None)
             if value is not None:
                 if getattr(value, 'shape', None):
@@ -654,13 +668,13 @@ class Time(object):
         return (self.whole - 1721045.0 + self.tt_fraction) / 365.25
 
     @reify
-    def tai(self):
-        return self.tt - tt_minus_tai
-
-    @reify
     def utc(self):
         utc = self._utc_tuple()
         return array(utc).view(CalendarArray) if self.shape else CalendarTuple(*utc)
+
+    @reify
+    def tai_fraction(self):
+        return self.tt_fraction - tt_minus_tai
 
     @reify
     def tdb_fraction(self):
@@ -700,6 +714,10 @@ class Time(object):
         return self.gmst + eq_eq / tau * 24.0
 
     # Low-precision floats generated from internal float pairs.
+
+    @property
+    def tai(self):
+        return self.whole + self.tai_fraction
 
     @property
     def tt(self):
@@ -899,7 +917,8 @@ _format_uses_minutes = re.compile(r'%[-_0^#EO]*[MR]').search
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
     if dt.tzinfo is None:
         raise ValueError(_naive_complaint)
-    dt = dt.astimezone(utc)
+    if dt.tzinfo is not utc:
+        dt = dt.astimezone(utc)
     return _utc_to_tai(leap_dates, leap_offsets,
                        dt.year, dt.month, dt.day,
                        dt.hour, dt.minute, dt.second + dt.microsecond * 1e-6)

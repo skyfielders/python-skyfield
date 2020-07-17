@@ -42,8 +42,8 @@ or how early I need to rise to see the morning sky:
     next_midnight = midnight + dt.timedelta(days=1)
 
     ts = load.timescale(builtin=True)
-    t0 = ts.utc(midnight)
-    t1 = ts.utc(next_midnight)
+    t0 = ts.from_datetime(midnight)
+    t1 = ts.from_datetime(next_midnight)
     eph = load('de421.bsp')
     bluffton = Topos('40.8939 N', '83.8917 W')
     f = almanac.dark_twilight_day(eph, bluffton)

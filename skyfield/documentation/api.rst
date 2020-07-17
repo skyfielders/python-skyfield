@@ -71,6 +71,8 @@ any given version of Skyfield will fall gradually out of date.
 .. autosummary::
 
    Timescale.now
+   Timescale.from_datetime
+   Timescale.from_datetimes
    Timescale.utc
    Timescale.tai
    Timescale.tai_jd
