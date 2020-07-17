@@ -1,10 +1,17 @@
+
 Changelog
 =========
 
-.. currentmodule:: skyfield.positionlib
-
 1.24 — The future
 -----------------
+
+* Added methods :meth:`~skyfield.timelib.Timescale.from_datetime()` and
+  :meth:`~skyfield.timelib.Timescale.from_datetimes()` to the
+  :class:`~skyfield.timelib.Timescale` class, to better advertise the
+  ability to build a Skyfield time from a Python datetime — an ability
+  that was previously overloaded into the ``year`` parameter of the
+  :meth:`~skyfield.timelib.Timescale.utc()` method (where it is still
+  supported for backwards compatibility, but no longer documented).
 
 * Fix: improved the accuracy with which velocity is converted between
   the Earth-fixed ITRF frame that rotates with the Earth and the
@@ -248,9 +255,9 @@ Changelog
   stellar parallax data from the dataframe if available.
   `#266 <https://github.com/skyfielders/python-skyfield/issues/266>`_
 
-* Fix: `find_discrete()` was generating empty arrays of search dates,
-  upsetting the astronomy code, if the start and end dates were very
-  close together.
+* Fix: :func:`~skyfield.searchlib.find_discrete()` was generating empty
+  arrays of search dates, upsetting the astronomy code, if the start and
+  end dates were very close together.
   `#240 <https://github.com/skyfielders/python-skyfield/issues/240>`_
 
 1.10 — 2019 February 2
