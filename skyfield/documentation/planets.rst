@@ -218,8 +218,8 @@ at the completion of a ``with`` statement:
 
 .. _third-party-ephemerides:
 
-Third-party libraries for other ephemeris formats
-=================================================
+Type 1 and Type 21 ephemeris formats
+====================================
 
 If you generate an ephemeris with a tool like NASA’s
 `HORIZONS <https://ssd.jpl.nasa.gov/horizons.cgi>`_ system,

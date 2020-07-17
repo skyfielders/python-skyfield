@@ -95,6 +95,12 @@ Adding more smarts to ephemeris handling
 * And additionally: the error when not enough bodies are available for
   deflection maybe someday needs to be more helpful.
 
+* Bring support for Type 1 and Type 21 JPL ephemerides into Skyfield
+  from the third-party libraries where it now lives.  The routines will
+  need to be vectorized and updated to use a Skyfield approach to vector
+  and matrix operations.  When complete and documented, make a comment
+  at: https://github.com/skyfielders/python-skyfield/issues/350
+
 For 2.0
 =======
 
