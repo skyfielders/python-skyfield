@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from collections import namedtuple
-from datetime import date, datetime, timedelta, tzinfo
+from datetime import date, datetime
 from numpy import (array, concatenate, cos, float_, interp, isnan, nan,
                    ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime
@@ -33,23 +33,28 @@ class CalendarArray(ndarray):
     def second(self): return self[5]
 
 try:
-    from pytz import utc
+    from datetime import timezone
+    utc = timezone.utc
 except ImportError:
+    try:
+        from pytz import utc
+    except ImportError:
+        # Lacking a full suite of timezones from pytz, we at least need a
+        # time zone object for UTC.
 
-    # Lacking a full suite of timezones from pytz, we at least need a
-    # time zone object for UTC.
+        from datetime import timedelta, tzinfo
 
-    class UTC(tzinfo):
-        'UTC'
-        zero = timedelta(0)
-        def utcoffset(self, dt):
-            return self.zero
-        def tzname(self, dt):
-            return 'UTC'
-        def dst(self, dt):
-            return self.zero
+        class UTC(tzinfo):
+            'UTC'
+            zero = timedelta(0)
+            def utcoffset(self, dt):
+                return self.zero
+            def tzname(self, dt):
+                return 'UTC'
+            def dst(self, dt):
+                return self.zero
 
-    utc = UTC()
+        utc = UTC()
 
 # Much of the following code is adapted from the USNO's "novas.c".
 
@@ -949,7 +954,7 @@ You must either specify that your datetime is in UTC:
     d = datetime(..., tzinfo=utc)  # to build a new datetime
     d = d.replace(tzinfo=utc)      # to fix an existing datetime
 
-Or install the third-party `pytz` library and use any of its timezones:
+Or use a timezone object like those provided by the third-party `pytz` library:
 
     from pytz import timezone
     eastern = timezone('US/Eastern')

@@ -63,20 +63,20 @@ are::
     # All the ways you can create a Time object
     # using a timescale:
 
-    ts.utc(year, month, day, hour, minute, second)
-    ts.utc(dt)      # Python datetime.datetime object
+    t = ts.utc(year, month, day, hour, minute, second)
+    t = ts.utc(dt)        # Python datetime.datetime object
 
-    ts.tai(year, month, day, hour, minute, second)
-    ts.tai(jd=float)
+    t = ts.tai(year, month, day, hour, minute, second)
+    t = ts.tai_jd(float)  # Julian date
 
-    ts.tt(year, month, day, hour, minute, second)
-    ts.tt(jd=float)
+    t = ts.tt(year, month, day, hour, minute, second)
+    t = ts.tt_jd(float)   # Julian date
 
-    ts.tdb(year, month, day, hour, minute, second)
-    ts.tdb(jd=float)
+    t = ts.tdb(year, month, day, hour, minute, second)
+    t = ts.tdb_jd(float)  # Julian date
 
-    ts.ut1(year, month, day, hour, minute, second)
-    ts.ut1(jd=float)
+    t = ts.ut1(year, month, day, hour, minute, second)
+    t = ts.ut1_jd(float)  # Julian date
 
 Once you have constructed a :class:`Time` object,
 you can provide it to any Skyfield routine that needs it.
@@ -110,8 +110,8 @@ are also automatically cached on the date object.
 
 .. _building-dates:
 
-UTC and your timezone
-=====================
+Building and printing UTC
+=========================
 
 The ``utc`` parameter in the examples above
 specifies Coordinated Universal Time (UTC),
@@ -140,14 +140,14 @@ For example:
     # Several ways to print a time as UTC.
 
     print(tuple(t1.utc))
-    print(t1.utc_iso())
+    print(t1.utc_iso(' '))
     print(t1.utc_jpl())
     print(t1.utc_strftime('Date %Y-%m-%d and time %H:%M:%S'))
 
 .. testoutput::
 
     (2014, 1, 18, 1, 35, 37.5)
-    2014-01-18T01:35:38Z
+    2014-01-18 01:35:38Z
     A.D. 2014-Jan-18 01:35:37.5000 UT
     Date 2014-01-18 and time 01:35:38
 
@@ -187,11 +187,33 @@ and configured with the correct time zone):
 
     A.D. 2015-Oct-11 10:00:00.0000 UT
 
-To move beyond UTC to working with actual timezones,
-you will need to install
-the third-party `pytz`_ package,
-either by listing it in the dependencies of your package,
-adding it to your project’s `requirements.txt`_ file,
+UTC and your timezone
+=====================
+
+To move beyond UTC and work with other world timezones,
+you will need to install a time zone database
+for your version of Python.
+
+* Every version of Python that Skyfield supports
+  will work with the `pytz`_ package described in this section.
+
+* Python 3.6 upgraded the Standard Library ``datetime`` type
+  so that the contortions of `pytz`_ are no longer necessary,
+  and instead recommends
+  `dateutil <https://dateutil.readthedocs.io/en/stable/>`_
+  for working with timezones.
+  Consult its documentation if you are interested in using it.
+
+* Python 3.9 will offer a native
+  `zoneinfo <https://docs.python.org/3.9/library/zoneinfo.html>`_
+  module that for the first time brings timezone support
+  into the Python Standard Library.
+
+But this documentation will focus on the approach
+which works universally across all Python versions.
+You can install the third-party `pytz`_ library
+by listing it in the dependencies of your package,
+or adding it to your project’s `requirements.txt`_ file,
 or simply installing it manually::
 
     pip install pytz
