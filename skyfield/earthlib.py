@@ -139,7 +139,7 @@ def sidereal_time(t):
     # Precession-in-RA terms in mean sidereal time taken from third
     # reference, eq. (42), with coefficients in arcseconds.
 
-    t = (t.tdb - T0) / 36525.0
+    t = (t.whole - T0 + t.tdb_fraction) / 36525.0
     st =        ( 0.014506 +
         (((( -    0.0000000368   * t
              -    0.000029956  ) * t
