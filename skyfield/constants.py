@@ -14,12 +14,12 @@ pi = 3.141592653589793
 tau = 6.283185307179586476925287  # lower case, for symmetry with math.pi
 
 # Physics.
-C = 299792458.0
+C = 299792458.0                            # m/s
 GM_SUN_Pitjeva_2005_km3_s2 = 132712440042  # Elena Pitjeva, 2015JPCRD..44c1210P
 
 # Earth and its orbit.
-ANGVEL = 7.2921150e-5
-ERAD = 6378136.6
+ANGVEL = 7.2921150e-5           # radians/s
+ERAD = 6378136.6                # meters
 IERS_2010_INVERSE_EARTH_FLATTENING = 298.25642
 
 # Heliocentric gravitational constant in meters^3 / second^2, from DE-405.
