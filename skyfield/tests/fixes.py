@@ -1,6 +1,7 @@
 """Helpers for making Skyfield tests stable."""
 
 import datetime as dt
+from skyfield import earthlib
 import skyfield.api
 import skyfield.timelib
 
@@ -27,3 +28,24 @@ def teardown():
     skyfield.api.load = skyfield.iokit.Loader('.')
     skyfield.timelib.Timescale._utcnow = dt.datetime.utcnow
     dt.datetime = _real_datetime_class
+
+class low_precision_ERA(object):
+    """Compute the Earth rotation angle with only a single float for UT1.
+
+    Skyfield now uses two floats ``t.whole`` and ``t.ut1_fraction`` to
+    represent the UT1 Julian date, supplying an additional 16 digits of
+    precision.  For the Earth rotation angle, which moves very quickly
+    per unit time compared to most other astronomical quantities, this
+    knocks Skyfield out of agreement with other libraries like NOVAS and
+    SOFA that round UT1 to a single float.  Various tests use this
+    context manager to make Skyfield match the lower-precision output.
+
+    """
+    def __enter__(self):
+        self.saved = earthlib.earth_rotation_angle
+        earthlib.earth_rotation_angle = self.era
+    def __exit__(self, *args):
+        earthlib.earth_rotation_angle = self.saved
+    def era(self, whole, fraction):
+        rounded_single_float = whole + fraction
+        return self.saved(rounded_single_float)

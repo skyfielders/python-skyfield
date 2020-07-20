@@ -292,7 +292,7 @@ than those of the old J2000 system.)
 
 .. testoutput::
 
-    [-3918.87651974 -1887.64832658  5209.08802573]
+    [-3918.8765203  -1887.6483254   5209.08802574]
 
 .. would love to be able to do this someday - see the SPICE source file
    nearpt.f
@@ -365,7 +365,7 @@ just as you did for the position measured from the Earth’s center:
 
 .. testoutput::
 
-    [ 331.6188371   392.18468546 1049.76011302]
+    [ 331.61883722  392.18468536 1049.76011302]
 
 But the most popular approach is to ask the topocentric position
 for its altitude and azimuth coordinates,
@@ -665,7 +665,7 @@ that are limiting this TLE set’s predictions:
     mean eccentricity is outside the range 0.0 to 1.0
 
     After:
-    [-5021.82658136   742.71506482  3831.57403957]
+    [-5021.82658191   742.71506112  3831.57403957]
     mrt is less than 1.0 which indicates the satellite has decayed
 
 If you use a ``Time`` array to ask about an entire range of dates,

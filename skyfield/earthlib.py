@@ -133,7 +133,7 @@ def sidereal_time(t):
 
     # Compute the Earth Rotation Angle.  Time argument is UT1.
 
-    theta = earth_rotation_angle(t.ut1)
+    theta = earth_rotation_angle(t.whole, t.ut1_fraction)
 
     # The equinox method.  See Circular 179, Section 2.6.2.
     # Precession-in-RA terms in mean sidereal time taken from third
@@ -152,16 +152,15 @@ def sidereal_time(t):
     return (st / 54000.0 + theta * 24.0) % 24.0
 
 
-def earth_rotation_angle(jd_ut1):
+def earth_rotation_angle(jd_ut1, fraction_ut1=0.0):
     """Return the value of the Earth Rotation Angle (theta) for a UT1 date.
 
     Uses the expression from the note to IAU Resolution B1.8 of 2000.
     Returns a fraction between 0.0 and 1.0 whole rotations.
 
     """
-    thet1 = 0.7790572732640 + 0.00273781191135448 * (jd_ut1 - T0)
-    thet3 = jd_ut1 % 1.0
-    return (thet1 + thet3) % 1.0
+    th = 0.7790572732640 + 0.00273781191135448 * (jd_ut1 - T0 + fraction_ut1)
+    return (th % 1.0 + jd_ut1 % 1.0 + fraction_ut1) % 1.0
 
 
 def refraction(alt_degrees, temperature_C, pressure_mbar):

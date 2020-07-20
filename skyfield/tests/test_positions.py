@@ -5,6 +5,7 @@ from skyfield.earthlib import earth_rotation_angle
 from skyfield.functions import length_of
 from skyfield.positionlib import ICRF, ITRF_to_GCRS2, _GIGAPARSEC_AU
 from skyfield.starlib import Star
+from .fixes import low_precision_ERA
 
 def test_subtraction():
     p0 = ICRF((10,20,30), (40,50,60))
@@ -201,7 +202,8 @@ def test_cirs_sofa():
     for ((ra_icrs, dec_icrs, tdb), (ra_sofa, dec_sofa)) in zip(test_data, sofa_results):
         ss = Star(ra_hours=(ra_icrs / 15.0), dec_degrees=dec_icrs)
         st = ts.tdb(jd=tdb)
-        ra_cirs, dec_cirs, _ = earth.at(st).observe(ss).apparent().cirs_radec(st)
+        with low_precision_ERA():
+            ra_cirs, dec_cirs, _ = earth.at(st).observe(ss).apparent().cirs_radec(st)
 
         assert np.allclose(ra_cirs._degrees, ra_sofa, rtol=0.0, atol=tol)
         assert np.allclose(dec_cirs._degrees, dec_sofa, rtol=0.0, atol=tol)

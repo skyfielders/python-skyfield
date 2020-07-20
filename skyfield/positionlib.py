@@ -743,7 +743,7 @@ def ITRF_to_GCRS(t, rITRF):
 
     # Todo: wobble
 
-    spin = rot_z(t.gast * tau / 24.0)
+    spin = rot_z(t.gast / 24.0 * tau)
     position = mxv(spin, array(rITRF))
     return mxv(t.MT, position)
 

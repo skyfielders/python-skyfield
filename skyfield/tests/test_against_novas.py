@@ -7,6 +7,7 @@ from skyfield.api import Topos, load
 from skyfield.constants import AU_KM, AU_M
 from skyfield.data import hipparcos
 from skyfield.functions import length_of
+from .fixes import low_precision_ERA
 
 OLD_AU_KM = 149597870.691  # TODO: load from de405
 OLD_AU = AU_KM / OLD_AU_KM
@@ -246,7 +247,8 @@ def test_sidereal_time_on_date0():
 
 def test_sidereal_time_with_nonzero_delta_t_on_date0():
     jd = load.timescale(delta_t=99.9).tt_jd(2440423.345833333 + 99.9 * one_second)
-    compare(earthlib.sidereal_time(jd), 16.195436229760602, 1e-13)
+    with low_precision_ERA():
+        compare(earthlib.sidereal_time(jd), 16.195436229760602, 1e-13)
 
 def test_sidereal_time_on_date1():
     jd = load.timescale(delta_t=0.0).tt_jd(2448031.5)
@@ -254,7 +256,8 @@ def test_sidereal_time_on_date1():
 
 def test_sidereal_time_with_nonzero_delta_t_on_date1():
     jd = load.timescale(delta_t=99.9).tt_jd(2448031.5 + 99.9 * one_second)
-    compare(earthlib.sidereal_time(jd), 15.825907462991848, 1e-13)
+    with low_precision_ERA():
+        compare(earthlib.sidereal_time(jd), 15.825907462991848, 1e-13)
 
 def test_sidereal_time_on_date2():
     jd = load.timescale(delta_t=0.0).tt_jd(2451545.0)
@@ -262,7 +265,8 @@ def test_sidereal_time_on_date2():
 
 def test_sidereal_time_with_nonzero_delta_t_on_date2():
     jd = load.timescale(delta_t=99.9).tt_jd(2451545.0 + 99.9 * one_second)
-    compare(earthlib.sidereal_time(jd), 18.69737482966941, 1e-13)
+    with low_precision_ERA():
+        compare(earthlib.sidereal_time(jd), 18.69737482966941, 1e-13)
 
 def test_sidereal_time_on_date3():
     jd = load.timescale(delta_t=0.0).tt_jd(2456164.5)
@@ -270,7 +274,8 @@ def test_sidereal_time_on_date3():
 
 def test_sidereal_time_with_nonzero_delta_t_on_date3():
     jd = load.timescale(delta_t=99.9).tt_jd(2456164.5 + 99.9 * one_second)
-    compare(earthlib.sidereal_time(jd), 22.2439084998698, 1e-13)
+    with low_precision_ERA():
+        compare(earthlib.sidereal_time(jd), 22.2439084998698, 1e-13)
 
 def test_star_vector():
     star = starlib.Star(ra_hours=2.530301028, dec_degrees=89.264109444,
@@ -455,22 +460,26 @@ def test_from_altaz_7(earth):
 
 def test_ITRF_to_GCRS_conversion_on_date0():
     jd = load.timescale(delta_t=39.707).tt_jd(2440423.345833333)
-    position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
+    with low_precision_ERA():
+        position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
     compare(position, (0.5701172053658128, -1.5232987806096392, 1.3017400651201707), 1e-13)
 
 def test_ITRF_to_GCRS_conversion_on_date1():
     jd = load.timescale(delta_t=57.1136).tt_jd(2448031.5)
-    position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
+    with low_precision_ERA():
+        position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
     compare(position, (0.41362649279562963, -1.5741081933652488, 1.3004216700893525), 1e-13)
 
 def test_ITRF_to_GCRS_conversion_on_date2():
     jd = load.timescale(delta_t=63.8285).tt_jd(2451545.0)
-    position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
+    with low_precision_ERA():
+        position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
     compare(position, (1.3757008573963405, -0.8702954291925735, 1.3000126987400913), 1e-13)
 
 def test_ITRF_to_GCRS_conversion_on_date3():
     jd = load.timescale(delta_t=66.7846).tt_jd(2456164.5)
-    position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
+    with low_precision_ERA():
+        position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
     compare(position, (1.5243574049688486, 0.5755748855663746, 1.2980940077752074), 1e-13)
 
 def test_tdb_minus_tt_on_date0():

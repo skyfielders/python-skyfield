@@ -41,6 +41,7 @@ def main():
         from skyfield.constants import AU_KM, AU_M
         from skyfield.data import hipparcos
         from skyfield.functions import length_of
+        from .fixes import low_precision_ERA
 
         OLD_AU_KM = 149597870.691  # TODO: load from de405
         OLD_AU = AU_KM / OLD_AU_KM
@@ -225,7 +226,8 @@ def output_subroutine_tests(dates):
 
             def test_sidereal_time_with_nonzero_delta_t_on_date{i}():
                 jd = load.timescale(delta_t=99.9).tt_jd({jd!r} + 99.9 * one_second)
-                compare(earthlib.sidereal_time(jd), {result2!r}, 1e-13)
+                with low_precision_ERA():
+                    compare(earthlib.sidereal_time(jd), {result2!r}, 1e-13)
             """)
 
     p, v = novas.starvectors(novas.make_cat_entry(
@@ -291,7 +293,8 @@ def output_subroutine_tests(dates):
         output(locals(), """\
             def test_ITRF_to_GCRS_conversion_on_date{i}():
                 jd = load.timescale(delta_t={delta_t!r}).tt_jd({tt!r})
-                position = positionlib.ITRF_to_GCRS(jd, {vector!r})
+                with low_precision_ERA():
+                    position = positionlib.ITRF_to_GCRS(jd, {vector!r})
                 compare(position, {result!r}, 1e-13)
             """)
 
