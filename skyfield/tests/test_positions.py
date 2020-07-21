@@ -1,8 +1,8 @@
 import numpy as np
 from skyfield import api
-from skyfield.constants import DAY_S
+from skyfield.constants import DAY_S, tau
 from skyfield.earthlib import earth_rotation_angle
-from skyfield.functions import length_of
+from skyfield.functions import length_of, mxv, rot_z
 from skyfield.positionlib import ICRF, ITRF_to_GCRS2, _GIGAPARSEC_AU
 from skyfield.starlib import Star
 from .fixes import low_precision_ERA
@@ -92,16 +92,41 @@ def test_position_from_radec():
     assert length_of(p.position.au - [0, 1, 0]) < 1e-16
 
 def test_velocity_in_ITRF_to_GCRS2():
+    # TODO: Get test working with these vectors too, showing it works
+    # with a non-zero velocity vector, but in that case the test will
+    # have to be fancier in how it corrects.
+    # r = np.array([(1, 0, 0), (1, 1 / DAY_S, 0)]).T
+    # v = np.array([(0, 1, 0), (0, 1, 0)]).T
+
     ts = api.load.timescale(builtin=True)
     t = ts.utc(2020, 7, 17, 8, 51, [0, 1])
-    r = np.array([(1, 0, 0), (1, 1.0 / DAY_S, 0)]).T
-    v = np.array([(0, 1, 0), (0, 1, 0)]).T
-    r, v = ITRF_to_GCRS2(t, r, v)
+    r = np.array([(1, 0, 0), (1, 0, 0)]).T
+    v = np.array([(0, 0, 0), (0, 0, 0)]).T
+
+    r, v = ITRF_to_GCRS2(t, r, v, True)
+
+    # Rotate back to equinox-of-date before applying correction.
+    r = mxv(t.M, r)
+    v = mxv(t.M, v)
+
     r0, r1 = r.T
     v0 = v[:,0]
-    actual_velocity = r1 - r0
-    stated_velocity = v0 / DAY_S
-    assert length_of(actual_velocity - stated_velocity) < 4e-9
+
+    # Apply a correction: the instantaneous velocity does not in fact
+    # carry the position in a straight line, but in an arc around the
+    # origin; so use trigonometry to move the destination point to where
+    # linear motion would have carried it.
+    angvel = (t.gast[1] - t.gast[0]) / 24.0 * tau
+    r1 = mxv(rot_z(np.arctan(angvel) - angvel), r1)
+    r1 *= np.sqrt(1 + angvel*angvel)
+
+    actual_motion = r1 - r0
+    predicted_motion = v0 / DAY_S
+
+    relative_error = (length_of(actual_motion - predicted_motion)
+                      / length_of(actual_motion))
+
+    assert relative_error < 2e-12
 
 # Test that the CIRS coordinate of the TIO is consistent with the Earth Rotation Angle
 # This is mostly an internal consistency check

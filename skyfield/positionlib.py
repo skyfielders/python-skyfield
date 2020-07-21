@@ -747,17 +747,29 @@ def ITRF_to_GCRS(t, rITRF):
     position = mxv(spin, array(rITRF))
     return mxv(t.MT, position)
 
-def ITRF_to_GCRS2(t, rITRF, vITRF):
+def ITRF_to_GCRS2(t, rITRF, vITRF, _high_accuracy=False):
     # TODO: wobble
 
     spin = rot_z(t.gast / 24.0 * tau)
     position = mxv(spin, array(rITRF))
     velocity = mxv(spin, array(vITRF))
 
-    # TODO: Would it increase accuracy to use the actual rate of spin
-    # for this date, instead of the average ANGVEL?
-    velocity[0] += DAY_S * ANGVEL * - position[1]
-    velocity[1] += DAY_S * ANGVEL * position[0]
+    # TODO: This is expensive, and should be extensively trimmed to only
+    # include the most important terms underlying GAST.  But it improves
+    # the precision by something like 1e5 times when compared to using
+    # the round number skyfield.constants.ANGVEL!
+    #
+    # See the test `test_velocity_in_ITRF_to_GCRS2()`.
+    #
+    if _high_accuracy:
+        _one_second = 1.0 / DAY_S
+        t_later = t.ts.tt_jd(t.whole, t.tt_fraction + _one_second)
+        angvel = (t_later.gast - t.gast) / 24.0 * tau
+    else:
+        angvel = ANGVEL
+
+    velocity[0] += DAY_S * angvel * - position[1]
+    velocity[1] += DAY_S * angvel * position[0]
 
     position = mxv(t.MT, position)
     velocity = mxv(t.MT, velocity)

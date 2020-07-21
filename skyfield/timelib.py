@@ -711,6 +711,7 @@ class Time(object):
         # TODO: move this into an eqeq function?
         c_terms = equation_of_the_equinoxes_complimentary_terms(tt)
         eq_eq = d_psi * cos(self._mean_obliquity_radians) + c_terms
+        # TODO: constrain to 24 hours?
         return self.gmst + eq_eq / tau * 24.0
 
     # Low-precision floats generated from internal float pairs.
