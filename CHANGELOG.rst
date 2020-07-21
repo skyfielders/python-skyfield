@@ -2,13 +2,13 @@
 Changelog
 =========
 
-1.24 — The future
------------------
+1.24 — 2020 July 20
+-------------------
 
 * Added methods :meth:`~skyfield.timelib.Timescale.from_datetime()` and
   :meth:`~skyfield.timelib.Timescale.from_datetimes()` to the
   :class:`~skyfield.timelib.Timescale` class, to better advertise the
-  ability to build a Skyfield time from a Python datetime — an ability
+  ability to build a Skyfield time from a Python ``datetime`` — an ability
   that was previously overloaded into the ``year`` parameter of the
   :meth:`~skyfield.timelib.Timescale.utc()` method (where it is still
   supported for backwards compatibility, but no longer documented).
