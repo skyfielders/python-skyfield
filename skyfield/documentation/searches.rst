@@ -183,17 +183,16 @@ around how the value changes through time.
 
     from matplotlib import pyplot as plt
 
-    plt.figure(figsize=(5, 3))
-    plt.title('Elongation of Mars (degrees)')
-    plt.xlabel('Year')
-    plt.axes().grid(True)
-    plt.axes().axhline(90, color='r')  # Red line at 90°
+    fig, ax = plt.subplots(figsize=(5, 3))
 
     t = ts.utc(2018, 1, range(366 * 5))
-    plt.plot(t.J, mars_elongation_degrees(t))
+    ax.axhline(90, color='r')  # Red line at 90°
+    ax.plot(t.J, mars_elongation_degrees(t))
+    ax.set(title='Elongation of Mars (degrees)', xlabel='Year')
+    ax.grid(True)
 
-    plt.tight_layout()
-    plt.savefig('mars-elongation.png')
+    fig.tight_layout()
+    fig.savefig('mars-elongation.png')
 
 .. image:: _static/mars-elongation.png
 
@@ -251,12 +250,10 @@ as we can verify by comparing this plot with our earlier plot.
 
 .. testcode::
 
-    from matplotlib import pyplot as plt
-
-    plt.figure(figsize=(5, 1.5))
-    plt.plot(t.J, mars_quadrature(t))
-    plt.tight_layout()
-    plt.savefig('mars-quadrature.png')
+    fig, ax = plt.subplots(figsize=(5, 1.5))
+    ax.plot(t.J, mars_quadrature(t))
+    fig.tight_layout()
+    fig.savefig('mars-quadrature.png')
 
 .. image:: _static/mars-quadrature.png
 
@@ -280,10 +277,10 @@ Here’s our function sampled at the beginning of each calendar year:
 .. testcode::
 
     t_annual = ts.utc(range(2018, 2024))
-    plt.figure(figsize=(5, 1.5))
-    plt.plot(t_annual.J, mars_quadrature(t_annual), 'ro')
-    plt.tight_layout()
-    plt.savefig('mars-quadrature-undersampled.png')
+    fig, ax = plt.subplots(figsize=(5, 1.5))
+    ax.plot(t_annual.J, mars_quadrature(t_annual), 'ro')
+    fig.tight_layout()
+    fig.savefig('mars-quadrature-undersampled.png')
 
 .. image:: _static/mars-quadrature-undersampled.png
 
@@ -407,16 +404,15 @@ which will also give us a sense for how Venus’s elongation behaves.
 
 .. testcode::
 
-    plt.figure(figsize=(5, 2))
-    plt.title('Elongation of Venus (degrees)')
-    plt.xlabel('Year')
-    plt.axes().grid(True)
+    fig, ax = plt.subplots(figsize=(5, 2))
 
     t = ts.utc(2018, 1, range(366 * 5))
-    plt.plot(t.J, venus_elongation_degrees(t))
+    ax.plot(t.J, venus_elongation_degrees(t))
+    ax.set(title='Elongation of Venus (degrees)', xlabel='Year')
+    ax.grid()
 
-    plt.tight_layout()
-    plt.savefig('venus-elongation.png')
+    fig.tight_layout()
+    fig.savefig('venus-elongation.png')
 
 .. image:: _static/venus-elongation.png
 
@@ -445,16 +441,15 @@ will not provide the search routine with enough data:
 
 .. testcode::
 
-    plt.figure(figsize=(5, 2))
-    plt.title('Elongation of Venus (degrees)')
-    plt.xlabel('Year')
-    plt.axes().grid(True)
+    fig, ax = plt.subplots(figsize=(5, 2))
 
     t = ts.utc(range(2018, 2024))
-    plt.plot(t.J, venus_elongation_degrees(t), 'ro')
+    ax.plot(t.J, venus_elongation_degrees(t), 'ro')
+    ax.set(title='Elongation of Venus (degrees)', xlabel='Year')
+    ax.grid()
 
-    plt.tight_layout()
-    plt.savefig('venus-elongation-undersampled.png')
+    fig.tight_layout()
+    fig.savefig('venus-elongation-undersampled.png')
 
 .. image:: _static/venus-elongation-undersampled.png
 

@@ -47,32 +47,30 @@ for plotting the elevation of a satellite over time:
 
     # Start a new figure.
 
-    plt.figure()
+    fig, ax = plt.subplots()
 
     # Draw the blue curve.
 
     x = t.toordinal()
     y = sat.at(t).distance().km - earth_radius_km
-    plt.plot(x, y)
+    ax.plot(x, y)
 
     # Label the official moment of reentry.
 
     x = reentry.toordinal()
     y = sat.at(reentry).distance().km - earth_radius_km
-    plt.plot(x, y, 'ro')
-    plt.text(x, y + 10, 'Moment of re-entry')
+    ax.plot(x, y, 'ro')
+    ax.text(x, y + 10, 'Moment of re-entry')
 
     # Grid lines and labels.
 
-    axes = plt.axes()
-    axes.grid(True)
-    label_dates_and_hours(axes)
-    plt.title('GOCE satellite altitude')
-    plt.ylabel('km above sea level')
+    label_dates_and_hours(ax)
+    ax.grid()
+    ax.set(title='GOCE satellite altitude', ylabel='km above sea level')
 
     # Render the plot to a PNG file.
 
-    plt.savefig('goce-reentry.png')
+    fig.savefig('goce-reentry.png')
 
 .. image:: _static/goce-reentry.png
 
