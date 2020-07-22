@@ -150,7 +150,7 @@ class Timescale(object):
         if isinstance(year, datetime):
             return self.from_datetime(year)
         if isinstance(year, date):
-            return self.from_datetime(dt.combine(year, _time_zero))
+            return self.from_datetime(datetime.combine(year, _time_zero))
         if hasattr(year, '__len__') and isinstance(year[0], datetime):
             return self.from_datetimes(year)
 
