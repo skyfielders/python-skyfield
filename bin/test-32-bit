@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd "$(dirname "${BASH_SOURCE[0]}")"
+cd ..
+exec ./containers/32-bit/run bash -c \
+     'cd skyfield && ls && assay --batch skyfield/tests'

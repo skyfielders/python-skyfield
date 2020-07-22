@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -ex
+CONTAINER_NAME=skyfield-python-2.6
+
+if [ ! -f /usr/bin/docker ]
+then
+    echo Error: please apt install docker.io >&2
+    exit 2
+fi
+
+cd "$(dirname $0)"
+
+docker build -t $CONTAINER_NAME . 1>&2
+
+#     -v $PWD/../../../assay:/assay \
+exec docker run -ti \
+     -v $PWD/../..:/skyfield \
+     $CONTAINER_NAME "$@"
