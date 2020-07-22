@@ -5,7 +5,10 @@ import shutil
 import tempfile
 from contextlib import contextmanager
 from datetime import date
-from mock import patch
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
 
 from skyfield import api
 
