@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime as dt
+import datetime as dt_module
 import re
 from collections import namedtuple
 from datetime import date, datetime
@@ -33,8 +33,8 @@ class CalendarArray(ndarray):
     @property
     def second(self): return self[5]
 
-if hasattr(dt, 'timezone'):
-    utc = dt.timezone.utc
+if hasattr(dt_module, 'timezone'):
+    utc = dt_module.timezone.utc
 else:
     try:
         from pytz import utc
@@ -42,9 +42,9 @@ else:
         # Lacking a full suite of timezones from pytz, we at least need a
         # time zone object for UTC.
 
-        class UTC(dt.tzinfo):
+        class UTC(dt_module.tzinfo):
             'UTC'
-            zero = dt.timedelta(0)
+            zero = dt_module.timedelta(0)
             def utcoffset(self, dt):
                 return self.zero
             def tzname(self, dt):
@@ -56,7 +56,7 @@ else:
 
 # Much of the following code is adapted from the USNO's "novas.c".
 
-_time_zero = dt.time()
+_time_zero = dt_module.time(tzinfo=utc)
 _half_minute = 30.0 / DAY_S
 _half_second = 0.5 / DAY_S
 _half_microsecond = 0.5e-6 / DAY_S
@@ -150,7 +150,7 @@ class Timescale(object):
         if isinstance(year, datetime):
             return self.from_datetime(year)
         if isinstance(year, date):
-            return self.from_datetime(dt.combine(year, _time_zero))
+            return self.from_datetime(datetime.combine(year, _time_zero))
         if hasattr(year, '__len__') and isinstance(year[0], datetime):
             return self.from_datetimes(year)
 

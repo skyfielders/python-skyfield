@@ -1,3 +1,4 @@
+import datetime as dt_module
 import numpy as np
 from assay import assert_raises
 from pytz import timezone
@@ -101,6 +102,11 @@ def test_building_time_from_list_of_utc_datetimes(ts):
     assert list(t.tai) == [
         2442046.5, 2442047.5, 2442048.5, 2442049.5, 2442050.5, 2442051.5,
     ]
+
+def test_building_time_from_python_date(ts):
+    d = dt_module.date(2020, 7, 22)
+    t = ts.utc(d)
+    assert t.utc == (2020, 7, 22, 0, 0, 0.0)
 
 def test_converting_ut1_to_tt(ts):
     ten_thousand_years = 365 * 10000
