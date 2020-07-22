@@ -40,9 +40,9 @@ Changelog
   parameter with the conceptually simpler ``step_days`` parameter, and
   updated the instructions in :doc:`searches` to match.
 
-* Made the :meth:`~skyfield.iokit.Loader.load.tle_file()` import method
-  less strict about Earth satellite names: any text on the line before
-  two lines of TLE data is now saved as the satellite name.  A parameter
+* Made the :meth:`~skyfield.iokit.Loader.tle_file()` import method less
+  strict about Earth satellite names: any text on the line before two
+  lines of TLE data is now saved as the satellite name.  A parameter
   ``skip_names=True`` turns this off if, for particular TLE files, this
   leads to unwanted text being saved.
 
