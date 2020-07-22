@@ -45,11 +45,11 @@ else:
         class UTC(dt.tzinfo):
             'UTC'
             zero = dt.timedelta(0)
-            def utcoffset(self, dt):
+            def utcoffset(self, _dt):
                 return self.zero
-            def tzname(self, dt):
+            def tzname(self, _dt):
                 return 'UTC'
-            def dst(self, dt):
+            def dst(self, _dt):
                 return self.zero
 
         utc = UTC()
@@ -357,15 +357,15 @@ class Time(object):
         datetimes is returned instead of a single value.
 
         """
-        dt, leap_second = self.astimezone_and_leap_second(tz)
-        return dt
+        _dt, leap_second = self.astimezone_and_leap_second(tz)
+        return _dt
 
     def astimezone_and_leap_second(self, tz):
         """Convert to a Python ``datetime`` and leap second in a timezone.
 
         Convert this time to a Python ``datetime`` and a leap second::
 
-            dt, leap_second = t.astimezone_and_leap_second(tz)
+            _dt, leap_second = t.astimezone_and_leap_second(tz)
 
         The argument ``tz`` should be a timezone from the third-party
         ``pytz`` package, which must be installed separately.  The date
@@ -384,17 +384,17 @@ class Time(object):
         single value each.
 
         """
-        dt, leap_second = self.utc_datetime_and_leap_second()
+        _dt, leap_second = self.utc_datetime_and_leap_second()
         normalize = getattr(tz, 'normalize', None)
         if self.shape and normalize is not None:
-            dt = array([normalize(d.astimezone(tz)) for d in dt])
+            _dt = array([normalize(d.astimezone(tz)) for d in _dt])
         elif self.shape:
-            dt = array([d.astimezone(tz) for d in dt])
+            _dt = array([d.astimezone(tz) for d in _dt])
         elif normalize is not None:
-            dt = normalize(dt.astimezone(tz))
+            _dt = normalize(_dt.astimezone(tz))
         else:
-            dt = dt.astimezone(tz)
-        return dt, leap_second
+            _dt = _dt.astimezone(tz)
+        return _dt, leap_second
 
     def toordinal(self):
         """Return the proleptic Gregorian ordinal of the UTC date.
@@ -419,15 +419,15 @@ class Time(object):
         returned instead of a single value.
 
         """
-        dt, leap_second = self.utc_datetime_and_leap_second()
-        return dt
+        _dt, leap_second = self.utc_datetime_and_leap_second()
+        return _dt
 
     def utc_datetime_and_leap_second(self):
         """Convert to a Python ``datetime`` in UTC, plus a leap second value.
 
         Convert this time to a `datetime`_ object and a leap second::
 
-            dt, leap_second = t.utc_datetime_and_leap_second()
+            _dt, leap_second = t.utc_datetime_and_leap_second()
 
         If the third-party `pytz`_ package is available, then its
         ``utc`` timezone will be used as the timezone of the return
@@ -456,10 +456,10 @@ class Time(object):
         if self.shape:
             utcs = [utc] * self.shape[0]
             argsets = zip(year, month, day, hour, minute, second, micro, utcs)
-            dt = array([datetime(*args) for args in argsets])
+            _dt = array([datetime(*args) for args in argsets])
         else:
-            dt = datetime(year, month, day, hour, minute, second, micro, utc)
-        return dt, leap_second
+            _dt = datetime(year, month, day, hour, minute, second, micro, utc)
+        return _dt, leap_second
 
     def utc_iso(self, delimiter='T', places=0):
         """Convert to an ISO 8601 string like ``2014-01-18T01:35:38Z`` in UTC.
@@ -915,14 +915,14 @@ _format_uses_milliseconds = re.compile(r'%[-_0^#EO]*f').search
 _format_uses_seconds = re.compile(r'%[-_0^#EO]*[STXc]').search
 _format_uses_minutes = re.compile(r'%[-_0^#EO]*[MR]').search
 
-def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
-    if dt.tzinfo is None:
+def _utc_datetime_to_tai(leap_dates, leap_offsets, _dt):
+    if _dt.tzinfo is None:
         raise ValueError(_naive_complaint)
-    if dt.tzinfo is not utc:
-        dt = dt.astimezone(utc)
+    if _dt.tzinfo is not utc:
+        _dt = _dt.astimezone(utc)
     return _utc_to_tai(leap_dates, leap_offsets,
-                       dt.year, dt.month, dt.day,
-                       dt.hour, dt.minute, dt.second + dt.microsecond * 1e-6)
+                       _dt.year, _dt.month, _dt.day,
+                       _dt.hour, _dt.minute, _dt.second + _dt.microsecond * 1e-6)
 
 def _utc_date_to_tai(leap_dates, leap_offsets, d):
     return _utc_to_tai(leap_dates, leap_offsets,
