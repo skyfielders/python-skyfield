@@ -2,6 +2,13 @@
 Changelog
 =========
 
+1.25 — 2020 July ?
+------------------
+
+* Fixed the ability of :meth:`~skyfield.timelib.Timescale.utc()` to
+  accept a Python ``datetime.date`` object as its argument.
+  `#409 <https://github.com/skyfielders/python-skyfield/issues/409>`_
+
 1.24 — 2020 July 20
 -------------------
 
