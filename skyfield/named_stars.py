@@ -1,3 +1,4 @@
+# TODO: Deprecate; maybe even remove, since it's not documented?
 """
 Convenience functions for users to get a Star instance using a small database
 of named stars.

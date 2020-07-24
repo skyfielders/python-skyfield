@@ -2,7 +2,7 @@
 
 import gzip
 from skyfield import iokit
-from skyfield.data.hipparcos import load_dataframe
+from skyfield.data import hipparcos, stellarium
 from skyfield.functions import BytesIO
 from skyfield.iokit import parse_tle
 
@@ -125,7 +125,7 @@ def test_hipparcos():
     g.close()
     b.seek(0)
     try:
-        df = load_dataframe(b)
+        df = hipparcos.load_dataframe(b)
     except ImportError:
         # raise SkipTest('pandas not available')
         # Assay doesn't understand skipping tests yet; just pass
@@ -135,3 +135,21 @@ def test_hipparcos():
     row = df.iloc[0]
     assert abs(row.ra_degrees - 000.00091185) < 1e-30
     assert abs(row.dec_degrees - +01.08901332) < 1e-30
+
+star_text = b"""\
+# star names by constellation
+# Andromeda (And)
+   677|_("Alpheratz") 1,2,5,6,11,12
+   677|_("Sirrah")
+  5447|_("Mirach") 1,2,5,6,11,12,23
+  9640|_("Almach") 1,2,5,6,11,12
+  9640|_("Almaak")
+"""
+
+def test_stellarium_star_names():
+    f = BytesIO(star_text)
+    star_names = stellarium.parse_star_names(f)
+    assert star_names[0].hip == 677
+    assert star_names[0].name == 'Alpheratz'
+    assert star_names[4].hip == 9640
+    assert star_names[4].name == 'Almaak'
