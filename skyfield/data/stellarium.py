@@ -17,7 +17,9 @@ def parse_constellations(lines):
         ]
 
     Each name is a 3-letter constellation abbreviation; each star is an
-    integer Hipparcos catalog number.
+    integer Hipparcos catalog number.  See :ref:`neowise-chart` for an
+    example of how to combine this data with the Hipparcos star catalog
+    to draw constellation lines on a chart.
 
     """
     constellations = []

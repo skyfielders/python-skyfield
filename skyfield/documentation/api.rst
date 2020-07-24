@@ -310,6 +310,8 @@ Constellations
 ==============
 
 .. autofunction:: skyfield.api.load_constellation_map
+.. autofunction:: skyfield.data.stellarium.parse_constellations
+.. autofunction:: skyfield.data.stellarium.parse_star_names
 
 Searching
 =========

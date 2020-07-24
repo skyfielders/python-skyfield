@@ -19,8 +19,10 @@ these are only intended to be a starting point
 for building your own scripts,
 either with matplotlib or whatever other plotting library you prefer.
 
-Finder chart for comet NEOWISE
-==============================
+.. _neowise-chart:
+
+Drawing a finder chart for comet NEOWISE
+========================================
 
 Here is a stand-alone script
 that brings together four different data sources —
@@ -61,8 +63,8 @@ But the basic data loading and filtering will be the same,
 so hopefully the script will still help get you started
 in targeting a more modern plotting library.
 
-Satellite altitude during re-entry
-==================================
+Plotting satellite altitude during re-entry
+===========================================
 
 Here is the decreasing altitude of a satellite as its orbit decayed
 and it re-entered the atmosphere above the Pacific Ocean:

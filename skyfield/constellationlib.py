@@ -29,11 +29,11 @@ from .functions import load_bundled_npy
 from .timelib import Time, julian_date_of_besselian_epoch
 
 def load_constellation_map():
-    """Load Skyfield's constellation map and return a lookup function
+    """Load Skyfield's constellation boundaries and return a lookup function.
 
-    Skyfield carries an internal constellation map that is optimized for
-    quick position lookup.  Call this function to load the map and
-    return a function mapping position to constellation name.
+    Skyfield carries an internal map of constellation boundaries that is
+    optimized for quick position lookup.  Call this function to load the
+    map and return a function mapping position to constellation name.
 
     >>> from skyfield.api import position_of_radec, load_constellation_map
     >>> constellation_at = load_constellation_map()

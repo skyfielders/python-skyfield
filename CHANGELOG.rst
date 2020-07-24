@@ -2,16 +2,27 @@
 Changelog
 =========
 
-1.25 — 2020 July ?
-------------------
+1.25 — 2020 July 24
+-------------------
 
-* Added a routine to load Stellarium constellation lines,
-  which is featured in a new example script in :doc:`example-plots`
-  that produces a finder chart for comet C/2020 F3 NEOWISE.
+* Added :func:`~skyfield.data.stellarium.parse_constellations()`
+  and :func:`~skyfield.data.stellarium.parse_star_names()`
+  to load Stellarium star names and constellation lines.
+  Constellation lines are featured in a new example script
+  :ref:`neowise-chart` that produces a finder chart
+  for comet C/2020 F3 NEOWISE.
+
+* The Hipparcos star catalog should now load faster, having switched
+  behind the scenes to a higher performance Pandas import routine.
 
 * Fixed the ability of :meth:`~skyfield.timelib.Timescale.utc()` to
   accept a Python ``datetime.date`` object as its argument.
   `#409 <https://github.com/skyfielders/python-skyfield/issues/409>`_
+
+* Slightly lowered the precision of two tests when they detect that
+  Python is compiled for a 32-bit processor, so the test suite can
+  succeed when contributors package Skyfield for 32-bit Linux.
+  `#411 <https://github.com/skyfielders/python-skyfield/issues/411>`_
 
 1.24 — 2020 July 20
 -------------------
