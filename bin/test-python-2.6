@@ -3,4 +3,4 @@
 cd "$(dirname "${BASH_SOURCE[0]}")"
 cd ..
 exec ./containers/python-2.6/run bash -c \
-     'cd skyfield && ls && assay --batch skyfield/tests'
+     'cd skyfield && assay --batch '"${*:-skyfield/tests}"
