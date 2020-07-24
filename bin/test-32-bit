@@ -3,4 +3,4 @@
 cd "$(dirname "${BASH_SOURCE[0]}")"
 cd ..
 exec ./containers/32-bit/run bash -c \
-     'cd skyfield && assay --batch '"${*:-skyfield/tests}"
+     'cd skyfield && assay '"${*:- --batch skyfield/tests}"
