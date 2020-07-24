@@ -6,7 +6,18 @@
 This section of the documentation
 will gradually accumulate example scripts
 for producing images from Skyfield computations.
-For now there are two:
+
+Note that these example scripts
+are written for fairly recent versions of `matplotlib`_.
+If you try running them on a system
+with an older version of the library,
+you might see errors — in particular with how they specify colors,
+in which case you can try omitting those parameters
+to get the script running.
+In any case,
+these are only intended to be a starting point
+for building your own scripts,
+either with matplotlib or whatever other plotting library you prefer.
 
 Finder chart for comet NEOWISE
 ==============================
@@ -43,8 +54,7 @@ Use the script as a starting point:
     os.rename('neowise-finder-chart.png', '_static/neowise-finder-chart.png')
 
 If you choose a different rendering engine
-instead of the venerable but rather ornery and complicated
-`matplotlib <https://matplotlib.org/>`_,
+instead of the venerable but rather ornery and complicated `matplotlib`_,
 then of course the plotting calls you make
 will be completely different.
 But the basic data loading and filtering will be the same,
@@ -59,8 +69,7 @@ and it re-entered the atmosphere above the Pacific Ocean:
 
 .. image:: _static/goce-reentry.png
 
-The code to produce the diagram
-using `matplotlib <https://matplotlib.org/>`_,
+The code to produce the diagram using `matplotlib`_,
 including custom tick marks that are based on the date,
 is:
 
@@ -125,3 +134,5 @@ is:
 
     import os
     os.rename('goce-reentry.png', '_static/goce-reentry.png')
+
+.. _matplotlib: https://matplotlib.org/
