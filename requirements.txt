@@ -3,13 +3,12 @@ beautifulsoup4==4.6.0
 html5lib==1.0.1
 lxml==4.4.1
 mock==2.0.0
-numpy==1.14.2
-matplotlib==2.2.2
+numpy==1.15.4
+matplotlib==3.3.0
 pandas==0.23.3
 pyflakes==2.1.1
 python-dateutil>=2.5.0
 pytz
 sphinx==1.7.2
 https://github.com/brandon-rhodes/assay/archive/master.zip
-https://github.com/whiskie14142/spktype21/archive/master.zip
 -e .

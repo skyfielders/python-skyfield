@@ -43,8 +43,11 @@ def build_stereographic_projection(center):
     # https://math.stackexchange.com/questions/409217/
     p = center.position.au
     u = p / length_of(p)
-    c = u.mean(axis=1)
-    c = c / length_of(c)
+    if len(u.shape) > 1:
+        c = u.mean(axis=1)
+        c = c / length_of(c)
+    else:
+        c = u
     x_c, y_c, z_c = c
 
     def project(position):
