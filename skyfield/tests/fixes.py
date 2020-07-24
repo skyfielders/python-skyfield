@@ -1,10 +1,13 @@
 """Helpers for making Skyfield tests stable."""
 
 import datetime as dt
+import sys
+
 from skyfield import earthlib
 import skyfield.api
 import skyfield.timelib
 
+IS_32_BIT = (sys.maxsize == 0x7fffffff)
 _real_datetime_class = dt.datetime
 
 class datetime(dt.datetime):

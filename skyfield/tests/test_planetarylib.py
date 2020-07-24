@@ -2,6 +2,7 @@ import numpy as np
 from skyfield.api import PlanetaryConstants, T0, load
 from skyfield.constants import AU_KM, AU_M
 from skyfield.positionlib import ICRF
+from .fixes import IS_32_BIT
 
 def test_frame_rotation_matrices():
     # To produce the following matrices:
@@ -47,7 +48,10 @@ def test_frame_rotation_matrices():
 
     R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
     assert (R == R2).all()
-    assert (Rv == desired_rate).all()  # Boom.
+    if IS_32_BIT:
+        assert abs(Rv - desired_rate).max() < 3e-26
+    else:
+        assert (Rv == desired_rate).all()  # Boom.
 
     # Second, a moment when the angle W is more than 2500 radians.
 
@@ -93,11 +97,17 @@ def test_frame_rotation_matrices():
     frame = pc.build_frame_named('MOON_ME_DE421')
     R = frame.rotation_at(ts.tdb_jd(tdb))
     delta = abs(R - desired_rotation)
-    assert (R == desired_rotation).all()
+    if IS_32_BIT:
+        assert abs(R - desired_rotation).max() < 2e-16
+    else:
+        assert (R == desired_rotation).all()
 
     R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
     assert (R == R2).all()
-    assert (Rv == desired_rate).all()
+    if IS_32_BIT:
+        assert abs(Rv - desired_rate).max() < 2e-23
+    else:
+        assert (Rv == desired_rate).all()
 
 def test_rotating_vector_into_frame():
     et_seconds = 259056665.1855896
