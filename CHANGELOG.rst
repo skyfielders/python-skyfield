@@ -5,6 +5,10 @@ Changelog
 1.25 — 2020 July ?
 ------------------
 
+* Added a routine to load Stellarium constellation lines,
+  which is featured in a new example script in :doc:`example-plots`
+  that produces a finder chart for comet C/2020 F3 NEOWISE.
+
 * Fixed the ability of :meth:`~skyfield.timelib.Timescale.utc()` to
   accept a Python ``datetime.date`` object as its argument.
   `#409 <https://github.com/skyfielders/python-skyfield/issues/409>`_
