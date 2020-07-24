@@ -47,7 +47,8 @@ JUP310 := https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup3
 excerpts: \
  ../skyfield/tests/data/de430-2015-03-02.bsp \
  ../skyfield/tests/data/jup310-2015-03-02.bsp \
- ../skyfield/tests/data/jup310-2053-10-08.bsp
+ ../skyfield/tests/data/jup310-2053-10-08.bsp \
+ ../ci/hip_main.dat.gz
 
 ../skyfield/tests/data/de430-2015-03-02.bsp:
 	python -m jplephem excerpt 2015/3/2 2015/3/3 $(DE430) $@
@@ -57,3 +58,6 @@ excerpts: \
 
 ../skyfield/tests/data/jup310-2053-10-08.bsp:
 	python -m jplephem excerpt 2053/10/8 2053/10/9 $(JUP310) $@
+
+../ci/hip_main.dat.gz: ../hip_main.dat.gz
+	zcat $< | awk -F\| '$$6 <= 6.6 || $$2 == 87937' | gzip -c -9 > $@
