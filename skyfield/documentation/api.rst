@@ -165,6 +165,17 @@ Kernels also support lookup using the Python ``kernel['Mars']`` syntax,
 in which case they return a function of time
 that returns vectors from the Solar System barycenter to the named body.
 
+Planetary reference frames
+==========================
+
+.. currentmodule:: skyfield.planetarylib
+
+.. autosummary::
+   :nosignatures:
+
+   PlanetaryConstants
+   Frame
+
 Almanac
 =======
 
@@ -223,17 +234,6 @@ Stars and other distant objects
    :nosignatures:
 
    Star
-
-Planetary reference frames
-==========================
-
-.. currentmodule:: skyfield.planetarylib
-
-.. autosummary::
-   :nosignatures:
-
-   PlanetaryConstants
-   Frame
 
 Astronomical positions
 ======================
