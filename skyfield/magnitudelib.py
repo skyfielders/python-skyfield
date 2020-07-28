@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Routines for computing magnitudes.
 
 Planetary routines adapted from:
@@ -16,10 +17,35 @@ Ap_Mag_V3.f90
 Ap_Mag_Output_V3.txt
 Ap_Mag_Input_V3.txt
 
+* ``r`` planet’s distance from the Sun.
+* ``delta`` from Earth?
+* ``ph_ang`` illumination phase angle (degrees)
+
 """
 from numpy import log10
+from .constants import RAD2DEG
+from .functions import angle_between, length_of
+from .naifcodes import target_name
 
-def mercury_magnitude(r, delta, ph_ang):
+def planetary_magnitude(position):
+    target = position.target
+    function = _FUNCTIONS.get(target)
+    if function is None:
+        name = target_name(target)
+        raise ValueError('cannot compute the magnitude of target %s' % name)
+
+    # Shamelessly treat the Sun as sitting at the Solar System Barycenter.
+    sun_to_observer = position.observer_data.bcrs_position
+    observer_to_planet = position.position.au
+    sun_to_planet = sun_to_observer + observer_to_planet
+
+    r = length_of(sun_to_planet)
+    delta = length_of(observer_to_planet)
+    ph_ang = angle_between(-sun_to_planet, -observer_to_planet) * RAD2DEG
+
+    return function(r, delta, ph_ang)
+
+def _mercury_magnitude(r, delta, ph_ang):
     distance_mag_factor = 5 * log10(r * delta)
     ph_ang_factor = (
         6.3280e-02 * ph_ang
@@ -31,7 +57,7 @@ def mercury_magnitude(r, delta, ph_ang):
     )
     return -0.613 + distance_mag_factor + ph_ang_factor
 
-def venus_magnitude(r, delta, ph_ang):
+def _venus_magnitude(r, delta, ph_ang):
     distance_mag_factor = 5 * log10(r * delta)
     if ph_ang < 163.7:
         ph_ang_factor = (
@@ -48,16 +74,16 @@ def venus_magnitude(r, delta, ph_ang):
         )
     return -4.384 + distance_mag_factor + ph_ang_factor
 
-def earth_magnitude(r, delta, ph_ang):
+def _earth_magnitude(r, delta, ph_ang):
     distance_mag_factor = 5 * log10 (r * delta)
     ph_ang_factor = -1.060e-03 * ph_ang + 2.054e-04 * ph_ang**2
     return -3.99 + distance_mag_factor + ph_ang_factor
 
-def jupiter_magnitude(r, delta, ph_ang):
+def _jupiter_magnitude(r, delta, ph_ang):
     distance_mag_factor = 5 * log10(r * delta)
     geocentric_phase_angle_limit = 12.0
 
-    if ph_ang <= geocentric_phase_angle_limit:
+    if ph_ang <= geocentric_phase_angle_limit:  # TODO: time arrays
         ph_ang_factor = -3.7E-04 * ph_ang + 6.16E-04 * ph_ang**2
     else:
         ph_ang_factor = -2.5 * log10(
@@ -75,14 +101,28 @@ def jupiter_magnitude(r, delta, ph_ang):
 
     return ap_mag
 
-def uranus_magnitude(r, delta, ph_ang,
-                     sun_sub_lat_planetog, earth_sub_lat_planetog):
+def _uranus_magnitude(r, delta, ph_ang,
+                      sun_sub_lat_planetog, earth_sub_lat_planetog):
     distance_mag_factor = 5.0 * log10 (r * delta)
     sub_lat_planetog = (abs(sun_sub_lat_planetog)
                         + abs(earth_sub_lat_planetog)) / 2.0
     sub_lat_factor = -0.00084 * sub_lat_planetog
     geocentric_phase_angle_limit = 3.1
     ap_mag = -7.110 + distance_mag_factor + sub_lat_factor
-    if ph_ang > geocentric_phase_angle_limit:
+    if ph_ang > geocentric_phase_angle_limit:  # TODO: time arrays
         ap_mag += 6.587e-3 * ph_ang + 1.045e-4 * ph_ang**2
     return ap_mag
+
+_FUNCTIONS = {
+    1: _mercury_magnitude,
+    2: _venus_magnitude,
+    3: _earth_magnitude,
+    5: _jupiter_magnitude,
+    7: _uranus_magnitude,
+
+    # Some planets can be reasonably identified with their barycenter.
+    199: _mercury_magnitude,
+    299: _venus_magnitude,
+    599: _jupiter_magnitude,
+    799: _uranus_magnitude,
+}
