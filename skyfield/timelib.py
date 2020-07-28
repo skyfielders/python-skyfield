@@ -520,11 +520,23 @@ class Time(object):
     def utc_strftime(self, format):
         """Format the UTC time using a Python datetime formatting string.
 
-        This internally calls the Python ``strftime()`` routine from the
-        Standard Library ``time()`` module, for which you can find a
-        quick reference at ``http://strftime.org/``.  If this object is
-        an array of times, then a sequence of strings is returned
-        instead of a single string.
+        This calls Python’s ``time.strftime()`` to format the date and
+        time.  A single string is returned or else a whole array of
+        strings, depending on whether this time object is an array.
+        The most commonly used formats are:
+
+        * ``%Y`` four-digit year, ``%y`` two-digit year
+        * ``%m`` month number, ``%B`` name, ``%b`` abbreviation
+        * ``%d`` day of month
+        * ``%H`` hour
+        * ``%M`` minute
+        * ``%S`` second
+        * ``%A`` day of week, ``%a`` its abbreviation
+
+        You can find the full list, along with options that control
+        field widths and leading zeros, at:
+
+        https://docs.python.org/3/library/time.html#time.strftime
 
         If the smallest time unit in your format is minutes or seconds,
         then the time is rounded to the nearest minute or second.
