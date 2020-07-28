@@ -250,7 +250,7 @@ def eccentric_anomaly(e, M):
 def true_anomaly(e, E):
     """Calculates true anomaly from eccentric anomaly
 
-    Equation from  here step 3 here:
+    Equation from step 3 in this document:
     https://web.archive.org/web/*/http://ccar.colorado.edu/asen5070/handouts/kep2cart_2002.doc
     """
     return 2 * arctan(((1+e)/(1-e))**.5 * tan(E/2))
