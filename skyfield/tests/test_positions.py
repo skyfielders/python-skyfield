@@ -14,6 +14,39 @@ def test_subtraction():
     assert tuple(p.position.au) == (9, 18, 27)
     assert tuple(p.velocity.au_per_d) == (36, 45, 54)
 
+def test_separation_from_on_scalar():
+    p0 = ICRF((1, 0, 0))
+    p1 = ICRF((0, 1, 0))
+    assert str(p0.separation_from(p1)) == '90deg 00\' 00.0"'
+
+def test_separation_from_on_two_array_values():
+    p0 = ICRF(([1,1], [0,0], [0,0]))
+    p1 = ICRF(([0,-1], [1,0], [0,0]))
+    sep = p0.separation_from(p1)
+    d = sep._degrees
+    assert len(d) == 2
+    assert d[0] == 90.0
+    assert d[1] == 180.0
+
+def test_separation_from_on_an_array_and_a_scalar():
+    p0 = ICRF(([1,0], [0,1], [0,0]))
+    p1 = ICRF((0, 0, 1))
+    sep = p0.separation_from(p1)
+    d = sep._degrees
+    assert len(d) == 2
+    assert d[0] == 90.0
+    assert d[1] == 90.0
+
+    # And the other way around:
+
+    p0 = ICRF((0, 0, 1))
+    p1 = ICRF(([1,0], [0,1], [0,0]))
+    sep = p0.separation_from(p1)
+    d = sep._degrees
+    assert len(d) == 2
+    assert d[0] == 90.0
+    assert d[1] == 90.0
+
 def test_J2000_ecliptic_coordinates_with_and_without_a_time_array():
     p0 = ICRF((1,0,0))
     p1 = ICRF((0,1,0))

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, einsum, exp, full, nan, nan_to_num
+from numpy import array, einsum, exp, full, reshape, nan, nan_to_num
 from .constants import ANGVEL, AU_M, ERAD, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .earthlib import compute_limb_angle, refract, reverse_terra
@@ -243,8 +243,19 @@ class ICRF(object):
         3 values from 43deg 23' 23.1" to 42deg 49' 46.6"
 
         """
-        return Angle(radians=angle_between(self.position.au,
-                                           another_icrf.position.au))
+        u = self.position.au
+        v = another_icrf.position.au
+
+        # Allow an array of positions to be compared with a single other
+        # position.
+        difference = len(u.shape) - len(v.shape)
+        if difference:
+            if difference > 0:
+                v = reshape(v, v.shape + (1,) * difference)
+            else:
+                u = reshape(u, u.shape + (1,) * -difference)
+
+        return Angle(radians=angle_between(u, v))
 
     def cirs_xyz(self, epoch):
         """Compute cartesian CIRS coordinates at a given epoch (x,y,z).
