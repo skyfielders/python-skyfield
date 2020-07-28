@@ -25,13 +25,13 @@ Ap_Mag_Input_V3.txt
 from numpy import log10
 from .constants import RAD2DEG
 from .functions import angle_between, length_of
-from .naifcodes import target_name
+from .naifcodes import _target_name
 
 def planetary_magnitude(position):
     target = position.target
     function = _FUNCTIONS.get(target)
     if function is None:
-        name = target_name(target)
+        name = _target_name(target)
         raise ValueError('cannot compute the magnitude of target %s' % name)
 
     # Shamelessly treat the Sun as sitting at the Solar System Barycenter.

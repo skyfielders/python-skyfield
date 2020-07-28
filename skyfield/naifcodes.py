@@ -15,7 +15,7 @@ def numbered_name_of(code):
     name = code_names.get(code, '(Unnamed)')
     return '{0} {1}'.format(code, name)
 
-def target_name(target):
+def _target_name(target):
     """Return `target` annotated for display to the user.
 
     * A string target is quoted to make clear that it's a string, like 'comet'.
