@@ -8,10 +8,7 @@ from skyfield.elementslib import (
     osculating_elements_of,
 )
 from skyfield.keplerlib import ele_to_vec
-from numpy import (
-    array, sin, cos, pi, sqrt, ndarray, float64, repeat, seterr, inf,
-    linspace, arccos,
-)
+from numpy import array, pi, ndarray, float64, repeat, seterr, inf, linspace
 import os
 
 def ts():
