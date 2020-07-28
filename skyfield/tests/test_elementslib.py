@@ -7,6 +7,7 @@ from skyfield.elementslib import (
     normpi,
     osculating_elements_of,
 )
+from skyfield.keplerlib import ele_to_vec
 from numpy import (
     array, sin, cos, pi, sqrt, ndarray, float64, repeat, seterr, inf,
     linspace, arccos,
@@ -399,73 +400,6 @@ def test_periapsis_time(ts):
     Tp = elem.periapsis_time.tdb
     line = -240.61044176706827*t.tdb + 593656801.6052344
     compare(Tp, line, 1e-5)
-
-
-def ele_to_vec(p, e, i, Om, w, v, mu):
-    """Calculates state vectors from orbital elements. Also checks for invalid
-    sets of elements.
-
-    These equations are from this document:
-
-    https://web.archive.org/web/*/http://ccar.colorado.edu/asen5070/handouts/kep2cart_2002.doc
-
-    """
-    # Checks that longitude of ascending node is 0 if inclination is 0
-    if isinstance(i, ndarray) or isinstance(Om, ndarray):
-        if ((i==0)*(Om!=0)).any():
-            raise ValueError('If inclination is 0, longitude of ascending node must be 0')
-    else:
-        if i==0 and Om!=0:
-            raise ValueError('If inclination is 0, longitude of ascending node must be 0')
-
-    # Checks that argument of periapsis is 0  if eccentricity is 0
-    if isinstance(e, ndarray) or isinstance(w, ndarray):
-        if ((e==0)*(w!=0)).any():
-            raise ValueError('If eccentricity is 0, argument of periapsis must be 0')
-    else:
-        if e==0 and w!=0:
-            raise ValueError('If eccentricity is 0, argument of periapsis must be 0')
-
-    # Checks that true anomaly is less than arccos(-1/e) for hyperbolic orbits
-    if isinstance(e, ndarray) and isinstance(v, ndarray):
-        inds = (e>1)
-        if (v[inds]>arccos(-1/e[inds])).any():
-            raise ValueError('If eccentricity is >1, abs(true anomaly) cannot be more than arccos(-1/e)')
-    elif isinstance(e, ndarray) and not isinstance(v, ndarray):
-        inds = (e>1)
-        if (v>arccos(-1/e[inds])).any():
-            raise ValueError('If eccentricity is >1, abs(true anomaly) cannot be more than arccos(-1/e)')
-    elif isinstance(v, ndarray) and not isinstance(e, ndarray):
-        if e>1 and (v>arccos(-1/e)).any():
-            raise ValueError('If eccentricity is >1, abs(true anomaly) cannot be more than arccos(-1/e)')
-    else:
-        if e>1 and v>arccos(-1/e):
-            raise ValueError('If eccentricity is >1, abs(true anomaly) cannot be more than arccos(-1/e)')
-
-    # Checks that inclination is between 0 and pi
-    if isinstance(i, ndarray):
-        assert ((i>=0) * (i < pi)).all()
-    else:
-        assert i>=0 and i<pi
-    r = p/(1 + e*cos(v))
-    h = sqrt(p*mu)
-    u = v+w
-
-    X = r*(cos(Om)*cos(u) - sin(Om)*sin(u)*cos(i))
-    Y = r*(sin(Om)*cos(u) + cos(Om)*sin(u)*cos(i))
-    Z = r*(sin(i)*sin(u))
-
-    X_dot = X*h*e/(r*p)*sin(v) - h/r*(cos(Om)*sin(u) + sin(Om)*cos(u)*cos(i))
-    Y_dot = Y*h*e/(r*p)*sin(v) - h/r*(sin(Om)*sin(u) - cos(Om)*cos(u)*cos(i))
-    Z_dot = Z*h*e/(r*p)*sin(v) + h/r*sin(i)*cos(u)
-
-    # z and z_dot are independent of Om, so if Om is an array and the other
-    # elements are scalars, z and z_dot need to be repeated
-    if Z.size!=X.size:
-        Z = repeat(Z, X.size)
-        Z_dot = repeat(Z_dot, X.size)
-
-    return array([X, Y, Z]), array([X_dot, Y_dot, Z_dot])
 
 
 def check_orbit(p, e, i, Om, w, v, ts):
