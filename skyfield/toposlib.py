@@ -8,16 +8,27 @@ from .vectorlib import VectorFunction
 class Topos(VectorFunction):
     """A vector function that knows the position of a place on Earth.
 
-    You can specify latitude and longitude by either either building
-    Skyfield :class:`~skyfield.units.Angle` objects yourself and
-    supplying them to the constructor as its first two arguments, or by
-    providing floating point numbers to the alternate keyword arguments
-    ``latitude_degrees`` and ``longitude_degrees``.
+    The constructor needs:
+
+    * Either an :class:`~skyfield.units.Angle` for the `latitude` or
+      else a plain float `latitude_degrees` providing the angle in
+      degrees.
+
+    * Either an :class:`~skyfield.units.Angle` for the `longitude` or
+      else a plain float `longitude_degrees` providing the angle in
+      degrees.
+
+    * Optionally, the `elevation_m` of the location, in meters above
+      mean sea level on a WGS-84 globe.  If not specified, the location
+      will be assumed to sit at exactly sea level.
 
     The ``center`` of a topos object is always ``399``, the center of
     gravity of the Earth, so every call to the ``at(t)`` method of a
     topos object returns a :class:`~skyfield.positionlib.Geocentric`
     position.
+
+    Once the object has been created, here are its attributes and
+    methods:
 
     """
     center = 399
