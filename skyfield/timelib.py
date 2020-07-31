@@ -62,25 +62,19 @@ tt_minus_tai = array(32.184 / DAY_S)
 class Timescale(object):
     """The data necessary to express dates in different timescales.
 
-    Whenever you want to express a date in Skyfield, you need a
-    `Timescale` that can translate between several different systems for
-    expressing time.  You will usually create a single `Timescale` at
-    the beginning of your program, and use it every time you want to
+    A `Timescale` loads the data files that provide ∆T and the UTC
+    schedule of leap seconds, which are used by `Time` objects to
+    translate between different time scales.  Most programs create a
+    single `Timescale` which is used on every occasion they need to
     generate a specific `Time`:
 
     >>> from skyfield.api import load
-    >>> ts = load.timescale(builtin=True)
+    >>> ts = load.timescale()
     >>> t = ts.utc(1980, 3, 1, 9, 30)
     >>> t
     <Time tt=2444299.896425741>
 
-    Loading a timescale without specifying ``builtin=True`` downloads
-    fresh data tables from the United States Naval Observatory and the
-    International Earth Rotation Service.  These files go out of date,
-    and Skyfield will fetch updated copies once your copy of the files
-    are too old.
-
-    """
+    """ # TODO: link to new docs
     _utcnow = datetime.utcnow
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
@@ -964,7 +958,7 @@ using its methods, which let you either specify a calendar date or else
 supply a raw Julian date value with the "jd" keyword:
 
         from skyfield.api import load
-        ts = load.timescale(builtin=True)
+        ts = load.timescale()
         t = ts.utc(1980, 4, 20)       # the new way
 
         t = ts.tt(jd=2444349.500592)  # jd is also supported for tai, tt, tdb

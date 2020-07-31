@@ -2,8 +2,21 @@
 Changelog
 =========
 
-1.26 — 2020 July 25
+1.26 — 2020 July 31
 -------------------
+
+* The official ∆T files from NASA’s FTP server have no new data beyond
+  February, the start of the global pandemic.  Unless new data appears
+  by next February, older versions of Skyfield will download the files
+  over again every time :meth:`~skyfield.iokit.Loader.timescale()` is
+  called without ``builtin=True``.  This has inspired two changes:
+
+  1. The loader’s :meth:`~skyfield.iokit.Loader.timescale()` method now
+     defaults to ``builtin=True``.  To download new ∆T files from NASA
+     and the leap second file from the International Earth Rotation
+     Service, specify ``builtin=False``.
+
+  2. (TODO)
 
 * The `ICRF.separation_from()` method now officially supports the
   combination of an array of positions with a single reference position!

@@ -13,7 +13,7 @@ that can be used to express them.
    from __future__ import print_function
    from skyfield.api import load
    from skyfield.positionlib import ICRF
-   ts = load.timescale(builtin=True)
+   ts = load.timescale()
    de421 = load('de421.bsp')
    earth = de421['Earth']
    mars = de421['Mars']

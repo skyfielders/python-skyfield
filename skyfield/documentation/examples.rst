@@ -41,7 +41,7 @@ or how early I need to rise to see the morning sky:
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
     next_midnight = midnight + dt.timedelta(days=1)
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t0 = ts.from_datetime(midnight)
     t1 = ts.from_datetime(next_midnight)
     eph = load('de421.bsp')
@@ -80,7 +80,7 @@ and 270° at the Last Quarter.
 
     from skyfield.api import load
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2019, 12, 9, 15, 36)
 
     eph = load('de421.bsp')
@@ -121,7 +121,7 @@ and 270° if the Sun is to the right of the Moon.
     from skyfield.api import load, Topos
     from skyfield.trigonometry import position_angle_of
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2019, 9, 30, 23)
 
     eph = load('de421.bsp')
@@ -177,7 +177,7 @@ like the Sun, Moon, or one of the planets.
     from skyfield.almanac import find_discrete, risings_and_settings
     from pytz import timezone
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t0 = ts.utc(2019, 1, 19)
     t1 = ts.utc(2019, 1, 21)
 
@@ -212,7 +212,7 @@ then Skyfield can return its right ascension and declination.
 
     from skyfield import api
 
-    ts = api.load.timescale(builtin=True)
+    ts = api.load.timescale()
     t = ts.utc(2019, 9, 13, 20)
     topos = api.Topos(latitude_degrees=42, longitude_degrees=-87)
     observer = topos.at(t)
@@ -250,7 +250,7 @@ creating the position directly.
     from skyfield.api import load
     from skyfield.positionlib import position_of_radec
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2020, 1, 3, 12, 45)
 
     earth = 399  # NAIF code for the Earth center of mass
@@ -296,7 +296,7 @@ to both Accra, Ghana, and the top of Mount Bierstadt in Colorado.
    from skyfield.api import Topos, load
    from skyfield.functions import length_of
 
-   ts = load.timescale(builtin=True)
+   ts = load.timescale()
    t = ts.utc(2019, 1, 1)
 
    bierstadt = Topos('39.5828 N', '105.6686 W', elevation_m=4287.012)

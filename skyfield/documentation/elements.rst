@@ -23,7 +23,7 @@ orbiting earth:
     from skyfield.api import load
     from skyfield.elementslib import osculating_elements_of
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2018, 4, 22, range(0, 25))
 
     planets = load('de421.bsp')

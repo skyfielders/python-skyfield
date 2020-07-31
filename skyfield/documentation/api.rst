@@ -61,7 +61,7 @@ you can run:
 
 .. testcode::
 
-    ts = api.load.timescale(builtin=True)
+    ts = api.load.timescale()
 
 This can avoid problems connecting
 to the servers from which the official files are distributed.

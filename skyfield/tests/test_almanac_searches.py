@@ -9,7 +9,7 @@ bump = 1e-5
 epsilon = 1e-10
 
 def make_t():
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t0 = ts.tt_jd(0)
     t1 = ts.tt_jd(1)
     return t0, t1

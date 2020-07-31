@@ -48,7 +48,7 @@ in this example, the famous Aristarchus crater.
 
     from skyfield.api import PlanetaryConstants, load
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2019, 12, 20, 11, 5)
 
     eph = load('de421.bsp')
@@ -91,7 +91,7 @@ or in altitude and azimuth measured against the astronaut’s horizon.
 
     from skyfield.api import PlanetaryConstants, load
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2019, 12, 20, 11, 5)
 
     eph = load('de421.bsp')
@@ -167,7 +167,7 @@ the result will be a simple 3×3 matrix.
 
     from skyfield.api import PlanetaryConstants, load
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2019, 12, 20, 11, 5)
 
     pc = PlanetaryConstants()

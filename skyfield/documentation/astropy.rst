@@ -30,7 +30,7 @@ between the two libraries:
       atime = Time('2010-01-01T00:00:00', scale='utc')
       print(atime)
 
-      ts = load.timescale(builtin=True)
+      ts = load.timescale()
       t = ts.from_astropy(atime)
       print(t.utc_jpl())
 
@@ -55,7 +55,7 @@ between the two libraries:
       planets = load('de421.bsp')
       earth = planets['earth']
 
-      ts = load.timescale(builtin=True)
+      ts = load.timescale()
       t = ts.utc(1980, 1, 1)
       barycentric = earth.at(t)
 

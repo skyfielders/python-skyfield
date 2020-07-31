@@ -105,7 +105,7 @@ def test_position_of_radec():
     p = api.position_of_radec(12, 90, distance_au=2)
     assert length_of(p.position.au - [0, 0, 2]) < epsilon
 
-    ts = api.load.timescale(builtin=True)
+    ts = api.load.timescale()
     epoch = ts.tt_jd(api.B1950)
     p = api.position_of_radec(0, 0, 1, epoch=epoch)
     assert length_of(p.position.au - [1, 0, 0]) > 1e-16
@@ -129,7 +129,7 @@ def test_velocity_in_ITRF_to_GCRS2():
     # r = np.array([(1, 0, 0), (1, 1 / DAY_S, 0)]).T
     # v = np.array([(0, 1, 0), (0, 1, 0)]).T
 
-    ts = api.load.timescale(builtin=True)
+    ts = api.load.timescale()
     t = ts.utc(2020, 7, 17, 8, 51, [0, 1])
     r = np.array([(1, 0, 0), (1, 0, 0)]).T
     v = np.array([(0, 0, 0), (0, 0, 0)]).T

@@ -182,7 +182,7 @@ class ICRF(object):
         right ascension and declination:
 
         >>> from skyfield.api import load
-        >>> ts = load.timescale(builtin=True)
+        >>> ts = load.timescale()
         >>> t = ts.utc(2020, 5, 13, 10, 32)
         >>> eph = load('de421.bsp')
         >>> astrometric = eph['earth'].at(t).observe(eph['sun'])
@@ -225,7 +225,7 @@ class ICRF(object):
         """Return the angle between this position and another.
 
         >>> from skyfield.api import load
-        >>> ts = load.timescale(builtin=True)
+        >>> ts = load.timescale()
         >>> t = ts.utc(2020, 4, 18)
         >>> eph = load('de421.bsp')
         >>> sun, venus, earth = eph['sun'], eph['venus'], eph['earth']

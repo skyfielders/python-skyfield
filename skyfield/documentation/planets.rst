@@ -198,7 +198,7 @@ at the completion of a ``with`` statement:
 
     from contextlib import closing
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.J2000
 
     with closing(planets):

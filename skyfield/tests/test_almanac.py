@@ -40,7 +40,7 @@ def test_moon_phases():
     assert (y == (1, 2)).all()
 
 def test_oppositions_conjunctions():
-    ts = api.load.timescale(builtin=True)
+    ts = api.load.timescale()
     t0 = ts.utc(2019, 1, 1)
     t1 = ts.utc(2021, 1, 1)
     e = api.load('de421.bsp')

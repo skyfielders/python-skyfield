@@ -100,7 +100,7 @@ is:
 
     # Build the time range `t` over which to plot, plus other values.
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.tt_jd(arange(sat.epoch.tt - 1.0, sat.epoch.tt + 3.0, 0.01))
     reentry = ts.utc(2013, 11, 11, 0, 16)
     earth_radius_km = 6371.

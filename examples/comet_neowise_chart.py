@@ -13,7 +13,7 @@ from skyfield.projections import build_stereographic_projection
 # need to be drawn once, so we take the middle comet date as the single
 # time `t` we use for everything else.
 
-ts = load.timescale(builtin=True)
+ts = load.timescale()
 t_comet = ts.utc(2020, 7, range(17, 27))
 t = t_comet[len(t_comet) // 2]  # middle date
 

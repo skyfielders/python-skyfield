@@ -16,7 +16,7 @@ def test_velocity():
     # get lost down in the noise.
     factor = 300.0
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2019, 11, 2, 3, 53, [0, 1.0 / factor])
     jacob = Topos(latitude_degrees=36.7138, longitude_degrees=-112.2169)
     p = jacob.at(t)
@@ -26,7 +26,7 @@ def test_velocity():
     assert length_of(velocity2 - factor * velocity1) < 0.0007
 
 def test_itrf_vector():
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2019, 11, 2, 3, 53)
     top = Topos(latitude_degrees=45, longitude_degrees=0,
                 elevation_m=constants.AU_M - constants.ERAD)

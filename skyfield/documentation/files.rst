@@ -26,25 +26,15 @@ then it will display progress bars as each file is downloaded:
    import os
    from skyfield.api import Loader
 
-   # Depending on the order that these .rst files run in, this might
-   # download the files afresh, or might find them already present:
-
    load = Loader('.')
-   ts = load.timescale()
-   planets = load('de421.bsp')
-
-   # But this second invocation of the loader will definitely find them,
-   # making the "print(load.log)" below come out right:
-
-   load = Loader('.')
-   ts = load.timescale()
+   ts = load.timescale(builtin=False)
    planets = load('de421.bsp')
 
 ::
 
    from skyfield.api import load
 
-   ts = load.timescale()
+   ts = load.timescale(builtin=False)
    planets = load('de421.bsp')
    print('Ready')
 
@@ -69,33 +59,17 @@ provided in the ``skyfield.api`` module.
 But other programs may want to build their own loader
 so that they have the chance to specify non-default behavior.
 
-.. _built-in-timescale-files:
-
-Using built-in timescale files
-==============================
-
-Some computers have difficulty downloading
-the official time scale files for ∆T and leap seconds,
-so Skyfield carries an extra copy of each file.
-You can use these built-in time scale files with:
-
-.. testcode::
-
-   ts = load.timescale(builtin=True)
-
-Note that these files will gradually go out of date,
-eventually making your calculations of future dates wrong by several seconds
-unless you upgrade Skyfield.
-
 Specifying the download directory
 =================================
 
 The default ``load()`` object saves files directly
 to your current working directory —
 usually the folder from which you launched your Skyfield program.
-If we ask the load object that we used above
-for the sequence of actions that it took,
-we will see that it looked for files in the current directory:
+For example,
+if we ask the loader we used above
+its log will show that it looked for them
+(and in this example, found them) in ``.``,
+the current working directory:
 
 .. testcode::
 

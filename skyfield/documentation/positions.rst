@@ -119,7 +119,7 @@ or else by generating a whole series of positions.
 
     from skyfield.api import Topos, load
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.now()
 
     planets = load('de421.bsp')
@@ -165,7 +165,7 @@ or else by generating a whole series of positions.
 
     from skyfield.api import Star, Topos, load
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.now()
 
     boston = earth + Topos('42.3583 N', '71.0603 W', elevation_m=43)
@@ -191,7 +191,7 @@ or else by generating a whole series of positions.
 
     from skyfield.api import EarthSatellite, Topos, load
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.now()
 
     line1 = '1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082'

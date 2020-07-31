@@ -101,7 +101,7 @@ def test_appendix_c_conversion_from_TEME_to_ITRF():
     assert abs(+5.531924446 - vITRF_per_second[2]) < epsilon
 
 def test_appendix_c_satellite():
-    ts = api.load.timescale(builtin=True)
+    ts = api.load.timescale()
 
     lines = appendix_c_example.splitlines()
     sat = EarthSatellite(lines[1], lines[2], lines[0], ts)

@@ -295,61 +295,37 @@ class Loader(object):
             download(url, path, self.verbose)
         return open(path, mode)
 
-    def timescale(self, delta_t=None, builtin=False):
+    def timescale(self, delta_t=None, builtin=True):
         """Open or download three time scale files, returning a `Timescale`.
 
-        This method is how most Skyfield users build a `Timescale`
-        object, which is necessary for building `Time` objects.  The
-        safest approach is::
+        This loads three data files that supply recent ∆T measurements
+        plus the current schedule of UTC leap seconds, and returns a new
+        `Timescale` object.  By default it loads copies of the three
+        files that are shipped with Skyfiled itself; to download new
+        files from the official sources, set ``builtin=False``.
 
-            ts = load.timescale(builtin=True)
-
-        This avoids downloading any files by using built-in copies of
-        them instead.  The problem is that the files distributed with
-        any particular version of Skyfield will go gradually out of date
-        and you will start missing leap seconds.  To instead download
-        current files, omit the ``builtin`` option::
-
-            ts = load.timescale()
-
-        UT1 is tabulated by the United States Naval Observatory files
-        ``deltat.data`` and ``deltat.preds``, while UTC is defined by
-        ``Leap_Second.dat`` from the International Earth Rotation
-        Service.
-
-        """
+        """  # TODO: add reference to new docs
+        # TODO: refactor this and _build_builtin_timescale() to
+        # eliminate redundancy.
         if builtin:
-            return _build_builtin_timescale()
+            return _build_builtin_timescale(delta_t)
 
         if delta_t is not None:
             delta_t_recent = np.array(((-1e99, 1e99), (delta_t, delta_t)))
         else:
-            try:
-                data = self('deltat.data')
-                preds = self('deltat.preds')
-            except IOError as e:
-                e.args = (e.args[0] + _TIMESCALE_IO_ADVICE,) + e.args[1:]
-                raise
+            data = self('deltat.data')
+            preds = self('deltat.preds')
             data_end_time = data[0, -1]
             i = np.searchsorted(preds[0], data_end_time, side='right')
             delta_t_recent = np.concatenate([data, preds[:,i:]], axis=1)
-        try:
-            leap_dates, leap_offsets = self('Leap_Second.dat')
-        except IOError as e:
-            e.args = (e.args[0] + _TIMESCALE_IO_ADVICE,) + e.args[1:]
-            raise
+
+        leap_dates, leap_offsets = self('Leap_Second.dat')
+
         return Timescale(delta_t_recent, leap_dates, leap_offsets)
 
     @property
     def log(self):
         return '\n'.join(self.events)
-
-_TIMESCALE_IO_ADVICE = """
-
-You can avoid this error by passing `timescale(builtin=True)` which
-makes Skyfield use built-in copies of the timescale files instead of
-downloading new ones.  The built-in leap second and Earth rotation files
-will gradually go out of date unless you periodically upgrade Skyfield."""
 
 def _search(mapping, filename):
     """Search a Loader data structure for a filename."""

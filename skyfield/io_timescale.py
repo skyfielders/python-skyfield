@@ -13,15 +13,18 @@ except:
 
 _lock = Lock()
 
-def _build_builtin_timescale():
-    b = get_data('skyfield', 'data/deltat.data')
-    expiration_date, data = parse_deltat_data(BytesIO(b))
-    b = get_data('skyfield', 'data/deltat.preds')
-    expiration_date, preds = parse_deltat_preds(BytesIO(b))
+def _build_builtin_timescale(delta_t=None):
+    if delta_t is not None:
+        delta_t_recent = np.array(((-1e99, 1e99), (delta_t, delta_t)))
+    else:
+        b = get_data('skyfield', 'data/deltat.data')
+        expiration_date, data = parse_deltat_data(BytesIO(b))
+        b = get_data('skyfield', 'data/deltat.preds')
+        expiration_date, preds = parse_deltat_preds(BytesIO(b))
 
-    data_end_time = data[0, -1]
-    i = np.searchsorted(preds[0], data_end_time, side='right')
-    delta_t_recent = np.concatenate([data, preds[:,i:]], axis=1)
+        data_end_time = data[0, -1]
+        i = np.searchsorted(preds[0], data_end_time, side='right')
+        delta_t_recent = np.concatenate([data, preds[:,i:]], axis=1)
 
     b = get_data('skyfield', 'data/Leap_Second.dat')
     expiration_date, arrays = parse_leap_seconds(BytesIO(b))

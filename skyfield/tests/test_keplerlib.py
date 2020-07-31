@@ -24,7 +24,7 @@ def test_against_horizons():
     # horizons/ceres-orbital-elements
     # horizons/ceres-position
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.tdb_jd(2458886.500000000)
 
     a = 2.768873850275102E+00 # A
@@ -59,7 +59,7 @@ def test_minor_planet():
             b'  6751 115 1801-2019 0.60 M-v 30h Williams   0000      '
             b'(1) Ceres              20190915\n')
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2020, 6, 17)
     eph = load('de421.bsp')
     df = mpc.load_mpcorb_dataframe(BytesIO(text))
@@ -80,7 +80,7 @@ def test_comet():
             b'  283.3593   88.9908  20200224  -2.0  4.0  C/1995 O1 (Hale-Bopp)'
             b'                                    MPC106342\n')
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2020, 5, 31)
     eph = load('de421.bsp')
     e = eph['earth'].at(t)

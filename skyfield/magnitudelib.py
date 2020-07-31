@@ -36,7 +36,7 @@ def planetary_magnitude(position):
 
     >>> from skyfield.api import load
     >>> from skyfield.magnitudelib import planetary_magnitude
-    >>> ts = load.timescale(builtin=True)
+    >>> ts = load.timescale()
     >>> t = ts.utc(2020, 7, 31)
     >>> eph = load('de421.bsp')
     >>> astrometric = eph['earth'].at(t).observe(eph['jupiter barycenter'])

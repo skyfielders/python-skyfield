@@ -16,7 +16,7 @@ def test_frame_rotation_matrices():
     # print(g(spice.pxform('J2000', 'MOON_PA', (tdb - T0) * DAY_S)))
     # print(g(spice.sxform('J2000', 'MOON_PA', (tdb - T0) * DAY_S)[3:6,:3]))
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
 
     pc = PlanetaryConstants()
     pc.read_text(load('moon_080317.tf'))
@@ -111,7 +111,7 @@ def test_frame_rotation_matrices():
 
 def test_rotating_vector_into_frame():
     et_seconds = 259056665.1855896
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.tdb_jd(T0 + et_seconds / 3600. / 24.0)
 
     pc = PlanetaryConstants()
@@ -147,7 +147,7 @@ def test_horizons_position_of_latitude_longitude_on_moon():
     # See the file `horizons/moon-from-moon-topos` for the HORIZONS
     # result this test compares against.
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.tdb_jd(2458827.5)
 
     pc = PlanetaryConstants()
@@ -176,7 +176,7 @@ def test_horizons_position_of_latitude_longitude_on_moon():
     # Is this 4-5 digits of precision all we can expect?  No idea.
 
 def test_observing_earth_from_location_on_moon():
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2019, 12, 13)
 
     pc = PlanetaryConstants()
@@ -218,7 +218,7 @@ def test_observing_earth_from_location_on_moon_with_time_vector():
     # test only the end result, to see if the operation more thoroughly
     # tested above will also work when given a time vector.
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2019, 12, [13, 14])
 
     pc = PlanetaryConstants()
@@ -242,7 +242,7 @@ def test_using_elevation_to_locate_center_of_moon():
     # Test the `elevation_m` parameter by using it to offset a Moon
     # surface location back to the Moon's center.
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.utc(2020, 4, 23)
 
     eph = load('de421.bsp')
@@ -268,7 +268,7 @@ def test_frame_alias():
     f1 = pc.build_frame_named('MOON_PA_DE421')
     f2 = pc.build_frame_named('MOON_PA')
 
-    ts = load.timescale(builtin=True)
+    ts = load.timescale()
     t = ts.tdb_jd(T0)
     assert (f1.rotation_at(t) == f2.rotation_at(t)).all()
 

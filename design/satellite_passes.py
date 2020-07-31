@@ -11,7 +11,7 @@ import numpy as np
 from skyfield import almanac, api
 from skyfield.nutationlib import iau2000b
 
-ts = api.load.timescale(builtin=True)
+ts = api.load.timescale()
 eph = api.load('de421.bsp')
 sat = api.EarthSatellite(
     '1 25544U 98067A   20150.54009403  .00000886  00000-0  23936-4 0  9992',
