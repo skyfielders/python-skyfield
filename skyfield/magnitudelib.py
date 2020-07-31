@@ -28,6 +28,22 @@ from .functions import angle_between, length_of
 from .naifcodes import _target_name
 
 def planetary_magnitude(position):
+    """Given the position of a planet, return its visual magnitude.
+
+    This prototype function — which so far only supports Mercury, Venus,
+    Earth, Jupiter, and Uranus — computes the visual magnitude of a
+    planet, given its position relative to an observer.
+
+    >>> from skyfield.api import load
+    >>> from skyfield.magnitudelib import planetary_magnitude
+    >>> ts = load.timescale(builtin=True)
+    >>> t = ts.utc(2020, 7, 31)
+    >>> eph = load('de421.bsp')
+    >>> astrometric = eph['earth'].at(t).observe(eph['jupiter barycenter'])
+    >>> print('%.2f' % planetary_magnitude(astrometric))
+    -2.73
+
+    """
     target = position.target
     function = _FUNCTIONS.get(target)
     if function is None:

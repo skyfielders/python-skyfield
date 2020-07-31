@@ -39,9 +39,7 @@ def test_separation_from_on_an_array_and_a_scalar():
 
     # And the other way around:
 
-    p0 = ICRF((0, 0, 1))
-    p1 = ICRF(([1,0], [0,1], [0,0]))
-    sep = p0.separation_from(p1)
+    sep = p1.separation_from(p0)
     d = sep._degrees
     assert len(d) == 2
     assert d[0] == 90.0

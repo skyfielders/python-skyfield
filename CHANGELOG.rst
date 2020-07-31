@@ -2,6 +2,19 @@
 Changelog
 =========
 
+1.26 — 2020 July 25
+-------------------
+
+* The `ICRF.separation_from()` method now officially supports the
+  combination of an array of positions with a single reference position!
+  Its previous support for that combination was, alas, accidental, and
+  was broken with the 1.23 release.
+  `#414 <https://github.com/skyfielders/python-skyfield/issues/414>`_
+  `#424 <https://github.com/skyfielders/python-skyfield/issues/424>`_
+
+* A prototype :func:`~skyfield.magnitudelib.planetary_magnitude()`
+  routine has been added with support for several planets.
+
 1.25 — 2020 July 24
 -------------------
 

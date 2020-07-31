@@ -10,15 +10,15 @@ class Topos(VectorFunction):
 
     The constructor needs:
 
-    * Either an :class:`~skyfield.units.Angle` for the `latitude` or
-      else a plain float `latitude_degrees` providing the angle in
+    * Either an :class:`~skyfield.units.Angle` for the ``latitude`` or
+      else a plain float ``latitude_degrees`` providing the angle in
       degrees.
 
-    * Either an :class:`~skyfield.units.Angle` for the `longitude` or
-      else a plain float `longitude_degrees` providing the angle in
+    * Either an :class:`~skyfield.units.Angle` for the ``longitude`` or
+      else a plain float ``longitude_degrees`` providing the angle in
       degrees.
 
-    * Optionally, the `elevation_m` of the location, in meters above
+    * Optionally, the ``elevation_m`` of the location, in meters above
       mean sea level on a WGS-84 globe.  If not specified, the location
       will be assumed to sit at exactly sea level.
 

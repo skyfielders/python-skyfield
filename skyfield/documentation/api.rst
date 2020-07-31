@@ -127,7 +127,7 @@ Other time scales and conversions are available through its methods.
    Time.nutation_matrix
    Time.precession_matrix
 
-Vector Functions
+Vector functions
 ================
 
 .. currentmodule:: skyfield.vectorlib
@@ -143,7 +143,7 @@ Either adding two vector functions ``v1 + v2`` or subtracting them ``v1 - v2``
 produces a new function of time that, when invoked with ``.at(t)``,
 returns the sum or difference of the vectors returned by the two functions.
 
-Planetary Ephemerides
+Planetary ephemerides
 =====================
 
 .. currentmodule:: skyfield.jpllib
@@ -164,6 +164,11 @@ See :doc:`planets`.
 Kernels also support lookup using the Python ``kernel['Mars']`` syntax,
 in which case they return a function of time
 that returns vectors from the Solar System barycenter to the named body.
+
+Planetary magnitudes
+====================
+
+.. autofunction:: skyfield.magnitudelib.planetary_magnitude
 
 Planetary reference frames
 ==========================
@@ -192,7 +197,7 @@ Routines to search for events like sunrise, sunset, and Moon phase.
    dark_twilight_day
    moon_phases
 
-Topocentric Locations
+Topocentric locations
 =====================
 
 .. currentmodule:: skyfield.toposlib
@@ -204,13 +209,13 @@ that computes the location of any position on the Earth’s surface.
 
    Topos
 
-Kepler Orbits
+Kepler orbits
 =============
 
 See :doc:`kepler-orbits`
 for computing the positions of comets, asteroids, and other minor planets.
 
-Earth Satellites
+Earth satellites
 ================
 
 .. currentmodule:: skyfield.sgp4lib
@@ -322,7 +327,7 @@ Searching
 .. autofunction:: find_maxima()
 .. autofunction:: find_minima()
 
-Osculating Orbital Elements
+Osculating orbital elements
 ===========================
 
 This routine returns osculating orbital elements for an object’s
