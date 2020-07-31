@@ -11,9 +11,6 @@
 .pydevproject
 .settings
 .tox/
-/Leap_Second.dat
-/deltat.data
-/deltat.preds
 /dist/
 /skyfield/documentation/_build/
 /tmp*
