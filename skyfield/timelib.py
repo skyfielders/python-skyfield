@@ -36,23 +36,17 @@ class CalendarArray(ndarray):
 if hasattr(dt_module, 'timezone'):
     utc = dt_module.timezone.utc
 else:
-    try:
-        from pytz import utc
-    except ImportError:
-        # Lacking a full suite of timezones from pytz, we at least need a
-        # time zone object for UTC.
+    class UTC(dt_module.tzinfo):
+        'UTC'
+        zero = dt_module.timedelta(0)
+        def utcoffset(self, dt):
+            return self.zero
+        def tzname(self, dt):
+            return 'UTC'
+        def dst(self, dt):
+            return self.zero
 
-        class UTC(dt_module.tzinfo):
-            'UTC'
-            zero = dt_module.timedelta(0)
-            def utcoffset(self, dt):
-                return self.zero
-            def tzname(self, dt):
-                return 'UTC'
-            def dst(self, dt):
-                return self.zero
-
-        utc = UTC()
+    utc = UTC()
 
 # Much of the following code is adapted from the USNO's "novas.c".
 

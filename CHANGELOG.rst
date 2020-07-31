@@ -15,6 +15,14 @@ Changelog
 * A prototype :func:`~skyfield.magnitudelib.planetary_magnitude()`
   routine has been added with support for several planets.
 
+* The ``utc`` timezone that Skyfield returns in Python datetimes is now
+  either the Python Standard Library’s own UTC object, if it supplies
+  one, or else is defined by Skyfield itself.  Skyfield no longer
+  silently tries importing the whole ``pytz`` package merely to use its
+  UTC object — which also means that the timezone returned by Skyfield
+  longer offers the non-standard ``localize()`` method.
+  `#413 <https://github.com/skyfielders/python-skyfield/issues/413>`_
+
 1.25 — 2020 July 24
 -------------------
 
