@@ -62,11 +62,10 @@ tt_minus_tai = array(32.184 / DAY_S)
 class Timescale(object):
     """The data necessary to express dates in different timescales.
 
-    A `Timescale` loads the data files that provide ∆T and the UTC
-    schedule of leap seconds, which are used by `Time` objects to
+    A `Timescale` loads data files that supply both the value of ∆T over
+    time, and the schedule of UTC leap seconds, which Skyfield uses to
     translate between different time scales.  Most programs create a
-    single `Timescale` which is used on every occasion they need to
-    generate a specific `Time`:
+    single `Timescale` which they use to build their `Time` objects:
 
     >>> from skyfield.api import load
     >>> ts = load.timescale()
@@ -78,11 +77,20 @@ class Timescale(object):
     _utcnow = datetime.utcnow
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
+        print(delta_t_recent[0][-1])
         self.delta_t_table = build_delta_t_table(delta_t_recent)
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
         self._leap_reverse_dates = leap_dates + leap_offsets / DAY_S
         self.J2000 = Time(self, float_(T0))
         self.B1950 = Time(self, float_(B1950))
+
+    @classmethod
+    def from_raw_data(cls, deltat_data, deltat_preds, leap_second_dat):
+        data_end_time = deltat_data[0, -1]
+        i = searchsorted(deltat_preds[0], data_end_time, side='right')
+        delta_t_recent = concatenate([deltat_data, deltat_preds[:,i:]], axis=1)
+        leap_dates, leap_offsets = leap_second_dat
+        return cls(delta_t_recent, leap_dates, leap_offsets)
 
     def now(self):
         """Return the current date and time as a `Time` object.

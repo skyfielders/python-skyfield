@@ -307,12 +307,13 @@ class Loader(object):
         """  # TODO: add reference to new docs
         # TODO: refactor this and _build_builtin_timescale() to
         # eliminate redundancy.
+        if delta_t is not None:
+            delta_t = np.array(((-1e99, 1e99), (delta_t, delta_t)))
+
         if builtin:
             return _build_builtin_timescale(delta_t)
 
-        if delta_t is not None:
-            delta_t_recent = np.array(((-1e99, 1e99), (delta_t, delta_t)))
-        else:
+        if delta_t is None:
             data = self('deltat.data')
             preds = self('deltat.preds')
             data_end_time = data[0, -1]

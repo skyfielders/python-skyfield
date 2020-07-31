@@ -5,16 +5,19 @@ Changelog
 1.26 — 2020 July 31
 -------------------
 
-* The official ∆T files from NASA’s FTP server have no new data beyond
-  February, the start of the global pandemic.  Unless new data appears
-  by next February, older versions of Skyfield will download the files
-  over again every time :meth:`~skyfield.iokit.Loader.timescale()` is
-  called without ``builtin=True``.  This has inspired two changes:
+* The official ∆T files on NASA’s FTP server have stopped receiving
+  updates — they have no new data beyond February, the start of the
+  global pandemic.  Unless they are updated by next February, older
+  versions of Skyfield will unfortunately download the files all over
+  again every time :meth:`~skyfield.iokit.Loader.timescale()` is called
+  (unless the caller passes ``builtin=True``).  To make Skyfield less
+  fragile going forward:
 
   1. The loader’s :meth:`~skyfield.iokit.Loader.timescale()` method now
-     defaults to ``builtin=True``.  To download new ∆T files from NASA
-     and the leap second file from the International Earth Rotation
-     Service, specify ``builtin=False``.
+     defaults to ``builtin=True``, telling it to use the ∆T and leap
+     second files that ship with Skyfield internally.  To download new
+     ∆T files from NASA and the leap second file from the International
+     Earth Rotation Service, specify ``builtin=False``.
 
   2. (TODO)
 
