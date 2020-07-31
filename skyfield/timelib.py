@@ -77,7 +77,6 @@ class Timescale(object):
     _utcnow = datetime.utcnow
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
-        print(delta_t_recent[0][-1])
         self.delta_t_table = build_delta_t_table(delta_t_recent)
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
         self._leap_reverse_dates = leap_dates + leap_offsets / DAY_S
