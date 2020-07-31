@@ -313,16 +313,16 @@ class Loader(object):
         if builtin:
             return _build_builtin_timescale(delta_t)
 
-        if delta_t is None:
-            data = self('deltat.data')
-            preds = self('deltat.preds')
-            data_end_time = data[0, -1]
-            i = np.searchsorted(preds[0], data_end_time, side='right')
-            delta_t_recent = np.concatenate([data, preds[:,i:]], axis=1)
+        if delta_t is not None:
+            deltat_data = delta_t
+            deltat_preds = delta_t
+        else:
+            deltat_data = self('deltat.data')
+            deltat_preds = self('deltat.preds')
 
-        leap_dates, leap_offsets = self('Leap_Second.dat')
-
-        return Timescale(delta_t_recent, leap_dates, leap_offsets)
+        leap_second_dat = self('Leap_Second.dat')
+        ts = Timescale.from_raw_data(deltat_data, deltat_preds, leap_second_dat)
+        return ts
 
     @property
     def log(self):
