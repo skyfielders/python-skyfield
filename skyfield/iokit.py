@@ -38,6 +38,8 @@ try:
 except ImportError:
     create_default_context = None
 
+_skip_certificate_support = (sys.version_info < (2, 7))
+
 try:
     from urllib.parse import urlparse
     from urllib.request import urlopen
@@ -435,7 +437,9 @@ def download(url, path, verbose=None, blocksize=128*1024, backup=False):
     """
     tempname = path + '.download'
     try:
-        if create_default_context is None:
+        if _skip_certificate_support:
+            connection = urlopen(url)
+        elif create_default_context is None:
             connection = urlopen(url, cafile=certifi.where())
         else:
             ssl_context = create_default_context(cafile=certifi.where())
