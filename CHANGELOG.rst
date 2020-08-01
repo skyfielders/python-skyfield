@@ -10,8 +10,8 @@ Changelog
   global pandemic.  Unless they are updated by next February, older
   versions of Skyfield will unfortunately download the files all over
   again every time :meth:`~skyfield.iokit.Loader.timescale()` is called
-  (unless the caller passes ``builtin=True``).  To make Skyfield less
-  fragile going forward:
+  (unless the ``builtin=True`` parameter is provided).  To make Skyfield
+  less fragile going forward:
 
   1. The loader’s :meth:`~skyfield.iokit.Loader.timescale()` method now
      defaults to ``builtin=True``, telling it to use the ∆T and leap

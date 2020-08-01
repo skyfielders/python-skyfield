@@ -156,33 +156,36 @@ class Loader(object):
             if url:
                 url += filename
 
-        path = self.path_to(filename)
-        exists = os.path.exists(path)
-        self._log(path)
-        if exists:
-            self._log('  File already exists')
-
         parser = _search(self.parsers, filename)
         opener = _search(self.openers, filename)
         if (parser is None) and (opener is None):
             raise ValueError('Skyfield does not know how to open a file'
                              ' named {0!r}'.format(filename))
 
+        path = self._fetch(url, filename, reload, backup)
+
+        if parser is not None:
+            self._log('  Parsing with {0}()', parser.__name__)
+            with open(path, 'rb') as f:
+                expiration_date, data = parser(f)
+            return data
+        else:
+            self._log('  Opening with {0}', opener.__name__)
+            return opener(path)
+
+    def _fetch(self, url, filename, reload, backup):
+        path = self.path_to(filename)
+        exists = os.path.exists(path)
+        self._log(path)
+        if exists:
+            self._log('  File already exists')
         if (not exists) or reload:
             if url is None:
                 raise ValueError('Skyfield does not know where to download {!r}'
                                  .format(filename))
             self._log('  Downloading {0}', url)
             download(url, path, self.verbose, backup=backup and exists)
-
-        if parser is not None:
-            self._log('  Parsing with: {0}()', parser.__name__)
-            with open(path, 'rb') as f:
-                expiration_date, data = parser(f)
-            return data
-        else:
-            self._log('  Opening with: {0}', opener.__name__)
-            return opener(path)
+        return path
 
     def _log(self, message, *args):
         self.events.append(message.format(*args))
@@ -261,17 +264,8 @@ class Loader(object):
 
         if filename is None:
             filename = urlparse(url).path.split('/')[-1]
-        path = self.path_to(filename)
-        self._log(path)
 
-        exists = os.path.exists(path)
-        if exists:
-            self._log('  File already exists')
-
-        if (not exists) or reload:
-            self._log('  Downloading {0}', url)
-            download(url, path, self.verbose, backup=exists and backup)
-
+        path = self._fetch(url, filename, reload, backup)
         return open(path, mode)
 
     def timescale(self, delta_t=None, builtin=True):
@@ -314,7 +308,6 @@ def _search(mapping, filename):
             if fnmatch(filename, pattern):
                 return result2
     return None
-
 
 def load_file(path):
     """Open a file on your local drive, using its extension to guess its type.
