@@ -845,7 +845,7 @@ which Skyfield parses and returns as a standard Python ``date``:
 
 .. testoutput::
 
-    2021-07-28
+    Leap second data expires on: 2021-07-28
 
 To instead check the dates of timescale files
 that you have downloaded yourself

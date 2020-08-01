@@ -170,12 +170,13 @@ class Loader(object):
             raise ValueError('Skyfield does not know how to open a file'
                              ' named {0!r}'.format(filename))
 
-        path = self._fetch(url, filename, reload, backup)
-
         if builtin:
             f = BytesIO(get_data('skyfield.data', filename))
             return parser(f)
-        elif parser is not None:
+
+        path = self._fetch(url, filename, reload, backup)
+
+        if parser is not None:
             self._log('  Parsing with {0}()', parser.__name__)
             with open(path, 'rb') as f:
                 return parser(f)
