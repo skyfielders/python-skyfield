@@ -62,9 +62,9 @@ tt_minus_tai = array(32.184 / DAY_S)
 class Timescale(object):
     """The data necessary to express dates in different timescales.
 
-    A `Timescale` loads data files that supply both the value of ∆T over
-    time, and the schedule of UTC leap seconds, which Skyfield uses to
-    translate between different time scales.  Most programs create a
+    A `Timescale` loads three data files.  They supply the value of ∆T
+    over time and the schedule of UTC leap seconds, which Skyfield uses
+    to translate between different time scales.  Most programs create a
     single `Timescale` which they use to build their `Time` objects:
 
     >>> from skyfield.api import load
@@ -73,7 +73,11 @@ class Timescale(object):
     >>> t
     <Time tt=2444299.896425741>
 
-    """ # TODO: link to new docs
+    See :ref:`downloading-timescale-files` if you are interested in
+    checking how recent the data is in the files loaded by the
+    timescale.
+
+    """
     _utcnow = datetime.utcnow
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
