@@ -1,6 +1,6 @@
 #!/bin/bash
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
-python -c 'from skyfield.api import load; load.timescale()'
+python -c 'from skyfield.api import load; load.timescale(builtin=False)'
 cp deltat.data deltat.preds Leap_Second.dat ../ci/
 mv deltat.data deltat.preds Leap_Second.dat ../skyfield/data/
