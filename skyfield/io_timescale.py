@@ -13,20 +13,14 @@ except:
 
 _lock = Lock()
 
-def _build_builtin_timescale(delta_t=None):
-    if delta_t is not None:
-        deltat_data = delta_t
-        deltat_preds = delta_t
-    else:
-        b = get_data('skyfield', 'data/deltat.data')
-        expiration_date, deltat_data = parse_deltat_data(BytesIO(b))
-        b = get_data('skyfield', 'data/deltat.preds')
-        expiration_date, deltat_preds = parse_deltat_preds(BytesIO(b))
+def _open(filename):
+    return BytesIO(get_data('skyfield.data', filename))
 
-    b = get_data('skyfield', 'data/Leap_Second.dat')
-    expiration_date, leap_second_dat = parse_leap_seconds(BytesIO(b))
-
-    return Timescale.from_raw_data(deltat_data, deltat_preds, leap_second_dat)
+def _build_builtin_timescale():
+    expiration_date, deltat_data = parse_deltat_data(_open('deltat.data'))
+    expiration_date, deltat_preds = parse_deltat_preds(_open('deltat.preds'))
+    expiration_date, leap_second_dat = parse_leap_seconds(_open('Leap_Second.dat'))
+    return Timescale._from_raw_data(deltat_data, deltat_preds, leap_second_dat)
 
 def parse_deltat_data(fileobj):
     """Parse the United States Naval Observatory ``deltat.data`` file.

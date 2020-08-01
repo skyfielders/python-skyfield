@@ -84,7 +84,7 @@ class Timescale(object):
         self.B1950 = Time(self, float_(B1950))
 
     @classmethod
-    def from_raw_data(cls, deltat_data, deltat_preds, leap_second_dat):
+    def _from_raw_data(cls, deltat_data, deltat_preds, leap_second_dat):
         data_end_time = deltat_data[0, -1]
         i = searchsorted(deltat_preds[0], data_end_time, side='right')
         delta_t_recent = concatenate([deltat_data, deltat_preds[:,i:]], axis=1)

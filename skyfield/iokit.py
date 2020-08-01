@@ -305,23 +305,19 @@ class Loader(object):
         files from the official sources, set ``builtin=False``.
 
         """  # TODO: add reference to new docs
-        # TODO: refactor this and _build_builtin_timescale() to
-        # eliminate redundancy.
-        if delta_t is not None:
-            delta_t = np.array(((-1e99, 1e99), (delta_t, delta_t)))
-
         if builtin:
-            return _build_builtin_timescale(delta_t)
-
-        if delta_t is not None:
-            deltat_data = delta_t
-            deltat_preds = delta_t
+            ts = _build_builtin_timescale()
         else:
             deltat_data = self('deltat.data')
             deltat_preds = self('deltat.preds')
+            leap_second_dat = self('Leap_Second.dat')
+            ts = Timescale._from_raw_data(deltat_data, deltat_preds,
+                                          leap_second_dat)
 
-        leap_second_dat = self('Leap_Second.dat')
-        ts = Timescale.from_raw_data(deltat_data, deltat_preds, leap_second_dat)
+        if delta_t is not None:
+            delta_t_table = np.array(((-1e99, 1e99), (delta_t, delta_t)))
+            ts.delta_t_table = delta_t_table
+
         return ts
 
     @property

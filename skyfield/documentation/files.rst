@@ -65,29 +65,6 @@ Specifying the download directory
 The default ``load()`` object saves files directly
 to your current working directory —
 usually the folder from which you launched your Skyfield program.
-For example,
-if we ask the loader we used above
-its log will show that it looked for them
-(and in this example, found them) in ``.``,
-the current working directory:
-
-.. testcode::
-
-    print(load.log)
-
-.. testoutput::
-
-    Already exists: ./deltat.data
-      Parsing with: parse_deltat_data()
-      Does not expire til: 2021-02-01
-    Already exists: ./deltat.preds
-      Parsing with: parse_deltat_preds()
-      Does not expire til: 2021-01-01
-    Already exists: ./Leap_Second.dat
-      Parsing with: parse_leap_seconds()
-      Does not expire til: 2021-07-28
-    Already exists: ./de421.bsp
-      Opening with: SpiceKernel
 
 But you can instead create your own loader
 that uses a different directory instead.
