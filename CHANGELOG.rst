@@ -381,10 +381,10 @@ Changelog
 ------------------
 
 * Both of the loader methods :meth:`~skyfield.iokit.Loader.open()` and
-  :meth:`~skyfield.iokit.Loader.tle()` now accept not just URLs but also
-  plain local file paths; they correctly re-download a remote file if
-  “reload=True” is specified; and they allow specifying a different local
-  “filename=” than the one at the end of the URL.
+  ``tle()`` now accept not just URLs but also plain local file paths;
+  they correctly re-download a remote file if “reload=True” is
+  specified; and they allow specifying a different local “filename=”
+  than the one at the end of the URL.
 
 * Earth satellite objects no longer try to instantiate a timescale object
   of their own, which often kicked off an unexpected download of the three
