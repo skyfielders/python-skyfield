@@ -111,6 +111,7 @@ h1, h2, h3 {
 }
 code, pre, tt, dt {
     font-family: "Ubuntu Mono Custom", monospace, serif;
+    font-size: 0.83333333em;
 }
 code, pre, tt {
     background-color: #FDF6E3;
@@ -119,7 +120,9 @@ code, tt {
     border-radius: 3px;
     border: 1px solid #e3dcca;
     padding: 1px 2px 2px;
-    font-size: 0.83333333em;
+}
+dt > code {
+    font-size: 100%;
 }
 a code:hover, a tt:hover {
     border-color: #827c6b;
