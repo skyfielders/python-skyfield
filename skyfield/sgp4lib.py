@@ -8,7 +8,6 @@ from sgp4.api import SGP4_ERRORS, Satrec
 
 from .constants import AU_KM, DAY_S, T0, tau
 from .functions import mxv, rot_x, rot_y, rot_z
-from .io_timescale import _build_builtin_timescale
 from .positionlib import ITRF_to_GCRS2
 from .searchlib import _find_discrete, find_maxima
 from .timelib import calendar_date
@@ -79,7 +78,8 @@ class EarthSatellite(VectorFunction):
         if ts is None:
             ts = self.ts
             if ts is None:
-                ts = EarthSatellite.ts = _build_builtin_timescale()
+                from .api import load  # avoid import loop
+                ts = EarthSatellite.ts = load.timescale()
 
         self.name = None if name is None else name.strip()
         satrec = Satrec.twoline2rv(line1, line2)

@@ -1,41 +1,19 @@
 import locale
 import numpy as np
 from datetime import datetime, timedelta
-from pkgutil import get_data
 from threading import Lock
 
 from .timelib import Timescale, julian_date
 
-try:
-    from io import BytesIO
-except:
-    from StringIO import StringIO as BytesIO
-
 _lock = Lock()
 
-def _open(filename):
-    return BytesIO(get_data('skyfield.data', filename))
-
-def _build_builtin_timescale():
-    data = _open('deltat.data')
-    preds = _open('deltat.preds')
-    leaps = _open('Leap_Second.dat')
-    return _build_timescale(data, preds, leaps)
-
 def _build_timescale(deltat_data, deltat_preds, leap_second_dat):
-    deltat_data = parse_deltat_data(deltat_data)
-    deltat_preds = parse_deltat_preds(deltat_preds)
-    expiration_date, leap_second_dat = parse_leap_seconds(leap_second_dat)
-
     data_end_time = deltat_data[0, -1]
     i = np.searchsorted(deltat_preds[0], data_end_time, side='right')
     delta_t_recent = np.concatenate([deltat_data, deltat_preds[:,i:]], axis=1)
 
     leap_dates, leap_offsets = leap_second_dat
-    ts = Timescale(delta_t_recent, leap_dates, leap_offsets)
-    ts.most_recent_delta_t = data_end_time
-    ts.leap_seconds_expire = expiration_date
-    return ts
+    return Timescale(delta_t_recent, leap_dates, leap_offsets)
 
 def parse_deltat_data(fileobj):
     """Parse the United States Naval Observatory ``deltat.data`` file.

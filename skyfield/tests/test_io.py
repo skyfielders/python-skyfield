@@ -65,7 +65,7 @@ def test_missing_file_gets_downloaded(load):
         data = load('deltat.data')
     print(repr(file_contents(load)[:-20]))
     assert file_contents(load).endswith(b' 68.1577\n')
-    assert data[-1] == 68.1577
+    assert data[1][-1] == 68.1577
 
 def test_builtin_timescale(load):
     ts = load.timescale()

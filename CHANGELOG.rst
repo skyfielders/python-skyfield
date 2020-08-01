@@ -2,8 +2,8 @@
 Changelog
 =========
 
-1.26 — 2020 July 31
--------------------
+1.26 — 2020 August 1
+--------------------
 
 * The official ∆T files on NASA’s FTP server have stopped receiving
   updates — they have no new data beyond February, the start of the
@@ -21,7 +21,9 @@ Changelog
 
   2. The concept of an “expired” file has been removed from ``load()``.
      Skyfield is now much simpler: if a file with the correct name
-     exists, Skyfield uses it.  See TODO
+     exists, Skyfield uses it.  See :ref:`downloading-timescale-files`
+     if you still want your application to check the age of your
+     timescale files and automatically download new ones.
 
 * The `ICRF.separation_from()` method now officially supports the
   combination of an array of positions with a single reference position!
@@ -32,6 +34,7 @@ Changelog
 
 * A prototype :func:`~skyfield.magnitudelib.planetary_magnitude()`
   routine has been added with support for several planets.
+  `#210 <https://github.com/skyfielders/python-skyfield/issues/210>`_
 
 * The ``utc`` timezone that Skyfield returns in Python datetimes is now
   either the Python Standard Library’s own UTC object, if it supplies

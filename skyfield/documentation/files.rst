@@ -8,7 +8,7 @@ Your Skyfield programs will typically download two kinds of data file.
 First, Skyfield will need up-to-date tables about time —
 files providing recently measured values for ∆T,
 future predictions of ∆T, and a table of recent leap seconds.
-See :doc:`time` for an introduction to these concepts.
+See :ref:`downloading-timescale-files` to learn more about these files.
 
 Second, Skyfield will need data
 about the objects that you want to observe:
@@ -97,38 +97,3 @@ by building a `Loader` whose verbosity is set to false.
 .. testcode::
 
    load = Loader('~/skyfield-data', verbose=False)
-
-.. _turning-off-downloads:
-
-Turning off downloads for expired files
-=======================================
-
-Sometimes you want to build an application
-that does not need network access in order to operate.
-Half of the solution is easy: simply distribute the application
-along with all of the data files that it needs,
-and Skyfield will find and use the files on disk
-instead of needing to download them.
-
-But the other half of the problem is that
-sometimes Skyfield will find a file on disk,
-but not want to use it because the file is too old.
-This can happen with each of the three time scale files,
-because they become out of date after several months.
-
-Normally, you will want Skyfield to go ahead and download new copies
-so that your results are as precise as possible.
-But if you think that you or your users might launch your program
-when they lack access to the network,
-then you can tell Skyfield to go ahead and use the files on disk
-regardless of whether they are too old and have expired:
-
-.. testcode::
-
-   load = Loader('~/skyfield-data', expire=False)
-
-With ``expire`` set to ``False``,
-Skyfield will still try to download each file the first time
-if it cannot find it in the directory the loader is using.
-But on all subsequent runs, it will happily keep using those files
-without ever checking whether it is time for them to expire.

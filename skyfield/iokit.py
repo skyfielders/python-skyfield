@@ -6,13 +6,14 @@ import errno
 import numpy as np
 import sys
 from fnmatch import fnmatch
+from pkgutil import get_data
 from time import time
 
 import certifi
 
 from .io_timescale import (
-    _build_builtin_timescale, _build_timescale,
-    parse_deltat_data, parse_deltat_preds, parse_leap_seconds,
+     _build_timescale, parse_deltat_data,
+    parse_deltat_preds, parse_leap_seconds,
 )
 from .jpllib import SpiceKernel
 from .sgp4lib import EarthSatellite
@@ -21,6 +22,11 @@ try:
     from fcntl import LOCK_EX, LOCK_UN, lockf
 except:
     lockf = None
+
+try:
+    from io import BytesIO
+except:
+    from StringIO import StringIO as BytesIO
 
 if sys.version_info >= (3, 3):
     _replace = os.replace
@@ -139,7 +145,7 @@ class Loader(object):
         """Return the path to ``filename`` in this loader's directory."""
         return os.path.join(self.directory, filename)
 
-    def __call__(self, filename, reload=False, backup=False):
+    def __call__(self, filename, reload=False, backup=False, builtin=False):
         """Open the given file, downloading it first if necessary."""
         if '://' in filename:
             url = filename
@@ -164,11 +170,13 @@ class Loader(object):
 
         path = self._fetch(url, filename, reload, backup)
 
-        if parser is not None:
+        if builtin:
+            f = BytesIO(get_data('skyfield.data', filename))
+            return parser(f)
+        elif parser is not None:
             self._log('  Parsing with {0}()', parser.__name__)
             with open(path, 'rb') as f:
-                expiration_date, data = parser(f)
-            return data
+                return parser(f)
         else:
             self._log('  Opening with {0}', opener.__name__)
             return opener(path)
@@ -271,24 +279,25 @@ class Loader(object):
     def timescale(self, delta_t=None, builtin=True):
         """Open or download three time scale files, returning a `Timescale`.
 
-        This loads three data files that supply recent ∆T measurements
-        plus the current schedule of UTC leap seconds, and returns a new
-        `Timescale` object.  By default it loads copies of the three
-        files that are shipped with Skyfiled itself; to download new
-        files from the official sources, set ``builtin=False``.
+        ``delta_t`` — Lets you override the standard ∆T tables by
+        providing your own ∆T offset in seconds.  For details, see
+        :ref:`custom-delta-t`.
 
-        """  # TODO: add reference to new docs
-        if builtin:
-            ts = _build_builtin_timescale()
-        else:
-            deltat_data = self.open(_CDDIS + 'deltat.data')
-            deltat_preds = self.open(_CDDIS + 'deltat.preds')
-            leap_second_dat = self.open(_IERS + 'Leap_Second.dat')
-            ts = _build_timescale(deltat_data, deltat_preds, leap_second_dat)
+        ``builtin`` — Set this to ``False`` to download new copies of
+        the three official files that supply recent ∆T measurements and
+        the current schedule of UTC leap seconds.  By default, Skyfield
+        uses copies of the three files that it ships with and installs
+        alongside its code.  For details, see
+        :ref:`downloading-timescale-files`.
+
+        """
+        deltat_data = self('deltat.data', builtin=builtin)
+        deltat_preds = self('deltat.preds', builtin=builtin)
+        _, leap_second_dat = self('Leap_Second.dat', builtin=builtin)
+        ts = _build_timescale(deltat_data, deltat_preds, leap_second_dat)
 
         if delta_t is not None:
-            delta_t_table = np.array(((-1e99, 1e99), (delta_t, delta_t)))
-            ts.delta_t_table = delta_t_table
+            ts.delta_t_table = np.array(((-1e99, 1e99), (delta_t, delta_t)))
 
         return ts
 

@@ -5,39 +5,15 @@
 
 .. currentmodule:: skyfield.timelib
 
-Astronomers use several different numerical scales for measuring time.
-Skyfield often has to use several timescales
-even within a single computation.
-So the :class:`Time` class
-is designed to cache each new time scale
-when a calculation first demands it.
-Further demands for the same time scale
-can then be satisfied without recomputing the value again.
-
-Each time scale supported by :class:`Time`
-is described in detail in one of the sections below.
-The supported time scales are:
-
-* ``t.utc`` — Coordinated Universal Time (“Greenwich Time”)
-* ``t.tai`` — International Atomic Time
-* ``t.tt`` — Terrestrial Time
-* ``t.tdb`` — Barycentric Dynamical Time (the JPL’s *T*\ :sub:`eph`)
-* ``t.ut1`` — Universal Time
-
-To specify a time,
-first build a :class:`Timescale` object
-by calling Skyfield’s ``load.timescale()`` routine.
-This downloads several data files from international authorities —
-the United States Naval Observatory
-and the International Earth Rotation Service —
-to make sure that Skyfield has current information
-about both leap seconds and the orientation of the Earth.
-(Both topics are covered in more detail below.)
-
-Once you have a timescale object,
-which Skyfield programmers conventionally name ``ts``,
-you can use its methods to create times
-specified using any of the time scales listed above:
+Astronomers use several numerical scales to measure time.
+Skyfield often has to use more than one of them within a single computation!
+The `Time` class is used to represent a single moment in time,
+or an array of such moments.
+It keeps track of all the different ways the same moment
+might be designated in different time scales.
+It performs this conversion using data tables
+that are stored in the `Timescale` object
+that was used to create it:
 
 .. testsetup::
 
@@ -48,62 +24,73 @@ specified using any of the time scales listed above:
 
 .. testcode::
 
-    # Building a date object
+    # Building a time object
 
     from skyfield.api import load
-    ts = load.timescale()
-    t = ts.utc(2014, 1, 18)
+    ts = load.timescale()     # Timescale object
+    t = ts.utc(2014, 1, 18)   # Time object
 
-The possibilities that will be explored in the course of this page
-are::
-
-    # All the ways you can create a Time object
-    # using a timescale:
-
-    t = ts.utc(year, month, day, hour, minute, second)
-    t = ts.utc(dt)        # Python datetime.datetime object
-
-    t = ts.tai(year, month, day, hour, minute, second)
-    t = ts.tai_jd(float)  # Julian date
-
-    t = ts.tt(year, month, day, hour, minute, second)
-    t = ts.tt_jd(float)   # Julian date
-
-    t = ts.tdb(year, month, day, hour, minute, second)
-    t = ts.tdb_jd(float)  # Julian date
-
-    t = ts.ut1(year, month, day, hour, minute, second)
-    t = ts.ut1_jd(float)  # Julian date
-
-Once you have constructed a :class:`Time` object,
-you can provide it to any Skyfield routine that needs it.
-
-.. testcode::
-
-    from skyfield.api import load
-
-    planets = load('de421.bsp')
-    earth = planets['earth']
-
-    # Building a date and using it with at()
-
-    ts = load.timescale()
-    t = ts.utc(2014, 1, 1)
-    print(earth.at(t).position.au)
+    print(t.tai)
+    print(t.tt)
+    print(t.tdb)
 
 .. testoutput::
 
-    [-0.17461758  0.88567056  0.38384886]
+    2456675.5004050927
+    2456675.5007775924
+    2456675.5007775975
 
-If you will need to use the same time value several times
-then it is best to create the object once,
-through a single method call to your timescale object,
-and then use that single time repeatedly in your calculations.
-Not only will you avoid asking Skyfield to repeatedly translate
-the same time value between the different time scales,
-but other expensive values that depend upon time
-are also automatically cached on the date object.
-(See the section on :ref:`date-cache` for more details.)
+Most applications create only one `Timescale` object,
+which is conventionally named ``ts``,
+and use it to build all of their times.
+
+Each `Time` object only computes a given timescale
+the first time it’s asked.
+On subsequent requests for the same timescale,
+it returns the value that it cached the first time,
+without recomputing it.
+This has an important consequence:
+if your program will need to do several computations for the same time,
+be sure to use the same `Time` object for all of them.
+Otherwise your separate time objects
+will have to compute the same time scales all over again.
+See the :ref:`date-cache` section below for more details.
+
+Each time scale supported by :class:`Time`
+is described in detail in one of the sections below.
+The supported time scales are:
+
+* ``t.utc`` — Coordinated Universal Time (“Greenwich Time”)
+* ``t.ut1`` — Universal Time
+* ``t.tai`` — International Atomic Time
+* ``t.tt`` — Terrestrial Time
+* ``t.tdb`` — Barycentric Dynamical Time (the JPL’s *T*\ :sub:`eph`)
+
+You can build a `Time` from several different source timescales.
+Here’s a summary.
+
+::
+
+    # All the ways you can create a Time object:
+
+    t = ts.utc(year, month, day, hour, minute, second)
+    t = ts.from_datetime(dt)
+    t = ts.from_datetimes([dt1, dt2, ...])
+    t = ts.now()
+
+    t = ts.tai(year, month, day, hour, minute, second)
+    t = ts.tai_jd(floating_point_Julian_date)
+
+    t = ts.tt(year, month, day, hour, minute, second)
+    t = ts.tt_jd(floating_point_Julian_date)
+
+    t = ts.tdb(year, month, day, hour, minute, second)
+    t = ts.tdb_jd(floating_point_Julian_date)
+
+    t = ts.ut1(year, month, day, hour, minute, second)
+    t = ts.ut1_jd(floating_point_Julian_date)
+
+The meaning of each timescale is discussed in the sections below.
 
 .. _building-dates:
 
@@ -206,7 +193,7 @@ for your version of Python.
   module that for the first time brings timezone support
   into the Python Standard Library.
 
-But this documentation will focus on the approach
+This documentation will focus on the approach
 which works universally across all Python versions.
 You can install the third-party `pytz`_ library
 by listing it in the dependencies of your package,
@@ -447,6 +434,9 @@ We can compute the position of the Earth as an example:
 .. testcode::
 
     # Single Earth position
+
+    planets = load('de421.bsp')
+    earth = planets['earth']
 
     t = ts.utc(2014, 1, 1)
     pos = earth.at(t).position.au
@@ -773,6 +763,8 @@ Skyfield will run off the end of its tables
 and will instead use the formula of Morrison and Stephenson (2004)
 to estimate when day and night might have occurred in that era.
 
+.. _custom-delta-t:
+
 Setting a Custom Value For ∆T
 =============================
 
@@ -834,6 +826,113 @@ and :meth:`~skyfield.timelib.Time.utc_jpl()`
 or those of the ``datetime`` that Skyfield returns
 from :meth:`~skyfield.timelib.Time.utc_datetime()`
 when printing dates to the screen.
+
+.. _downloading-timescale-files:
+
+Downloading new timescale files
+===============================
+
+The timescale object uses three files,
+from NASA and the International Earth Rotation Service,
+that provide Earth rotation data and UTC leap seconds.
+
+Each Skyfield release includes recent copies
+of these three timescale data files.
+You might be interested in checking their age and downloading new copies,
+especially if your application will run for several years
+on the same version of Skyfield.
+Earlier versions of Skyfield tried downloading new files automatically,
+but the result was a disaster:
+scripts that had been running fine for a year
+would, for example, unexpectedly die
+if their timescale files went out of date
+when the network happened to be down.
+
+The two effects of several-year-old timescale files are:
+
+1. Positions affected by the Earth’s rotation,
+   like altitude and azimuth angles,
+   will gradually grow less precise over the years
+   without updated Earth positions from new ∆T files.
+
+2. Dates in UTC will be off by one or more whole seconds,
+   once leap seconds occur
+   that were not included in Skyfield’s copy of the leap second file.
+
+The two ∆T files include no explicit expiration date,
+but you can check the date of the last measured value of ∆T
+as well as the date of the final speculative prediction:
+
+.. testcode::
+
+    from datetime import date
+    from skyfield.timelib import calendar_tuple
+
+    julian_dates, values = load('deltat.data', builtin=True)
+    y, m, d, _, _, _ = calendar_tuple(julian_dates[-1])
+    last_observation = date(y, m, d)
+
+    julian_dates, values = load('deltat.preds', builtin=True)
+    y, m, d, _, _, _ = calendar_tuple(julian_dates[-1])
+    last_prediction = date(y, m, d)
+
+    print('Date of last ∆T observation:', last_observation)
+    print('Date of final ∆T prediction:', last_prediction)
+
+.. testoutput::
+
+    Date of last ∆T observation: 2020-02-01
+    Date of final ∆T prediction: 2027-10-01
+
+By contrast,
+the leap second file offers an explicit expiration date
+right in the file itself,
+which Skyfield parses and returns as a standard Python ``date``:
+
+.. testcode::
+
+    expiration_date, leap_second_dat = load('Leap_Second.dat', builtin=True)
+    print('Leap second data expires on:', expiration_date)
+
+.. testoutput::
+
+    2021-07-28
+
+To instead check the dates of timescale files
+that you have downloaded yourself
+and have sitting on disk,
+simply remove ``builtin=True`` from the above calls to ``load()``.
+
+Using Python’s ``today()`` function and basic date arithmetic,
+you could determine whether these dates are far enough in the past
+that your application wants to attempt to download more recent files.
+For example:
+
+::
+
+    if (date.today() - last_observation).days > 365:
+
+        # Force the download of new files.
+        load('deltat.data', reload=True)
+        load('deltat.preds', reload=True)
+        load('Leap_Second.dat', reload=True)
+
+        # Use them to build a new timescale.
+        ts = load.timescale(builtin=False)
+
+If you do download new files,
+remember to always build your timescales with ``builtin=False``
+or Skyfield will ignore your files and use its internal ones instead.
+
+Keep in mind that downloads can be dangerous
+if your application needs to run unattended:
+what if the network is down at the moment the files get too old?
+What if the files go out of date on the original server
+and the download does not change their apparent age?
+In the interests of safety and simplicity,
+it is probably more likely that you will want an automatic update
+to run as a separate periodic batch job
+than as part of your main program.
 
 .. _date-cache:
 
