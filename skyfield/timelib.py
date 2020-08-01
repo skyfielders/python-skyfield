@@ -83,14 +83,6 @@ class Timescale(object):
         self.J2000 = Time(self, float_(T0))
         self.B1950 = Time(self, float_(B1950))
 
-    @classmethod
-    def _from_raw_data(cls, deltat_data, deltat_preds, leap_second_dat):
-        data_end_time = deltat_data[0, -1]
-        i = searchsorted(deltat_preds[0], data_end_time, side='right')
-        delta_t_recent = concatenate([deltat_data, deltat_preds[:,i:]], axis=1)
-        leap_dates, leap_offsets = leap_second_dat
-        return cls(delta_t_recent, leap_dates, leap_offsets)
-
     def now(self):
         """Return the current date and time as a `Time` object.
 

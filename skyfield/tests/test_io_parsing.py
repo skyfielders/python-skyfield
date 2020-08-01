@@ -20,8 +20,7 @@ YEAR    TT-UT PREDICTION  UT1-UTC PREDICTION  ERROR
 
 def test_old_deltat_preds():
     lines = old_deltat_preds.splitlines()
-    expiration_date, data = iokit.parse_deltat_preds(lines)
-    assert expiration_date.strftime('%Y-%m-%d') == '2019-01-01'
+    data = iokit.parse_deltat_preds(lines)
 
     assert data[0][0] == 2457754.5
     assert str(data[1][0]) == '68.591'
@@ -40,9 +39,7 @@ new_deltat_preds = b"""\
 
 def test_new_deltat_preds():
     lines = new_deltat_preds.splitlines()
-    expiration_date, data = iokit.parse_deltat_preds(lines)
-
-    assert expiration_date.strftime('%Y-%m-%d') == '2021-01-01'
+    data = iokit.parse_deltat_preds(lines)
 
     assert data[0][0] == 2458484.5
     assert str(data[1][0]) == '69.34'

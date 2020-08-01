@@ -5,19 +5,17 @@ import os
 import errno
 import numpy as np
 import sys
-from datetime import date
 from fnmatch import fnmatch
 from time import time
 
 import certifi
 
-from .io_timescale import (_build_builtin_timescale, parse_deltat_data,
-                           parse_deltat_preds, parse_leap_seconds)
+from .io_timescale import (
+    _build_builtin_timescale, _build_timescale,
+    parse_deltat_data, parse_deltat_preds, parse_leap_seconds,
+)
 from .jpllib import SpiceKernel
 from .sgp4lib import EarthSatellite
-from .timelib import Timescale
-
-today = date.today
 
 try:
     from fcntl import LOCK_EX, LOCK_UN, lockf
@@ -82,9 +80,7 @@ class Loader(object):
       output is not a TTY, then no progress bar is printed anyway.)
 
     ``expire``
-      If set to ``False``, then Skyfield will always use an existing
-      file on disk, instead of expiring files that are out of date and
-      replacing them with newly downloaded copies.
+      (This option is no longer supported.)
 
     Once a `Loader` is created, it can be called like a function to
     open, or else to download and open, a file whose name it recognizes::
@@ -94,10 +90,9 @@ class Loader(object):
     Each loader also supports an attribute and a few methods.
 
     """
-    def __init__(self, directory, verbose=True, expire=True):
+    def __init__(self, directory, verbose=True, expire=False):
         self.directory = os.path.expanduser(directory)
         self.verbose = verbose
-        self.expire = expire
         self.events = []
         try:
             os.makedirs(self.directory)
@@ -144,7 +139,7 @@ class Loader(object):
         """Return the path to ``filename`` in this loader's directory."""
         return os.path.join(self.directory, filename)
 
-    def __call__(self, filename):
+    def __call__(self, filename, reload=False, backup=False):
         """Open the given file, downloading it first if necessary."""
         if '://' in filename:
             url = filename
@@ -162,46 +157,23 @@ class Loader(object):
                 url += filename
 
         path = self.path_to(filename)
+        exists = os.path.exists(path)
+        self._log(path)
+        if exists:
+            self._log('  File already exists')
+
         parser = _search(self.parsers, filename)
         opener = _search(self.openers, filename)
         if (parser is None) and (opener is None):
             raise ValueError('Skyfield does not know how to open a file'
                              ' named {0!r}'.format(filename))
 
-        if os.path.exists(path):
-            self._log('Already exists: {0}', path)
-            if parser is not None:
-                self._log('  Parsing with: {0}()', parser.__name__)
-                with open(path, 'rb') as f:
-                    expiration_date, data = parser(f)
-                if not self.expire:
-                    self._log('  Ignoring expiration: {0}', expiration_date)
-                    return data
-                if expiration_date is None:
-                    self._log('  Does not specify an expiration date')
-                    return data
-                if today() <= expiration_date:
-                    self._log('  Does not expire til: {0}', expiration_date)
-                    return data
-                self._log('  Expired on: {0}', expiration_date)
-                for n in itertools.count(1):
-                    prefix, suffix = filename.rsplit('.', 1)
-                    backup_name = '{0}.old{1}.{2}'.format(prefix, n, suffix)
-                    if not os.path.exists(self.path_to(backup_name)):
-                        break
-                self._log('  Renaming to: {0}', backup_name)
-                os.rename(self.path_to(filename), self.path_to(backup_name))
-            else:
-                # Currently, openers have no concept of expiration.
-                self._log('  Opening with: {0}', opener.__name__)
-                return opener(path)
-
-        if url is None:
-            raise ValueError('Skyfield does not know where to download {!r}'
-                             .format(filename))
-
-        self._log('  Downloading: {0}', url)
-        download(url, path, self.verbose)
+        if (not exists) or reload:
+            if url is None:
+                raise ValueError('Skyfield does not know where to download {!r}'
+                                 .format(filename))
+            self._log('  Downloading {0}', url)
+            download(url, path, self.verbose, backup=backup and exists)
 
         if parser is not None:
             self._log('  Parsing with: {0}()', parser.__name__)
@@ -263,7 +235,7 @@ class Loader(object):
         with self.open(url, reload=reload, filename=filename) as f:
             return list(parse_tle_file(f, ts, skip_names))
 
-    def open(self, url, mode='rb', reload=False, filename=None):
+    def open(self, url, mode='rb', reload=False, filename=None, backup=False):
         """Open a file, downloading it first if it does not yet exist.
 
         Unlike when you call a loader directly like ``my_loader()``,
@@ -286,13 +258,20 @@ class Loader(object):
             path_that_might_be_relative = url
             path = os.path.join(self.directory, path_that_might_be_relative)
             return open(path, mode)
+
         if filename is None:
             filename = urlparse(url).path.split('/')[-1]
         path = self.path_to(filename)
-        if reload and os.path.exists(path):
-            os.remove(path)
-        if not os.path.exists(path):
-            download(url, path, self.verbose)
+        self._log(path)
+
+        exists = os.path.exists(path)
+        if exists:
+            self._log('  File already exists')
+
+        if (not exists) or reload:
+            self._log('  Downloading {0}', url)
+            download(url, path, self.verbose, backup=exists and backup)
+
         return open(path, mode)
 
     def timescale(self, delta_t=None, builtin=True):
@@ -308,11 +287,10 @@ class Loader(object):
         if builtin:
             ts = _build_builtin_timescale()
         else:
-            deltat_data = self('deltat.data')
-            deltat_preds = self('deltat.preds')
-            leap_second_dat = self('Leap_Second.dat')
-            ts = Timescale._from_raw_data(deltat_data, deltat_preds,
-                                          leap_second_dat)
+            deltat_data = self.open(_CDDIS + 'deltat.data')
+            deltat_preds = self.open(_CDDIS + 'deltat.preds')
+            leap_second_dat = self.open(_IERS + 'Leap_Second.dat')
+            ts = _build_timescale(deltat_data, deltat_preds, leap_second_dat)
 
         if delta_t is not None:
             delta_t_table = np.array(((-1e99, 1e99), (delta_t, delta_t)))
@@ -442,7 +420,7 @@ def parse_tle_file(lines, ts=None, skip_names=False):
             b0 = b1
             b1 = b2
 
-def download(url, path, verbose=None, blocksize=128*1024):
+def download(url, path, verbose=None, blocksize=128*1024, backup=False):
     """Download a file from a URL, possibly displaying a progress bar.
 
     Saves the output to the file named by `path`.  If the URL cannot be
@@ -502,6 +480,8 @@ def download(url, path, verbose=None, blocksize=128*1024):
                 if bar is not None:
                     bar.report(length, content_length)
             w.flush()
+            if backup:
+                _rename_original(path)
             if lockf is not None:
                 # On Unix, rename while still protected by the lock.
                 try:
@@ -522,6 +502,13 @@ def download(url, path, verbose=None, blocksize=128*1024):
             raise IOError('error renaming {0} to {1} - {2}'.format(
                 tempname, path, e))
 
+def _rename_original(path):
+    for n in itertools.count(1):
+        prefix, suffix = path.rsplit('.', 1)
+        backup_path = '{0}.old{1}.{2}'.format(prefix, n, suffix)
+        if not os.path.exists(backup_path):
+            break
+    os.rename(path, backup_path)
 
 class ProgressBar(object):
     def __init__(self, path):

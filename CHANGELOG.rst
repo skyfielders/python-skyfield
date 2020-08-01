@@ -19,7 +19,9 @@ Changelog
      ∆T files from NASA and the leap second file from the International
      Earth Rotation Service, specify ``builtin=False``.
 
-  2. (TODO)
+  2. The concept of an “expired” file has been removed from ``load()``.
+     Skyfield is now much simpler: if a file with the correct name
+     exists, Skyfield uses it.  See TODO
 
 * The `ICRF.separation_from()` method now officially supports the
   combination of an array of positions with a single reference position!

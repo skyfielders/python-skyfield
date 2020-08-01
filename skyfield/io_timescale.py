@@ -1,6 +1,6 @@
 import locale
 import numpy as np
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from pkgutil import get_data
 from threading import Lock
 
@@ -17,10 +17,25 @@ def _open(filename):
     return BytesIO(get_data('skyfield.data', filename))
 
 def _build_builtin_timescale():
-    expiration_date, deltat_data = parse_deltat_data(_open('deltat.data'))
-    expiration_date, deltat_preds = parse_deltat_preds(_open('deltat.preds'))
-    expiration_date, leap_second_dat = parse_leap_seconds(_open('Leap_Second.dat'))
-    return Timescale._from_raw_data(deltat_data, deltat_preds, leap_second_dat)
+    data = _open('deltat.data')
+    preds = _open('deltat.preds')
+    leaps = _open('Leap_Second.dat')
+    return _build_timescale(data, preds, leaps)
+
+def _build_timescale(deltat_data, deltat_preds, leap_second_dat):
+    deltat_data = parse_deltat_data(deltat_data)
+    deltat_preds = parse_deltat_preds(deltat_preds)
+    expiration_date, leap_second_dat = parse_leap_seconds(leap_second_dat)
+
+    data_end_time = deltat_data[0, -1]
+    i = np.searchsorted(deltat_preds[0], data_end_time, side='right')
+    delta_t_recent = np.concatenate([deltat_data, deltat_preds[:,i:]], axis=1)
+
+    leap_dates, leap_offsets = leap_second_dat
+    ts = Timescale(delta_t_recent, leap_dates, leap_offsets)
+    ts.most_recent_delta_t = data_end_time
+    ts.leap_seconds_expire = expiration_date
+    return ts
 
 def parse_deltat_data(fileobj):
     """Parse the United States Naval Observatory ``deltat.data`` file.
@@ -34,11 +49,8 @@ def parse_deltat_data(fileobj):
 
     """
     array = np.loadtxt(fileobj)
-    year, month, day = array[-1,:3].astype(int)
-    expiration_date = date(year + 1, month, day)
     year, month, day, delta_t = array.T
-    data = np.array((julian_date(year, month, day), delta_t))
-    return expiration_date, data
+    return np.array((julian_date(year, month, day), delta_t))
 
 def parse_deltat_preds(fileobj):
     """Parse the United States Naval Observatory ``deltat.preds`` file.
@@ -69,9 +81,7 @@ def parse_deltat_preds(fileobj):
 
     year = year_float.astype(int)
     month = 1 + (year_float * 12.0).astype(int) % 12
-    expiration_date = date(year[0] + 2, month[0], 1)
-    data = np.array((julian_date(year, month, 1), delta_t))
-    return expiration_date, data
+    return np.array((julian_date(year, month, 1), delta_t))
 
 def parse_leap_seconds(fileobj):
     """Parse the IERS file ``Leap_Second.dat``.
