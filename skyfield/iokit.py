@@ -171,6 +171,8 @@ class Loader(object):
                              ' named {0!r}'.format(filename))
 
         if builtin:
+            self._log('{0}\n  Parsing builtin file with {1}()',
+                      filename, parser.__name__)
             f = BytesIO(get_data('skyfield.data', filename))
             return parser(f)
 
@@ -195,7 +197,7 @@ class Loader(object):
                 raise ValueError('Skyfield does not know where to download {!r}'
                                  .format(filename))
             self._log('  Downloading {0}', url)
-            download(url, path, self.verbose, backup=backup and exists)
+            download(url, path, self.verbose, backup=backup)
         return path
 
     def _log(self, message, *args):
@@ -483,8 +485,11 @@ def download(url, path, verbose=None, blocksize=128*1024, backup=False):
                 if bar is not None:
                     bar.report(length, content_length)
             w.flush()
-            if backup:
-                _rename_original(path)
+            if os.path.exists(path):
+                if backup:
+                    _rename_original(path)
+                else:
+                    os.unlink(path)  # stop rename() from erroring on Windows
             if lockf is not None:
                 # On Unix, rename while still protected by the lock.
                 try:
