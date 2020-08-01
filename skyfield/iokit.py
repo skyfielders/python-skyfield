@@ -472,10 +472,6 @@ def download(url, path, verbose=None, blocksize=128*1024, backup=False):
             if lockf is not None:
                 fd = w.fileno()
                 lockf(fd, LOCK_EX)           # only one download at a time
-                if os.path.exists(path): # did someone else finish first?
-                    if os.path.exists(tempname):
-                        os.unlink(tempname)
-                    return
             w.seek(0)
             length = 0
             while True:
