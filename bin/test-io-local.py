@@ -36,20 +36,23 @@ def main():
     with cd(os.path.join(here, '..', 'ci')):
         with local_web_server() as (host, port):
             # The first time, it should create the file in the empty directory.
-            load('http://{0}:{1}/de421.bsp'.format(host, port), reload=True)
+            f = load('http://{0}:{1}/de421.bsp'.format(host, port), reload=True)
+            f.close()
             filenames = os.listdir(directory)
             print(filenames)
             assert filenames == ['de421.bsp']
 
             # The second time, it should overwrite it.
-            load('http://{0}:{1}/de421.bsp'.format(host, port), reload=True)
+            f = load('http://{0}:{1}/de421.bsp'.format(host, port), reload=True)
+            f.close()
             filenames = os.listdir(directory)
             print(filenames)
             assert filenames == ['de421.bsp']
 
             # The third time, it should make a backup.
-            load('http://{0}:{1}/de421.bsp'.format(host, port), reload=True,
-                 backup=True)
+            f = load('http://{0}:{1}/de421.bsp'.format(host, port),
+                     reload=True, backup=True)
+            f.close()
             filenames = os.listdir(directory)
             print(filenames)
             assert filenames == ['de421.bsp', 'de421.old1.bsp']
