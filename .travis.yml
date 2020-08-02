@@ -17,7 +17,7 @@ jobs:
 env:
   global:
     CIBW_TEST_REQUIRES=https://github.com/brandon-rhodes/assay/archive/master.zip
-    CIBW_TEST_COMMAND="python -m assay --batch skyfield.tests.test_io"
+    CIBW_TEST_COMMAND="python -m assay --batch {package}/tests/test_io.py"
 #    CIBW_TEST_COMMAND="python -c \"from skyfield import api; api.load('de421.bsp')\""
 
 
