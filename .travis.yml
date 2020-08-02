@@ -4,15 +4,15 @@ jobs:
   include:
     # perform a linux build
     - services: docker
-    # # and a mac build
-    # - os: osx
-    #   language: shell
-    # # and a windows build
-    # - os: windows
-    #   language: shell
-    #   before_install:
-    #     - choco install python --version 3.8.0
-    #     - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
+    # and a mac build
+    - os: osx
+      language: shell
+    # and a windows build
+    - os: windows
+      language: shell
+      before_install:
+        - choco install python --version 3.8.0
+        - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
 
 env:
   global:
