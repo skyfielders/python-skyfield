@@ -18,7 +18,7 @@ env:
   global:
     CIBW_TEST_REQUIRES="mock https://github.com/brandon-rhodes/assay/archive/master.zip"
     CIBW_TEST_COMMAND_LINUX="python -m assay --batch /project/skyfield/bin/test-io-local.py"
-    CIBW_TEST_COMMAND_WINDOWS="pwd; dir"
+    CIBW_TEST_COMMAND_WINDOWS="dir {project}"
 #    CIBW_TEST_COMMAND="python -c \"from skyfield import api; api.load('de421.bsp')\""
 
 
