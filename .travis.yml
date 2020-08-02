@@ -2,11 +2,11 @@ language: python
 
 jobs:
   include:
-    # perform a linux build
-    - services: docker
+    # # perform a linux build
+    # - services: docker
     # and a mac build
-    - os: osx
-      language: shell
+    # - os: osx
+    #   language: shell
     # and a windows build
     - os: windows
       language: shell
@@ -17,7 +17,8 @@ jobs:
 env:
   global:
     CIBW_TEST_REQUIRES="mock https://github.com/brandon-rhodes/assay/archive/master.zip"
-    CIBW_TEST_COMMAND="python -m assay --batch /project/skyfield/tests/test_io.py"
+    CIBW_TEST_COMMAND_LINUX="python -m assay --batch /project/skyfield/bin/test-io-local.py"
+    CIBW_TEST_COMMAND_WINDOWS="pwd; dir"
 #    CIBW_TEST_COMMAND="python -c \"from skyfield import api; api.load('de421.bsp')\""
 
 
