@@ -3,7 +3,9 @@
 import os
 import shutil
 import tempfile
+import threading
 from contextlib import contextmanager
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 try:
     from unittest.mock import patch
 except ImportError:
@@ -34,6 +36,24 @@ def file_contents(load):
         return f.read()
 
 @contextmanager
+def cd(directory):
+    old = os.getcwd()
+    try:
+        os.chdir(directory)
+        yield
+    finally:
+        os.chdir(old)
+
+def local_web_server():
+    with contextmanager(load)() as loader:
+        with cd(loader.directory):
+            save_file(loader)
+            httpd = HTTPServer(('localhost', 0), SimpleHTTPRequestHandler)
+            thread = threading.Thread(target=httpd.serve_forever)
+            thread.start()
+            yield loader, httpd.server_address
+
+@contextmanager
 def fake_download(load):
     download = lambda *args, **kw: save_file(load, new_content)
     with patch('skyfield.iokit.download', download):
@@ -59,6 +79,13 @@ def test_open_in_subdirectory(load):
         f.write(b'example text\n')
     data = load.open('folder/file.tle').read()
     assert data == b'example text\n'
+
+def test_download_with_real_http(local_web_server):
+    load, (host, port) = local_web_server
+    data = load('http://{0}:{1}/deltat.data'.format(host, port), reload=True)
+    print(repr(file_contents(load)[:-20]))
+    assert file_contents(load).endswith(b' 68.1024\n')
+    assert data[1][-1] == 68.1024
 
 def test_missing_file_gets_downloaded(load):
     with fake_download(load):
