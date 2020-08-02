@@ -1,32 +1,29 @@
-# Config file for automatic testing at travis-ci.org
-
 language: python
-sudo: false
 
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
-  - "3.7"
+jobs:
+  include:
+    # perform a linux build
+    - services: docker
+    # and a mac build
+    - os: osx
+      language: shell
+    # and a windows build
+    - os: windows
+      language: shell
+      before_install:
+        - choco install python --version 3.8.0
+        - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
 
-# matrix:
-#   include:
-#     - python: "3.7"
-#       dist: xenial    # required for Python 3.7 (travis-ci/travis-ci#9069)
-#       sudo: required  # required for Python 3.7 (travis-ci/travis-ci#9069)
+env:
+  global:
+    CIBW_TEST_REQUIRES=https://github.com/brandon-rhodes/assay/archive/master.zip
+    CIBW_TEST_COMMAND="python -m assay --batch skyfield/tests"
 
 install:
-  - "python setup.py sdist"
-  - "mkdir tmp"
-  - "ln ci/* tmp"
-  - "cd tmp"
-  - "pip install --upgrade pip"
-  - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
-  - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
-  - "if [[ $TRAVIS_PYTHON_VERSION < 3.7 ]] ; then pip install numpy==1.11.3 scipy==1.2.2 pandas==0.23.4 unittest2 ; else pip install pandas ; fi"
-  - "python -c 'import pandas'"
+  - python -m pip install twine cibuildwheel==1.1.0
 
 script:
-  - "../test-code.sh"
-  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install astropy==3.0.1 matplotlib==3.3.0 numpy==1.15.4 scipy==1.2.2 sphinx==1.7.2 spktype21 ; cd .. ; ./test-docs.sh ; fi"
-  - "if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]] ; then pip install pyflakes ; pyflakes $(find skyfield/ -name '*.py') ; fi"
+  - python -m cibuildwheel --output-dir wheelhouse
+
+after_success:
+  - ls -l wheelhouse/
