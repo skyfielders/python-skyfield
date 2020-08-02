@@ -5,7 +5,11 @@ import shutil
 import tempfile
 import threading
 from contextlib import contextmanager
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+try:
+    from http.server import HTTPServer, SimpleHTTPRequestHandler
+except ImportError:
+    from BaseHTTPServer import HTTPServer
+    from SimpleHTTPServer import SimpleHTTPRequestHandler
 try:
     from unittest.mock import patch
 except ImportError:
