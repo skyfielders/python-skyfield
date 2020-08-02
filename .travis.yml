@@ -22,7 +22,7 @@ env:
 
 
 install:
-  - python -m pip install twine cibuildwheel==1.1.0
+  - python -m pip install twine cibuildwheel==1.5.5
 
 script:
   - python -m cibuildwheel --output-dir wheelhouse
