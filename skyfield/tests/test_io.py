@@ -4,6 +4,11 @@ import os
 import shutil
 import tempfile
 from contextlib import contextmanager
+from threading import Thread
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 try:
     from unittest.mock import patch
 except ImportError:
@@ -39,7 +44,7 @@ def fake_download(load):
     with patch('skyfield.iokit.download', download):
         yield
 
-# The tests.
+# Simple tests.
 
 def test_build_url(load):
     url = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de421.bsp'
@@ -70,3 +75,48 @@ def test_missing_file_gets_downloaded(load):
 def test_builtin_timescale(load):
     ts = load.timescale()
     ts.utc(2019, 7, 21, 11, 11)
+
+# Impressive tests: synchronize threads to reproduce concurrency bugs.
+
+class FakeConnection():
+    def __init__(self):
+        self.control = Queue()
+        self.blocks = Queue()
+        self.headers = {}
+
+    def __call__(self, *args, **kw):  # Intercept urlopen()
+        return self
+
+    def read(self, blocksize):  # Intercept connection.read()
+        self.control.put('Read requested')
+        return self.blocks.get()
+
+def test_concurrent_downloads(load):
+    eof = b''
+    data = b' 1973  2  1  43.4724\n'
+
+    c1 = FakeConnection()
+    c2 = FakeConnection()
+    t1 = Thread(target=load, args=('deltat.data',), daemon=True)
+    t2 = Thread(target=load, args=('deltat.data',), daemon=True)
+
+    with patch('skyfield.iokit.urlopen', c1):
+        t1.start()
+        c1.control.get()  # has reached its first read()
+    with patch('skyfield.iokit.urlopen', c2):
+        t2.start()
+        c2.control.get()  # has reached its first read()
+
+    assert sorted(os.listdir(load.directory)) == [
+        'deltat.data.download', 'deltat.data.download2',
+    ]
+    c1.blocks.put(data)
+    c1.blocks.put(eof)
+    t1.join()
+    assert sorted(os.listdir(load.directory)) == [
+        'deltat.data', 'deltat.data.download2',
+    ]
+    c2.blocks.put(data)
+    c2.blocks.put(eof)
+    t2.join()
+    assert sorted(os.listdir(load.directory)) == ['deltat.data']

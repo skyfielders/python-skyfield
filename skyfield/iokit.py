@@ -19,11 +19,6 @@ from .jpllib import SpiceKernel
 from .sgp4lib import EarthSatellite
 
 try:
-    from fcntl import LOCK_EX, LOCK_UN, lockf
-except:
-    lockf = None
-
-try:
     from io import BytesIO
 except:
     from StringIO import StringIO as BytesIO
@@ -431,14 +426,13 @@ def download(url, path, verbose=None, blocksize=128*1024, backup=False):
     """Download a file from a URL, possibly displaying a progress bar.
 
     Saves the output to the file named by `path`.  If the URL cannot be
-    downloaded or the file cannot be written, an IOError is raised.
+    downloaded or the file cannot be written, an ``IOError`` is raised.
 
     Normally, if the standard error output is a terminal, then a
     progress bar is displayed to keep the user entertained.  Specify
-    `verbose=True` or `verbose=False` to control this behavior.
+    `verbose=True` or `verbose=False` to override this behavior.
 
     """
-    tempname = path + '.download'
     try:
         if _skip_certificate_support:
             connection = urlopen(url)
@@ -448,9 +442,10 @@ def download(url, path, verbose=None, blocksize=128*1024, backup=False):
             ssl_context = create_default_context(cafile=certifi.where())
             connection = urlopen(url, context=ssl_context)
     except Exception as e:
-        e2 = IOError('cannot get {0} because {1}'.format(url, e))
+        e2 = IOError('cannot download {0} because {1}'.format(url, e))
         e2.__cause__ = None
         raise e2
+
     if verbose is None:
         verbose = sys.stderr.isatty()
 
@@ -463,18 +458,26 @@ def download(url, path, verbose=None, blocksize=128*1024, backup=False):
             bar = ProgressBar(path)
             content_length = int(connection.headers.get('content-length', -1))
 
-    # Python open() provides no way to achieve O_CREAT without also
-    # truncating the file, which would ruin the work of another process
-    # that is trying to download the same file at the same time.  So:
+    # Claim our own unique download filename.
 
-    flags = getattr(os, 'O_BINARY', 0) | os.O_CREAT | os.O_RDWR
-    fd = os.open(tempname, flags, 0o666)
+    tempbase = tempname = path + '.download'
+    flags = getattr(os, 'O_BINARY', 0) | os.O_CREAT | os.O_EXCL | os.O_RDWR
+    i = 1
+    while True:
+        try:
+            fd = os.open(tempname, flags, 0o666)
+        except OSError as e:  # "FileExistsError" is not supported by Python 2
+            if e.errno != errno.EEXIST:
+                raise
+            i += 1
+            tempname = '{0}{1}'.format(tempbase, i)
+        else:
+            break
+
+    # Download to the temporary filename.
+
     with os.fdopen(fd, 'wb') as w:
         try:
-            if lockf is not None:
-                fd = w.fileno()
-                lockf(fd, LOCK_EX)           # only one download at a time
-            w.seek(0)
             length = 0
             while True:
                 data = connection.read(blocksize)
@@ -485,30 +488,21 @@ def download(url, path, verbose=None, blocksize=128*1024, backup=False):
                 if bar is not None:
                     bar.report(length, content_length)
             w.flush()
-            if os.path.exists(path):
-                if backup:
-                    _rename_original(path)
-                else:
-                    os.unlink(path)  # stop rename() from erroring on Windows
-            if lockf is not None:
-                # On Unix, rename while still protected by the lock.
-                try:
-                    os.rename(tempname, path)
-                except Exception as e:
-                    raise IOError('error renaming {0} to {1} - {2}'.format(
-                        tempname, path, e))
         except Exception as e:
             raise IOError('error getting {0} - {1}'.format(url, e))
-        finally:
-            if lockf is not None:
-                lockf(fd, LOCK_UN)
-    if lockf is None:
-        # On Windows, rename here because the file needs to be closed first.
-        try:
-            _replace(tempname, path)
-        except Exception as e:
-            raise IOError('error renaming {0} to {1} - {2}'.format(
-                tempname, path, e))
+
+    # Move the original out of the way, if requested.
+
+    if os.path.exists(path) and backup:
+        _rename_original(path)
+
+    # Rename the temporary file to the destination name.
+
+    try:
+        _replace(tempname, path)
+    except Exception as e:
+        raise IOError('error renaming {0} to {1} - {2}'.format(
+            tempname, path, e))
 
 def _rename_original(path):
     for n in itertools.count(1):
