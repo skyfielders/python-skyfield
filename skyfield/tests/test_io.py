@@ -92,13 +92,17 @@ class FakeConnection():
         return self.blocks.get()
 
 def test_concurrent_downloads(load):
+    # While downloads in a single process are protecte
+
     eof = b''
     data = b' 1973  2  1  43.4724\n'
 
     c1 = FakeConnection()
     c2 = FakeConnection()
-    t1 = Thread(target=load, args=('deltat.data',), daemon=True)
-    t2 = Thread(target=load, args=('deltat.data',), daemon=True)
+    t1 = Thread(target=load, args=('deltat.data',))
+    t2 = Thread(target=load, args=('deltat.data',))
+    t1.daemon = True
+    t2.daemon = True
 
     with patch('skyfield.iokit.urlopen', c1):
         t1.start()
