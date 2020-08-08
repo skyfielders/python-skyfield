@@ -4,7 +4,7 @@ import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh,
                   cross, exp, log, ndarray, newaxis, ones_like, pi, power,
-                  repeat, sin, sinh, sqrt, sum, tan, tile, zeros_like)
+                  repeat, sin, sinh, sqrt, sum, tan, tanh, tile, zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
@@ -248,12 +248,15 @@ def eccentric_anomaly(e, M):
 
 
 def true_anomaly(e, E):
-    """Calculates true anomaly from eccentric anomaly
+    """Calculates true anomaly from eccentricity and eccentric anomaly.
 
-    Equation from step 3 in this document:
-    https://web.archive.org/web/*/http://ccar.colorado.edu/asen5070/handouts/kep2cart_2002.doc
+    Equations from the relevant Wikipedia entries.
+
     """
-    return 2 * arctan(((1+e)/(1-e))**.5 * tan(E/2))
+    if e > 1.0:  # hyperbolic orbit
+        return 2.0 * arctan(sqrt((e + 1.0) / (e - 1.0)) * tanh(E/2))
+    else:
+        return 2.0 * arctan(sqrt((1.0 + e) / (1.0 - e)) * tan(E/2))
 
 
 def ele_to_vec(p, e, i, Om, w, v, mu):
