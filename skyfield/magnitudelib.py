@@ -118,7 +118,7 @@ def _jupiter_magnitude(r, delta, ph_ang):
     return ap_mag
 
 def _uranus_magnitude(r, delta, ph_ang,
-                      sun_sub_lat_planetog, earth_sub_lat_planetog):
+                      sun_sub_lat_planetog=0.0, earth_sub_lat_planetog=0.0):
     distance_mag_factor = 5.0 * log10 (r * delta)
     sub_lat_planetog = (abs(sun_sub_lat_planetog)
                         + abs(earth_sub_lat_planetog)) / 2.0
@@ -130,15 +130,15 @@ def _uranus_magnitude(r, delta, ph_ang,
     return ap_mag
 
 _FUNCTIONS = {
-    1: _mercury_magnitude,
-    2: _venus_magnitude,
-    3: _earth_magnitude,
-    5: _jupiter_magnitude,
-    7: _uranus_magnitude,
-
-    # Some planets can be reasonably identified with their barycenter.
     199: _mercury_magnitude,
     299: _venus_magnitude,
+    399: _earth_magnitude,
     599: _jupiter_magnitude,
     799: _uranus_magnitude,
+
+    # Some planets can be reasonably identified with their barycenter.
+    1: _mercury_magnitude,
+    2: _venus_magnitude,
+    5: _jupiter_magnitude,
+    7: _uranus_magnitude,
 }

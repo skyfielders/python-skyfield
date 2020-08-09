@@ -1,5 +1,15 @@
-
 from skyfield import magnitudelib as m
+from skyfield.api import load
+
+def test_front_end_function():
+    # Simply call the routine with each planet to discover any exceptions.
+    ts = load.timescale()
+    t = ts.utc(2020, 7, 31)
+    eph = load('de421.bsp')
+    for name in ('mercury', 'venus', 'earth',
+                 'jupiter barycenter', 'uranus barycenter'):
+        astrometric = eph['sun'].at(t).observe(eph[name])
+        m.planetary_magnitude(astrometric)
 
 def test_mercury_magnitude_function():
     assert abs(-2.477 - m._mercury_magnitude(0.310295423552, 1.32182643625754, 1.1677)) < 0.0005
