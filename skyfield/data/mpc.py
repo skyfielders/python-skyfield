@@ -204,8 +204,11 @@ def load_comets_dataframe_slow(fobj):
 
 def comet_orbit(row, ts, gm_km3_s2):
     e = row.eccentricity
-    a = row.perihelion_distance_au / (1.0 - e)
-    p = a * (1.0 - e*e)
+    if e == 1.0:
+        p = row.perihelion_distance_au / 2
+    else:
+        a = row.perihelion_distance_au / (1.0 - e)
+        p = a * (1.0 - e*e)
     t_perihelion = ts.tt(row.perihelion_year, row.perihelion_month,
                          row.perihelion_day)
 
