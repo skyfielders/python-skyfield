@@ -260,7 +260,6 @@ def true_anomaly_hyperbolic(e, E):
     Equations from the relevant Wikipedia entries.
 
     """
-    if e > 1.0:  # hyperbolic orbit
     return 2.0 * arctan(sqrt((e + 1.0) / (e - 1.0)) * tanh(E/2))
 
 
