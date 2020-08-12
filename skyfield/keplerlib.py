@@ -153,9 +153,12 @@ class _KeplerOrbit(VectorFunction):
             NAIF ID of the secondary body
         """
         M = DEG2RAD * mean_anomaly_degrees
-        E = eccentric_anomaly(eccentricity, M)
-        v = true_anomaly(eccentricity, E)
         gm_au3_d2 = gm_km3_s2 * _CONVERT_GM
+        if e == 1.0:
+            v = true_anomaly_parabolic(semilatus_rectum_au, gm_au3_d2, M)
+        else:
+            E = eccentric_anomaly(eccentricity, M)
+            v = true_anomaly(eccentricity, E)
         pos, vel = ele_to_vec(
             semilatus_rectum_au,
             eccentricity,
@@ -257,6 +260,14 @@ def true_anomaly(e, E):
         return 2.0 * arctan(sqrt((e + 1.0) / (e - 1.0)) * tanh(E/2))
     else:
         return 2.0 * arctan(sqrt((1.0 + e) / (1.0 - e)) * tan(E/2))
+
+
+def true_anomaly_parabolic(p, gm, M):
+    delta_t = sqrt(2 * p**3 / gm) * M
+    periapsis_distance = p / 2
+    A = 3 / 2 * sqrt(gm / (2 * periapsis_distance**3)) * delta_t
+    B = (A + (A**2 + 1))**(1/3)
+    return 2 * arctan(B - 1/B)
 
 
 def ele_to_vec(p, e, i, Om, w, v, mu):
