@@ -160,7 +160,7 @@ class _KeplerOrbit(VectorFunction):
         elif eccentricity > 1.0:
             E = eccentric_anomaly(eccentricity, M)
             v = true_anomaly_hyperbolic(eccentricity, E)
-        else: 
+        else:
             v = true_anomaly_parabolic(semilatus_rectum_au, gm_au3_d2, M)
 
         pos, vel = ele_to_vec(
@@ -275,7 +275,7 @@ def true_anomaly_closed(e, E):
 def true_anomaly_parabolic(p, gm, M):
     """Calculates true anomaly from semi-latus rectum, gm, and mean anomaly.
 
-    Valid for parabolic orbits. Equations from 
+    Valid for parabolic orbits. Equations from
     https://en.wikipedia.org/wiki/Parabolic_trajectory.
 
     """
