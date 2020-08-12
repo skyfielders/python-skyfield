@@ -257,7 +257,7 @@ def eccentric_anomaly(e, M):
 def true_anomaly_hyperbolic(e, E):
     """Calculates true anomaly from eccentricity and eccentric anomaly.
 
-    Equations from the relevant Wikipedia entries.
+    Valid for hyperbolic orbits. Equations from the relevant Wikipedia entries.
 
     """
     return 2.0 * arctan(sqrt((e + 1.0) / (e - 1.0)) * tanh(E/2))
@@ -266,16 +266,17 @@ def true_anomaly_hyperbolic(e, E):
 def true_anomaly_closed(e, E):
     """Calculates true anomaly from eccentricity and eccentric anomaly.
 
-    Equations from the relevant Wikipedia entries.
+    Valid for closed orbits. Equations from the relevant Wikipedia entries.
 
     """
     return 2.0 * arctan(sqrt((1.0 + e) / (1.0 - e)) * tan(E/2))
 
 
 def true_anomaly_parabolic(p, gm, M):
-    """Calculates true anomaly for parabolic orbits from semi-latus rectum, gm, and mean anomaly.
+    """Calculates true anomaly from semi-latus rectum, gm, and mean anomaly.
 
-    Equations from https://en.wikipedia.org/wiki/Parabolic_trajectory.
+    Valid for parabolic orbits. Equations from 
+    https://en.wikipedia.org/wiki/Parabolic_trajectory.
 
     """
     delta_t = sqrt(2 * p**3 / gm) * M # from http://www.bogan.ca/orbits/kepler/orbteqtn.html
