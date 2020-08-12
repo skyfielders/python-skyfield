@@ -43,6 +43,10 @@ def planetary_magnitude(position):
     >>> print('%.2f' % planetary_magnitude(astrometric))
     -2.73
 
+    The routine does not yet take into account whether the observer is
+    facing the equator or poles of Uranus, so will only be accurate to
+    within about 0.1 magnitudes.
+
     """
     target = position.target
     function = _FUNCTIONS.get(target)

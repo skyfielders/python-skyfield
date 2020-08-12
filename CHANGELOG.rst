@@ -2,6 +2,14 @@
 Changelog
 =========
 
+1.27 — 2020 August ?
+--------------------
+
+* The prototype :func:`~skyfield.magnitudelib.planetary_magnitude()` now
+  runs on Uranus without raising an exception.  The routine does not yet
+  take into account whether the observer is facing the equator or poles
+  of Uranus, so will only be accurate to within about 0.1 magnitudes.
+
 1.26 — 2020 August 1
 --------------------
 
