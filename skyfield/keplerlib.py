@@ -154,11 +154,15 @@ class _KeplerOrbit(VectorFunction):
         """
         M = DEG2RAD * mean_anomaly_degrees
         gm_au3_d2 = gm_km3_s2 * _CONVERT_GM
-        if e == 1.0:
-            v = true_anomaly_parabolic(semilatus_rectum_au, gm_au3_d2, M)
-        else:
+        if eccentricity < 1.0:
             E = eccentric_anomaly(eccentricity, M)
-            v = true_anomaly(eccentricity, E)
+            v = true_anomaly_closed(eccentricity, E)
+        elif eccentricity > 1.0:
+            E = eccentric_anomaly(eccentricity, M)
+            v = true_anomaly_hyperbolic(eccentricity, E)
+        else: 
+            v = true_anomaly_parabolic(semilatus_rectum_au, gm_au3_d2, M)
+
         pos, vel = ele_to_vec(
             semilatus_rectum_au,
             eccentricity,
@@ -250,20 +254,32 @@ def eccentric_anomaly(e, M):
         raise ValueError('Failed to converge')
 
 
-def true_anomaly(e, E):
+def true_anomaly_hyperbolic(e, E):
     """Calculates true anomaly from eccentricity and eccentric anomaly.
 
     Equations from the relevant Wikipedia entries.
 
     """
     if e > 1.0:  # hyperbolic orbit
-        return 2.0 * arctan(sqrt((e + 1.0) / (e - 1.0)) * tanh(E/2))
-    else:
-        return 2.0 * arctan(sqrt((1.0 + e) / (1.0 - e)) * tan(E/2))
+    return 2.0 * arctan(sqrt((e + 1.0) / (e - 1.0)) * tanh(E/2))
+
+
+def true_anomaly_closed(e, E):
+    """Calculates true anomaly from eccentricity and eccentric anomaly.
+
+    Equations from the relevant Wikipedia entries.
+
+    """
+    return 2.0 * arctan(sqrt((1.0 + e) / (1.0 - e)) * tan(E/2))
 
 
 def true_anomaly_parabolic(p, gm, M):
-    delta_t = sqrt(2 * p**3 / gm) * M
+    """Calculates true anomaly for parabolic orbits from semi-latus rectum, gm, and mean anomaly.
+
+    Equations from https://en.wikipedia.org/wiki/Parabolic_trajectory.
+
+    """
+    delta_t = sqrt(2 * p**3 / gm) * M # from http://www.bogan.ca/orbits/kepler/orbteqtn.html
     periapsis_distance = p / 2
     A = 3 / 2 * sqrt(gm / (2 * periapsis_distance**3)) * delta_t
     B = (A + (A**2 + 1))**(1/3)
