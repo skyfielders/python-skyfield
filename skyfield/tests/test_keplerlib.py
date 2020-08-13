@@ -104,6 +104,30 @@ def test_comet():
 
         assert k.target == 'C/1995 O1 (Hale-Bopp)'
 
+def test_comet_with_eccentricity_of_exactly_one():
+    ts = load.timescale()
+    t = ts.utc(2020, 8, 13)
+    planets = load('de421.bsp')
+    earth, sun = planets['earth'], planets['sun']
+
+    data = (b'    CK15A020  2015 08  1.8353  5.341055  1.000000  208.8369  '
+            b'258.5042  109.1696            10.5  4.0  C/2015 A2 (PANSTARRS)'
+            b'                                    MPC 93587')
+
+    with BytesIO(data) as f:
+        df = mpc.load_comets_dataframe(f)
+
+    df = df[df['designation'] == 'C/2015 A2 (PANSTARRS)']
+    comet = mpc.comet_orbit(df.iloc[0], ts, GM_SUN)
+    ra, dec, distance = earth.at(t).observe(sun + comet).radec()
+
+    # These are exactly the RA and declination from the Minor Planet
+    # Center for this comet!  (The RA seconds returned by Skyfield
+    # actually say "46.45s", which would round up to 46.5, but what's a
+    # tenth of an arcsecond among friends?)
+    assert str(ra).startswith('18h 46m 46.4')
+    assert str(dec).startswith("-72deg 05' 33.")
+
 # Test various round-trips through the kepler orbit object.
 
 def _data_path(filename):

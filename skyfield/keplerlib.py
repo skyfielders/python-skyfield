@@ -52,6 +52,39 @@ class _KeplerOrbit(VectorFunction):
         self._rotation = None  # TODO: make argument?
 
     @classmethod
+    def _from_periapsis(
+            cls,
+            semilatus_rectum_au,
+            eccentricity,
+            inclination_degrees,
+            longitude_of_ascending_node_degrees,
+            argument_of_perihelion_degrees,
+            t_periapsis,
+            gm_km3_s2,
+            center=None,
+            target=None,
+        ):
+        """Build a `KeplerOrbit` given its parameters and date of periapsis."""
+        gm_au3_d2 = gm_km3_s2 * _CONVERT_GM
+        pos, vel = ele_to_vec(
+            semilatus_rectum_au,
+            eccentricity,
+            DEG2RAD * inclination_degrees,
+            DEG2RAD * longitude_of_ascending_node_degrees,
+            DEG2RAD * argument_of_perihelion_degrees,
+            0.0,
+            gm_au3_d2,
+        )
+        return cls(
+            Distance(pos),
+            Velocity(vel),
+            t_periapsis,
+            gm_au3_d2,
+            center,
+            target,
+        )
+
+    @classmethod
     def _from_true_anomaly(cls, p, e, i, Om, w, v,
                           epoch,
                           mu_km_s=None,
