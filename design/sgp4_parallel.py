@@ -13,7 +13,7 @@ from skyfield.sgp4lib import TEME_to_ITRF
 from skyfield.positionlib import ITRF_to_GCRS2, build_position
 from skyfield.vectorlib import ObserverData
 
-# Run SGP4 in parallel across n satellites x m times
+# SGP4 in parallel across n satellites x m times
 def positions_for(satellites, times):
     sat_array = SatrecArray( [s.model for s in satellites] )
     jd = times._utc_float()
@@ -74,8 +74,7 @@ def test_iss():
     #np.set_printoptions(precision=16)
     #print(geo1.velocity.km_per_s - geo2.velocity.km_per_s)
     #
-    assert np.array_equal(geo1.position.km, geo2.position.km)
-    #assert np.array_equal(geo1.velocity.km_per_s, geo2.velocity.km_per_s)
+    assert np.isclose(geo1.position.km, geo2.position.km).all()
     one_m_per_hour = 1.0 * 24.0 / AU_M
     assert abs(geo1.velocity.au_per_d - geo2.velocity.au_per_d).max() < one_m_per_hour
 
@@ -94,8 +93,8 @@ def test_two_sats():
     kestrel1, iss1  = positions
     iss2 = iss.at(times)
     kestrel2 = kestrel.at(times)
-    assert np.array_equal(iss1.position.km, iss2.position.km)
-    assert np.array_equal(kestrel1.position.km, kestrel2.position.km)
+    assert np.isclose(iss1.position.km, iss2.position.km).all()
+    assert np.isclose(kestrel1.position.km, kestrel2.position.km).all()
 
 # With optimized SGP4, peak memory use 142MB and runs in ~1s on my laptop
 def test_many_sats():
