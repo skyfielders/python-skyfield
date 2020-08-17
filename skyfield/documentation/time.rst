@@ -781,8 +781,8 @@ when creating your timescale:
 Downloading new timescale files
 ===============================
 
-The timescale object uses three files,
-from NASA and the International Earth Rotation Service,
+The timescale object uses three files —
+two from NASA and one from the International Earth Rotation Service —
 that provide Earth rotation data and UTC leap seconds.
 
 Each Skyfield release includes recent copies
@@ -802,14 +802,15 @@ The two effects of several-year-old timescale files are:
 1. Positions affected by the Earth’s rotation,
    like altitude and azimuth angles,
    will gradually grow less precise over the years
-   without updated Earth positions from new ∆T files.
+   without updated Earth rotation angles from new ∆T files.
 
-2. Dates in UTC will be off by one or more whole seconds,
+2. Dates in UTC will be off by one or more whole seconds
    once leap seconds occur
    that were not included in Skyfield’s copy of the leap second file.
 
-The two ∆T files include no explicit expiration date,
-but you can check the date of the last measured value of ∆T
+The two ∆T files that chronicle the gradual drift in the Earth’s rotation rate
+include no explicit expiration date.
+But you can check the date of the last measured value of ∆T
 as well as the date of the final speculative prediction:
 
 .. testcode::
@@ -833,33 +834,18 @@ as well as the date of the final speculative prediction:
     Date of last ∆T observation: 2020-02-01
     Date of final ∆T prediction: 2027-10-01
 
-By contrast,
-the leap second file offers an explicit expiration date
-right in the file itself,
-which Skyfield parses and returns as a standard Python ``date``:
-
-.. testcode::
-
-    expiration_date, leap_second_dat = load('Leap_Second.dat', builtin=True)
-    print('Leap second data expires on:', expiration_date)
-
-.. testoutput::
-
-    Leap second data expires on: 2021-07-28
-
-To instead check the dates of timescale files
-that you have downloaded yourself
-and have sitting on disk,
-simply remove ``builtin=True`` from the above calls to ``load()``.
-
 Using Python’s ``today()`` function and basic date arithmetic,
 you could determine whether these dates are far enough in the past
-that your application wants to attempt to download more recent files.
-For example:
+that your application needs to take action —
+like printing a warning,
+exiting with a fatal error,
+or even trying to download more recent files itself:
 
 ::
 
-    if (date.today() - last_observation).days > 365:
+    days_old = (date.today() - last_observation).days
+
+    if days_old > 366:
 
         # Force the download of new files.
         load('deltat.data', reload=True)
@@ -869,9 +855,27 @@ For example:
         # Use them to build a new timescale.
         ts = load.timescale(builtin=False)
 
-If you do download new files,
-remember to always build your timescales with ``builtin=False``
-or Skyfield will ignore your files and use its internal ones instead.
+In contrast to the ∆T files,
+the leap second file does include an explicit expiration date
+which Skyfield parses and returns as a standard Python ``date``.
+Compare it to today’s date to learn whether the file is expired:
+
+.. testcode::
+
+    expiration_date, leap_second_dat = load('Leap_Second.dat', builtin=True)
+    print('Leap second data expires on:', expiration_date)
+
+    is_expired = date.today() > expiration_date
+
+.. testoutput::
+
+    Leap second data expires on: 2021-07-28
+
+If you have downloaded your own timescale files to disk
+instead of using Skyfield’s builtin files,
+you can check their age by repeating the above operations
+on a timescale object built
+with ``load.timescale(builtin=False)`` specified.
 
 Keep in mind that downloads can be dangerous
 if your application needs to run unattended:
