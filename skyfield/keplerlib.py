@@ -327,22 +327,6 @@ def ele_to_vec(p, e, i, Om, w, v, mu):
 
     https://web.archive.org/web/*/http://ccar.colorado.edu/asen5070/handouts/kep2cart_2002.doc
     """
-    # Checks that longitude of ascending node is 0 if inclination is 0
-    if isinstance(i, ndarray) or isinstance(Om, ndarray):
-        if ((i==0)*(Om!=0)).any():
-            raise ValueError('If inclination is 0, longitude of ascending node must be 0')
-    else:
-        if i==0 and Om!=0:
-            raise ValueError('If inclination is 0, longitude of ascending node must be 0')
-
-    # Checks that argument of periapsis is 0  if eccentricity is 0
-    if isinstance(e, ndarray) or isinstance(w, ndarray):
-        if ((e==0)*(w!=0)).any():
-            raise ValueError('If eccentricity is 0, argument of periapsis must be 0')
-    else:
-        if e==0 and w!=0:
-            raise ValueError('If eccentricity is 0, argument of periapsis must be 0')
-
     # Checks that true anomaly is less than arccos(-1/e) for hyperbolic orbits
     if isinstance(e, ndarray) and isinstance(v, ndarray):
         inds = (e>1)
@@ -359,11 +343,13 @@ def ele_to_vec(p, e, i, Om, w, v, mu):
         if e>1 and v>arccos(-1/e):
             raise ValueError('If eccentricity is >1, abs(true anomaly) cannot be more than arccos(-1/e)')
 
-    # Checks that inclination is between 0 and pi
+    # Checks that inclination is in the range [0, pi]
     if isinstance(i, ndarray):
-        assert ((i>=0) * (i < pi)).all()
+        if not ((i>=0) * (i <= pi)).all():
+            raise ValueError('Inclination outside the range [0, pi] radians')
     else:
-        assert i>=0 and i<pi
+        if not 0 <= i <= pi:
+            raise ValueError('Inclination outside the range [0, pi] radians')
 
     r = p/(1 + e*cos(v))
     h = sqrt(p*mu)
