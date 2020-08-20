@@ -4,8 +4,7 @@ from numpy import pi, seterr, linspace
 from skyfield.api import load
 from skyfield.constants import GM_SUN_Pitjeva_2005_km3_s2 as GM_SUN
 from skyfield.data import mpc
-from skyfield.elementslib import OsculatingElements
-from skyfield.keplerlib import _KeplerOrbit as KeplerOrbit, propagate
+from skyfield.keplerlib import _KeplerOrbit as KeplerOrbit, propagate, _CONVERT_GM
 from skyfield.tests.test_elementslib import compare, ele_to_vec
 from skyfield.units import Angle, Distance, Velocity
 
@@ -138,7 +137,9 @@ def check_orbit(p, e, i, Om, w, v,
     pos0, vel0 = ele_to_vec(p, e, i, Om, w, v, mu)
 
     pos1, vel1 = propagate(pos0, vel0, 0, times, mu)
-    ele = OsculatingElements(Distance(km=pos1), Velocity(km_per_s=vel1), dummy_time, mu)
+
+    orbit = KeplerOrbit(Distance(km=pos1), Velocity(km_per_s=vel1), dummy_time, mu_au3_d2=mu*_CONVERT_GM)
+    ele = orbit.elements_at_epoch
 
     if p_eps: compare(p, ele.semi_latus_rectum.km, p_eps)
     if e_eps: compare(e, ele.eccentricity, e_eps)

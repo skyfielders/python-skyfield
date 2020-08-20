@@ -237,7 +237,7 @@ class _KeplerOrbit(VectorFunction):
         return OsculatingElements(self.position_at_epoch,
                                   self.velocity_at_epoch,
                                   self.epoch,
-                                  self._mu_km_s,
+                                  mu_km_s = self.mu_au3_d2 / _CONVERT_GM,
         )
 
 
