@@ -214,5 +214,5 @@ def test_hyperbolic_polar():
 
 
 def test_equatorial_non_zero_longitude_of_ascending_node():
-    check_orbit(p=300000, e=.3, i=1, Om=0, w=4, v=5,
+    check_orbit(p=300000, e=.3, i=0, Om=0, w=4, v=5,
                 p_eps=1e-2, e_eps=1e-8, i_eps=1e-15, w_eps=1e-7)
