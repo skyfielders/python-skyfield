@@ -138,8 +138,18 @@ def test_circular_equatorial():
                 p_eps=1e-2, e_eps=1e-8, i_eps=1e-15)
 
 
+def test_circular_retrograde_equatorial():
+    check_orbit(p=300000, e=0, i=pi, Om=0, w=0, v=1,
+                p_eps=1e-2, e_eps=1e-8, i_eps=1e-15)
+
+
 def test_circular_polar():
     check_orbit(p=300000, e=0, i=pi/2, Om=1, w=0, v=1,
+                p_eps=1e-2, e_eps=1e-8, i_eps=1e-15, Om_eps=1e-15)
+
+
+def test_circular_non_zero_arg_of_periapsis():
+    check_orbit(p=300000, e=0, i=.5, Om=1, w=.5, v=1,
                 p_eps=1e-2, e_eps=1e-8, i_eps=1e-15, Om_eps=1e-15)
 
 
@@ -150,6 +160,11 @@ def test_elliptical():
 
 def test_elliptical_equatorial():
     check_orbit(p=300000, e=.3, i=0, Om=0, w=1, v=5,
+                p_eps=1e-2, e_eps=1e-8, i_eps=1e-15, Om_eps=1e-15, w_eps=1e-7)
+
+
+def test_elliptical_retrograde_equatorial():
+    check_orbit(p=300000, e=.3, i=pi, Om=0, w=4, v=5,
                 p_eps=1e-2, e_eps=1e-8, i_eps=1e-15, Om_eps=1e-15, w_eps=1e-7)
 
 
@@ -168,6 +183,11 @@ def test_parabolic_equatorial():
                 p_eps=1e-5, e_eps=1e-14, i_eps=1e-15, Om_eps=1e-15, w_eps=1e-13)
 
 
+def test_parabolic_retrograde_equatorial():
+    check_orbit(p=300000, e=1, i=pi, Om=0, w=1, v=2,
+                p_eps=1e-5, e_eps=1e-14, i_eps=1e-15, Om_eps=1e-13, w_eps=1e-13)
+
+
 def test_parabolic_polar():
     check_orbit(p=300000, e=1, i=pi/2, Om=1, w=2, v=3,
                 p_eps=1e-5, e_eps=1e-14, i_eps=1e-14, Om_eps=1e-13, w_eps=1e-13)
@@ -183,6 +203,16 @@ def test_hyperbolic_equatorial():
                 p_eps=1e0, e_eps=1e-6, i_eps=1e-15, Om_eps=1e-15, w_eps=1e-6)
 
 
+def test_hyperbolic_retrograde_equatorial():
+    check_orbit(p=300000, e=1.3, i=pi, Om=0, w=1, v=.5,
+                p_eps=1e0, e_eps=1e-6, i_eps=1e-15, Om_eps=1e-9, w_eps=1e-6)
+
+
 def test_hyperbolic_polar():
     check_orbit(p=300000, e=1.3, i=pi/2, Om=1, w=2, v=.5,
                 p_eps=1e0, e_eps=1e-6, i_eps=1e-10, Om_eps=1e-10, w_eps=1e-6)
+
+
+def test_equatorial_non_zero_longitude_of_ascending_node():
+    check_orbit(p=300000, e=.3, i=1, Om=0, w=4, v=5,
+                p_eps=1e-2, e_eps=1e-8, i_eps=1e-15, w_eps=1e-7)
