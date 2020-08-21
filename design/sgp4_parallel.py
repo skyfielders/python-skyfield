@@ -34,9 +34,11 @@ def positions_for(satellites, earthLocation, times):
         sat_v_GCRS -= loc_v_GCRS
         # Mirror VectorFunction at()
         observer_data = ObserverData()
-        observer_data.gcrs_position = sat_p_GCRS
+        observer_data.gcrs_position = loc_p_GCRS
+        observer_data.altaz_rotation = earthLocation._altaz_rotation(times)
+        observer_data.elevation_m = earthLocation.elevation.m
         target = -100000 - satellites[index].model.satnum
-        position = build_position(sat_p_GCRS, sat_v_GCRS, times, 399, target, observer_data)
+        position = build_position(sat_p_GCRS, sat_v_GCRS, times, earthLocation, target, observer_data)
         position.message = messages
         yield position
 
