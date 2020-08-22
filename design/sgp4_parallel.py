@@ -18,8 +18,8 @@ def positions_for(satellites, earthLocation, times):
     sat_array = SatrecArray( [s.model for s in satellites] )
     jd = times._utc_float()
     e, r, v = sat_array.sgp4(jd, np.zeros_like(jd))
-    assert len(satellites) == np.shape(r)[0]
     _, loc_v_GCRS, loc_p_GCRS, _ = earthLocation._at(times)
+    loc_altaz_rotation = earthLocation._altaz_rotation(times)
     # Unpack the TEME coordinates, convert to GCRS and subtract earthLocation
     for index in range(r.shape[0]):
         errors = e[index]
@@ -35,7 +35,7 @@ def positions_for(satellites, earthLocation, times):
         # Mirror VectorFunction at()
         observer_data = ObserverData()
         observer_data.gcrs_position = loc_p_GCRS
-        observer_data.altaz_rotation = earthLocation._altaz_rotation(times)
+        observer_data.altaz_rotation = loc_altaz_rotation
         observer_data.elevation_m = earthLocation.elevation.m
         target = -100000 - satellites[index].model.satnum
         position = build_position(sat_p_GCRS, sat_v_GCRS, times, earthLocation, target, observer_data)
