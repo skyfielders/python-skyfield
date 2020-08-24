@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
+import numpy as np
 from numpy import (
     array, concatenate, identity, multiply, ones_like, repeat, zeros_like
 )
