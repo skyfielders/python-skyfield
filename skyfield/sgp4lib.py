@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
+import numpy as np
 from numpy import (
     array, concatenate, identity, multiply, ones_like, repeat, zeros_like
 )
@@ -156,9 +157,11 @@ class EarthSatellite(VectorFunction):
         """
         sat = self.model
         jd = t._utc_float()
+        no_errors = [None] * len(t)
         if getattr(jd, 'shape', None):
             e, r, v = sat.sgp4_array(jd, zeros_like(jd))
-            messages = [SGP4_ERRORS[error] if error else None for error in e]
+            messages = no_errors if not np.any(e) else \
+                    [SGP4_ERRORS[error] if error else None for error in e ]
             return r.T, v.T, messages
         else:
             error, position, velocity = sat.sgp4(jd, 0.0)
