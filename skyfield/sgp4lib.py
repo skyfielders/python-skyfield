@@ -156,9 +156,11 @@ class EarthSatellite(VectorFunction):
         """
         sat = self.model
         jd = t._utc_float()
+        no_errors = [None] * len(t)
         if getattr(jd, 'shape', None):
             e, r, v = sat.sgp4_array(jd, zeros_like(jd))
-            messages = [SGP4_ERRORS[error] if error else None for error in e]
+            messages = no_errors if not np.any(errors) else \
+                    [SGP4_ERRORS[error] if error else None for error in errors ]
             return r.T, v.T, messages
         else:
             error, position, velocity = sat.sgp4(jd, 0.0)
