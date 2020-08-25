@@ -8,8 +8,9 @@ conversions from TEME?
 import numpy as np
 from sgp4.api import SatrecArray, SGP4_ERRORS, accelerated
 from skyfield.api import load, utc, EarthSatellite, Topos
-from skyfield.constants import AU_KM, DAY_S, AU_M
+from skyfield.constants import ANGVEL, AU_KM, DAY_S, AU_M, tau
 from skyfield.sgp4lib import TEME_to_ITRF, _zero_zero_minus_one, theta_GMST1982, _cross
+from skyfield.nutationlib import iau2000b_radians
 from skyfield.positionlib import ITRF_to_GCRS2, build_position
 from skyfield.vectorlib import ObserverData
 from skyfield.functions import mxv, rot_z
@@ -20,7 +21,8 @@ def precompute_for_TEME(jd_ut1):
     angular_velocity = np.multiply.outer(_zero_zero_minus_one, theta_dot)
     R = rot_z(-theta)
     return angular_velocity, R
-# This is based on the earlier version of TEME_to_ITRF() and does not include xp, yp, or fraction_ut1
+
+# Based on an earlier version of TEME_to_ITRF() and does not include xp, yp, or fraction_ut1
 def TEME_to_ITRF_fast(jd_ut1, rTEME, vTEME, angular_velocity, R):
     if len(rTEME.shape) == 1:
         rPEF = (R).dot(rTEME)
@@ -30,15 +32,31 @@ def TEME_to_ITRF_fast(jd_ut1, rTEME, vTEME, angular_velocity, R):
         vPEF = mxv(R, vTEME) + _cross(angular_velocity, rPEF)
     return rPEF, vPEF
 
+def precompute_for_ITRF(t):
+    spin = rot_z(t.gast / 24.0 * tau)
+    return spin
+
+# Based on an earlier version of ITRF_to_GCRS2() and does not include _high_accuracy for now
+def ITRF_to_GCRS2_fast(t, rITRF, vITRF, spin):
+    position = mxv(spin, rITRF)
+    velocity = mxv(spin, vITRF)
+    velocity[0] += DAY_S * ANGVEL * - position[1]
+    velocity[1] += DAY_S * ANGVEL * position[0]
+    position = mxv(t.MT, position)
+    velocity = mxv(t.MT, velocity)
+    return position, velocity
+
 # Run SGP4 in parallel across n satellites x m times
 def positions_for(satellites, earthLocation, times):
     sat_array = SatrecArray( [s.model for s in satellites] )
     jd = times._utc_float()
     e, r, v = sat_array.sgp4(jd, np.zeros_like(jd))
+    # Cached computations
     _, loc_v_GCRS, loc_p_GCRS, _ = earthLocation._at(times)
     loc_altaz_rotation = earthLocation._altaz_rotation(times)
     no_errors = [None] * len(e[0])
     angular_velocity, R = precompute_for_TEME(times.ut1)
+    spin = precompute_for_ITRF(times)
     # Unpack the TEME coordinates, convert to GCRS and subtract earthLocation
     for index in range(r.shape[0]):
         errors = e[index]
@@ -48,7 +66,8 @@ def positions_for(satellites, earthLocation, times):
         rTEME = np.divide(r[index].T, AU_KM)
         vTEME = np.divide(v[index].T, AU_KM / DAY_S)
         rITRF, vITRF = TEME_to_ITRF_fast(times.ut1, rTEME, vTEME, angular_velocity, R)
-        sat_p_GCRS, sat_v_GCRS = ITRF_to_GCRS2(times, rITRF, vITRF)
+        sat_p_GCRS, sat_v_GCRS = ITRF_to_GCRS2_fast(times, rITRF, vITRF, spin)
+        #sat_p_GCRS, sat_v_GCRS = ITRF_to_GCRS2(times, rITRF, vITRF)
         # Mirror VectorSum _at() for (EarthSatellite - Topos)
         sat_p_GCRS -= loc_p_GCRS
         sat_v_GCRS -= loc_v_GCRS
