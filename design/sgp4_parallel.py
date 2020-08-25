@@ -9,9 +9,26 @@ import numpy as np
 from sgp4.api import SatrecArray, SGP4_ERRORS, accelerated
 from skyfield.api import load, utc, EarthSatellite, Topos
 from skyfield.constants import AU_KM, DAY_S, AU_M
-from skyfield.sgp4lib import TEME_to_ITRF
+from skyfield.sgp4lib import TEME_to_ITRF, _zero_zero_minus_one, theta_GMST1982, _cross
 from skyfield.positionlib import ITRF_to_GCRS2, build_position
 from skyfield.vectorlib import ObserverData
+from skyfield.functions import mxv, rot_z
+
+# Precompute values to be reused across all satellites for the same times for conversion from TEME
+def precompute_for_TEME(jd_ut1):
+    theta, theta_dot = theta_GMST1982(jd_ut1)
+    angular_velocity = np.multiply.outer(_zero_zero_minus_one, theta_dot)
+    R = rot_z(-theta)
+    return angular_velocity, R
+# This is based on the earlier version of TEME_to_ITRF() and does not include xp, yp, or fraction_ut1
+def TEME_to_ITRF_fast(jd_ut1, rTEME, vTEME, angular_velocity, R):
+    if len(rTEME.shape) == 1:
+        rPEF = (R).dot(rTEME)
+        vPEF = (R).dot(vTEME) + _cross(angular_velocity, rPEF)
+    else:
+        rPEF = mxv(R, rTEME)
+        vPEF = mxv(R, vTEME) + _cross(angular_velocity, rPEF)
+    return rPEF, vPEF
 
 # Run SGP4 in parallel across n satellites x m times
 def positions_for(satellites, earthLocation, times):
@@ -20,14 +37,17 @@ def positions_for(satellites, earthLocation, times):
     e, r, v = sat_array.sgp4(jd, np.zeros_like(jd))
     _, loc_v_GCRS, loc_p_GCRS, _ = earthLocation._at(times)
     loc_altaz_rotation = earthLocation._altaz_rotation(times)
+    no_errors = [None] * len(e[0])
+    angular_velocity, R = precompute_for_TEME(times.ut1)
     # Unpack the TEME coordinates, convert to GCRS and subtract earthLocation
     for index in range(r.shape[0]):
         errors = e[index]
-        messages = [SGP4_ERRORS[error] if error else None for error in errors ]
+        messages = no_errors if not np.any(errors) else \
+                    [SGP4_ERRORS[error] if error else None for error in errors ]
         # Adapted from _position_and_velocity_TEME_km(), ITRF_position_velocity_error()
         rTEME = np.divide(r[index].T, AU_KM)
         vTEME = np.divide(v[index].T, AU_KM / DAY_S)
-        rITRF, vITRF = TEME_to_ITRF(times.ut1, rTEME, vTEME)
+        rITRF, vITRF = TEME_to_ITRF_fast(times.ut1, rTEME, vTEME, angular_velocity, R)
         sat_p_GCRS, sat_v_GCRS = ITRF_to_GCRS2(times, rITRF, vITRF)
         # Mirror VectorSum _at() for (EarthSatellite - Topos)
         sat_p_GCRS -= loc_p_GCRS
@@ -78,7 +98,7 @@ def test_iss():
     #geo2 = iss.at(times)
     print(geo2.position.km)
     #
-    assert np.isclose(geo1.position.km, geo2.position.km).all()
+    assert np.allclose(geo1.position.km, geo2.position.km)
     one_m_per_hour = 1.0 * 24.0 / AU_M
     assert abs(geo1.velocity.au_per_d - geo2.velocity.au_per_d).max() < one_m_per_hour
 
@@ -98,8 +118,8 @@ def test_two_sats():
     kestrel1, iss1 = positions
     iss2 = (iss - city).at(times)
     kestrel2 = (kestrel - city).at(times)
-    assert np.isclose(iss1.position.km, iss2.position.km).all()
-    assert np.isclose(kestrel1.position.km, kestrel2.position.km).all()
+    assert np.allclose(iss1.position.km, iss2.position.km)
+    assert np.allclose(kestrel1.position.km, kestrel2.position.km)
 
 def test_many_sats():
     print("test many sats")
@@ -107,7 +127,7 @@ def test_many_sats():
     active_sats = load.tle_file("https://celestrak.com/NORAD/elements/active.txt", reload=False)
     print(" active satellites:", len(active_sats), " x 300 time values")
     trange = range(0, 300, 1)
-    times = ts.utc(2020, 7, 5, 12, 0, trange)
+    times = ts.utc(2020, 8, 25, 12, 0, trange)
     city = Topos('44.0247 N', '88.5426 W')
     positions = list(positions_for(active_sats, city, times))
     assert len(active_sats) == len(positions)
