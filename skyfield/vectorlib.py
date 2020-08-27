@@ -3,7 +3,7 @@
 from jplephem.names import target_names as _jpl_code_name_dict
 from numpy import max
 from .constants import C_AUDAY
-from .errors import DeprecationError, raise_error_for_deprecated_time_arguments
+from .errors import DeprecationError
 from .functions import length_of
 from .positionlib import build_position
 from .timelib import Time
@@ -57,7 +57,6 @@ class VectorFunction(object):
         return VectorSum(other.target, self.target,
                          selfp + othern, selfn + otherp)
 
-    @raise_error_for_deprecated_time_arguments
     def at(self, t):
         """At time ``t``, compute the target's position relative to the center.
 
