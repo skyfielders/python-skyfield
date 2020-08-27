@@ -10,8 +10,7 @@ from sgp4.api import SatrecArray, SGP4_ERRORS, accelerated
 from skyfield.api import load, utc, EarthSatellite, Topos
 from skyfield.constants import ANGVEL, AU_KM, DAY_S, AU_M, tau
 from skyfield.sgp4lib import TEME_to_ITRF, _zero_zero_minus_one, theta_GMST1982, _cross
-from skyfield.nutationlib import iau2000b_radians
-from skyfield.positionlib import ITRF_to_GCRS2, build_position
+from skyfield.positionlib import build_position
 from skyfield.vectorlib import ObserverData
 from skyfield.functions import mxv, rot_z
 
@@ -139,6 +138,8 @@ def test_two_sats():
     kestrel2 = (kestrel - city).at(times)
     assert np.allclose(iss1.position.km, iss2.position.km)
     assert np.allclose(kestrel1.position.km, kestrel2.position.km)
+    assert np.allclose(iss1.velocity.au_per_d, iss2.velocity.au_per_d)
+    assert np.allclose(kestrel1.velocity.au_per_d, kestrel2.velocity.au_per_d)
 
 def test_many_sats():
     print("test many sats")
