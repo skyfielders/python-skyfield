@@ -63,7 +63,7 @@ The supported time scales are:
 * ``t.utc`` — Coordinated Universal Time (“Greenwich Time”)
 * ``t.ut1`` — Universal Time
 * ``t.tai`` — International Atomic Time
-* ``t.tt`` — Terrestrial Time
+* ``t.tt`` and ``t.J`` — Terrestrial Time
 * ``t.tdb`` — Barycentric Dynamical Time (the JPL’s *T*\ :sub:`eph`)
 
 You can build a `Time` from several different source timescales.
@@ -83,6 +83,7 @@ Here’s a summary.
 
     t = ts.tt(year, month, day, hour, minute, second)
     t = ts.tt_jd(floating_point_Julian_date)
+    t = ts.J(floating_point_Julian_year)
 
     t = ts.tdb(year, month, day, hour, minute, second)
     t = ts.tdb_jd(floating_point_Julian_date)
@@ -668,7 +669,18 @@ using a slightly different starting point for the day.
 For practical purposes, TT is simply TAI
 plus exactly 32.184 seconds.
 So it is now more than a minute ahead of UTC.
+You can also retrieve Terrestrial Time as a floating point number of years
+of exactly 365.25 days each:
 
+.. testcode::
+
+    print('Julian year = {:.4f}'.format(t.J))
+
+.. testoutput::
+
+    Julian year = 2014.0000
+
+Finally,
 Barycentric Dynamical Time (TDB) runs at approximately the rate
 that an atomic clock would run
 if it were at rest with respect to the Solar System barycenter,

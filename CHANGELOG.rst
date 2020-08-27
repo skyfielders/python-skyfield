@@ -5,6 +5,13 @@ Changelog
 1.27 — 2020 August ?
 --------------------
 
+* Added :meth:`~skyfield.timelib.Timescale.J()` that builds a time array
+  from an array of floating point years.
+  `#436 <https://github.com/skyfielders/python-skyfield/issues/436>`_
+
+* Comets and asteroids with parabolic and hyperbolic orbits are now
+  supported.
+
 * The prototype :func:`~skyfield.magnitudelib.planetary_magnitude()` now
   runs on Uranus without raising an exception.  The routine does not yet
   take into account whether the observer is facing the equator or poles

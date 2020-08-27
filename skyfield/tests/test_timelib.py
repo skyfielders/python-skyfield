@@ -3,7 +3,7 @@ import numpy as np
 from assay import assert_raises
 from pytz import timezone
 from skyfield import api
-from skyfield.constants import DAY_S
+from skyfield.constants import DAY_S, T0
 from skyfield.timelib import utc, calendar_tuple, julian_date
 from datetime import datetime
 
@@ -312,6 +312,9 @@ def test_delta_t(ts):
     assert abs(t.delta_t + 20.0 - (32.0 * 5.0**2)) < 1.0
 
 def test_J(ts):
+    assert ts.J(2000).tt == T0
+    assert ts.J(1900).tt == T0 - 36525.0
+    assert (ts.J([1900, 2000]).tt == [T0 - 36525.0, T0]).all()
     assert ts.tt(2000, 1, 1.5).J == 2000.0
     assert ts.tt(1900, 1, 0.5).J == 1900.0
 

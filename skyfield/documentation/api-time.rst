@@ -35,7 +35,7 @@ The Time object
 
    .. attribute:: J
 
-      Terrestrial Time (TT) as a decimal number of Julian years.
+      Terrestrial Time (TT) as a floating point number of Julian years.
 
    .. attribute:: tdb
 

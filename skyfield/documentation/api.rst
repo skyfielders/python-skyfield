@@ -78,6 +78,7 @@ any given version of Skyfield will fall gradually out of date.
    Timescale.tai_jd
    Timescale.tt
    Timescale.tt_jd
+   Timescale.J
    Timescale.tdb
    Timescale.tdb_jd
    Timescale.ut1
@@ -91,13 +92,13 @@ The `Time` class is Skyfield's way of representing
 either a single time, or a whole array of times.
 The same time can be represented in several different time scales.
 
-========= ==================================================
+========= =====================================================
 ``t.tai`` International Atomic Time (TAI) as a Julian date.
 ``t.tt``  Terrestrial Time (TT) as a Julian date.
-``t.J``   Terrestrial Time (TT) as decimal Julian years.
+``t.J``   Terrestrial Time (TT) as floating point Julian years.
 ``t.tdb`` Barycentric Dynamical Time (TDB) as a Julian date.
 ``t.ut1`` Universal Time (UT1) as a Julian date.
-========= ==================================================
+========= =====================================================
 
 A couple of offsets between time scales are also available.
 

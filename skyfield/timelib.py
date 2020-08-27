@@ -212,6 +212,17 @@ class Timescale(object):
         fraction2 += fraction
         return Time(self, whole, fraction2)
 
+    def J(self, year):
+        """Build a `Time` from a TT Julian year or array of years.
+
+        Julian years are convenient uniform periods of exactly 365.25
+        days of Terrestrial Time, centered on 2000 January 1 12h TT =
+        Julian year 2000.0.
+
+        """
+        tt = _to_array(year) * 365.25 + 1721045.0
+        return Time(self, tt, 0.0)
+
     def tdb(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
         """Build a `Time` from a TDB calendar date.
@@ -667,7 +678,13 @@ class Time(object):
 
     @reify
     def J(self):
-        """Decimal Julian years centered on J2000.0 = TT 2000 January 1 12h."""
+        """Return a floating point Julian year or array of years for this date.
+
+        Julian years are convenient uniform periods of exactly 365.25
+        days of Terrestrial Time, centered on 2000 January 1 12h TT =
+        Julian year 2000.0.
+
+        """
         return (self.whole - 1721045.0 + self.tt_fraction) / 365.25
 
     @reify
