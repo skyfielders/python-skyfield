@@ -89,6 +89,7 @@ class ICRF(object):
 
     """
     _default_center = None
+    _ephemeris = None  # cached so we can compute how light is deflected
 
     def __init__(self, position_au, velocity_au_per_d=None, t=None,
                  center=None, target=None, observer_data=None):
@@ -536,8 +537,9 @@ class Barycentric(ICRF):
         astrometric = Astrometric(p, v, t,
                                   center=self.target, target=body.target,
                                   observer_data=self.observer_data)
-        astrometric.light_time = light_time
+        astrometric._ephemeris = self._ephemeris
         astrometric.center_barycentric = self
+        astrometric.light_time = light_time
         return astrometric
 
 # TODO: pre-create a Barycentric object representing the SSB, and make
@@ -607,7 +609,7 @@ class Astrometric(ICRF):
             include_earth_deflection = nadir_angle >= 0.8
 
         add_deflection(target_au, bcrs_position,
-                       observer_data.ephemeris, t, include_earth_deflection)
+                       self._ephemeris, t, include_earth_deflection)
 
         add_aberration(target_au, bcrs_velocity, self.light_time)
 

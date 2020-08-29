@@ -76,11 +76,11 @@ class VectorFunction(object):
                              ' instance as its argument, instead of the'
                              ' value {0!r}'.format(t))
         observer_data = ObserverData()
-        observer_data.ephemeris = self.ephemeris
         p, v, observer_data.gcrs_position, message = self._at(t)
         center = self.center
         self._snag_observer_data(observer_data, t)
         position = build_position(p, v, t, center, self.target, observer_data)
+        position._ephemeris = self.ephemeris
         position.message = message
         return position
 
@@ -247,12 +247,11 @@ class ObserverData(object):
     """Essential facts about an observer, that may be needed later."""
     # TODO: expand the documentation for this class
 
-    __slots__ = ('altaz_rotation', 'elevation_m', 'ephemeris', 'gcrs_position')
+    __slots__ = ('altaz_rotation', 'elevation_m', 'gcrs_position')
 
     def __init__(self):
         self.altaz_rotation = None
         self.elevation_m = None
-        self.ephemeris = None
         self.gcrs_position = None
 
 def _jpl_name(code_or_string):
