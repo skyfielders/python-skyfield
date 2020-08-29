@@ -75,6 +75,20 @@ Sprint Possibilities
     it be called the ``.center``?  But that’s already taken.  Maybe
     ``.center_position``?  ``.center_barycentric``?)
 
+  * DISCOVERY: we already keep the ``Topos`` around!  We call it the
+    ``.center`` of the position, using the power of an object-oriented
+    language like Python to keep the actual live object, instead of a
+    number or string, to represent “such-and-such a latitude and
+    longitude and elevation”.  The only thing we don’t keep around is
+    the position of the center relative to the SSB, we instead only seem
+    to keep the ``Topos`` object that generated that position.  We need
+    to now cache the position too (as described above), which sounds
+    wasteful, but (a) the ``observer_data`` is already keeping both the
+    position and velocity arrays around anyway, and (b) the only other
+    weighty attribute is the time, which both objects share a single
+    copy of anyway.  So since the ``Topos`` is already the ``center``,
+    we just need a ``center_barycentric`` or somesuch.
+
 * Trying to index a unit class should print help suggesting a unit be
   specified, similar to trying to iterate across one.
 
