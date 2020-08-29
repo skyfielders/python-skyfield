@@ -10,6 +10,56 @@ forget.
 Sprint Possibilities
 ====================
 
+* Improve the situation around “observer data”.
+
+  * When an vector or vector sum like ``earth + boston`` is asked its
+    position ``.at(t)``, instead of pre-computing a dedicated altaz
+    rotation matrix, it should instead gain an ``.observer_frame``
+    attribute whose API is like a ``planetarylib.Frame``.
+
+  * An apparent position should probably just copy the
+    ``.observer_frame`` of the astrometric frame from which it is
+    derived.
+
+  * Or should it be ``.center_frame`` since the origin of the vector is
+    called its ``.center`` not its ``.observer``?
+
+  * The ``.altaz()`` method can ask the frame for its rotation at time
+    ``t``, so ``.altaz_rotation`` no longer needs to be precomputed.
+
+  * Why does ``observer_data`` keep the ``elevation_m``?  Solely to
+    support atmospheric refraction in ``altaz()``.  Hmm.  Where could
+    that come from instead?  There is not quite a concept of a frame
+    having an elevation, alas.  So maybe we need a different plan:
+    instead of psassing the ``.observer_frame`` around, we could pass
+    the whole ``Topos`` — the ``bluffton`` part of ``earth + bluffton``,
+    above.  It knows its elevation and could be taught how to generate
+    the rotation matrix of its reference frame.
+
+  * In fact, we could defer to the ``Topos`` the knowledge of how to
+    apply refraction, and then planetary topos-like objects could do
+    refraction relevant to those planets, instead of having Earth
+    refraction hard-coded like it currently is in ``altaz()``.
+
+  * We currently special-case two components of the full
+    center-to-target vector: the barycenter-to-target vector for things
+    like deflection, aberration, and like magnitude being affected by
+    distance from the sun; and Earth-to-target, for Earth deflection.
+    First, those could reasonably live on the position object itself, as
+    they are not really specific to the observer; and, second, we could
+    instead simply save the components we added together.  But maybe
+    that would take too much RAM?  Let’s continue to special case those
+    two sub-results only, to save RAM, but from now on keep them on the
+    position itself.
+
+  * It feels like further simplifications might happen in ``VectorSum``
+    but we’ll see.  Maybe ``._at()`` should finally become something
+    more visible, like ``.vectors_at()``?  Its purpose is to return a
+    position and velocity without building a whole position object that
+    would just get thrown away in the case of a sum of two vectors, for
+    which the user will only need a final position object for the
+    combined sum.
+
 * Trying to index a unit class should print help suggesting a unit be
   specified, similar to trying to iterate across one.
 
