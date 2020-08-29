@@ -55,7 +55,7 @@ def planetary_magnitude(position):
         raise ValueError('cannot compute the magnitude of target %s' % name)
 
     # Shamelessly treat the Sun as sitting at the Solar System Barycenter.
-    sun_to_observer = position.observer_data.bcrs_position
+    sun_to_observer = position.center_barycentric.position.au
     observer_to_planet = position.position.au
     sun_to_planet = sun_to_observer + observer_to_planet
 

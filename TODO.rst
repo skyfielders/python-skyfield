@@ -63,18 +63,6 @@ Sprint Possibilities
     which the user will only need a final position object for the
     combined sum.
 
-  * Further thought: the position returned by ``earth + topos`` should
-    be called the ``.observer`` on the Astrometric and Apparent
-    positions, and should remember the ``topos`` as its “frame”, and
-    should cache any request for its frame at its time ``t``.  It is
-    really the only object that (a) is generated from the topos, (b)
-    that is also specific to a particular time ``t``, and (c) that is
-    common to all the different planets, stars, and so forth that
-    someone might ``.observe()`` from that single position.  It would be
-    a shame to recompute the rotation over and over again!  (Or should
-    it be called the ``.center``?  But that’s already taken.  Maybe
-    ``.center_position``?  ``.center_barycentric``?)
-
   * DISCOVERY: we already keep the ``Topos`` around!  We call it the
     ``.center`` of the position, using the power of an object-oriented
     language like Python to keep the actual live object, instead of a

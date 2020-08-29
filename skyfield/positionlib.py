@@ -537,6 +537,7 @@ class Barycentric(ICRF):
                                   center=self.target, target=body.target,
                                   observer_data=self.observer_data)
         astrometric.light_time = light_time
+        astrometric.center_barycentric = self
         return astrometric
 
 # TODO: pre-create a Barycentric object representing the SSB, and make
@@ -582,8 +583,10 @@ class Astrometric(ICRF):
 
         observer_data = self.observer_data
         gcrs_position = observer_data.gcrs_position
-        bcrs_position = observer_data.bcrs_position
-        bcrs_velocity = observer_data.bcrs_velocity
+
+        cbp = self.center_barycentric
+        bcrs_position = cbp.position.au
+        bcrs_velocity = cbp.velocity.au_per_d
 
         # If a single observer position (3,) is observing an array of
         # targets (3,n), then deflection and aberration will complain
