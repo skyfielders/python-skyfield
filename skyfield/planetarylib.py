@@ -230,6 +230,8 @@ class PlanetTopos(VectorFunction):
 
     def _snag_observer_data(self, observer_data, t):
         R = self._frame.rotation_at(t)
+        # TODO: avoid computing this rotation until altaz() is called
+        # and we know we need it.
         observer_data.altaz_rotation = mxmxm(
             # TODO: Figure out how to produce this rotation directly
             # from _position_au, to support situations where we were not

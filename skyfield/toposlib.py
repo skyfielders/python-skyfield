@@ -71,6 +71,8 @@ class Topos(VectorFunction):
         return '<{0}>'.format(self)
 
     def _snag_observer_data(self, observer_data, t):
+        # TODO: avoid actually computing _altaz_rotation() until we are
+        # in an altaz() call and know we need it.
         observer_data.altaz_rotation = self._altaz_rotation(t)
         observer_data.elevation_m = self.elevation.m
 
