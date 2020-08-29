@@ -31,10 +31,13 @@ Sprint Possibilities
     support atmospheric refraction in ``altaz()``.  Hmm.  Where could
     that come from instead?  There is not quite a concept of a frame
     having an elevation, alas.  So maybe we need a different plan:
-    instead of psassing the ``.observer_frame`` around, we could pass
-    the whole ``Topos`` — the ``bluffton`` part of ``earth + bluffton``,
+    instead of passing the ``.observer_frame`` around, we could pass the
+    whole ``Topos`` — the ``bluffton`` part of ``earth + bluffton``,
     above.  It knows its elevation and could be taught how to generate
-    the rotation matrix of its reference frame.
+    the rotation matrix of its reference frame.  UPDATE: we can give
+    frames the concept of refraction.  That way all that needs to be
+    passed is an ``observer_frame``, instead of an ``observer`` through
+    which a frame then needs to be requested.
 
   * In fact, we could defer to the ``Topos`` the knowledge of how to
     apply refraction, and then planetary topos-like objects could do
@@ -59,6 +62,18 @@ Sprint Possibilities
     would just get thrown away in the case of a sum of two vectors, for
     which the user will only need a final position object for the
     combined sum.
+
+  * Further thought: the position returned by ``earth + topos`` should
+    be called the ``.observer`` on the Astrometric and Apparent
+    positions, and should remember the ``topos`` as its “frame”, and
+    should cache any request for its frame at its time ``t``.  It is
+    really the only object that (a) is generated from the topos, (b)
+    that is also specific to a particular time ``t``, and (c) that is
+    common to all the different planets, stars, and so forth that
+    someone might ``.observe()`` from that single position.  It would be
+    a shame to recompute the rotation over and over again!  (Or should
+    it be called the ``.center``?  But that’s already taken.  Maybe
+    ``.center_position``?  ``.center_barycentric``?)
 
 * Trying to index a unit class should print help suggesting a unit be
   specified, similar to trying to iterate across one.
