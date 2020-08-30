@@ -169,7 +169,7 @@ class SpiceKernel(object):
         chain = chain[::-1]
         center = chain[0].center
         target = chain[-1].target
-        return VectorSum(center, target, chain, ())
+        return VectorSum(center, target, chain)
 
     def __contains__(self, name_or_code):
         if isinstance(name_or_code, int):

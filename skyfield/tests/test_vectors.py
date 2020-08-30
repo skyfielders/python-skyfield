@@ -24,7 +24,7 @@ def test_chebyshev_subtraction():
 
     assert str(v) == """\
 Sum of 2 vectors:
- - Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 10 SUN
+ + ReversedVector [TODO]
  + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER"""
 
     assert repr(v) == "\
@@ -81,8 +81,8 @@ target=Topos 38deg 55' 17.4" N -77deg 04' 00.8" E>"""
 
     assert str(v) == """\
 Sum of 4 vectors:
- - Segment 'de421.bsp' 4 MARS BARYCENTER -> 499 MARS
- - Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 4 MARS BARYCENTER
+ + ReversedVector [TODO]
+ + ReversedVector [TODO]
  + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
  + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH"""
 

@@ -48,7 +48,7 @@ def test_exception_raised_for_dates_outside_ephemeris(ts):
     assert e.start_time.tdb == 2414864.5
     assert e.end_time.tdb == 2471184.5
     assert e.time_mask == [True]
-    assert e.segment is eph['earth'].positives[0].spk_segment
+    assert e.segment is eph['earth'].vector_functions[0].spk_segment
 
 def test_planet_position_class(ts):
     e = api.load('de421.bsp')

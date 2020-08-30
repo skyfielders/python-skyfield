@@ -345,7 +345,7 @@ to ask “where will the satellite be *relative to* my location?”
 .. testoutput::
 
     Sum of 2 vectors:
-     - Topos 40deg 53' 38.0" N -83deg 53' 30.1" E
+     + ReversedVector [TODO]
      + EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
 
 Every time you call this vector sum’s `at()` method,

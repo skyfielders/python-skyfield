@@ -32,14 +32,10 @@ class VectorFunction(object):
                     " is the center where the other vector starts"
                 )
 
-        selfp = getattr(self, 'positives', None) or (self,)
-        selfn = getattr(self, 'negatives', ())
+        self_vfs = getattr(self, 'vector_functions', None) or (self,)
+        other_vfs = getattr(other, 'vector_functions', None) or (other,)
 
-        otherp = getattr(other, 'positives', None) or (other,)
-        othern = getattr(other, 'negatives', ())
-
-        return VectorSum(self.center, other.target,
-                         selfp + otherp, selfn + othern)
+        return VectorSum(self.center, other.target, self_vfs + other_vfs)
 
     def __neg__(self):
         return ReversedVector(self)
@@ -51,14 +47,11 @@ class VectorFunction(object):
                 " if they both start at the same center"
             )
 
-        selfp = getattr(self, 'positives', None) or (self,)
-        selfn = getattr(self, 'negatives', ())
+        self_vfs = getattr(self, 'vector_functions', None) or (self,)
+        other_vfs = getattr(other, 'vector_functions', None) or (other,)
+        other_vfs = tuple(reversed([-vf for vf in other_vfs]))
 
-        otherp = getattr(other, 'positives', None) or (other,)
-        othern = getattr(other, 'negatives', ())
-
-        return VectorSum(other.target, self.target,
-                         selfp + othern, selfn + otherp)
+        return VectorSum(other.target, self.target, other_vfs + self_vfs)
 
     def at(self, t):
         """At time ``t``, compute the target's position relative to the center.
@@ -156,50 +149,50 @@ class ReversedVector(VectorFunction):
         self.target = vector_function.center
         self.vector_function = vector_function
 
+    def __repr__(self):
+        return 'ReversedVector [TODO]'
+
     def _at(self, t):
         p, v, gcrs_position, message = self.vector_function._at(t)
+        #gcrs_position = None if gcrs_position is None else -gcrs_position
         return -p, -v, gcrs_position, message
 
 class VectorSum(VectorFunction):
-    def __init__(self, center, target, positives, negatives):
+    def __init__(self, center, target, vector_functions):
         self.center = center
         self.target = target
-        self.positives = positives
-        self.negatives = negatives
+        self.vector_functions = vector_functions
 
         # For now, just grab the first ephemeris we can find.
-        ephemerides = (segment.ephemeris for segments in (positives, negatives)
-                       for segment in segments if segment.ephemeris)
+        ephemerides = (segment.ephemeris for segment in vector_functions
+                       if segment.ephemeris)
         self.ephemeris = next(ephemerides, None)
 
     def __str__(self):
-        positives = self.positives
-        negatives = self.negatives
-        lines = [' - ' + str(segment) for segment in reversed(negatives)]
-        lines.extend(' + ' + str(segment) for segment in positives)
+        vector_functions = self.vector_functions
+        lines = [' + ' + str(segment) for segment in vector_functions]
         return 'Sum of {0} vectors:\n{1}'.format(
-            len(positives) + len(negatives),
+            len(vector_functions),
             '\n'.join(lines),
         )
 
     def __repr__(self):
         return '<{0} of {1} vectors {2} -> {3}>'.format(
             type(self).__name__,
-            len(self.positives) + len(self.negatives),
+            len(self.vector_functions),
             self.center_name,
             self.target_name,
         )
 
     def _at(self, t):
         p, v = 0.0, 0.0
-        for segment in self.positives:
-            p2, v2, gcrs_position, message = segment._at(t)
+        gcrs_position = None
+        for vf in self.vector_functions:
+            p2, v2, another_gcrs_position, message = vf._at(t)
+            if gcrs_position is None:  # TODO: so bootleg; rework whole idea
+                gcrs_position = another_gcrs_position
             p += p2
             v += v2
-        for segment in self.negatives:
-            p2, v2, gcrs_position, ignored_message = segment._at(t)
-            p -= p2
-            v -= v2
         return p, v, gcrs_position, message
 
 def _correct_for_light_travel_time(observer, target):
