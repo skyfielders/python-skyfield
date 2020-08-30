@@ -208,7 +208,6 @@ class PlanetTopos(VectorFunction):
     """
     def __init__(self, frame, position_au):
         self.center = frame.center
-        self.target = self # TODO: make more interesting
         self._frame = frame
         self._position_au = position_au
 
@@ -222,30 +221,39 @@ class PlanetTopos(VectorFunction):
         self.longitude = longitude
         return self
 
+    @property
+    def target(self):
+        # When used as a vector function, this planetary geographic
+        # location computes positions from the planet's center to
+        # itself.  (This is a property, rather than an attribute, to
+        # avoid a circular reference that delays garbage collection.)
+        return self
+
     def _at(self, t):
         R, dRdt = self._frame.rotation_and_rate_at(t)
         r = mxv(_T(R), self._position_au)
         v = mxv(_T(dRdt), self._position_au) * DAY_S
         return r, v, None, None
 
-    def _snag_observer_data(self, observer_data, t):
-        R = self._frame.rotation_at(t)
-        # TODO: avoid computing this rotation until altaz() is called
-        # and we know we need it.
-        observer_data.altaz_rotation = mxmxm(
+    def rotation_at(self, t):
+        """Compute the altazimuth rotation matrix for this location’s sky."""
+        R = mxmxm(
             # TODO: Figure out how to produce this rotation directly
             # from _position_au, to support situations where we were not
             # given a latitude and longitude.  If that is not feasible,
             # then at least cache the product of these first two matrices.
             rot_y(_quartertau - self.latitude.radians),
             rot_z(_halftau - self.longitude.radians),
-            R)
-
+            self._frame.rotation_at(t),
+        )
+        # TODO:
         # Can clockwise be turned into counterclockwise through any
         # possible rotation?  For now, flip the sign of y so that
         # azimuth reads north-east rather than the other direction.
-        observer_data.altaz_rotation[1] *= -1
+        R[1] *= -1
+        return R
 
+    def _snag_observer_data(self, observer_data, t):
         # TODO: find a better way to turn off atmospheric refraction in
         # _to_altaz().  Consider: is elevation_m even the right value to
         # be persisting through all the logic to that point?

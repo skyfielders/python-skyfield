@@ -12,21 +12,6 @@ Sprint Possibilities
 
 * Improve the situation around “observer data”.
 
-  * When an vector or vector sum like ``earth + boston`` is asked its
-    position ``.at(t)``, instead of pre-computing a dedicated altaz
-    rotation matrix, it should instead gain an ``.observer_frame``
-    attribute whose API is like a ``planetarylib.Frame``.
-
-  * An apparent position should probably just copy the
-    ``.observer_frame`` of the astrometric frame from which it is
-    derived.
-
-  * Or should it be ``.center_frame`` since the origin of the vector is
-    called its ``.center`` not its ``.observer``?
-
-  * The ``.altaz()`` method can ask the frame for its rotation at time
-    ``t``, so ``.altaz_rotation`` no longer needs to be precomputed.
-
   * Why does ``observer_data`` keep the ``elevation_m``?  Solely to
     support atmospheric refraction in ``altaz()``.  Hmm.  Where could
     that come from instead?  There is not quite a concept of a frame
@@ -62,20 +47,6 @@ Sprint Possibilities
     would just get thrown away in the case of a sum of two vectors, for
     which the user will only need a final position object for the
     combined sum.
-
-  * DISCOVERY: we already keep the ``Topos`` around!  We call it the
-    ``.center`` of the position, using the power of an object-oriented
-    language like Python to keep the actual live object, instead of a
-    number or string, to represent “such-and-such a latitude and
-    longitude and elevation”.  The only thing we don’t keep around is
-    the position of the center relative to the SSB, we instead only seem
-    to keep the ``Topos`` object that generated that position.  We need
-    to now cache the position too (as described above), which sounds
-    wasteful, but (a) the ``observer_data`` is already keeping both the
-    position and velocity arrays around anyway, and (b) the only other
-    weighty attribute is the time, which both objects share a single
-    copy of anyway.  So since the ``Topos`` is already the ``center``,
-    we just need a ``center_barycentric`` or somesuch.
 
 * Trying to index a unit class should print help suggesting a unit be
   specified, similar to trying to iterate across one.

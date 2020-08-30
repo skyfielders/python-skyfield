@@ -245,12 +245,10 @@ def _correct_for_light_travel_time(observer, target):
 
 class ObserverData(object):
     """Essential facts about an observer, that may be needed later."""
-    # TODO: expand the documentation for this class
 
-    __slots__ = ('altaz_rotation', 'elevation_m', 'gcrs_position')
+    __slots__ = ('elevation_m', 'gcrs_position')
 
     def __init__(self):
-        self.altaz_rotation = None
         self.elevation_m = None
         self.gcrs_position = None
 

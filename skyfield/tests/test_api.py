@@ -107,7 +107,7 @@ def test_altaz_needs_topos(ts):
 
 def test_from_altaz_needs_topos():
     p = positionlib.ICRF([0.0, 0.0, 0.0])
-    with assert_raises(ValueError, 'the orientation of the horizon'):
+    with assert_raises(ValueError, 'to compute an altazimuth position'):
         p.from_altaz(alt_degrees=0, az_degrees=0)
 
 def test_from_altaz_parameters(ts):

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from .constants import ASEC2RAD, tau
 from .earthlib import terra
 from .functions import mxmxm, mxv, rot_x, rot_y, rot_z
@@ -62,7 +64,13 @@ class Topos(VectorFunction):
 
         self.R_lat = rot_y(latitude.radians)[::-1]
 
-        self.target = str(self)
+    @property
+    def target(self):
+        # When used as a vector function, this Earth geographic location
+        # computes positions from the Earth's center to itself.  (This
+        # is a property, rather than an attribute, to avoid a circular
+        # reference that delays garbage collection.)
+        return self
 
     def __str__(self):
         return 'Topos {0} N {1} E'.format(self.latitude, self.longitude)
@@ -71,9 +79,6 @@ class Topos(VectorFunction):
         return '<{0}>'.format(self)
 
     def _snag_observer_data(self, observer_data, t):
-        # TODO: avoid actually computing _altaz_rotation() until we are
-        # in an altaz() call and know we need it.
-        observer_data.altaz_rotation = self._altaz_rotation(t)
         observer_data.elevation_m = self.elevation.m
 
     def _altaz_rotation(self, t):
@@ -107,3 +112,7 @@ class Topos(VectorFunction):
         pos, vel = terra(self.latitude.radians, self.longitude.radians,
                          self.elevation.au, gast)
         return Distance(pos)
+
+    def rotation_at(self, t):
+        """Compute the altazimuth rotation matrix for this location’s sky."""
+        return self._altaz_rotation(t)
