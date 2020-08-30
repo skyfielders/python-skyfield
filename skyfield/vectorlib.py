@@ -41,6 +41,9 @@ class VectorFunction(object):
         return VectorSum(self.center, other.target,
                          selfp + otherp, selfn + othern)
 
+    def __neg__(self):
+        return ReversedVector(self)
+
     def __sub__(self, other):
         if self.center != other.center:
             raise ValueError(
@@ -147,6 +150,15 @@ previously hiding inside the old method:
     line1, line2 = tle_text.splitlines()[-2:]
     sat = earth + EarthSatellite(line1, line2)""")
 
+class ReversedVector(VectorFunction):
+    def __init__(self, vector_function):
+        self.center = vector_function.target
+        self.target = vector_function.center
+        self.vector_function = vector_function
+
+    def _at(self, t):
+        p, v, gcrs_position, message = self.vector_function._at(t)
+        return -p, -v, gcrs_position, message
 
 class VectorSum(VectorFunction):
     def __init__(self, center, target, positives, negatives):

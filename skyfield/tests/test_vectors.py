@@ -30,6 +30,16 @@ Sum of 2 vectors:
     assert repr(v) == "\
 <VectorSum of 2 vectors 10 SUN -> 3 EARTH BARYCENTER>"
 
+def test_negation():
+    ts = load.timescale()
+    t = ts.utc(2020, 8, 30, 16, 5)
+    usno = Topos('38.9215 N', '77.0669 W', elevation_m=92.0)
+    neg = -usno
+    p1 = usno.at(t)
+    p2 = neg.at(t)
+    assert (p1.position.au == - p2.position.au).all()
+    assert (p1.velocity.au_per_d == - p2.velocity.au_per_d).all()
+
 def test_vectors():
     ts = load.timescale()
     t = ts.tt(2017, 1, 23, 10, 44)
