@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from numpy import exp
 from .constants import ASEC2RAD, tau
-from .earthlib import terra
+from .earthlib import refract, terra
+
 from .functions import mxmxm, mxv, rot_x, rot_y, rot_z
 from .units import Distance, Angle, _interpret_ltude
 from .vectorlib import VectorFunction
@@ -78,9 +80,6 @@ class Topos(VectorFunction):
     def __repr__(self):
         return '<{0}>'.format(self)
 
-    def _snag_observer_data(self, observer_data, t):
-        observer_data.elevation_m = self.elevation.m
-
     def _altaz_rotation(self, t):
         """Compute the rotation from the ICRF into the alt-az system."""
         R_lon = rot_z(- self.longitude.radians - t.gast * tau / 24.0)
@@ -112,6 +111,24 @@ class Topos(VectorFunction):
         pos, vel = terra(self.latitude.radians, self.longitude.radians,
                          self.elevation.au, gast)
         return Distance(pos)
+
+    def refract(self, altitude_degrees, temperature_C, pressure_mbar):
+        """Predict how the atmosphere will refract a position.
+
+        Given a body that is standing ``altitude_degrees`` above the
+        true horizon, return an ``Angle`` predicting its apparent
+        altitude given the supplied temperature and pressure, either of
+        which can be the string ``'standard'`` to use 10°C and a
+        pressure of 1010 mbar adjusted for the elevation of this
+        geographic location.
+
+        """
+        if temperature_C == 'standard':
+            temperature_C = 10.0
+        if pressure_mbar == 'standard':
+            pressure_mbar = 1010.0 * exp(-self.elevation.m / 9.1e3)
+        alt = refract(altitude_degrees, temperature_C, pressure_mbar)
+        return Angle(degrees=alt)
 
     def rotation_at(self, t):
         """Compute the altazimuth rotation matrix for this location’s sky."""

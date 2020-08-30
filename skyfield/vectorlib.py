@@ -78,14 +78,10 @@ class VectorFunction(object):
         observer_data = ObserverData()
         p, v, observer_data.gcrs_position, message = self._at(t)
         center = self.center
-        self._snag_observer_data(observer_data, t)
         position = build_position(p, v, t, center, self.target, observer_data)
         position._ephemeris = self.ephemeris
         position.message = message
         return position
-
-    def _snag_observer_data(self, data, t):
-        pass
 
     def _observe_from_bcrs(self, observer):
         if self.center != 0:
@@ -193,14 +189,6 @@ class VectorSum(VectorFunction):
             p -= p2
             v -= v2
         return p, v, gcrs_position, message
-
-    def _snag_observer_data(self, observer_data, t):
-        if self.negatives:
-            final_segment = self.negatives[-1]
-        elif self.positives:
-            final_segment = self.positives[-1]
-        final_segment._snag_observer_data(observer_data, t)
-
 
 def _correct_for_light_travel_time(observer, target):
     """Return a light-time corrected astrometric position and velocity.

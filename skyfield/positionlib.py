@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, einsum, exp, full, reshape, nan, nan_to_num
+from numpy import array, einsum, full, reshape, nan, nan_to_num
 from .constants import ANGVEL, AU_M, ERAD, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .descriptorlib import reify
-from .earthlib import compute_limb_angle, refract, reverse_terra
+from .earthlib import compute_limb_angle, reverse_terra
 from .framelib import build_ecliptic_matrix
 from .functions import (
     mxv, _to_array, angle_between, from_spherical,
@@ -435,7 +435,10 @@ class ICRF(object):
         # Return and cache (with @reify) the orientation of this
         # observer, in case a single observer.at() position is used in
         # several subsequent .observe().apparent().altaz() calls.
-        return self.target.rotation_at(self.t)
+        rotation_at = getattr(self.target, 'rotation_at', None)
+        if rotation_at is None:
+            raise ValueError(_altaz_message)
+        return rotation_at(self.t)
 
     def from_altaz(self, alt=None, az=None, alt_degrees=None, az_degrees=None,
                    distance=Distance(au=0.1)):
@@ -736,13 +739,7 @@ class Geocentric(ICRF):
 
 
 def _to_altaz(position, temperature_C, pressure_mbar):
-    """Compute (alt, az, distance) relative to the observer's horizon.
-
-    """
-    elevation_m = position.observer_data.elevation_m
-    if elevation_m is None:  # TODO: remove check eventually
-        raise ValueError(_altaz_message)
-
+    """Compute (alt, az, distance) relative to the observer's horizon."""
     cb = position.center_barycentric
     if cb is not None:
         R = cb._altaz_rotation
@@ -761,12 +758,12 @@ def _to_altaz(position, temperature_C, pressure_mbar):
     if temperature_C is None:
         alt = Angle(radians=alt)
     else:
-        if temperature_C == 'standard':
-            temperature_C = 10.0
-        if pressure_mbar == 'standard':
-            pressure_mbar = 1010.0 * exp(-elevation_m / 9.1e3)
-        alt = refract(alt * RAD2DEG, temperature_C, pressure_mbar)
-        alt = Angle(degrees=alt)
+        refract = getattr(position.center, 'refract', None)
+        if refract is None:
+            raise ValueError(_altaz_message)
+        alt = position.center.refract(
+            alt * RAD2DEG, temperature_C, pressure_mbar,
+        )
 
     return alt, Angle(radians=az), Distance(r_au)
 

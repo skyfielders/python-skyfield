@@ -253,12 +253,6 @@ class PlanetTopos(VectorFunction):
         R[1] *= -1
         return R
 
-    def _snag_observer_data(self, observer_data, t):
-        # TODO: find a better way to turn off atmospheric refraction in
-        # _to_altaz().  Consider: is elevation_m even the right value to
-        # be persisting through all the logic to that point?
-        observer_data.elevation_m = 'not None, yet not an Earth elevation'
-
 def parse_text_pck(lines):
     """Yield ``(name, equals, value)`` tuples parsed from a PCK text kernel.
 

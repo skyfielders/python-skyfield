@@ -12,23 +12,6 @@ Sprint Possibilities
 
 * Improve the situation around “observer data”.
 
-  * Why does ``observer_data`` keep the ``elevation_m``?  Solely to
-    support atmospheric refraction in ``altaz()``.  Hmm.  Where could
-    that come from instead?  There is not quite a concept of a frame
-    having an elevation, alas.  So maybe we need a different plan:
-    instead of passing the ``.observer_frame`` around, we could pass the
-    whole ``Topos`` — the ``bluffton`` part of ``earth + bluffton``,
-    above.  It knows its elevation and could be taught how to generate
-    the rotation matrix of its reference frame.  UPDATE: we can give
-    frames the concept of refraction.  That way all that needs to be
-    passed is an ``observer_frame``, instead of an ``observer`` through
-    which a frame then needs to be requested.
-
-  * In fact, we could defer to the ``Topos`` the knowledge of how to
-    apply refraction, and then planetary topos-like objects could do
-    refraction relevant to those planets, instead of having Earth
-    refraction hard-coded like it currently is in ``altaz()``.
-
   * We currently special-case two components of the full
     center-to-target vector: the barycenter-to-target vector for things
     like deflection, aberration, and like magnitude being affected by
