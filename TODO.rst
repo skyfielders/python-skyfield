@@ -10,6 +10,13 @@ forget.
 Sprint Possibilities
 ====================
 
+* Should the deflection routine really say this instead?:
+
+```
+            limb_angle, nadir_angle = compute_limb_angle(
+                target_au + gcrs_position, gcrs_position)
+```
+
 * Improve the situation around “observer data”.
 
   * We currently special-case two components of the full
