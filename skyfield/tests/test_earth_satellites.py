@@ -7,10 +7,8 @@ from skyfield.constants import AU_KM, AU_M
 from skyfield.sgp4lib import TEME_to_ITRF
 from skyfield.timelib import julian_date
 
-iss_tle0 = """\
-1 25544U 98067A   18184.80969102  .00001614  00000-0  31745-4 0  9993
-2 25544  51.6414 295.8524 0003435 262.6267 204.2868 15.54005638121106
-"""
+line1 = '1 25544U 98067A   18184.80969102  .00001614  00000-0  31745-4 0  9993'
+line2 = '2 25544  51.6414 295.8524 0003435 262.6267 204.2868 15.54005638121106'
 
 # Here are numbers from HORIZONS, which I copied into the test below:
 #
@@ -27,7 +25,7 @@ iss_tle0 = """\
 
 def test_iss_against_horizons():
     ts = api.load.timescale()
-    s = EarthSatellite(*iss_tle0.splitlines())
+    s = EarthSatellite(line1, line2)
 
     hp = array([
         [2.633404251158200E-5, 1.015087620439817E-5, 3.544778677556393E-5],
@@ -139,14 +137,14 @@ def test_epoch_date():
     assert sat.epoch.utc_jpl() == 'A.D. 1998-Jan-01 00:00:00.0000 UT'
 
 def test_target_number():
-    s = EarthSatellite(*iss_tle0.splitlines())
+    s = EarthSatellite(line1, line2)
     assert s.target == -125544
 
 def test_is_sunlit():
     # Yes, a positionlib method; but it made sense to test it here.
     ts = api.load.timescale()
     t = ts.utc(2018, 7, 3, 0, range(0, 60, 10))
-    s = EarthSatellite(*iss_tle0.splitlines())
+    s = EarthSatellite(line1, line2)
     eph = load('de421.bsp')
     expected = [True, False, False, False, True, True]
     assert list(s.at(t).is_sunlit(eph)) == expected
@@ -155,14 +153,25 @@ def test_is_sunlit():
     topos = api.Topos('40.8939 N', '83.8917 W')
     assert list((s - topos).at(t).is_sunlit(eph)) == expected
 
-def test_is_behind_earth():
+def test_is_venus_behind_earth():
     # Like the previous test: a satellite-focused positionlib method.
     # Just for fun, we ask whether the Sun is behind the earth, so this
     # measures the same celestial circumstance as the previous test.
     ts = api.load.timescale()
     t = ts.utc(2018, 7, 3, 0, range(0, 60, 10))
-    s = EarthSatellite(*iss_tle0.splitlines())
+    s = EarthSatellite(line1, line2)
     eph = load('de421.bsp')
     expected = [False, True, True, True, False, False]
     p = (eph['earth'] + s).at(t).observe(eph['sun']).apparent()
+    assert list(p.is_behind_earth()) == expected
+
+def test_is_another_satellite_behind_earth():
+    # See if the method works with a pure geometric difference.
+    ts = api.load.timescale()
+    t = ts.utc(2018, 7, 3, 0, range(0, 60, 10))
+    s = EarthSatellite(line1, line2)
+    # The "other satellite" is fictitious: the ISS offset by one day.
+    s2 = EarthSatellite(line1.replace('184.80969102', '185.80969102'), line2)
+    expected = [True, True, True, True, True, True]
+    p = (s - s2).at(t)
     assert list(p.is_behind_earth()) == expected
