@@ -21,7 +21,7 @@ _GALACTIC = inertial_frames['GALACTIC']
 _GIGAPARSEC_AU = 206264806247096.38  # 1e9 * 360 * 3600 / tau
 
 def build_position(position_au, velocity_au_per_d=None, t=None,
-                   center=None, target=None, observer_data=None):
+                   center=None, target=None):
     if center == 0:
         cls = Barycentric
     elif center == 399:
@@ -30,11 +30,10 @@ def build_position(position_au, velocity_au_per_d=None, t=None,
         cls = Geometric
     else:
         cls = ICRF
-    return cls(position_au, velocity_au_per_d, t, center, target, None)
+    return cls(position_au, velocity_au_per_d, t, center, target)
 
 def position_of_radec(ra_hours, dec_degrees, distance_au=_GIGAPARSEC_AU,
-                      epoch=None, t=None, center=None, target=None,
-                      observer_data=None):
+                      epoch=None, t=None, center=None, target=None):
     """Build a position object from a right ascension and declination.
 
     If a specific ``distance_au`` is not provided, Skyfield returns a
@@ -56,7 +55,7 @@ def position_of_radec(ra_hours, dec_degrees, distance_au=_GIGAPARSEC_AU,
     return build_position(position_au, None, t, center, target)
 
 def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
-                        t=None, center=None, target=None, observer_data=None):
+                        t=None, center=None, target=None):
     """DEPRECATED version of ``position_of_radec()``.
 
     Problems:
@@ -95,14 +94,12 @@ class ICRF(object):
     _ephemeris = None  # cached so we can compute how light is deflected
 
     def __init__(self, position_au, velocity_au_per_d=None, t=None,
-                 center=None, target=None, observer_data=None):
+                 center=None, target=None):
         self.t = t
         self.position = Distance(position_au)
         if velocity_au_per_d is None:
             velocity_au_per_d = full(self.position.au.shape, nan)
         self.velocity = Velocity(velocity_au_per_d)
-        # TODO: are center and target useful? Then why are they not
-        # propagated down to Astrometric and Apparent positions?
         self.center = self._default_center if center is None else center
         self.target = target
 
