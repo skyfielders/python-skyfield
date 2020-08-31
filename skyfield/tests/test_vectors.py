@@ -72,7 +72,6 @@ Sum of 3 vectors:
     assert repr(v) == """\
 <VectorSum of 3 vectors 0 SOLAR SYSTEM BARYCENTER -> Topos 38deg 55' 17.4" N -77deg 04' 00.8" E>"""
 
-    print(str(v.at(t)))
     assert str(v.at(t)) == """\
 <Barycentric BCRS position and velocity at date t center=0 \
 target=Topos 38deg 55' 17.4" N -77deg 04' 00.8" E>"""
@@ -90,7 +89,7 @@ Sum of 4 vectors:
 <VectorSum of 4 vectors 499 MARS -> 399 EARTH>"
 
     assert str(v.at(t)) == "\
-<Geometric ICRS position and velocity at date t center=499 target=399>"
+<ICRF position and velocity at date t center=499 target=399>"
 
     geocentric = Geocentric([0,0,0])
     assert geocentric.center == 399

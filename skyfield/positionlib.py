@@ -26,7 +26,7 @@ def build_position(position_au, velocity_au_per_d=None, t=None,
         cls = Barycentric
     elif center == 399:
         cls = Geocentric
-    elif observer_data is not None:  # TODO: a better way to decide this?
+    elif hasattr(center, 'rotation_at'):  # and thus deserves an altaz() method
         cls = Geometric
     else:
         cls = ICRF
@@ -53,7 +53,7 @@ def position_of_radec(ra_hours, dec_degrees, distance_au=_GIGAPARSEC_AU,
     position_au = from_spherical(distance_au, theta, phi)
     if epoch is not None:
         position_au = mxv(epoch.MT, position_au)
-    return build_position(position_au, None, t, center, target, None)
+    return build_position(position_au, None, t, center, target)
 
 def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
                         t=None, center=None, target=None, observer_data=None):

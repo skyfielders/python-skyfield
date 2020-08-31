@@ -73,7 +73,7 @@ class VectorFunction(object):
                              ' value {0!r}'.format(t))
         p, v, gcrs_position, message = self._at(t)
         center = self.center
-        position = build_position(p, v, t, center, self.target, True)
+        position = build_position(p, v, t, center, self.target)
         position._ephemeris = self.ephemeris
         position._observer_gcrs_au = gcrs_position
         position.message = message
