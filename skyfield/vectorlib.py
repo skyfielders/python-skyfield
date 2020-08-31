@@ -71,11 +71,11 @@ class VectorFunction(object):
             raise ValueError('please provide the at() method with a Time'
                              ' instance as its argument, instead of the'
                              ' value {0!r}'.format(t))
-        observer_data = ObserverData()
-        p, v, observer_data.gcrs_position, message = self._at(t)
+        p, v, gcrs_position, message = self._at(t)
         center = self.center
-        position = build_position(p, v, t, center, self.target, observer_data)
+        position = build_position(p, v, t, center, self.target, True)
         position._ephemeris = self.ephemeris
+        position._observer_gcrs_au = gcrs_position
         position.message = message
         return position
 
@@ -234,16 +234,6 @@ def _correct_for_light_travel_time(observer, target):
     else:
         raise ValueError('light-travel time failed to converge')
     return tposition - cposition, tvelocity - cvelocity, t, light_time
-
-
-class ObserverData(object):
-    """Essential facts about an observer, that may be needed later."""
-
-    __slots__ = ('elevation_m', 'gcrs_position')
-
-    def __init__(self):
-        self.elevation_m = None
-        self.gcrs_position = None
 
 def _jpl_name(code_or_string):
     if isinstance(code_or_string, int):

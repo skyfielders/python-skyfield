@@ -26,11 +26,11 @@ def build_position(position_au, velocity_au_per_d=None, t=None,
         cls = Barycentric
     elif center == 399:
         cls = Geocentric
-    elif observer_data is not None:
+    elif observer_data is not None:  # TODO: a better way to decide this?
         cls = Geometric
     else:
         cls = ICRF
-    return cls(position_au, velocity_au_per_d, t, center, target, observer_data)
+    return cls(position_au, velocity_au_per_d, t, center, target, None)
 
 def position_of_radec(ra_hours, dec_degrees, distance_au=_GIGAPARSEC_AU,
                       epoch=None, t=None, center=None, target=None,
@@ -53,7 +53,7 @@ def position_of_radec(ra_hours, dec_degrees, distance_au=_GIGAPARSEC_AU,
     position_au = from_spherical(distance_au, theta, phi)
     if epoch is not None:
         position_au = mxv(epoch.MT, position_au)
-    return build_position(position_au, None, t, center, target, observer_data)
+    return build_position(position_au, None, t, center, target, None)
 
 def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
                         t=None, center=None, target=None, observer_data=None):
@@ -73,7 +73,7 @@ def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
 
     """
     return position_of_radec(ra_hours, dec_degrees, distance, epoch,
-                             t, center, target, observer_data)
+                             t, center, target)
 
 class ICRF(object):
     """An (x,y,z) position and velocity oriented to the ICRF axes.
@@ -90,6 +90,7 @@ class ICRF(object):
 
     """
     center_barycentric = None
+    _observer_gcrs_au = None
     _default_center = None
     _ephemeris = None  # cached so we can compute how light is deflected
 
@@ -104,7 +105,6 @@ class ICRF(object):
         # propagated down to Astrometric and Apparent positions?
         self.center = self._default_center if center is None else center
         self.target = target
-        self.observer_data = observer_data
 
     def __repr__(self):
         name = self.__class__.__name__
@@ -143,8 +143,6 @@ class ICRF(object):
             self.t[i],
             self.center,
             self.target,
-            # TODO: figure out how to slice observer data
-            #self.observer_data,
         )
 
     def __neg__(self):
@@ -154,8 +152,6 @@ class ICRF(object):
             self.t,
             self.target,
             self.center,
-            # TODO: figure out how to invert observer data
-            #self.observer_data,
         )
 
     def distance(self):
@@ -403,11 +399,10 @@ class ICRF(object):
         if self.center == 399:
             earth_m = - self.position.m
         else:
-            o = self.observer_data
-            if (o is not None) and (o.gcrs_position is not None):
-                earth_m = - self.position.m - o.gcrs_position * AU_M
-            else:
+            gcrs_position = self._observer_gcrs_au
+            if gcrs_position is None:
                 raise ValueError('cannot tell whether this position is sunlit')
+            earth_m = - self.position.m - gcrs_position * AU_M
 
         sun_m = (ephemeris['sun'] - ephemeris['earth']).at(self.t).position.m
         near, far = intersect_line_and_sphere(sun_m + earth_m, earth_m, ERAD)
@@ -421,11 +416,11 @@ class ICRF(object):
         See :ref:`is-behind-earth`.
 
         """
-        o = self.observer_data
-        if (o is None) or (o.gcrs_position is None):
+        gcrs_position = self._observer_gcrs_au
+        if gcrs_position is None:
             raise ValueError('can only compute Earth occultation for'
-                             'positions observed from an Earth satellite')
-        earth_m = - o.gcrs_position * AU_M
+                             ' positions observed from an Earth satellite')
+        earth_m = - gcrs_position * AU_M
         vector_m = self.position.m
         near, far = intersect_line_and_sphere(vector_m, earth_m, ERAD)
         return nan_to_num(far) > 0
@@ -546,9 +541,7 @@ class Barycentric(ICRF):
 
         """
         p, v, t, light_time = body._observe_from_bcrs(self)
-        astrometric = Astrometric(p, v, t,
-                                  center=self.target, target=body.target,
-                                  observer_data=self.observer_data)
+        astrometric = Astrometric(p, v, t, self.target, body.target)
         astrometric._ephemeris = self._ephemeris
         astrometric.center_barycentric = self
         astrometric.light_time = light_time
@@ -595,12 +588,12 @@ class Astrometric(ICRF):
         t = self.t
         target_au = self.position.au.copy()
 
-        observer_data = self.observer_data
-        gcrs_position = observer_data.gcrs_position
-
         cb = self.center_barycentric
         bcrs_position = cb.position.au
         bcrs_velocity = cb.velocity.au_per_d
+        gcrs_position = cb._observer_gcrs_au
+        if gcrs_position is None:
+            gcrs_position = self._observer_gcrs_au
 
         # If a single observer position (3,) is observing an array of
         # targets (3,n), then deflection and aberration will complain
@@ -625,10 +618,9 @@ class Astrometric(ICRF):
 
         add_aberration(target_au, bcrs_velocity, self.light_time)
 
-        apparent = Apparent(
-            target_au, None, t, self.center, self.target, observer_data,
-        )
+        apparent = Apparent(target_au, None, t, self.center, self.target)
         apparent.center_barycentric = self.center_barycentric
+        apparent._observer_gcrs_au = gcrs_position
         return apparent
 
 
