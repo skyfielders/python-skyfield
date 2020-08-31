@@ -413,11 +413,11 @@ class ICRF(object):
         See :ref:`is-behind-earth`.
 
         """
-        gcrs_position = self._observer_gcrs_au
-        if gcrs_position is None:
+        observer_gcrs_au = self._observer_gcrs_au
+        if observer_gcrs_au is None:
             raise ValueError('can only compute Earth occultation for'
                              ' positions observed from an Earth satellite')
-        earth_m = - gcrs_position * AU_M
+        earth_m = - observer_gcrs_au * AU_M
         vector_m = self.position.m
         near, far = intersect_line_and_sphere(vector_m, earth_m, ERAD)
         return nan_to_num(far) > 0
@@ -588,9 +588,7 @@ class Astrometric(ICRF):
         cb = self.center_barycentric
         bcrs_position = cb.position.au
         bcrs_velocity = cb.velocity.au_per_d
-        gcrs_position = cb._observer_gcrs_au
-        if gcrs_position is None:
-            gcrs_position = self._observer_gcrs_au
+        observer_gcrs_au = cb._observer_gcrs_au
 
         # If a single observer position (3,) is observing an array of
         # targets (3,n), then deflection and aberration will complain
@@ -600,14 +598,14 @@ class Astrometric(ICRF):
             shape = bcrs_position.shape + (1,)
             bcrs_position = bcrs_position.reshape(shape)
             bcrs_velocity = bcrs_velocity.reshape(shape)
-            if gcrs_position is not None:
-                gcrs_position = gcrs_position.reshape(shape)
+            if observer_gcrs_au is not None:
+                observer_gcrs_au = observer_gcrs_au.reshape(shape)
 
-        if gcrs_position is None:
+        if observer_gcrs_au is None:
             include_earth_deflection = array((False,))
         else:
             limb_angle, nadir_angle = compute_limb_angle(
-                target_au, gcrs_position)
+                target_au, observer_gcrs_au)
             include_earth_deflection = nadir_angle >= 0.8
 
         add_deflection(target_au, bcrs_position,
@@ -617,7 +615,7 @@ class Astrometric(ICRF):
 
         apparent = Apparent(target_au, None, t, self.center, self.target)
         apparent.center_barycentric = self.center_barycentric
-        apparent._observer_gcrs_au = gcrs_position
+        apparent._observer_gcrs_au = observer_gcrs_au
         return apparent
 
 
