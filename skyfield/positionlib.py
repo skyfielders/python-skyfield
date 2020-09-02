@@ -550,18 +550,21 @@ class Barycentric(ICRF):
 class Astrometric(ICRF):
     """An astrometric (x,y,z) position relative to a particular observer.
 
-    The *astrometric position* of a body is its position relative to an
+    The astrometric position of a body is its position relative to an
     observer, adjusted for light-time delay.  It is the position of the
     body back when it emitted (or reflected) the light that is now
-    reaching the observer's eyes or telescope.
+    reaching the observer's eye or telescope.  Astrometric positions are
+    usually generated in Skyfield by calling the `Barycentric` method
+    `observe()`, which performs the light-time correction.
 
-    Both the ``.position`` and ``.velocity`` are (x,y,z) vectors
-    oriented along the axes of the International Terrestrial Reference
-    Frame (ITRF), the modern replacement for J2000 coordinates.
+    Both the ``.position`` and ``.velocity`` are ``[x y z]`` vectors
+    oriented along the axes of the ICRF, the modern replacement for the
+    J2000 reference frame.
 
-    Astrometric positions are usually generated in Skyfield by calling
-    the `Barycentric` method `observe()` to determine where a body will
-    appear in the sky relative to a specific observer.
+    It is common to either call ``.radec()`` (with no argument) on an
+    astrometric position to generate an *astrometric place* right
+    ascension and declination with respect to the ICRF axes, or else to
+    call ``.apparent()`` to generate an :class:`Apparent` position.
 
     """
     def apparent(self):
@@ -622,17 +625,26 @@ class Astrometric(ICRF):
 class Apparent(ICRF):
     """An apparent (x,y,z) position relative to a particular observer.
 
-    The *apparent position* of a body is its position relative to an
-    observer adjusted for light-time delay, deflection (light rays
-    bending as they pass large masses like the Sun or Jupiter), and
-    aberration (light slanting because of the observer's motion through
-    space).
+    This class’s vectors give the position and velocity of a body
+    relative to an observer, adjusted for light-time delay, deflection
+    (light rays bending as they pass large masses like Jupiter or the
+    Sun), and aberration (light slanting because of the observer's
+    motion through space).  They are usually produced in Skyfield by
+    calling the `apparent()` method of an `Astrometric` object.
 
-    Included in aberration is the relativistic transformation that takes
-    the ``.position`` and ``.velocity`` (x,y,z) vectors out of the BCRS,
-    centered on the Solar System barycenter, and into the reference
-    frame of the observer.  In the case of an Earth observer, the
-    transform takes the coordinate into the GCRS.
+    Both the ``.position`` and ``.velocity`` are ``[x y z]`` vectors
+    oriented along the axes of the ICRF, the modern replacement for the
+    J2000 reference frame.  If the observer is at the geocenter, they
+    are more specifically GCRS coordinates.  Two common coordinates that
+    this vector can generate are:
+
+    * *Proper place:* call ``.radec()`` without arguments to compute
+      right ascension and declination with respect to the fixed axes of
+      the ICRF.
+
+    * *Apparent place,* the most popular option: call ``.radec('date')``
+      to generate right ascension and declination with respect to for
+      the equator and equinox of date.
 
     """
     def altaz(self, temperature_C=None, pressure_mbar='standard'):
