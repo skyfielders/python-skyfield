@@ -348,9 +348,7 @@ class Time(object):
         for name in 'tai_fraction', 'tdb_fraction', 'ut1_fraction':
             value = getattr(self, name, None)
             if value is not None:
-                if getattr(value, 'shape', None):
-                    value = value[index]
-                setattr(t, name, value)
+                setattr(t, name, value[index])
         return t
 
     def astimezone(self, tz):
