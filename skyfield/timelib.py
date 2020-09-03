@@ -10,7 +10,8 @@ from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
-from .functions import mxm, mxmxm, _to_array, load_bundled_npy, rot_z
+from .functions import (mxm, mxmxm, load_bundled_npy, rot_z,
+                        _to_array, _reconcile)
 from .nutationlib import (
     build_nutation_matrix, equation_of_the_equinoxes_complimentary_terms,
     iau2000a_radians, mean_obliquity,
@@ -173,6 +174,7 @@ class Timescale(object):
         a = _to_array
         whole = julian_day(a(year), a(month), a(day)) - 0.5
         fraction = (a(second) + a(minute) * 60.0 + a(hour) * 3600.0) / DAY_S
+        whole, fraction = _reconcile(whole, fraction)
         t = Time(self, whole, fraction + tt_minus_tai)
         t.tai_fraction = fraction
         return t
@@ -204,6 +206,7 @@ class Timescale(object):
         a = _to_array
         whole = julian_day(a(year), a(month), a(day)) - 0.5
         fraction = (a(second) + a(minute) * 60.0 + a(hour) * 3600.0) / DAY_S
+        whole, fraction = _reconcile(whole, fraction)
         return Time(self, whole, fraction)
 
     def tt_jd(self, jd, fraction=0.0):

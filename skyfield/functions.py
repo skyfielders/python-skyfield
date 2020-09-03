@@ -1,7 +1,8 @@
 """Basic operations that are needed repeatedly throughout Skyfield."""
 
 from numpy import (
-    arcsin, arctan2, array, cos, einsum, float_, load, rollaxis, sin, sqrt
+    arcsin, arctan2, array, cos, einsum, full_like,
+    float_, load, rollaxis, sin, sqrt,
 )
 from pkgutil import get_data
 from skyfield.constants import tau
@@ -132,6 +133,23 @@ def _to_array(value):
         return array(value)
     else:
         return float_(value)
+
+def _reconcile(a, b):
+    """Coerce two NumPy generics-or-arrays to the same number of dimensions."""
+    difference = b.ndim - a.ndim
+    if difference > 0:
+        if a.ndim:
+            # TODO: test this case
+            a.shape += (1,) * difference
+        else:
+            a = full_like(b, a)
+    elif difference < 0:
+        if b.ndim:
+            # TODO: test this case
+            b.shape += (1,) * -difference
+        else:
+            b = full_like(a, b)
+    return a, b
 
 try:
     from io import BytesIO
