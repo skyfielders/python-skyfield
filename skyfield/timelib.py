@@ -981,7 +981,7 @@ def _strftime(format, jd, fraction):
     year, month, day, hour, minute, second = calendar_tuple(jd, fraction)
 
     if ms:
-        second, microsecond = divmod(second, 1e6)
+        second, microsecond = divmod(second * 1e6, 1e6)
         microsecond = microsecond.astype(int)
 
     second = second.astype(int)

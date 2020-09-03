@@ -29,8 +29,12 @@ def test_time_creation_methods(ts, time_parameter, time_value):
     tup = getattr(t, time_parameter + '_calendar')()
     assert tup == (1973, 1, 18, 1, 35, 37.5)
 
-    string = getattr(t, time_parameter + '_strftime')()
+    strftime = getattr(t, time_parameter + '_strftime')
+    string = strftime()
     assert string == '1973-01-18 01:35:38 ' + time_parameter.upper()
+
+    string = strftime('%S.%f')
+    assert string == '37.500000'
 
 def test_tai_fraction_loses_no_precision(ts):
     t = ts.tai_jd(2459008.0, 0.0123456789)
