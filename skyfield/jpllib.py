@@ -204,6 +204,9 @@ class SPICESegment(VectorFunction):
     def __repr__(self):
         return '<{0}>'.format(self)
 
+    def time_range(self, ts):
+        s = self.spk_segment
+        return ts.tdb_jd(s.start_jd), ts.tdb_jd(s.end_jd)
 
 class ChebyshevPosition(SPICESegment):
     def _at(self, t):

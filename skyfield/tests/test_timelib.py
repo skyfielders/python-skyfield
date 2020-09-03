@@ -24,6 +24,14 @@ def test_time_creation_methods(ts, time_parameter, time_value):
         t = method(jd=time_value) # TODO: deprecate
     assert getattr(t, time_parameter) == 2441700.56640625
 
+    # Also go ahead and test the calendar and formatting operations.
+
+    tup = getattr(t, time_parameter + '_calendar')()
+    assert tup == (1973, 1, 18, 1, 35, 37.5)
+
+    string = getattr(t, time_parameter + '_strftime')()
+    assert string == '1973-01-18 01:35:38 ' + time_parameter.upper()
+
 def test_tai_fraction_loses_no_precision(ts):
     t = ts.tai_jd(2459008.0, 0.0123456789)
     assert t.whole == 2459008.0

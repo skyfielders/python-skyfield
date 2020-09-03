@@ -41,6 +41,34 @@ After you have loaded an ephemeris and have used a statement like:
 — to retrieve a planet, consult the chapter :doc:`positions`
 to learn about all the positions that you can use it to generate.
 
+If you want to examine the segments that make up the ephemeris,
+you can loop over its ``segments`` list.
+You can ``print()`` a segment to see a textual description,
+or access segment attributes that give its center, target,
+and the dates over which it provides valid positions:
+
+.. testcode::
+
+    ts = load.timescale()
+
+    segment = planets.segments[0]
+    start, end = segment.time_range(ts)
+
+    print('Center:', segment.center_name)
+    print('Target:', segment.target_name)
+    print('Date range:', start.tdb_strftime(), '-', end.tdb_strftime())
+
+.. testoutput::
+
+    Center: 0 SOLAR SYSTEM BARYCENTER
+    Target: 1 MERCURY BARYCENTER
+    Date range: 1899-07-29 00:00:00 TDB - 2053-10-09 00:00:00 TDB
+
+For example, you can see above
+that the first segment of the ephemeris DE421
+provides the position of Mercury relative to the center of the Solar System
+over the entire twentieth century and half of the twenty-first.
+
 Making an excerpt of an ephemeris
 =================================
 

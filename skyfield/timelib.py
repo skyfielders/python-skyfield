@@ -522,7 +522,7 @@ class Time(object):
         else:
             return format % args
 
-    def utc_strftime(self, format):
+    def utc_strftime(self, format='%Y-%m-%d %H:%M:%S UTC'):
         """Format the UTC time using a Python datetime formatting string.
 
         This calls Python’s ``time.strftime()`` to format the date and
@@ -606,6 +606,8 @@ class Time(object):
         i = searchsorted(ts._leap_reverse_dates, tai, 'right')
         return tai - ts.leap_offsets[i] / DAY_S
 
+    # Calendar tuples.
+
     def tai_calendar(self):
         """Return TAI as a tuple (year, month, day, hour, minute, second)."""
         return calendar_tuple(self.whole, self.tai_fraction)
@@ -613,6 +615,32 @@ class Time(object):
     def tt_calendar(self):
         """Return TT as a tuple (year, month, day, hour, minute, second)."""
         return calendar_tuple(self.whole, self.tt_fraction)
+
+    def tdb_calendar(self):
+        """Return TDB as a tuple (year, month, day, hour, minute, second)."""
+        return calendar_tuple(self.whole, self.tdb_fraction)
+
+    def ut1_calendar(self):
+        """Return UT1 as a tuple (year, month, day, hour, minute, second)."""
+        return calendar_tuple(self.whole, self.ut1_fraction)
+
+    # Date formatting.
+
+    def tai_strftime(self, format='%Y-%m-%d %H:%M:%S TAI'):
+        """Format TAI with a datetime strftime() format string."""
+        return _strftime(format, self.whole, self.tai_fraction)
+
+    def tt_strftime(self, format='%Y-%m-%d %H:%M:%S TT'):
+        """Format TT with a datetime strftime() format string."""
+        return _strftime(format, self.whole, self.tt_fraction)
+
+    def tdb_strftime(self, format='%Y-%m-%d %H:%M:%S TDB'):
+        """Format TDB with a datetime strftime() format string."""
+        return _strftime(format, self.whole, self.tdb_fraction)
+
+    def ut1_strftime(self, format='%Y-%m-%d %H:%M:%S UT1'):
+        """Format UT1 with a datetime strftime() format string."""
+        return _strftime(format, self.whole, self.ut1_fraction)
 
     # Convenient caching of several expensive functions of time.
 
@@ -937,6 +965,37 @@ def build_delta_t_table(delta_t_recent):
 _format_uses_milliseconds = re.compile(r'%[-_0^#EO]*f').search
 _format_uses_seconds = re.compile(r'%[-_0^#EO]*[STXc]').search
 _format_uses_minutes = re.compile(r'%[-_0^#EO]*[MR]').search
+
+def _strftime(format, jd, fraction):
+    ms = _format_uses_milliseconds(format)
+
+    if ms:
+        pass
+    elif _format_uses_seconds(format):
+        jd = jd + _half_second
+    elif _format_uses_minutes(format):
+        jd = jd + _half_minute
+    else:
+        pass
+
+    year, month, day, hour, minute, second = calendar_tuple(jd, fraction)
+
+    if ms:
+        second, microsecond = divmod(second, 1e6)
+        microsecond = microsecond.astype(int)
+
+    second = second.astype(int)
+
+    if ms:
+        tup = year, month, day, hour, minute, second, microsecond
+    else:
+        tup = year, month, day, hour, minute, second
+
+    dt = dt_module.datetime
+    if getattr(jd, 'ndim', 0):
+        return [dt(*item).strftime(format) for item in zip(*tup)]
+    else:
+        return dt(*tup).strftime(format)
 
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
     if dt.tzinfo is None:

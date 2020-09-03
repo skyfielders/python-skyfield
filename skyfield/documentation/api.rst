@@ -121,6 +121,12 @@ Other time scales and conversions are available through its methods.
    Time.toordinal
    Time.tai_calendar
    Time.tt_calendar
+   Time.tdb_calendar
+   Time.ut1_calendar
+   Time.tai_strftime
+   Time.tt_strftime
+   Time.tdb_strftime
+   Time.ut1_strftime
    Time.M
    Time.MT
    Time.gmst
