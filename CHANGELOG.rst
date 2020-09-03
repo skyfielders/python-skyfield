@@ -9,6 +9,17 @@ Changelog
   from an array of floating point years.
   `#436 <https://github.com/skyfielders/python-skyfield/issues/436>`_
 
+* Added four new ``strftime`` methods for the non-UTC timescales
+  `(#443). <https://github.com/skyfielders/python-skyfield/issues/443>`_
+  All four of them support ``%f`` for microseconds,
+  and provide a reasonable default format string
+  for callers who don’t wish to concoct their own:
+
+  * :meth:`~skyfield.timelib.Timescale.tai_strftime()`
+  * :meth:`~skyfield.timelib.Timescale.tt_strftime()`
+  * :meth:`~skyfield.timelib.Timescale.tdb_strftime()`
+  * :meth:`~skyfield.timelib.Timescale.ut1_strftime()`
+
 * Comets and asteroids with parabolic and hyperbolic orbits are now
   supported.
 
