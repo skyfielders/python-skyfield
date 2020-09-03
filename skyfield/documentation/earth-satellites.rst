@@ -117,7 +117,7 @@ build lookup dictionaries using Python’s dictionary comprehension syntax:
 
 .. testoutput::
 
-    EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
+    EarthSatellite 399 EARTH -> ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
 
 .. testcode::
 
@@ -127,7 +127,7 @@ build lookup dictionaries using Python’s dictionary comprehension syntax:
 
 .. testoutput::
 
-    EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
+    EarthSatellite 399 EARTH -> ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
 
 If instead your program already has the two lines of TLE data,
 and does not need Skyfield to download and parse a Celestrak file,
@@ -148,7 +148,7 @@ Note that ``ts`` should be a timescale object:
 
 .. testoutput::
 
-    EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
+    EarthSatellite 399 EARTH -> ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
 
 The “epoch” date of a satellite element set
 is the all-important date and time
@@ -345,8 +345,8 @@ to ask “where will the satellite be *relative to* my location?”
 .. testoutput::
 
     Sum of 2 vectors:
-     + ReversedVector [TODO]
-     + EarthSatellite 'ISS (ZARYA)' number=25544 epoch=2014-01-20T22:23:04Z
+     Topos (reversed) Earth latitude 40deg 53' 38.0" N longitude -83deg 53' 30.1" E -> 399 EARTH
+     EarthSatellite 399 EARTH -> ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
 
 Every time you call this vector sum’s `at()` method,
 it will first compute the satellite’s position,

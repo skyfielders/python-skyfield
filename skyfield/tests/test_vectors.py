@@ -24,11 +24,13 @@ def test_chebyshev_subtraction():
 
     assert str(v) == """\
 Sum of 2 vectors:
- + ReversedVector [TODO]
- + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER"""
+ 'de421.bsp' segment (reversed) 10 SUN -> 0 SOLAR SYSTEM BARYCENTER
+ 'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER"""
 
-    assert repr(v) == "\
-<VectorSum of 2 vectors 10 SUN -> 3 EARTH BARYCENTER>"
+    assert repr(v) == """\
+<VectorSum of 2 vectors:
+ 'de421.bsp' segment (reversed) 10 SUN -> 0 SOLAR SYSTEM BARYCENTER
+ 'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER>"""
 
 def test_negation():
     ts = load.timescale()
@@ -39,6 +41,10 @@ def test_negation():
     p2 = neg.at(t)
     assert (p1.position.au == - p2.position.au).all()
     assert (p1.velocity.au_per_d == - p2.velocity.au_per_d).all()
+
+    # A second negation should return the unwrapped original.
+    neg = -neg
+    assert neg is usno
 
 def test_vectors():
     ts = load.timescale()
@@ -52,11 +58,13 @@ def test_vectors():
 
     assert str(v) == """\
 Sum of 2 vectors:
- + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
- + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH"""
+ 'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+ 'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH"""
 
-    assert repr(v) == "\
-<VectorSum of 2 vectors 0 SOLAR SYSTEM BARYCENTER -> 399 EARTH>"
+    assert repr(v) == """\
+<VectorSum of 2 vectors:
+ 'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+ 'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH>"""
 
     assert str(v.at(t)) == "\
 <Barycentric BCRS position and velocity at date t center=0 target=399>"
@@ -65,28 +73,34 @@ Sum of 2 vectors:
 
     assert str(v) == """\
 Sum of 3 vectors:
- + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
- + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH
- + Topos 38deg 55' 17.4" N -77deg 04' 00.8" E"""
+ 'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+ 'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH
+ Topos 399 EARTH -> Earth latitude 38deg 55' 17.4" N longitude -77deg 04' 00.8" E elevation 92 m"""
 
     assert repr(v) == """\
-<VectorSum of 3 vectors 0 SOLAR SYSTEM BARYCENTER -> Topos 38deg 55' 17.4" N -77deg 04' 00.8" E>"""
+<VectorSum of 3 vectors:
+ 'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+ 'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH
+ Topos 399 EARTH -> Earth latitude 38deg 55' 17.4" N longitude -77deg 04' 00.8" E elevation 92 m>"""
 
     assert str(v.at(t)) == """\
-<Barycentric BCRS position and velocity at date t center=0 \
-target=Topos 38deg 55' 17.4" N -77deg 04' 00.8" E>"""
+<Barycentric BCRS position and velocity at date t center=0 target=Earth latitude 38deg 55' 17.4" N longitude -77deg 04' 00.8" E elevation 92 m>"""
 
     v = earth - mars
 
     assert str(v) == """\
 Sum of 4 vectors:
- + ReversedVector [TODO]
- + ReversedVector [TODO]
- + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
- + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH"""
+ 'de421.bsp' segment (reversed) 499 MARS -> 4 MARS BARYCENTER
+ 'de421.bsp' segment (reversed) 4 MARS BARYCENTER -> 0 SOLAR SYSTEM BARYCENTER
+ 'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+ 'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH"""
 
-    assert repr(v) == "\
-<VectorSum of 4 vectors 499 MARS -> 399 EARTH>"
+    assert repr(v) == """\
+<VectorSum of 4 vectors:
+ 'de421.bsp' segment (reversed) 499 MARS -> 4 MARS BARYCENTER
+ 'de421.bsp' segment (reversed) 4 MARS BARYCENTER -> 0 SOLAR SYSTEM BARYCENTER
+ 'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+ 'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH>"""
 
     assert str(v.at(t)) == "\
 <ICRF position and velocity at date t center=499 target=399>"

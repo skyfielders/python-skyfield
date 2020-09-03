@@ -140,6 +140,8 @@ class Loader(object):
 
     def path_to(self, filename):
         """Return the path to ``filename`` in this loader's directory."""
+        if self.directory == '.':
+            return filename
         return os.path.join(self.directory, filename)
 
     def __call__(self, filename, reload=False, backup=False, builtin=False):

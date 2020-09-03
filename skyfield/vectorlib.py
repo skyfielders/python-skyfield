@@ -3,6 +3,7 @@
 from jplephem.names import target_names as _jpl_code_name_dict
 from numpy import max
 from .constants import C_AUDAY
+from .descriptorlib import reify
 from .errors import DeprecationError
 from .functions import length_of
 from .positionlib import build_position
@@ -13,13 +14,25 @@ class VectorFunction(object):
 
     ephemeris = None
 
-    @property
+    @reify
+    def vector_name(self):
+        return type(self).__name__
+
+    @reify
     def center_name(self):
         return _jpl_name(self.center)
 
-    @property
+    @reify
     def target_name(self):
         return _jpl_name(self.target)
+
+    def __repr__(self):
+        return '<{0}>'.format(str(self))
+
+    def __str__(self):
+        return '{0} {1} -> {2}'.format(
+            self.vector_name, self.center_name, self.target_name,
+        )
 
     def __add__(self, other):
         if self.target != other.center:
@@ -149,12 +162,23 @@ class ReversedVector(VectorFunction):
         self.target = vector_function.center
         self.vector_function = vector_function
 
-    def __repr__(self):
-        return 'ReversedVector [TODO]'
+    @reify
+    def vector_name(self):
+        return self.vector_function.vector_name + ' (reversed)'
+
+    @reify
+    def center_name(self):
+        return self.vector_function.target_name
+
+    @reify
+    def target_name(self):
+        return self.vector_function.center_name
+
+    def __neg__(self):
+        return self.vector_function
 
     def _at(self, t):
         p, v, gcrs_position, message = self.vector_function._at(t)
-        #gcrs_position = None if gcrs_position is None else -gcrs_position
         return -p, -v, gcrs_position, message
 
 class VectorSum(VectorFunction):
@@ -170,19 +194,14 @@ class VectorSum(VectorFunction):
 
     def __str__(self):
         vector_functions = self.vector_functions
-        lines = [' + ' + str(segment) for segment in vector_functions]
+        lines = [' ' + str(segment) for segment in vector_functions]
         return 'Sum of {0} vectors:\n{1}'.format(
             len(vector_functions),
             '\n'.join(lines),
         )
 
     def __repr__(self):
-        return '<{0} of {1} vectors {2} -> {3}>'.format(
-            type(self).__name__,
-            len(self.vector_functions),
-            self.center_name,
-            self.target_name,
-        )
+        return '<Vector{0}>'.format(self)
 
     def _at(self, t):
         p, v = 0.0, 0.0
@@ -235,9 +254,10 @@ def _correct_for_light_travel_time(observer, target):
         raise ValueError('light-travel time failed to converge')
     return tposition - cposition, tvelocity - cvelocity, t, light_time
 
-def _jpl_name(code_or_string):
-    if isinstance(code_or_string, int):
-        name = _jpl_code_name_dict.get(code_or_string)
-        if name is not None:
-            return '{0} {1}'.format(code_or_string, name)
-    return str(code_or_string)
+def _jpl_name(target):
+    if not isinstance(target, int):
+        return type(target).__name__
+    name = _jpl_code_name_dict.get(target)
+    if name is None:
+        return str(target)
+    return '{0} {1}'.format(target, name)

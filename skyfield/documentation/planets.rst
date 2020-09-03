@@ -200,8 +200,8 @@ and Skyfield will put together a solution using the segments provided.
 .. testoutput::
 
     Sum of 2 vectors:
-     + Segment 'de421.bsp' 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
-     + Segment 'de421.bsp' 3 EARTH BARYCENTER -> 399 EARTH
+     'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+     'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH
 
 Each time you ask this ``earth`` object for its position at a given time,
 Skyfield will compute both of these underlying vectors

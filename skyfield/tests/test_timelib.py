@@ -70,7 +70,9 @@ time_params_with_array = [
 
 def test_time_creation_with_arrays(time_scale_name, time_params_with_array):
     ts = api.load.timescale()
-    getattr(ts, time_scale_name)(*time_params_with_array)
+    print(time_scale_name)
+    t = getattr(ts, time_scale_name)(*time_params_with_array)
+    t.utc_jpl()  # a reasonably complicated operation
 
 def test_timescale_utc_method_with_array_inside(ts):
     seconds = np.arange(48.0, 58.0, 1.0)

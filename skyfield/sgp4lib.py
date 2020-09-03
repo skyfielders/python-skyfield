@@ -135,16 +135,14 @@ class EarthSatellite(VectorFunction):
         self._setup(satrec)
         return self
 
-    def __str__(self):
-        sat = self.model
-        return 'EarthSatellite{0} number={1!r} epoch={2}'.format(
-            ' ' + repr(self.name) if self.name else '',
-            sat.satnum,
-            self.epoch.utc_iso(),
+    @property
+    def target_name(self):
+        return '{0}{1}catalog #{2} epoch {3}'.format(
+            self.name or '',
+            ' ' if self.name else '',
+            self.model.satnum,
+            self.epoch.utc_strftime(),
         )
-
-    def __repr__(self):
-        return '<{0}>'.format(self)
 
     def _position_and_velocity_TEME_km(self, t):
         """Return the raw true equator mean equinox (TEME) vectors from SGP4.

@@ -3,11 +3,9 @@
 from numpy import exp
 from .constants import ASEC2RAD, tau
 from .earthlib import refract, terra
-
 from .functions import mxmxm, mxv, rot_x, rot_y, rot_z
 from .units import Distance, Angle, _interpret_ltude
 from .vectorlib import VectorFunction
-
 
 class Topos(VectorFunction):
     """A vector function that knows the position of a place on Earth.
@@ -74,11 +72,12 @@ class Topos(VectorFunction):
         # reference that delays garbage collection.)
         return self
 
-    def __str__(self):
-        return 'Topos {0} N {1} E'.format(self.latitude, self.longitude)
-
-    def __repr__(self):
-        return '<{0}>'.format(self)
+    @property
+    def target_name(self):
+        m = self.elevation.m
+        e = ' elevation {0:.0f} m'.format(m) if m else ''
+        return 'Earth latitude {0} N longitude {1} E{2}'.format(
+            self.latitude, self.longitude, e)
 
     def _altaz_rotation(self, t):
         """Compute the rotation from the ICRF into the alt-az system."""

@@ -53,9 +53,13 @@ class SpiceKernel(object):
     the body by its name or official SPICE identifying integer:
 
     >>> planets['earth']
-    <VectorSum of 2 vectors 0 SOLAR SYSTEM BARYCENTER -> 399 EARTH>
+    <VectorSum of 2 vectors:
+     'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+     'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH>
     >>> planets[499]
-    <VectorSum of 2 vectors 0 SOLAR SYSTEM BARYCENTER -> 499 MARS>
+    <VectorSum of 2 vectors:
+     'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 4 MARS BARYCENTER
+     'de421.bsp' segment 4 MARS BARYCENTER -> 499 MARS>
 
     The result will be a :class:`~skyfield.vectorlib.VectorFunction`
     instance that you can ask for a position at a given input time.
@@ -178,7 +182,6 @@ class SpiceKernel(object):
             code = _jpl_name_code_dict.get(name_or_code.upper())
         return code in self.codes
 
-
 class SPICESegment(VectorFunction):
 
     def __new__(cls, ephemeris, spk_segment):
@@ -195,20 +198,15 @@ class SPICESegment(VectorFunction):
         self.target = spk_segment.target
         self.spk_segment = spk_segment
 
-    def __str__(self):
-        return 'Segment {0!r} {1}'.format(
-            self.ephemeris.filename,
-            _format_segment_brief(self),
-        )
-
-    def __repr__(self):
-        return '<{0}>'.format(self)
-
     def time_range(self, ts):
         s = self.spk_segment
         return ts.tdb_jd(s.start_jd), ts.tdb_jd(s.end_jd)
 
 class ChebyshevPosition(SPICESegment):
+    @property
+    def vector_name(self):
+        return '{0!r} segment'.format(self.ephemeris.path)
+
     def _at(self, t):
         segment = self.spk_segment
         try:

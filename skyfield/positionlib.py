@@ -114,13 +114,25 @@ class ICRF(object):
             suffix = ' ICRS'
         else:
             suffix = ''
+
+        center = self.center
+        target = self.target
+
+        center_name = getattr(center, 'center_name', None)
+        if center_name is None:
+            center_name = str(center)
+
+        target_name = getattr(target, 'target_name', None)
+        if target_name is None:
+            target_name = str(target)
+
         return '<{0}{1} position{2}{3}{4}{5}>'.format(
             name,
             suffix,
             '' if (self.velocity is None) else ' and velocity',
             '' if self.t is None else ' at date t',
-            '' if self.center is None else ' center={0}'.format(self.center),
-            '' if self.target is None else ' target={0}'.format(self.target),
+            '' if self.center is None else ' center={0}'.format(center_name),
+            '' if self.target is None else ' target={0}'.format(target_name),
         )
 
     def __sub__(self, body):
