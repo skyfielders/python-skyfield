@@ -633,16 +633,26 @@ class Astrometric(ICRF):
         apparent._observer_gcrs_au = observer_gcrs_au
         return apparent
 
-
 class Apparent(ICRF):
-    """An apparent (x,y,z) position relative to a particular observer.
+    """An apparent `[x y z]` position relative to a particular observer.
 
-    This class’s vectors give the position and velocity of a body
-    relative to an observer, adjusted for light-time delay, deflection
-    (light rays bending as they pass large masses like Jupiter or the
-    Sun), and aberration (light slanting because of the observer's
-    motion through space).  They are usually produced in Skyfield by
-    calling the `apparent()` method of an `Astrometric` object.
+    This class’s vectors provide the position and velocity of a body
+    relative to an observer, adjusted to predict where the body’s image
+    will really appear (hence "apparent") in the sky:
+
+    * Light-time delay, as already present in an `Astrometric` position.
+
+    * Deflection: gravity bends light, and thus the image of a distant
+      object, as the light passes massive objects like Jupiter, Saturn,
+      and the Sun.  For an observer on the Earth’s surface or in Earth
+      orbit, the slight deflection by the gravity of the Earth itself is
+      also included.
+
+    * Aberration: incoming light arrives slanted because of the
+      observer's motion through space.
+
+    These positions are usually produced in Skyfield by calling the
+    `apparent()` method of an `Astrometric` object.
 
     Both the ``.position`` and ``.velocity`` are ``[x y z]`` vectors
     oriented along the axes of the ICRF, the modern replacement for the
@@ -655,8 +665,8 @@ class Apparent(ICRF):
       the ICRF.
 
     * *Apparent place,* the most popular option: call ``.radec('date')``
-      to generate right ascension and declination with respect to for
-      the equator and equinox of date.
+      to generate right ascension and declination with respect to the
+      equator and equinox of date.
 
     """
     def altaz(self, temperature_C=None, pressure_mbar='standard'):
