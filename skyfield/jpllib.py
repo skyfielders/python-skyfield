@@ -198,15 +198,15 @@ class SPICESegment(VectorFunction):
         self.target = spk_segment.target
         self.spk_segment = spk_segment
 
+    @property
+    def vector_name(self):
+        return '{0!r} segment'.format(self.ephemeris.path)
+
     def time_range(self, ts):
         s = self.spk_segment
         return ts.tdb_jd(s.start_jd), ts.tdb_jd(s.end_jd)
 
 class ChebyshevPosition(SPICESegment):
-    @property
-    def vector_name(self):
-        return '{0!r} segment'.format(self.ephemeris.path)
-
     def _at(self, t):
         segment = self.spk_segment
         try:

@@ -24,12 +24,12 @@ def test_chebyshev_subtraction():
 
     assert str(v) == """\
 Sum of 2 vectors:
- 'de421.bsp' segment (reversed) 10 SUN -> 0 SOLAR SYSTEM BARYCENTER
+ Reversed 'de421.bsp' segment 10 SUN -> 0 SOLAR SYSTEM BARYCENTER
  'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER"""
 
     assert repr(v) == """\
 <VectorSum of 2 vectors:
- 'de421.bsp' segment (reversed) 10 SUN -> 0 SOLAR SYSTEM BARYCENTER
+ Reversed 'de421.bsp' segment 10 SUN -> 0 SOLAR SYSTEM BARYCENTER
  'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER>"""
 
 def test_negation():
@@ -90,15 +90,15 @@ Sum of 3 vectors:
 
     assert str(v) == """\
 Sum of 4 vectors:
- 'de421.bsp' segment (reversed) 499 MARS -> 4 MARS BARYCENTER
- 'de421.bsp' segment (reversed) 4 MARS BARYCENTER -> 0 SOLAR SYSTEM BARYCENTER
+ Reversed 'de421.bsp' segment 499 MARS -> 4 MARS BARYCENTER
+ Reversed 'de421.bsp' segment 4 MARS BARYCENTER -> 0 SOLAR SYSTEM BARYCENTER
  'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
  'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH"""
 
     assert repr(v) == """\
 <VectorSum of 4 vectors:
- 'de421.bsp' segment (reversed) 499 MARS -> 4 MARS BARYCENTER
- 'de421.bsp' segment (reversed) 4 MARS BARYCENTER -> 0 SOLAR SYSTEM BARYCENTER
+ Reversed 'de421.bsp' segment 499 MARS -> 4 MARS BARYCENTER
+ Reversed 'de421.bsp' segment 4 MARS BARYCENTER -> 0 SOLAR SYSTEM BARYCENTER
  'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
  'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH>"""
 

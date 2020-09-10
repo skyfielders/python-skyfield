@@ -2,6 +2,12 @@ import textwrap
 from ..api import Topos, load
 from ..sgp4lib import EarthSatellite
 
+lines = [
+    'ISS (ZARYA)             ',
+    '1 25544U 98067A   13330.58127943  .00000814  00000-0  21834-4 0  1064',
+    '2 25544  51.6484  23.7537 0001246  74.1647  18.7420 15.50540527859894',
+]
+
 def dedent(s):
     return textwrap.dedent(s.rstrip())
 
@@ -15,53 +21,45 @@ def test_jpl_segment(eph):
     """)
     assert str(e) == expected
     expected = dedent("""\
-        <'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 1 MERCURY BARYCENTER>
+        <ChebyshevPosition 'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 1 MERCURY BARYCENTER>
     """)
     assert repr(e) == expected
 
 def test_satellite_with_name(eph):
-    lines = [
-        'ISS (ZARYA)             ',
-        '1 25544U 98067A   13330.58127943  .00000814  00000-0  21834-4 0  1064',
-        '2 25544  51.6484  23.7537 0001246  74.1647  18.7420 15.50540527859894',
-    ]
     s = EarthSatellite(lines[1], lines[2], lines[0])
     expected = dedent("""\
-        EarthSatellite 399 EARTH -> ISS (ZARYA) catalog #25544 epoch 2013-11-26 13:57:03 UTC
+        ISS (ZARYA) catalog #25544 epoch 2013-11-26 13:57:03 UTC
     """)
     assert str(s) == expected
     expected = dedent("""\
-        <EarthSatellite 399 EARTH -> ISS (ZARYA) catalog #25544 epoch 2013-11-26 13:57:03 UTC>
+        <EarthSatellite ISS (ZARYA) catalog #25544 epoch 2013-11-26 13:57:03 UTC>
     """)
     assert repr(s) == expected
 
 def test_satellite_without_name(eph):
-    lines = [
-        '1 25544U 98067A   13330.58127943  .00000814  00000-0  21834-4 0  1064',
-        '2 25544  51.6484  23.7537 0001246  74.1647  18.7420 15.50540527859894',
-    ]
-    s = EarthSatellite(lines[0], lines[1])
+    s = EarthSatellite(lines[1], lines[2])
     expected = dedent("""\
-        EarthSatellite 399 EARTH -> catalog #25544 epoch 2013-11-26 13:57:03 UTC
+        catalog #25544 epoch 2013-11-26 13:57:03 UTC
     """)
     assert str(s) == expected
     expected = dedent("""\
-        <EarthSatellite 399 EARTH -> catalog #25544 epoch 2013-11-26 13:57:03 UTC>
+        <EarthSatellite catalog #25544 epoch 2013-11-26 13:57:03 UTC>
     """)
     assert repr(s) == expected
 
 def test_topos(eph):
     t = Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
     expected = dedent("""\
-        Topos 399 EARTH -> Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E
+        Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E
     """)
     assert str(t) == expected
+    # TODO
     expected = dedent("""\
-        <Topos 399 EARTH -> Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E>
+        <Topos Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E>
     """)
     assert repr(t) == expected
 
-def test_vector_sum(eph):
+def test_jpl_vector_sum(eph):
     e = eph['earth']
     expected = dedent("""\
         Sum of 2 vectors:
@@ -75,3 +73,20 @@ def test_vector_sum(eph):
          'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH>
     """)
     assert repr(e) == expected
+
+def test_topos_and_earth_satellite_vector_sum(eph):
+    s = EarthSatellite(lines[0], lines[1])
+    t = Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
+    v = s - t
+    expected = dedent("""\
+        Sum of 2 vectors:
+         Reversed Topos Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
+         EarthSatellite 399 EARTH -> catalog #25544 epoch 1999-12-31 00:00:00 UTC
+    """)
+    assert str(v) == expected
+    expected = dedent("""\
+        <VectorSum of 2 vectors:
+         Reversed Topos Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
+         EarthSatellite 399 EARTH -> catalog #25544 epoch 1999-12-31 00:00:00 UTC>
+    """)
+    assert repr(v) == expected

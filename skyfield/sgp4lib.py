@@ -135,6 +135,9 @@ class EarthSatellite(VectorFunction):
         self._setup(satrec)
         return self
 
+    def __str__(self):
+        return self.target_name
+
     @property
     def target_name(self):
         return '{0}{1}catalog #{2} epoch {3}'.format(

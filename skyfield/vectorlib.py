@@ -27,9 +27,14 @@ class VectorFunction(object):
         return _jpl_name(self.target)
 
     def __repr__(self):
-        return '<{0}>'.format(str(self))
+        return '<{0} {1}>'.format(type(self).__name__, str(self))
 
     def __str__(self):
+        if self.target is self:
+            return self.target_name
+        return self.arrow_str()
+
+    def arrow_str(self):
         return '{0} {1} -> {2}'.format(
             self.vector_name, self.center_name, self.target_name,
         )
@@ -164,7 +169,7 @@ class ReversedVector(VectorFunction):
 
     @reify
     def vector_name(self):
-        return self.vector_function.vector_name + ' (reversed)'
+        return 'Reversed ' + self.vector_function.vector_name
 
     @reify
     def center_name(self):
@@ -194,7 +199,7 @@ class VectorSum(VectorFunction):
 
     def __str__(self):
         vector_functions = self.vector_functions
-        lines = [' ' + str(segment) for segment in vector_functions]
+        lines = [' ' + segment.arrow_str() for segment in vector_functions]
         return 'Sum of {0} vectors:\n{1}'.format(
             len(vector_functions),
             '\n'.join(lines),
