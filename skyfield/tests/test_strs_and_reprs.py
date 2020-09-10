@@ -75,18 +75,18 @@ def test_jpl_vector_sum(eph):
     assert repr(e) == expected
 
 def test_topos_and_earth_satellite_vector_sum(eph):
-    s = EarthSatellite(lines[0], lines[1])
+    s = EarthSatellite(lines[1], lines[2])
     t = Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
     v = s - t
     expected = dedent("""\
         Sum of 2 vectors:
          Reversed Topos Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
-         EarthSatellite 399 EARTH -> catalog #25544 epoch 1999-12-31 00:00:00 UTC
+         EarthSatellite 399 EARTH -> catalog #25544 epoch 2013-11-26 13:57:03 UTC
     """)
     assert str(v) == expected
     expected = dedent("""\
         <VectorSum of 2 vectors:
          Reversed Topos Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
-         EarthSatellite 399 EARTH -> catalog #25544 epoch 1999-12-31 00:00:00 UTC>
+         EarthSatellite 399 EARTH -> catalog #25544 epoch 2013-11-26 13:57:03 UTC>
     """)
     assert repr(v) == expected
