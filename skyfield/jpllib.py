@@ -251,15 +251,3 @@ def _format_segment(segment):
     tname = _jpl_code_name_dict.get(segment.target, 'unknown')
     return '    {0:3} -> {1:<3}  {2} -> {3}'.format(
         segment.center, segment.target, cname, tname)
-
-def _format_segment_brief(segment):
-    cname = _jpl_code_name_dict.get(segment.center)
-    tname = _jpl_code_name_dict.get(segment.target)
-    return '{0}{1}{2} -> {3}{4}{5}'.format(
-        segment.center,
-        ' ' if cname else '',
-        cname,
-        segment.target,
-        ' ' if tname else '',
-        tname,
-    )
