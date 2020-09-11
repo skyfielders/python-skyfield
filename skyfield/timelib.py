@@ -590,7 +590,7 @@ class Time(object):
                                   - ts.leap_offsets[i] / DAY_S + 0.5, 1.0)
         whole = (whole1 + whole2).astype(int)
 
-        year, month, day = calendar_date(whole)
+        year, month, day = compute_calendar_date(whole)
         hour, hfrac = divmod(fraction * 24.0, 1.0)
         minute, second = divmod(hfrac * 3600.0, 60.0)
         is_leap_second = j < ts.leap_dates[i-1]
@@ -848,27 +848,48 @@ def julian_date(year, month=1, day=1, hour=0, minute=0, second=0.0):
 def julian_date_of_besselian_epoch(b):
     return 2415020.31352 + (b - 1900.0) * 365.242198781
 
-def calendar_date(jd_integer):
-    """Convert Julian Day `jd_integer` into a Gregorian (year, month, day).
+def compute_calendar_date(jd_integer, julian_before=None):
+    """Convert Julian day ``jd_integer`` into a calendar (year, month, day).
 
-    From Fliegel, H. & Van Flandern, T. Comm. of the ACM, Vol. 11,
-    No. 10, October 1968, p. 657.
+    By default, this returns a proleptic Gregorian date.  If you instead
+    want the Julian calendar used for old dates, provide a Julian day
+    ``julian_before`` on which the calendar should cut over.  One
+    popular choice is the date on which Pope Gregory adopted the new
+    calendar in October 1582:
+
+    >>> gregory = 2299161
+    >>> for jd in range(gregory - 2, gregory + 2):
+    ...     print(compute_calendar_date(jd, gregory))
+    (1582, 10, 3)
+    (1582, 10, 4)
+    (1582, 10, 15)
+    (1582, 10, 16)
+
+    Another is the date on which England switched in September 1752:
+
+    >>> england = 2361222
+    >>> for jd in range(england - 2, england + 2):
+    ...     print(compute_calendar_date(jd, england))
+    (1752, 9, 1)
+    (1752, 9, 2)
+    (1752, 9, 14)
+    (1752, 9, 15)
 
     """
-    k = jd_integer + 68569
-    n = 4 * k // 146097
+    use_gregorian = (julian_before is None) or (jd_integer >= julian_before)
 
-    k = k - (146097 * n + 3) // 4
-    m = 4000 * (k + 1) // 1461001
-    k = k - 1461 * m // 4 + 31
-    month = 80 * k // 2447
-    day = k - 2447 * month // 80
-    k = month // 11
-
-    month = month + 2 - 12 * k
-    year = 100 * (n - 49) + m + k
-
+    # Adapted from the Astronomical Almanac 15.11.1.
+    f = jd_integer + 1401
+    f += use_gregorian * ((4 * jd_integer + 274277) // 146097 * 3 // 4 - 38)
+    e = 4 * f + 3
+    g = e % 1461 // 4
+    h = 5 * g + 2
+    day = h % 153 // 5 + 1
+    month = (h // 153 + 2) % 12 + 1
+    year = e // 1461 - 4716 + (12 + 2 - month) // 12
     return year, month, day
+
+calendar_date = compute_calendar_date  # old name, in case anyone used it
 
 def calendar_tuple(jd_float, fraction=0.0):
     """Return a (year, month, day, hour, minute, second.fraction) tuple."""
@@ -876,7 +897,7 @@ def calendar_tuple(jd_float, fraction=0.0):
     whole1, fraction1 = divmod(jd_float, 1.0)
     whole2, fraction = divmod(fraction1 + fraction + 0.5, 1.0)
     whole = (whole1 + whole2).astype(int)
-    year, month, day = calendar_date(whole)
+    year, month, day = compute_calendar_date(whole)
     hour, hfrac = divmod(fraction * 24.0, 1.0)  # TODO
     minute, second = divmod(hfrac * 3600.0, 60.0)
     return year, month, day, hour.astype(int), minute.astype(int), second

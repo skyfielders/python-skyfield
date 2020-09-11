@@ -134,6 +134,13 @@ Other time scales and conversions are available through its methods.
    Time.nutation_matrix
    Time.precession_matrix
 
+Time utilities
+==============
+
+.. autosummary::
+
+   compute_calendar_date
+
 Vector functions
 ================
 

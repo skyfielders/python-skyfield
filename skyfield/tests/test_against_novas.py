@@ -43,16 +43,16 @@ def reduce_precision(t):
     t.tdb_fraction = 0.0
 
 def test_calendar_date_0():
-    compare(timelib.calendar_date(2440423.345833333), array((1969, 7, 20.345833333209157)), 0.0)
+    compare(timelib.compute_calendar_date(2440423), array((1969, 7, 20.0)), 0.0)
 
 def test_calendar_date_1():
-    compare(timelib.calendar_date(2448031.5), array((1990, 5, 19.5)), 0.0)
+    compare(timelib.compute_calendar_date(2448031), array((1990, 5, 19.0)), 0.0)
 
 def test_calendar_date_2():
-    compare(timelib.calendar_date(2451545.0), array((2000, 1, 1.0)), 0.0)
+    compare(timelib.compute_calendar_date(2451545), array((2000, 1, 1.0)), 0.0)
 
 def test_calendar_date_3():
-    compare(timelib.calendar_date(2456164.5), array((2012, 8, 24.5)), 0.0)
+    compare(timelib.compute_calendar_date(2456164), array((2012, 8, 24.0)), 0.0)
 
 def test_earth_rotation_angle_date0():
     compare(earthlib.earth_rotation_angle(2440423.345833333) * 360.0, 243.3216078027496,

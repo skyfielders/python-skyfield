@@ -63,3 +63,12 @@ The Time object
 
 .. _datetime: https://docs.python.org/3.5/library/datetime.html#datetime.datetime
 .. _pytz: http://pythonhosted.org/pytz/
+
+Time utilities
+==============
+
+.. testsetup::
+
+    from skyfield.timelib import compute_calendar_date
+
+.. autofunction:: compute_calendar_date

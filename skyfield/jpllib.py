@@ -9,7 +9,7 @@ from jplephem.names import target_name_pairs
 
 from .constants import AU_KM, DAY_S
 from .errors import EphemerisRangeError
-from .timelib import calendar_date
+from .timelib import compute_calendar_date
 from .vectorlib import VectorFunction, VectorSum, _jpl_code_name_dict
 
 _jpl_name_code_dict = dict(
@@ -85,8 +85,8 @@ class SpiceKernel(object):
         for s in segments:
             if start != s.start_jd or end != s.end_jd:
                 start, end = s.start_jd, s.end_jd
-                starts = format_date(*calendar_date(int(start)))
-                ends = format_date(*calendar_date(int(end)))
+                starts = format_date(*compute_calendar_date(int(start)))
+                ends = format_date(*compute_calendar_date(int(end)))
                 lines.append('  JD {0:.2f} - JD {1:.2f}  ({2} through {3})'
                              .format(start, end, starts, ends))
             lines.append(_format_segment(s))

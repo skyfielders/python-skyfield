@@ -101,10 +101,11 @@ def output_subroutine_tests(dates):
         return y, m, d + h / 24.0 - 0.5
 
     for i, jd in enumerate(date_floats):
-        cal_date = call(shorter_cal_date, jd)
+        jdi = int(jd)
+        cal_date = call(shorter_cal_date, jdi)
         output(locals(), """\
             def test_calendar_date_{i}():
-                compare(timelib.calendar_date({jd!r}), array({cal_date}), 0.0)
+                compare(timelib.compute_calendar_date({jdi!r}), array({cal_date}), 0.0)
             """)
 
     for i, jd in enumerate(date_floats):

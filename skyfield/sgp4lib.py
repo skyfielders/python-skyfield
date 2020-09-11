@@ -10,7 +10,7 @@ from .constants import AU_KM, DAY_S, T0, tau
 from .functions import mxv, rot_x, rot_y, rot_z
 from .positionlib import ITRF_to_GCRS2
 from .searchlib import _find_discrete, find_maxima
-from .timelib import calendar_date
+from .timelib import compute_calendar_date
 from .vectorlib import VectorFunction
 
 _identity = identity(3)
@@ -129,8 +129,9 @@ class EarthSatellite(VectorFunction):
         # TODO: once sgp4 starts filling in epochyr and epochdays in
         # sgp4init(), the separate epoch code here and in __init__() can
         # be unified to always use epochyr and epochdays.
-        year, month, day = calendar_date(satrec.jdsatepoch)
-        self.epoch = ts.utc(year, month, day + satrec.jdsatepochF)
+        whole, fraction = divmod(satrec.jdsatepoch, 1.0)
+        year, month, day = compute_calendar_date(whole)
+        self.epoch = ts.utc(year, month, day + fraction + satrec.jdsatepochF)
 
         self._setup(satrec)
         return self
