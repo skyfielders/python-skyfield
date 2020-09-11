@@ -36,7 +36,7 @@ def mxmxm(M1, M2, M3):
 _mxv, _mxm, _mxmxm = mxv, mxm, mxmxm  # In case anyone imported old name
 
 def length_of(xyz):
-    """Given a 3-element array `[x y z]`, return its length.
+    """Given a 3-element array ``[x y z]``, return its length.
 
     The three elements can be simple scalars, or the array can be two
     dimensions and offer three whole series of x, y, and z coordinates.

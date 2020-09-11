@@ -634,7 +634,7 @@ class Astrometric(ICRF):
         return apparent
 
 class Apparent(ICRF):
-    """An apparent `[x y z]` position relative to a particular observer.
+    """An apparent ``[x y z]`` position relative to a particular observer.
 
     This class’s vectors provide the position and velocity of a body
     relative to an observer, adjusted to predict where the body’s image

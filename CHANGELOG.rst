@@ -15,10 +15,10 @@ Changelog
   and provide a reasonable default format string
   for callers who don’t wish to concoct their own:
 
-  * :meth:`~skyfield.timelib.Timescale.tai_strftime()`
-  * :meth:`~skyfield.timelib.Timescale.tt_strftime()`
-  * :meth:`~skyfield.timelib.Timescale.tdb_strftime()`
-  * :meth:`~skyfield.timelib.Timescale.ut1_strftime()`
+  * :meth:`~skyfield.timelib.Time.tai_strftime()`
+  * :meth:`~skyfield.timelib.Time.tt_strftime()`
+  * :meth:`~skyfield.timelib.Time.tdb_strftime()`
+  * :meth:`~skyfield.timelib.Time.ut1_strftime()`
 
 * Comets and asteroids with parabolic and hyperbolic orbits are now
   supported.

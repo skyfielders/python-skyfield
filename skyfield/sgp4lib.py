@@ -48,7 +48,7 @@ class EarthSatellite(VectorFunction):
     ``model.satnum``
         The unique satellite NORAD catalog number given in the TLE file.
     ``model.classification``
-        Satellite classification or `U`
+        Satellite classification, or else ``'U'`` for “Unknown”
     ``model.intldesg``
         International designator
     ``model.epochyr``
