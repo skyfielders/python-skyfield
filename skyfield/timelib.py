@@ -607,19 +607,19 @@ class Time(object):
     # Calendar tuples.
 
     def tai_calendar(self):
-        """Return TAI as a tuple (year, month, day, hour, minute, second)."""
+        """Return TAI as Gregorian (year, month, day, hour, minute, second)."""
         return calendar_tuple(self.whole, self.tai_fraction)
 
     def tt_calendar(self):
-        """Return TT as a tuple (year, month, day, hour, minute, second)."""
+        """Return TT as Gregorian (year, month, day, hour, minute, second)."""
         return calendar_tuple(self.whole, self.tt_fraction)
 
     def tdb_calendar(self):
-        """Return TDB as a tuple (year, month, day, hour, minute, second)."""
+        """Return TDB as Gregorian (year, month, day, hour, minute, second)."""
         return calendar_tuple(self.whole, self.tdb_fraction)
 
     def ut1_calendar(self):
-        """Return UT1 as a tuple (year, month, day, hour, minute, second)."""
+        """Return UT1 as Gregorian (year, month, day, hour, minute, second)."""
         return calendar_tuple(self.whole, self.ut1_fraction)
 
     # Date formatting.
@@ -835,7 +835,13 @@ def julian_day(year, month=1, day=1):
             - 32075)
 
 def julian_date(year, month=1, day=1, hour=0, minute=0, second=0.0):
-    """Given a proleptic Gregorian calendar date, return a Julian date float."""
+    """Given a proleptic Gregorian calendar date and time, build a Julian date.
+
+    The difference between a “Julian day” and a “Julian date” is that
+    the “day” is the integer part, while the “date” includes a fraction
+    indicating the time.
+
+    """
     return julian_day(year, month, day) - 0.5 + (
         second + minute * 60.0 + hour * 3600.0) / DAY_S
 
@@ -843,8 +849,12 @@ def julian_date_of_besselian_epoch(b):
     return 2415020.31352 + (b - 1900.0) * 365.242198781
 
 def calendar_date(jd_integer):
-    """Convert Julian Day `jd_integer` into a Gregorian (year, month, day)."""
+    """Convert Julian Day `jd_integer` into a Gregorian (year, month, day).
 
+    From Fliegel, H. & Van Flandern, T. Comm. of the ACM, Vol. 11,
+    No. 10, October 1968, p. 657.
+
+    """
     k = jd_integer + 68569
     n = 4 * k // 146097
 
