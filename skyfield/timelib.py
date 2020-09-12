@@ -5,7 +5,7 @@ from collections import namedtuple
 from datetime import date, datetime
 from numpy import (array, concatenate, cos, float_, interp, isnan, nan,
                    ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like)
-from time import strftime
+from time import strftime, struct_time
 from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
@@ -996,6 +996,14 @@ _format_uses_seconds = re.compile(r'%[-_0^#EO]*[STXc]').search
 _format_uses_minutes = re.compile(r'%[-_0^#EO]*[MR]').search
 
 def _strftime(format, jd, fraction):
+    # Python forces an unhappy choice upon us: either use the faster
+    # time.strftime() and lose support for '%f', or use the slower
+    # datetime.strftime() and crash if years are negative.  We take the
+    # first option, but then patch '%f' support back in by secretly
+    # passing the microseconds string as the time zone name.  After all,
+    # the routines supported by this function never use time zones.
+    # What could go wrong?
+
     ms = _format_uses_milliseconds(format)
 
     if ms:
@@ -1004,27 +1012,28 @@ def _strftime(format, jd, fraction):
         jd = jd + _half_second
     elif _format_uses_minutes(format):
         jd = jd + _half_minute
-    else:
-        pass
 
     year, month, day, hour, minute, second = calendar_tuple(jd, fraction)
+    z = year * 0
 
     if ms:
-        second, microsecond = divmod(second * 1e6, 1e6)
-        microsecond = microsecond.astype(int)
-
-    second = second.astype(int)
-
-    if ms:
-        tup = year, month, day, hour, minute, second, microsecond
+        format = format[:ms.start()] + '%Z' + format[ms.end():]
+        second = (second * 1e6).astype(int)
+        second, usec = divmod(second, 1000000)
+        if getattr(jd, 'ndim', 0):
+            usec = ['%06d' % u for u in usec]
+            tup = year, month, day, hour, minute, second, z, z, z, usec
+            return [strftime(format, struct_time(item)) for item in zip(*tup)]
+        usec = '%06d' % usec
+        return strftime(format, struct_time(
+            (year, month, day, hour, minute, second, z, z, z, usec)
+        ))
     else:
-        tup = year, month, day, hour, minute, second
-
-    dt = dt_module.datetime
-    if getattr(jd, 'ndim', 0):
-        return [dt(*item).strftime(format) for item in zip(*tup)]
-    else:
-        return dt(*tup).strftime(format)
+        second = second.astype(int)
+        tup = year, month, day, hour, minute, second, z, z, z
+        if getattr(jd, 'ndim', 0):
+            return [strftime(format, item) for item in zip(*tup)]
+        return strftime(format, tup)
 
 def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
     if dt.tzinfo is None:

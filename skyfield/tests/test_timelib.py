@@ -1,5 +1,6 @@
 import datetime as dt_module
 import numpy as np
+import sys
 from assay import assert_raises
 from pytz import timezone
 from skyfield import api
@@ -35,6 +36,39 @@ def test_time_creation_methods(ts, time_parameter, time_value):
 
     string = strftime('%S.%f')
     assert string == '37.500000'
+
+def test_strftime_on_prehistoric_dates(ts):
+    t = ts.tt(-746, 2, 26)
+    assert t.utc_strftime('%Y %S') == '-746 18'
+    assert t.ut1_strftime('%Y %S') == '-746 14'
+    assert t.tai_strftime('%Y %S') == '-746 28'
+    assert t.tt_strftime('%Y %S') == '-746 00'
+    assert t.tdb_strftime('%Y %S') == '-746 00'
+
+    t = ts.tt(-746, 2, [26, 26])
+    assert t.utc_strftime('%Y %S') == ['-746 18'] * 2
+    assert t.ut1_strftime('%Y %S') == ['-746 14'] * 2
+    assert t.tai_strftime('%Y %S') == ['-746 28'] * 2
+    assert t.tt_strftime('%Y %S') == ['-746 00'] * 2
+    assert t.tdb_strftime('%Y %S') == ['-746 00'] * 2
+
+def test_strftime_with_microseconds(ts):
+    if sys.version_info <= (3,):
+        return  # Python 2 struct_time cannot be instantiated with "tm_zone"
+
+    t = ts.tt(2020, 9, 12)
+    assert t.utc_strftime('%Y %S %f') == '2020 50 %f'
+    assert t.ut1_strftime('%Y %S %f') == '2020 49 776521'
+    assert t.tai_strftime('%Y %S %f') == '2020 27 816000'
+    assert t.tt_strftime('%Y %S %f') == '2020 00 000000'
+    assert t.tdb_strftime('%Y %S %f') == '2020 59 998446'
+
+    t = ts.tt(2020, 9, [12, 12])
+    assert t.utc_strftime('%Y %S %f') == ['2020 50 %f'] * 2
+    assert t.ut1_strftime('%Y %S %f') == ['2020 49 776521'] * 2
+    assert t.tai_strftime('%Y %S %f') == ['2020 27 816000'] * 2
+    assert t.tt_strftime('%Y %S %f') == ['2020 00 000000'] * 2
+    assert t.tdb_strftime('%Y %S %f') == ['2020 59 998446'] * 2
 
 def test_tai_fraction_loses_no_precision(ts):
     t = ts.tai_jd(2459008.0, 0.0123456789)
