@@ -549,9 +549,8 @@ class Time(object):
         ts = self.ts
         tai = self.tai
         i = searchsorted(ts._leap_reverse_dates, tai, 'right')
-        j = tai - ts.leap_offsets[i] / DAY_S
-        is_leap_second = j < ts.leap_dates[i-1]
         fraction = self.tai_fraction - ts.leap_offsets[i] / DAY_S
+        is_leap_second = fraction + self.whole - ts.leap_dates[i-1] < 0
         return _strftime(format, self.whole, fraction, is_leap_second)
 
     def _utc_tuple(self, offset=0.0):
@@ -885,9 +884,11 @@ def calendar_tuple(jd_float, fraction=0.0):
     whole2, fraction = divmod(fraction1 + fraction + 0.5, 1.0)
     whole = (whole1 + whole2).astype(int)
     year, month, day = compute_calendar_date(whole)
-    hour, hfrac = divmod(fraction * 24.0, 1.0)  # TODO
-    minute, second = divmod(hfrac * 3600.0, 60.0)
-    return year, month, day, hour.astype(int), minute.astype(int), second
+    second = fraction * 86400.0
+    minute, second = divmod(second, 60.0)
+    minute = minute.astype(int)
+    hour, minute = divmod(minute, 60)
+    return year, month, day, hour, minute, second
 
 def tdb_minus_tt(jd_tdb, fraction_tdb=0.0):
     """Computes how far TDB is in advance of TT, given TDB.
