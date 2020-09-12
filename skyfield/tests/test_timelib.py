@@ -63,14 +63,14 @@ def test_strftime_with_microseconds(ts):
         return  # we do not currently support %f under Python 2
 
     t = ts.tt(2020, 9, 12)
-    assert t.utc_strftime('%Y %S %f') == '2020 50 815999'  # TODO: 999?
+    assert t.utc_strftime('%Y %S %f') == '2020 50 816000'
     assert t.ut1_strftime('%Y %S %f') == '2020 49 776521'
     assert t.tai_strftime('%Y %S %f') == '2020 27 816000'
     assert t.tt_strftime('%Y %S %f') == '2020 00 000000'
     assert t.tdb_strftime('%Y %S %f') == '2020 59 998446'
 
     t = ts.tt(2020, 9, [12, 12])
-    assert t.utc_strftime('%Y %S %f') == ['2020 50 815999'] * 2
+    assert t.utc_strftime('%Y %S %f') == ['2020 50 816000'] * 2
     assert t.ut1_strftime('%Y %S %f') == ['2020 49 776521'] * 2
     assert t.tai_strftime('%Y %S %f') == ['2020 27 816000'] * 2
     assert t.tt_strftime('%Y %S %f') == ['2020 00 000000'] * 2

@@ -995,11 +995,11 @@ def _strftime(format, jd, fraction, seconds_bump=None):
     ms = _format_uses_milliseconds(format)
 
     if ms:
-        pass
+        fraction = fraction + 1e-16  # encourage .0 to not turn into .999999
     elif _format_uses_seconds(format):
-        jd = jd + _half_second
+        fraction = fraction + _half_second
     elif _format_uses_minutes(format):
-        jd = jd + _half_minute
+        fraction = fraction + _half_minute
 
     year, month, day, hour, minute, second = calendar_tuple(jd, fraction)
     z = year * 0
