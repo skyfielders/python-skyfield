@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
 import re

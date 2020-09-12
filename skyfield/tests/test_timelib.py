@@ -34,6 +34,9 @@ def test_time_creation_methods(ts, time_parameter, time_value):
     string = strftime()
     assert string == '1973-01-18 01:35:38 ' + time_parameter.upper()
 
+    if sys.version_info <= (3,):
+        return  # we do not currently support %f under Python 2
+
     string = strftime('%S.%f')
     assert string == '37.500000'
 
@@ -54,17 +57,17 @@ def test_strftime_on_prehistoric_dates(ts):
 
 def test_strftime_with_microseconds(ts):
     if sys.version_info <= (3,):
-        return  # Python 2 struct_time cannot be instantiated with "tm_zone"
+        return  # we do not currently support %f under Python 2
 
     t = ts.tt(2020, 9, 12)
-    assert t.utc_strftime('%Y %S %f') == '2020 50 %f'
+    assert t.utc_strftime('%Y %S %f') == '2020 50 815999'  # TODO: 999?
     assert t.ut1_strftime('%Y %S %f') == '2020 49 776521'
     assert t.tai_strftime('%Y %S %f') == '2020 27 816000'
     assert t.tt_strftime('%Y %S %f') == '2020 00 000000'
     assert t.tdb_strftime('%Y %S %f') == '2020 59 998446'
 
     t = ts.tt(2020, 9, [12, 12])
-    assert t.utc_strftime('%Y %S %f') == ['2020 50 %f'] * 2
+    assert t.utc_strftime('%Y %S %f') == ['2020 50 815999'] * 2
     assert t.ut1_strftime('%Y %S %f') == ['2020 49 776521'] * 2
     assert t.tai_strftime('%Y %S %f') == ['2020 27 816000'] * 2
     assert t.tt_strftime('%Y %S %f') == ['2020 00 000000'] * 2
@@ -292,11 +295,11 @@ def test_jpl_format(ts):
         'A.D. 0300-Jul-01 00:00:00.0000 UT',
         ]
 
-def test_stftime_of_single_date(ts):
+def test_stftime_of_a_leap_second(ts):
     t = ts.utc(1973, 12, 31, 23, 59, 60)
     assert t.utc_strftime('%Y %m %d %H %M %S') == '1973 12 31 23 59 60'
 
-def test_stftime_of_date_array(ts):
+def test_stftime_of_date_array_over_a_leap_second(ts):
     t = ts.utc(1973, 12, 31, 23, 59, np.arange(59.0, 61.1, 1.0))
     assert t.utc_strftime('%a %Y %m %d %H %M %S') == [
         'Mon 1973 12 31 23 59 59',

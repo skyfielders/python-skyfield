@@ -546,26 +546,13 @@ class Time(object):
         Otherwise the value is truncated rather than rounded.
 
         """
-        if _format_uses_milliseconds(format):
-            rounding = 0.0
-        elif _format_uses_seconds(format):
-            rounding = _half_second
-        elif _format_uses_minutes(format):
-            rounding = _half_minute
-        else:
-            rounding = 0.0
-
-        tup = self._utc_tuple(rounding)
-        year, month, day, hour, minute, second = tup
-        second = second.astype(int)
-        # TODO: _utc_float() repeats the same work as _utc_tuple() above
-        weekday = (self._utc_float() + 0.5).astype(int) % 7
-        zero = zeros_like(year)
-        tup = (year, month, day, hour, minute, second, weekday, zero, zero)
-        if self.shape:
-            return [strftime(format, item) for item in zip(*tup)]
-        else:
-            return strftime(format, tup)
+        ts = self.ts
+        tai = self.tai
+        i = searchsorted(ts._leap_reverse_dates, tai, 'right')
+        j = tai - ts.leap_offsets[i] / DAY_S
+        is_leap_second = j < ts.leap_dates[i-1]
+        fraction = self.tai_fraction - ts.leap_offsets[i] / DAY_S
+        return _strftime(format, self.whole, fraction, is_leap_second)
 
     def _utc_tuple(self, offset=0.0):
         """Return UTC as (year, month, day, hour, minute, second.fraction).
@@ -995,7 +982,7 @@ _format_uses_milliseconds = re.compile(r'%[-_0^#EO]*f').search
 _format_uses_seconds = re.compile(r'%[-_0^#EO]*[STXc]').search
 _format_uses_minutes = re.compile(r'%[-_0^#EO]*[MR]').search
 
-def _strftime(format, jd, fraction):
+def _strftime(format, jd, fraction, seconds_bump=None):
     # Python forces an unhappy choice upon us: either use the faster
     # time.strftime() and lose support for '%f', or use the slower
     # datetime.strftime() and crash if years are negative.  We take the
@@ -1016,21 +1003,30 @@ def _strftime(format, jd, fraction):
     year, month, day, hour, minute, second = calendar_tuple(jd, fraction)
     z = year * 0
 
+    # TODO: will this always produce the same whole number that
+    # calendar_tuple() produces internally?  Or should we make a private
+    # version of calendar_tuple() that returns it to us for use here?
+    weekday = (fraction + 0.5 + _to_array(jd)).astype(int) % 7
+
     if ms:
         format = format[:ms.start()] + '%Z' + format[ms.end():]
         second = (second * 1e6).astype(int)
         second, usec = divmod(second, 1000000)
+        if seconds_bump is not None:
+            second += seconds_bump
         if getattr(jd, 'ndim', 0):
             usec = ['%06d' % u for u in usec]
-            tup = year, month, day, hour, minute, second, z, z, z, usec
+            tup = year, month, day, hour, minute, second, weekday, z, z, usec
             return [strftime(format, struct_time(item)) for item in zip(*tup)]
         usec = '%06d' % usec
         return strftime(format, struct_time(
-            (year, month, day, hour, minute, second, z, z, z, usec)
+            (year, month, day, hour, minute, second, weekday, z, z, usec)
         ))
     else:
         second = second.astype(int)
-        tup = year, month, day, hour, minute, second, z, z, z
+        if seconds_bump is not None:
+            second += seconds_bump
+        tup = year, month, day, hour, minute, second, weekday, z, z
         if getattr(jd, 'ndim', 0):
             return [strftime(format, item) for item in zip(*tup)]
         return strftime(format, tup)
