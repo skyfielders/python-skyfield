@@ -41,6 +41,9 @@ def test_time_creation_methods(ts, time_parameter, time_value):
     assert string == '37.500000'
 
 def test_strftime_on_prehistoric_dates(ts):
+    if sys.version_info <= (3,):
+        return  # Python 2 time.strftime() complains about negative years
+
     t = ts.tt(-746, 2, 26)
     assert t.utc_strftime('%Y %S') == '-746 18'
     assert t.ut1_strftime('%Y %S') == '-746 14'
