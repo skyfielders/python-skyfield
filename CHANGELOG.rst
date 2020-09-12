@@ -5,6 +5,11 @@ Changelog
 1.27 — 2020 August ?
 --------------------
 
+* Added :func:`~skyfield.timelib.compute_calendar_date()` which lets the
+  caller choose the Julian calendar for ancient dates instead of always
+  using the proleptic Gregorian calendar.  This should be particularly
+  useful for historians.
+
 * Added :meth:`~skyfield.timelib.Timescale.J()` that builds a time array
   from an array of floating point years.
   `#436 <https://github.com/skyfielders/python-skyfield/issues/436>`_
@@ -20,13 +25,14 @@ Changelog
   * :meth:`~skyfield.timelib.Time.tdb_strftime()`
   * :meth:`~skyfield.timelib.Time.ut1_strftime()`
 
-* Comets and asteroids with parabolic and hyperbolic orbits are now
-  supported.
+* Comets and asteroids with parabolic and hyperbolic orbits should raise
+  fewer errors.
 
-* The prototype :func:`~skyfield.magnitudelib.planetary_magnitude()` now
-  runs on Uranus without raising an exception.  The routine does not yet
-  take into account whether the observer is facing the equator or poles
-  of Uranus, so will only be accurate to within about 0.1 magnitudes.
+* The prototype :func:`~skyfield.magnitudelib.planetary_magnitude()` can
+  now return magnitudes for Uranus without raising an exception.  The
+  routine does not yet take into account whether the observer is facing
+  the equator or poles of Uranus, so will only be accurate to within
+  about 0.1 magnitudes.
 
 1.26 — 2020 August 1
 --------------------
