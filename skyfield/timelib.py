@@ -350,12 +350,10 @@ class Time(object):
         return t
 
     def astimezone(self, tz):
-        """Convert to a Python ``datetime`` in a ``pytz`` provided timezone.
+        """Convert to a Python ``datetime`` in a particular timezone ``tz``.
 
-        Convert this time to a ``datetime`` in the timezone ``tz``,
-        which should be one of the timezones provided by the third-party
-        ``pytz`` package.  If this time is an array, then an array of
-        datetimes is returned instead of a single value.
+        If this time is an array, then an array of datetimes is returned
+        instead of a single value.
 
         """
         dt, leap_second = self.astimezone_and_leap_second(tz)
@@ -368,9 +366,8 @@ class Time(object):
 
             dt, leap_second = t.astimezone_and_leap_second(tz)
 
-        The argument ``tz`` should be a timezone from the third-party
-        ``pytz`` package, which must be installed separately.  The date
-        and time returned will be for that time zone.
+        The argument ``tz`` should be a ``datetime`` compatible
+        timezone.
 
         The leap second value is provided because a Python ``datetime``
         can only number seconds ``0`` through ``59``, but leap seconds
@@ -411,13 +408,8 @@ class Time(object):
     def utc_datetime(self):
         """Convert to a Python ``datetime`` in UTC.
 
-        If the third-party `pytz`_ package is available, then its
-        ``utc`` timezone will be used as the timezone of the returned
-        `datetime`_.  Otherwise, an equivalent Skyfield ``utc`` timezone
-        object is used.
-
-        If this time is an array, then a sequence of datetimes is
-        returned instead of a single value.
+        If this time is an array, then a list of datetimes is returned
+        instead of a single value.
 
         """
         dt, leap_second = self.utc_datetime_and_leap_second()
@@ -429,10 +421,6 @@ class Time(object):
         Convert this time to a `datetime`_ object and a leap second::
 
             dt, leap_second = t.utc_datetime_and_leap_second()
-
-        If the third-party `pytz`_ package is available, then its
-        ``utc`` timezone will be used as the timezone of the return
-        value.  Otherwise, Skyfield uses its own ``utc`` timezone.
 
         The leap second value is provided because a Python ``datetime``
         can only number seconds ``0`` through ``59``, but leap seconds
