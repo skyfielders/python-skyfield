@@ -566,17 +566,11 @@ class Time(object):
         ts = self.ts
         tai = self.tai + offset
         i = searchsorted(ts._leap_reverse_dates, tai, 'right')
+        year, month, day, hour, minute, second = calendar_tuple(
+            self.whole,
+            offset - ts.leap_offsets[i] / DAY_S + self.tai_fraction,
+        )
         j = tai - ts.leap_offsets[i] / DAY_S
-
-        whole1, fraction = divmod(self.whole, 1.0)
-        whole2, fraction = divmod(offset - tt_minus_tai
-                                  + fraction + self.tt_fraction
-                                  - ts.leap_offsets[i] / DAY_S + 0.5, 1.0)
-        whole = (whole1 + whole2).astype(int)
-
-        year, month, day = compute_calendar_date(whole)
-        hour, hfrac = divmod(fraction * 24.0, 1.0)
-        minute, second = divmod(hfrac * 3600.0, 60.0)
         is_leap_second = j < ts.leap_dates[i-1]
         second += is_leap_second
         return year, month, day, hour.astype(int), minute.astype(int), second
@@ -703,7 +697,8 @@ class Time(object):
     @reify
     def utc(self):
         utc = self._utc_tuple()
-        return array(utc).view(CalendarArray) if self.shape else CalendarTuple(*utc)
+        return (array(utc).view(CalendarArray) if self.shape
+                else CalendarTuple(*utc))
 
     @reify
     def tai_fraction(self):
@@ -728,8 +723,9 @@ class Time(object):
 
     @reify
     def dut1(self):
-        # TODO: add test, and then streamline this computation.
-        return (self.tt - self._utc_float()) * DAY_S - self.delta_t
+        ts = self.ts
+        i = searchsorted(ts._leap_reverse_dates, self.tai, 'right')
+        return 32.184 + ts.leap_offsets[i] - self.delta_t
 
     @reify
     def gmst(self):
@@ -744,8 +740,7 @@ class Time(object):
         # TODO: move this into an eqeq function?
         c_terms = equation_of_the_equinoxes_complimentary_terms(tt)
         eq_eq = d_psi * cos(self._mean_obliquity_radians) + c_terms
-        # TODO: constrain to 24 hours?
-        return self.gmst + eq_eq / tau * 24.0
+        return (self.gmst + eq_eq / tau * 24.0) % 24.0
 
     # Low-precision floats generated from internal float pairs.
 
@@ -836,7 +831,7 @@ def compute_calendar_date(jd_integer, julian_before=None):
     """Convert Julian day ``jd_integer`` into a calendar (year, month, day).
 
     By default, this returns a proleptic Gregorian date.  If you instead
-    want the Julian calendar used for old dates, provide a Julian day
+    want to use the Julian calendar for old dates, provide a Julian day
     ``julian_before`` on which the calendar should cut over.  One
     popular choice is the date on which Pope Gregory adopted the new
     calendar in October 1582:

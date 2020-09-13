@@ -365,6 +365,17 @@ def test_delta_t(ts):
     t = ts.utc(year=2320)
     assert abs(t.delta_t + 20.0 - (32.0 * 5.0**2)) < 1.0
 
+def test_dut1(ts):
+    # Roughly agreeing with tables on NIST website
+    t = ts.utc(2017, 3, 30)
+    assert str(t.dut1)[:3] == '0.4'
+
+    t = ts.utc(2018, 9, 21)
+    assert str(t.dut1)[:3] == '0.0'
+
+    t = ts.utc(2019, 5, 2)
+    assert str(t.dut1)[:4] == '-0.1'  # table says -0.2
+
 def test_J(ts):
     assert ts.J(2000).tt == T0
     assert ts.J(1900).tt == T0 - 36525.0
