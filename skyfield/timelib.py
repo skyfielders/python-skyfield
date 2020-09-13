@@ -1022,10 +1022,6 @@ def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
                        dt.year, dt.month, dt.day,
                        dt.hour, dt.minute, dt.second + dt.microsecond * 1e-6)
 
-def _utc_date_to_tai(leap_dates, leap_offsets, d):
-    return _utc_to_tai(leap_dates, leap_offsets,
-                       d.year, d.month, d.day, 0.0, 0.0, 0.0)
-
 def _utc_to_tai(leap_dates, leap_offsets,
                 year, month, day, hour, minute, second):
     j = julian_day(year, month, day) - 0.5
