@@ -1050,9 +1050,8 @@ def _utc_to_tai(leap_dates, leap_offsets,
     j = julian_day(year, month, day) - 0.5
     i = searchsorted(leap_dates, j, 'right')
     seconds = leap_offsets[i] + second + minute * 60.0 + hour * 3600.0
-    # TODO: Is there a more efficient way to force two arrays to the same shape?
-    zeros = zeros_like(j) + zeros_like(seconds)
-    return zeros + j, zeros + seconds / DAY_S
+    j, seconds = _reconcile(j, seconds)
+    return j, seconds / DAY_S
 
 _JulianDate_deprecation_message = """Skyfield no longer supports direct\
  instantiation of JulianDate objects (which are now called Time objects)
