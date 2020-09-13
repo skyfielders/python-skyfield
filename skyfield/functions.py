@@ -136,16 +136,16 @@ def _to_array(value):
 
 def _reconcile(a, b):
     """Coerce two NumPy generics-or-arrays to the same number of dimensions."""
-    difference = b.ndim - a.ndim
+    an = getattr(a, 'ndim', 0)
+    bn = getattr(b, 'ndim', 0)
+    difference = bn - an
     if difference > 0:
-        if a.ndim:
-            # TODO: test this case
+        if an:
             a.shape += (1,) * difference
         else:
             a = full_like(b, a)
     elif difference < 0:
-        if b.ndim:
-            # TODO: test this case
+        if bn:
             b.shape += (1,) * -difference
         else:
             b = full_like(a, b)

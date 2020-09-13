@@ -120,9 +120,7 @@ class Timescale(object):
         instead of ``None``.
 
         """
-        leap_dates = self.leap_dates
-        leap_offsets = self.leap_offsets
-        pairs = [_utc_datetime_to_tai(leap_dates, leap_offsets, d)
+        pairs = [_utc_datetime_to_tai(self.leap_dates, self.leap_offsets, d)
                  for d in datetime_list]
         jd, fr = zip(*pairs)
         t = Time(self, _to_array(jd), fr + tt_minus_tai)
