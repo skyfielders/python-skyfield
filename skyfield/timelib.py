@@ -4,7 +4,7 @@ import re
 from collections import namedtuple
 from datetime import date, datetime
 from numpy import (array, concatenate, cos, float_, interp, isnan, nan,
-                   ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like)
+                   ndarray, pi, rollaxis, searchsorted, sin, where)
 from time import strftime, struct_time
 from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .descriptorlib import reify
