@@ -4,6 +4,7 @@ from numpy import exp
 from .constants import ASEC2RAD, tau
 from .earthlib import refract, terra
 from .functions import mxmxm, mxv, rot_x, rot_y, rot_z
+from .descriptorlib import reify
 from .units import Distance, Angle, _interpret_ltude
 from .vectorlib import VectorFunction
 
@@ -72,7 +73,7 @@ class Topos(VectorFunction):
         # reference that delays garbage collection.)
         return self
 
-    @property
+    @reify  # not @property, so users have the option of overwriting it
     def target_name(self):
         m = self.elevation.m
         e = ' elevation {0:.0f} m'.format(m) if m else ''

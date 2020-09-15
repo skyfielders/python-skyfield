@@ -25,7 +25,7 @@ def test_jpl_segment(eph):
     """)
     assert repr(e) == expected
 
-def test_satellite_with_name(eph):
+def test_satellite_with_name():
     s = EarthSatellite(lines[1], lines[2], lines[0])
     expected = dedent("""\
         ISS (ZARYA) catalog #25544 epoch 2013-11-26 13:57:03 UTC
@@ -36,7 +36,7 @@ def test_satellite_with_name(eph):
     """)
     assert repr(s) == expected
 
-def test_satellite_without_name(eph):
+def test_satellite_without_name():
     s = EarthSatellite(lines[1], lines[2])
     expected = dedent("""\
         catalog #25544 epoch 2013-11-26 13:57:03 UTC
@@ -47,17 +47,20 @@ def test_satellite_without_name(eph):
     """)
     assert repr(s) == expected
 
-def test_topos(eph):
+def test_topos():
     t = Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
     expected = dedent("""\
         Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E
     """)
     assert str(t) == expected
-    # TODO
     expected = dedent("""\
         <Topos Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E>
     """)
     assert repr(t) == expected
+
+    t.target_name = 'Custom name'
+    assert str(t) == 'Custom name'
+    assert repr(t) == "<Topos Custom name>"
 
 def test_jpl_vector_sum(eph):
     e = eph['earth']
