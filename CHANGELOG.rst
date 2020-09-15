@@ -5,6 +5,10 @@ Changelog
 1.27 — 2020 September 15
 ------------------------
 
+* The printed appearance of both vectors and of vector functions like
+  Earth locations and Earth satellites have been rewritten to be more
+  informative and consistent.
+
 * Added :func:`~skyfield.timelib.compute_calendar_date()` which lets the
   caller choose the Julian calendar for ancient dates instead of always
   using the proleptic Gregorian calendar.  This should be particularly
