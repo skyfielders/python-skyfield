@@ -2,8 +2,8 @@
 Changelog
 =========
 
-1.27 — 2020 August ?
---------------------
+1.27 — 2020 September 15
+------------------------
 
 * Added :func:`~skyfield.timelib.compute_calendar_date()` which lets the
   caller choose the Julian calendar for ancient dates instead of always
@@ -25,14 +25,14 @@ Changelog
   * :meth:`~skyfield.timelib.Time.tdb_strftime()`
   * :meth:`~skyfield.timelib.Time.ut1_strftime()`
 
-* Comets and asteroids with parabolic and hyperbolic orbits should raise
-  fewer errors.
+* Thanks to several fixes, comets and asteroids with parabolic and
+  hyperbolic orbits should now raise fewer errors.
 
 * The prototype :func:`~skyfield.magnitudelib.planetary_magnitude()` can
   now return magnitudes for Uranus without raising an exception.  The
   routine does not yet take into account whether the observer is facing
-  the equator or poles of Uranus, so will only be accurate to within
-  about 0.1 magnitudes.
+  the equator or poles of Uranus, so the magnitude predicted for the
+  planet will only be accurate to within about 0.1 magnitudes.
 
 1.26 — 2020 August 1
 --------------------
