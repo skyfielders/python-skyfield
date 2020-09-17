@@ -137,8 +137,7 @@ class Timescale(object):
         if hasattr(year, '__len__') and isinstance(year[0], datetime):
             return self.from_datetimes(year)
 
-        a = _to_array
-        tup = a(year), a(month), a(day), a(hour), a(minute), a(second)
+        tup = year, month, day, hour, minute, second
         return self._utc(tup)
 
     def _utc(self, tup):
