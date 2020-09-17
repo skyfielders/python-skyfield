@@ -238,9 +238,8 @@ class Timescale(object):
         if jd is not None:
             return self.tdb_jd(jd)  # deprecate someday
         whole, fraction = self._cal(year, month, day, hour, minute, second)
-        t = Time(self, whole, fraction - tdb_minus_tt(whole + fraction) / DAY_S)
-        t.tdb_fraction = fraction
-        return t
+        jd = whole + fraction  # TODO: why do tests break if we pass separately
+        return Time(self, jd, - tdb_minus_tt(jd) / DAY_S)
 
     def tdb_jd(self, jd, fraction=0.0):
         """Build `Time` from a Barycentric Dynamical Time (TDB) Julian date."""
