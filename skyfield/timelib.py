@@ -142,7 +142,7 @@ class Timescale(object):
 
     def _utc(self, tup):
         year, month, day, hour, minute, second = tup
-        whole, fraction = self._cal(year, month, day, hour, minute, 0.0)
+        whole, fraction = self._jd(year, month, day, hour, minute, 0.0)
         i = searchsorted(self.leap_dates, whole + fraction, 'right')
         fraction += (self.leap_offsets[i] + second) / DAY_S
         whole, fraction = _reconcile(whole, fraction)  # second could be array
@@ -150,7 +150,7 @@ class Timescale(object):
         t.tai_fraction = fraction
         return t
 
-    def _cal(self, year, month, day, hour, minute, second):
+    def _jd(self, year, month, day, hour, minute, second):
         a = _to_array
         whole = julian_day(a(year), a(month), a(day)) - 0.5
         fraction = (a(second) + a(minute) * 60.0 + a(hour) * 3600.0) / DAY_S
@@ -172,7 +172,7 @@ class Timescale(object):
         """
         if jd is not None:
             return self.tai_jd(jd)  # deprecate someday
-        whole, fraction = self._cal(year, month, day, hour, minute, second)
+        whole, fraction = self._jd(year, month, day, hour, minute, second)
         t = Time(self, whole, fraction + tt_minus_tai)
         t.tai_fraction = fraction
         return t
@@ -201,7 +201,7 @@ class Timescale(object):
         """
         if jd is not None:
             return self.tt_jd(jd)  # deprecate someday
-        whole, fraction = self._cal(year, month, day, hour, minute, second)
+        whole, fraction = self._jd(year, month, day, hour, minute, second)
         return Time(self, whole, fraction)
 
     def tt_jd(self, jd, fraction=0.0):
@@ -235,7 +235,7 @@ class Timescale(object):
         """
         if jd is not None:
             return self.tdb_jd(jd)  # deprecate someday
-        whole, fraction = self._cal(year, month, day, hour, minute, second)
+        whole, fraction = self._jd(year, month, day, hour, minute, second)
         jd = whole + fraction  # TODO: why do tests break if we pass separately
         return Time(self, jd, - tdb_minus_tt(jd) / DAY_S)
 
@@ -260,7 +260,7 @@ class Timescale(object):
 
         """
         if jd is None:
-            whole, fraction = self._cal(year, month, day, hour, minute, second)
+            whole, fraction = self._jd(year, month, day, hour, minute, second)
             jd = whole + fraction  # TODO: can we pass high precision on?
         return self.ut1_jd(jd)
 
