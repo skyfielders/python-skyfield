@@ -137,8 +137,8 @@ class Timescale(object):
         if hasattr(year, '__len__') and isinstance(year[0], datetime):
             return self.from_datetimes(year)
 
-        tup = (_to_array(year), _to_array(month), _to_array(day),
-               _to_array(hour), _to_array(minute), _to_array(second))
+        a = _to_array
+        tup = a(year), a(month), a(day), a(hour), a(minute), a(second)
         return self._utc(tup)
 
     def _utc(self, tup):
@@ -151,6 +151,12 @@ class Timescale(object):
         t = Time(self, j, fraction + tt_minus_tai)
         t.tai_fraction = fraction
         return t
+
+    def _cal(self, year, month, day, hour, minute, second):
+        a = _to_array
+        whole = julian_day(a(year), a(month), a(day)) - 0.5
+        fraction = (a(second) + a(minute) * 60.0 + a(hour) * 3600.0) / DAY_S
+        return _reconcile(whole, fraction)
 
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
@@ -168,10 +174,7 @@ class Timescale(object):
         """
         if jd is not None:
             return self.tai_jd(jd)  # deprecate someday
-        a = _to_array
-        whole = julian_day(a(year), a(month), a(day)) - 0.5
-        fraction = (a(second) + a(minute) * 60.0 + a(hour) * 3600.0) / DAY_S
-        whole, fraction = _reconcile(whole, fraction)
+        whole, fraction = self._cal(year, month, day, hour, minute, second)
         t = Time(self, whole, fraction + tt_minus_tai)
         t.tai_fraction = fraction
         return t
@@ -200,10 +203,7 @@ class Timescale(object):
         """
         if jd is not None:
             return self.tt_jd(jd)  # deprecate someday
-        a = _to_array
-        whole = julian_day(a(year), a(month), a(day)) - 0.5
-        fraction = (a(second) + a(minute) * 60.0 + a(hour) * 3600.0) / DAY_S
-        whole, fraction = _reconcile(whole, fraction)
+        whole, fraction = self._cal(year, month, day, hour, minute, second)
         return Time(self, whole, fraction)
 
     def tt_jd(self, jd, fraction=0.0):
@@ -236,14 +236,10 @@ class Timescale(object):
 
         """
         if jd is not None:
-            tdb = jd
-        else:
-            tdb = julian_date(
-                _to_array(year), _to_array(month), _to_array(day),
-                _to_array(hour), _to_array(minute), _to_array(second),
-            )
-        tdb = _to_array(tdb)
-        t = Time(self, tdb, - tdb_minus_tt(tdb) / DAY_S)
+            return self.tdb_jd(jd)  # deprecate someday
+        whole, fraction = self._cal(year, month, day, hour, minute, second)
+        t = Time(self, whole, fraction - tdb_minus_tt(whole + fraction) / DAY_S)
+        t.tdb_fraction = fraction
         return t
 
     def tdb_jd(self, jd, fraction=0.0):
@@ -266,14 +262,10 @@ class Timescale(object):
         2456675.56640625
 
         """
-        if jd is not None:
-            ut1 = jd
-        else:
-            ut1 = julian_date(
-                _to_array(year), _to_array(month), _to_array(day),
-                _to_array(hour), _to_array(minute), _to_array(second),
-            )
-        return self.ut1_jd(ut1)
+        if jd is None:
+            whole, fraction = self._cal(year, month, day, hour, minute, second)
+            jd = whole + fraction  # TODO: can we pass high precision on?
+        return self.ut1_jd(jd)
 
     def ut1_jd(self, jd):
         """Build a `Time` from a UT1 Julian date."""
