@@ -792,7 +792,7 @@ class Time(object):
     @reify
     def NT(self): return rollaxis(self.N, 1)
 
-def julian_day(year, month=1, day=1):
+def julian_day(year, month=1, day=1, julian_before=None):
     """Given a proleptic Gregorian calendar date, return a Julian day int."""
     # The Explanatory Supplement to the Astronomical Almanac, 15.11
     janfeb = month <= 2
@@ -800,7 +800,7 @@ def julian_day(year, month=1, day=1):
     f = (month + 9) % 12
     e = 1461 * g // 4 + day - 1402
     J = e + (153 * f + 2) // 5
-    if 1:
+    if (julian_before is None) or (J >= julian_before):
         J += 38
         J -= (g + 184) // 100 * 3 // 4
     return J

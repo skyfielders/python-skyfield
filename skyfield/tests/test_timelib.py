@@ -5,7 +5,9 @@ from assay import assert_raises
 from pytz import timezone
 from skyfield import api
 from skyfield.constants import DAY_S, T0
-from skyfield.timelib import utc, calendar_tuple, julian_date
+from skyfield.timelib import (
+    calendar_tuple, compute_calendar_date, julian_date, julian_day, utc,
+)
 from datetime import datetime
 
 one_second = 1.0 / DAY_S
@@ -437,6 +439,18 @@ def test_jd_calendar():
 
     # Check reversal of array
     assert (julian_date(*cal_array) == jd_array).all()
+
+def test_julian_gregorian_cutover():
+    gregory = 2299161
+    assert compute_calendar_date(gregory - 2, gregory) == (1582, 10, 3)
+    assert compute_calendar_date(gregory - 1, gregory) == (1582, 10, 4)
+    assert compute_calendar_date(gregory + 0, gregory) == (1582, 10, 15)
+    assert compute_calendar_date(gregory + 1, gregory) == (1582, 10, 16)
+
+    assert julian_day(1582, 10, 3, gregory) == (gregory - 2)
+    assert julian_day(1582, 10, 4, gregory) == (gregory - 1)
+    assert julian_day(1582, 10, 15, gregory) == (gregory + 0)
+    assert julian_day(1582, 10, 16, gregory) == (gregory + 1)
 
 def test_time_equality(ts):
     t0 = ts.tt_jd(2459008.5, 0.125)
