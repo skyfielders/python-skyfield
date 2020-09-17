@@ -118,7 +118,7 @@ class Timescale(object):
 
         """
         tuples = (_datetime_to_utc_tuple(d) for d in datetime_list)
-        return self._utc(_to_array(value) for value in zip(*tuples))
+        return self._utc(array(value) for value in zip(*tuples))
 
     def utc(self, year, month=1, day=1, hour=0, minute=0, second=0.0):
         """Build a `Time` from a UTC calendar date.
