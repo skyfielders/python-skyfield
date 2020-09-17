@@ -107,7 +107,7 @@ class Timescale(object):
         zone object as its ``tzinfo`` attribute instead of ``None``.
 
         """
-        return self.utc(*_datetime_to_utc_tuple(datetime))
+        return self._utc(_datetime_to_utc_tuple(datetime))
 
     def from_datetimes(self, datetime_list):
         """Return a `Time` for a Python ``datetime`` list.
@@ -117,8 +117,8 @@ class Timescale(object):
         instead of ``None``.
 
         """
-        tuples = [_datetime_to_utc_tuple(d) for d in datetime_list]
-        return self.utc(*zip(*tuples))
+        tuples = (_datetime_to_utc_tuple(d) for d in datetime_list)
+        return self._utc(_to_array(value) for value in zip(*tuples))
 
     def utc(self, year, month=1, day=1, hour=0, minute=0, second=0.0):
         """Build a `Time` from a UTC calendar date.
@@ -137,21 +137,19 @@ class Timescale(object):
         if hasattr(year, '__len__') and isinstance(year[0], datetime):
             return self.from_datetimes(year)
 
-        year = _to_array(year)
-        month = _to_array(month)
-        day = _to_array(day)
-        hour = _to_array(hour)
-        minute = _to_array(minute)
-        second = _to_array(second)
+        tup = (_to_array(year), _to_array(month), _to_array(day),
+               _to_array(hour), _to_array(minute), _to_array(second))
+        return self._utc(tup)
 
+    def _utc(self, tup):
+        year, month, day, hour, minute, second = tup
         j = julian_day(year, month, day) - 0.5
         i = searchsorted(self.leap_dates, j, 'right')
         seconds = self.leap_offsets[i] + second + minute * 60.0 + hour * 3600.0
         j, seconds = _reconcile(j, seconds)
-        tai1, tai2 = j, seconds / DAY_S
-
-        t = Time(self, tai1, tai2 + tt_minus_tai)
-        t.tai_fraction = tai2
+        fraction = seconds / DAY_S
+        t = Time(self, j, fraction + tt_minus_tai)
+        t.tai_fraction = fraction
         return t
 
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
