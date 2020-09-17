@@ -143,12 +143,11 @@ class Timescale(object):
 
     def _utc(self, tup):
         year, month, day, hour, minute, second = tup
-        j = julian_day(year, month, day) - 0.5
-        i = searchsorted(self.leap_dates, j, 'right')
-        seconds = self.leap_offsets[i] + second + minute * 60.0 + hour * 3600.0
-        j, seconds = _reconcile(j, seconds)
-        fraction = seconds / DAY_S
-        t = Time(self, j, fraction + tt_minus_tai)
+        whole, fraction = self._cal(year, month, day, hour, minute, 0.0)
+        i = searchsorted(self.leap_dates, whole + fraction, 'right')
+        fraction += (self.leap_offsets[i] + second) / DAY_S
+        whole, fraction = _reconcile(whole, fraction)  # second could be array
+        t = Time(self, whole, fraction + tt_minus_tai)
         t.tai_fraction = fraction
         return t
 
