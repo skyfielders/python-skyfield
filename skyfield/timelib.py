@@ -137,11 +137,19 @@ class Timescale(object):
         if hasattr(year, '__len__') and isinstance(year[0], datetime):
             return self.from_datetimes(year)
 
-        tai1, tai2 = _utc_to_tai(
-            self.leap_dates, self.leap_offsets, _to_array(year),
-            _to_array(month), _to_array(day), _to_array(hour),
-            _to_array(minute), _to_array(second),
-        )
+        year = _to_array(year)
+        month = _to_array(month)
+        day = _to_array(day)
+        hour = _to_array(hour)
+        minute = _to_array(minute)
+        second = _to_array(second)
+
+        j = julian_day(year, month, day) - 0.5
+        i = searchsorted(self.leap_dates, j, 'right')
+        seconds = self.leap_offsets[i] + second + minute * 60.0 + hour * 3600.0
+        j, seconds = _reconcile(j, seconds)
+        tai1, tai2 = j, seconds / DAY_S
+
         t = Time(self, tai1, tai2 + tt_minus_tai)
         t.tai_fraction = tai2
         return t
@@ -1018,14 +1026,6 @@ def _datetime_to_utc_tuple(dt):
         dt = dt.astimezone(utc)
     return (dt.year, dt.month, dt.day,
             dt.hour, dt.minute, dt.second + dt.microsecond / 1e6)
-
-def _utc_to_tai(leap_dates, leap_offsets,
-                year, month, day, hour, minute, second):
-    j = julian_day(year, month, day) - 0.5
-    i = searchsorted(leap_dates, j, 'right')
-    seconds = leap_offsets[i] + second + minute * 60.0 + hour * 3600.0
-    j, seconds = _reconcile(j, seconds)
-    return j, seconds / DAY_S
 
 _JulianDate_deprecation_message = """Skyfield no longer supports direct\
  instantiation of JulianDate objects (which are now called Time objects)
