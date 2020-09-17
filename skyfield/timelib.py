@@ -87,6 +87,7 @@ class Timescale(object):
         self._leap_reverse_dates = leap_dates + leap_offsets / DAY_S
         self.J2000 = Time(self, float_(T0))
         self.B1950 = Time(self, float_(B1950))
+        #self.julian_calendar_cutoff = None
 
     def now(self):
         """Return the current date and time as a `Time` object.
@@ -106,11 +107,7 @@ class Timescale(object):
         zone object as its ``tzinfo`` attribute instead of ``None``.
 
         """
-        jd, fr = _utc_datetime_to_tai(
-            self.leap_dates, self.leap_offsets, datetime)
-        t = Time(self, jd, fr + tt_minus_tai)
-        t.tai_fraction = fr
-        return t
+        return self.utc(*_datetime_to_utc_tuple(datetime))
 
     def from_datetimes(self, datetime_list):
         """Return a `Time` for a Python ``datetime`` list.
@@ -120,12 +117,8 @@ class Timescale(object):
         instead of ``None``.
 
         """
-        pairs = [_utc_datetime_to_tai(self.leap_dates, self.leap_offsets, d)
-                 for d in datetime_list]
-        jd, fr = zip(*pairs)
-        t = Time(self, _to_array(jd), fr + tt_minus_tai)
-        t.tai_fraction = fr
-        return t
+        tuples = [_datetime_to_utc_tuple(d) for d in datetime_list]
+        return self.utc(*zip(*tuples))
 
     def utc(self, year, month=1, day=1, hour=0, minute=0, second=0.0):
         """Build a `Time` from a UTC calendar date.
@@ -794,7 +787,7 @@ class Time(object):
 
 def julian_day(year, month=1, day=1, julian_before=None):
     """Given a proleptic Gregorian calendar date, return a Julian day int."""
-    # The Explanatory Supplement to the Astronomical Almanac, 15.11
+    # See the Explanatory Supplement to the Astronomical Almanac 15.11.
     janfeb = month <= 2
     g = year + 4716 - janfeb
     f = (month + 9) % 12
@@ -849,7 +842,7 @@ def compute_calendar_date(jd_integer, julian_before=None):
     """
     use_gregorian = (julian_before is None) or (jd_integer >= julian_before)
 
-    # Adapted from the Astronomical Almanac 15.11.1.
+    # See the Explanatory Supplement to the Astronomical Almanac 15.11.
     f = jd_integer + 1401
     f += use_gregorian * ((4 * jd_integer + 274277) // 146097 * 3 // 4 - 38)
     e = 4 * f + 3
@@ -1017,14 +1010,14 @@ def _strftime(format, jd, fraction, seconds_bump=None):
             return [strftime(format, item) for item in zip(*tup)]
         return strftime(format, tup)
 
-def _utc_datetime_to_tai(leap_dates, leap_offsets, dt):
-    if dt.tzinfo is None:
+def _datetime_to_utc_tuple(dt):
+    z = dt.tzinfo
+    if z is None:
         raise ValueError(_naive_complaint)
-    if dt.tzinfo is not utc:
+    if z is not utc:
         dt = dt.astimezone(utc)
-    return _utc_to_tai(leap_dates, leap_offsets,
-                       dt.year, dt.month, dt.day,
-                       dt.hour, dt.minute, dt.second + dt.microsecond * 1e-6)
+    return (dt.year, dt.month, dt.day,
+            dt.hour, dt.minute, dt.second + dt.microsecond / 1e6)
 
 def _utc_to_tai(leap_dates, leap_offsets,
                 year, month, day, hour, minute, second):
