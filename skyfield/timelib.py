@@ -794,12 +794,16 @@ class Time(object):
 
 def julian_day(year, month=1, day=1):
     """Given a proleptic Gregorian calendar date, return a Julian day int."""
-    janfeb = month < 3
-    return (day
-            + 1461 * (year + 4800 - janfeb) // 4
-            + 367 * (month - 2 + janfeb * 12) // 12
-            - 3 * ((year + 4900 - janfeb) // 100) // 4
-            - 32075)
+    # The Explanatory Supplement to the Astronomical Almanac, 15.11
+    janfeb = month <= 2
+    g = year + 4716 - janfeb
+    f = (month + 9) % 12
+    e = 1461 * g // 4 + day - 1402
+    J = e + (153 * f + 2) // 5
+    if 1:
+        J += 38
+        J -= (g + 184) // 100 * 3 // 4
+    return J
 
 def julian_date(year, month=1, day=1, hour=0, minute=0, second=0.0):
     """Given a proleptic Gregorian calendar date and time, build a Julian date.
