@@ -218,6 +218,10 @@ def test_astimezone_and_leap_second(ts):
     assert dt == tz.localize(datetime(1969, 7, 20, 16, 18, 0, 0))
     assert leap_second == 0
 
+def test_toordinal(ts):
+    t = ts.utc(1973, 12, 31, 11, 59, 60)
+    assert t.toordinal() == 720623.5
+
 def test_utc_datetime(ts):
     t = ts.utc(1969, 7, 20, 20, 18, 42.186479)
     dt = t.utc_datetime()

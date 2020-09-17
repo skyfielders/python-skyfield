@@ -391,7 +391,8 @@ class Time(object):
         directly as a coordinate for a plot.
 
         """
-        return self._utc_float() - 1721424.5
+        whole, fraction, is_leap_second = self._utc_float(0.0)
+        return whole - 1721424.5 + fraction
 
     def utc_datetime(self):
         """Convert to a Python ``datetime`` in UTC.
@@ -520,11 +521,7 @@ class Time(object):
         Otherwise the value is truncated rather than rounded.
 
         """
-        ts = self.ts
-        tai = self.tai
-        i = searchsorted(ts._leap_reverse_dates, tai, 'right')
-        fraction = self.tai_fraction - ts.leap_offsets[i] / DAY_S
-        is_leap_second = fraction + self.whole - ts.leap_dates[i-1] < 0
+        whole, fraction, is_leap_second = self._utc_float(0.0)
         return _strftime(format, self.whole, fraction, is_leap_second)
 
     def _utc_tuple(self, offset=0.0):
@@ -539,24 +536,18 @@ class Time(object):
         throw away the seconds; and so forth.
 
         """
-        ts = self.ts
-        tai = self.tai + offset
-        i = searchsorted(ts._leap_reverse_dates, tai, 'right')
-        year, month, day, hour, minute, second = calendar_tuple(
-            self.whole,
-            offset - ts.leap_offsets[i] / DAY_S + self.tai_fraction,
-        )
-        j = tai - ts.leap_offsets[i] / DAY_S
-        is_leap_second = j < ts.leap_dates[i-1]
+        jd, fraction, is_leap_second = self._utc_float(offset)
+        year, month, day, hour, minute, second = calendar_tuple(jd, fraction)
         second += is_leap_second
         return year, month, day, hour.astype(int), minute.astype(int), second
 
-    def _utc_float(self):
-        """Return UTC as a floating point Julian date."""
-        tai = self.tai
+    def _utc_float(self, offset):
         ts = self.ts
-        i = searchsorted(ts._leap_reverse_dates, tai, 'right')
-        return tai - ts.leap_offsets[i] / DAY_S
+        i = searchsorted(ts._leap_reverse_dates, self.tai + offset, 'right')
+        whole = self.whole
+        fraction = offset - ts.leap_offsets[i] / DAY_S + self.tai_fraction
+        is_leap_second = (whole + fraction) < ts.leap_dates[i-1]
+        return whole, fraction, is_leap_second
 
     # Calendar tuples.
 

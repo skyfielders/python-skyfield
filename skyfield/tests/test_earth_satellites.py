@@ -106,7 +106,8 @@ def test_appendix_c_satellite():
 
     jd_epoch = sat.model.jdsatepoch + sat.model.jdsatepochF
     three_days_later = jd_epoch + 3.0
-    offset = ts.tt(jd=three_days_later)._utc_float() - three_days_later
+    whole, fraction, is_leap_second = ts.tt(jd=three_days_later)._utc_float(0.0)
+    offset = whole + fraction - three_days_later
     t = ts.tt(jd=three_days_later - offset)
 
     # First, a crucial sanity check (which is, technically, a test of
