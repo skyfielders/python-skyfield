@@ -15,18 +15,23 @@ from .planetarylib import PlanetaryConstants
 from .positionlib import position_from_radec, position_of_radec
 from .starlib import Star
 from .sgp4lib import EarthSatellite
-from .timelib import Time, Timescale, utc
+from .timelib import (
+    GREGORIAN_START, GREGORIAN_START_ENGLAND, Time, Timescale, utc
+)
 from .toposlib import Topos
 from .units import Angle, Distance
 from .named_stars import NamedStar
 
 load = Loader('.')
 
-__all__ = ['Angle', 'B1950', 'Distance', 'EarthSatellite', 'Loader',
-           'NamedStar', 'PlanetaryConstants', 'Star', 'T0', 'Time',
-           'Timescale', 'Topos', 'datetime', 'load', 'load_constellation_map',
-           'load_file', 'position_from_radec', 'position_of_radec',
-           'utc', 'pi', 'tau']
+__all__ = [
+    'Angle', 'B1950', 'Distance', 'EarthSatellite',
+    'GREGORIAN_START', 'GREGORIAN_START_ENGLAND',
+    'Loader', 'NamedStar', 'PlanetaryConstants', 'Star', 'T0', 'Time',
+    'Timescale', 'Topos', 'datetime', 'load', 'load_constellation_map',
+    'load_file', 'position_from_radec', 'position_of_radec',
+    'utc', 'pi', 'tau',
+]
 
 # An attempt at friendliest-possible deprecations:
 

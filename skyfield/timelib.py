@@ -18,6 +18,9 @@ from .nutationlib import (
 )
 from .precessionlib import compute_precession
 
+GREGORIAN_START = 2299161
+GREGORIAN_START_ENGLAND = 2361222
+
 CalendarTuple = namedtuple('CalendarTuple', 'year month day hour minute second')
 
 class CalendarArray(ndarray):
@@ -87,7 +90,7 @@ class Timescale(object):
         self._leap_reverse_dates = leap_dates + leap_offsets / DAY_S
         self.J2000 = Time(self, float_(T0))
         self.B1950 = Time(self, float_(B1950))
-        #self.julian_calendar_cutoff = None
+        self.julian_calendar_cutoff = None
 
     def now(self):
         """Return the current date and time as a `Time` object.
@@ -152,12 +155,13 @@ class Timescale(object):
 
     def _jd(self, year, month, day, hour, minute, second):
         a = _to_array
-        whole = julian_day(a(year), a(month), a(day)) - 0.5
+        cutoff = self.julian_calendar_cutoff
+        whole = julian_day(a(year), a(month), a(day), cutoff) - 0.5
         fraction = (a(second) + a(minute) * 60.0 + a(hour) * 3600.0) / DAY_S
         return _reconcile(whole, fraction)
 
     def _cal(self, whole, fraction):
-        return calendar_tuple(whole, fraction)
+        return calendar_tuple(whole, fraction, self.julian_calendar_cutoff)
 
     def _strftime(self, format, jd, fraction, seconds_bump=None):
         # Python forces an unhappy choice upon us: either use the faster
@@ -893,13 +897,13 @@ def compute_calendar_date(jd_integer, julian_before=None):
 
 calendar_date = compute_calendar_date  # old name, in case anyone used it
 
-def calendar_tuple(jd_float, fraction=0.0):
+def calendar_tuple(jd_float, fraction=0.0, julian_before=None):
     """Return a (year, month, day, hour, minute, second.fraction) tuple."""
     jd_float = _to_array(jd_float)
     whole1, fraction1 = divmod(jd_float, 1.0)
     whole2, fraction = divmod(fraction1 + fraction + 0.5, 1.0)
     whole = (whole1 + whole2).astype(int)
-    year, month, day = compute_calendar_date(whole)
+    year, month, day = compute_calendar_date(whole, julian_before)
     second = fraction * 86400.0
     minute, second = divmod(second, 60.0)
     minute = minute.astype(int)

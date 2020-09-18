@@ -1,4 +1,5 @@
 import datetime as dt_module
+import numbers
 import numpy as np
 import sys
 from assay import assert_raises
@@ -6,6 +7,7 @@ from pytz import timezone
 from skyfield import api
 from skyfield.constants import DAY_S, T0
 from skyfield.timelib import (
+    GREGORIAN_START, GREGORIAN_START_ENGLAND,
     calendar_tuple, compute_calendar_date, julian_date, julian_day, utc,
 )
 from datetime import datetime
@@ -13,28 +15,29 @@ from datetime import datetime
 one_second = 1.0 / DAY_S
 epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
 
-time_parameter = ['tai', 'tt', 'tdb', 'ut1']
+continuous_timescale = ['tai', 'tt', 'tdb', 'ut1']
+time_scale_name = ['utc', 'tai', 'tt', 'tdb', 'ut1']
 time_value = [(1973, 1, 18, 1, 35, 37.5), 2441700.56640625]
 
 def ts():
     yield api.load.timescale()
 
-def test_time_creation_methods(ts, time_parameter, time_value):
-    method = getattr(ts, time_parameter)
+def test_time_creation_methods(ts, continuous_timescale, time_value):
+    method = getattr(ts, continuous_timescale)
     if isinstance(time_value, tuple):
         t = method(*time_value)
     else:
         t = method(jd=time_value) # TODO: deprecate
-    assert getattr(t, time_parameter) == 2441700.56640625
+    assert getattr(t, continuous_timescale) == 2441700.56640625
 
     # Also go ahead and test the calendar and formatting operations.
 
-    tup = getattr(t, time_parameter + '_calendar')()
+    tup = getattr(t, continuous_timescale + '_calendar')()
     assert tup == (1973, 1, 18, 1, 35, 37.5)
 
-    strftime = getattr(t, time_parameter + '_strftime')
+    strftime = getattr(t, continuous_timescale + '_strftime')
     string = strftime()
-    assert string == '1973-01-18 01:35:38 ' + time_parameter.upper()
+    assert string == '1973-01-18 01:35:38 ' + continuous_timescale.upper()
 
     if sys.version_info <= (3,):
         return  # we do not currently support %f under Python 2
@@ -100,7 +103,6 @@ def test_tt_seconds_preserve_10_decimal_places_in_calendar_seconds(ts):
     assert c[:5] == (2020, 6, 7, 2, 2)
     assert '%.10f' % c[5] == '12.0123456789'
 
-time_scale_name = ['utc', 'tai', 'tt', 'tdb']
 time_params_with_array = [
     ((2018, 2019, 2020), 3, 25, 13, 1, 10),
     (2018, (3, 4, 5), 25, 13, 1, 10),
@@ -406,9 +408,6 @@ def test_time_repr(ts):
     assert repr(ts.tt_jd([1, 2, 3, 4])) == '<Time tt=[1.0 ... 4.0] len=4>'
 
 def test_jd_calendar():
-
-    import numbers
-
     # Check a specific instance (using UNIX epoch here, though that's
     # an arbitrary choice)
     jd_unix = 2440587.5
@@ -444,7 +443,7 @@ def test_jd_calendar():
     # Check reversal of array
     assert (julian_date(*cal_array) == jd_array).all()
 
-def test_julian_gregorian_cutover():
+def test_raw_julian_gregorian_cutover():
     gregory = 2299161
     assert compute_calendar_date(gregory - 2, gregory) == (1582, 10, 3)
     assert compute_calendar_date(gregory - 1, gregory) == (1582, 10, 4)
@@ -455,6 +454,88 @@ def test_julian_gregorian_cutover():
     assert julian_day(1582, 10, 4, gregory) == (gregory - 1)
     assert julian_day(1582, 10, 15, gregory) == (gregory + 0)
     assert julian_day(1582, 10, 16, gregory) == (gregory + 1)
+
+def test_constructor_julian_gregorian_cutover(ts, time_scale_name):
+    def jd(y, m, d):
+        t = getattr(ts, time_scale_name)(y, m, d)
+        if time_scale_name == 'utc':
+            return sum(t._utc_float(0.0))
+        return getattr(t, time_scale_name)
+
+    ts = api.load.timescale()
+
+    assert jd(1582, 10, 4) == 2299149.5
+    assert jd(1582, 10, 15) == 2299160.5
+    assert jd(1752, 9, 2) == 2361209.5
+    assert jd(1752, 9, 14) == 2361221.5
+
+    ts.julian_calendar_cutoff = GREGORIAN_START
+
+    assert jd(1582, 10, 4) == 2299159.5
+    assert jd(1582, 10, 15) == 2299160.5
+    assert jd(1752, 9, 2) == 2361209.5
+    assert jd(1752, 9, 14) == 2361221.5
+
+    ts.julian_calendar_cutoff = GREGORIAN_START_ENGLAND
+
+    assert jd(1582, 10, 4) == 2299159.5
+    assert jd(1582, 10, 15) == 2299170.5
+    assert jd(1752, 9, 2) == 2361220.5
+    assert jd(1752, 9, 14) == 2361221.5
+
+def test_calendar_tuple_julian_gregorian_cutover(ts, time_scale_name):
+    def ymd(jd):
+        t = ts.tt_jd(jd, 0.1)
+        if time_scale_name == 'utc':
+            return t.utc[:3]
+        return getattr(t, time_scale_name + '_calendar')()[:3]
+
+    ts = api.load.timescale()
+
+    assert ymd(2299149.5) == (1582, 10, 4)
+    assert ymd(2299160.5) == (1582, 10, 15)
+    assert ymd(2361209.5) == (1752, 9, 2)
+    assert ymd(2361221.5) == (1752, 9, 14)
+
+    ts.julian_calendar_cutoff = GREGORIAN_START
+
+    assert ymd(2299159.5) == (1582, 10, 4)
+    assert ymd(2299160.5) == (1582, 10, 15)
+    assert ymd(2361209.5) == (1752, 9, 2)
+    assert ymd(2361221.5) == (1752, 9, 14)
+
+    ts.julian_calendar_cutoff = GREGORIAN_START_ENGLAND
+
+    assert ymd(2299159.5) == (1582, 10, 4)
+    assert ymd(2299170.5) == (1582, 10, 15)
+    assert ymd(2361220.5) == (1752, 9, 2)
+    assert ymd(2361221.5) == (1752, 9, 14)
+
+def test_strftime_julian_gregorian_cutover(ts, time_scale_name):
+    def ymd(jd):
+        t = ts.tt_jd(jd, 0.1)
+        return getattr(t, time_scale_name + '_strftime')('%Y %m %d')
+
+    ts = api.load.timescale()
+
+    assert ymd(2299149.5) == '1582 10 04'
+    assert ymd(2299160.5) == '1582 10 15'
+    assert ymd(2361209.5) == '1752 09 02'
+    assert ymd(2361221.5) == '1752 09 14'
+
+    ts.julian_calendar_cutoff = GREGORIAN_START
+
+    assert ymd(2299159.5) == '1582 10 04'
+    assert ymd(2299160.5) == '1582 10 15'
+    assert ymd(2361209.5) == '1752 09 02'
+    assert ymd(2361221.5) == '1752 09 14'
+
+    ts.julian_calendar_cutoff = GREGORIAN_START_ENGLAND
+
+    assert ymd(2299159.5) == '1582 10 04'
+    assert ymd(2299170.5) == '1582 10 15'
+    assert ymd(2361220.5) == '1752 09 02'
+    assert ymd(2361221.5) == '1752 09 14'
 
 def test_time_equality(ts):
     t0 = ts.tt_jd(2459008.5, 0.125)
