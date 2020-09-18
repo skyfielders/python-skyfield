@@ -156,6 +156,57 @@ class Timescale(object):
         fraction = (a(second) + a(minute) * 60.0 + a(hour) * 3600.0) / DAY_S
         return _reconcile(whole, fraction)
 
+    def _cal(self, whole, fraction):
+        return calendar_tuple(whole, fraction)
+
+    def _strftime(self, format, jd, fraction, seconds_bump=None):
+        # Python forces an unhappy choice upon us: either use the faster
+        # time.strftime() and lose support for '%f', or use the slower
+        # datetime.strftime() and crash if years are negative.  We take the
+        # first option, but then patch '%f' support back in by secretly
+        # passing the microseconds string as the time zone name.  After all,
+        # the routines supported by this function never use time zones.
+        # What could go wrong?
+
+        ms = _format_uses_milliseconds(format)
+
+        if ms:
+            fraction = fraction + 1e-16  # encourage .0 to not turn into .999999
+        elif _format_uses_seconds(format):
+            fraction = fraction + _half_second
+        elif _format_uses_minutes(format):
+            fraction = fraction + _half_minute
+
+        year, month, day, hour, minute, second = self._cal(jd, fraction)
+        z = year * 0
+
+        # TODO: will this always produce the same whole number that
+        # calendar_tuple() produces internally?  Or should we make a private
+        # version of calendar_tuple() that returns it to us for use here?
+        weekday = (fraction + 0.5 + _to_array(jd)).astype(int) % 7
+
+        if ms:
+            format = format[:ms.start()] + '%Z' + format[ms.end():]
+            second = (second * 1e6).astype(int)
+            second, usec = divmod(second, 1000000)
+            if seconds_bump is not None:
+                second += seconds_bump
+            if getattr(jd, 'ndim', 0):
+                u = ['%06d' % u for u in usec]
+                tup = year, month, day, hour, minute, second, weekday, z, z, u
+                return [strftime(format, struct_time(t)) for t in zip(*tup)]
+            u = '%06d' % usec
+            tup = year, month, day, hour, minute, second, weekday, z, z, u
+            return strftime(format, struct_time(tup))
+        else:
+            second = second.astype(int)
+            if seconds_bump is not None:
+                second += seconds_bump
+            tup = year, month, day, hour, minute, second, weekday, z, z
+            if getattr(jd, 'ndim', 0):
+                return [strftime(format, item) for item in zip(*tup)]
+            return strftime(format, tup)
+
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
         """Build a `Time` from a TAI proleptic Gregorian date.
@@ -259,7 +310,7 @@ class Timescale(object):
         2456675.56640625
 
         """
-        if jd is None:
+        if jd is None:  # TODO: deprecate the jd parameter to this method
             whole, fraction = self._jd(year, month, day, hour, minute, second)
             jd = whole + fraction  # TODO: can we pass high precision on?
         return self.ut1_jd(jd)
@@ -332,6 +383,8 @@ class Time(object):
         # otherwise, a `for` loop over it will not raise an error.
         t = Time(self.ts, self.whole[index], self.tt_fraction[index])
         for name in 'tai_fraction', 'tdb_fraction', 'ut1_fraction':
+            # TODO: drat, I suspect this forces the creation of all of
+            # the fractions whether we need them or not.
             value = getattr(self, name, None)
             if value is not None:
                 setattr(t, name, value[index])
@@ -426,14 +479,13 @@ class Time(object):
         """
         year, month, day, hour, minute, second = self._utc_tuple(
             _half_microsecond)
-        second, fraction = divmod(second, 1.0)
-        second = second.astype(int)
+        micro = (second * 1e6).astype(int)
+        second, micro = divmod(micro, 1000000)
         leap_second = second // 60
         second -= leap_second  # fit within limited bounds of Python datetime
-        micro = (fraction * 1e6).astype(int)
         if self.shape:
-            utcs = [utc] * self.shape[0]
-            argsets = zip(year, month, day, hour, minute, second, micro, utcs)
+            zone = [utc] * self.shape[0]
+            argsets = zip(year, month, day, hour, minute, second, micro, zone)
             dt = array([datetime(*args) for args in argsets])
         else:
             dt = datetime(year, month, day, hour, minute, second, micro, utc)
@@ -522,7 +574,7 @@ class Time(object):
 
         """
         whole, fraction, is_leap_second = self._utc_float(0.0)
-        return _strftime(format, self.whole, fraction, is_leap_second)
+        return self.ts._strftime(format, self.whole, fraction, is_leap_second)
 
     def _utc_tuple(self, offset=0.0):
         """Return UTC as (year, month, day, hour, minute, second.fraction).
@@ -537,7 +589,7 @@ class Time(object):
 
         """
         jd, fraction, is_leap_second = self._utc_float(offset)
-        year, month, day, hour, minute, second = calendar_tuple(jd, fraction)
+        year, month, day, hour, minute, second = self.ts._cal(jd, fraction)
         second += is_leap_second
         return year, month, day, hour.astype(int), minute.astype(int), second
 
@@ -553,37 +605,37 @@ class Time(object):
 
     def tai_calendar(self):
         """Return TAI as Gregorian (year, month, day, hour, minute, second)."""
-        return calendar_tuple(self.whole, self.tai_fraction)
+        return self.ts._cal(self.whole, self.tai_fraction)
 
     def tt_calendar(self):
         """Return TT as Gregorian (year, month, day, hour, minute, second)."""
-        return calendar_tuple(self.whole, self.tt_fraction)
+        return self.ts._cal(self.whole, self.tt_fraction)
 
     def tdb_calendar(self):
         """Return TDB as Gregorian (year, month, day, hour, minute, second)."""
-        return calendar_tuple(self.whole, self.tdb_fraction)
+        return self.ts._cal(self.whole, self.tdb_fraction)
 
     def ut1_calendar(self):
         """Return UT1 as Gregorian (year, month, day, hour, minute, second)."""
-        return calendar_tuple(self.whole, self.ut1_fraction)
+        return self.ts._cal(self.whole, self.ut1_fraction)
 
     # Date formatting.
 
     def tai_strftime(self, format='%Y-%m-%d %H:%M:%S TAI'):
         """Format TAI with a datetime strftime() format string."""
-        return _strftime(format, self.whole, self.tai_fraction)
+        return self.ts._strftime(format, self.whole, self.tai_fraction)
 
     def tt_strftime(self, format='%Y-%m-%d %H:%M:%S TT'):
         """Format TT with a datetime strftime() format string."""
-        return _strftime(format, self.whole, self.tt_fraction)
+        return self.ts._strftime(format, self.whole, self.tt_fraction)
 
     def tdb_strftime(self, format='%Y-%m-%d %H:%M:%S TDB'):
         """Format TDB with a datetime strftime() format string."""
-        return _strftime(format, self.whole, self.tdb_fraction)
+        return self.ts._strftime(format, self.whole, self.tdb_fraction)
 
     def ut1_strftime(self, format='%Y-%m-%d %H:%M:%S UT1'):
         """Format UT1 with a datetime strftime() format string."""
-        return _strftime(format, self.whole, self.ut1_fraction)
+        return self.ts._strftime(format, self.whole, self.ut1_fraction)
 
     # Convenient caching of several expensive functions of time.
 
@@ -946,55 +998,6 @@ def build_delta_t_table(delta_t_recent):
 _format_uses_milliseconds = re.compile(r'%[-_0^#EO]*f').search
 _format_uses_seconds = re.compile(r'%[-_0^#EO]*[STXc]').search
 _format_uses_minutes = re.compile(r'%[-_0^#EO]*[MR]').search
-
-def _strftime(format, jd, fraction, seconds_bump=None):
-    # Python forces an unhappy choice upon us: either use the faster
-    # time.strftime() and lose support for '%f', or use the slower
-    # datetime.strftime() and crash if years are negative.  We take the
-    # first option, but then patch '%f' support back in by secretly
-    # passing the microseconds string as the time zone name.  After all,
-    # the routines supported by this function never use time zones.
-    # What could go wrong?
-
-    ms = _format_uses_milliseconds(format)
-
-    if ms:
-        fraction = fraction + 1e-16  # encourage .0 to not turn into .999999
-    elif _format_uses_seconds(format):
-        fraction = fraction + _half_second
-    elif _format_uses_minutes(format):
-        fraction = fraction + _half_minute
-
-    year, month, day, hour, minute, second = calendar_tuple(jd, fraction)
-    z = year * 0
-
-    # TODO: will this always produce the same whole number that
-    # calendar_tuple() produces internally?  Or should we make a private
-    # version of calendar_tuple() that returns it to us for use here?
-    weekday = (fraction + 0.5 + _to_array(jd)).astype(int) % 7
-
-    if ms:
-        format = format[:ms.start()] + '%Z' + format[ms.end():]
-        second = (second * 1e6).astype(int)
-        second, usec = divmod(second, 1000000)
-        if seconds_bump is not None:
-            second += seconds_bump
-        if getattr(jd, 'ndim', 0):
-            usec = ['%06d' % u for u in usec]
-            tup = year, month, day, hour, minute, second, weekday, z, z, usec
-            return [strftime(format, struct_time(item)) for item in zip(*tup)]
-        usec = '%06d' % usec
-        return strftime(format, struct_time(
-            (year, month, day, hour, minute, second, weekday, z, z, usec)
-        ))
-    else:
-        second = second.astype(int)
-        if seconds_bump is not None:
-            second += seconds_bump
-        tup = year, month, day, hour, minute, second, weekday, z, z
-        if getattr(jd, 'ndim', 0):
-            return [strftime(format, item) for item in zip(*tup)]
-        return strftime(format, tup)
 
 def _datetime_to_utc_tuple(dt):
     z = dt.tzinfo
