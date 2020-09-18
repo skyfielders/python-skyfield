@@ -456,6 +456,9 @@ def test_raw_julian_gregorian_cutover():
     assert julian_day(1582, 10, 16, gregory) == (gregory + 1)
 
 def test_constructor_julian_gregorian_cutover(ts, time_scale_name):
+    if sys.version_info <= (3,):
+        return  # Python 2 time.strftime() complains about the year 1582
+
     def jd(y, m, d):
         t = getattr(ts, time_scale_name)(y, m, d)
         if time_scale_name == 'utc':
@@ -484,6 +487,9 @@ def test_constructor_julian_gregorian_cutover(ts, time_scale_name):
     assert jd(1752, 9, 14) == 2361221.5
 
 def test_calendar_tuple_julian_gregorian_cutover(ts, time_scale_name):
+    if sys.version_info <= (3,):
+        return  # Python 2 time.strftime() complains about the year 1582
+
     def ymd(jd):
         t = ts.tt_jd(jd, 0.1)
         if time_scale_name == 'utc':
@@ -512,6 +518,9 @@ def test_calendar_tuple_julian_gregorian_cutover(ts, time_scale_name):
     assert ymd(2361221.5) == (1752, 9, 14)
 
 def test_strftime_julian_gregorian_cutover(ts, time_scale_name):
+    if sys.version_info <= (3,):
+        return  # Python 2 time.strftime() complains about the year 1582
+
     def ymd(jd):
         t = ts.tt_jd(jd, 0.1)
         return getattr(t, time_scale_name + '_strftime')('%Y %m %d')
