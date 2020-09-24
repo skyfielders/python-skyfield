@@ -20,15 +20,15 @@ from .timelib import (
 )
 from .toposlib import Topos
 from .units import Angle, Distance
-from .named_stars import NamedStar
 
 load = Loader('.')
 
 __all__ = [
     'Angle', 'B1950', 'Distance', 'EarthSatellite',
     'GREGORIAN_START', 'GREGORIAN_START_ENGLAND',
-    'Loader', 'NamedStar', 'PlanetaryConstants', 'Star', 'T0', 'Time',
-    'Timescale', 'Topos', 'datetime', 'load', 'load_constellation_map',
+    'Loader', 'PlanetaryConstants', 'Star',
+    'T0', 'Time', 'Timescale', 'Topos',
+    'datetime', 'load', 'load_constellation_map',
     'load_file', 'position_from_radec', 'position_of_radec',
     'utc', 'pi', 'tau',
 ]

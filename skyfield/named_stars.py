@@ -1,12 +1,9 @@
-# TODO: Deprecate; maybe even remove, since it's not documented?
-"""
-Convenience functions for users to get a Star instance using a small database
-of named stars.
-"""
-from .data import hipparcos
+# This list was seeded from:
+# https://en.wikipedia.org/wiki/List_of_stars_in_the_Hipparcos_Catalogue
 
-#This list was seeded from
-#https://en.wikipedia.org/wiki/List_of_stars_in_the_Hipparcos_Catalogue
+# Recent discussion:
+# https://github.com/skyfielders/python-skyfield/issues/304
+
 named_star_dict= {
  'Achernar': 7588,
  'Acrux': 60718,
@@ -128,11 +125,3 @@ named_star_dict= {
  'Wei': 82396,
  'Wezen': 34444
 }
-
-def NamedStar(name):
-    """DEPRECATED: See stars.rst for how to load a star catalog."""
-    try:
-        hid = named_star_dict[name]
-        return hipparcos.get(str(hid))
-    except KeyError:
-        raise ValueError("No star named {0} known to skyfield.".format(name))

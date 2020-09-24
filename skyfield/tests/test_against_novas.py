@@ -6,7 +6,7 @@ from skyfield import (earthlib, framelib, nutationlib, positionlib,
 from skyfield.api import Topos, load
 from skyfield.constants import AU_KM, AU_M
 from skyfield.data import hipparcos
-from skyfield.functions import length_of
+from skyfield.functions import BytesIO, length_of
 from .fixes import low_precision_ERA
 
 OLD_AU_KM = 149597870.691  # TODO: load from de405
@@ -3105,46 +3105,41 @@ def test_moon_topocentric_date4(de405):
     compare(az.degrees, (151.19707488767745, 338.13295291812307, 156.2971102404744, 191.29497427201525), 0.0005 * arcsecond)
 
 def test_hipparcos_conversion0(earth):
-    line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
-    star = hipparcos.parse(line)
-    compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
-    compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
+    line = b'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
+    df = hipparcos.load_dataframe(BytesIO(line))
+    star = starlib.Star.from_dataframe(df.iloc[0])
     ra, dec, distance = earth.at(load.timescale().tt_jd(2440423.345833333)).observe(star).radec()
     compare(ra.hours, 2.5283697000528966, 0.00001 * ra_arcsecond)
     compare(dec.degrees, 89.26420852419295, 0.00001 * arcsecond)
 
 def test_hipparcos_conversion1(earth):
-    line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
-    star = hipparcos.parse(line)
-    compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
-    compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
+    line = b'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
+    df = hipparcos.load_dataframe(BytesIO(line))
+    star = starlib.Star.from_dataframe(df.iloc[0])
     ra, dec, distance = earth.at(load.timescale().tt_jd(2448031.5)).observe(star).radec()
     compare(ra.hours, 2.529691010447949, 0.00001 * ra_arcsecond)
     compare(dec.degrees, 89.26413900274704, 0.00001 * arcsecond)
 
 def test_hipparcos_conversion2(earth):
-    line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
-    star = hipparcos.parse(line)
-    compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
-    compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
+    line = b'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
+    df = hipparcos.load_dataframe(BytesIO(line))
+    star = starlib.Star.from_dataframe(df.iloc[0])
     ra, dec, distance = earth.at(load.timescale().tt_jd(2451545.0)).observe(star).radec()
     compare(ra.hours, 2.5302921836971946, 0.00001 * ra_arcsecond)
     compare(dec.degrees, 89.26411033462212, 0.00001 * arcsecond)
 
 def test_hipparcos_conversion3(earth):
-    line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
-    star = hipparcos.parse(line)
-    compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
-    compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
+    line = b'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
+    df = hipparcos.load_dataframe(BytesIO(line))
+    star = starlib.Star.from_dataframe(df.iloc[0])
     ra, dec, distance = earth.at(load.timescale().tt_jd(2456164.5)).observe(star).radec()
     compare(ra.hours, 2.5311170753257395, 0.00001 * ra_arcsecond)
     compare(dec.degrees, 89.26406913848278, 0.00001 * arcsecond)
 
 def test_hipparcos_conversion4(earth):
-    line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
-    star = hipparcos.parse(line)
-    compare(star.ra.hours, 2.530301023497941, 0.001 * ra_arcsecond)
-    compare(star.dec.degrees, 89.26410950742938, 0.001 * arcsecond)
+    line = b'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
+    df = hipparcos.load_dataframe(BytesIO(line))
+    star = starlib.Star.from_dataframe(df.iloc[0])
     ra, dec, distance = earth.at(load.timescale().tt_jd([2440423.345833333, 2448031.5, 2451545.0, 2456164.5])).observe(star).radec()
     compare(ra.hours, (2.5283697000528966, 2.529691010447949, 2.5302921836971946, 2.5311170753257395), 0.00001 * ra_arcsecond)
     compare(dec.degrees, (89.26420852419295, 89.26413900274704, 89.26411033462212, 89.26406913848278), 0.00001 * arcsecond)

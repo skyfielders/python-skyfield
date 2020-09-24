@@ -126,14 +126,6 @@ def test_from_altaz_parameters(ts):
     assert str(p.from_altaz(alt=a, az=a).distance()) == '0.1 au'
     assert str(p.from_altaz(alt=a, az=a, distance=d).distance()) == '0.234 au'
 
-def test_named_star_throws_valueerror():
-    with assert_raises(ValueError, 'No star named foo known to skyfield'):
-        api.NamedStar('foo')
-
-def test_named_star_returns_star():
-    s = api.NamedStar('Polaris')
-    assert isinstance(s, api.Star)
-
 def test_github_81(ts):
     t = ts.utc(1980, 1, 1)
     assert t == t

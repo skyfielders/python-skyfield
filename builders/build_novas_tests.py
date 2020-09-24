@@ -40,7 +40,7 @@ def main():
         from skyfield.api import Topos, load
         from skyfield.constants import AU_KM, AU_M
         from skyfield.data import hipparcos
-        from skyfield.functions import length_of
+        from skyfield.functions import BytesIO, length_of
         from .fixes import low_precision_ERA
 
         OLD_AU_KM = 149597870.691  # TODO: load from de405
@@ -465,10 +465,9 @@ def output_catalog_tests(dates):
         output(locals(), r"""
 
         def test_hipparcos_conversion{i}(earth):
-            line = 'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
-            star = hipparcos.parse(line)
-            compare(star.ra.hours, {polaris.ra!r}, 0.001 * ra_arcsecond)
-            compare(star.dec.degrees, {polaris.dec!r}, 0.001 * arcsecond)
+            line = b'H|       11767| |02 31 47.08|+89 15 50.9| 1.97|1|H|037.94614689|+89.26413805| |   7.56|   44.22|  -11.74|  0.39|  0.45|  0.48|  0.47|  0.55|-0.16| 0.05| 0.27|-0.01| 0.08| 0.05| 0.04|-0.12|-0.09|-0.36|  1| 1.22| 11767| 2.756|0.003| 2.067|0.003| | 0.636|0.003|T|0.70|0.00|L| | 2.1077|0.0021|0.014|102| | 2.09| 2.13|   3.97|P|1|A|02319+8915|I| 1| 1| | | |  |   |       |     |     |    |S| |P|  8890|B+88    8 |          |          |0.68|F7:Ib-IIv SB|G\n'
+            df = hipparcos.load_dataframe(BytesIO(line))
+            star = starlib.Star.from_dataframe(df.iloc[0])
             ra, dec, distance = earth.at(load.timescale().tt_jd({jd})).observe(star).radec()
             compare(ra.hours, {ra!r}, 0.00001 * ra_arcsecond)
             compare(dec.degrees, {dec!r}, 0.00001 * arcsecond)

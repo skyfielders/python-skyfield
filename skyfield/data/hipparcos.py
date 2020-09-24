@@ -1,11 +1,3 @@
-import gzip
-from skyfield.functions import to_spherical
-from skyfield.starlib import Star
-from skyfield.timelib import T0
-from skyfield.units import Angle
-
-days = T0 - 2448349.0625
-
 # This URL worked until September 2020:
 
 #URL = 'http://cdsarc.u-strasbg.fr/ftp/cats/I/239/hip_main.dat.gz'
@@ -23,32 +15,6 @@ URL = 'https://cdsarc.u-strasbg.fr/ftp/cats/I/239/hip_main.dat'
 # https://github.com/skyfielders/python-skyfield/issues/454
 
 url = URL  # old name, in case anyone used it
-
-def parse(line):
-    "DEPRECATED; see :func:`~skyfield.data.hipparcos.load_dataframe() instead."
-    # See ftp://cdsarc.u-strasbg.fr/cats/I/239/ReadMe
-    star = Star(
-        ra=Angle(degrees=float(line[51:63])),
-        dec=Angle(degrees=float(line[64:76])),
-        ra_mas_per_year=float(line[87:95]),
-        dec_mas_per_year=float(line[96:104]),
-        parallax_mas=float(line[79:86]),
-        names=[('HIP', int(line[8:14]))],
-        )
-    star._position_au += star._velocity_au_per_d * days
-    distance, dec, ra = to_spherical(star._position_au)
-    star.ra = Angle(radians=ra, preference='hours')
-    star.dec = Angle(radians=dec)
-    return star
-
-def load(match_function):
-    "DEPRECATED; see :func:`~skyfield.data.hipparcos.load_dataframe() instead."
-    from skyfield import api
-
-    with api.load.open(url) as f:
-        for line in gzip.GzipFile(fileobj=f):
-            if match_function(line):
-                yield parse(line)
 
 PANDAS_MESSAGE = """Skyfield needs Pandas to load the Hipparcos catalog
 
@@ -84,8 +50,13 @@ def load_dataframe(fobj):
     except ImportError:
         raise ImportError(PANDAS_MESSAGE)
 
+    fobj.seek(0)
+    magic = fobj.read(2)
+    compression = 'gzip' if (magic == b'\x1f\x8b') else None
+    fobj.seek(0)
+
     df = read_csv(
-        fobj, sep='|', names=_COLUMN_NAMES,
+        fobj, sep='|', names=_COLUMN_NAMES, compression=compression,
         usecols=['HIP', 'Vmag', 'RAdeg', 'DEdeg', 'Plx', 'pmRA', 'pmDE'],
         na_values=['     ', '       ', '        ', '            '],
     )
@@ -98,13 +69,3 @@ def load_dataframe(fobj):
         epoch_year = 1991.25,
     )
     return df.set_index('hip')
-
-def get(which):
-    "DEPRECATED; see :func:`~skyfield.data.hipparcos.load_dataframe() instead."
-    if isinstance(which, str):
-        pattern = ('H|      %6s' % which).encode('ascii')
-        for star in load(lambda line: line.startswith(pattern)):
-            return star
-    else:
-        patterns = set(id.encode('ascii').rjust(6) for id in which)
-        return list(load(lambda line: line[8:14] in patterns))
