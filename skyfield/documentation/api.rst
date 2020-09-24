@@ -39,34 +39,22 @@ Opening files
    Loader.timescale
    Loader.tle_file
 
+.. _api-Timescale:
+
 Time scales
 ===========
 
 .. currentmodule:: skyfield.timelib
 
-A Skyfield `Timescale` object is typically built
-at the beginning of each program:
+A script will typically start by building a single Skyfield `Timescale`
+to use for all date and time conversions:
 
 .. testcode::
 
     from skyfield import api
     ts = api.load.timescale()
 
-It downloads and parses the data tables necessary
-to correctly convert between Universal Time
-and the more stable time scales used by astronomers.
-
-If you want to skip downloading up-to-date time scale files,
-you can run:
-
-.. testcode::
-
-    ts = api.load.timescale()
-
-This can avoid problems connecting
-to the servers from which the official files are distributed.
-Note that the time scale files distributed with
-any given version of Skyfield will fall gradually out of date.
+Its methods are:
 
 .. autosummary::
 
@@ -84,6 +72,8 @@ any given version of Skyfield will fall gradually out of date.
    Timescale.ut1
    Timescale.ut1_jd
    Timescale.from_astropy
+
+.. _api-Time:
 
 Time objects
 ============

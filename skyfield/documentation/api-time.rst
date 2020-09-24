@@ -8,6 +8,26 @@ of the several time scales used by astronomers,
 and of how you can convert time to and from familiar time scales
 like UTC and the worldwide time zones that are adapted from it.
 
+.. _calendar date:
+
+Calendar date
+=============
+
+1. When building a `Time` from a calendar date,
+   you can not only designate a single moment by its time and date,
+   but you can also build a `Time` representing a whole array of moments
+   by supplying a Python list or NumPy array
+   for either the year, month, day, hour, minute, or second.
+   See `date-arrays`.
+
+2. By default,
+   Skyfield uses the modern Gregorian calendar for all dates —
+   even dates before the Gregorian calendar was introduced in 1582.
+
+3. You can instead opt to use the old Julian calendar for ancient dates,
+   which is the most common practice among historians.
+   See `choice of calendars`.
+
 Timescale, for building and converting times
 ============================================
 

@@ -113,7 +113,7 @@ class Timescale(object):
         return self._utc(_datetime_to_utc_tuple(datetime))
 
     def from_datetimes(self, datetime_list):
-        """Return a `Time` for a Python ``datetime`` list.
+        """Return a `Time` for a list of Python ``datetime``\ s.
 
         The ``datetime`` objects must each be “timezone-aware”: they
         must each have a time zone object as their ``tzinfo`` attribute
@@ -124,13 +124,7 @@ class Timescale(object):
         return self._utc(array(value) for value in zip(*tuples))
 
     def utc(self, year, month=1, day=1, hour=0, minute=0, second=0.0):
-        """Build a `Time` from a UTC calendar date.
-
-        Specify the date as a numeric year, month, day, hour, minute,
-        and second.  Any argument may be an array in which case the
-        return value is a ``Time`` representing a whole array of times.
-
-        """
+        """Build a `Time` from a UTC `calendar date`."""
         # TODO: someday deprecate passing datetime objects here, as
         # there are now separate constructors for them.
         if isinstance(year, datetime):
@@ -213,18 +207,7 @@ class Timescale(object):
 
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
-        """Build a `Time` from a TAI proleptic Gregorian date.
-
-        Supply the International Atomic Time (TAI) as a proleptic
-        Gregorian calendar date:
-
-        >>> t = ts.tai(2014, 1, 18, 1, 35, 37.5)
-        >>> t.tai
-        2456675.56640625
-        >>> t.tai_calendar()
-        (2014, 1, 18, 1, 35, 37.5)
-
-        """
+        """Build a `Time` from an International Atomic Time `calendar date`."""
         if jd is not None:
             return self.tai_jd(jd)  # deprecate someday
         whole, fraction = self._jd(year, month, day, hour, minute, second)
@@ -233,7 +216,7 @@ class Timescale(object):
         return t
 
     def tai_jd(self, jd, fraction=0.0):
-        """Build a `Time` from a TAI Julian date."""
+        """Build a `Time` from an International Atomic Time Julian date."""
         whole, fraction2 = divmod(_to_array(jd), 1.0)
         fraction2 += fraction
         t = Time(self, whole, fraction2 + tt_minus_tai)
@@ -242,31 +225,20 @@ class Timescale(object):
 
     def tt(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
            jd=None):
-        """Build a `Time` from a TT calendar date.
-
-        Supply the Terrestrial Time (TT) as a proleptic Gregorian
-        calendar date:
-
-        >>> t = ts.tt(2014, 1, 18, 1, 35, 37.5)
-        >>> t.tt
-        2456675.56640625
-        >>> t.tt_calendar()
-        (2014, 1, 18, 1, 35, 37.5)
-
-        """
+        """Build a `Time` from a Terrestrial Time `calendar date`."""
         if jd is not None:
             return self.tt_jd(jd)  # deprecate someday
         whole, fraction = self._jd(year, month, day, hour, minute, second)
         return Time(self, whole, fraction)
 
     def tt_jd(self, jd, fraction=0.0):
-        """Build a `Time` from a TT Julian date."""
+        """Build a `Time` from a Terrestrial Time Julian date."""
         whole, fraction2 = divmod(_to_array(jd), 1.0)
         fraction2 += fraction
         return Time(self, whole, fraction2)
 
     def J(self, year):
-        """Build a `Time` from a TT Julian year or array of years.
+        """Build a `Time` from a Terrestrial Time Julian year or array.
 
         Julian years are convenient uniform periods of exactly 365.25
         days of Terrestrial Time, centered on 2000 January 1 12h TT =
@@ -278,16 +250,7 @@ class Timescale(object):
 
     def tdb(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
-        """Build a `Time` from a TDB calendar date.
-
-        Supply the Barycentric Dynamical Time (TDB) as a proleptic
-        Gregorian calendar date:
-
-        >>> t = ts.tdb(2014, 1, 18, 1, 35, 37.5)
-        >>> t.tdb
-        2456675.56640625
-
-        """
+        """Build a `Time` from a Barycentric Dynamical Time `calendar date`."""
         if jd is not None:
             return self.tdb_jd(jd)  # deprecate someday
         whole, fraction = self._jd(year, month, day, hour, minute, second)
@@ -295,7 +258,7 @@ class Timescale(object):
         return Time(self, jd, - tdb_minus_tt(jd) / DAY_S)
 
     def tdb_jd(self, jd, fraction=0.0):
-        """Build `Time` from a Barycentric Dynamical Time (TDB) Julian date."""
+        """Build `Time` from a Barycentric Dynamical Time Julian date."""
         whole, fraction2 = divmod(jd, 1.0)
         fraction2 += fraction
         t = Time(self, whole, fraction2 - tdb_minus_tt(jd, fraction) / DAY_S)
@@ -304,23 +267,14 @@ class Timescale(object):
 
     def ut1(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
-        """Build a `Time` from a UT1 calendar date.
-
-        Supply the Universal Time (UT1) as a proleptic Gregorian
-        calendar date:
-
-        >>> t = ts.ut1(2014, 1, 18, 1, 35, 37.5)
-        >>> t.ut1
-        2456675.56640625
-
-        """
+        """Build a `Time` from a UT1 Universal Time `calendar date`."""
         if jd is None:  # TODO: deprecate the jd parameter to this method
             whole, fraction = self._jd(year, month, day, hour, minute, second)
             jd = whole + fraction  # TODO: can we pass high precision on?
         return self.ut1_jd(jd)
 
     def ut1_jd(self, jd):
-        """Build a `Time` from a UT1 Julian date."""
+        """Build a `Time` from a UT1 Universal Time Julian date."""
         ut1 = _to_array(jd)
 
         # Estimate TT = UT1, to get a rough Delta T estimate.
@@ -608,19 +562,19 @@ class Time(object):
     # Calendar tuples.
 
     def tai_calendar(self):
-        """Return TAI as Gregorian (year, month, day, hour, minute, second)."""
+        """TAI as a (year, month, day, hour, minute, second) `calendar date`."""
         return self.ts._cal(self.whole, self.tai_fraction)
 
     def tt_calendar(self):
-        """Return TT as Gregorian (year, month, day, hour, minute, second)."""
+        """TT as a (year, month, day, hour, minute, second) `calendar date`."""
         return self.ts._cal(self.whole, self.tt_fraction)
 
     def tdb_calendar(self):
-        """Return TDB as Gregorian (year, month, day, hour, minute, second)."""
+        """TDB as a (year, month, day, hour, minute, second) `calendar date`."""
         return self.ts._cal(self.whole, self.tdb_fraction)
 
     def ut1_calendar(self):
-        """Return UT1 as Gregorian (year, month, day, hour, minute, second)."""
+        """UT1 as a (year, month, day, hour, minute, second) `calendar date`."""
         return self.ts._cal(self.whole, self.ut1_fraction)
 
     # Date formatting.
@@ -748,6 +702,7 @@ class Time(object):
     def dut1(self):
         ts = self.ts
         i = searchsorted(ts._leap_reverse_dates, self.tai, 'right')
+        print(32.184, ts.leap_offsets[i], self.delta_t)
         return 32.184 + ts.leap_offsets[i] - self.delta_t
 
     @reify
@@ -828,7 +783,13 @@ class Time(object):
     def NT(self): return rollaxis(self.N, 1)
 
 def julian_day(year, month=1, day=1, julian_before=None):
-    """Given a proleptic Gregorian calendar date, return a Julian day int."""
+    """Given a calendar date, return a Julian day integer.
+
+    Uses the proleptic Gregorian calendar unless ``julian_before`` is
+    set to a specific Julian day, in which case the Julian calendar is
+    used for dates older than that.
+
+    """
     # See the Explanatory Supplement to the Astronomical Almanac 15.11.
     janfeb = month <= 2
     g = year + 4716 - janfeb
@@ -857,29 +818,9 @@ def julian_date_of_besselian_epoch(b):
 def compute_calendar_date(jd_integer, julian_before=None):
     """Convert Julian day ``jd_integer`` into a calendar (year, month, day).
 
-    By default, this returns a proleptic Gregorian date.  If you instead
-    want to use the Julian calendar for old dates, provide a Julian day
-    ``julian_before`` on which the calendar should cut over.  One
-    popular choice is the date on which Pope Gregory adopted the new
-    calendar in October 1582:
-
-    >>> gregory = 2299161
-    >>> for jd in range(gregory - 2, gregory + 2):
-    ...     print(compute_calendar_date(jd, gregory))
-    (1582, 10, 3)
-    (1582, 10, 4)
-    (1582, 10, 15)
-    (1582, 10, 16)
-
-    Another is the date on which England switched in September 1752:
-
-    >>> england = 2361222
-    >>> for jd in range(england - 2, england + 2):
-    ...     print(compute_calendar_date(jd, england))
-    (1752, 9, 1)
-    (1752, 9, 2)
-    (1752, 9, 14)
-    (1752, 9, 15)
+    Uses the proleptic Gregorian calendar unless ``julian_before`` is
+    set to a specific Julian day, in which case the Julian calendar is
+    used for dates older than that.
 
     """
     use_gregorian = (julian_before is None) or (jd_integer >= julian_before)

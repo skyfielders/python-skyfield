@@ -5,15 +5,13 @@
 
 .. currentmodule:: skyfield.timelib
 
-Astronomers use several numerical scales to measure time.
-Skyfield often has to use more than one of them within a single computation!
-The `Time` class is used to represent a single moment in time,
-or an array of such moments.
-It keeps track of all the different ways the same moment
-might be designated in different time scales.
-It performs this conversion using data tables
-that are stored in the `Timescale` object
-that was used to create it:
+Astronomers use a variety of different scales to measure time.
+Skyfield often has to use several timescales within a single computation!
+The `Time` class is how Skyfield represents either a single moment in time
+or a whole array of moments,
+and keeps track of all of the different designations
+assigned to that moment
+by the various standard time scales:
 
 .. testsetup::
 
@@ -24,74 +22,129 @@ that was used to create it:
 
 .. testcode::
 
-    # Building a time object
-
     from skyfield.api import load
-    ts = load.timescale()     # Timescale object
-    t = ts.utc(2014, 1, 18)   # Time object
+    ts = load.timescale()
+    t = ts.tt(2000, 1, 1, 12, 0)
 
-    print(t.tai)
-    print(t.tt)
-    print(t.tdb)
+    print('TT date and time: ', t.tt_strftime())
+    print('TAI date and time:', t.tai_strftime())
+    print('UTC date and time:', t.utc_strftime())
+    print('TDB Julian date: {:.10f}'.format(t.tdb))
+    print('Julian century: {:.1f}'.format(t.J))
 
 .. testoutput::
 
-    2456675.5004050927
-    2456675.5007775924
-    2456675.5007775975
+    TT date and time:  2000-01-01 12:00:00 TT
+    TAI date and time: 2000-01-01 11:59:28 TAI
+    UTC date and time: 2000-01-01 11:58:56 UTC
+    TDB Julian date: 2451544.9999999991
+    Julian century: 2000.0
 
+The `Timescale` object returned by ``load.timescale()``
+manages the conversions between different time scales
+and is also how the programmer builds `Time` objects for specific dates.
 Most applications create only one `Timescale` object,
-which is conventionally named ``ts``,
+which Skyfield programmers conventionally name ``ts``,
 and use it to build all of their times.
 
-Each `Time` object only computes a given timescale
-the first time it’s asked.
-On subsequent requests for the same timescale,
-it returns the value that it cached the first time,
-without recomputing it.
-This has an important consequence:
-if your program will need to do several computations for the same time,
-be sure to use the same `Time` object for all of them.
-Otherwise your separate time objects
-will have to compute the same time scales all over again.
-See the :ref:`date-cache` section below for more details.
+For quick reference,
+here are the supported timescales:
 
-Each time scale supported by :class:`Time`
-is described in detail in one of the sections below.
-The supported time scales are:
+* UTC — Coordinated Universal Time (“Greenwich Time”)
+* UT1 — Universal Time
+* TAI — International Atomic Time
+* TT — Terrestrial Time
+* TDB — Barycentric Dynamical Time (the JPL’s *T*\ :sub:`eph`)
 
-* ``t.utc`` — Coordinated Universal Time (“Greenwich Time”)
-* ``t.ut1`` — Universal Time
-* ``t.tai`` — International Atomic Time
-* ``t.tt`` and ``t.J`` — Terrestrial Time
-* ``t.tdb`` — Barycentric Dynamical Time (the JPL’s *T*\ :sub:`eph`)
+And here are links to the API documentation for time scales and times:
 
-You can build a `Time` from several different source timescales.
-Here’s a summary.
+* :ref:`api-Timescale`
+* :ref:`api-Time`
 
-::
+.. _choice of calendars:
 
-    # All the ways you can create a Time object:
+Ancient and modern dates
+========================
 
-    t = ts.utc(year, month, day, hour, minute, second)
-    t = ts.from_datetime(dt)
-    t = ts.from_datetimes([dt1, dt2, ...])
-    t = ts.now()
+Skyfield normally uses the modern Gregorian calendar,
+even for dates in history before the Gregorian calendar’s adoption in 1582.
+This “proleptic” use of Gregorian dates
+makes date calculations simple,
+is compatible with Python’s ``datetime``,
+and is also the behavior of the United States Naval Observatory library
+on which many Skyfield routines were originally based.
 
-    t = ts.tai(year, month, day, hour, minute, second)
-    t = ts.tai_jd(floating_point_Julian_date)
+But the Gregorian calendar is awkward
+for historians and students of ancient astronomy,
+because the calendar in actual use before 1582
+was the old Julian calendar
+established by Julius Caesar’s calendar reform in 45 BC.
+The two calendars agree over the century
+between the leap day of AD 200 and the leap day of AD 300.
+But because the Julian calendar is not quite synchronized with the seasons,
+its dates run ahead of the Gregorian calendar before that century
+and run behind the Gregorian calendar after it.
 
-    t = ts.tt(year, month, day, hour, minute, second)
-    t = ts.tt_jd(floating_point_Julian_date)
-    t = ts.J(floating_point_Julian_year)
+If you would like Skyfield
+to switch to the Julian calendar for historical dates —
+both when interpreting the dates you input,
+and when producing calendar dates as output —
+simply give your ``Timescale`` object
+the Julian date on which you would like the calendar to switch.
 
-    t = ts.tdb(year, month, day, hour, minute, second)
-    t = ts.tdb_jd(floating_point_Julian_date)
+.. testcode::
 
-    t = ts.ut1(year, month, day, hour, minute, second)
-    t = ts.ut1_jd(floating_point_Julian_date)
+    from skyfield.api import GREGORIAN_START
 
-The meaning of each timescale is discussed in the sections below.
+    ts.julian_calendar_cutoff = GREGORIAN_START
+
+    t = ts.tt_jd(range(2299159, 2299163))
+    for s in t.tt_strftime():
+        print(s)
+
+.. testoutput::
+
+    1582-10-03 12:00:00 TT
+    1582-10-04 12:00:00 TT
+    1582-10-15 12:00:00 TT
+    1582-10-16 12:00:00 TT
+
+As you can see from these four successive days in history,
+Pope Gregory had the calendar jump
+from the Julian calendar date 1582 October 4
+to the Gregorian calendar date October 15 the next day
+in order to bring the date of Easter back into sync with the equinox.
+Skyfield provides two constants for popular cutoff dates:
+
+* ``GREGORIAN_START`` — Julian day 2299161,
+  on which the new Gregorian calendar went into effect in Rome.
+
+* ``GREGORIAN_START_ENGLAND`` — Julian day 2361222,
+  on which the new Gregorian calendar went into effect in England in 1752
+  (the reform having initially been rejected by the English bishops,
+  “Seeing that the Bishop of Rome is Antichrist,
+  therefore we may not communicate with him in any thing”).
+
+You are free to choose your own cutoff Julian date
+if you are studying astronomy records from a country
+that adopted the Gregorian calendar on some other date.
+Russia, for example, did not adopt it until the twentieth century.
+The default value, that always uses Gregorian dates, is ``None``:
+
+.. testcode::
+
+    ts.julian_calendar_cutoff = None
+
+Note that even the Julian calendar becomes anachronistic
+before its adoption in 45 BC,
+so all dates generated by Skyfield are “proleptic” before that date.
+And, of course, the Julian calendar
+was local to the civilization that ringed the Mediterranean.
+If you are interested in relating astronomical events
+to more ancient Roman calendars,
+or the calendars of other civilizations,
+try searching for a third-party Python package
+that supports the calendar you are interested in.
 
 .. _building-dates:
 
@@ -378,37 +431,42 @@ Date arrays
 ===========
 
 If you want to ask where a planet or satellite was
-at a whole list of different times and dates,
-then Skyfield will work most efficiently
-if you build a single :class:`Time` object
-that holds an entire array of dates,
-instead of building many separate :class:`Time` objects.
-There are three techniques for building arrays.
+across a whole series of times and dates,
+then Skyfield will work most efficiently if,
+instead of building many separate :class:`Time` objects,
+you build a single :class:`Time` object that holds the entire array of dates.
 
-* Provide ``ts.utc()`` with a Python list of ``datetime`` objects.
+There are three techniques for building a `Time` array.
 
-* Provide ``tai()`` or ``tt()`` or ``tdb()`` or ``ut1()``
-  with an entire NumPy array or Python list of floating point values.
+* Provide :meth:`~Timescale.tai()` or :meth:`~Timescale.tt()`
+  or :meth:`~Timescale.tdb()` or :meth:`~Timescale.ut1()`
+  with a Python list or NumPy array of numbers
+  for one of the six components of the calendar date
+  (year, month, day, hour, minute, or second).
 
-* When specifying year, month, day, hour, minute, and second,
-  make one of the values a list or array.
+* Provide :meth:`~Timescale.tai_jd()` or :meth:`~Timescale.tt_jd()`
+  or :meth:`~Timescale.tdb_jd()` or :meth:`~Timescale.ut1_jd()`
+  with a list or NumPy array of floating point numbers.
 
-The last possibility is generally the one that is the most fun,
+* Provide :meth:`~Timescale.from_datetimes()`
+  with a Python list of ``datetime`` objects.
+
+The first possibility is generally the one that is the most fun,
 because its lets you vary whichever time unit you want
-while holding the others steady.
-And you are free to provide out-of-range values
+while holding the others constant.
+You are free to provide out-of-range values
 and leave it to Skyfield to work out the correct result.
 Here are some examples::
 
     ts.utc(range(1900, 1950))     # Fifty years 1900–1949
-    ts.utc(1980, range(1, 25))    # Twenty-four months
-    ts.utc(2005, 5, [1, 10, 20])  # 1st, 10th, and 20th of May
+    ts.utc(1980, range(1, 25))    # 24 months of 1980 and 1981
+    ts.utc(2005, 5, [1, 11, 21])  # 1st, 11th, and 21st of May
 
-    # The ten seconds crossing the 1974 leap second
+    # Negative values work too!  Here are the
+    # ten seconds crossing the 1974 leap second.
     ts.utc(1975, 1, 1, 0, 0, range(-5, 5))
 
-The resulting :class:`Time` object will hold an array of times
-instead of just a single scalar value.
+The resulting :class:`Time` object will hold an array of times.
 As illustrated in the previous section (on leap seconds),
 you can use a Python ``for`` to print each time separately:
 
@@ -416,8 +474,8 @@ you can use a Python ``for`` to print each time separately:
 
     t = ts.utc(2020, 6, 16, 7, range(4))
 
-    for ti in t:
-        print(ti.utc_strftime('%Y-%m-%d %H:%M'))
+    for s in t.utc_strftime('%Y-%m-%d %H:%M'):
+        print(s)
 
 .. testoutput::
 
@@ -532,9 +590,9 @@ one of which is less efficient and the other more efficient.
     2014-01-03  x = -0.21 y = 0.88 z = 0.38
     2014-01-04  x = -0.23 y = 0.88 z = 0.38
 
-Finally, converting an array Julian date back into a calendar tuple
-results in the year, month, and all of the other values
-being as deep as the array itself:
+Finally, converting an array `Time` back into a calendar tuple
+results in the year, month, day, hour, minute, and second
+each having the same dimension as the array itself:
 
 .. testcode::
 
@@ -549,7 +607,7 @@ being as deep as the array itself:
      [   0.    0.    0.    0.]
      [   0.    0.    0.    0.]]
 
-Again, simply slice across the second dimension of the array
+Simply slice across the second dimension of the array
 to pull a particular calendar tuple out of the larger result:
 
 .. testcode::
@@ -560,7 +618,8 @@ to pull a particular calendar tuple out of the larger result:
 
     [2014.    1.    3.    0.    0.    0.]
 
-The rows can be fetched not only by index
+Slicing in the other direction,
+the rows can be fetched not only by index
 but also through the attribute names ``year``, ``month``, ``day``,
 ``hour``, ``minute``,  and ``second``.
 
