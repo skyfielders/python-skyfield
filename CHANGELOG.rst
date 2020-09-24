@@ -13,6 +13,11 @@ Changelog
   permanent solution is discussed at:
   `#454 <https://github.com/skyfielders/python-skyfield/issues/454>`_
 
+* To unblock this release, removed a few deprecated pre-1.0 experiments
+  from April 2015 in ``skyfield.hipparcos`` and ``skyfield.named_stars``
+  that broke because the Hipparcos catalog is no longer compressed;
+  hopefully no one was using them.
+
 * In a sweeping internal change, the :meth:`~skyfield.timelib.Timescale`
   and :meth:`~skyfield.timelib.Time` objects now offer support for the
   Julian calendar that’s used by historians for dates preceding the
