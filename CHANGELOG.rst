@@ -2,6 +2,23 @@
 Changelog
 =========
 
+1.28 — 2020 September 24
+------------------------
+
+* **Broken URL:** Because the VizieR archive apparently decided to
+  uncompress their copy of the ``hip_main.dat.gz`` Hipparcos catalog
+  file, the old URL now returns a 404 error.  As an emergency fix, this
+  version of Skyfield switches to their uncompressed ``hip_main.dat``.
+  Hopefully they don’t compress it again and break the new URL!  A more
+  permanent solution is discussed at:
+  `#454 <https://github.com/skyfielders/python-skyfield/issues/454>`_
+
+* In a sweeping internal change, the :meth:`~skyfield.timelib.Timescale`
+  and :meth:`~skyfield.timelib.Time` objects now offer support for the
+  Julian calendar that’s used by historians for dates preceding the
+  adoption of the Gregorian calendar in 1582.  See `choice of calendars`
+  if you want to turn on Julian dates in your application.
+
 1.27 — 2020 September 15
 ------------------------
 

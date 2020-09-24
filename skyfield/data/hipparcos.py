@@ -5,7 +5,23 @@ from skyfield.timelib import T0
 from skyfield.units import Angle
 
 days = T0 - 2448349.0625
-URL = 'http://cdsarc.u-strasbg.fr/ftp/cats/I/239/hip_main.dat.gz'
+
+# This URL worked until September 2020:
+
+#URL = 'http://cdsarc.u-strasbg.fr/ftp/cats/I/239/hip_main.dat.gz'
+
+# Then someone at VizieR apparently ran `gunzip` on the file, breaking
+# the existing URL.  The fastest fix is for us to switch to:
+
+URL = 'https://cdsarc.u-strasbg.fr/ftp/cats/I/239/hip_main.dat'
+
+# But what if someone runs `gzip` on the file again?  Then the new URL
+# will break like the old one did.  It appears that VizieR makes no
+# guarantee that raw catalog URLs are stable, and that we need to switch
+# to one of their catalog generation URLs, which produce text in a new
+# format that Skyfield will have to learn.  Discussion at:
+# https://github.com/skyfielders/python-skyfield/issues/454
+
 url = URL  # old name, in case anyone used it
 
 def parse(line):
@@ -56,7 +72,7 @@ _COLUMN_NAMES = (
     'CPD', '(V-I)red', 'SpType', 'r_SpType',
 )
 
-def load_dataframe(fobj, compression='gzip'):
+def load_dataframe(fobj):
     """Given an open file for `hip_main.dat.gz`, return a parsed dataframe.
 
     If your copy of ``hip_main.dat`` has already been unzipped, pass the
@@ -69,7 +85,7 @@ def load_dataframe(fobj, compression='gzip'):
         raise ImportError(PANDAS_MESSAGE)
 
     df = read_csv(
-        fobj, sep='|', compression=compression, names=_COLUMN_NAMES,
+        fobj, sep='|', names=_COLUMN_NAMES,
         usecols=['HIP', 'Vmag', 'RAdeg', 'DEdeg', 'Plx', 'pmRA', 'pmDE'],
         na_values=['     ', '       ', '        ', '            '],
     )
