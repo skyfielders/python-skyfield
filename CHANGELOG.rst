@@ -2,6 +2,14 @@
 Changelog
 =========
 
+1.29 — 2020 September 25
+------------------------
+
+* Fixed the new Julian calendar feature, which was raising an exception
+  in the calendar routines like `~skyfield.timelib.Time.tt_calendar()`
+  if the time object was in fact an array of times.
+  `#450 <https://github.com/skyfielders/python-skyfield/issues/450>`_
+
 1.28 — 2020 September 24
 ------------------------
 
@@ -23,6 +31,7 @@ Changelog
   Julian calendar that’s used by historians for dates preceding the
   adoption of the Gregorian calendar in 1582.  See `choice of calendars`
   if you want to turn on Julian dates in your application.
+  `#450 <https://github.com/skyfielders/python-skyfield/issues/450>`_
 
 1.27 — 2020 September 15
 ------------------------
