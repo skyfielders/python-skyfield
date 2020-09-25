@@ -796,9 +796,9 @@ def julian_day(year, month=1, day=1, julian_before=None):
     f = (month + 9) % 12
     e = 1461 * g // 4 + day - 1402
     J = e + (153 * f + 2) // 5
-    if (julian_before is None) or (J >= julian_before):
-        J += 38
-        J -= (g + 184) // 100 * 3 // 4
+
+    mask = 1 if (julian_before is None) else (J >= julian_before)
+    J += (38 - (g + 184) // 100 * 3 // 4) * mask
     return J
 
 def julian_date(year, month=1, day=1, hour=0, minute=0, second=0.0):

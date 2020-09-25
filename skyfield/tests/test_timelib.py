@@ -450,10 +450,22 @@ def test_raw_julian_gregorian_cutover():
     assert compute_calendar_date(gregory + 0, gregory) == (1582, 10, 15)
     assert compute_calendar_date(gregory + 1, gregory) == (1582, 10, 16)
 
+    jd = np.arange(gregory - 2, gregory + 2)
+    assert [list(a) for a in compute_calendar_date(jd, gregory)] == [
+        [1582, 1582, 1582, 1582],
+        [10, 10, 10, 10],
+        [3, 4, 15, 16],
+    ]
+
     assert julian_day(1582, 10, 3, gregory) == (gregory - 2)
     assert julian_day(1582, 10, 4, gregory) == (gregory - 1)
     assert julian_day(1582, 10, 15, gregory) == (gregory + 0)
     assert julian_day(1582, 10, 16, gregory) == (gregory + 1)
+
+    days = [3, 4, 15, 16]
+    assert list(julian_day(1582, 10, np.array(days), gregory)) == [
+        2299159, 2299160, 2299161, 2299162,
+    ]
 
 def test_constructor_julian_gregorian_cutover(ts, time_scale_name):
     if sys.version_info <= (3,):
