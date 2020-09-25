@@ -45,6 +45,11 @@ def test_time_creation_methods(ts, continuous_timescale, time_value):
     string = strftime('%S.%f')
     assert string == '37.500000'
 
+def test_is_time_iterable(ts, time_scale_name):
+    t = getattr(ts, time_scale_name)(2020, 9, (25, 26))
+    for item in t:
+        pass
+
 def test_strftime_on_prehistoric_dates(ts):
     if sys.version_info <= (3,):
         return  # Python 2 time.strftime() complains about negative years

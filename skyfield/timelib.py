@@ -292,7 +292,7 @@ class Timescale(object):
         # and look for the notebook "error-in-timescale-ut1.ipynb".
         delta_t_approx /= DAY_S
         t = Time(self, ut1, delta_t_approx)
-        t.ut1_fraction = 0.0
+        t.ut1_fraction = 0.0 * ut1
         return t
 
     def from_astropy(self, t):
