@@ -5,10 +5,13 @@ Changelog
 1.29 — 2020 September 25
 ------------------------
 
-* Fixed the new Julian calendar feature, which was raising an exception
-  in the calendar routines like `~skyfield.timelib.Time.tt_calendar()`
-  if the time object was in fact an array of times.
+* Fix: the new Julian calendar feature was raising an exception in the
+  calendar methods like :meth:`~skyfield.timelib.Time.tt_calendar()` if
+  the time object was in fact an array of times.
   `#450 <https://github.com/skyfielders/python-skyfield/issues/450>`_
+
+* Fix: trying to iterate over a time object would raise an exception if
+  the time was created through :meth:`~skyfield.timelib.Timescale.ut1()`.
 
 1.28 — 2020 September 24
 ------------------------
