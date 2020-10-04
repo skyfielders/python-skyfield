@@ -702,7 +702,6 @@ class Time(object):
     def dut1(self):
         ts = self.ts
         i = searchsorted(ts._leap_reverse_dates, self.tai, 'right')
-        print(32.184, ts.leap_offsets[i], self.delta_t)
         return 32.184 + ts.leap_offsets[i] - self.delta_t
 
     @reify
