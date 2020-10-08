@@ -183,6 +183,12 @@ class Timescale(object):
         # version of calendar_tuple() that returns it to us for use here?
         weekday = (fraction + 0.5 + _to_array(jd)).astype(int) % 7
 
+        if _format_uses_day_of_year(format):
+            start_of_year = julian_day(year, 1, 1, self.julian_calendar_cutoff)
+            yday = (jd + fraction + 1.5 - start_of_year).astype(int)
+        else:
+            yday = z
+
         if ms:
             format = format[:ms.start()] + '%Z' + format[ms.end():]
             second = (second * 1e6).astype(int)
@@ -191,16 +197,17 @@ class Timescale(object):
                 second += seconds_bump
             if getattr(jd, 'ndim', 0):
                 u = ['%06d' % u for u in usec]
-                tup = year, month, day, hour, minute, second, weekday, z, z, u
+                tup = (year, month, day, hour, minute, second,
+                       weekday, yday, z, u)
                 return [strftime(format, struct_time(t)) for t in zip(*tup)]
             u = '%06d' % usec
-            tup = year, month, day, hour, minute, second, weekday, z, z, u
+            tup = year, month, day, hour, minute, second, weekday, yday, z, u
             return strftime(format, struct_time(tup))
         else:
             second = second.astype(int)
             if seconds_bump is not None:
                 second += seconds_bump
-            tup = year, month, day, hour, minute, second, weekday, z, z
+            tup = year, month, day, hour, minute, second, weekday, yday, z
             if getattr(jd, 'ndim', 0):
                 return [strftime(format, item) for item in zip(*tup)]
             return strftime(format, tup)
@@ -938,6 +945,7 @@ def build_delta_t_table(delta_t_recent):
 _format_uses_milliseconds = re.compile(r'%[-_0^#EO]*f').search
 _format_uses_seconds = re.compile(r'%[-_0^#EO]*[STXc]').search
 _format_uses_minutes = re.compile(r'%[-_0^#EO]*[MR]').search
+_format_uses_day_of_year = re.compile(r'%[-_0^#EO]*j').search
 
 def _datetime_to_utc_tuple(dt):
     z = dt.tzinfo

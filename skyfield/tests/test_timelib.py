@@ -349,17 +349,26 @@ def test_jpl_format(ts):
         'A.D. 0300-Jul-01 00:00:00.0000 UT',
         ]
 
-def test_stftime_of_a_leap_second(ts):
+def test_strftime_of_a_leap_second(ts):
     t = ts.utc(1973, 12, 31, 23, 59, 60)
     assert t.utc_strftime('%Y %m %d %H %M %S') == '1973 12 31 23 59 60'
 
-def test_stftime_of_date_array_over_a_leap_second(ts):
+def test_strftime_of_date_array_over_a_leap_second(ts):
     t = ts.utc(1973, 12, 31, 23, 59, np.arange(59.0, 61.1, 1.0))
     assert t.utc_strftime('%a %Y %m %d %H %M %S') == [
         'Mon 1973 12 31 23 59 59',
         'Mon 1973 12 31 23 59 60',
         'Tue 1974 01 01 00 00 00',
     ]
+
+def test_strftime_day_of_year(ts):
+    # Based on example date at https://strftime.org/
+    assert ts.utc(2013, 9, 29).utc_strftime('%j') == '272'
+    assert ts.utc(2013, 9, 30).utc_strftime('%j') == '273'
+    assert ts.utc(2013, 9, 30, 23, 59).utc_strftime('%j') == '273'
+    assert ts.utc(2013, 9, 30, 23, 60).utc_strftime('%j') == '274'
+
+    assert ts.utc(2013, 9, [29, 30]).utc_strftime('%j') == ['272', '273']
 
 def test_leap_second(ts):
 
