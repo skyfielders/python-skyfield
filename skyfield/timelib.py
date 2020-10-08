@@ -4,7 +4,7 @@ import re
 from collections import namedtuple
 from datetime import date, datetime
 from numpy import (array, concatenate, cos, float_, interp, isnan, nan,
-                   ndarray, pi, rollaxis, searchsorted, sin, where)
+                   ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime, struct_time
 from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .descriptorlib import reify
@@ -215,12 +215,11 @@ class Timescale(object):
         t.tai_fraction = fraction
         return t
 
-    def tai_jd(self, jd, fraction=0.0):
+    def tai_jd(self, jd, fraction=None):
         """Build a `Time` from an International Atomic Time Julian date."""
-        whole, fraction2 = divmod(_to_array(jd), 1.0)
-        fraction2 += fraction
-        t = Time(self, whole, fraction2 + tt_minus_tai)
-        t.tai_fraction = fraction2
+        jd, fraction = _normalize_jd_and_fraction(jd, fraction)
+        t = Time(self, jd, fraction + tt_minus_tai)
+        t.tai_fraction = fraction
         return t
 
     def tt(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
@@ -231,11 +230,10 @@ class Timescale(object):
         whole, fraction = self._jd(year, month, day, hour, minute, second)
         return Time(self, whole, fraction)
 
-    def tt_jd(self, jd, fraction=0.0):
+    def tt_jd(self, jd, fraction=None):
         """Build a `Time` from a Terrestrial Time Julian date."""
-        whole, fraction2 = divmod(_to_array(jd), 1.0)
-        fraction2 += fraction
-        return Time(self, whole, fraction2)
+        jd, fraction = _normalize_jd_and_fraction(jd, fraction)
+        return Time(self, jd, fraction)
 
     def J(self, year):
         """Build a `Time` from a Terrestrial Time Julian year or array.
@@ -257,12 +255,11 @@ class Timescale(object):
         jd = whole + fraction  # TODO: why do tests break if we pass separately
         return Time(self, jd, - tdb_minus_tt(jd) / DAY_S)
 
-    def tdb_jd(self, jd, fraction=0.0):
+    def tdb_jd(self, jd, fraction=None):
         """Build `Time` from a Barycentric Dynamical Time Julian date."""
-        whole, fraction2 = divmod(jd, 1.0)
-        fraction2 += fraction
-        t = Time(self, whole, fraction2 - tdb_minus_tt(jd, fraction) / DAY_S)
-        t.tdb_fraction = fraction2
+        jd, fraction = _normalize_jd_and_fraction(jd, fraction)
+        t = Time(self, jd, fraction - tdb_minus_tt(jd, fraction) / DAY_S)
+        t.tdb_fraction = fraction
         return t
 
     def ut1(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
@@ -302,22 +299,21 @@ class Timescale(object):
 class Time(object):
     """A single moment in history, or an array of several moments.
 
-    You will not typically instantiate this class yourself, but will
-    rely on a Skyfield ``Timescale`` object to build dates for you:
-
-    >>> t = ts.utc(1980, 1, 1)
-    >>> print(t)
-    <Time tt=2444239.5005924073>
-
-    Times are represented internally by a pair of floating point Julian
-    dates, but can be converted to other formats by using the many
-    methods that time objects make available.
+    Skyfield programs don’t usually instantiate this class directly, but
+    instead build time objects using one of the timescale methods listed
+    at `timescale-summary`.  If you do attempt the low-level operation
+    of building a time object yourself, either leave ``tt_fraction`` at
+    its default value of ``None`` — in which case Skyfield will assume
+    the fraction is zero — or provide a ``tt_fraction`` array that has
+    exactly the same dimensions as your ``tt`` array.
 
     """
     psi_correction = 0.0  # TODO: temporarily unsupported
     eps_correction = 0.0  # TODO: temporarily unsupported
 
-    def __init__(self, ts, tt, tt_fraction=0.0):
+    def __init__(self, ts, tt, tt_fraction=None):
+        if tt_fraction is None:
+            tt_fraction = zeros_like(tt)
         self.ts = ts
         self.whole = tt
         self.tt_fraction = tt_fraction
@@ -951,6 +947,14 @@ def _datetime_to_utc_tuple(dt):
         dt = dt.astimezone(utc)
     return (dt.year, dt.month, dt.day,
             dt.hour, dt.minute, dt.second + dt.microsecond / 1e6)
+
+def _normalize_jd_and_fraction(jd, fraction):
+    jd = _to_array(jd)
+    if fraction is None:
+        jd, fraction = divmod(jd, 1.0)
+    else:
+        jd, fraction = _reconcile(jd, _to_array(fraction))
+    return jd, fraction
 
 _JulianDate_deprecation_message = """Skyfield no longer supports direct\
  instantiation of JulianDate objects (which are now called Time objects)

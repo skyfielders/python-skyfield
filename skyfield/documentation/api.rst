@@ -41,6 +41,8 @@ Opening files
 
 .. _api-Timescale:
 
+.. _timescale-summary:
+
 Time scales
 ===========
 

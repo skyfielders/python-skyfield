@@ -7,7 +7,7 @@ from pytz import timezone
 from skyfield import api
 from skyfield.constants import DAY_S, T0
 from skyfield.timelib import (
-    GREGORIAN_START, GREGORIAN_START_ENGLAND,
+    GREGORIAN_START, GREGORIAN_START_ENGLAND, Time,
     calendar_tuple, compute_calendar_date, julian_date, julian_day, utc,
 )
 from datetime import datetime
@@ -21,6 +21,40 @@ time_value = [(1973, 1, 18, 1, 35, 37.5), 2441700.56640625]
 
 def ts():
     yield api.load.timescale()
+
+def a(*args):
+    return np.array(args)
+
+def all_kinds_of_time_array(ts):
+    yield ts.utc(2020, 10, [8, 9])
+    yield ts.tai(2020, 10, [8, 9])
+    yield ts.tt(2020, 10, [8, 9])
+    yield ts.tdb(2020, 10, [8, 9])
+    yield ts.ut1(2020, 10, [8, 9])
+
+    jd = a(2459130.5, 2459131.5)
+
+    yield ts.tai_jd(jd)
+    yield ts.tt_jd(jd)
+    yield ts.tdb_jd(jd)
+    yield ts.ut1_jd(jd)
+    yield Time(ts, jd)
+
+    for jd, fraction in [
+            (a(2459130.5, 2459131.5), 0.25),
+            (2459130.5, a(0.0, 0.25)),
+            (a(2459130.5, 2459131.5), a(0.0, 0.25)),
+    ]:
+        yield ts.tai_jd(jd, fraction)
+        yield ts.tt_jd(jd, fraction)
+        yield ts.tdb_jd(jd, fraction)
+        # yield ts.ut1_jd(jd, fraction)  # not yet supported
+
+    # We only support direct Time instantiation for the final case,
+    # where jd and fraction are arrays that already agree in their
+    # dimensions.
+
+    yield Time(ts, jd, fraction)
 
 def test_time_creation_methods(ts, continuous_timescale, time_value):
     method = getattr(ts, continuous_timescale)
@@ -44,6 +78,10 @@ def test_time_creation_methods(ts, continuous_timescale, time_value):
 
     string = strftime('%S.%f')
     assert string == '37.500000'
+
+def test_time_can_be_indexed(ts):
+    for t in all_kinds_of_time_array(ts):
+        t[0]
 
 def test_is_time_iterable(ts, time_scale_name):
     t = getattr(ts, time_scale_name)(2020, 9, (25, 26))
