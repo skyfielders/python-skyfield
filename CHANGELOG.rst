@@ -2,6 +2,25 @@
 Changelog
 =========
 
+1.30 — 2020 October 11
+----------------------
+
+* The various ``strftime()`` Skyfield methods now support the ``%j``
+  day-of-year format code.
+
+* Fix: the new Julian calendar support broke support for out-of-range
+  month numbers, wrapping them into the current year instead of letting
+  them overflow into subsequent years.
+  `#461 <https://github.com/skyfielders/python-skyfield/issues/461>`_
+
+* Fix: a stray debugging ``print()`` statement was stranded in ``t.dut1``.
+  `#455 <https://github.com/skyfielders/python-skyfield/issues/455>`_
+
+* The :class:`~skyfield.timelib.Time` object, if manually instantiated
+  without a Julian date fraction, now provides a fraction array with
+  dimensions that match the Julian date argument.
+  `#458 <https://github.com/skyfielders/python-skyfield/issues/458>`_
+
 1.29 — 2020 September 25
 ------------------------
 
