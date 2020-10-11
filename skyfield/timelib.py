@@ -792,6 +792,11 @@ def julian_day(year, month=1, day=1, julian_before=None):
     used for dates older than that.
 
     """
+    # Support months <1 and >12 by overflowing cleanly into adjacent years.
+    y, month = divmod(month - 1, 12)
+    year = year + y
+    month += 1
+
     # See the Explanatory Supplement to the Astronomical Almanac 15.11.
     janfeb = month <= 2
     g = year + 4716 - janfeb

@@ -79,6 +79,13 @@ def test_time_creation_methods(ts, continuous_timescale, time_value):
     string = strftime('%S.%f')
     assert string == '37.500000'
 
+def test_months_overflow_correctly(ts):
+    assert ts.tt(2020, -1).tt_strftime('%Y-%m') == '2019-11'
+    assert ts.tt(2020, 15).tt_strftime('%Y-%m') == '2021-03'
+    assert ts.tt(2020, [-1, 0, 1, 13, 14, 15]).tt_strftime('%Y-%m') == [
+        '2019-11', '2019-12', '2020-01', '2021-01', '2021-02', '2021-03',
+    ]
+
 def test_time_can_be_indexed(ts):
     for t in all_kinds_of_time_array(ts):
         t[0]
