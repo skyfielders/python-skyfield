@@ -13,6 +13,7 @@ Choosing a source for ∆T
 import argparse
 import re
 import sys
+from time import time
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,23 +30,73 @@ def main(argv):
     # args = parser.parse_args(argv)
     # print(args.accumulate(args.integers))
 
-    draw_plot_comparing_USNO_and_IERS_data()
+    #draw_plot_comparing_USNO_and_IERS_data()
+    reduce_IERS_data()
 
 RE = re.compile(b'^(..)(..)(..)' + b'.' * 52 + b'(.\d........)', re.M)
+
+def reduce_IERS_data():
+    f = load.open('finals.all')
+    iers.parse_dut1_from_finals_all(f)
+    year, month, day, dut1 = iers.parse_dut1_from_finals_all(f)
+
+    ts = load.timescale()
+    print(ts.delta_t_table)
 
 def draw_plot_comparing_USNO_and_IERS_data():
     f = load.open('finals.all')
     year, month, day, dut1 = iers.parse_dut1_from_finals_all(f)
+
+    # auto-detect leap seconds
+    leap_seconds = np.diff(dut1) > 0.9
+    #x = np.append(leap_seconds > 0.9, False)
+    #x = np.prepend(leap_seconds > 0.9, False)
+    #x = np.concatenate([leap_seconds > 0.9, [False]]).astype(bool)
+    x = np.concatenate([[False], leap_seconds, ])
+    print(x)
+    print(x, sum(x))
+    print(year[x])
+    print(month[x])
+    print(day[x])
+
+    delta_t = dut1 - np.cumsum(x)
 
     ts = load.timescale()
     t = ts.utc(year, month, day)
     y_new = dut1
     y_old = t.dut1
 
+
+
+    # and: figure out error cost of interpolating weeks or months
+    all_points = np.arange(len(delta_t))
+    samples = all_points[::600] + 0.001
+    print(f'{len(samples)} samples')
+
+    for skip in range(1, 40):
+        index = np.arange(0, len(delta_t), skip)
+        excerpt = delta_t[index]
+        interpolated = np.interp(all_points, index, excerpt)
+        difference_seconds = abs(interpolated - delta_t).max()
+        difference_arcseconds = difference_seconds / 24.0 * 360.0
+        storage = 4 * len(excerpt)
+
+        t0 = time()
+        np.interp(samples, index, excerpt)
+        duration = time() - t0
+
+        fmt = '{:2} days  {:10.6f} s   {:10.6f} arcseconds  {} bytes  {:.6f} s'
+        print(fmt.format(
+            skip, difference_seconds, difference_arcseconds, storage, duration,
+        ))
+    #print(dut1)
+
     fig, ax = plt.subplots()
     ax.set(xlabel='Year', title='UT1 minus UTC')
-    ax.plot(t.J, y_old, '-', label='deltat.dat')
-    ax.plot(t.J, y_new, ',', label='finals.all')
+    # ax.plot(t.J, y_old, '-', label='deltat.dat')
+    # ax.plot(t.J, y_new, ',', label='finals.all')
+    ax.plot(delta_t)
+    ax.plot(np.diff(delta_t))
     ax.grid()
     plt.legend()
     fig.savefig('tmp.png')
