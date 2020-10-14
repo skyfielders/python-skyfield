@@ -34,43 +34,20 @@ def main(argv):
     # print(args.accumulate(args.integers))
 
     #draw_plot_comparing_USNO_and_IERS_data()
-    reduce_IERS_data()
 
-RE = re.compile(b'^(..)(..)(..)' + b'.' * 52 + b'(.\d........)', re.M)
-
-def reduce_IERS_data():
     f = load.open('finals.all')
     mjd, dut1 = iers.parse_dut1_from_finals_all(f)
-    jd = mjd + 2400000.5
-    # print(dut1)
-
-    leap_second_indices = np.concatenate([[False], np.diff(dut1) > 0.9])
-    delta_t2 = np.cumsum(leap_second_indices) - dut1 + 32.184 + 12.0
-
-    delta_t_recent = np.array([jd, delta_t2])
-    #print(delta_t_recent)
-
-    leap_dates = 2400000.5 + np.concatenate([
-        [-inf], [41317.0, 41499.0, 41683.0], mjd[leap_second_indices], [inf],
-    ])
-    #print(leap_dates)
-    leap_offsets = np.concatenate([
-        [10.0, 10.0], np.arange(10, len(leap_dates) + 8),
-    ])
-    print(leap_offsets)
+    delta_t_recent, leap_dates, leap_offsets = (
+        iers.build_timescale_arrays(mjd, dut1)
+    )
 
     ts = load.timescale()
-    ts
-    #print(ts.delta_t_table)
-
     jd = mjd + 2400000.5
     t = ts.tt_jd(jd)
 
-    #print(delta_t2 - t.delta_t)
-
     fig, ax = plt.subplots()
-    ax.plot(t.J, t.delta_t)
-    ax.plot(t.J, delta_t2)
+    ax.plot(t.tt, t.delta_t)
+    ax.plot(delta_t_recent[0], delta_t_recent[1])
     ax.grid()
     fig.savefig('tmp.png')
 
