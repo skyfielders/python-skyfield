@@ -90,7 +90,8 @@ to switch to the Julian calendar for historical dates —
 both when interpreting the dates you input,
 and when producing calendar dates as output —
 simply give your ``Timescale`` object
-the Julian date on which you would like the calendar to switch.
+the `Julian day <https://en.wikipedia.org/wiki/Julian_day>`_
+on which you would like the calendar to switch.
 
 .. testcode::
 
@@ -111,9 +112,9 @@ the Julian date on which you would like the calendar to switch.
 
 As you can see from these four successive days in history,
 Pope Gregory had the calendar jump
-from the Julian calendar date 1582 October 4
-to the Gregorian calendar date October 15 the next day
-in order to bring the date of Easter back into sync with the equinox.
+directly from the old Julian calendar date 1582 October 4
+to the new Gregorian calendar date 1582 October 15,
+bringing the date of Easter back into sync with the equinox.
 Skyfield provides two constants for popular cutoff dates:
 
 * ``GREGORIAN_START`` — Julian day 2299161,
@@ -125,11 +126,13 @@ Skyfield provides two constants for popular cutoff dates:
   “Seeing that the Bishop of Rome is Antichrist,
   therefore we may not communicate with him in any thing”).
 
-You are free to choose your own cutoff Julian date
+You are free to choose your own cutoff Julian day
 if you are studying astronomy records from a country
 that adopted the Gregorian calendar on some other date.
 Russia, for example, did not adopt it until the twentieth century.
-The default value, that always uses Gregorian dates, is ``None``:
+The default value,
+that asks the timescale to always use Gregorian dates,
+is ``None``:
 
 .. testcode::
 
@@ -155,14 +158,20 @@ The ``utc`` parameter in the examples above
 specifies Coordinated Universal Time (UTC),
 the world clock known affectionately as “Greenwich Mean Time”
 which is the basis for all of the world’s timezones.
+If you are comfortable dealing directly with UTC
+instead of your local timezone,
+you can build and display dates
+without needing any other library besides Skyfield.
 
-If you are comfortable dealing directly with UTC,
-you can simply set and retrieve it manually.
-You can provide its constructor with just the year, month, and day,
-or be more specific and give an hour, minute, and second.
-And not only can you attach a fraction to the seconds,
-but you can also freely use fractional days, hours, and minutes.
-For example:
+You can build a `Time` from a calendar date and UTC time
+using `Timescale.utc`.
+Provide only as many parameters as you want —
+year, month, day, hour, minute, and second —
+and Skyfield will fill in the rest
+by defaulting to January first and zero hours, minutes, and seconds.
+
+Feel free to use fractional days, hours, and minutes.
+Here are several ways to specify the exact same time and date:
 
 .. testcode::
 
@@ -178,36 +187,39 @@ For example:
     # Several ways to print a time as UTC.
 
     print(tuple(t1.utc))
-    print(t1.utc_iso(' '))
+    print(t1.utc_strftime())
+    print(t1.utc_strftime('On %Y %a %d at %H:%M:%S'))
+    print(t1.utc_iso())
     print(t1.utc_jpl())
-    print(t1.utc_strftime('Date %Y-%m-%d and time %H:%M:%S'))
 
 .. testoutput::
 
     (2014, 1, 18, 1, 35, 37.5)
-    2014-01-18 01:35:38Z
+    2014-01-18 01:35:38
+    2014-01-18T01:35:38Z
     A.D. 2014-Jan-18 01:35:37.5000 UT
     Date 2014-01-18 and time 01:35:38
 
 The 6 values returned by ``utc()``
-can also be accessed as the attributes
+can be accessed as the attributes
 ``year``, ``month``, ``day``, ``hour``, ``minute``,  and ``second``.
 
 .. testcode::
 
-    print(t1.utc.year, '/', t2.utc.month, '/', t2.utc.day)
-    print(t2.utc.hour, ':', t2.utc.minute, ':', t2.utc.second)
+    print(t1.utc.year, '/', t1.utc.month, '/', t1.utc.day)
+    print(t1.utc.hour, ':', t1.utc.minute, ':', t1.utc.second)
 
 .. testoutput::
 
     2014 / 1 / 18
     1 : 35 : 37.5
 
-And by scraping together the minimal support for UTC
-that exists in the Python Standard Library,
-Skyfield is able to offer a :func:`~skyfield.timelib.Timescale.now()` function
+If you want to use the current time,
+Skyfield leverages the minimal support for UTC
+in the Python Standard Library
+to offer a :func:`~skyfield.timelib.Timescale.now()` function
 that reads your system clock
-and returns the current time as a Julian date object
+and returns the current time as a `Time` object
 (assuming that your operating system clock is correct
 and configured with the correct time zone):
 
@@ -247,17 +259,17 @@ for your version of Python.
   module that for the first time brings timezone support
   into the Python Standard Library.
 
-This documentation will focus on the approach
+This documentation will focus on the first approach,
 which works universally across all Python versions.
 You can install the third-party `pytz`_ library
 by listing it in the dependencies of your package,
-or adding it to your project’s `requirements.txt`_ file,
+adding it to your project’s `requirements.txt`_ file,
 or simply installing it manually::
 
     pip install pytz
 
 Once it is installed,
-building Julian dates from local times is simple.
+building a `Time` from a local time is simple.
 Instantiate a normal Python ``datetime``,
 pass it to the ``localize()`` method of your time zone,
 and pass the result to Skyfield:
@@ -269,15 +281,15 @@ and pass the result to Skyfield:
 
     eastern = timezone('US/Eastern')
 
-    # Converting US Eastern Time to a Julian date.
+    # Converting US Eastern Time to a Skyfield Time.
 
     d = datetime(2014, 1, 16, 1, 32, 9)
     e = eastern.localize(d)
     t = ts.from_datetime(e)
 
-And if Skyfield returns a Julian date at the end of a calculation,
-you can ask the Julian date object to build a ``datetime`` object
-for either UTC or for your own timezone:
+When Skyfield returns a `Time` at the end of a calculation,
+you can ask for either a UTC ``datetime``
+or a ``datetime`` in your own timezone:
 
 .. testcode::
 
@@ -310,7 +322,7 @@ to spare you from having to make the call yourself.
 If you want a :class:`Time` to hold an entire array of dates,
 as discussed below in :ref:`date-arrays`,
 then you can provide a list of ``datetime`` objects
-when building a Julian date.
+to the `Timescale.from_datetimes()` method.
 The UTC methods will then return whole lists of values.
 
 .. _leap-seconds:
@@ -365,8 +377,11 @@ Keep two consequences in mind when using UTC in your calculations.
 First, expect an occasional jump or discrepancy
 if you are striding forward through time
 using the UTC minute, hour, or day.
-A graph will show a planet moving slightly farther
-during an hour that was lengthened by a leap second.
+For example,
+an hourly plot of planet’s position
+will show the planet moving slightly farther
+during an hour that was lengthened by a leap second
+than during other hours of the year.
 An Earth satellite’s velocity will seem higher
 when you reach the minute that includes 61 seconds.
 And so forth.
@@ -377,7 +392,8 @@ using the uniform time scales discussed below in :ref:`tai-tt-tdb`.
 
 Second, leap seconds disqualify the Python ``datetime``
 from use as a general way to represent time
-because it refuses to accept seconds greater than 59:
+because in many versions of Python
+the ``datetime`` refuses to accept seconds greater than 59:
 
 .. testcode::
 
@@ -389,14 +405,14 @@ because it refuses to accept seconds greater than 59:
       ...
     ValueError: second must be in 0..59
 
-That is why Skyfield offers a second version
-of each method that returns a ``datetime``::
+That limitation is why Skyfield offers a second version
+of each method that returns a ``datetime``.
+These fancier methods return a leap-second flag as an additional return value:
 
-    t.utc_datetime_and_leap_second()
-    t.astimezone_and_leap_second(tz)
+* `Time.utc_datetime_and_leap_second()`
+* `Time.astimezone_and_leap_second()`
 
-These more accurate alternatives also return a ``leap_second``,
-which usually has the value ``0`` but jumps to ``1``
+The leap-second return value is usually ``0`` but jumps to ``1``
 when Skyfield is forced to represent a leap second
 as a ``datetime`` with the incorrect time 23:59:59.
 
@@ -680,7 +696,8 @@ So twelve noon was the moment of Julian date zero:
 
     0.0
 
-Did you notice how negative years work?
+Did you notice how negative years work —
+that we expressed 4714 BC using the negative number `-4713`?
 People still counted by starting at one, not zero,
 when the scholar Dionysius Exiguus created the eras BC and AD
 in around the year AD 500.
@@ -696,7 +713,7 @@ so modern dates tend to be rather large numbers:
 
 .. testcode::
 
-    # 2014 January 1 as a Julian Date
+    # 2014 January 1 00:00 UTC expressed as Julian dates
 
     t = ts.utc(2014, 1, 1)
     print('TAI = %r' % t.tai)
@@ -996,13 +1013,13 @@ or invokes a computation that needs their value:
 ``M``, ``MT``
     This 3×3 matrix and its inverse
     perform the complete rotation between a vector in the ICRF
-    and a vector in the dynamical reference system of this Julian date.
+    and a vector in the dynamical reference system for this time and date.
 
 ``C``, ``CT``
     This 3×3 matrix and its inverse
     perform the complete rotation between a vector in the ICRF
-    and a vector in the celestial intermediate reference system (CIRS) of
-    this Julian date.
+    and a vector in the celestial intermediate reference system (CIRS)
+    of this time and date.
 
 You will typically never need to access these matrices yourself,
 as they are used automatically
