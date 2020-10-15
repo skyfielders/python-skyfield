@@ -11,12 +11,14 @@ from time import time
 
 import certifi
 
+from .data import iers
+from .functions import load_bundled_npy
 from .io_timescale import (
-     _build_timescale, parse_deltat_data,
-    parse_deltat_preds, parse_leap_seconds,
+    parse_deltat_data, parse_deltat_preds, parse_leap_seconds,
 )
 from .jpllib import SpiceKernel
 from .sgp4lib import EarthSatellite
+from .timelib import Timescale
 
 try:
     from io import BytesIO
@@ -279,24 +281,31 @@ class Loader(object):
         return open(path, mode)
 
     def timescale(self, delta_t=None, builtin=True):
-        """Open or download three time scale files, returning a `Timescale`.
+        """Return a `Timescale` built using official Earth rotation data.
 
         ``delta_t`` — Lets you override the standard ∆T tables by
         providing your own ∆T offset in seconds.  For details, see
         :ref:`custom-delta-t`.
 
-        ``builtin`` — Set this to ``False`` to download new copies of
-        the three official files that supply recent ∆T measurements and
-        the current schedule of UTC leap seconds.  By default, Skyfield
-        uses copies of the three files that it ships with and installs
-        alongside its code.  For details, see
+        ``builtin`` — By default, Skyfield uses ∆T and leap second
+        tables that it carries internally.  Set this option to ``False``
+        to download up-to-date data (about 3.3 MB) directly from the
+        International Earth Rotation Service instead.  For details, see
         :ref:`downloading-timescale-files`.
 
         """
-        deltat_data = self('deltat.data', builtin=builtin)
-        deltat_preds = self('deltat.preds', builtin=builtin)
-        _, leap_second_dat = self('Leap_Second.dat', builtin=builtin)
-        ts = _build_timescale(deltat_data, deltat_preds, leap_second_dat)
+        if builtin:
+            arrays = load_bundled_npy('iers.npz')
+            delta_t_recent = arrays['delta_t_recent']
+            leap_dates = arrays['leap_dates']
+            leap_offsets = arrays['leap_offsets']
+        else:
+            with self.open(iers.FINALS_URL) as f:
+                mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+            delta_t_recent, leap_dates, leap_offsets = (
+                iers.build_timescale_arrays(mjd_utc, dut1))
+
+        ts = Timescale(delta_t_recent, leap_dates, leap_offsets)
 
         if delta_t is not None:
             ts.delta_t_table = np.array(((-1e99, 1e99), (delta_t, delta_t)))

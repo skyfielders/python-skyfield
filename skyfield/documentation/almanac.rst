@@ -391,7 +391,7 @@ The difference in rising time can be a minute or more:
 
 .. testoutput::
 
-    2020-02-01 12:46:28Z Limb of the Sun crests the horizon
+    2020-02-01 12:46:27Z Limb of the Sun crests the horizon
     2020-02-01 12:47:53Z Center of the Sun reaches the horizon
 
 Elevated vantage points

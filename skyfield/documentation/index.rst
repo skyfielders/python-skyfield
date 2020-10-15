@@ -71,7 +71,7 @@ on the Earth’s surface:
 .. testoutput::
 
     25deg 27' 54.0"
-    101deg 33' 44.0"
+    101deg 33' 44.1"
 
 Skyfield does not depend on the `AstroPy`_ project
 or its compiled libraries.

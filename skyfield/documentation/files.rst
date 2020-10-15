@@ -3,61 +3,38 @@
  Downloading and Using Data Files
 ==================================
 
-Your Skyfield programs will typically download two kinds of data file.
-
-First, Skyfield will need up-to-date tables about time —
-files providing recently measured values for ∆T,
-future predictions of ∆T, and a table of recent leap seconds.
-See :ref:`downloading-timescale-files` to learn more about these files.
-
-Second, Skyfield will need data
-about the objects that you want to observe:
-planets, stars, or Earth satellites.
-The rest of the documentation
-will introduce you to each of these kinds of data source.
-
-The result will be a program that, when run for the first time,
-downloads several data files before it can perform useful operations.
-If the program’s output is a terminal window,
-then it will display progress bars as each file is downloaded:
-
-.. testsetup::
-
-   import os
-   from skyfield.api import Loader
-
-   load = Loader('.')
-   ts = load.timescale(builtin=False)
-   planets = load('de421.bsp')
+The first time you run a Skyfield program,
+it will typically download one or more data files from the Internet
+that help it compute the positions of planets or satellites —
+one file for each call the program makes to Skyfield’s ``load()`` routine.
+If the program is attached to a terminal,
+then a simple progress bar will be displayed
+as Skyfield downloads each file.
 
 ::
 
    from skyfield.api import load
-
-   ts = load.timescale(builtin=False)
    planets = load('de421.bsp')
    print('Ready')
 
 ::
 
-   [#################################] 100% deltat.data
-   [#################################] 100% deltat.preds
-   [#################################] 100% Leap_Second.dat
    [#################################] 100% de421.bsp
    Ready
 
 The second time you run the program, however,
-it will find the data files already sitting in the current directory
-and can start up without needing to access the network:
+the program will find the data files
+already sitting in the current directory.
+In that case, the program will run without needing access to the Internet:
 
 ::
 
    Ready
 
-Most programs will run just fine using the default ``load()`` object
+Most programs will run just fine using the default ``load()`` routine
 provided in the ``skyfield.api`` module.
 But other programs may want to build their own loader
-so that they have the chance to specify non-default behavior.
+so they have the chance to override its default behaviors.
 
 Specifying the download directory
 =================================
@@ -96,4 +73,5 @@ by building a `Loader` whose verbosity is set to false.
 
 .. testcode::
 
+   from skyfield.api import Loader
    load = Loader('~/skyfield-data', verbose=False)

@@ -137,14 +137,14 @@ def test_strftime_with_microseconds(ts):
 
     t = ts.tt(2020, 9, 12)
     assert t.utc_strftime('%Y %S %f') == '2020 50 816000'
-    assert t.ut1_strftime('%Y %S %f') == '2020 49 776521'
+    assert t.ut1_strftime('%Y %S %f') == '2020 50 638465'
     assert t.tai_strftime('%Y %S %f') == '2020 27 816000'
     assert t.tt_strftime('%Y %S %f') == '2020 00 000000'
     assert t.tdb_strftime('%Y %S %f') == '2020 59 998446'
 
     t = ts.tt(2020, 9, [12, 12])
     assert t.utc_strftime('%Y %S %f') == ['2020 50 816000'] * 2
-    assert t.ut1_strftime('%Y %S %f') == ['2020 49 776521'] * 2
+    assert t.ut1_strftime('%Y %S %f') == ['2020 50 638465'] * 2
     assert t.tai_strftime('%Y %S %f') == ['2020 27 816000'] * 2
     assert t.tt_strftime('%Y %S %f') == ['2020 00 000000'] * 2
     assert t.tdb_strftime('%Y %S %f') == ['2020 59 998446'] * 2
@@ -436,9 +436,10 @@ def test_leap_second(ts):
     assert ts.tai(jd=t5).utc_iso() == '1974-01-01T00:00:01Z'
 
 def test_delta_t(ts):
-    # Check delta_t calculation around year 2000/1/1 (from IERS tables this is 63.8285)
+    # The IERS "finals2000A.all" for 2000 Jan 1 gives DUT1 = 0.3554779,
+    # and 0.3554779 - 0.184 - 1.0 = -0.8285221.
     t = ts.utc(2000, 1, 1, 0, 0, 0)
-    assert abs(t.delta_t - 63.8285) < 1e-5
+    assert abs(t.delta_t - 63.8285221) < 1e-9
 
     # Check historic value. Compare to the table in Morrison and
     # Stephenson 2004, the tolerance is 2 sigma

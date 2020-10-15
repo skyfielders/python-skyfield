@@ -36,13 +36,13 @@ def main(argv):
     #draw_plot_comparing_USNO_and_IERS_data()
 
     f = load.open('finals.all')
-    mjd, dut1 = iers.parse_dut1_from_finals_all(f)
+    mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
     delta_t_recent, leap_dates, leap_offsets = (
-        iers.build_timescale_arrays(mjd, dut1)
+        iers.build_timescale_arrays(mjd_utc, dut1)
     )
 
     ts = load.timescale()
-    jd = mjd + 2400000.5
+    jd = mjd_utc + 2400000.5
     t = ts.tt_jd(jd)
 
     fig, ax = plt.subplots()

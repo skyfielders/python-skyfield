@@ -365,7 +365,7 @@ just as you did for the position measured from the Earth’s center:
 
 .. testoutput::
 
-    [ 331.61883722  392.18468536 1049.76011302]
+    [ 331.61874618  392.18485533 1049.76011316]
 
 But the most popular approach is to ask the topocentric position
 for its altitude and azimuth coordinates,

@@ -26,9 +26,9 @@ def main(argv):
     ]})
 
     f = load.open(iers.FINALS_URL)
-    mjd, dut1 = iers.parse_dut1_from_finals_all(f)
+    mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
     delta_t_recent, leap_dates, leap_offsets = (
-        iers.build_timescale_arrays(mjd, dut1)
+        iers.build_timescale_arrays(mjd_utc, dut1)
     )
     savez_compressed(
         'skyfield/data/iers',

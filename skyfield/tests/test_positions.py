@@ -5,7 +5,7 @@ from skyfield.earthlib import earth_rotation_angle
 from skyfield.functions import length_of, mxv, rot_z
 from skyfield.positionlib import ICRF, ITRF_to_GCRS2, _GIGAPARSEC_AU
 from skyfield.starlib import Star
-from .fixes import IS_32_BIT, low_precision_ERA
+from .fixes import low_precision_ERA
 
 def test_subtraction():
     p0 = ICRF((10,20,30), (40,50,60))
@@ -157,7 +157,7 @@ def test_velocity_in_ITRF_to_GCRS2():
     relative_error = (length_of(actual_motion - predicted_motion)
                       / length_of(actual_motion))
 
-    acceptable_error = 4e-12 if IS_32_BIT else 2e-12
+    acceptable_error = 4e-12
     assert relative_error < acceptable_error
 
 # Test that the CIRS coordinate of the TIO is consistent with the Earth Rotation Angle

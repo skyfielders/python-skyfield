@@ -57,7 +57,7 @@ or how early I need to rise to see the morning sky:
 
     2020-04-19 05:09   Astronomical twilight starts
     2020-04-19 05:46   Nautical twilight starts
-    2020-04-19 06:21   Civil twilight starts
+    2020-04-19 06:20   Civil twilight starts
     2020-04-19 06:49   Day starts
     2020-04-19 20:20   Civil twilight starts
     2020-04-19 20:48   Nautical twilight starts
