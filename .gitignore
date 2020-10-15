@@ -12,6 +12,7 @@
 .settings
 .tox/
 /dist/
+/finals2000A.all
 /skyfield/documentation/_build/
 /tmp*
 CometEls.txt

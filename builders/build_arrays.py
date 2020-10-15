@@ -1,13 +1,18 @@
+#!/usr/bin/env python3
+
 import argparse
 import sys
 
+from skyfield.api import load
+from skyfield.data import iers
 from numpy import array, savez_compressed
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Save arrays to a file')
     parser.parse_args(argv)
+
     g = globals()
-    savez_compressed('nutation', **{key: g[key] for key in [
+    savez_compressed('skyfield/data/nutation', **{key: g[key] for key in [
         'ke0_t',
         'ke1',
         'lunisolar_longitude_coefficients',
@@ -19,6 +24,18 @@ def main(argv):
         'se0_t_0',
         'se0_t_1',
     ]})
+
+    f = load.open(iers.FINALS_URL)
+    mjd, dut1 = iers.parse_dut1_from_finals_all(f)
+    delta_t_recent, leap_dates, leap_offsets = (
+        iers.build_timescale_arrays(mjd, dut1)
+    )
+    savez_compressed(
+        'skyfield/data/iers',
+        delta_t_recent=delta_t_recent,
+        leap_dates=leap_dates,
+        leap_offsets=leap_offsets,
+    )
 
 # ----------------------------------------------------------------------
 # START of arrays that used to be inline in nutation.py
