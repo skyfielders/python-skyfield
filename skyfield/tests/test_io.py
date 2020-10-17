@@ -17,6 +17,7 @@ except ImportError:
 from assay import assert_raises
 from skyfield import api
 
+ci = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../ci'))
 old_content = (b' 2015 10  1  67.9546\n'
                b' 2015 11  1  68.0055\n'
                b' 2015 12  1  68.0514\n'
@@ -31,17 +32,17 @@ def load():
     finally:
         shutil.rmtree(path)
 
-def save_file(load, content=old_content):
-    with open(load.path_to('deltat.data'), 'wb') as f:
+def save_file(load, path, content=old_content):
+    with open(load.path_to(path), 'wb') as f:
         f.write(content)
 
-def file_contents(load):
-    with open(load.path_to('deltat.data'), 'rb') as f:
+def file_contents(load, path):
+    with open(load.path_to(path), 'rb') as f:
         return f.read()
 
 @contextmanager
 def fake_download(load):
-    download = lambda *args, **kw: save_file(load, new_content)
+    download = lambda *args, **kw: save_file(load, 'deltat.data', new_content)
     with patch('skyfield.iokit.download', download):
         yield
 
@@ -57,7 +58,6 @@ def test_open_in_main_directory(load):
     with open(os.path.join(load.directory, 'file.tle'), 'wb') as f:
         f.write(b'example text\n')
     data = load.open('file.tle').read()
-    print(repr(data))
     assert data == b'example text\n'
 
 def test_open_in_subdirectory(load):
@@ -70,13 +70,35 @@ def test_open_in_subdirectory(load):
 def test_missing_file_gets_downloaded(load):
     with fake_download(load):
         data = load('deltat.data')
-    print(repr(file_contents(load)[:-20]))
-    assert file_contents(load).endswith(b' 68.1577\n')
+    assert file_contents(load, 'deltat.data').endswith(b' 68.1577\n')
     assert data[1][-1] == 68.1577
 
-def test_builtin_timescale(load):
+def test_builtin_timescale_uses_recent_IERS_data(load):
     ts = load.timescale()
-    ts.utc(2019, 7, 21, 11, 11)
+    # DUT1 cut and pasted from "20 1 1" line of "finals2000A.all":
+    assert abs(ts.utc(2020, 1, 1).dut1 - (-0.1771547)) < 1e-8
+
+def test_non_builtin_timescale_prefers_USNO_files(load):
+    with open(os.path.join(ci, 'deltat.preds'), 'rb') as f:
+        preds = f.read()
+    with open(os.path.join(ci, 'Leap_Second.dat'), 'rb') as f:
+        leaps = f.read()
+
+    save_file(load, 'deltat.data',
+              b' 1973  2  1  111.1\n'
+              b' 1973  3  1  222.2\n'
+              b' 1973  4  1  333.3\n')
+    save_file(load, 'deltat.preds', preds)
+    save_file(load, 'Leap_Second.dat', leaps)
+    save_file(load, 'finals2000A.all', b'invalid data')
+
+    ts = load.timescale(builtin=False)
+    assert abs(ts.utc(1973, 3, 1).delta_t - 222.2) < 1e-2
+
+def test_non_builtin_timescale_tries_to_load_finals2000A_all(load):
+    save_file(load, 'finals2000A.all', b'invalid data')
+    with assert_raises(IndexError):
+        load.timescale(builtin=False)
 
 # Impressive tests: synchronize threads to reproduce concurrency bugs.
 

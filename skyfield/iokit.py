@@ -14,6 +14,7 @@ import certifi
 from .data import iers
 from .functions import load_bundled_npy
 from .io_timescale import (
+    _build_legacy_data,
     parse_deltat_data, parse_deltat_preds, parse_leap_seconds,
 )
 from .jpllib import SpiceKernel
@@ -153,6 +154,9 @@ class Loader(object):
         mtime = os.stat(self.path_to(filename)).st_mtime
         seconds = time() - mtime
         return seconds / 86400.0
+
+    def _exists(self, filename):
+        return os.path.exists(self.path_to(filename))
 
     def __call__(self, filename, reload=False, backup=False, builtin=False):
         """Open the given file, downloading it first if necessary."""
@@ -321,17 +325,31 @@ class Loader(object):
         :ref:`custom-delta-t`.
 
         ``builtin`` — By default, Skyfield uses ∆T and leap second
-        tables that it carries internally.  Set this option to ``False``
-        to download up-to-date data (about 3.3 MB) directly from the
-        International Earth Rotation Service instead.  For details, see
-        :ref:`downloading-timescale-files`.
+        tables that it carries internally; to instead load this data
+        from files, set this option to ``False``.  For compatibility
+        with Skyfield ≤ 1.30, if you have on disk the three files
+        ``deltat.data``, ``deltat.preds``, and ``Leap_Second.dat``, then
+        Skyfield will load them.  Otherwise, Skyfield will download and
+        use ``finals2000A.all`` from the International Earth Rotation
+        Service.  For details, see :ref:`downloading-timescale-files`.
 
         """
+        e = self._exists
         if builtin:
             arrays = load_bundled_npy('iers.npz')
             delta_t_recent = arrays['delta_t_recent']
             leap_dates = arrays['leap_dates']
             leap_offsets = arrays['leap_offsets']
+        elif e('deltat.data') and e('deltat.preds') and e('Leap_Second.dat'):
+            # Avoid changing the meaning of "builtin=False" and
+            # surprising the user with a file download, if their
+            # previous version of Skyfield already downloaded the three
+            # old files we used to rely on.
+            deltat_data = self('deltat.data')
+            deltat_preds = self('deltat.preds')
+            _, leap_second_dat = self('Leap_Second.dat')
+            delta_t_recent, leap_dates, leap_offsets = _build_legacy_data(
+                deltat_data, deltat_preds, leap_second_dat)
         else:
             with self.open('finals2000A.all') as f:
                 mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)

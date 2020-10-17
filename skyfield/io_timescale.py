@@ -3,17 +3,16 @@ import numpy as np
 from datetime import datetime, timedelta
 from threading import Lock
 
-from .timelib import Timescale, julian_date
+from .timelib import julian_date
 
 _lock = Lock()
 
-def _build_timescale(deltat_data, deltat_preds, leap_second_dat):
+def _build_legacy_data(deltat_data, deltat_preds, leap_second_dat):
     data_end_time = deltat_data[0, -1]
     i = np.searchsorted(deltat_preds[0], data_end_time, side='right')
     delta_t_recent = np.concatenate([deltat_data, deltat_preds[:,i:]], axis=1)
-
     leap_dates, leap_offsets = leap_second_dat
-    return Timescale(delta_t_recent, leap_dates, leap_offsets)
+    return delta_t_recent, leap_dates, leap_offsets
 
 def parse_deltat_data(fileobj):
     """Parse the United States Naval Observatory ``deltat.data`` file.

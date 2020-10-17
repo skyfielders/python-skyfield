@@ -790,12 +790,12 @@ It is hard to predict future values for UT1.
 The Earth is a young world
 with a still-molten iron core,
 a viscous mantle,
-and ice ages that move water weight up to the poles
-then release it back again into the ocean.
-While we think we can predict (for example)
+and ice ages that move water weight into glaciers at the poles
+then release it back into the ocean.
+While we think we can predict, for example,
 Jupiter’s position thousands of years from now,
 predicting the fluid dynamics of the elastic rotating ellipsoid we call home
-is, at the moment, beyond us.
+is — at the moment — beyond us.
 We can only watch with sensitive instruments
 to see what the Earth does next.
 
@@ -806,8 +806,8 @@ and for the schedule of leap seconds (discussed above)
 that keeps UTC from straying more than 0.9 seconds away from UT1.
 
 Each new version of Skyfield carries recent IERS data in internal tables.
-This data will gradually fall out of date, however,
-with two consequences:
+This data will gradually fall out of date after each Skyfield release,
+however, with two consequences:
 
 * The next time the IERS declares a new leap second
   that is not listed in Skyfield’s built-in tables,
@@ -819,13 +819,14 @@ with two consequences:
   Skyfield’s idea of where the Earth is pointing will grow less accurate.
   This will affect both the position and direction
   of each :class:`~skyfield.toposlib.Topos` geographic location —
-  whether used as an observer or as an observation target —
+  whether used as an observer or a target —
   and will also affect Earth satellite positions.
 
 You can avoid both of these problems
 by periodically downloading new data from the IERS.
 Simply specify that you don’t want Skyfield to use its builtin tables.
-Skyfield will instead download ``finals2000A.all`` from the IERS:
+In that case :meth:`~skyfield.iokit.Loader.timescale()`
+will instead download ``finals2000A.all`` from the IERS:
 
 ::
 
@@ -843,8 +844,12 @@ then will keep using that same copy of the file that it finds on disk.
 If your script will always have Internet access
 and you worry about the file falling out of date
 (and if you can trust the “modify time” file attribute on your filesystem),
-you can have Skyfield download a new copy
-once the copy on disk has grown too old:
+then you can have Skyfield download a new copy
+once the file on disk has grown too old
+(where “too old” for your application
+must be determined by comparing your accuracy needs
+with how quickly UT1 diverges without fresh IERS data;
+this example uses 30 days only as an illustration):
 
 ::
 
@@ -853,9 +858,24 @@ once the copy on disk has grown too old:
 
     ts = load.timescale(builtin=False)
 
-Astronomers use two common conventions
-for stating the difference between clock time and UT1,
-and Skyfield supports them both.
+But, beware!
+For compatibility with versions of Skyfield ≤ 1.30,
+Skyfield will ignore ``finals2000A.all``
+if the three old files
+``deltat.data``, ``deltat.preds``, and ``Leap_Second.dat``
+exist in the loader’s directory,
+in which case it will use them instead.
+This is to prevent users who specify ``builtins=False``,
+but who downloaded the three necessary files long ago,
+from experiencing an unexpected download attempt.
+The hope is that all scripts
+which did not previously need Internet access
+will continue to run without it.
+
+If you ever want to display or plot the behavior of UT1,
+astronomers use two common conventions
+for stating the difference between clock time and UT1.
+Skyfield supports them both.
 
 .. testcode::
 
