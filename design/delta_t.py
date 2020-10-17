@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Choosing a source for ∆T
 ========================
@@ -11,8 +13,6 @@ Choosing a source for ∆T
   1 millisecond of time = 15 mas.
 
 """
-
-#!/usr/bin/env python3
 
 import argparse
 import re
@@ -39,21 +39,53 @@ def main(argv):
 
     #draw_plot_comparing_USNO_and_IERS_data()
 
-    f = load.open('finals.all')
+    f = load.open('finals2000A.all')
     mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
     delta_t_recent, leap_dates, leap_offsets = (
         iers.build_timescale_arrays(mjd_utc, dut1)
     )
 
     ts = load.timescale()
-    jd = mjd_utc + 2400000.5
-    t = ts.tt_jd(jd)
 
     fig, ax = plt.subplots()
-    ax.plot(t.tt, t.delta_t)
-    ax.plot(delta_t_recent[0], delta_t_recent[1])
+
+    # jd = mjd_utc + 2400000.5
+    # t = ts.tt_jd(jd)
+    # ax.plot(t.J, t.delta_t)
+
+    t = ts.J(range(1600, 2150))
+    ax.plot(t.J, t.delta_t, label='Skyfield')
+
+    t = ts.J(range(2150, 2190))
+    ms2004 = timelib.delta_t_formula_morrison_and_stephenson_2004(t.tt)
+    ax.plot(t.J, ms2004, label='M&S 2004 long-term parabola')
+
+    y = np.arange(2005, 2050)
+    t = y - 2000
+    ax.plot(y, 62.92 + 0.32217 * t + 0.005589 * t * t,
+            label='M&S 2004 polynomial 2005-2050')
+
+    y = np.arange(2050, 2150)
+    ax.plot(y, -20 + 32 * ((y-1820)/100)**2 - 0.5628 * (2150 - y),
+            label='M&S 2004 polynomial 2050-2150')
+    # y = np.array([2050, 2149])
+    # ax.plot(y, -20 + 32 * ((y-1820)/100)**2 - 0.5628 * (2150 - y))
+
+    ax.set(xlabel='Year', ylabel='∆T')
     ax.grid()
+    ax.legend()
     fig.savefig('tmp.png')
+
+    is_2050_to_2150_polynomial_worth_it()
+
+def is_2050_to_2150_polynomial_worth_it():
+    # How different is the polynomial at:
+    # https://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html
+    # from simply doing a linear interpolation from the endpoints?
+    y = np.arange(2050, 2150)
+    delta_t = -20 + 32 * ((y-1820)/100)**2 - 0.5628 * (2150 - y)
+    linear_approximation = np.linspace(delta_t[0], delta_t[-1], len(delta_t))
+    print('Maximum difference:', max(abs(delta_t - linear_approximation)), 's')
 
 def draw_plot_comparing_USNO_and_IERS_data():
     f = load.open('finals.all')
