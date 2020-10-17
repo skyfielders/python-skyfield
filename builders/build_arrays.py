@@ -25,7 +25,7 @@ def main(argv):
         'se0_t_1',
     ]})
 
-    f = load.open(iers.FINALS_URL)
+    f = load.open('finals2000A.all')
     mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
     delta_t_recent, leap_dates, leap_offsets = (
         iers.build_timescale_arrays(mjd_utc, dut1)

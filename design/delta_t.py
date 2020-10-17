@@ -6,6 +6,10 @@ Choosing a source for ∆T
 2. `ftp://ftp.iers.org/products/eop/rapid/standard/csv/`_
 
 * The CSV files are slightly larger, both compressed and uncompressed.
+* For the position of an object at the celestial equator,
+  1 second of time = 15 arcseconds.
+  1 millisecond of time = 15 mas.
+
 """
 
 #!/usr/bin/env python3

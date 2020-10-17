@@ -10,7 +10,6 @@ import re
 
 from ..constants import DAY_S
 
-FINALS_URL = 'ftp://ftp.iers.org/products/eop/rapid/standard/finals2000A.all'
 _DUT1 = re.compile(b'^......(.........) ' + b'.' * 42 + b'(.\d........)', re.M)
 inf = float('inf')
 

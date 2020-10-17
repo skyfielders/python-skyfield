@@ -5,7 +5,7 @@
 
 The first time you run a Skyfield program,
 it will typically download one or more data files from the Internet
-that help it compute the positions of planets or satellites —
+that provide data about planet or satellite orbits —
 one file for each call the program makes to Skyfield’s ``load()`` routine.
 If the program is attached to a terminal,
 then a simple progress bar will be displayed
@@ -23,9 +23,10 @@ as Skyfield downloads each file.
    Ready
 
 The second time you run the program, however,
-the program will find the data files
+the program will find the data file
 already sitting in the current directory.
-In that case, the program will run without needing access to the Internet:
+In that case, the program will use the file on disk
+without needing access to the Internet:
 
 ::
 

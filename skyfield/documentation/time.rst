@@ -187,18 +187,18 @@ Here are several ways to specify the exact same time and date:
     # Several ways to print a time as UTC.
 
     print(tuple(t1.utc))
-    print(t1.utc_strftime())
-    print(t1.utc_strftime('On %Y %a %d at %H:%M:%S'))
     print(t1.utc_iso())
+    print(t1.utc_strftime())
+    print(t1.utc_strftime('On %Y %b %d at %H:%M:%S'))
     print(t1.utc_jpl())
 
 .. testoutput::
 
     (2014, 1, 18, 1, 35, 37.5)
-    2014-01-18 01:35:38
     2014-01-18T01:35:38Z
+    2014-01-18 01:35:38 UTC
+    On 2014 Jan 18 at 01:35:38
     A.D. 2014-Jan-18 01:35:37.5000 UT
-    Date 2014-01-18 and time 01:35:38
 
 The 6 values returned by ``utc()``
 can be accessed as the attributes
@@ -697,7 +697,7 @@ So twelve noon was the moment of Julian date zero:
     0.0
 
 Did you notice how negative years work —
-that we expressed 4714 BC using the negative number `-4713`?
+that we expressed 4714 BC using the negative number ``-4713``?
 People still counted by starting at one, not zero,
 when the scholar Dionysius Exiguus created the eras BC and AD
 in around the year AD 500.
@@ -771,85 +771,119 @@ which is continuous with the *T*\ :sub:`eph` time scale
 traditionally used for Solar System and spacecraft simulations
 at the Jet Propulsion Laboratory.
 
-UT1 and ∆T
-==========
+.. _downloading-timescale-files:
+
+UT1 and downloading IERS data
+=============================
 
 Finally, UT1 is the least uniform time scale of all
 because its clock cannot be housed in a laboratory,
 nor is its rate established by any human convention.
 It is, rather, the clock
 whose “hand” is the rotation of the Earth itself!
+The direction that the Earth is facing determines
+not only the coordinates of every city and observatory in the world,
+but also the local directions that each site
+will designate as their local “up”, “north”, and “east”.
 
-The UT1 time is derived from the direction
-that the Earth happens to be pointing at any given moment.
-And the Earth is a young world
-with a still-molten iron core, a viscous mantle,
-and continents that rise and fall
-as each passing ice age weighs them down with ice and then melts away.
-We think that we can predict, with high accuracy,
-where the planets will be in their orbits
-thousands of years from now.
-But to predict the fluid dynamics of an elastic rotating ellipsoid
+It is hard to predict future values for UT1.
+The Earth is a young world
+with a still-molten iron core,
+a viscous mantle,
+and ice ages that move water weight up to the poles
+then release it back again into the ocean.
+While we think we can predict (for example)
+Jupiter’s position thousands of years from now,
+predicting the fluid dynamics of the elastic rotating ellipsoid we call home
 is, at the moment, beyond us.
-We cannot, for example, run a simulation or formula
-to predict leap seconds more than a few months ahead of time!
-Instead, we simply have to watch with sensitive instruments
-to see what the Earth will do next.
+We can only watch with sensitive instruments
+to see what the Earth does next.
 
-If you are interested in the Earth as a dynamic body,
-visit the `Long-term Delta T
-<http://www.usno.navy.mil/USNO/earth-orientation/eo-products/long-term>`_
-page provided by the United States Naval Observatory.
-You will find graphs and tables
-showing how the length of Earth’s day
-expands and contracts by milliseconds over the decades.
-The accumulated error at any given moment
-is provided as ∆T,
-the evolving difference between TT and UT1
-that dropped below zero in 1871 but then rose past it in 1902
-and now stands at more than +67.2 seconds.
+Skyfield relies on the IERS,
+the International Earth Rotation Service,
+for accurate measurements of UT1
+and for the schedule of leap seconds (discussed above)
+that keeps UTC from straying more than 0.9 seconds away from UT1.
 
-The task of governing leap seconds can be stated, then,
-as the task of keeping the difference between TT and UTC
-close to the natural value ∆T out in the wild.
-The standards bodies promise, in fact,
-that the difference between these two artificial time scales
-will always be within 0.9 seconds of the observed ∆T value.
+Each new version of Skyfield carries recent IERS data in internal tables.
+This data will gradually fall out of date, however,
+with two consequences:
 
-In calculations that do not involve Earth’s rotation,
-∆T never arises.
-The positions of planets,
-the distance to the Moon,
-and the movement of a comet or asteroid
-all ignore ∆T completely.
-When, then, does ∆T come into play?
+* The next time the IERS declares a new leap second
+  that is not listed in Skyfield’s built-in tables,
+  Skyfield’s UTC time will be off by 1 second
+  for every date that falls after the leap second.
 
-* ∆T is used when you specify your geographic location
-  as a :class:`~skyfield.toposlib.Topos`
-  and Skyfield needs to compute its location at a given date and time.
+* As the Earth’s rotation speeds up or slows down in the coming years
+  more than was predicted in Skyfield’s built-in UT1 tables,
+  Skyfield’s idea of where the Earth is pointing will grow less accurate.
+  This will affect both the position and direction
+  of each :class:`~skyfield.toposlib.Topos` geographic location —
+  whether used as an observer or as an observation target —
+  and will also affect Earth satellite positions.
 
-* ∆T is needed to determine directions
-  like “up,” “north,” and “east” when you want Skyfield
-  to compute the altitude and azimuth of an object
-  in your local sky.
+You can avoid both of these problems
+by periodically downloading new data from the IERS.
+Simply specify that you don’t want Skyfield to use its builtin tables.
+Skyfield will instead download ``finals2000A.all`` from the IERS:
 
-* ∆T determines the Earth orientation for Skyfield
-  when an Earth satellite position generated from TLE elements
-  gets translated into a full Solar System position.
+::
 
-When you create your ``ts`` timescale object
-at the beginning of your program,
-Skyfield downloads up-to-date ``deltat.data`` and ``deltat.preds`` files
-(if they are not already downloaded)
-from the United States Naval Observatory.
-These provide sub-millisecond level measurements
-of the direction that the Earth is pointing,
-allowing Skyfield to make
+    # Download and use the `finals.all` file.
 
-When you ask about dates in the far future or past,
-Skyfield will run off the end of its tables
-and will instead use the formula of Morrison and Stephenson (2004)
-to estimate when day and night might have occurred in that era.
+    ts = load.timescale(builtin=False)
+
+::
+
+    [#################################] 100% finals2000A.all
+
+As usual with data files,
+Skyfield will only download the file the first time you need it,
+then will keep using that same copy of the file that it finds on disk.
+If your script will always have Internet access
+and you worry about the file falling out of date
+(and if you can trust the “modify time” file attribute on your filesystem),
+you can have Skyfield download a new copy
+once the copy on disk has grown too old:
+
+::
+
+    if load.days_old('finals2000A.all') > 30.0:
+        load.download('finals2000A.all')
+
+    ts = load.timescale(builtin=False)
+
+Astronomers use two common conventions
+for stating the difference between clock time and UT1,
+and Skyfield supports them both.
+
+.. testcode::
+
+    print('{:+.4f}'.format(t.dut1))
+    print('{:+.4f}'.format(t.delta_t))
+
+.. testoutput::
+
+    -0.0970
+    +67.2810
+
+The two quantities are:
+
+* DUT1 — The difference between UTC and UT1,
+  which should always be less than 0.9 if the IERS succeeds at its mission.
+  Note that there are two different reasons that this value changes:
+  every day it changes a small amount because of the drift of UT1;
+  and superimposed on this drift
+  is a big jump of 1.0 seconds
+  every time a leap second passes.
+
+* ∆T — The difference between UTC and TT.
+  This is a much more straightforward value than DUT1,
+  without all the ugly discontinuities caused by leap seconds.
+  Because TT is a uniform timescale,
+  ∆T provides a pure and continuous record
+  of how UT1 has changed over the decades
+  that we have been measuring the Earth’s rotation to high precision.
 
 .. _custom-delta-t:
 
@@ -863,117 +897,6 @@ when creating your timescale:
 .. testcode::
 
     load.timescale(delta_t=67.2810).utc((2014, 1, 1))
-
-.. _downloading-timescale-files:
-
-Downloading new timescale files
-===============================
-
-The timescale object uses three files —
-two from NASA and one from the International Earth Rotation Service —
-that provide Earth rotation data and UTC leap seconds.
-
-Each Skyfield release includes recent copies
-of these three timescale data files.
-You might be interested in checking their age and downloading new copies,
-especially if your application will run for several years
-on the same version of Skyfield.
-Earlier versions of Skyfield tried downloading new files automatically,
-but the result was a disaster:
-scripts that had been running fine for a year
-would, for example, unexpectedly die
-if their timescale files went out of date
-when the network happened to be down.
-
-The two effects of several-year-old timescale files are:
-
-1. Positions affected by the Earth’s rotation,
-   like altitude and azimuth angles,
-   will gradually grow less precise over the years
-   without updated Earth rotation angles from new ∆T files.
-
-2. Dates in UTC will be off by one or more whole seconds
-   once leap seconds occur
-   that were not included in Skyfield’s copy of the leap second file.
-
-The two ∆T files that chronicle the gradual drift in the Earth’s rotation rate
-include no explicit expiration date.
-But you can check the date of the last measured value of ∆T
-as well as the date of the final speculative prediction:
-
-.. testcode::
-
-    from datetime import date
-    from skyfield.timelib import calendar_tuple
-
-    julian_dates, values = load('deltat.data', builtin=True)
-    y, m, d, _, _, _ = calendar_tuple(julian_dates[-1])
-    last_observation = date(y, m, d)
-
-    julian_dates, values = load('deltat.preds', builtin=True)
-    y, m, d, _, _, _ = calendar_tuple(julian_dates[-1])
-    last_prediction = date(y, m, d)
-
-    print('Date of last ∆T observation:', last_observation)
-    print('Date of final ∆T prediction:', last_prediction)
-
-.. testoutput::
-
-    Date of last ∆T observation: 2020-02-01
-    Date of final ∆T prediction: 2027-10-01
-
-Using Python’s ``today()`` function and basic date arithmetic,
-you could determine whether these dates are far enough in the past
-that your application needs to take action —
-like printing a warning,
-exiting with a fatal error,
-or even trying to download more recent files itself:
-
-::
-
-    days_old = (date.today() - last_observation).days
-
-    if days_old > 366:
-
-        # Force the download of new files.
-        load('deltat.data', reload=True)
-        load('deltat.preds', reload=True)
-        load('Leap_Second.dat', reload=True)
-
-        # Use them to build a new timescale.
-        ts = load.timescale(builtin=False)
-
-In contrast to the ∆T files,
-the leap second file does include an explicit expiration date
-which Skyfield parses and returns as a standard Python ``date``.
-Compare it to today’s date to learn whether the file is expired:
-
-.. testcode::
-
-    expiration_date, leap_second_dat = load('Leap_Second.dat', builtin=True)
-    print('Leap second data expires on:', expiration_date)
-
-    is_expired = date.today() > expiration_date
-
-.. testoutput::
-
-    Leap second data expires on: 2021-07-28
-
-If you have downloaded your own timescale files to disk
-instead of using Skyfield’s builtin files,
-you can check their age by repeating the above operations
-on a timescale object built
-with ``load.timescale(builtin=False)`` specified.
-
-Keep in mind that downloads can be dangerous
-if your application needs to run unattended:
-what if the network is down at the moment the files get too old?
-What if the files go out of date on the original server
-and the download does not change their apparent age?
-In the interests of safety and simplicity,
-it is probably more likely that you will want an automatic update
-to run as a separate periodic batch job
-than as part of your main program.
 
 .. _date-cache:
 

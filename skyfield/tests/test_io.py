@@ -14,6 +14,7 @@ try:
 except ImportError:
     from mock import patch
 
+from assay import assert_raises
 from skyfield import api
 
 old_content = (b' 2015 10  1  67.9546\n'
@@ -49,7 +50,8 @@ def fake_download(load):
 def test_build_url(load):
     url = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de421.bsp'
     assert load.build_url('de421.bsp') == url
-    assert load.build_url('unknown.kind.of.file') is None
+    with assert_raises(ValueError, 'know the URL'):
+        load.build_url('unknown.kind.of.file')
 
 def test_open_in_main_directory(load):
     with open(os.path.join(load.directory, 'file.tle'), 'wb') as f:

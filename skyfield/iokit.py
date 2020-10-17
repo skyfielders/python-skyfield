@@ -53,6 +53,7 @@ def _filename_of(url):
     return urlparse(url).path.split('/')[-1]
 
 _IERS = 'https://hpiers.obspm.fr/iers/bul/bulc/'
+_IERS2 = 'ftp://ftp.iers.org/products/eop/rapid/standard/'
 _JPL = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/'
 _NAIF_KERNELS = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/'
 _NAIF = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
@@ -112,6 +113,7 @@ class Loader(object):
         self.urls = {
             'deltat.data': _CDDIS,
             'deltat.preds': _CDDIS,
+            'finals2000A.all': _IERS2,
             'Leap_Second.dat': _IERS,
             'moon_080317.tf': _NAIF_KERNELS + 'fk/satellites/',
             'moon_pa_de421_1900-2050.bpc': _NAIF_KERNELS + 'pck/',
@@ -146,6 +148,12 @@ class Loader(object):
             return filename
         return os.path.join(self.directory, filename)
 
+    def days_old(self, filename):
+        """Return how recently ``filename`` was modified, measured in days."""
+        mtime = os.stat(self.path_to(filename)).st_mtime
+        seconds = time() - mtime
+        return seconds / 86400.0
+
     def __call__(self, filename, reload=False, backup=False, builtin=False):
         """Open the given file, downloading it first if necessary."""
         if '://' in filename:
@@ -175,7 +183,7 @@ class Loader(object):
             f = BytesIO(get_data('skyfield.data', filename))
             return parser(f)
 
-        path = self._fetch(url, filename, reload, backup)
+        path = self._assure(url, filename, reload, backup)
 
         if parser is not None:
             self._log('  Parsing with {0}()', parser.__name__)
@@ -185,7 +193,7 @@ class Loader(object):
             self._log('  Opening with {0}', opener.__name__)
             return opener(path)
 
-    def _fetch(self, url, filename, reload, backup):
+    def _assure(self, url, filename, reload, backup):
         path = self.path_to(filename)
         exists = os.path.exists(path)
         self._log(path)
@@ -203,9 +211,17 @@ class Loader(object):
         self.events.append(message.format(*args))
 
     def build_url(self, filename):
-        """Return the URL Skyfield will try downloading for a given filename."""
+        """Return the URL Skyfield will try downloading for a given filename.
+
+        Raises ``ValueError`` if Skyfield doesn't know where to get the
+        file based on its name.
+
+        """
         base = _search(self.urls, filename)
-        return None if (base is None) else base + filename
+        if base:
+            return base + filename
+        raise ValueError("Skyfield doesn't know the URL of {0!r}"
+                         .format(filename))
 
     def tle(self, url, reload=False, filename=None):
         """Load and parse a satellite TLE file.
@@ -250,6 +266,23 @@ class Loader(object):
         with self.open(url, reload=reload, filename=filename) as f:
             return list(parse_tle_file(f, ts, skip_names))
 
+    def download(self, url, filename=None, backup=False):
+        """Download a file, even if it’s already on disk; return its path.
+
+        You can specify the local ``filename`` to which the file will be
+        saved; the default is to use the final component of ``url``.
+        Set ``backup`` to ``True`` if you want an already-existing file
+        moved out of the way instead of overwritten.
+
+        """
+        if '://' not in url:
+            url = self.build_url(url)
+        if filename is None:
+            filename = urlparse(url).path.split('/')[-1]
+        path = self.path_to(filename)
+        download(url, path, self.verbose, backup=backup)
+        return path
+
     def open(self, url, mode='rb', reload=False, filename=None, backup=False):
         """Open a file, downloading it first if it does not yet exist.
 
@@ -277,7 +310,7 @@ class Loader(object):
         if filename is None:
             filename = urlparse(url).path.split('/')[-1]
 
-        path = self._fetch(url, filename, reload, backup)
+        path = self._assure(url, filename, reload, backup)
         return open(path, mode)
 
     def timescale(self, delta_t=None, builtin=True):
@@ -300,7 +333,7 @@ class Loader(object):
             leap_dates = arrays['leap_dates']
             leap_offsets = arrays['leap_offsets']
         else:
-            with self.open(iers.FINALS_URL) as f:
+            with self.open('finals2000A.all') as f:
                 mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
             delta_t_recent, leap_dates, leap_offsets = (
                 iers.build_timescale_arrays(mjd_utc, dut1))
