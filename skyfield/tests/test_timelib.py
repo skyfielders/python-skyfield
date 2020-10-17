@@ -180,8 +180,7 @@ time_params_with_array = [
     (2018, 3, 25, 13, 1, (10, 11, 12)),
 ]
 
-def test_time_creation_with_arrays(time_scale_name, time_params_with_array):
-    ts = api.load.timescale()
+def test_time_creation_with_arrays(ts, time_scale_name, time_params_with_array):
     print(time_scale_name)
     t = getattr(ts, time_scale_name)(*time_params_with_array)
     t.utc_jpl()  # a reasonably complicated operation
@@ -545,7 +544,7 @@ def test_raw_julian_gregorian_cutover():
         2299159, 2299160, 2299161, 2299162,
     ]
 
-def test_constructor_julian_gregorian_cutover(ts, time_scale_name):
+def test_constructor_julian_gregorian_cutover(time_scale_name):
     if sys.version_info <= (3,):
         return  # Python 2 time.strftime() complains about the year 1582
 
@@ -576,7 +575,7 @@ def test_constructor_julian_gregorian_cutover(ts, time_scale_name):
     assert jd(1752, 9, 2) == 2361220.5
     assert jd(1752, 9, 14) == 2361221.5
 
-def test_calendar_tuple_julian_gregorian_cutover(ts, time_scale_name):
+def test_calendar_tuple_julian_gregorian_cutover(time_scale_name):
     if sys.version_info <= (3,):
         return  # Python 2 time.strftime() complains about the year 1582
 
@@ -607,7 +606,7 @@ def test_calendar_tuple_julian_gregorian_cutover(ts, time_scale_name):
     assert ymd(2361220.5) == (1752, 9, 2)
     assert ymd(2361221.5) == (1752, 9, 14)
 
-def test_strftime_julian_gregorian_cutover(ts, time_scale_name):
+def test_strftime_julian_gregorian_cutover(time_scale_name):
     if sys.version_info <= (3,):
         return  # Python 2 time.strftime() complains about the year 1582
 
