@@ -21,7 +21,7 @@ from time import time
 
 import matplotlib.pyplot as plt
 import numpy as np
-from skyfield import timelib
+from skyfield import functions, timelib
 from skyfield.api import load
 from skyfield.data import iers
 
@@ -32,24 +32,122 @@ def main(argv):
     with load.open(url) as f:
         columns = load_table_S15(f)
     i, start_year, end_year, a0, a1, a2, a3 = columns
+    report = []
 
-    y = np.arange(start_year[0], end_year[-1] + 0.1, 0.1)
+    # Range of years to plot.
+
+    y = np.arange(start_year[0], end_year[-1] + 0.1, 0.01)
+
+    # Old Skyfield table-driven interpolation.
+
+    ts = load.timescale()
+    t = ts.J(y)
+
+    T0 = time()
+    old_delta_t = t.delta_t
+    report.append((time() - T0, 's for table-driven interpolated delta_t'))
+
+    # New Parabola.
+
+    c1825 = (y - 1825.0) / 100.0
+    t0 = time()
+    delta_t_parabola = -320.0 + 32.5 * c1825 * c1825
+    report.append((time() - t0, 's to compute ∆T with 2018 parabola'))
+
+    # New 2018 splines.
+
+    T0 = time()
+
     i = np.searchsorted(start_year, y, 'right') - 1
     y0 = start_year[i]
     y1 = end_year[i]
     t = (y - y0) / (y1 - y0)
-
-    from time import time
-    t0 = time()
     delta_t = ((a3[i] * t + a2[i]) * t + a1[i]) * t + a0[i]
-    print(time() - t0)
 
-    fig, ax = plt.subplots()
-    ax.plot(y, delta_t)
+    report.append((time() - T0, 's to compute ∆T with 2018 splines'))
+
+    # New 2018 splines combined with IERS data.
+
+    arrays = functions.load_bundled_npy('iers.npz')
+    iers_tt, iers_delta_t = arrays['delta_t_recent']
+    iers_y = (iers_tt - 1721045.0) / 365.25
+
+    cutoff_index = np.searchsorted(end_year, iers_y[0])
+    cutoff_year = end_year[cutoff_index - 1]
+
+    print(cutoff_index, len(end_year))
+    print(cutoff_year)
+    # print(end_year[:cutoff_index])
+
+    def to_tt(year):
+        return year * 365.25 + 1721045.0
+
+    # : i, start_year, end_year, a0, a1, a2, a3 :
+    z = np.zeros_like(iers_tt)
+    #iers_end_year = 
+
+    cat = np.concatenate
+    c = cutoff_index
+    start_tt = cat([to_tt(start_year[:c]), to_tt(end_year[-1:]), iers_tt[:-1]])
+    end_tt = cat([to_tt(end_year[:c]), iers_tt])
+    a0 = cat([a0[:c], [0], iers_delta_t[:-1]])
+    a1 = cat([a1[:c], iers_delta_t - a0[-len(iers_delta_t):]])
+    a2 = cat([a2[:c], z])
+    a3 = cat([a3[:c], z])
+
+    # Try using combined splines.
+
+    T0 = time()
+
+    tt = to_tt(y)
+    i = np.searchsorted(start_tt, tt, 'right') - 1
+    tt0 = start_tt[i]
+    tt1 = end_tt[i]
+    t = (tt - tt0) / (tt1 - tt0)
+    experimental_delta_t = ((a3[i] * t + a2[i]) * t + a1[i]) * t + a0[i]
+
+    report.append((time() - T0, 's to compute ∆T with combined spline table'))
+
+    # The plot.
+
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+
+    ax = ax1
+
+    ax.plot(y, delta_t_parabola, label='2018 parabola')
+    ax.plot(y, delta_t, label='2018 splines ∆T')
+    ax.plot(y, old_delta_t, label='Old Skyfield ∆T')
+
+    #ax.set_xlim(-720, -718)
+    #ax.set_ylim(-400, 200)
     ax.set_xlim(1550, 2020)
-    ax.set_ylim(-60, 200)
+    ax.set_ylim(-400, 200)
+
+    ax.legend()
     ax.grid()
+
+    ax = ax2
+
+    i = (y >= 1973)
+    ax.plot(y[i], delta_t[i] - old_delta_t[i])
+    ax.grid()
+    ax.set(ylabel='2018 splines - IERS')
+
+    ax = ax3
+
+    end_year = 1973.1
+    i = (y >= 1972.9) & (y <= end_year)
+    ax.plot(y[i], delta_t[i])
+
+    i = (iers_y <= end_year)
+    ax.plot(iers_y[i], iers_delta_t[i], '.')
+    ax.grid()
+    #ax.set(ylabel='2018 splines - IERS')
+
     fig.savefig('tmp.png')
+
+    for args in report:
+        print(*args)
 
     return
 
