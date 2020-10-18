@@ -13,8 +13,8 @@ Choosing a source for ∆T
   1 millisecond of time = 15 mas.
 
 """
-
 import argparse
+import csv
 import re
 import sys
 from time import time
@@ -28,6 +28,31 @@ from skyfield.data import iers
 inf = float('inf')
 
 def main(argv):
+    url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
+    with load.open(url) as f:
+        columns = load_table_S15(f)
+    i, start_year, end_year, a0, a1, a2, a3 = columns
+
+    y = np.arange(start_year[0], end_year[-1] + 0.1, 0.1)
+    i = np.searchsorted(start_year, y, 'right') - 1
+    y0 = start_year[i]
+    y1 = end_year[i]
+    t = (y - y0) / (y1 - y0)
+
+    from time import time
+    t0 = time()
+    delta_t = ((a3[i] * t + a2[i]) * t + a1[i]) * t + a0[i]
+    print(time() - t0)
+
+    fig, ax = plt.subplots()
+    ax.plot(y, delta_t)
+    ax.set_xlim(1550, 2020)
+    ax.set_ylim(-60, 200)
+    ax.grid()
+    fig.savefig('tmp.png')
+
+    return
+
     # parser = argparse.ArgumentParser(description=put description here)
     # parser.add_argument('integers', metavar='N', type=int, nargs='+',
     #                     help='an integer for the accumulator')
@@ -46,6 +71,8 @@ def main(argv):
     )
 
     ts = load.timescale()
+
+    print('TT 2050:', ts.J(2050).tt)
 
     fig, ax = plt.subplots()
 
@@ -77,6 +104,14 @@ def main(argv):
     fig.savefig('tmp.png')
 
     is_2050_to_2150_polynomial_worth_it()
+
+def load_table_S15(f):
+    # http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt
+    content = f.read()
+    banner = b'- ' * 36 + b'-\n'
+    sections = content.split(banner)
+    table = np.loadtxt(sections[2].splitlines())
+    return table.T
 
 def is_2050_to_2150_polynomial_worth_it():
     # How different is the polynomial at:
