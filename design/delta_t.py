@@ -22,7 +22,7 @@ from time import time
 import matplotlib.pyplot as plt
 import numpy as np
 from skyfield import functions, timelib
-from skyfield.api import load
+from skyfield.api import load, Loader
 from skyfield.data import iers
 
 inf = float('inf')
@@ -38,14 +38,25 @@ def main(argv):
 
     y = np.arange(start_year[0], end_year[-1] + 0.1, 0.01)
 
-    # Old Skyfield table-driven interpolation.
+    # Skyfield original tables.
+
+    ts = Loader('ci').timescale(builtin=False)
+    print('Old shape:', ts.delta_t_table.shape)
+    t = ts.J(y)
+
+    T0 = time()
+    t.delta_t
+    report.append((time() - T0, 's for old interpolation tables'))
+
+    # Skyfield IERS table-driven interpolation.
 
     ts = load.timescale()
+    print('IERS shape:', ts.delta_t_table.shape)
     t = ts.J(y)
 
     T0 = time()
     old_delta_t = t.delta_t
-    report.append((time() - T0, 's for table-driven interpolated delta_t'))
+    report.append((time() - T0, 's for IERS table interpolated delta_t'))
 
     # New Parabola.
 
