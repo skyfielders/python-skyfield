@@ -33,10 +33,13 @@ def main(argv):
         columns = load_table_S15(f)
     i, start_year, end_year, a0, a1, a2, a3 = columns
     report = []
+    print('Table start and end years:', start_year[0], end_year[-1])
 
     # Range of years to plot.
 
-    y = np.arange(start_year[0], end_year[-1] + 0.1, 0.01)
+    #y = np.arange(start_year[0], end_year[-1] + 0.1, 0.01)
+    y = np.arange(start_year[0], end_year[-1] + 0.1, 0.1)
+    #y = np.arange(end_year[-1] - 30.0, end_year[-1] + 0.1, 0.01)
 
     # Skyfield original tables.
 
@@ -48,12 +51,20 @@ def main(argv):
     t.delta_t
     report.append((time() - T0, 's for old interpolation tables'))
 
+    # For perspective.
+
+    T0 = time()
+    t.M
+    report.append((time() - T0, 's to compute N P B'))
+
     # Skyfield IERS table-driven interpolation.
 
     ts = load.timescale()
     print('IERS shape:', ts.delta_t_table.shape)
     t = ts.J(y)
 
+    t.delta_t
+    del t.delta_t
     T0 = time()
     old_delta_t = t.delta_t
     report.append((time() - T0, 's for IERS table interpolated delta_t'))
@@ -67,12 +78,19 @@ def main(argv):
 
     # New 2018 splines.
 
+    indexes = np.arange(len(start_year))
+    #print(start_year[:10])
+
     T0 = time()
 
-    i = np.searchsorted(start_year, y, 'right') - 1
-    y0 = start_year[i]
-    y1 = end_year[i]
-    t = (y - y0) / (y1 - y0)
+    #i = np.searchsorted(start_year, y, 'right') - 1
+    i = np.interp(y, start_year, indexes)
+    t = i
+    i = i.astype(int)
+    t %= 1.0
+    # y0 = start_year[i]
+    # y1 = end_year[i]
+    # t = (y - y0) / (y1 - y0)
     delta_t = ((a3[i] * t + a2[i]) * t + a1[i]) * t + a0[i]
 
     report.append((time() - T0, 's to compute ∆T with 2018 splines'))
@@ -95,7 +113,7 @@ def main(argv):
 
     # : i, start_year, end_year, a0, a1, a2, a3 :
     z = np.zeros_like(iers_tt)
-    #iers_end_year = 
+    #iers_end_year =
 
     cat = np.concatenate
     c = cutoff_index
@@ -108,16 +126,79 @@ def main(argv):
 
     # Try using combined splines.
 
-    T0 = time()
-
     tt = to_tt(y)
-    i = np.searchsorted(start_tt, tt, 'right') - 1
-    tt0 = start_tt[i]
-    tt1 = end_tt[i]
-    t = (tt - tt0) / (tt1 - tt0)
+    f_index = np.arange(len(start_tt))
+
+    A = np.searchsorted(start_tt, tt, 'right') - 1
+    T0 = time()
+    A = np.searchsorted(start_tt, tt, 'right') - 1
+    report.append((time() - T0, 'trial A'))
+
+    B = np.searchsorted(start_tt, tt, 'left')
+    T0 = time()
+    B = np.searchsorted(start_tt, tt, 'left')
+    report.append((time() - T0, 'trial B'))
+
+    print('sizes:', tt.shape, start_tt.shape, f_index.shape)
+    interp = np.interp
+    C = interp(tt, start_tt, f_index, 1.0, 1.0)
+    T0 = time()
+    C = interp(tt, start_tt, f_index, 1.0, 1.0)
+    report.append((time() - T0, 'trial C'))
+    C1 = C.astype(int)
+
+    assert A.shape == B.shape == C.shape
+
+    print(A[:4])
+    print(B[:4])
+    print(C[:4])
+    print(C1[:4])
+
+    a0123 = np.array([a0, a1, a2, a3]).T
+    print(a0123.shape)
+
+    I1 = np.interp(tt, start_tt, f_index)
+
+    T0 = time()
+    #i = np.searchsorted(start_tt, tt, 'right') - 1
+    I1 = np.interp(tt, start_tt, f_index)
+    i = I1.astype(int)
+    # I2 = I1 % 1.0
+    # tt0 = start_tt[i]
+    # tt1 = end_tt[i]
+    # t = (tt - tt0) / (tt1 - tt0)
+    # print('t ', t[:4])
+    # print('I2', I2[:4])
+    # t = I1 % 1.0
+    I1 %= 1.0
+    t = I1
+
+    #print(a0123[i].shape)
+    # a0, a1, a2, a3 = a0123[i].T
+    # experimental_delta_t = ((a3 * t + a2) * t + a1) * t + a0
+
     experimental_delta_t = ((a3[i] * t + a2[i]) * t + a1[i]) * t + a0[i]
+    #experimental_delta_t = a0[i]
 
     report.append((time() - T0, 's to compute ∆T with combined spline table'))
+
+    experimental_delta_t
+
+    # Hybrid approach: splines for years outside IERS range, but simple
+    # linear interpolation inside IERS table.
+
+    print(y)
+    y_tt = to_tt(y)
+    iers_mask = (iers_tt[0] <= y_tt) & (y_tt <= iers_tt[-1])
+    print(iers_mask.shape, sum(iers_mask))
+
+    # generate index: subtract floor, build mask, turn matches into ints
+    # and 0.0-0.99 remainders, then do direct indexing into table.
+    # for ~mask, do splines, maybe having fake spline where table is?
+    # paste them together
+
+    # T0 = time()
+    # report.append((time() - T0, 's to compute ∆T with combined spline table'))
 
     # The plot.
 
