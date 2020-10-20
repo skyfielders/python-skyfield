@@ -895,15 +895,14 @@ def interpolate_delta_t(delta_t_table, tt):
             delta_t = delta_t_formula_morrison_and_stephenson_2004(tt)
     return delta_t
 
-def delta_t_formula_morrison_and_stephenson_2004(tt):
-    """Delta T formula from Morrison and Stephenson, 2004.
+def delta_t_formula_stephenson_morrison_hohenkerk_2016(tt, fraction):
+    """∆T long-term parabola from Morrison, Stephenson, Hohenkerk 2016."""
+    t = (tt - 2387626.25 + fraction) / 36525.0  # centuries before/after 1825
+    return -320.0 + 32.5 * t * t
 
-    This parabola can be used to estimate the value of Delta T for dates
-    in the far past or future, for which more specific estimates are not
-    available.
-
-    """
-    t = (tt - 2385800.5) / 36525.0  # centuries before or after 1820
+def delta_t_formula_morrison_and_stephenson_2004(tt, fraction=0.0):
+    """∆T long-term parabola from Morrison and Stephenson, 2004."""
+    t = (tt - 2385800.5 + fraction) / 36525.0  # centuries before/after 1820
     return 32.0 * t * t - 20.0
 
 def build_delta_t_table(delta_t_recent):
