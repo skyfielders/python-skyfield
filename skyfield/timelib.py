@@ -691,10 +691,7 @@ class Time(object):
 
     @reify
     def ut1_fraction(self):
-        # Calling "self.delta_t" would cache a useless intermediate value, so:
-        table = self.ts.delta_t_table
-        delta_t = interpolate_delta_t(table, self.tt)
-        return self.tt_fraction - delta_t / DAY_S
+        return self.tt_fraction - self.delta_t / DAY_S
 
     @reify
     def delta_t(self):
