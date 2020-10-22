@@ -10,6 +10,21 @@ forget.
 Sprint Possibilities
 ====================
 
+* The “finals2000A.all” file expresses DUT1 like ``0.8084178`` with 7
+  digits after the decimal place.  How accurate is that?  It goes down
+  to tenths of microseconds.  Roughly how much arc does the Earth rotate
+  through in a tenth of a microsecond?
+
+  (1e-7 / 24 / 60 / 60) * 360 * 60 * 60 * 1e3
+  = 0.0015
+
+  So we know the Earth’s orientation to within 0.0015 mas.  How does
+  that compare to the error of storing TT in a 64-bit float?  Per the
+  output of ``design/time_precision.py``, using a single float for TT
+  provides steps of around 4e-5 and 5e-5 from 1950 through 2050: about
+  500 times less precise than the DUT1 numbers!  Therefore, we should
+  design delta-T to use both TT floats.
+
 * Should the deflection routine really say this instead?:
 
 ```
