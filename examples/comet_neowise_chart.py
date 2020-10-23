@@ -102,7 +102,8 @@ offset = 0.002
 
 ax.plot(comet_x, comet_y, '+', c=comet_color, zorder=3)
 
-for xi, yi, tstr in zip(comet_x, comet_y, t_comet.utc_strftime('%-m/%d')):
+for xi, yi, tstr in zip(comet_x, comet_y, t_comet.utc_strftime('%m/%d')):
+    tstr = tstr.lstrip('0')
     text = ax.text(xi + offset, yi - offset, tstr, color=comet_color,
                    ha='left', va='top', fontsize=9, weight='bold', zorder=-1)
     text.set_alpha(0.5)
