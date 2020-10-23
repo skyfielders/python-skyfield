@@ -1,10 +1,8 @@
 import numpy as np
-import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.collections import LineCollection
 
-from skyfield import api
-from skyfield.api import Star, load, tau
+from skyfield.api import Star, load
 from skyfield.constants import GM_SUN_Pitjeva_2005_km3_s2 as GM_SUN
 from skyfield.data import hipparcos, mpc, stellarium
 from skyfield.projections import build_stereographic_projection
@@ -28,7 +26,10 @@ earth = eph['earth']
 with load.open(mpc.COMET_URL) as f:
     comets = mpc.load_comets_dataframe(f)
 
-comets = comets.set_index('designation', drop=False)
+comets = (comets.sort_values('reference')
+          .groupby('designation', as_index=False).last()
+          .set_index('designation', drop=False))
+
 row = comets.loc['C/2020 F3 (NEOWISE)']
 comet = sun + mpc.comet_orbit(row, ts, GM_SUN)
 

@@ -133,7 +133,7 @@ _COMET_FAST_COLUMNS = (
     'perihelion_distance_au', 'eccentricity', 'argument_of_perihelion_degrees',
     'longitude_of_ascending_node_degrees', 'inclination_degrees',
     'magnitude_H', 'magnitude_G',
-    'designation',
+    'designation', 'reference',
 )
 
 _fast_comet_re = None
@@ -166,7 +166,7 @@ def load_comets_dataframe(fobj):
                 pat.append(' ' * (start - previous_end))
             keep = name in keepers
             if name == 'designation':
-                pat.append('(.*?)  .*')
+                pat.append('(.*?)  +(.*)')
                 break
             else:
                 if keep:

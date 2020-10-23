@@ -61,8 +61,11 @@ but most Skyfield users will simply index their dataframe by comet designation.
 
 .. testcode::
 
-    # Index by designation for fast lookup.
-    comets = comets.set_index('designation', drop=False)
+    # Keep only the most recent orbit for each comet,
+    # and index by designation for fast lookup.
+    comets = (comets.sort_values('reference')
+              .groupby('designation', as_index=False).last()
+              .set_index('designation', drop=False))
 
     # Sample lookups.
     row = comets.loc['1P/Halley']
