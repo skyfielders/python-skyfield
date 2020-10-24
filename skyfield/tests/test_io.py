@@ -17,7 +17,7 @@ except ImportError:
 from assay import assert_raises
 from skyfield import api
 
-ci = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../ci'))
+data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data'))
 old_content = (b' 2015 10  1  67.9546\n'
                b' 2015 11  1  68.0055\n'
                b' 2015 12  1  68.0514\n'
@@ -79,9 +79,9 @@ def test_builtin_timescale_uses_recent_IERS_data(load):
     assert abs(ts.utc(2020, 1, 1).dut1 - (-0.1771547)) < 1e-8
 
 def test_non_builtin_timescale_prefers_USNO_files(load):
-    with open(os.path.join(ci, 'deltat.preds'), 'rb') as f:
+    with open(os.path.join(data_dir, 'deltat.preds'), 'rb') as f:
         preds = f.read()
-    with open(os.path.join(ci, 'Leap_Second.dat'), 'rb') as f:
+    with open(os.path.join(data_dir, 'Leap_Second.dat'), 'rb') as f:
         leaps = f.read()
 
     save_file(load, 'deltat.data',
