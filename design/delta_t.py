@@ -257,7 +257,7 @@ def main(argv):
     f = load.open('finals2000A.all')
     mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
     delta_t_recent, leap_dates, leap_offsets = (
-        iers.build_timescale_arrays(mjd_utc, dut1)
+        iers._build_timescale_arrays(mjd_utc, dut1)
     )
 
     ts = load.timescale()

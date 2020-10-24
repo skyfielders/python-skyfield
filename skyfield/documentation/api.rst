@@ -35,6 +35,8 @@ Opening files
 
    Loader
    Loader.build_url
+   Loader.days_old
+   Loader.download
    Loader.path_to
    Loader.timescale
    Loader.tle_file

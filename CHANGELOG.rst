@@ -2,6 +2,30 @@
 Changelog
 =========
 
+1.31 — 2020 October 24
+----------------------
+
+* Skyfield now uses the International Earth Rotation Service (IERS) file
+  ``finals2000A.all`` for updated ∆T and leap seconds.  The USNO is no
+  longer updating the files ``deltat.data`` and ``deltat.preds`` that
+  previous versions of Skyfield used, and the ``cddis.nasa.gov`` server
+  from which they were fetched will discontinue anonymous FTP on 2020
+  October 31.  See `downloading-timescale-files`.
+  `#452 <https://github.com/skyfielders/python-skyfield/issues/452>`_
+  `#464 <https://github.com/skyfielders/python-skyfield/issues/464>`_
+
+* The comets dataframe built from the MPC file ``CometEls.txt`` now
+  includes the ``reference`` column, so users can tell which orbit is
+  most recent if there are several orbits for a single comet.  (For
+  example, the file currently lists two C/2020 F3 (NEOWISE) orbits.)
+  The comet examples in the documentation now build a dataframe that
+  only includes the most recent orbit for each comet.
+  `#463 <https://github.com/skyfielders/python-skyfield/issues/463>`_
+
+* Two new methods :meth:`~skyfield.iokit.Loader.days_old()` and
+  :meth:`~skyfield.iokit.Loader.download()` make it simple to download a
+  fresh copy of a file if the copy on disk is older than you would like.
+
 1.30 — 2020 October 11
 ----------------------
 

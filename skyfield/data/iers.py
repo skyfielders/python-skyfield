@@ -20,7 +20,7 @@ def parse_dut1_from_finals_all(f):
     ])
     return data['mjd_utc'], data['dut1']
 
-def build_timescale_arrays(mjd_utc, dut1):
+def _build_timescale_arrays(mjd_utc, dut1):
     big_jumps = np.diff(dut1) > 0.9
     leap_second_mask = np.concatenate([[False], big_jumps])
     tt_minus_utc = np.cumsum(leap_second_mask) + 32.184 + 12.0
