@@ -740,7 +740,7 @@ call this special constructor:
 .. testoutput::
 
     Satellite number: 5
-    Epoch: A.D. 2000-Jun-27 06:50:24.0000 UT
+    Epoch: A.D. 2000-Jun-27 18:50:24.0000 UT
 
 The result should be a satellite object that behaves
 exactly as though it had been loaded from TLE lines.

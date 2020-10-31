@@ -131,6 +131,7 @@ class EarthSatellite(VectorFunction):
         # be unified to always use epochyr and epochdays.
         whole, fraction = divmod(satrec.jdsatepoch, 1.0)
         year, month, day = compute_calendar_date(whole)
+        day += 0.5  # convert integer Julian day into Julian date float
         self.epoch = ts.utc(year, month, day + fraction + satrec.jdsatepochF)
 
         self._setup(satrec)

@@ -2,6 +2,14 @@
 Changelog
 =========
 
+1.32 — Future
+-------------
+
+* Fix: the ``.epoch`` attribute of Earth satellite objects that were
+  built using :meth:`~skyfield.sgp4lib.EarthSatellite.from_satrec()`
+  was, alas, a half-day off.
+  `#466 <https://github.com/skyfielders/python-skyfield/issues/466>`_
+
 1.31 — 2020 October 24
 ----------------------
 
