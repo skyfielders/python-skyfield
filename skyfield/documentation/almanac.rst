@@ -197,16 +197,67 @@ for different bodies:
   with the Sun from our point of view, never oppositions, with 0
   indicating an inferior conjunction and 1 a superior conjunction.
 
+.. _transits:
+
+Meridian Transits
+=================
+
+Every day the Earth’s rotation
+swings the sky through nearly 360°,
+leaving the celestial poles stationary
+while bringing each star and planet in turn
+across your *meridian* —
+the “line of longitude” in the sky above you
+that runs from the South Pole to the North Pole
+through the zenith point directly above your location on Earth.
+You can ask Skyfield for the times at which a body
+crosses your meridian,
+and then the antimeridian on the opposite side of the celestial globe:
+
+.. testcode::
+
+    bluffton = api.Topos('40.8939 N', '83.8917 W')
+
+    t0 = ts.utc(2020, 11, 6)
+    t1 = ts.utc(2020, 11, 7)
+    f = almanac.meridian_transits(eph, eph['Mars'], bluffton)
+    t, y = almanac.find_discrete(t0, t1, f)
+
+    print(t.utc_strftime('%Y-%m-%d %H:%M'))
+    print(y)
+    print([almanac.MERIDIAN_TRANSITS[yi] for yi in y])
+
+.. testoutput::
+
+    ['2020-11-06 03:32', '2020-11-06 15:30']
+    [ True False]
+    ['Meridian transit', 'Antimeridian transit']
+
+Some astronomers call these moments
+“upper culmination” and “lower culmination” instead.
+
+Observers often think of transit as the moment
+when an object is highest in the sky,
+which is roughly true.
+But at very high precision,
+if the body has any north or south velocity
+then its moment of highest altitude will be slightly earlier or later.
+
+Bodies near the poles are exceptions to the general rule
+that a body is visible at transit but below the horizon at antitransit.
+For a body that’s circumpolar from your location,
+transit and antitransit are both moments of visibility,
+when it stands above and below the pole;
+and objects close to the opposite pole will always be below the horizon,
+even as they invisibly transit your line of longitude
+down below your horizon.
+
 Sunrise and Sunset
 ==================
 
 Because sunrise and sunset differ depending on your location on the
 Earth’s surface, you first need to create a Topos object describing your
 geographic location.
-
-.. testcode::
-
-    bluffton = api.Topos('40.8939 N', '83.8917 W')
 
 Then you can create a start time and an end time and ask for all of the
 sunrises and sunsets in between.

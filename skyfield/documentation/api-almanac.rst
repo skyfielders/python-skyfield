@@ -22,6 +22,8 @@ times of sunrise, sunset, and the phases of the moon.
 
 .. autofunction:: oppositions_conjunctions
 
+.. autofunction:: meridian_transits
+
 .. autofunction:: sunrise_sunset
 
 .. autofunction:: dark_twilight_day

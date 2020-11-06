@@ -5,6 +5,11 @@ Changelog
 1.32 — Future
 -------------
 
+* The almanac module’s new :func:`~skyfield.almanac.meridian_transits()`
+  routine can find the moments at which a body transits the meridian and
+  antimeridian.
+  `#460 <https://github.com/skyfielders/python-skyfield/issues/460>`_
+
 * Fix: the ``.epoch`` attribute of Earth satellite objects that were
   built using :meth:`~skyfield.sgp4lib.EarthSatellite.from_satrec()`
   was, alas, a half-day off.

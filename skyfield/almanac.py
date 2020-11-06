@@ -4,7 +4,7 @@
 from __future__ import print_function, division
 
 from numpy import cos, pi, zeros_like
-from .constants import tau
+from .constants import pi, tau
 from .searchlib import find_discrete
 from .nutationlib import iau2000b_radians
 
@@ -169,6 +169,34 @@ def oppositions_conjunctions(ephemeris, target):
 
     leading_or_trailing.rough_period = 60  # Mercury
     return leading_or_trailing
+
+MERIDIAN_TRANSITS = ['Antimeridian transit', 'Meridian transit']
+
+def meridian_transits(ephemeris, target, topos):
+    """Build a function of time for finding when a body transits the meridian.
+
+    The returned function accepts a :class:`~skyfield.timelib.Time`
+    argument and returns ``True`` if the ``target`` body is west of the
+    observer’s meridian at that time, and otherwise returns ``False.``
+    See :ref:`transits` for how to use this to search for a body’s
+    meridian transits and antimeridian transits.
+
+    """
+    topos_at = (ephemeris['earth'] + topos).at
+
+    def west_of_meridian_at(t):
+        """Return `True` if the target is west of the observer’s meridian."""
+        t._nutation_angles_radians = iau2000b_radians(t)
+        # TODO: should we work to avoid computing Topos position twice?
+        # We could grab its hidden GCRS vector and do the trig ourselves.
+        # Or there might be something clever we can do with the two raw
+        # vectors, skipping the cost of computing spherical coordinates.
+        ra1, _, _ = topos.at(t).radec(epoch='date')
+        ra2, _, _ = topos_at(t).observe(target).apparent().radec(epoch='date')
+        return (ra1.radians - ra2.radians) % tau < pi
+
+    west_of_meridian_at.rough_period = 0.5  # twice a day
+    return west_of_meridian_at
 
 def sunrise_sunset(ephemeris, topos):
     """Build a function of time that returns whether the sun is up.
