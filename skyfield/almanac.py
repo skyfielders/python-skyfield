@@ -294,10 +294,3 @@ def risings_and_settings(ephemeris, target, topos,
 
     is_body_up_at.rough_period = 0.5  # twice a day
     return is_body_up_at
-
-def _distance_to(center, target):
-    def distance_at(t):
-        t._nutation_angles_radians = iau2000b_radians(t)
-        distance = center.at(t).observe(target).distance().au
-        return distance
-    return distance_at
