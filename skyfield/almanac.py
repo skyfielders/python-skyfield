@@ -3,7 +3,7 @@
 
 from __future__ import print_function, division
 
-from numpy import cos, pi, zeros_like
+from numpy import cos, zeros_like
 from .constants import pi, tau
 from .searchlib import find_discrete
 from .nutationlib import iau2000b_radians
