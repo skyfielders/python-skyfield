@@ -302,6 +302,9 @@ LUNAR_ECLIPSES = [
     'Total',
 ]
 
+from .relativity import add_aberration, C_AUDAY
+from .constants import AU_KM, C
+
 def lunar_eclipses(eph, start_time, end_time):
     """Return the lunar eclipses between `start_time` and `end_time`.
 
@@ -311,18 +314,38 @@ def lunar_eclipses(eph, start_time, end_time):
     Explanatory Supplement to the Astronomical Almanac 11.2.3.
 
     """
-    earth = eph['earth']
-    moon = eph['moon']
-    sun = eph['sun']
+    sdict = dict(((s.center, s.target), s.spk_segment) for s in eph.segments)
+    sun = sdict[0,10]
+    earth_barycenter = sdict[0,3]
+    earth = sdict[3,399]
+    moon = sdict[3,301]
 
     def f(t):
+        jd, fr = t.whole, t.tdb_fraction
+
+        b, velocity = earth_barycenter.compute_and_differentiate(jd, fr)
+        e = earth.compute(jd, fr)
+        m = moon.compute(jd, fr)
+        s = sun.compute(jd, fr)
+
+        earth_to_sun = s - b - e
+        earth_to_moon = m - e
+
+        earth_to_sun /= AU_KM
+        velocity /= AU_KM
+        light_travel_time = length_of(earth_to_sun) / C_AUDAY
+
+        add_aberration(earth_to_sun, velocity, light_travel_time)
+        return angle_between(earth_to_sun, earth_to_moon)
+
+    def f2(t):
         e = earth.at(t).position.au
-        #s = sun.at(t).position.au
         m = moon.at(t).position.au
+        #s = sun.at(t).position.au
         #v1 = s - e
-        #v1 = earth.at(t).observe(sun).position.au
         #v1 = moon.at(t).observe(sun).position.au
         #v1 = moon.at(t).observe(sun).apparent().position.au
+        #v1 = earth.at(t).observe(sun).position.au
         v1 = earth.at(t).observe(sun).apparent().position.au
         v2 = m - e
         #v2 = earth.at(t).observe(moon).position.au
@@ -331,6 +354,10 @@ def lunar_eclipses(eph, start_time, end_time):
 
     f.step_days = 5.0
     t, y = find_maxima(start_time, end_time, f)
+
+    earth = eph['earth']
+    moon = eph['moon']
+    sun = eph['sun']
 
     e = earth.at(t).position.m
     s = sun.at(t).position.m
@@ -347,7 +374,10 @@ def lunar_eclipses(eph, start_time, end_time):
     solar_radius_m = 696340e3
     moon_radius_m = 1.7371e6
 
-    #pi_m = arcsin(ERAD / length_of(me))
+    # pi_m = arcsin(ERAD / length_of(me))
+    # X =ERAD / length_of(me)
+    # Y = arcsin(X)
+    # print(X, X/Y)
     pi_m = ERAD / length_of(me)
     #pi_s = arcsin(ERAD / length_of(es))
     pi_s = ERAD / length_of(es)
