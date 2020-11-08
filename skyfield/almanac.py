@@ -3,10 +3,9 @@
 
 from __future__ import print_function, division
 
-from numpy import arcsin, cos, zeros_like, byte
-from .constants import ERAD, pi, tau
-from .functions import angle_between, length_of
-from .searchlib import find_discrete, find_maxima
+from numpy import cos, zeros_like
+from .constants import pi, tau
+from .searchlib import find_discrete
 from .nutationlib import iau2000b_radians
 
 # Not only to support historic code but also for future convenience, let
@@ -295,108 +294,3 @@ def risings_and_settings(ephemeris, target, topos,
 
     is_body_up_at.rough_period = 0.5  # twice a day
     return is_body_up_at
-
-LUNAR_ECLIPSES = [
-    'Penumbral',
-    'Partial',
-    'Total',
-]
-
-from .relativity import add_aberration, C_AUDAY
-from .constants import AU_KM, C
-
-def lunar_eclipses(eph, start_time, end_time):
-    """Return the lunar eclipses between `start_time` and `end_time`.
-
-    Two arrays are returned: a :class:`~skyfield.timelib.Time` giving
-    the dates of each eclipse, and an integer array of codes (whose
-    meanings are listed in the `LUNAR_ECLIPSES` list).  Adapted from the
-    Explanatory Supplement to the Astronomical Almanac 11.2.3.
-
-    """
-    sdict = dict(((s.center, s.target), s.spk_segment) for s in eph.segments)
-    sun = sdict[0,10]
-    earth_barycenter = sdict[0,3]
-    earth = sdict[3,399]
-    moon = sdict[3,301]
-
-    def f(t):
-        jd, fr = t.whole, t.tdb_fraction
-
-        b, velocity = earth_barycenter.compute_and_differentiate(jd, fr)
-        e = earth.compute(jd, fr)
-        m = moon.compute(jd, fr)
-        s = sun.compute(jd, fr)
-
-        earth_to_sun = s - b - e
-        earth_to_moon = m - e
-
-        earth_to_sun /= AU_KM
-        velocity /= AU_KM
-        light_travel_time = length_of(earth_to_sun) / C_AUDAY
-
-        add_aberration(earth_to_sun, velocity, light_travel_time)
-        return angle_between(earth_to_sun, earth_to_moon)
-
-    def f2(t):
-        e = earth.at(t).position.au
-        m = moon.at(t).position.au
-        #s = sun.at(t).position.au
-        #v1 = s - e
-        #v1 = moon.at(t).observe(sun).position.au
-        #v1 = moon.at(t).observe(sun).apparent().position.au
-        #v1 = earth.at(t).observe(sun).position.au
-        v1 = earth.at(t).observe(sun).apparent().position.au
-        v2 = m - e
-        #v2 = earth.at(t).observe(moon).position.au
-        #v2 = -moon.at(t).observe(earth).position.au
-        return angle_between(v1, v2)
-
-    f.step_days = 5.0
-    t, y = find_maxima(start_time, end_time, f)
-
-    earth = eph['earth']
-    moon = eph['moon']
-    sun = eph['sun']
-
-    e = earth.at(t).position.m
-    s = sun.at(t).position.m
-    m = moon.at(t).position.m
-
-    #me = moon.at(t).observe(earth).apparent().position.m
-    #me = moon.at(t).observe(earth).apparent().position.m
-    me = e - m
-    es = s - e
-    #es = s - m
-    #es = moon.at(t).observe(sun).apparent().position.m
-    #es = earth.at(t).observe(sun).apparent().position.m
-
-    solar_radius_m = 696340e3
-    moon_radius_m = 1.7371e6
-
-    # pi_m = arcsin(ERAD / length_of(me))
-    # X =ERAD / length_of(me)
-    # Y = arcsin(X)
-    # print(X, X/Y)
-    pi_m = ERAD / length_of(me)
-    #pi_s = arcsin(ERAD / length_of(es))
-    pi_s = ERAD / length_of(es)
-    #s_s = arcsin(solar_radius_m / length_of(es))
-    s_s = solar_radius_m / length_of(es)
-
-    pi_1 = 0.998340 * pi_m
-
-    sigma = angle_between(es, me)
-    s_m = arcsin(moon_radius_m / length_of(me))
-
-    penumbral = sigma < 1.02 * (pi_1 + pi_s + s_s) + s_m
-    partial = sigma < 1.02 * (pi_1 + pi_s - s_s) + s_m
-    total = sigma < 1.02 * (pi_1 + pi_s - s_s) - s_m
-
-    t = t[penumbral]
-    partial = partial[penumbral]
-    total = total[penumbral]
-
-    code = partial.astype(byte)
-    code += total
-    return t, code

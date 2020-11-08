@@ -1,6 +1,7 @@
 """Check Skyfield lunar eclipses against the huge NASA table of eclipses."""
 
-from skyfield import almanac
+from collections import Counter
+from skyfield import eclipselib
 from skyfield.api import load, GREGORIAN_START
 import datetime as dt
 
@@ -15,7 +16,7 @@ lines = data.decode('ascii').splitlines()
 
 for line in lines[14:]:
     year = int(line[7:12])
-    if year < 1 or year > 1000:
+    if year < 1 or year >= 3000:
     #if year < 1900 or year > 1920:
         continue
     datestr = line[8:29]
@@ -32,13 +33,12 @@ end_time = ts.tt_jd(timeN.whole + 1, timeN.tt_fraction)
 start_time.whole -= 1.0
 end_time.whole += 1.0
 
-#eph = load('de421.bsp')
 eph = load('de406.bsp')
-t, y = almanac.lunar_eclipses(eph, start_time, end_time)
+t, y = eclipselib.lunar_eclipses(eph, start_time, end_time)
 
 max_diff = 0.0
 total_diff = 0.0
-total_judge = 0
+problems = Counter()
 
 i = 0
 
@@ -46,10 +46,12 @@ for ti, yi in zip(t, y):
     t5, letter = table[i]
     diff = (ti.utc_datetime() - t5.utc_datetime()).total_seconds()
     if diff < -100.0:
+        problems['Extra'] += 1
         print('SKIPPING eclipse we found but is not in their list')
         continue
     i += 1
     while diff > 100.0:
+        problems['Missing'] += 1
         print('MISSING eclipse!')
         t5, letter = table[i]
         i += 1
@@ -59,10 +61,10 @@ for ti, yi in zip(t, y):
     letter2 = 'NPT'[yi]
     judge = '' if letter == letter2 else f'their {letter} != our {letter2}'
     if judge:
-        total_judge += 1
+        problems['Mismatch'] += 1
     print(ti.tt_strftime(), yi, t5.tt_strftime(), letter, diff, judge)
 
 print('Largest difference in time of an eclipse (seconds):', max_diff)
 print('Total difference in seconds between eclipse times:', total_diff)
-print('Number of eclipses with different descriptions:',
-      total_judge, '/', len(table))
+for name, count in sorted(problems.items()):
+    print(f'{name}: {count} / {len(table)}')
