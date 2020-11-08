@@ -23,6 +23,17 @@ def lunar_eclipses(eph, start_time, end_time):
     Explanatory Supplement to the Astronomical Almanac 11.2.3.
 
     """
+    # Calls to the inner function `f()` from `find_maxima()` incur most
+    # of the expense of this routine, so we use raw ephemeris segments.
+    # This (a) avoids computing velocities we won't use (calls to `at()`
+    # always compute velocity), and (b) avoids computing any segments
+    # twice.
+    #
+    # Note that we neglect light-travel time between the Earth and Moon,
+    # and also light travel time from the Sun: the Sun moves so slowly
+    # that a few minutes of difference in its position does not
+    # meaningfully affect our eclipse predictions.
+
     sdict = dict(((s.center, s.target), s.spk_segment) for s in eph.segments)
     sun = sdict[0,10]
     earth_barycenter = sdict[0,3]
@@ -30,11 +41,6 @@ def lunar_eclipses(eph, start_time, end_time):
     moon = sdict[3,301]
 
     def f(t):
-        # Calls to this from `find_maxima()` incur most of the expense
-        # of finding eclipses, so we use raw ephemeris segments, which
-        # (a) avoids computing velocities we won't use, and (b) avoids
-        # computing the Earth's vector twice.
-
         jd, fr = t.whole, t.tdb_fraction
         b, velocity = earth_barycenter.compute_and_differentiate(jd, fr)
         e = earth.compute(jd, fr)
@@ -45,9 +51,9 @@ def lunar_eclipses(eph, start_time, end_time):
         earth_to_moon = m - e
 
         # The aberration routine requires specific units.  (We can leave
-        # the `earth_to_moon` vector unconverted because all we care
-        # about in the end is its direction.)  We approximate the
-        # Earth’s velocity as being that of the Earth-Moon barycenter.
+        # the `earth_to_moon` vector unconverted because we only need
+        # its direction.)  We approximate the Earth’s velocity as being
+        # that of the Earth-Moon barycenter.
 
         earth_to_sun /= AU_KM
         velocity /= AU_KM
@@ -68,8 +74,8 @@ def lunar_eclipses(eph, start_time, end_time):
     earth_to_sun = s - b - e
     moon_to_earth = e - m
 
-    solar_radius_km = 696340
-    moon_radius_km = 1.7371e3
+    solar_radius_km = 696340.0
+    moon_radius_km = 1737.1
 
     # Strict geometry would demand that `arcsin()` be applied to these
     # three values, but the angles are small enough that no eclipse
@@ -80,12 +86,16 @@ def lunar_eclipses(eph, start_time, end_time):
 
     pi_1 = 0.998340 * pi_m
 
-    sigma = angle_between(earth_to_sun, moon_to_earth)
-    s_m = arcsin(moon_radius_km / length_of(moon_to_earth))
+    closest_approach = angle_between(earth_to_sun, moon_to_earth)
+    moon_radius = arcsin(moon_radius_km / length_of(moon_to_earth))
 
-    penumbral = sigma < 1.02 * (pi_1 + pi_s + s_s) + s_m
-    partial = sigma < 1.02 * (pi_1 + pi_s - s_s) + s_m
-    total = sigma < 1.02 * (pi_1 + pi_s - s_s) - s_m
+    atmosphere_blur = 1.02
+    penumbra_radius = atmosphere_blur * (pi_1 + pi_s + s_s)
+    umbra_radius = atmosphere_blur * (pi_1 + pi_s - s_s)
+
+    penumbral = closest_approach < penumbra_radius + moon_radius
+    partial = closest_approach < umbra_radius + moon_radius
+    total = closest_approach < umbra_radius - moon_radius
 
     t = t[penumbral]
     partial = partial[penumbral]
@@ -93,4 +103,11 @@ def lunar_eclipses(eph, start_time, end_time):
 
     code = partial.astype(byte)
     code += total
-    return t, code
+    details = {
+        'closest_approach_radians': closest_approach,
+        'moon_radius_radians': moon_radius,
+        'penumbra_radius_radians': penumbra_radius,
+        'umbra_radius_radians': umbra_radius,
+    }
+
+    return t, code, details
