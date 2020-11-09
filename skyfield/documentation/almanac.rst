@@ -623,6 +623,13 @@ in the *Explanatory Supplement to the Astronomical Almanac.*
   it is expected to always at least return every eclipse
   listed in the *Canon*.
 
+* Skyfield tends to return eclipse times
+  that are a few seconds earlier than those given by the *Canon*.
+  For decades near the present the disagreement
+  rarely exceeds 2 seconds,
+  but for eclipses 2,000 years ago the difference
+  can be as large as 20 seconds.
+
 * Skyfield also finds 71 barely partial eclipses
   beyond those listed in the *Canon*.
 
