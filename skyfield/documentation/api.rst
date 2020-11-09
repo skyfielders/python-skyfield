@@ -205,6 +205,12 @@ Routines to search for events like sunrise, sunset, and Moon phase.
    dark_twilight_day
    moon_phases
 
+.. currentmodule:: skyfield.eclipselib
+
+.. autosummary::
+
+   lunar_eclipses
+
 Topocentric locations
 =====================
 

@@ -14,13 +14,18 @@ LUNAR_ECLIPSES = [
     'Total',
 ]
 
-def lunar_eclipses(eph, start_time, end_time):
-    """Return the lunar eclipses between `start_time` and `end_time`.
+def lunar_eclipses(start_time, end_time, eph):
+    """Return the lunar eclipses between ``start_time`` and ``end_time``.
 
-    Two arrays are returned: a :class:`~skyfield.timelib.Time` giving
-    the dates of each eclipse, and an integer array of codes (whose
-    meanings are listed in the `LUNAR_ECLIPSES` list).  Adapted from the
-    Explanatory Supplement to the Astronomical Almanac 11.2.3.
+    Returns a three-item tuple:
+
+    * A :class:`~skyfield.timelib.Time` giving the dates of each eclipse.
+    * An integer array of codes identifying how complete each eclipse is.
+    * A dictionary of further supplementary details about each eclipse.
+
+    This routine is adapted from the Explanatory Supplement to the
+    Astronomical Almanac 11.2.3.  See `lunar-eclipses` for the details
+    of how to call this function.
 
     """
     # Calls to the inner function `f()` from `find_maxima()` incur most

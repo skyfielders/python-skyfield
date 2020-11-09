@@ -29,3 +29,7 @@ times of sunrise, sunset, and the phases of the moon.
 .. autofunction:: dark_twilight_day
 
 .. autofunction:: risings_and_settings
+
+.. currentmodule:: skyfield.eclipselib
+
+.. autofunction:: lunar_eclipses

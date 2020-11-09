@@ -34,7 +34,7 @@ start_time.whole -= 1.0
 end_time.whole += 1.0
 
 eph = load('de406.bsp')
-t, y, details = eclipselib.lunar_eclipses(eph, start_time, end_time)
+t, y, details = eclipselib.lunar_eclipses(start_time, end_time, eph)
 
 max_diff = 0.0
 total_diff = 0.0

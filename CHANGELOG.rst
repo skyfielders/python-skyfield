@@ -5,6 +5,10 @@ Changelog
 1.32 — Future
 -------------
 
+* A new :func:`~skyfield.eclipselib.lunar_eclipses()` routine finds
+  lunar eclipses and determines their degree of totality.
+  `#445 <https://github.com/skyfielders/python-skyfield/issues/445>`_
+
 * The almanac module’s new :func:`~skyfield.almanac.meridian_transits()`
   routine can find the moments at which a body transits the meridian and
   antimeridian.
