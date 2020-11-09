@@ -14,6 +14,11 @@ Changelog
   antimeridian.
   `#460 <https://github.com/skyfielders/python-skyfield/issues/460>`_
 
+* Fix: the :func:`~skyfield.searchlib.find_minima()` function was
+  ignoring its ``epsilon`` and ``num`` arguments and always using the
+  default values instead.
+  `#475 <https://github.com/skyfielders/python-skyfield/pull/475>`_
+
 * Fix: the ``.epoch`` attribute of Earth satellite objects that were
   built using :meth:`~skyfield.sgp4lib.EarthSatellite.from_satrec()`
   was, alas, a half-day off.
