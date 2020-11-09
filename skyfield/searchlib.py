@@ -85,7 +85,7 @@ def find_minima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
     def g(t): return -f(t)
     g.rough_period = getattr(f, 'rough_period', None)
     g.step_days = getattr(f, 'step_days', None)
-    t, y = find_maxima(start_time, end_time, g, epsilon=1.0 / DAY_S, num=12)
+    t, y = find_maxima(start_time, end_time, g, epsilon, num)
     return t, -y
 
 def find_maxima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
