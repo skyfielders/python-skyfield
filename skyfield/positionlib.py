@@ -166,6 +166,11 @@ class ICRF(object):
     def distance(self):
         """Compute the distance from the origin to this position.
 
+        The return value is a :class:`~skyfield.units.Distance` that
+        prints itself out in astronomical units (au) but that also
+        offers attributes ``au``, ``km``, and ``m`` if you want to
+        access its magnitude as a number.
+
         >>> v = ICRF([1, 1, 0])
         >>> print(v.distance())
         1.41421 au

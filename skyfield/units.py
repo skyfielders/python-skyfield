@@ -28,6 +28,18 @@ class Distance(object):
     You can initialize a ``Distance`` by providing a single float or a
     float array as either an ``au=``, ``km=``, or ``m=`` parameter.
 
+    You can access the magnitude of the distance with its three
+    attributes ``.au``, ``.km``, and ``.m``.  By default a distance
+    prints itself in astronomical units (au), but you can take control
+    of the formatting and choice of units yourself using standard Python
+    numeric formatting:
+
+    >>> d = Distance(au=1)
+    >>> print(d)
+    1.0 au
+    >>> print('{:.2f} km'.format(d.km))
+    149597870.70 km
+
     """
     _warned = False
 
