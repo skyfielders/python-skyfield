@@ -121,6 +121,31 @@ or in altitude and azimuth measured against the astronaut’s horizon.
     32deg 27' 09.7" degrees above the horizon
     118deg 12' 55.9" degrees around the horizon from north
 
+Computing the sub-solar point on the Moon
+=========================================
+
+This works not only for the Sun,
+but for any target body.
+You can learn the Moon latitude and longitude directly beneath the body
+by observing the target from the Moon’s center
+and then asking the lunar reference frame
+for the latitude and longitude.
+
+.. testcode::
+
+    sun = eph['Sun']
+
+    p = moon.at(t).observe(sun).apparent()
+    lat, lon, distance = p.frame_latlon(frame)
+    lon_degrees = (lon.degrees + 180.0) % 360.0 - 180.0
+    print('Sub-solar latitude: {:.1f} degrees'.format(lat.degrees))
+    print('Sub-solar longitude: {:.1f} degrees'.format(lon_degrees))
+
+.. testoutput::
+
+    Sub-solar latitude: 0.3 degrees
+    Sub-solar longitude: -104.9 degrees
+
 Computing lunar libration
 =========================
 
@@ -136,7 +161,7 @@ Thus:
 
     p = (earth - moon).at(t)
     lat, lon, distance = p.frame_latlon(frame)
-    lon_degrees = (lon.degrees - 180.0) % 360.0 - 180.0
+    lon_degrees = (lon.degrees + 180.0) % 360.0 - 180.0
     print('Libration in latitude: {:.3f}'.format(lat.degrees))
     print('Libration in longitude: {:.3f}'.format(lon_degrees))
 
