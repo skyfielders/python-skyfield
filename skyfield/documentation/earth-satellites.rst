@@ -65,8 +65,8 @@ for artificial satellites in Earth orbit:
 .. _Revisiting Spacetrack Report #3:
     https://celestrak.com/publications/AIAA/2006-6753/
 
-Finding and loading satellite elements
---------------------------------------
+Loading a TLE file
+------------------
 
 You can find satellite element sets at the
 `NORAD Two-Line Element Sets <http://celestrak.com/NORAD/elements/>`_
@@ -105,9 +105,12 @@ which is listed in Celestrak’s ``stations.txt`` file:
 
     Loaded 60 satellites
 
-If you want to operate on every satellite in the list, simply loop over it.
-To instead select individual satellites by name or number,
-build lookup dictionaries using Python’s dictionary comprehension syntax:
+If you want to operate on every satellite in the list,
+simply loop over the list with a ``for`` loop.
+If you instead want to be able
+to select individual satellites by name or number,
+try building a lookup dictionary
+using Python’s dictionary comprehension syntax:
 
 .. testcode::
 
@@ -129,14 +132,64 @@ build lookup dictionaries using Python’s dictionary comprehension syntax:
 
     ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
 
-If instead your program already has the two lines of TLE data,
-and does not need Skyfield to download and parse a Celestrak file,
-you can instantiate an :class:`~skyfield.sgp4lib.EarthSatellite` directly.
-Note that ``ts`` should be a timescale object:
+Performing a TLE query
+----------------------
+
+In addition to offering traditional text files
+like ``stations.txt`` and ``active.txt``,
+Celestrak supports queries that return TLE elements.
+
+But be careful!
+
+Because every query to Celestrak requests the same filename ``tle.php``
+Skyfield will by default only download the first result.
+Your second, third, and all subsequent attempts to query Celestrak
+will simply return the contents
+of the ``tle.php`` file that’s already on disk —
+giving you the results of your first query over and over again.
+
+Here are two easy remedies:
+
+1. Specify the argument ``reload=True``,
+   which asks Skyfield to always download new results
+   even if there is already a file on disk.
+   Every query will overwrite the file with new data.
+
+2. Or, specify a ``filename=`` argument
+   so that each query’s result
+   is saved to a file specific to that query.
+   Each query result will be saved to disk with its own filename.
+
+Here’s an example of the second approach —
+code that requests one specific satellite,
+saving the result to a file specific to the query:
 
 .. testcode::
 
-    # Alternative: build the satellite directly from strings.
+    n = 25544
+    url = 'https://celestrak.com/satcat/tle.php?CATNR={}'.format(n)
+    filename = 'tle-CATNR-{}.txt'.format(n)
+    satellites = load.tle_file(url, filename=filename)
+    print(satellites)
+
+.. testoutput::
+
+    [<EarthSatellite ISS (ZARYA) catalog #25544 epoch 2020-11-07 22:23:09 UTC>]
+
+The above code will download a new result
+each time it’s asked for a satellite that it hasn’t yet fetched.
+But note that when asked again for the same satellite,
+it will simply reload the existing file from disk
+unless ``reload=True`` is specified.
+
+Loading a TLE set from strings
+------------------------------
+
+If your program already has the two lines of TLE data for a satellite
+and doesn’t need Skyfield to download and parse a Celestrak file,
+you can instantiate an :class:`~skyfield.sgp4lib.EarthSatellite` directly.
+
+.. testcode::
 
     from skyfield.api import EarthSatellite
 
@@ -149,6 +202,9 @@ Note that ``ts`` should be a timescale object:
 .. testoutput::
 
     ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
+
+Checking a TLE’s epoch
+----------------------
 
 The “epoch” date of a satellite element set
 is the all-important date and time
