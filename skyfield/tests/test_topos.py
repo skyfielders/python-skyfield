@@ -1,4 +1,4 @@
-from numpy import abs
+from numpy import abs, sqrt
 
 from skyfield import constants
 from skyfield.api import Topos, load
@@ -26,14 +26,20 @@ def test_velocity():
     assert length_of(velocity2 - factor * velocity1) < 0.0007
 
 def test_itrf_vector():
-    ts = load.timescale()
-    t = ts.utc(2019, 11, 2, 3, 53)
     top = Topos(latitude_degrees=45, longitude_degrees=0,
                 elevation_m=constants.AU_M - constants.ERAD)
-    x, y, z = top.at(t).itrf_xyz().au
-    assert abs(x - 0.7071) < 1e-4
+
+    x, y, z = top.itrf_xyz().au
+    assert abs(x - sqrt(0.5)) < 2e-7
     assert abs(y - 0.0) < 1e-14
-    assert abs(z - 0.7071) < 1e-4
+    assert abs(z - sqrt(0.5)) < 2e-7
+
+    ts = load.timescale()
+    t = ts.utc(2019, 11, 2, 3, 53)
+    x, y, z = top.at(t).itrf_xyz().au
+    assert abs(x - sqrt(0.5)) < 1e-4
+    assert abs(y - 0.0) < 1e-14
+    assert abs(z - sqrt(0.5)) < 1e-4
 
 def test_beneath(ts, angle):
     t = ts.utc(2018, 1, 19, 14, 37, 55)

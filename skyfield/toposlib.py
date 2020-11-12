@@ -120,7 +120,7 @@ class Topos(VectorFunction):
         Returns a 3-element :class:`~skyfield.units.Distance` object.
 
         """
-        return self.itrf_position
+        return self.itrs_position
 
     def refract(self, altitude_degrees, temperature_C, pressure_mbar):
         """Predict how the atmosphere will refract a position.
