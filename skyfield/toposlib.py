@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from numpy import exp
-from .constants import ASEC2RAD, tau
+from .constants import ASEC2RAD, T0, tau
 from .earthlib import refract, terra
 from .functions import mxmxm, mxv, rot_x, rot_y, rot_z
 from .descriptorlib import reify
-from .units import Distance, Angle, _interpret_ltude
+from .units import Angle, Distance, Velocity, _interpret_ltude
 from .vectorlib import VectorFunction
 
 class Topos(VectorFunction):
@@ -59,11 +59,15 @@ class Topos(VectorFunction):
 
         self.latitude = latitude
         self.longitude = longitude
-        self.elevation = Distance(m=elevation_m)
+        self.elevation = elevation = Distance(m=elevation_m)
         self.x = x
         self.y = y
 
         self.R_lat = rot_y(latitude.radians)[::-1]
+
+        p, v = terra(latitude.radians, longitude.radians, elevation.au, 0.0)
+        self.itrs_position = Distance(p)
+        self.itrs_velocity = Velocity(v)
 
     @property
     def target(self):
@@ -87,17 +91,26 @@ class Topos(VectorFunction):
 
     def _at(self, t):
         """Compute the GCRS position and velocity of this Topos at time `t`."""
-        pos, vel = terra(self.latitude.radians, self.longitude.radians,
-                         self.elevation.au, t.gast)
+        pos = self.itrs_position.au
+        vel = self.itrs_velocity.au_per_d
+
+        if self.x or self.y:
+            R = rot_x(-self.y * ASEC2RAD)
+            pos = mxv(R, pos)
+
+            R = rot_y(-self.x * ASEC2RAD)
+            pos = mxv(R, pos)
+
+            sprime = -47.0e-6 * (t.tdb - T0) / 36525.0
+            tiolon = -sprime * ASEC2RAD
+            pos = mxv(rot_z(-tiolon), pos)
+
+        theta = t.gast / 24.0 * tau
+        R = rot_z(theta)
+        pos = mxv(R, pos)
+        vel = mxv(R, vel)
         pos = mxv(t.MT, pos)
         vel = mxv(t.MT, vel)
-        if self.x:
-            R = rot_y(self.x * ASEC2RAD)
-            pos = mxv(R, pos)
-        if self.y:
-            R = rot_x(self.y * ASEC2RAD)
-            pos = mxv(R, pos)
-        # TODO: also rotate velocity
 
         return pos, vel, pos, None
 
@@ -107,10 +120,7 @@ class Topos(VectorFunction):
         Returns a 3-element :class:`~skyfield.units.Distance` object.
 
         """
-        gast = 0.0
-        pos, vel = terra(self.latitude.radians, self.longitude.radians,
-                         self.elevation.au, gast)
-        return Distance(pos)
+        return self.itrf_position
 
     def refract(self, altitude_degrees, temperature_C, pressure_mbar):
         """Predict how the atmosphere will refract a position.

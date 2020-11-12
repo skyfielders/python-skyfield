@@ -95,9 +95,10 @@ def test_boston_geometry():
     boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8),
                                 x=0.003483, y=0.358609)
     a = (e['earth'] - boston).at(t)
+    meter = 1e-3
     compare(a.position.km,
       [-1.764697476371664E+02, -4.717131288041386E+03, -4.274926422016179E+03],
-      0.0027)  # TODO: try to get this < 1 meter
+      0.7 * meter)
 
 def test_moon_from_boston_geometry():
     e = api.load_file(_data_path('de430-2015-03-02.bsp'))
@@ -107,7 +108,7 @@ def test_moon_from_boston_geometry():
     a = (e['moon'] - boston).at(t)
     compare(a.position.au,
       [-1.341501206552443E-03, 2.190483327459023E-03, 6.839177007993498E-04],
-      1.7 * meter)  # TODO: improve this
+      1.1 * meter)
 
 def test_moon_from_boston_astrometric():
     e = api.load_file(_data_path('de430-2015-03-02.bsp'))
@@ -118,7 +119,7 @@ def test_moon_from_boston_astrometric():
     ra, dec, distance = a.radec()
     compare(ra._degrees, 121.4796470, 0.001 * arcsecond)
     compare(dec.degrees, 14.9108450, 0.001 * arcsecond)
-    compare(distance.au, 0.00265828588792, 1.6 * meter)  # TODO: improve this
+    compare(distance.au, 0.00265828588792, 0.05 * meter)
 
 def test_position_angle_from_boston(ts):
     t = ts.utc(2053, 10, 9)

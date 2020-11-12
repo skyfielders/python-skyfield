@@ -41,14 +41,14 @@ def terra(latitude, longitude, elevation, gast):
     sinst = sin(stlocl)
     cosst = cos(stlocl)
 
-    # Compute position vector components in kilometers.
+    # Compute position vector components in au.
 
     ac = ach * cosphi
     acsst = ac * sinst
     accst = ac * cosst
     pos = array((accst, acsst, zero + ash * sinphi))
 
-    # Compute velocity vector components in kilometers/sec.
+    # Compute velocity vector components in au/day.
 
     vel = ANGVEL * DAY_S * array((-acsst, accst, zero))
 
