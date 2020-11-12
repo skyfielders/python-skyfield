@@ -29,7 +29,7 @@ def test_itrf_vector():
     top = Topos(latitude_degrees=45, longitude_degrees=0,
                 elevation_m=constants.AU_M - constants.ERAD)
 
-    x, y, z = top.itrf_xyz().au
+    x, y, z = top.itrs_position.au
     assert abs(x - sqrt(0.5)) < 2e-7
     assert abs(y - 0.0) < 1e-14
     assert abs(z - sqrt(0.5)) < 2e-7

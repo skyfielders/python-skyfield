@@ -115,11 +115,7 @@ class Topos(VectorFunction):
         return pos, vel, pos, None
 
     def itrf_xyz(self):
-        """Return this location as an (x,y,z) vector in the ITRF frame.
-
-        Returns a 3-element :class:`~skyfield.units.Distance` object.
-
-        """
+        """DEPRECATED: access the ``itrs_position`` attribute instead."""
         return self.itrs_position
 
     def refract(self, altitude_degrees, temperature_C, pressure_mbar):
