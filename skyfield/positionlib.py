@@ -103,6 +103,16 @@ class ICRF(object):
         self.center = self._default_center if center is None else center
         self.target = target
 
+    @classmethod
+    def from_radec(cls, ra_hours, dec_degrees,
+                   distance_au=_GIGAPARSEC_AU, epoch=None):
+        theta = _to_array(dec_degrees) / 360.0 * tau
+        phi = _to_array(ra_hours) / 24.0 * tau
+        position_au = from_spherical(distance_au, theta, phi)
+        if epoch is not None:
+            position_au = mxv(epoch.MT, position_au)
+        return cls(position_au)
+
     def __repr__(self):
         name = self.__class__.__name__
         center = self.center
@@ -478,7 +488,6 @@ class ICRF(object):
         p = from_spherical(r, alt, az)
         p = einsum('ji...,j...->i...', R, p)
         return Apparent(p)
-
 
 # For compatibility with my original name for the class.  Not an
 # important enough change to warrant a deprecation error for users, so:

@@ -3,6 +3,7 @@ from numpy import abs, sqrt
 from skyfield import constants
 from skyfield.api import Topos, load
 from skyfield.functions import length_of
+from skyfield.positionlib import Apparent
 
 angle = (-15, 15, 35, 45)
 
@@ -40,6 +41,60 @@ def test_itrf_vector():
     assert abs(x - sqrt(0.5)) < 1e-4
     assert abs(y - 0.0) < 1e-14
     assert abs(z - sqrt(0.5)) < 1e-4
+
+def test_polar_motion_when_computing_topos_position(ts):
+    xp_arcseconds = 11.0
+    yp_arcseconds = 22.0
+
+    top = Topos(latitude=(42, 21, 24.1), longitude=(-71, 3, 24.8),
+                elevation_m=43.0, x=xp_arcseconds, y=yp_arcseconds)
+    t = ts.utc(2020, 11, 12, 22, 2)
+
+    # "expected" comes from:
+    # from novas.compat import ter2cel
+    # print(ter2cel(t.whole, t.ut1_fraction, t.delta_t, xp_arcseconds,
+    #               yp_arcseconds, top.itrs_position.km, method=1))
+
+    expected = (3146.221313017412, -3525.955228249315, 4269.301880718039)
+    assert max(abs(top.at(t).position.km - expected)) < 6e-11
+
+def test_polar_motion_when_computing_altaz_coordinates(ts):
+    latitude = 37.3414
+    longitude = -121.6429
+    elevation = 1283.0
+    ra_hours = 5.59
+    dec_degrees = -5.45
+
+    # xp_arcseconds = 0.0
+    # yp_arcseconds = 0.0
+    xp_arcseconds = 11.0
+    yp_arcseconds = 22.0
+
+    t = ts.utc(2020, 11, 12, 22, 16)
+    top = Topos(latitude_degrees=latitude, longitude_degrees=longitude,
+                elevation_m=elevation,
+                x=xp_arcseconds, y=yp_arcseconds)
+
+    pos = Apparent.from_radec(ra_hours, dec_degrees, epoch=t)
+    pos.t = t
+    pos.center = top
+
+    alt, az, distance = pos.altaz()
+
+    # To generate the test altitude and azimuth below:
+    # from novas.compat import equ2hor, make_on_surface
+    # location = make_on_surface(latitude, longitude, elevation, 0, 0)
+    # (novas_zd, novas_az), (rar, decr) = equ2hor(
+    #     t.ut1, t.delta_t, xp_arcseconds, yp_arcseconds, location,
+    #     ra_hours, dec_degrees, 0,
+    # )
+    # novas_alt = 90.0 - novas_zd
+
+    novas_alt = -58.091982532734704
+    novas_az = 1.887311822537328
+
+    assert abs(alt.degrees - novas_alt) < 1.9e-9
+    assert abs(az.degrees - novas_az) < 1.3e-7
 
 def test_beneath(ts, angle):
     t = ts.utc(2018, 1, 19, 14, 37, 55)

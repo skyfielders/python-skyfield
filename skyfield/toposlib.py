@@ -86,8 +86,30 @@ class Topos(VectorFunction):
 
     def _altaz_rotation(self, t):
         """Compute the rotation from the ICRF into the alt-az system."""
-        R_lon = rot_z(- self.longitude.radians - t.gast * tau / 24.0)
-        return mxmxm(self.R_lat, R_lon, t.M)
+        from .functions import mxm
+
+        R = t.M
+        R = mxm(rot_z(-t.gast * tau / 24.0), R)
+
+        if self.x or self.y:
+            sprime = -47.0e-6 * (t.tdb - T0) / 36525.0
+            tiolon = -sprime * ASEC2RAD
+            R = mxm(
+                rot_z(tiolon),
+                R,
+            )
+            R = mxm(
+                rot_y(self.x * ASEC2RAD),
+                R,
+            )
+            R = mxm(
+                rot_x(self.y * ASEC2RAD),
+                R,
+            )
+
+        R_lon = rot_z(- self.longitude.radians)
+        R = mxmxm(self.R_lat, R_lon, R)
+        return R
 
     def _at(self, t):
         """Compute the GCRS position and velocity of this Topos at time `t`."""
