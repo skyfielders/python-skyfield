@@ -76,9 +76,6 @@ Sprint Possibilities
 * Expand a bit on the documentation for stars, now that they can have an
   epoch for their position.
 
-* Load and use the various offsets between UTC and TAI that were in
-  effect before 1972.
-
 * When I wrote `add_deflection()` and needed to know whether Jupiter
   itself is available in an ephemeris, or whether the Jupiter Barycenter
   should be used in its place, I tried writing the test `if name not in
@@ -113,11 +110,7 @@ Sprint Possibilities
 * In `stars.rst`, document the other alternatives for how to set the RA
   and dec of a new Star object.
 
-* Solar and lunar eclipses.
-
-* We should implement comets and asteroids using the standard formulae
-  (can we find a good vector version, that will match the rest of our
-  approach?) for a Keplerian orbit.
+* Solar eclipses.
 
 Adding more smarts to ephemeris handling
 ========================================
