@@ -10,15 +10,20 @@ import re
 
 from ..constants import DAY_S
 
-_DUT1 = re.compile(b'^......(.........) ' + b'.' * 42 + b'(.\d........)', re.M)
 inf = float('inf')
+_R = re.compile(b'^......(.........) . '
+                b'(.\d.......)......... '
+                b'(.\d.......).........  '
+                b'.(.\d........)', re.M)
 
-def parse_dut1_from_finals_all(f):
-    data = np.fromregex(f, _DUT1, [
+def parse_dut1_x_y_from_finals_all(f):
+    data = np.fromregex(f, _R, [
         ('mjd_utc', np.float32),
+        ('x', np.float32),
+        ('y', np.float32),
         ('dut1', np.float32),
     ])
-    return data['mjd_utc'], data['dut1']
+    return data['mjd_utc'], data['x'], data['y'], data['dut1']
 
 def _build_timescale_arrays(mjd_utc, dut1):
     big_jumps = np.diff(dut1) > 0.9
@@ -36,3 +41,9 @@ def _build_timescale_arrays(mjd_utc, dut1):
     leap_offsets[0] = leap_offsets[1] = 10.0
 
     return delta_t_recent, leap_dates, leap_offsets
+
+# Compatibility with older Skyfield versions:
+
+def parse_dut1_from_finals_all(f):
+    v = parse_dut1_x_y_from_finals_all(f)
+    return v[0], v[3]
