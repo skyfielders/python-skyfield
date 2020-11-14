@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from numpy import exp
-from .constants import ASEC2RAD, T0, tau
+from numpy import exp, rollaxis
+from .constants import tau
 from .earthlib import refract, terra
-from .functions import mxmxm, mxm, mxv, rot_x, rot_y, rot_z
+from .functions import mxmxm, mxm, mxv, rot_y, rot_z
 from .descriptorlib import reify
 from .units import Angle, Distance, Velocity, _interpret_ltude
 from .vectorlib import VectorFunction
@@ -99,7 +99,7 @@ class Topos(VectorFunction):
         vel = self.itrs_velocity.au_per_d
 
         if t.ts.polar_motion_table is not None:
-            R = t.polar_motion_matrix().T
+            R = rollaxis(t.polar_motion_matrix(), 1)
             pos = mxv(R, pos)
             vel = mxv(R, vel)
 
