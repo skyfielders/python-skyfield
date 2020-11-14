@@ -3,7 +3,7 @@
 from numpy import exp, rollaxis
 from .constants import tau
 from .earthlib import refract, terra
-from .functions import mxmxm, mxm, mxv, rot_y, rot_z
+from .functions import mxm, mxv, rot_y, rot_z
 from .descriptorlib import reify
 from .units import Angle, Distance, Velocity, _interpret_ltude
 from .vectorlib import VectorFunction
@@ -61,11 +61,22 @@ class Topos(VectorFunction):
         self.longitude = longitude
         self.elevation = elevation = Distance(m=elevation_m)
 
-        self.R_lat = rot_y(latitude.radians)[::-1]
-
         p, v = terra(latitude.radians, longitude.radians, elevation.au, 0.0)
         self.itrs_position = Distance(p)
         self.itrs_velocity = Velocity(v)
+
+        self._R_latlon = mxm(
+            rot_y(self.latitude.radians)[::-1],  # TODO: Why "::-1"?
+            rot_z(-self.longitude.radians),
+        )
+
+    @reify
+    def R_lat(self):
+        # Why did I make this a public attribute back in 2015?  Drat.
+        # Now it has to stay around forever in case anyone was using it,
+        # even though we now use _R_latlon instead.  At least we can
+        # switch to producing it on-demand.
+        return rot_y(self.latitude.radians)[::-1]
 
     @property
     def target(self):
@@ -89,8 +100,7 @@ class Topos(VectorFunction):
         if t.ts.polar_motion_table is not None:
             R = mxm(t.polar_motion_matrix(), R)
 
-        R_lon = rot_z(- self.longitude.radians)
-        R = mxmxm(self.R_lat, R_lon, R)
+        R = mxm(self._R_latlon, R)
         return R
 
     def _at(self, t):
