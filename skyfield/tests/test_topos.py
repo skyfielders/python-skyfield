@@ -45,9 +45,10 @@ def test_itrf_vector():
 def test_polar_motion_when_computing_topos_position(ts):
     xp_arcseconds = 11.0
     yp_arcseconds = 22.0
+    ts.polar_motion_table = [0.0], [xp_arcseconds], [yp_arcseconds]
 
     top = Topos(latitude=(42, 21, 24.1), longitude=(-71, 3, 24.8),
-                elevation_m=43.0, x=xp_arcseconds, y=yp_arcseconds)
+                elevation_m=43.0)
     t = ts.utc(2020, 11, 12, 22, 2)
 
     # "expected" comes from:
@@ -65,15 +66,13 @@ def test_polar_motion_when_computing_altaz_coordinates(ts):
     ra_hours = 5.59
     dec_degrees = -5.45
 
-    # xp_arcseconds = 0.0
-    # yp_arcseconds = 0.0
     xp_arcseconds = 11.0
     yp_arcseconds = 22.0
+    ts.polar_motion_table = [0.0], [xp_arcseconds], [yp_arcseconds]
 
     t = ts.utc(2020, 11, 12, 22, 16)
     top = Topos(latitude_degrees=latitude, longitude_degrees=longitude,
-                elevation_m=elevation,
-                x=xp_arcseconds, y=yp_arcseconds)
+                elevation_m=elevation)
 
     pos = Apparent.from_radec(ra_hours, dec_degrees, epoch=t)
     pos.t = t

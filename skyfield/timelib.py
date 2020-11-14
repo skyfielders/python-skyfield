@@ -10,7 +10,7 @@ from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
-from .functions import (mxm, mxmxm, load_bundled_npy, rot_z,
+from .functions import (mxm, mxmxm, load_bundled_npy, rot_x, rot_y, rot_z,
                         _to_array, _reconcile)
 from .nutationlib import (
     build_nutation_matrix, equation_of_the_equinoxes_complimentary_terms,
@@ -83,6 +83,7 @@ class Timescale(object):
 
     """
     _utcnow = datetime.utcnow
+    polar_motion_table = None
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
         self.delta_t_table = build_delta_t_table(delta_t_recent)
@@ -315,9 +316,6 @@ class Time(object):
     exactly the same dimensions as your ``tt`` array.
 
     """
-    psi_correction = 0.0  # TODO: temporarily unsupported
-    eps_correction = 0.0  # TODO: temporarily unsupported
-
     def __init__(self, ts, tt, tt_fraction=None):
         if tt_fraction is None:
             tt_fraction = zeros_like(tt)
@@ -736,7 +734,23 @@ class Time(object):
     def ut1(self):
         return self.whole + self.ut1_fraction
 
-    # Crucial functions of time.
+    # Earth position as a function of time.
+
+    def polar_motion_angles(self):
+        table = self.ts.polar_motion_table
+        if table is None:
+            return 0.0, 0.0, 0.0
+        sprime = -47.0e-6 * (self.tdb - T0) / 36525.0
+        tt, x, y = table
+        return sprime, interp(self.tt, tt, x), interp(self.tt, tt, y)
+
+    def polar_motion_matrix(self):
+        sprime, x, y = self.polar_motion_angles()
+        return mxmxm(
+            rot_x(y * ASEC2RAD),
+            rot_y(x * ASEC2RAD),
+            rot_z(-sprime * ASEC2RAD),
+        )
 
     def nutation_matrix(self):
         """Compute the 3×3 nutation matrix N for this date."""

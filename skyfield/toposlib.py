@@ -3,7 +3,7 @@
 from numpy import exp
 from .constants import ASEC2RAD, T0, tau
 from .earthlib import refract, terra
-from .functions import mxmxm, mxv, rot_x, rot_y, rot_z
+from .functions import mxmxm, mxm, mxv, rot_x, rot_y, rot_z
 from .descriptorlib import reify
 from .units import Angle, Distance, Velocity, _interpret_ltude
 from .vectorlib import VectorFunction
@@ -60,8 +60,6 @@ class Topos(VectorFunction):
         self.latitude = latitude
         self.longitude = longitude
         self.elevation = elevation = Distance(m=elevation_m)
-        self.x = x
-        self.y = y
 
         self.R_lat = rot_y(latitude.radians)[::-1]
 
@@ -86,26 +84,10 @@ class Topos(VectorFunction):
 
     def _altaz_rotation(self, t):
         """Compute the rotation from the ICRF into the alt-az system."""
-        from .functions import mxm
+        R = mxm(rot_z(-t.gast * tau / 24.0), t.M)
 
-        R = t.M
-        R = mxm(rot_z(-t.gast * tau / 24.0), R)
-
-        if self.x or self.y:
-            sprime = -47.0e-6 * (t.tdb - T0) / 36525.0
-            tiolon = -sprime * ASEC2RAD
-            R = mxm(
-                rot_z(tiolon),
-                R,
-            )
-            R = mxm(
-                rot_y(self.x * ASEC2RAD),
-                R,
-            )
-            R = mxm(
-                rot_x(self.y * ASEC2RAD),
-                R,
-            )
+        if t.ts.polar_motion_table is not None:
+            R = mxm(t.polar_motion_matrix(), R)
 
         R_lon = rot_z(- self.longitude.radians)
         R = mxmxm(self.R_lat, R_lon, R)
@@ -116,24 +98,17 @@ class Topos(VectorFunction):
         pos = self.itrs_position.au
         vel = self.itrs_velocity.au_per_d
 
-        if self.x or self.y:
-            R = rot_x(-self.y * ASEC2RAD)
+        if t.ts.polar_motion_table is not None:
+            R = t.polar_motion_matrix().T
             pos = mxv(R, pos)
+            vel = mxv(R, vel)
 
-            R = rot_y(-self.x * ASEC2RAD)
-            pos = mxv(R, pos)
-
-            sprime = -47.0e-6 * (t.tdb - T0) / 36525.0
-            tiolon = -sprime * ASEC2RAD
-            pos = mxv(rot_z(-tiolon), pos)
-
-        theta = t.gast / 24.0 * tau
-        R = rot_z(theta)
+        R = rot_z(t.gast / 24.0 * tau)
         pos = mxv(R, pos)
         vel = mxv(R, vel)
+
         pos = mxv(t.MT, pos)
         vel = mxv(t.MT, vel)
-
         return pos, vel, pos, None
 
     def itrf_xyz(self):

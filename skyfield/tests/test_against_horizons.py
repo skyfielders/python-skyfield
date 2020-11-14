@@ -91,9 +91,10 @@ def test_callisto_astrometric(ts):
 
 def test_boston_geometry():
     e = api.load_file(_data_path('jup310-2015-03-02.bsp'))
-    t = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
-    boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8),
-                                x=0.003483, y=0.358609)
+    ts = api.load.timescale(delta_t=67.185390 + 0.5285957)
+    ts.polar_motion_table = [0.0], [0.003483], [0.358609]
+    t = ts.tdb(2015, 3, 2)
+    boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8))
     a = (e['earth'] - boston).at(t)
     meter = 1e-3
     compare(a.position.km,
@@ -102,9 +103,10 @@ def test_boston_geometry():
 
 def test_moon_from_boston_geometry():
     e = api.load_file(_data_path('de430-2015-03-02.bsp'))
-    t = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
-    boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8),
-                                x=0.003483, y=0.358609)
+    ts = api.load.timescale(delta_t=67.185390 + 0.5285957)
+    ts.polar_motion_table = [0.0], [0.003483], [0.358609]
+    t = ts.tdb(2015, 3, 2)
+    boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8))
     a = (e['moon'] - boston).at(t)
     compare(a.position.au,
       [-1.341501206552443E-03, 2.190483327459023E-03, 6.839177007993498E-04],
@@ -112,9 +114,10 @@ def test_moon_from_boston_geometry():
 
 def test_moon_from_boston_astrometric():
     e = api.load_file(_data_path('de430-2015-03-02.bsp'))
-    t = api.load.timescale(delta_t=67.185390 + 0.5285957).tdb(2015, 3, 2)
-    boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8),
-                                x=0.003483, y=0.358609)
+    ts = api.load.timescale(delta_t=67.185390 + 0.5285957)
+    ts.polar_motion_table = [0.0], [0.003483], [0.358609]
+    t = ts.tdb(2015, 3, 2)
+    boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8))
     a = boston.at(t).observe(e['moon'])
     ra, dec, distance = a.radec()
     compare(ra._degrees, 121.4796470, 0.001 * arcsecond)
