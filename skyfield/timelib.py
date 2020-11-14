@@ -343,10 +343,9 @@ class Time(object):
         # TODO: raise non-IndexError exception if this Time is not an array;
         # otherwise, a `for` loop over it will not raise an error.
         t = Time(self.ts, self.whole[index], self.tt_fraction[index])
+        d = self.__dict__
         for name in 'tai_fraction', 'tdb_fraction', 'ut1_fraction':
-            # TODO: drat, I suspect this forces the creation of all of
-            # the fractions whether we need them or not.
-            value = getattr(self, name, None)
+            value = d.get(name)
             if value is not None:
                 setattr(t, name, value[index])
         return t
