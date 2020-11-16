@@ -785,8 +785,6 @@ def _to_altaz(position, temperature_C, pressure_mbar):
         else:
             raise ValueError(_altaz_message)
 
-    # TODO: wobble
-
     position_au = mxv(R, position.position.au)
     r_au, alt, az = to_spherical(position_au)
 
@@ -809,16 +807,11 @@ _altaz_message = (
 )
 
 def ITRF_to_GCRS(t, rITRF):
-
-    # Todo: wobble
-
     spin = rot_z(t.gast / 24.0 * tau)
     position = mxv(spin, array(rITRF))
     return mxv(t.MT, position)
 
 def ITRF_to_GCRS2(t, rITRF, vITRF, _high_accuracy=False):
-    # TODO: wobble
-
     spin = rot_z(t.gast / 24.0 * tau)
     position = mxv(spin, array(rITRF))
     velocity = mxv(spin, array(vITRF))

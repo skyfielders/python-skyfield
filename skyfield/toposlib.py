@@ -25,6 +25,9 @@ class Topos(VectorFunction):
       mean sea level on a WGS-84 globe.  If not specified, the location
       will be assumed to sit at exactly sea level.
 
+    * The arguments ``x`` and ``y`` are ignored, and are present only
+      for compatibility with earlier versions of Skyfield.
+
     The ``center`` of a topos object is always ``399``, the center of
     gravity of the Earth, so every call to the ``at(t)`` method of a
     topos object returns a :class:`~skyfield.positionlib.Geocentric`

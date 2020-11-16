@@ -2,8 +2,8 @@
 Changelog
 =========
 
-1.32 — Future
--------------
+1.32 — 2020 November 16
+-----------------------
 
 * A new :func:`~skyfield.eclipselib.lunar_eclipses()` routine finds
   lunar eclipses and determines their degree of totality.
@@ -23,6 +23,10 @@ Changelog
   built using :meth:`~skyfield.sgp4lib.EarthSatellite.from_satrec()`
   was, alas, a half-day off.
   `#466 <https://github.com/skyfielders/python-skyfield/issues/466>`_
+
+* Fix: the :class:`~skyfield.toposlib.Topos` constructor arguments ``x``
+  and ``y``, which never worked properly, have been deprecated and are
+  now ignored.
 
 1.31 — 2020 October 24
 ----------------------
