@@ -162,6 +162,7 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 sync: html
+	rm -rf _build/html/_sources
 	rsync -r _build/html/ ~/rhodesmill.org/skyfield
 	,push
 

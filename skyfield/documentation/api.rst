@@ -201,9 +201,13 @@ Routines to search for events like sunrise, sunset, and Moon phase.
    phase_angle
    fraction_illuminated
    seasons
+   moon_phases
+   moon_nodes
+   oppositions_conjunctions
+   meridian_transits
    sunrise_sunset
    dark_twilight_day
-   moon_phases
+   risings_and_settings
 
 .. currentmodule:: skyfield.eclipselib
 

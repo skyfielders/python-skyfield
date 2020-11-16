@@ -2,8 +2,8 @@
 Changelog
 =========
 
-1.32 — 2020 November 16
------------------------
+v1.32 — 2020 November 16
+------------------------
 
 * A new :func:`~skyfield.eclipselib.lunar_eclipses()` routine finds
   lunar eclipses and determines their degree of totality.

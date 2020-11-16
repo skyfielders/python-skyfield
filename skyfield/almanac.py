@@ -199,7 +199,7 @@ def meridian_transits(ephemeris, target, topos):
     return west_of_meridian_at
 
 def sunrise_sunset(ephemeris, topos):
-    """Build a function of time that returns whether the sun is up.
+    """Build a function of time that returns whether the Sun is up.
 
     The function that is returned will expect a single argument that is
     a :class:`~skyfield.timelib.Time`, and will return ``True`` if the
@@ -259,7 +259,7 @@ def dark_twilight_day(ephemeris, topos):
     topos_at = (ephemeris['earth'] + topos).at
 
     def is_it_dark_twilight_day_at(t):
-        """Return whether the sun is up, down, or whether there is twilight."""
+        """Return whether the Sun is up, down, or whether there is twilight."""
         t._nutation_angles_radians = iau2000b_radians(t)
         degrees = topos_at(t).observe(sun).apparent().altaz()[0].degrees
         r = zeros_like(degrees, int)
