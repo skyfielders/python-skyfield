@@ -99,16 +99,10 @@ def test_appendix_c_conversion_from_TEME_to_ITRF():
     assert abs(+5.531924446 - vITRF_per_second[2]) < epsilon
 
 def test_appendix_c_satellite():
-    ts = api.load.timescale()
-
     lines = appendix_c_example.splitlines()
+    ts = api.load.timescale()
     sat = EarthSatellite(lines[1], lines[2], lines[0], ts)
-
-    jd_epoch = sat.model.jdsatepoch + sat.model.jdsatepochF
-    three_days_later = jd_epoch + 3.0
-    whole, fraction, is_leap_second = ts.tt(jd=three_days_later)._utc_float(0.0)
-    offset = whole + fraction - three_days_later
-    t = ts.tt(jd=three_days_later - offset)
+    t = ts.tt_jd(sat.epoch.whole + 3.0, sat.epoch.tt_fraction)
 
     # First, a crucial sanity check (which is, technically, a test of
     # the `sgp4` package and not of Skyfield): are the right coordinates

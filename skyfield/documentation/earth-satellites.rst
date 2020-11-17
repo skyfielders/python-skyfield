@@ -348,7 +348,7 @@ than those of the old J2000 system.)
 
 .. testoutput::
 
-    [-3918.8765203  -1887.6483254   5209.08802574]
+    [-3918.87650458 -1887.64838745  5209.08801512]
 
 .. would love to be able to do this someday - see the SPICE source file
    nearpt.f
@@ -421,7 +421,7 @@ just as you did for the position measured from the Earth’s center:
 
 .. testoutput::
 
-    [ 331.61874618  392.18485533 1049.76011316]
+    [ 331.61876191  392.18479328 1049.76010254]
 
 But the most popular approach is to ask the topocentric position
 for its altitude and azimuth coordinates,

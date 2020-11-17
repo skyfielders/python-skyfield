@@ -2,7 +2,7 @@
 """An interface between Skyfield and the Python ``sgp4`` library."""
 
 from numpy import (
-    array, concatenate, identity, multiply, ones_like, repeat, zeros_like
+    array, concatenate, identity, multiply, ones_like, repeat,
 )
 from sgp4.api import SGP4_ERRORS, Satrec
 
@@ -158,14 +158,13 @@ class EarthSatellite(VectorFunction):
 
         """
         sat = self.model
-        whole, fraction, is_leap_second = t._utc_float(0.0)
-        jd = whole + fraction
+        jd, fraction, is_leap_second = t._utc_float(0.0)
         if getattr(jd, 'shape', None):
-            e, r, v = sat.sgp4_array(jd, zeros_like(jd))
+            e, r, v = sat.sgp4_array(jd, fraction)
             messages = [SGP4_ERRORS[error] if error else None for error in e]
             return r.T, v.T, messages
         else:
-            error, position, velocity = sat.sgp4(jd, 0.0)
+            error, position, velocity = sat.sgp4(jd, fraction)
             message = SGP4_ERRORS[error] if error else None
             return array(position), array(velocity), message
 
