@@ -434,6 +434,22 @@ def test_leap_second(ts):
     assert ts.tai(jd=t4).utc_iso() == '1974-01-01T00:00:00Z'
     assert ts.tai(jd=t5).utc_iso() == '1974-01-01T00:00:01Z'
 
+def test_leap_second_sensitivity(ts):
+    # Bump back infinitesimally into a leap second and check the result.
+    t = ts.utc(2017, 1, 1, 0, 0, 0)
+    a, b = t.whole, t.tai_fraction
+
+    t2 = ts.tai_jd(a, b)
+    tup = t2._utc_tuple(0.0)
+    assert tup == (2017, 1, 1, 0, 0, 0.0)
+
+    b = np.nextafter(b, -1)
+
+    t3 = ts.tai_jd(a, b)
+    tup = t3._utc_tuple(0.0)
+    assert tup[:5] == (2016, 12, 31, 23, 59)
+    assert tup[5] > 60.9999999999999
+
 def test_delta_t(ts):
     # The IERS "finals2000A.all" for 2000 Jan 1 gives DUT1 = 0.3554779,
     # and 0.3554779 - 0.184 - 1.0 = -0.8285221.

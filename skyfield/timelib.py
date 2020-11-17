@@ -93,6 +93,16 @@ class Timescale(object):
         self.B1950 = Time(self, float_(B1950))
         self.julian_calendar_cutoff = None
 
+        # Work-in-progress: make a less crazy leap-second table, that
+        # does not need the -inf and +inf at the ends.
+
+        leap_dates = leap_dates[2:-1]
+        leap_offsets = leap_offsets[3:]
+
+        self._leap_utc = (leap_dates[:,None] * DAY_S + [[-1,0]]).flatten()
+        self._leap_offsets = (leap_offsets[:,None] + [[-1,0]]).flatten()
+        self._leap_tai = self._leap_utc + self._leap_offsets
+
     def now(self):
         """Return the current date and time as a `Time` object.
 
@@ -435,8 +445,7 @@ class Time(object):
         single value each.
 
         """
-        year, month, day, hour, minute, second = self._utc_tuple(
-            _half_microsecond)
+        year, month, day, hour, minute, second = self._utc_tuple(0.5e-6)
         micro = (second * 1e6).astype(int)
         second, micro = divmod(micro, 1000000)
         leap_second = second // 60
@@ -465,7 +474,7 @@ class Time(object):
 
         if places:
             power_of_ten = 10 ** places
-            offset = _half_second / power_of_ten
+            offset = 0.5 / power_of_ten
             year, month, day, hour, minute, second = self._utc_tuple(offset)
             second, fraction = divmod(second, 1.0)
             fraction *= power_of_ten
@@ -474,7 +483,7 @@ class Time(object):
             args = (year, month, day, hour, minute, second, fraction)
         else:
             format = '%04d-%02d-%02d{0}%02d:%02d:%02dZ'.format(delimiter)
-            args = self._utc_tuple(_half_second)
+            args = self._utc_tuple(0.5)
 
         if self.shape:
             return [format % tup for tup in zip(*args)]
@@ -490,8 +499,7 @@ class Time(object):
         single string.
 
         """
-        offset = _half_second / 1e4
-        year, month, day, hour, minute, second = self._utc_tuple(offset)
+        year, month, day, hour, minute, second = self._utc_tuple(0.00005)
         second, fraction = divmod(second, 1.0)
         fraction *= 1e4
         bc = year < 1
@@ -534,22 +542,29 @@ class Time(object):
         whole, fraction, is_leap_second = self._utc_float(0.0)
         return self.ts._strftime(format, self.whole, fraction, is_leap_second)
 
-    def _utc_tuple(self, offset=0.0):
+    def _utc_tuple(self, offset):
         """Return UTC as (year, month, day, hour, minute, second.fraction).
 
-        The `offset` is added to the UTC time before it is split into
-        its components.  This is useful if the user is going to round
-        the result before displaying it.  If the result is going to be
-        displayed as seconds, for example, set `offset` to half a second
-        and then throw away the fraction; if the result is going to be
-        displayed as minutes, set `offset` to thirty seconds and then
-        throw away the seconds; and so forth.
+        The `offset` in seconds is added to the UTC time before it is
+        split into its components.  This is useful if the user is going
+        to round the result before displaying it.  If the result is
+        going to be displayed as seconds, for example, set `offset` to
+        0.5 and then throw away the fraction; if the result is going to
+        be displayed as minutes, set `offset` to 30.0 and then throw
+        away the seconds; and so forth.
 
         """
-        jd, fraction, is_leap_second = self._utc_float(offset)
-        year, month, day, hour, minute, second = self.ts._cal(jd, fraction)
+        second, sfr, is_leap_second = self._utc_seconds(offset)
+        second = second.astype(int)
+        second -= is_leap_second
+        jd, second = divmod(second + 12*60*60, 86400)
+        cutoff = self.ts.julian_calendar_cutoff
+        year, month, day = compute_calendar_date(jd, cutoff)
+        minute, second = divmod(second, 60.0)
+        minute = minute.astype(int)
+        hour, minute = divmod(minute, 60)
         second += is_leap_second
-        return year, month, day, hour.astype(int), minute.astype(int), second
+        return year, month, day, hour, minute, second + sfr
 
     def _utc_float(self, offset):
         ts = self.ts
@@ -558,6 +573,17 @@ class Time(object):
         fraction = offset - ts.leap_offsets[i] / DAY_S + self.tai_fraction
         is_leap_second = (whole + fraction) < ts.leap_dates[i-1]
         return whole, fraction, is_leap_second
+
+    def _utc_seconds(self, offset):
+        """Return time as seconds since JD 0.0, plus a 0 ≤ fraction < 1."""
+        seconds, fr = divmod(self.whole * DAY_S, 1.0)
+        seconds2, fr = divmod(fr + offset + self.tai_fraction * DAY_S, 1.0)
+        seconds += seconds2
+        ts = self.ts
+        offset = interp(seconds, ts._leap_tai, ts._leap_offsets)
+        offset, is_leap_second = divmod(offset, 1.0)
+        is_leap_second = is_leap_second.astype(bool)
+        return seconds - offset, fr, is_leap_second
 
     # Calendar tuples.
 
@@ -673,7 +699,7 @@ class Time(object):
 
     @reify
     def utc(self):
-        utc = self._utc_tuple()
+        utc = self._utc_tuple(0.0)
         return (array(utc).view(CalendarArray) if self.shape
                 else CalendarTuple(*utc))
 
