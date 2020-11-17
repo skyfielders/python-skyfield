@@ -159,6 +159,11 @@ class EarthSatellite(VectorFunction):
         """
         sat = self.model
         jd, fraction, is_leap_second = t._utc_float(0.0)
+        # seconds, fraction, is_leap_second = t._utc_seconds(0.0)
+        # jd = (seconds + fraction) / DAY_S
+        # fraction = jd * 0.0
+        # print(min(jd), len(jd), max(jd))
+
         if getattr(jd, 'shape', None):
             e, r, v = sat.sgp4_array(jd, fraction)
             messages = [SGP4_ERRORS[error] if error else None for error in e]

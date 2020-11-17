@@ -17,12 +17,11 @@ def test_sat_almanac_LEO():
     horizon = 20
     nexpected = 12
 
-    #times, yis = almanac.find_satellite_events(t0, t1, sat, topos, horizon=20)
     times, yis = sat.find_events(topos, t0, t1, 20.0)
     assert(verify_sat_almanac(times, yis, sat, topos, horizon, nexpected))
 
 
-def test_sat_almanac_Tricky():
+def test_sat_almanac_tricky():
     # Various tricky satellites
     # Integral: 3 days high eccentricity.
     # ANIK-F1R  Geo always visible from Boston
@@ -57,6 +56,7 @@ def test_sat_almanac_Tricky():
                 'Swift': 0,
                 'GRACE-FO 2': 90}
     for iline0 in range(0, len(tles)-3, 3):
+        #print('---')
         sat = api.EarthSatellite(tles[1+iline0].strip(),
                                  tles[2+iline0].strip(),
                                  name=tles[iline0].strip())
@@ -67,7 +67,6 @@ def test_sat_almanac_Tricky():
         horizon = 20
         nexpected = expected[sat.name]
 
-        # times, yis = almanac.find_satellite_events(t0, t1, sat, topos, horizon=20)
         times, yis = sat.find_events(topos, t0, t1, 20.0)
         assert(verify_sat_almanac(times, yis, sat, topos, horizon, nexpected))
 

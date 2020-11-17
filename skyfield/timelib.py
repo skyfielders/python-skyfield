@@ -412,8 +412,8 @@ class Time(object):
         directly as a coordinate for a plot.
 
         """
-        whole, fraction, is_leap_second = self._utc_float(0.0)
-        return whole - 1721424.5 + fraction
+        whole, fraction, is_leap_second = self._utc_seconds(0.0)
+        return (whole - 148731076800.0 + fraction) / DAY_S
 
     def utc_datetime(self):
         """Convert to a Python ``datetime`` in UTC.
@@ -539,8 +539,12 @@ class Time(object):
         Otherwise the value is truncated rather than rounded.
 
         """
-        whole, fraction, is_leap_second = self._utc_float(0.0)
-        return self.ts._strftime(format, self.whole, fraction, is_leap_second)
+        seconds, fr, is_leap_second = self._utc_seconds(0.0)
+        seconds -= is_leap_second
+        whole, fraction = divmod(seconds, DAY_S)
+        whole2, fraction = divmod((fraction + fr) / DAY_S, 1.0)
+        whole += whole2
+        return self.ts._strftime(format, whole, fraction, is_leap_second)
 
     def _utc_tuple(self, offset):
         """Return UTC as (year, month, day, hour, minute, second.fraction).
@@ -567,6 +571,7 @@ class Time(object):
         return year, month, day, hour, minute, second + sfr
 
     def _utc_float(self, offset):
+        # TODO rm
         ts = self.ts
         i = searchsorted(ts._leap_reverse_dates, self.tai + offset, 'right')
         whole = self.whole
@@ -575,7 +580,7 @@ class Time(object):
         return whole, fraction, is_leap_second
 
     def _utc_seconds(self, offset):
-        """Return time as seconds since JD 0.0, plus a 0 ≤ fraction < 1."""
+        """Return integer seconds since JD 0.0, plus a 0 ≤ fraction < 1."""
         seconds, fr = divmod(self.whole * DAY_S, 1.0)
         seconds2, fr = divmod(fr + offset + self.tai_fraction * DAY_S, 1.0)
         seconds += seconds2

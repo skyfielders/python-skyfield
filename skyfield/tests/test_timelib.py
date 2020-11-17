@@ -567,7 +567,7 @@ def test_constructor_julian_gregorian_cutover(time_scale_name):
     def jd(y, m, d):
         t = getattr(ts, time_scale_name)(y, m, d)
         if time_scale_name == 'utc':
-            return sum(t._utc_float(0.0))
+            return sum(t._utc_seconds(0.0)) / DAY_S
         return getattr(t, time_scale_name)
 
     ts = api.load.timescale()
