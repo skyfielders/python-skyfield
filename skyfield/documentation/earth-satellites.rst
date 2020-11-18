@@ -4,8 +4,10 @@
 ==================
 
 Skyfield is able to predict the positions of Earth satellites
-from the Two-Line Element (TLE) files published
-by organizations like `CelesTrak`_.
+by loading satellite orbital elements
+from Two-Line Element (TLE) files —
+published by organizations like `CelesTrak`_ —
+and running them through the SGP4 satellite propagation routine.
 But there several limitations to be aware of
 when using Skyfield to generate positions
 for artificial satellites in Earth orbit:
