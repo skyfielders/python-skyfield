@@ -351,7 +351,8 @@ class Loader(object):
             delta_t_recent, leap_dates, leap_offsets = _build_legacy_data(
                 deltat_data, deltat_preds, leap_second_dat)
         else:
-            with self.open('finals2000A.all') as f:
+            url = self.build_url('finals2000A.all')
+            with self.open(url) as f:
                 mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
             delta_t_recent, leap_dates, leap_offsets = (
                 iers._build_timescale_arrays(mjd_utc, dut1))

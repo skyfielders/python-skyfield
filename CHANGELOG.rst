@@ -2,6 +2,14 @@
 Changelog
 =========
 
+v1.33 — 2020 November 18
+------------------------
+
+* Fix: running ``load.timescale(builtin=False)`` was raising an
+  exception ``FileNotFoundError`` if the ``finals2000A.all`` file was
+  not already on disk, instead of downloading the file automatically.
+  `#477 <https://github.com/skyfielders/python-skyfield/issues/477>`_
+
 v1.32 — 2020 November 16
 ------------------------
 
