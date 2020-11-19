@@ -7,6 +7,7 @@ from numpy import cos, zeros_like
 from .constants import pi, tau
 from .searchlib import find_discrete
 from .nutationlib import iau2000b_radians
+from .units import Angle
 
 # Not only to support historic code but also for future convenience, let
 # folks import the search routine alongside the almanac routines.
@@ -95,6 +96,20 @@ MOON_PHASES = [
     'Full Moon',
     'Last Quarter',
 ]
+
+def moon_phase(ephemeris, t):
+    """Return the Moon phase 0°–360° at time ``t``, where 180° is Full Moon.
+
+    More precisely: this returns an :class:`~skyfield.units.Angle`
+    giving the difference between the geocentric apparent ecliptic
+    longitudes of the Moon and Sun, constrained to the interval 0°–360°
+    (0–𝜏 radians) where 0° is New Moon and 180° is Full Moon.
+
+    """
+    e = ephemeris['earth'].at(t)
+    _, mlon, _ = e.observe(ephemeris['moon']).apparent().ecliptic_latlon('date')
+    _, slon, _ = e.observe(ephemeris['sun']).apparent().ecliptic_latlon('date')
+    return Angle(radians=(mlon.radians - slon.radians) % tau)
 
 def moon_phases(ephemeris):
     """Build a function of time that returns the moon phase 0 through 3.

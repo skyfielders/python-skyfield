@@ -16,6 +16,8 @@ times of sunrise, sunset, and the phases of the moon.
 
 .. autofunction:: seasons
 
+.. autofunction:: moon_phase
+
 .. autofunction:: moon_phases
 
 .. autofunction:: moon_nodes

@@ -106,7 +106,21 @@ Phases of the Moon
 ==================
 
 The phases of the Moon are the same for everyone on Earth, so no Topos
-is necessary but only an ephemeris object.
+is necessary but only an ephemeris object.  You can ask for the current
+phase of the Moon as an angle, where 0° is New Moon and 180° is Full:
+
+.. testcode::
+
+    t = ts.utc(2020, 11, 19)
+    phase = almanac.moon_phase(eph, t)
+    print('Moon phase: {:.1f} degrees'.format(phase.degrees))
+
+.. testoutput::
+
+    Moon phase: 51.3 degrees
+
+Or you can have Skyfield search over a range of dates for the moments
+when the Moon reaches First Quarter, Full, Last Quarter, and New:
 
 .. testcode::
 

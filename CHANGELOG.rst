@@ -2,6 +2,14 @@
 Changelog
 =========
 
+v1.34 — Future
+--------------
+
+* A new almanac routine :func:`~skyfield.almanac.moon_phase()` returns
+  the Moon phase as an angle where 0° is New Moon, 90° is First Quarter,
+  180° is Full, and 270° is Last Quarter.
+  `#282 <https://github.com/skyfielders/python-skyfield/issues/282>`_
+
 v1.33 — 2020 November 18
 ------------------------
 

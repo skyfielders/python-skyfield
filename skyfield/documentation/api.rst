@@ -201,6 +201,7 @@ Routines to search for events like sunrise, sunset, and Moon phase.
    phase_angle
    fraction_illuminated
    seasons
+   moon_phase
    moon_phases
    moon_nodes
    oppositions_conjunctions
