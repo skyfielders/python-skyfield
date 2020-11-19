@@ -581,14 +581,22 @@ class Time(object):
 
     def _utc_seconds(self, offset):
         """Return integer seconds since JD 0.0, plus a 0 ≤ fraction < 1."""
-        seconds, fr = divmod(self.whole * DAY_S, 1.0)
-        seconds2, fr = divmod(fr + offset + self.tai_fraction * DAY_S, 1.0)
-        seconds += seconds2
+        seconds, fr = self._tai_seconds
+        seconds2, fr = divmod(fr + offset, 1.0)
+        seconds = seconds + seconds2  # not +=, which would modify the cached array
         ts = self.ts
-        offset = interp(seconds, ts._leap_tai, ts._leap_offsets)
-        offset, is_leap_second = divmod(offset, 1.0)
+        tai_minus_utc = interp(seconds, ts._leap_tai, ts._leap_offsets)
+        tai_minus_utc, is_leap_second = divmod(tai_minus_utc, 1.0)
         is_leap_second = is_leap_second.astype(bool)
-        return seconds - offset, fr, is_leap_second
+        return seconds - tai_minus_utc, fr, is_leap_second
+
+    @reify
+    def _tai_seconds(self):
+        # If UTC was supplied, this will already hold an exact value; otherwise:
+        seconds, fr = divmod(self.whole * DAY_S, 1.0)
+        seconds2, fr = divmod(fr + self.tai_fraction * DAY_S, 1.0)
+        seconds += seconds2
+        return seconds, fr
 
     # Calendar tuples.
 
