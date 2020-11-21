@@ -187,7 +187,23 @@ is ready for Skyfield to load.
 
     4 minor planets loaded
 
-As was also demonstrated in the previous section on comets,
+Some Skyfield users have encountered Minor Planet Center files
+with bodies whose `orbital elements are incomplete
+<https://github.com/skyfielders/python-skyfield/issues/449>`_,
+presumably because their orbits are still being determined.
+To avoid receiving an ``EphemerisRangeError`` exception
+when Skyfield tries to compute a position for these bodies,
+you can ask Pandas to filter them out of your dataframe:
+
+.. testcode::
+
+    # Filtering the orbits dataframe to avoid triggering
+    # an `EphemerisRangeError` on ill-defined orbits.
+
+    bad_orbits = minor_planets.semimajor_axis_au.isnull()
+    minor_planets = minor_planets[~bad_orbits]
+
+As was demonstrated in the previous section on comets,
 you can ask Pandas to index the dataframe by minor planet designation
 for quick lookup.
 
