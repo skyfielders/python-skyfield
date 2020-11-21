@@ -37,3 +37,11 @@ def build_ecliptic_matrix(t):
     _, d_eps = t._nutation_angles_radians
     true_obliquity = t._mean_obliquity_radians + d_eps
     return mxm(rot_x(- true_obliquity), t.M)
+
+class mean_equator_and_equinox_of_date(object):
+    """The dynamical mean equator and equinox of date."""
+    @staticmethod
+    def rotation_at(t):
+        return t.M
+
+mean_equator_and_equinox_of_date = mean_equator_and_equinox_of_date()

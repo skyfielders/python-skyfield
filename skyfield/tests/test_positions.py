@@ -2,7 +2,8 @@ import numpy as np
 from skyfield import api
 from skyfield.constants import DAY_S, tau
 from skyfield.earthlib import earth_rotation_angle
-from skyfield.functions import length_of, mxv, rot_z
+from skyfield.framelib import mean_equator_and_equinox_of_date
+from skyfield.functions import from_spherical, length_of, mxv, rot_z
 from skyfield.positionlib import ICRF, ITRF_to_GCRS2, _GIGAPARSEC_AU
 from skyfield.starlib import Star
 from .fixes import low_precision_ERA
@@ -87,6 +88,27 @@ def test_dynamic_ecliptic_coordinates_with_and_without_a_time_array():
 
     assert distance2.au[0] == distance0.au
     assert distance2.au[1] == distance1.au
+
+def test_frame_rotations_for_mean_of_date():
+    ts = api.load.timescale()
+    t = ts.utc(2020, 11, 21)
+    p = ICRF((1.1,1.2,1.3), t=t)
+    lat, lon, distance1 = p.frame_latlon(mean_equator_and_equinox_of_date)
+
+    # Verify that the frame_latlon() coordinates match those from the
+    # more conventional radec() call.
+    ra, dec, distance2 = p.radec(epoch='date')
+    assert abs(lat.arcseconds() - dec.arcseconds()) < 1e-6
+    assert abs(lon.arcseconds() - ra.arcseconds()) < 1e-6
+    assert abs(distance1.au - distance2.au) < 1e-15
+
+    # Now that we know the coordinates are good, we can use them to
+    # rebuild a trusted x,y,z vector with which to test frame_xyz().
+    x1, y1, z1 = from_spherical(distance1.au, lat.radians, lon.radians)
+    x2, y2, z2 = p.frame_xyz(mean_equator_and_equinox_of_date).au
+    assert abs(x1 - x2) < 1e-15
+    assert abs(y1 - y2) < 1e-15
+    assert abs(z1 - z2) < 1e-15
 
 def test_position_of_radec():
     epsilon = _GIGAPARSEC_AU * 1e-16
