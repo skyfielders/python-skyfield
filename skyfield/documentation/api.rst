@@ -331,6 +331,14 @@ Position methods specific to one class
    Apparent.altaz
    Geocentric.subpoint
 
+Reference frames
+================
+
+.. autosummary::
+
+   skyfield.framelib.mean_equator_and_equinox_of_date
+   skyfield.framelib.itrs
+
 Constellations
 ==============
 

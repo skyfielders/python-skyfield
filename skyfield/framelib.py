@@ -38,7 +38,7 @@ def build_ecliptic_matrix(t):
     true_obliquity = t._mean_obliquity_radians + d_eps
     return mxm(rot_x(- true_obliquity), t.M)
 
-class Mean_Equator_and_Equinox_of_Date(object):
+class mean_equator_and_equinox_of_date(object):
     """The dynamical frame of the Earth’s mean equator and equinox of date.
 
     This reference frame combines current theories of the Earth’s
@@ -51,8 +51,10 @@ class Mean_Equator_and_Equinox_of_Date(object):
     wobble with respect to the Earth’s rotational pole (“polar motion”),
     the right ascension and declination computed with this reference
     frame should reflect the real path across the sky that a body will
-    describe as the Earth’s rotation carries that body across the sky
-    along a given line of declination.
+    describe as the Earth’s rotation carries that body along a given
+    line of declination.
+
+    See `reference_frames` for how to use coordinate frames.
 
     """
     @staticmethod
@@ -65,15 +67,20 @@ class Mean_Equator_and_Equinox_of_Date(object):
         # small enough that we neglect it in practice.
         return t.M, t.M
 
-class ITRS(object):
+mean_equator_and_equinox_of_date = mean_equator_and_equinox_of_date()
+
+class itrs(object):
     """The International Terrestrial Reference System (ITRS).
 
     This is the IAU standard for an Earth-centered Earth-fixed (ECEF)
     coordinate system, anchored to the Earth’s crust and continents.
     This reference frame combines three other reference frames: the
     Earth’s mean equator and equinox of date, the Earth’s rotation with
-    respect to the stars, and polar wobble of the crust with respect to
-    the Earth’s pole of rotation.
+    respect to the stars, and (if your ``Timescale`` has polar offsets
+    loaded) the polar wobble of the crust with respect to the Earth’s
+    pole of rotation.
+
+    See `reference_frames` for how to use coordinate frames.
 
     """
     @staticmethod
@@ -86,3 +93,5 @@ class ITRS(object):
     # @staticmethod
     # def rotation_and_rate_at(t):
     # TODO
+
+itrs = itrs()

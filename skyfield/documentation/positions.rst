@@ -647,10 +647,10 @@ to express the position of the Moon relative to the rotating Earth:
 
 .. testcode::
 
-    from skyfield.framelib import ITRS
+    from skyfield.framelib import itrs
 
     a = earth.at(t).observe(planets['moon']).apparent()
-    x = a.frame_xyz(ITRS)
+    x = a.frame_xyz(itrs)
     print(x.km.astype(int))
 
 .. testoutput::
@@ -665,14 +665,14 @@ The two position methods that accept reference frames as arguments are:
 Here are the reference frames defined in the ``framelib`` module
 (click on their names for more detailed descriptions):
 
-* `Mean_Equator_and_Equinox_of_Date` —
+* `mean_equator_and_equinox_of_date` —
   this is supplied as an explicit reference frame
   in case you want (x,y,z) coordinates;
   if you want angles,
-  it’s better to use ``radec(epoch='date')``
+  it’s better to use the standard position method ``radec(epoch='date')``
   since that will return the conventional units of hours-of-right-ascension
-  where ``frame_latlon(...)`` would return degrees-of-longitude.
-* `ITRS`
+  instead of the degrees-of-longitude returned by ``frame_latlon()``.
+* `itrs`
 
 See also :doc:`planetary` for reference frames
 that are not included with Skyfield

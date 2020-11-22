@@ -6,7 +6,7 @@ from .constants import ANGVEL, AU_M, ERAD, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .descriptorlib import reify
 from .earthlib import compute_limb_angle, reverse_terra
-from .framelib import build_ecliptic_matrix, ITRS
+from .framelib import build_ecliptic_matrix, itrs
 from .functions import (
     _T, _to_array, angle_between, from_spherical,
     length_of, mxv, rot_z, to_spherical,
@@ -736,7 +736,7 @@ class Geocentric(ICRF):
         See :ref:`reference_frames`.
 
         """
-        return self.frame_xyz(ITRS)
+        return self.frame_xyz(itrs)
 
     def subpoint(self):
         """Return the latitude and longitude directly beneath this position.
@@ -799,7 +799,7 @@ _altaz_message = (
 )
 
 def ITRF_to_GCRS(t, rITRF):  # Deprecated; for compatibility with old versions.
-    return mxv(_T(ITRS.rotation_at(t)), rITRF)
+    return mxv(_T(itrs.rotation_at(t)), rITRF)
 
 def ITRF_to_GCRS2(t, rITRF, vITRF, _high_accuracy=False):
     spin = rot_z(t.gast / 24.0 * tau)

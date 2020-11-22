@@ -9,6 +9,6 @@ whose use is described in `reference_frames`.
 
 .. currentmodule:: skyfield.framelib
 
-.. autoclass:: Mean_Equator_and_Equinox_of_Date
+.. autodata:: mean_equator_and_equinox_of_date
 
-.. autoclass:: ITRS
+.. autodata:: itrs
