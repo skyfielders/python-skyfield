@@ -56,7 +56,7 @@ Here is a list of the attributes of the Elements object and their types:
      ├── inclination                 → `Angle object <api-units.html>`_
      │
      │   **Element describing the direction in which the orbital plane is tilted:**
-     ├── longitude_of_ascending node → `Angle object <api-units.html>`_
+     ├── longitude_of_ascending_node → `Angle object <api-units.html>`_
      │
      │   **Elements describing direction of periapsis:**
      ├── argument_of_periapsis       → `Angle object <api-units.html>`_
