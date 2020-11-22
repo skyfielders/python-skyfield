@@ -167,29 +167,26 @@ class Frame(object):
 
     def rotation_and_rate_at(self, t):
         """Return rotation and rate matrices for this frame at time ``t``."""
-        components, rates = self._segment.compute(t.tdb, 0.0, True)
+        components, rates = self._segment.compute(t.whole, t.tdb_fraction, True)
         ra, dec, w = components
+        radot, decdot, wdot = rates
+
         R = mxm(rot_z(-w), mxm(rot_x(-dec), rot_z(-ra)))
 
         zero = w * 0.0
-        one = 1.0 + zero
         ca = cos(w)
         sa = sin(w)
         u = cos(dec)
         v = -sin(dec)
 
-        solutn = array((
-            (one, zero, u),
-            (zero, ca, -sa * v),
-            (zero, sa, ca * v),
-        ))
-
-        domega = mxv(solutn, rates[::-1])
+        domega0 = wdot + u * radot
+        domega1 = ca * decdot - sa * v * radot
+        domega2 = sa * decdot + ca * v * radot
 
         drdtrt = array((
-            (zero, domega[0], domega[2]),
-            (-domega[0], zero, domega[1]),
-            (-domega[2], -domega[1], zero),
+            (zero, domega0, domega2),
+            (-domega0, zero, domega1),
+            (-domega2, -domega1, zero),
         ))
 
         dRdt = mxm(drdtrt, R)
