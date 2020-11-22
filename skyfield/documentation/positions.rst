@@ -665,7 +665,7 @@ The two position methods that accept reference frames as arguments are:
 Here are the reference frames defined in the ``framelib`` module
 (click on their names for more detailed descriptions):
 
-* `mean_equator_and_equinox_of_date` —
+* `true_equator_and_equinox_of_date` —
   this is supplied as an explicit reference frame
   in case you want (x,y,z) coordinates;
   if you want angles,

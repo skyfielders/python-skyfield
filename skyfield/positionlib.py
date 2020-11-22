@@ -215,7 +215,7 @@ class ICRF(object):
         +18deg 28' 55.3"
 
         If you instead want the coordinates referenced to the dynamical
-        system defined by the Earth's mean equator and equinox, provide
+        system defined by the Earth's true equator and equinox, provide
         a specific epoch time.
 
         >>> ra, dec, distance = astrometric.apparent().radec(epoch='date')

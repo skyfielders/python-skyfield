@@ -2,7 +2,7 @@ import numpy as np
 from skyfield import api
 from skyfield.constants import DAY_S, tau
 from skyfield.earthlib import earth_rotation_angle
-from skyfield.framelib import mean_equator_and_equinox_of_date
+from skyfield.framelib import true_equator_and_equinox_of_date
 from skyfield.functions import from_spherical, length_of, mxv, rot_z
 from skyfield.positionlib import ICRF, ITRF_to_GCRS2, _GIGAPARSEC_AU
 from skyfield.starlib import Star
@@ -93,7 +93,7 @@ def test_frame_rotations_for_mean_of_date():
     ts = api.load.timescale()
     t = ts.utc(2020, 11, 21)
     p = ICRF((1.1,1.2,1.3), t=t)
-    lat, lon, distance1 = p.frame_latlon(mean_equator_and_equinox_of_date)
+    lat, lon, distance1 = p.frame_latlon(true_equator_and_equinox_of_date)
 
     # Verify that the frame_latlon() coordinates match those from the
     # more conventional radec() call.
@@ -105,7 +105,7 @@ def test_frame_rotations_for_mean_of_date():
     # Now that we know the coordinates are good, we can use them to
     # rebuild a trusted x,y,z vector with which to test frame_xyz().
     x1, y1, z1 = from_spherical(distance1.au, lat.radians, lon.radians)
-    x2, y2, z2 = p.frame_xyz(mean_equator_and_equinox_of_date).au
+    x2, y2, z2 = p.frame_xyz(true_equator_and_equinox_of_date).au
     assert abs(x1 - x2) < 1e-15
     assert abs(y1 - y2) < 1e-15
     assert abs(z1 - z2) < 1e-15

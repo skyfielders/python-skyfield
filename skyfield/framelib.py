@@ -38,8 +38,8 @@ def build_ecliptic_matrix(t):
     true_obliquity = t._mean_obliquity_radians + d_eps
     return mxm(rot_x(- true_obliquity), t.M)
 
-class mean_equator_and_equinox_of_date(object):
-    """The dynamical frame of the Earth’s mean equator and equinox of date.
+class true_equator_and_equinox_of_date(object):
+    """The dynamical frame of the Earth’s true equator and equinox of date.
 
     This reference frame combines current theories of the Earth’s
     precession and nutation (plus a small offset between the ITRS and
@@ -67,7 +67,7 @@ class mean_equator_and_equinox_of_date(object):
         # small enough that we neglect it in practice.
         return t.M, t.M
 
-mean_equator_and_equinox_of_date = mean_equator_and_equinox_of_date()
+true_equator_and_equinox_of_date = true_equator_and_equinox_of_date()
 
 class itrs(object):
     """The International Terrestrial Reference System (ITRS).
@@ -75,7 +75,7 @@ class itrs(object):
     This is the IAU standard for an Earth-centered Earth-fixed (ECEF)
     coordinate system, anchored to the Earth’s crust and continents.
     This reference frame combines three other reference frames: the
-    Earth’s mean equator and equinox of date, the Earth’s rotation with
+    Earth’s true equator and equinox of date, the Earth’s rotation with
     respect to the stars, and (if your ``Timescale`` has polar offsets
     loaded) the polar wobble of the crust with respect to the Earth’s
     pole of rotation.

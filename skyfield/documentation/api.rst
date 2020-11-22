@@ -336,7 +336,7 @@ Reference frames
 
 .. autosummary::
 
-   skyfield.framelib.mean_equator_and_equinox_of_date
+   skyfield.framelib.true_equator_and_equinox_of_date
    skyfield.framelib.itrs
 
 Constellations
