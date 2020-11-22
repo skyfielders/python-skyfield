@@ -266,9 +266,10 @@ Astronomical positions
 
 The `ICRF` three-dimensional position vector serves as the base class
 for all of the following position classes.  Each class represents an
-(x,y,z) ``.position`` and ``.velocity`` in the International Terrestrial
-Reference Frame (ITRF), an inertial system that is an update to J2000
-and that does not rotate with the Earth itself.
+(x,y,z) ``.position`` and ``.velocity`` vector oriented to the axes of
+the International Celestial Reference Frame, an inertial system that is
+an update to J2000 and that does not rotate with respect to the
+universe.
 
 .. autosummary::
    :nosignatures:

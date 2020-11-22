@@ -632,6 +632,52 @@ you can measure how far an object has moved:
 
     In one minute the ISS moved 461 km
 
+.. _reference_frames:
+
+Coordinates in other reference frames
+=====================================
+
+You can ask Skyfield to express a position
+in a number of other reference frames
+besides the standard ICRF reference frame
+(the modern equivalent to J2000 coordinates)
+that Skyfield uses internally.
+For example,
+to express the position of the Moon relative to the rotating Earth:
+
+.. testcode::
+
+    from skyfield.framelib import ITRS
+
+    a = earth.at(t).observe(planets['moon']).apparent()
+    x = a.frame_xyz(ITRS)
+    print(x.km.astype(int))
+
+.. testoutput::
+
+    [ 349045 -106774  122510]
+
+The two position methods that accept reference frames as arguments are:
+
+* `frame_xyz()`
+* `frame_latlon()`
+
+Here are the reference frames defined in the ``framelib`` module
+(click on their names for more detailed descriptions):
+
+* `Mean_Equator_and_Equinox_of_Date` —
+  this is supplied as an explicit reference frame
+  in case you want (x,y,z) coordinates;
+  if you want angles,
+  it’s better to use ``radec(epoch='date')``
+  since that will return the conventional units of hours-of-right-ascension
+  where ``frame_latlon(...)`` would return degrees-of-longitude.
+* `ITRS`
+
+See also :doc:`planetary` for reference frames
+that are not included with Skyfield
+but that you can load from NASA reference files.
+
 .. testcleanup::
 
    __import__('skyfield.tests.fixes').tests.fixes.teardown()

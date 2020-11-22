@@ -1,8 +1,8 @@
 """Raw transforms between coordinate frames, as NumPy matrices."""
 
 from numpy import array
-from .constants import ASEC2RAD
-from .functions import mxm, rot_x
+from .constants import ASEC2RAD, tau
+from .functions import mxm, rot_x, rot_z
 
 def build_matrix():
     # 'xi0', 'eta0', and 'da0' are ICRS frame biases in arcseconds taken
@@ -38,10 +38,51 @@ def build_ecliptic_matrix(t):
     true_obliquity = t._mean_obliquity_radians + d_eps
     return mxm(rot_x(- true_obliquity), t.M)
 
-class mean_equator_and_equinox_of_date(object):
-    """The dynamical mean equator and equinox of date."""
+class Mean_Equator_and_Equinox_of_Date(object):
+    """The dynamical frame of the Earth’s mean equator and equinox of date.
+
+    This reference frame combines current theories of the Earth’s
+    precession and nutation (plus a small offset between the ITRS and
+    J2000 systems) to produce the orientation, on any date, of the
+    Earth’s celestial poles and equator, from which a right ascension
+    and declination can be produced.
+
+    Ignoring the few tenths of an arcsecond by which the continents
+    wobble with respect to the Earth’s rotational pole (“polar motion”),
+    the right ascension and declination computed with this reference
+    frame should reflect the real path across the sky that a body will
+    describe as the Earth’s rotation carries that body across the sky
+    along a given line of declination.
+
+    """
     @staticmethod
     def rotation_at(t):
         return t.M
 
-mean_equator_and_equinox_of_date = mean_equator_and_equinox_of_date()
+    @staticmethod
+    def rotation_and_rate_at(t):
+        # A slight lie: t.M does have a slight rotational velocity, but
+        # small enough that we neglect it in practice.
+        return t.M, t.M
+
+class ITRS(object):
+    """The International Terrestrial Reference System (ITRS).
+
+    This is the IAU standard for an Earth-centered Earth-fixed (ECEF)
+    coordinate system, anchored to the Earth’s crust and continents.
+    This reference frame combines three other reference frames: the
+    Earth’s mean equator and equinox of date, the Earth’s rotation with
+    respect to the stars, and polar wobble of the crust with respect to
+    the Earth’s pole of rotation.
+
+    """
+    @staticmethod
+    def rotation_at(t):
+        R = mxm(rot_z(-t.gast * tau / 24.0), t.M)
+        if t.ts.polar_motion_table is not None:
+            R = mxm(t.polar_motion_matrix(), R)
+        return R
+
+    # @staticmethod
+    # def rotation_and_rate_at(t):
+    # TODO

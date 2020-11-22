@@ -6,10 +6,10 @@ from .constants import ANGVEL, AU_M, ERAD, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .descriptorlib import reify
 from .earthlib import compute_limb_angle, reverse_terra
-from .framelib import build_ecliptic_matrix
+from .framelib import build_ecliptic_matrix, ITRS
 from .functions import (
-    mxv, _to_array, angle_between, from_spherical,
-    length_of, rot_z, to_spherical,
+    _T, _to_array, angle_between, from_spherical,
+    length_of, mxv, rot_z, to_spherical,
 )
 from .geometry import intersect_line_and_sphere
 from .relativity import add_aberration, add_deflection
@@ -376,7 +376,12 @@ class ICRF(object):
                 Distance(au=d))
 
     def frame_xyz(self, frame):
-        """Express this position as an (x,y,z) vector in a particular frame."""
+        """Return this position as an (x,y,z) vector in a reference frame.
+
+        Returns a :class:`~skyfield.units.Distance` object giving the
+        (x,y,z) of this position in the given ``frame``.
+
+        """
         R = frame.rotation_at(self.t)
         return Distance(au=mxv(R, self.position.au))
 
@@ -503,8 +508,8 @@ class Geometric(ICRF):
     light to travel from one position to the other.
 
     Both the ``.position`` and ``.velocity`` are (x,y,z) vectors
-    oriented along the axes of the International Terrestrial Reference
-    Frame (ITRF), the modern replacement for J2000 coordinates.
+    oriented along the axes of the International Celestial Reference
+    System (ICRS), the modern replacement for J2000 coordinates.
 
     """
     def altaz(self, temperature_C=None, pressure_mbar='standard'):
@@ -543,9 +548,10 @@ class Barycentric(ICRF):
     >>> mars.at(t)
     <Barycentric BCRS position and velocity at date t center=0 target=499>
 
-    Both the ``.position`` and ``.velocity`` are (x,y,z) vectors
-    oriented along the axes of the International Terrestrial Reference
-    Frame (ITRF), the modern replacement for J2000 coordinates.
+    This class’s ``.position`` and ``.velocity`` are (x,y,z) vectors in
+    the Barycentric Celestial Reference System (BCRS), the modern
+    replacement for J2000 coordinates measured from the Solar System
+    Barycenter.
 
     """
     def observe(self, body):
@@ -725,26 +731,12 @@ class Geocentric(ICRF):
     _default_center = 399
 
     def itrf_xyz(self):
-        """Return this position as an (x,y,z) vector in the ITRF frame.
+        """DEPRECATED: use ``.frame_xyz(ITRS)`` instead.
 
-        Returns a :class:`~skyfield.units.Distance` object giving the
-        (x,y,z) of this coordinate in the International Terrestrial
-        Reference Frame (ITRF), an internationally agreed upon
-        Earth-centered Earth-fixed (ECEF) coordinate system that
-        rotates with the surface of the Earth itself.
+        See :ref:`reference_frames`.
 
         """
-        if self.center != 399:
-            raise ValueError("you can only ask for an Earth-centered position"
-                             " to be converted into an ITRF coordinate")
-
-        t = self.t
-        au = mxv(t.M, self.position.au)
-
-        spin = rot_z(- t.gast * tau / 24.0)
-        au = mxv(spin, array(au))
-
-        return Distance(au)
+        return self.frame_xyz(ITRS)
 
     def subpoint(self):
         """Return the latitude and longitude directly beneath this position.
@@ -806,10 +798,8 @@ _altaz_message = (
     ' loaded from a set of planetary constants'
 )
 
-def ITRF_to_GCRS(t, rITRF):
-    spin = rot_z(t.gast / 24.0 * tau)
-    position = mxv(spin, array(rITRF))
-    return mxv(t.MT, position)
+def ITRF_to_GCRS(t, rITRF):  # Deprecated; for compatibility with old versions.
+    return mxv(_T(ITRS.rotation_at(t)), rITRF)
 
 def ITRF_to_GCRS2(t, rITRF, vITRF, _high_accuracy=False):
     spin = rot_z(t.gast / 24.0 * tau)

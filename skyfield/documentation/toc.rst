@@ -35,8 +35,9 @@ that is accelerated using NumPy vector math!
    api-almanac
    api-satellites
    api-stars
-   api-planetary
    api-position
+   api-framelib
+   api-planetary
    api-elements
    api-units
    api-trigonometry
