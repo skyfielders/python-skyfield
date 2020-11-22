@@ -1,6 +1,6 @@
 import numpy as np
 from skyfield.api import PlanetaryConstants, T0, load
-from skyfield.constants import AU_KM, AU_M
+from skyfield.constants import AU_KM, AU_M, DAY_S
 from skyfield.positionlib import ICRF
 from .fixes import IS_32_BIT
 
@@ -42,6 +42,7 @@ def test_frame_rotation_matrices():
         [4.245963144600506e-10, -5.067878765502927e-10,
          -2.045010122720299e-10],
     ]
+    desired_rate = np.array(desired_rate) * DAY_S
 
     R = frame.rotation_at(ts.tdb_jd(tdb))
     assert (R == desired_rotation).all()  # Boom.
@@ -69,13 +70,17 @@ def test_frame_rotation_matrices():
         [-5.817943897465853e-10, -4.4636767256698343e-10,
          -2.1589045361778893e-10],
     ]
+    desired_rate = np.array(desired_rate) * DAY_S
+
     R = frame.rotation_at(ts.tdb_jd(tdb))
-    delta = abs(R - desired_rotation)
-    assert (delta < 2e-13).all()  # a few digits are lost in large W radians?
+    delta = abs(R - desired_rotation).max()
+    assert delta < 2e-13  # a few digits are lost in large W radians?
 
     R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
+    delta = abs(Rv - desired_rate).max()
     assert (R == R2).all()
-    assert abs(Rv - desired_rate).max() < 4e-19  # About 13 digits precision.
+    print(delta)
+    assert delta < 3e-14  # About 13 digits precision.
 
     # Finally, a frame which is defined by a constant rotation of
     # another frame.
@@ -94,6 +99,8 @@ def test_frame_rotation_matrices():
         [4.550211407392054e-10, -1.4469992803332584e-09,
          -5.823780954758093e-10],
     ]
+    desired_rate = np.array(desired_rate) * DAY_S
+
     frame = pc.build_frame_named('MOON_ME_DE421')
     R = frame.rotation_at(ts.tdb_jd(tdb))
     delta = abs(R - desired_rotation)
@@ -105,7 +112,7 @@ def test_frame_rotation_matrices():
     R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
     assert (R == R2).all()
     if IS_32_BIT:
-        assert abs(Rv - desired_rate).max() < 2e-23
+        assert abs(Rv - desired_rate).max() < 2e-18
     else:
         assert (Rv == desired_rate).all()
 

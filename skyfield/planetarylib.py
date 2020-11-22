@@ -166,7 +166,11 @@ class Frame(object):
         return R
 
     def rotation_and_rate_at(self, t):
-        """Return rotation and rate matrices for this frame at time ``t``."""
+        """Return rotation and rate matrices for this frame at time ``t``.
+
+        The rate matrix returned is in units of angular motion per day.
+
+        """
         components, rates = self._segment.compute(t.whole, t.tdb_fraction, True)
         ra, dec, w = components
         radot, decdot, wdot = rates
@@ -195,7 +199,7 @@ class Frame(object):
             R = mxm(self._matrix, R)
             dRdt = mxm(self._matrix, dRdt)
 
-        return R, dRdt
+        return R, dRdt * DAY_S
 
 class PlanetTopos(VectorFunction):
     """Location that rotates with the surface of another Solar System body.
@@ -228,9 +232,11 @@ class PlanetTopos(VectorFunction):
         return self
 
     def _at(self, t):
+        # Since `_position_au` has zero velocity in this reference
+        # frame, velocity includes a `dRdt` term but not an `R` term.
         R, dRdt = self._frame.rotation_and_rate_at(t)
         r = mxv(_T(R), self._position_au)
-        v = mxv(_T(dRdt), self._position_au) * DAY_S
+        v = mxv(_T(dRdt), self._position_au)
         return r, v, None, None
 
     def rotation_at(self, t):
