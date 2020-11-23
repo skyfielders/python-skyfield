@@ -583,11 +583,11 @@ class Time(object):
         """Return integer seconds since JD 0.0, plus a 0 ≤ fraction < 1."""
         seconds, fr = self._tai_seconds
         seconds2, fr = divmod(fr + offset, 1.0)
-        seconds = seconds + seconds2  # not +=, which would modify the cached array
+        seconds = seconds + seconds2  # not +=, which would modify cached array
         ts = self.ts
         tai_minus_utc = interp(seconds, ts._leap_tai, ts._leap_offsets)
         tai_minus_utc, is_leap_second = divmod(tai_minus_utc, 1.0)
-        is_leap_second = is_leap_second.astype(bool)
+        is_leap_second = is_leap_second > 0.0
         return seconds - tai_minus_utc, fr, is_leap_second
 
     @reify
