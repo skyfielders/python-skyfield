@@ -36,14 +36,19 @@ try:
 except ImportError:
     create_default_context = None
 
-_skip_certificate_support = (sys.version_info < (2, 7))
-
 try:
     from urllib.parse import urlparse
     from urllib.request import urlopen
 except:
     from urlparse import urlparse
     from urllib2 import urlopen
+
+try:
+    urlopen('', cafile=None)
+except TypeError:
+    supports_cafile_argument = False
+except ValueError:  # Expected when the URL is an empty string.
+    supports_cafile_argument = True
 
 # If we are running under the built-in IDLE development environment, we
 # cannot use '\r' to keep repainting the current line as a progress bar:
@@ -497,13 +502,13 @@ def download(url, path, verbose=None, blocksize=128*1024, backup=False):
 
     """
     try:
-        if _skip_certificate_support:
-            connection = urlopen(url)
-        elif create_default_context is None:
-            connection = urlopen(url, cafile=certifi.where())
-        else:
+        if create_default_context is not None:
             ssl_context = create_default_context(cafile=certifi.where())
             connection = urlopen(url, context=ssl_context)
+        elif supports_cafile_argument:
+            connection = urlopen(url, cafile=certifi.where())
+        else:
+            connection = urlopen(url)  # Very old Python: no certificate check.
     except Exception as e:
         e2 = IOError('cannot download {0} because {1}'.format(url, e))
         e2.__cause__ = None
