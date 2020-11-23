@@ -46,9 +46,9 @@ except:
 try:
     urlopen('', cafile=None)
 except TypeError:
-    supports_cafile_argument = False
+    _supports_cafile_argument = False
 except ValueError:  # Expected when the URL is an empty string.
-    supports_cafile_argument = True
+    _supports_cafile_argument = True
 
 # If we are running under the built-in IDLE development environment, we
 # cannot use '\r' to keep repainting the current line as a progress bar:
@@ -505,7 +505,7 @@ def download(url, path, verbose=None, blocksize=128*1024, backup=False):
         if create_default_context is not None:
             ssl_context = create_default_context(cafile=certifi.where())
             connection = urlopen(url, context=ssl_context)
-        elif supports_cafile_argument:
+        elif _supports_cafile_argument:
             connection = urlopen(url, cafile=certifi.where())
         else:
             connection = urlopen(url)  # Very old Python: no certificate check.
