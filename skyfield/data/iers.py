@@ -16,7 +16,7 @@ _R = re.compile(b'^......(.........) . '
                 b'(.\d.......).........  '
                 b'.(.\d........)', re.M)
 
-def parse_dut1_x_y_from_finals_all(f):
+def parse_x_y_dut1_from_finals_all(f):
     data = np.fromregex(f, _R, [
         ('mjd_utc', np.float32),
         ('x', np.float32),
@@ -45,5 +45,5 @@ def _build_timescale_arrays(mjd_utc, dut1):
 # Compatibility with older Skyfield versions:
 
 def parse_dut1_from_finals_all(f):
-    v = parse_dut1_x_y_from_finals_all(f)
+    v = parse_x_y_dut1_from_finals_all(f)
     return v[0], v[3]
