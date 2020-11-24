@@ -9,7 +9,7 @@ from .earthlib import compute_limb_angle, reverse_terra
 from .framelib import build_ecliptic_matrix, itrs
 from .functions import (
     _T, _to_array, angle_between, from_spherical,
-    length_of, mxv, rot_z, to_spherical,
+    length_of, mxm, mxv, rot_z, to_spherical,
 )
 from .geometry import intersect_line_and_sphere
 from .relativity import add_aberration, add_deflection
@@ -802,9 +802,8 @@ def ITRF_to_GCRS(t, rITRF):  # Deprecated; for compatibility with old versions.
     return mxv(_T(itrs.rotation_at(t)), rITRF)
 
 def ITRF_to_GCRS2(t, rITRF, vITRF, _high_accuracy=False):
-    spin = rot_z(t.gast / 24.0 * tau)
-    position = mxv(spin, array(rITRF))
-    velocity = mxv(spin, array(vITRF))
+    position = array(rITRF)
+    velocity = array(vITRF)
 
     # TODO: This is expensive, and should be extensively trimmed to only
     # include the most important terms underlying GAST.  But it improves
@@ -820,10 +819,19 @@ def ITRF_to_GCRS2(t, rITRF, vITRF, _high_accuracy=False):
     else:
         angvel = ANGVEL
 
-    velocity[0] += DAY_S * angvel * - position[1]
-    velocity[1] += DAY_S * angvel * position[0]
+    spin = rot_z(t.gast / 24.0 * tau)
+    R = mxm(t.MT, spin)
 
-    position = mxv(t.MT, position)
-    velocity = mxv(t.MT, velocity)
+    z = 0.0 * angvel
+    import numpy as np
+    V = np.array((
+        (z,-DAY_S * angvel,z),
+        (DAY_S * angvel,z,z),
+        (z,z,z),
+    ))
+
+    velocity = velocity + mxv(V, position)
+    position = mxv(R, position)
+    velocity = mxv(R, velocity)
 
     return position, velocity
