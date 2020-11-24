@@ -330,7 +330,7 @@ we are ready to unleash :func:`~skyfield.searchlib.find_discrete()`:
 .. testoutput::
 
     <Time tt=[2458202.1729387594 ... 2459818.7282241164] len=5>
-    [ True False  True False  True]
+    [1 0 1 0 1]
 
 The result is a pair of arrays.
 The first provides the dates and times of quadrature,
@@ -348,18 +348,18 @@ to pair up the dates with the values:
 
 .. testoutput::
 
-    2018-03-24 16:08  True
-    2018-12-03 00:34  False
-    2020-06-06 19:11  True
-    2021-02-01 10:34  False
-    2022-08-27 05:27  True
+    2018-03-24 16:08  1
+    2018-12-03 00:34  0
+    2020-06-06 19:11  1
+    2021-02-01 10:34  0
+    2022-08-27 05:27  1
 
 And we are done!
 Those are the UTC dates
 on which Mars reaches western quadrature
-(when our discrete routine has just changed to ``True``)
+(when our discrete routine has just changed to ``1``)
 and eastern quadrature
-(when our routine has changed to ``False``),
+(when our routine has changed to ``0``),
 as can be confirmed by comparing these dates
 with those in a standard reference.
 

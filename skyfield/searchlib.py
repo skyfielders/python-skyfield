@@ -2,8 +2,8 @@
 
 from __future__ import print_function, division
 
-from numpy import (add, append, argsort, concatenate, diff, flatnonzero,
-                   linspace, multiply, reshape, sign)
+from numpy import (add, append, argsort, bool_, concatenate, diff, flatnonzero,
+                   int8, issubdtype, linspace, multiply, reshape, sign)
 from .constants import DAY_S
 EPSILON = 0.001 / DAY_S
 
@@ -73,7 +73,7 @@ def _find_discrete(ts, jd, f, epsilon, num):
 
         jd = o(starts, start_mask).flatten() + o(ends, end_mask).flatten()
 
-    return ts.tt_jd(ends), y
+    return ts.tt_jd(ends), _fix_numpy_deprecation(y)
 
 def find_minima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
     """Find the local minima in the values returned by a function of time.
@@ -86,7 +86,7 @@ def find_minima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
     g.rough_period = getattr(f, 'rough_period', None)
     g.step_days = getattr(f, 'step_days', None)
     t, y = find_maxima(start_time, end_time, g, epsilon, num)
-    return t, -y
+    return t, _fix_numpy_deprecation(-y)
 
 def find_maxima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
     """Find the local maxima in the values returned by a function of time.
@@ -171,7 +171,7 @@ def find_maxima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
         jd = o(starts, start_alpha).flatten() + o(ends, end_alpha).flatten()
         jd = _remove_adjacent_duplicates(jd)
 
-    return ts.tt_jd(jd), y
+    return ts.tt_jd(jd), _fix_numpy_deprecation(y)
 
 def _choose_brackets(y):
     """Return the indices between which we should search for maxima of `y`."""
@@ -215,3 +215,10 @@ def _remove_adjacent_duplicates(a):
     mask = diff(a) != 0
     mask = append(mask, [True])
     return a[mask]
+
+def _fix_numpy_deprecation(y):
+    # Alas, in the future NumPy will apparently disallow using Booleans
+    # as indices, whereas we often encourage the use of `y` as an index.
+    if issubdtype(y.dtype, bool_):
+        y.dtype = int8
+    return y

@@ -10,6 +10,13 @@ v1.34 — Future
   180° is Full, and 270° is Last Quarter.
   `#282 <https://github.com/skyfielders/python-skyfield/issues/282>`_
 
+* Almanac search routines that previously returned a Boolean true/false
+  array now return an integer 0/1 array instead, to work around a new
+  deprecation warning in NumPy which, for example, would have outlawed
+  using the Boolean array from :func:`~skyfield.almanac.moon_nodes()` to
+  index into the ``MOON_NODES`` list that provides a name for each node.
+  `#486 <https://github.com/skyfielders/python-skyfield/issues/486>`_
+
 v1.33 — 2020 November 18
 ------------------------
 

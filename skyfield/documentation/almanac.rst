@@ -165,7 +165,7 @@ possible.
 .. testoutput::
 
     ['2020-04-27T17:54:17Z', '2020-05-10T09:01:42Z']
-    [ True False]
+    [1 0]
     ['ascending', 'descending']
 
 .. _oppositions-conjunctions:
@@ -244,7 +244,7 @@ and then the antimeridian on the opposite side of the celestial globe:
 .. testoutput::
 
     ['2020-11-06 03:32', '2020-11-06 15:30']
-    [ True False]
+    [1 0]
     ['Meridian transit', 'Antimeridian transit']
 
 Some astronomers call these moments
@@ -296,10 +296,10 @@ and for the average refraction of the atmosphere at the horizon.
 .. testoutput::
 
     ['2018-09-12T11:13:13Z', '2018-09-12T23:49:38Z']
-    [ True False]
+    [1 0]
 
-The result ``t`` will be an array of times, and ``y`` will be ``True``
-if the sun rises at the corresponding time and ``False`` if it sets.
+The result ``t`` will be an array of times, and ``y`` will be ``1`` if
+the sun rises at the corresponding time and ``0`` if it sets.
 
 If you need to provide your own custom value for refraction, adjust the
 estimate of the Sun’s radius, or account for a vantage point above the
@@ -392,8 +392,8 @@ using the :func:`~skyfield.almanac.risings_and_settings()` routine:
     2020-02-01T09:29:16Z Rise
     2020-02-01T18:42:57Z Set
 
-As with sunrise and sunset above, ``True`` means the moment of rising
-and ``False`` means the moment of setting.
+As with sunrise and sunset above,
+``1`` means the moment of rising and ``0`` means the moment of setting.
 
 The routine also offers some optional parameters,
 whose several uses are covered in the following sections.
