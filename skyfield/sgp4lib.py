@@ -7,8 +7,8 @@ from numpy import (
 from sgp4.api import SGP4_ERRORS, Satrec
 
 from .constants import AU_KM, DAY_S, T0, tau
-from .functions import mxv, rot_x, rot_y, rot_z
-from .positionlib import ITRF_to_GCRS2
+from .framelib import itrs
+from .functions import _T, mxv, rot_x, rot_y, rot_z
 from .searchlib import _find_discrete, find_maxima
 from .timelib import compute_calendar_date
 from .vectorlib import VectorFunction
@@ -191,9 +191,13 @@ class EarthSatellite(VectorFunction):
 
     def _at(self, t):
         """Compute this satellite's GCRS position and velocity at time `t`."""
-        rITRF, vITRF, error = self.ITRF_position_velocity_error(t)
-        rGCRS, vGCRS = ITRF_to_GCRS2(t, rITRF, vITRF)
-        return rGCRS, vGCRS, rGCRS, error
+        r, v, error = self.ITRF_position_velocity_error(t)
+        R, V = itrs.rotation_and_rate_at(t)
+        RT, VT = _T(R), _T(V)
+        v += mxv(VT, r)
+        v = mxv(RT, v)
+        r = mxv(RT, r)
+        return r, v, r, error
 
     def find_events(self, topos, t0, t1, altitude_degrees=0.0):
         """Return the times at which the satellite rises, culminates, and sets.

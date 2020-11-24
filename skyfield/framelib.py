@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 """Raw transforms between coordinate frames, as NumPy matrices."""
 
 from numpy import array
-from .constants import ASEC2RAD, tau
+from .constants import ANGVEL, ASEC2RAD, DAY_S, tau
 from .functions import mxm, rot_x, rot_z
 
 def build_matrix():
@@ -54,7 +55,7 @@ class true_equator_and_equinox_of_date(object):
     describe as the Earth’s rotation carries that body along a given
     line of declination.
 
-    See `reference_frames` for how to use coordinate frames.
+    See `reference_frames` for how to use frames like this one.
 
     """
     @staticmethod
@@ -63,11 +64,17 @@ class true_equator_and_equinox_of_date(object):
 
     @staticmethod
     def rotation_and_rate_at(t):
-        # A slight lie: t.M does have a slight rotational velocity, but
-        # small enough that we neglect it in practice.
-        return t.M, t.M
+        # The `None` is a slight lie: t.M does have rotational velocity.
+        # But it's so small that we neglect it in practice.
+        return t.M, None
 
 true_equator_and_equinox_of_date = true_equator_and_equinox_of_date()
+
+_itrs_angvel_matrix = array((
+    (0.0, DAY_S * ANGVEL, 0.0),
+    (-DAY_S * ANGVEL, 0.0, 0.0),
+    (0.0, 0.0, 0.0),
+))
 
 class itrs(object):
     """The International Terrestrial Reference System (ITRS).
@@ -80,7 +87,7 @@ class itrs(object):
     loaded) the polar wobble of the crust with respect to the Earth’s
     pole of rotation.
 
-    See `reference_frames` for how to use coordinate frames.
+    See `reference_frames` for how to use frames like this one.
 
     """
     @staticmethod
@@ -90,8 +97,12 @@ class itrs(object):
             R = mxm(t.polar_motion_matrix(), R)
         return R
 
-    # @staticmethod
-    # def rotation_and_rate_at(t):
-    # TODO
+    @staticmethod
+    def rotation_and_rate_at(t):
+        R = mxm(rot_z(-t.gast * tau / 24.0), t.M)
+        if t.ts.polar_motion_table is not None:
+            R = mxm(t.polar_motion_matrix(), R)
+        V = _itrs_angvel_matrix
+        return R, V
 
 itrs = itrs()
