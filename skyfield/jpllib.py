@@ -164,6 +164,11 @@ class SpiceKernel(object):
 
     def __getitem__(self, target):
         """Return a vector function for computing the location of `target`."""
+        if isinstance(target, slice):
+            i = range( *target.indices(10) )
+            return ( self[x] for x in i )
+        if isinstance(target, tuple):
+            return ( self[x] for x in target )
         target = self.decode(target)
         segments = self.segments
         segment_dict = dict((segment.target, segment) for segment in segments)
