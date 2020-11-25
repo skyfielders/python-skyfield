@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from numpy import exp, rollaxis
-from .constants import tau
+from numpy import exp
 from .earthlib import refract, terra
-from .functions import mxm, mxv, rot_y, rot_z
+from .framelib import itrs
+from .functions import _T, mxm, mxv, rot_y, rot_z
 from .descriptorlib import reify
 from .units import Angle, Distance, Velocity, _interpret_ltude
 from .vectorlib import VectorFunction
@@ -65,6 +65,7 @@ class Topos(VectorFunction):
         self.elevation = elevation = Distance(m=elevation_m)
 
         p, v = terra(latitude.radians, longitude.radians, elevation.au, 0.0)
+        # TODO: Wrongly named! The velocity is already kinematic, not ITRS.
         self.itrs_position = Distance(p)
         self.itrs_velocity = Velocity(v)
 
@@ -98,31 +99,19 @@ class Topos(VectorFunction):
 
     def _altaz_rotation(self, t):
         """Compute the rotation from the ICRF into the alt-az system."""
-        R = mxm(rot_z(-t.gast * tau / 24.0), t.M)
-
-        if t.ts.polar_motion_table is not None:
-            R = mxm(t.polar_motion_matrix(), R)
-
+        R = itrs.rotation_at(t)
         R = mxm(self._R_latlon, R)
         return R
 
     def _at(self, t):
         """Compute the GCRS position and velocity of this Topos at time `t`."""
-        pos = self.itrs_position.au
-        vel = self.itrs_velocity.au_per_d
+        r = self.itrs_position.au
+        v = self.itrs_velocity.au_per_d
 
-        if t.ts.polar_motion_table is not None:
-            R = rollaxis(t.polar_motion_matrix(), 1)
-            pos = mxv(R, pos)
-            vel = mxv(R, vel)
-
-        R = rot_z(t.gast / 24.0 * tau)
-        pos = mxv(R, pos)
-        vel = mxv(R, vel)
-
-        pos = mxv(t.MT, pos)
-        vel = mxv(t.MT, vel)
-        return pos, vel, pos, None
+        RT = _T(itrs.rotation_at(t))
+        r = mxv(RT, r)
+        v = mxv(RT, v)
+        return r, v, r, None
 
     def itrf_xyz(self):
         """DEPRECATED: access the ``itrs_position`` attribute instead."""

@@ -63,10 +63,10 @@ class true_equator_and_equinox_of_date(object):
         return t.M
 
     @staticmethod
-    def rotation_and_rate_at(t):
+    def twist_at(t):
         # The `None` is a slight lie: t.M does have rotational velocity.
         # But it's so small that we neglect it in practice.
-        return t.M, None
+        return None
 
 true_equator_and_equinox_of_date = true_equator_and_equinox_of_date()
 
@@ -98,11 +98,7 @@ class itrs(object):
         return R
 
     @staticmethod
-    def rotation_and_rate_at(t):
-        R = mxm(rot_z(-t.gast * tau / 24.0), t.M)
-        if t.ts.polar_motion_table is not None:
-            R = mxm(t.polar_motion_matrix(), R)
-        V = _itrs_angvel_matrix
-        return R, V
+    def twist_at(t):
+        return _itrs_angvel_matrix
 
 itrs = itrs()
