@@ -5,7 +5,7 @@ from .earthlib import refract, terra
 from .framelib import itrs
 from .functions import _T, mxm, mxv, rot_y, rot_z
 from .descriptorlib import reify
-from .units import Angle, Distance, Velocity, _interpret_ltude
+from .units import Angle, Distance, _interpret_ltude
 from .vectorlib import VectorFunction
 
 class Topos(VectorFunction):
@@ -65,9 +65,8 @@ class Topos(VectorFunction):
         self.elevation = elevation = Distance(m=elevation_m)
 
         p, v = terra(latitude.radians, longitude.radians, elevation.au, 0.0)
-        # TODO: Wrongly named! The velocity is already kinematic, not ITRS.
         self.itrs_position = Distance(p)
-        self.itrs_velocity = Velocity(v)
+        self._velocity_au_per_d = v
 
         self._R_latlon = mxm(
             rot_y(self.latitude.radians)[::-1],  # TODO: Why "::-1"?
@@ -106,7 +105,7 @@ class Topos(VectorFunction):
     def _at(self, t):
         """Compute the GCRS position and velocity of this Topos at time `t`."""
         r = self.itrs_position.au
-        v = self.itrs_velocity.au_per_d
+        v = self._velocity_au_per_d
 
         RT = _T(itrs.rotation_at(t))
         r = mxv(RT, r)
