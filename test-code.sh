@@ -16,7 +16,7 @@ to install all of the tools and libraries for Skyfield development.
 EOF
     exit 2
 fi
-if grep ' $' */*.py */*/*.py
+if grep ' $' $(git ls-files design examples skyfield | grep '\.py$')
 then
     echo
     echo 'Error: trailing whitespace detected on the above-listed lines'
