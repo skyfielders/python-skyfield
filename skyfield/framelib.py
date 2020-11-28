@@ -63,7 +63,7 @@ class true_equator_and_equinox_of_date(object):
         return t.M
 
     @staticmethod
-    def twist_at(t):
+    def _twist_at(t):
         # The `None` is a slight lie: t.M does have rotational velocity.
         # But it's so small that we neglect it in practice.
         return None
@@ -98,7 +98,9 @@ class itrs(object):
         return R
 
     @staticmethod
-    def twist_at(t):
+    def _twist_at(t):
+        # TODO: taking the derivative of the instantaneous angular
+        # velocity provides a more accurate transform.
         return _itrs_angvel_matrix
 
 itrs = itrs()

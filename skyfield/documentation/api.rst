@@ -317,6 +317,9 @@ All positions support a basic set of methods:
    ICRF.speed
    ICRF.radec
    ICRF.separation_from
+   ICRF.frame_xyz
+   ICRF.frame_xyz_and_velocity
+   ICRF.frame_latlon
    ICRF.ecliptic_xyz
    ICRF.ecliptic_velocity
    ICRF.ecliptic_latlon

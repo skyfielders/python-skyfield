@@ -383,7 +383,24 @@ class ICRF(object):
 
         """
         R = frame.rotation_at(self.t)
-        return Distance(au=mxv(R, self.position.au))
+        return Distance(mxv(R, self.position.au))
+
+    def frame_xyz_and_velocity(self, frame):
+        """Return (x,y,z) position and velocity vectors in a reference frame.
+
+        Returns two vectors in the given coordinate ``frame``: a
+        :class:`~skyfield.units.Distance` providing an (x,y,z) position
+        and a :class:`~skyfield.units.Velocity` giving (xdot,ydot,zdot)
+        velocity.
+
+        """
+        R = frame.rotation_at(self.t)
+        V = frame._twist_at(self.t)
+        r, v = self.position.au, self.velocity.au_per_d
+        r = mxv(R, r)
+        v = mxv(R, v)
+        v += mxv(V, r)
+        return Distance(r), Velocity(v)
 
     def frame_latlon(self, frame):
         """Return as longitude, latitude, and distance in the given frame."""
@@ -731,11 +748,7 @@ class Geocentric(ICRF):
     _default_center = 399
 
     def itrf_xyz(self):
-        """DEPRECATED: use ``.frame_xyz(ITRS)`` instead.
-
-        See :ref:`reference_frames`.
-
-        """
+        """Deprecated. Call ``.frame_xyz(itrs)``; see `reference_frames`."""
         return self.frame_xyz(itrs)
 
     def subpoint(self):

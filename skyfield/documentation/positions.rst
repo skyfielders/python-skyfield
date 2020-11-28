@@ -657,9 +657,10 @@ to express the position of the Moon relative to the rotating Earth:
 
     [ 349045 -106774  122510]
 
-The two position methods that accept reference frames as arguments are:
+The three position methods that accept reference frames as arguments are:
 
 * `frame_xyz()`
+* `frame_xyz_and_velocity()`
 * `frame_latlon()`
 
 Here are the reference frames defined in the ``framelib`` module

@@ -192,9 +192,8 @@ class EarthSatellite(VectorFunction):
     def _at(self, t):
         """Compute this satellite's GCRS position and velocity at time `t`."""
         r, v, error = self.ITRF_position_velocity_error(t)
-        R = itrs.rotation_at(t)
-        V = itrs.twist_at(t)
-        RT, VT = _T(R), _T(V)
+        RT = _T(itrs.rotation_at(t))
+        VT = _T(itrs._twist_at(t))
         v += mxv(VT, r)
         v = mxv(RT, v)
         r = mxv(RT, r)
