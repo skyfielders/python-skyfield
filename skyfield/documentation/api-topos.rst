@@ -29,3 +29,7 @@
       The integer 399,
       which identifies this topocentric position’s vector
       as having its origin at the center of the Earth.
+
+   .. method:: at(t)
+
+      Return the position of this Earth location at time ``t``.

@@ -5,6 +5,9 @@ Changelog
 v1.34 — Future
 --------------
 
+* Added a method :meth:`~skyfield.toposlib.Topos.lst_hours_at()` that
+  computes Local Sidereal Time.
+
 * A new almanac routine :func:`~skyfield.almanac.moon_phase()` returns
   the Moon phase as an angle where 0° is New Moon, 90° is First Quarter,
   180° is Full, and 270° is Last Quarter.

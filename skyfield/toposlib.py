@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from numpy import exp
+from .constants import T0
 from .earthlib import refract, terra
 from .framelib import itrs
 from .functions import _T, mxm, mxv, rot_y, rot_z
@@ -111,6 +112,11 @@ class Topos(VectorFunction):
         r = mxv(RT, r)
         v = mxv(RT, v)
         return r, v, r, None
+
+    def lst_hours_at(self, t):
+        """Return this position’s Local Sidereal Time in hours at time ``t``."""
+        sprime = -47.0e-6 * (t.whole - T0 + t.tdb_fraction) / 36525.0
+        return (t.gast + self.longitude._hours + sprime / 54000.0) % 24.0
 
     def itrf_xyz(self):
         """DEPRECATED: access the ``itrs_position`` attribute instead."""

@@ -26,6 +26,18 @@ def test_velocity():
     print(length_of(velocity2 - factor * velocity1))
     assert length_of(velocity2 - factor * velocity1) < 0.0007
 
+def test_lst():
+    ts = load.timescale()
+    ts.delta_t_table = [-1e99, 1e99], [69.363285] * 2  # from finals2000A.all
+    t = ts.utc(2020, 11, 27, 15, 34)
+    top = Topos(latitude_degrees=0, longitude_degrees=0)
+    expected = 20.0336663100  # see "authorities/horizons-lst"
+    actual = top.lst_hours_at(t)
+    difference_mas = (actual - expected) * 3600 * 15 * 1e3
+    horizons_ra_offset_mas = 51.25
+    difference_mas -= horizons_ra_offset_mas
+    assert abs(difference_mas) < 1.0
+
 def test_itrf_vector():
     top = Topos(latitude_degrees=45, longitude_degrees=0,
                 elevation_m=constants.AU_M - constants.ERAD)
