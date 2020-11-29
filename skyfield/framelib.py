@@ -96,16 +96,19 @@ class itrs(object):
 
 itrs = itrs()
 
-class galactic_frame(object):
-    """The Galactic System II reference frame."""
+class InertialFrame(object):
+    def __init__(self, doc, matrix):
+        self.__doc__ = doc
+        self._matrix = matrix
+
     def rotation_at(self, t):
-        return _inertial_frames['GALACTIC']
+        return self._matrix
 
-galactic_frame = galactic_frame()
-
-class ecliptic_J2000_frame(object):
-    """The mean ecliptic and equinox of J2000 reference frame."""
-    def rotation_at(self, t):
-        return _inertial_frames['ECLIPJ2000']
-
-ecliptic_J2000_frame = ecliptic_J2000_frame()
+ecliptic_J2000_frame = InertialFrame(
+    'Mean ecliptic and equinox of J2000 reference frame.',
+    _inertial_frames['ECLIPJ2000'],
+)
+galactic_frame = InertialFrame(
+    'Galactic System II reference frame.',
+    _inertial_frames['GALACTIC'],
+)
