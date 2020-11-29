@@ -123,8 +123,8 @@ _COMET_COLUMNS = [
     ('perturbed_epoch_year', (81, 85)),
     ('perturbed_epoch_month', (85, 87)),
     ('perturbed_epoch_day', (87, 89)),
-    ('magnitude_H', (91, 95)),
-    ('magnitude_G', (96, 100)),
+    ('magnitude_g', (91, 95)),
+    ('magnitude_k', (96, 100)),
     ('designation', (102, 158)),
     ('reference', (159, 168)),
 ]
@@ -132,7 +132,7 @@ _COMET_FAST_COLUMNS = (
     'perihelion_year', 'perihelion_month', 'perihelion_day',
     'perihelion_distance_au', 'eccentricity', 'argument_of_perihelion_degrees',
     'longitude_of_ascending_node_degrees', 'inclination_degrees',
-    'magnitude_H', 'magnitude_G',
+    'magnitude_g', 'magnitude_k',
     'designation', 'reference',
 )
 
