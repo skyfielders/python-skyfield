@@ -20,6 +20,12 @@ v1.34 — Future
   index into the ``MOON_NODES`` list that provides a name for each node.
   `#486 <https://github.com/skyfielders/python-skyfield/issues/486>`_
 
+* The undocumented columns ``magnitude_H`` and ``magnitude_G`` in the
+  Minor Planet Center comets dataframe have been renamed ``magnitude_g``
+  and ``magnitude_k`` following further research on the file format
+  (which does not itself document which magnitude model is intended).
+  `#416 <https://github.com/skyfielders/python-skyfield/issues/416>`_
+
 v1.33 — 2020 November 18
 ------------------------
 
