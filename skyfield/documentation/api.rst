@@ -324,8 +324,6 @@ All positions support a basic set of methods:
    ICRF.ecliptic_xyz
    ICRF.ecliptic_velocity
    ICRF.ecliptic_latlon
-   ICRF.galactic_xyz
-   ICRF.galactic_latlon
    ICRF.is_sunlit
    ICRF.from_altaz
 

@@ -680,6 +680,7 @@ Here are the reference frames defined in the ``framelib`` module
   since that will return the conventional units of hours-of-right-ascension
   instead of the degrees-of-longitude returned by ``frame_latlon()``.
 * `itrs`
+* :data:`~skyfield.framelib.galactic_frame`
 
 See also :doc:`planetary` for reference frames
 that are not included with Skyfield

@@ -5,6 +5,7 @@ from numpy import max
 from skyfield import api
 from skyfield.api import Topos
 from skyfield.constants import AU_M
+from skyfield.framelib import galactic_frame
 from skyfield.trigonometry import position_angle_of
 
 def _data_path(filename):
@@ -63,7 +64,7 @@ def test_fk4_frame(ts):
 def test_galactic_frame(ts):
     e = api.load('de421.bsp')
     astrometric = e['earth'].at(ts.utc(1980, 1, 1, 0, 0)).observe(e['moon'])
-    glat, glon, d = astrometric.galactic_latlon()
+    glat, glon, d = astrometric.frame_latlon(galactic_frame)
     print(glat, glat.degrees, glon, glon.degrees)
     compare(glat.degrees, -8.047315, 0.005)  # TODO: awful! Track this down.
     compare(glon.degrees, 187.221794, 0.005)

@@ -3,6 +3,7 @@
 
 from numpy import array
 from .constants import ANGVEL, ASEC2RAD, DAY_S, tau
+from .data.spice import inertial_frames as _inertial_frames
 from .functions import mxm, rot_x, rot_z
 
 def build_matrix():
@@ -104,3 +105,14 @@ class itrs(object):
         return _itrs_angvel_matrix
 
 itrs = itrs()
+
+class galactic_frame(object):
+    """The Galactic System II reference frame."""
+    def rotation_at(self, t):
+        return _inertial_frames['GALACTIC']
+
+    @staticmethod
+    def _twist_at(t):
+        return None
+
+galactic_frame = galactic_frame()

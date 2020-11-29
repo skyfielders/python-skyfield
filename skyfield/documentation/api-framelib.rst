@@ -12,3 +12,5 @@ whose use is described in `reference_frames`.
 .. autodata:: true_equator_and_equinox_of_date
 
 .. autodata:: itrs
+
+.. autodata:: galactic_frame

@@ -6,7 +6,7 @@ from .constants import ANGVEL, AU_M, ERAD, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .descriptorlib import reify
 from .earthlib import compute_limb_angle, reverse_terra
-from .framelib import build_ecliptic_matrix, itrs
+from .framelib import build_ecliptic_matrix, itrs, galactic_frame
 from .functions import (
     _T, _to_array, angle_between, from_spherical,
     length_of, mxm, mxv, rot_z, to_spherical,
@@ -17,7 +17,6 @@ from .timelib import Time
 from .units import Angle, Distance, Velocity, _interpret_angle
 
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
-_GALACTIC = inertial_frames['GALACTIC']
 _GIGAPARSEC_AU = 206264806247096.38  # 1e9 * 360 * 3600 / tau
 
 def build_position(position_au, velocity_au_per_d=None, t=None,
@@ -381,18 +380,9 @@ class ICRF(object):
                 Angle(radians=lon),
                 Distance(au=d))
 
-    def galactic_xyz(self):
-        """Compute galactic coordinates (x,y,z)"""
-        vector = _GALACTIC.dot(self.position.au)
-        return Distance(vector)
-
-    def galactic_latlon(self):
-        """Compute galactic coordinates (lat, lon, distance)"""
-        vector = _GALACTIC.dot(self.position.au)
-        d, lat, lon = to_spherical(vector)
-        return (Angle(radians=lat, signed=True),
-                Angle(radians=lon),
-                Distance(au=d))
+    # Deprecated methods that have been replaced by `framelib.py`:
+    def galactic_xyz(self): return self.frame_xyz(galactic_frame)
+    def galactic_latlon(self): return self.frame_latlon(galactic_frame)
 
     def frame_xyz(self, frame):
         """Return this position as an (x,y,z) vector in a reference frame.
