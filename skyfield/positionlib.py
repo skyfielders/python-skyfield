@@ -123,9 +123,10 @@ class ICRF(object):
 
         """
         r, v = distance.au, velocity.au_per_d
-        V = frame._twist_at(t)
-        if V is not None:
-            v = v + mxv(_T(V), r)
+        twist_at = getattr(frame, '_twist_at', None)
+        if twist_at is not None:
+            RV = _T(twist_at(t))
+            v = v + mxv(RV, r)
         RT = _T(frame.rotation_at(t))
         r = mxv(RT, r)
         v = mxv(RT, v)
@@ -405,11 +406,12 @@ class ICRF(object):
 
         """
         R = frame.rotation_at(self.t)
-        V = frame._twist_at(self.t)
         r, v = self.position.au, self.velocity.au_per_d
         r = mxv(R, r)
         v = mxv(R, v)
-        if V is not None:
+        twist_at = getattr(frame, '_twist_at', None)
+        if twist_at is not None:
+            V = twist_at(self.t)
             v += mxv(V, r)
         return Distance(r), Velocity(v)
 

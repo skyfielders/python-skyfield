@@ -63,12 +63,6 @@ class true_equator_and_equinox_of_date(object):
     def rotation_at(t):
         return t.M
 
-    @staticmethod
-    def _twist_at(t):
-        # The `None` is a slight lie: t.M does have rotational velocity.
-        # But it's so small that we neglect it in practice.
-        return None
-
 true_equator_and_equinox_of_date = true_equator_and_equinox_of_date()
 
 _itrs_angvel_matrix = array((
@@ -107,12 +101,12 @@ class itrs(object):
 itrs = itrs()
 
 class galactic_frame(object):
-    """The Galactic System II reference frame."""
+    """The Galactic System II reference frame.
+
+    See `reference_frames` for how to use frames like this one.
+
+    """
     def rotation_at(self, t):
         return _inertial_frames['GALACTIC']
-
-    @staticmethod
-    def _twist_at(t):
-        return None
 
 galactic_frame = galactic_frame()
