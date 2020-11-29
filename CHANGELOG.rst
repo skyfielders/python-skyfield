@@ -5,6 +5,15 @@ Changelog
 v1.34 — Future
 --------------
 
+* Gave the position classes nw methods
+  :func:`~skyfield.positionlib.ICRF.frame_xyz()`,
+  :func:`~skyfield.positionlib.ICRF.frame_xyz_and_velocity()`, and
+  :func:`~skyfield.positionlib.ICRF.from_time_and_frame_vectors()`
+  along with two reference frames:
+  :data:`~skyfield.framelib.true_equator_and_equinox_of_date` and
+  :data:`~skyfield.framelib.itrs`.
+  See :ref:`reference_frames`.
+
 * Added a method :meth:`~skyfield.toposlib.Topos.lst_hours_at()` that
   computes Local Sidereal Time.
 

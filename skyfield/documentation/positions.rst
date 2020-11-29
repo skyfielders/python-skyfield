@@ -657,11 +657,17 @@ to express the position of the Moon relative to the rotating Earth:
 
     [ 349045 -106774  122510]
 
-The three position methods that accept reference frames as arguments are:
+The three position methods that accept a reference frame argument are:
 
 * `frame_xyz()`
 * `frame_xyz_and_velocity()`
 * `frame_latlon()`
+
+Position classes also support a constructor
+that accepts a position vector and a velocity vector
+in a particular reference frame:
+
+* `from_time_and_frame_vectors()`
 
 Here are the reference frames defined in the ``framelib`` module
 (click on their names for more detailed descriptions):

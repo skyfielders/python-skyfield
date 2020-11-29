@@ -113,6 +113,25 @@ class ICRF(object):
             position_au = mxv(epoch.MT, position_au)
         return cls(position_au)
 
+    @classmethod
+    def from_time_and_frame_vectors(cls, t, frame, distance, velocity):
+        """Constructor: build a position from two vectors in a reference frame.
+
+        * ``t`` — The :class:`~skyfield.timelib.Time` of the position.
+        * ``frame`` — A reference frame listed at `reference_frames`.
+        * ``distance`` — A `Distance` x,y,z vector in the given frame.
+        * ``velocity`` — A `Velocity` ẋ,ẏ,ż vector in the given frame.
+
+        """
+        r, v = distance.au, velocity.au_per_d
+        V = frame._twist_at(t)
+        if V is not None:
+            v = v + mxv(_T(V), r)
+        RT = _T(frame.rotation_at(t))
+        r = mxv(RT, r)
+        v = mxv(RT, v)
+        return cls(r, v, t)  # TODO: args for center and target?
+
     def __repr__(self):
         name = self.__class__.__name__
         center = self.center
@@ -379,7 +398,8 @@ class ICRF(object):
         """Return this position as an (x,y,z) vector in a reference frame.
 
         Returns a :class:`~skyfield.units.Distance` object giving the
-        (x,y,z) of this position in the given ``frame``.
+        (x,y,z) of this position in the given ``frame``.  See
+        `reference_frames`.
 
         """
         R = frame.rotation_at(self.t)
@@ -391,7 +411,7 @@ class ICRF(object):
         Returns two vectors in the given coordinate ``frame``: a
         :class:`~skyfield.units.Distance` providing an (x,y,z) position
         and a :class:`~skyfield.units.Velocity` giving (xdot,ydot,zdot)
-        velocity.
+        velocity.  See `reference_frames`.
 
         """
         R = frame.rotation_at(self.t)
@@ -399,11 +419,16 @@ class ICRF(object):
         r, v = self.position.au, self.velocity.au_per_d
         r = mxv(R, r)
         v = mxv(R, v)
-        v += mxv(V, r)
+        if V is not None:
+            v += mxv(V, r)
         return Distance(r), Velocity(v)
 
     def frame_latlon(self, frame):
-        """Return as longitude, latitude, and distance in the given frame."""
+        """Return as longitude, latitude, and distance in the given frame.
+
+        See `reference_frames`.
+
+        """
         R = frame.rotation_at(self.t)
         vector = mxv(R, self.position.au)
         d, lat, lon = to_spherical(vector)

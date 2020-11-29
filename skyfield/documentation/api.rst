@@ -320,6 +320,7 @@ All positions support a basic set of methods:
    ICRF.frame_xyz
    ICRF.frame_xyz_and_velocity
    ICRF.frame_latlon
+   ICRF.from_time_and_frame_vectors
    ICRF.ecliptic_xyz
    ICRF.ecliptic_velocity
    ICRF.ecliptic_latlon

@@ -19,7 +19,7 @@ from .timelib import (
     GREGORIAN_START, GREGORIAN_START_ENGLAND, Time, Timescale, utc
 )
 from .toposlib import Topos
-from .units import Angle, Distance
+from .units import Angle, Distance, Velocity
 
 load = Loader('.')
 
@@ -27,7 +27,7 @@ __all__ = [
     'Angle', 'B1950', 'Distance', 'EarthSatellite',
     'GREGORIAN_START', 'GREGORIAN_START_ENGLAND',
     'Loader', 'PlanetaryConstants', 'Star',
-    'T0', 'Time', 'Timescale', 'Topos',
+    'T0', 'Time', 'Timescale', 'Topos', 'Velocity',
     'datetime', 'load', 'load_constellation_map',
     'load_file', 'position_from_radec', 'position_of_radec',
     'utc', 'pi', 'tau',
