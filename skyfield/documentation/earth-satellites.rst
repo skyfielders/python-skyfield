@@ -406,7 +406,7 @@ to ask “where will the satellite be *relative to* my location?”
      Reversed Topos Earth latitude 40deg 53' 38.0" N longitude -83deg 53' 30.1" E -> 399 EARTH
      EarthSatellite 399 EARTH -> ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
 
-Every time you call this vector sum’s `at()` method,
+Every time you call this vector sum’s ``at()`` method,
 it will first compute the satellite’s position,
 then your own position,
 and finish by subtracting them.
@@ -575,8 +575,8 @@ When computing positions for the Sun, Moon, planets, and stars,
 Skyfield encourages a far more fussy approach
 than directly subtracting two vectors.
 In those cases, the user is encouraged
-to compute their current location with `at()`
-and then call the `observe()` method on the result
+to compute their current location with ``at()``
+and then call the ``observe()`` method on the result
 so that Skyfield can correctly adjust the object’s position
 for the time it takes light to travel.
 
