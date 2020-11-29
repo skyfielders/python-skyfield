@@ -56,8 +56,6 @@ class true_equator_and_equinox_of_date(object):
     describe as the Earth’s rotation carries that body along a given
     line of declination.
 
-    See `reference_frames` for how to use frames like this one.
-
     """
     @staticmethod
     def rotation_at(t):
@@ -82,8 +80,6 @@ class itrs(object):
     loaded) the polar wobble of the crust with respect to the Earth’s
     pole of rotation.
 
-    See `reference_frames` for how to use frames like this one.
-
     """
     @staticmethod
     def rotation_at(t):
@@ -101,12 +97,15 @@ class itrs(object):
 itrs = itrs()
 
 class galactic_frame(object):
-    """The Galactic System II reference frame.
-
-    See `reference_frames` for how to use frames like this one.
-
-    """
+    """The Galactic System II reference frame."""
     def rotation_at(self, t):
         return _inertial_frames['GALACTIC']
 
 galactic_frame = galactic_frame()
+
+class ecliptic_J2000_frame(object):
+    """The mean ecliptic and equinox of J2000 reference frame."""
+    def rotation_at(self, t):
+        return _inertial_frames['ECLIPJ2000']
+
+ecliptic_J2000_frame = ecliptic_J2000_frame()

@@ -322,7 +322,6 @@ All positions support a basic set of methods:
    ICRF.frame_latlon
    ICRF.from_time_and_frame_vectors
    ICRF.ecliptic_xyz
-   ICRF.ecliptic_velocity
    ICRF.ecliptic_latlon
    ICRF.is_sunlit
    ICRF.from_altaz

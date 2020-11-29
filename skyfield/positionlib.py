@@ -2,11 +2,11 @@
 """Classes representing different kinds of astronomical position."""
 
 from numpy import array, einsum, full, reshape, nan, nan_to_num
+from . import framelib
 from .constants import ANGVEL, AU_M, ERAD, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .descriptorlib import reify
 from .earthlib import compute_limb_angle, reverse_terra
-from .framelib import build_ecliptic_matrix, itrs, galactic_frame
 from .functions import (
     _T, _to_array, angle_between, from_spherical,
     length_of, mxm, mxv, rot_z, to_spherical,
@@ -358,14 +358,12 @@ class ICRF(object):
                              ' a floating point Terrestrial Time (TT),'
                              ' or the string "date" for epoch-of-date')
 
-        rotation = build_ecliptic_matrix(epoch)
+        rotation = framelib.build_ecliptic_matrix(epoch)
         position_au = mxv(rotation, self.position.au)
         return Distance(position_au)
 
     def ecliptic_velocity(self):
-        """Compute J2000 ecliptic velocity vector (x_dot, y_dot, z_dot)"""
-        vector = _ECLIPJ2000.dot(self.velocity.au_per_d)
-        return Velocity(vector)
+        return self.frame_xyz_and_velocity(framelib.ecliptic_J2000)[1]
 
     def ecliptic_latlon(self, epoch=None):
         """Compute J2000 ecliptic coordinates (lat, lon, distance)
@@ -375,6 +373,7 @@ class ICRF(object):
         an epoch time.
 
         """
+        #1/0
         vector = self.ecliptic_xyz(epoch)
         d, lat, lon = to_spherical(vector.au)
         return (Angle(radians=lat, signed=True),
@@ -382,8 +381,8 @@ class ICRF(object):
                 Distance(au=d))
 
     # Deprecated methods that have been replaced by `framelib.py`:
-    def galactic_xyz(self): return self.frame_xyz(galactic_frame)
-    def galactic_latlon(self): return self.frame_latlon(galactic_frame)
+    def galactic_xyz(self): return self.frame_xyz(framelib.galactic_frame)
+    def galactic_latlon(self): return self.frame_latlon(framelib.galactic_frame)
 
     def frame_xyz(self, frame):
         """Return this position as an (x,y,z) vector in a reference frame.
@@ -766,7 +765,7 @@ class Geocentric(ICRF):
 
     def itrf_xyz(self):
         """Deprecated. Call ``.frame_xyz(itrs)``; see `reference_frames`."""
-        return self.frame_xyz(itrs)
+        return self.frame_xyz(framelib.itrs)
 
     def subpoint(self):
         """Return the latitude and longitude directly beneath this position.
@@ -829,7 +828,7 @@ _altaz_message = (
 )
 
 def ITRF_to_GCRS(t, rITRF):  # Deprecated; for compatibility with old versions.
-    return mxv(_T(itrs.rotation_at(t)), rITRF)
+    return mxv(_T(framelib.itrs.rotation_at(t)), rITRF)
 
 def ITRF_to_GCRS2(t, rITRF, vITRF, _high_accuracy=False):
     position = array(rITRF)
