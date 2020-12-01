@@ -134,6 +134,10 @@ class Velocity(object):
         return self.au_per_d * AU_KM / DAY_S
 
     @reify
+    def m_per_s(self):
+        return self.au_per_d * AU_M / DAY_S
+
+    @reify
     def AU_per_d(self):
         if not Velocity._warned:
             print('WARNING: the IAU has renamed the astronomical unit to'
