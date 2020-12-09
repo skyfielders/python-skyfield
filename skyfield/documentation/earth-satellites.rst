@@ -687,18 +687,18 @@ At that point, the satellite will return a position and velocity
 are the special floating-point value ``nan`` which means *not-a-number*.
 
 When a propagation error occurs and you get ``nan`` values,
-you can examine the ``sgp4_error`` attribute of the returned position
+you can examine the ``message`` attribute of the returned position
 to learn the error that the SGP4 propagator encountered.
 
 We can take as an example the satellite elements above.
 They are the last elements ever issued for GOCE,
-about one day before the satellite re-entered the atmosphere
+just before the satellite re-entered the atmosphere
 after an extended and successful mission.
 Because of the steep decay of its orbit,
 the elements are valid over an unusually short period —
 from just before noon on Saturday to just past noon on Tuesday:
 
-.. image:: _static/goce-decay.png
+.. image:: _static/goce-reentry.png
 
 By asking for GOCE’s position just before or after this window,
 we can learn about the propagation errors
@@ -727,7 +727,7 @@ that are limiting this TLE set’s predictions:
     mrt is less than 1.0 which indicates the satellite has decayed
 
 If you use a ``Time`` array to ask about an entire range of dates,
-then ``sgp4_error`` will be a sequence filled in with ``None``
+then ``message`` will be a sequence filled in with ``None``
 whenever the SGP4 propagator was successful
 and otherwise recording the propagator error:
 
