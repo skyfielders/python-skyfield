@@ -30,9 +30,9 @@ together with all of the attributes and methods that they support:
      ├── `position <api-position.html#skyfield.positionlib.ICRF.position>`_.m          →   x, y, z
      ├── `position <api-position.html#skyfield.positionlib.ICRF.position>`_.to(unit)   →   AstroPy distance units
      │
-     ├── `velocity <api-position.html#skyfield.positionlib.ICRF.velocity>`_.au_per_d   →   xdot, ydot, zdot
-     ├── `velocity <api-position.html#skyfield.positionlib.ICRF.velocity>`_.km_per_s   →   xdot, ydot, zdot
-     ├── `velocity <api-position.html#skyfield.positionlib.ICRF.velocity>`_.to(unit)   →   AstroPy velocity units
+     ├── velocity.au_per_d   →   xdot, ydot, zdot
+     ├── velocity.km_per_s   →   xdot, ydot, zdot
+     ├── velocity.to(unit)   →   AstroPy velocity units
      │
      ├── `radec() <api-position.html#skyfield.positionlib.ICRF.radec>`_             →   ra, dec, distance (ICRF = J2000)
      ├── `radec(epoch=t) <api-position.html#skyfield.positionlib.ICRF.radec>`_      →   ra, dec, distance (Equinox of time t)

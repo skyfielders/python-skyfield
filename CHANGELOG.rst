@@ -528,7 +528,7 @@ v1.32 — 2020 November 16
 1.8 — 2018 September 12
 -----------------------
 
-* There is now an :doc:`almanac` module can compute the times of
+* There is now an :doc:`almanac` module that can compute the times of
   sunrise, sunset, and the phases of the moon, based on the search
   algorithms announced at my recent PyBay talk “An Import Loop and a
   Fiery Reentry.”
@@ -549,7 +549,7 @@ v1.32 — 2020 November 16
 
 * Ecliptic coordinates can now be produced for epochs other than J2000
   thanks to a new optional parameter specifying the desired epoch for
-  the :meth:`~skyfield.positionlib.ICRF.ecliptic_latlon()` method.
+  the ``ecliptic_latlon()`` method.
 
 * A position that gives a position, velocity, and time can now be
   converted into full osculating orbital elements through the routine

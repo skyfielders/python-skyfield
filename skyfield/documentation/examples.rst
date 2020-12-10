@@ -79,6 +79,7 @@ and 270° at the Last Quarter.
 .. testcode::
 
     from skyfield.api import load
+    from skyfield.framelib import ecliptic_frame
 
     ts = load.timescale()
     t = ts.utc(2019, 12, 9, 15, 36)
@@ -87,8 +88,8 @@ and 270° at the Last Quarter.
     sun, moon, earth = eph['sun'], eph['moon'], eph['earth']
 
     e = earth.at(t)
-    _, slon, _ = e.observe(sun).apparent().ecliptic_latlon()
-    _, mlon, _ = e.observe(moon).apparent().ecliptic_latlon()
+    _, slon, _ = e.observe(sun).apparent().frame_latlon(ecliptic_frame)
+    _, mlon, _ = e.observe(moon).apparent().frame_latlon(ecliptic_frame)
     phase = (mlon.degrees - slon.degrees) % 360.0
 
     print('{0:.1f}'.format(phase))
@@ -138,8 +139,9 @@ and 270° if the Sun is to the right of the Moon.
     238deg 55' 55.3"
 
 The :func:`~skyfield.trigonometry.position_angle_of()` routine
-will not only accept the output of :meth:`~skyfield.positionlib.Apparent.altaz()`,
-but also of :meth:`~skyfield.positionlib.ICRF.ecliptic_latlon()`
+will not only accept
+the output of :meth:`~skyfield.positionlib.Apparent.altaz()`,
+but also of :meth:`~skyfield.positionlib.ICRF.frame_latlon()`
 if you want a position angle relative to the ecliptic’s north pole.
 
 Beware, though, that :meth:`~skyfield.positionlib.ICRF.radec()`

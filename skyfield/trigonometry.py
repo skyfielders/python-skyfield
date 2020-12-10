@@ -10,7 +10,7 @@ def position_angle_of(anglepair1, anglepair2):
     Each argument should be a tuple whose first two items are
     :class:`~skyfield.units.Angle` objects, like the tuples returned by
     :meth:`~skyfield.positionlib.ICRF.radec()`,
-    :meth:`~skyfield.positionlib.ICRF.ecliptic_latlon()`, and
+    :meth:`~skyfield.positionlib.ICRF.frame_latlon()`, and
     :meth:`~skyfield.positionlib.Apparent.altaz()`.
 
     If one of the two angle items is signed (if its ``.signed``
