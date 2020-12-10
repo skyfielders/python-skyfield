@@ -3,16 +3,18 @@
 import argparse
 import sys
 
+import numpy as np
+from numpy import array
+
 from skyfield.api import load
 from skyfield.data import iers
-from numpy import array, savez_compressed
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Save arrays to a file')
     parser.parse_args(argv)
 
     g = globals()
-    savez_compressed('skyfield/data/nutation', **{key: g[key] for key in [
+    np.savez_compressed('skyfield/data/nutation', **{key: g[key] for key in [
         'ke0_t',
         'ke1',
         'lunisolar_longitude_coefficients',
@@ -25,12 +27,18 @@ def main(argv):
         'se0_t_1',
     ]})
 
-    f = load.open('finals2000A.all')
+    url = load.build_url('finals2000A.all')
+    f = load.open(url)
     mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+
+    # Reduce the size of the output file by about 30%, for values that
+    # finals2000A.all only specifies to 7 decimal places anyway.
+    dut1 = dut1.astype(np.float32)
+
     delta_t_recent, leap_dates, leap_offsets = (
         iers._build_timescale_arrays(mjd_utc, dut1)
     )
-    savez_compressed(
+    np.savez_compressed(
         'skyfield/data/iers',
         delta_t_recent=delta_t_recent,
         leap_dates=leap_dates,

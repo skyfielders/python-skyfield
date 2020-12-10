@@ -17,13 +17,16 @@ _R = re.compile(b'^......(.........) . '
                 b'.(.\d........)', re.M)
 
 def parse_x_y_dut1_from_finals_all(f):
-    data = np.fromregex(f, _R, [
-        ('mjd_utc', np.float32),
-        ('x', np.float32),
-        ('y', np.float32),
-        ('dut1', np.float32),
+    return np.fromregex(f, _R, [
+        ('mjd_utc', float),
+        ('x', float),
+        ('y', float),
+        ('dut1', float),
     ])
-    return data['mjd_utc'], data['x'], data['y'], data['dut1']
+
+def install_polar_motion_table(ts, finals_data):
+    t = ts.utc(1858, 11, 17.0 + finals_data['mjd_utc'])
+    ts.polar_motion_table = t.tt, finals_data['x'], finals_data['y']
 
 def _build_timescale_arrays(mjd_utc, dut1):
     big_jumps = np.diff(dut1) > 0.9
@@ -45,5 +48,5 @@ def _build_timescale_arrays(mjd_utc, dut1):
 # Compatibility with older Skyfield versions:
 
 def parse_dut1_from_finals_all(f):
-    v = parse_x_y_dut1_from_finals_all(f)
-    return v[0], v[3]
+    data = parse_x_y_dut1_from_finals_all(f)
+    return data['mjd_utc'], data['dut1']

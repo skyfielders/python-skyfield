@@ -6,6 +6,7 @@ from assay import assert_raises
 from pytz import timezone
 from skyfield import api
 from skyfield.constants import DAY_S, T0
+from skyfield.data import iers
 from skyfield.timelib import (
     GREGORIAN_START, GREGORIAN_START_ENGLAND, Time,
     calendar_tuple, compute_calendar_date, julian_date, julian_day, utc,
@@ -476,6 +477,25 @@ def test_dut1(ts):
 
     t = ts.utc(2019, 5, 2)
     assert str(t.dut1)[:4] == '-0.1'  # table says -0.2
+
+def test_polar_motion_table():
+    with api.load.open('finals2000A.all') as f:
+        finals_data = iers.parse_x_y_dut1_from_finals_all(f)
+
+    ts = api.load.timescale()
+    iers.install_polar_motion_table(ts, finals_data)
+
+    bump = 1e-4  # TODO: can this be improved?
+
+    t = ts.utc(1973, 1, 3, 0, 0, -bump)
+    sprime, x, y = t.polar_motion_angles()
+    assert x > 0.118980
+    assert y > 0.135656
+
+    t = ts.utc(1973, 1, 3, 0, 0, +bump)
+    sprime, x, y = t.polar_motion_angles()
+    assert x < 0.118980
+    assert y < 0.135656
 
 def test_J(ts):
     assert ts.J(2000).tt == T0
