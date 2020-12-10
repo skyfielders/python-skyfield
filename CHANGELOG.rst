@@ -2,18 +2,19 @@
 Changelog
 =========
 
-v1.34 — Future
---------------
+v1.34 — 2020 December 10
+------------------------
 
-* Gave the position classes new methods
+* The position classes have gained methods
   :func:`~skyfield.positionlib.ICRF.frame_xyz()`,
   :func:`~skyfield.positionlib.ICRF.frame_xyz_and_velocity()`,
   :func:`~skyfield.positionlib.ICRF.frame_latlon()`, and
   :func:`~skyfield.positionlib.ICRF.from_time_and_frame_vectors()`
   that work with a new library ``skyfield.framelib``
-  offering a number of familiar reference frames.
-  These replace the ad-hoc position methods
-  for ecliptic and galactic coordinates.
+  to offer a number of familiar reference frames.
+  These replace the existing ad-hoc position methods
+  for ecliptic and galactic coordinates,
+  which are now deprecated (but will continue to be supported).
   See :ref:`reference_frames`.
 
 * Added support for IERS :ref:`polar motion` 𝑥 and 𝑦.

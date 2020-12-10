@@ -43,18 +43,16 @@ def build_ecliptic_matrix(t):
 class true_equator_and_equinox_of_date(object):
     """The dynamical frame of the Earth’s true equator and equinox of date.
 
-    This reference frame combines current theories of the Earth’s
-    precession and nutation (plus a small offset between the ITRS and
-    J2000 systems) to produce the orientation, on any date, of the
-    Earth’s celestial poles and equator, from which a right ascension
-    and declination can be produced.
+    This is supplied as an explicit reference frame in case you want
+    x,y,z coordinates; if you want angles, it’s better to use the
+    standard position method ``radec(epoch='date')`` since that will
+    return the conventional units of hours-of-right-ascension instead of
+    the degrees-of-longitude that ``frame_latlon()`` would return.
 
-    Ignoring the few tenths of an arcsecond by which the continents
-    wobble with respect to the Earth’s rotational pole (“polar motion”),
-    the right ascension and declination computed with this reference
-    frame should reflect the real path across the sky that a body will
-    describe as the Earth’s rotation carries that body along a given
-    line of declination.
+    This reference frame combines current theories of the Earth’s
+    precession and nutation with a small offset between the ITRS and
+    J2000 systems to produce right ascension and declination for a given
+    date relative to the Earth’s axis and equator of rotation.
 
     """
     @staticmethod
