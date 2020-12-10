@@ -24,6 +24,7 @@ that is accelerated using NumPy vector math!
    kepler-orbits
    earth-satellites
    searches
+   accuracy-efficiency
    elements
    astropy
    api

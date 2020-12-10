@@ -19,14 +19,18 @@ _R = re.compile(b'^......(.........) . '
 def parse_x_y_dut1_from_finals_all(f):
     return np.fromregex(f, _R, [
         ('mjd_utc', float),
-        ('x', float),
-        ('y', float),
+        ('x_arcseconds', float),
+        ('y_arcseconds', float),
         ('dut1', float),
     ])
 
 def install_polar_motion_table(ts, finals_data):
     t = ts.utc(1858, 11, 17.0 + finals_data['mjd_utc'])
-    ts.polar_motion_table = t.tt, finals_data['x'], finals_data['y']
+    ts.polar_motion_table = (
+        t.tt,
+        np.array(finals_data['x_arcseconds']),
+        np.array(finals_data['y_arcseconds']),
+    )
 
 def _build_timescale_arrays(mjd_utc, dut1):
     big_jumps = np.diff(dut1) > 0.9
