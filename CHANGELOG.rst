@@ -7,10 +7,12 @@ v1.34 — Future
 
 * Gave the position classes new methods
   :func:`~skyfield.positionlib.ICRF.frame_xyz()`,
-  :func:`~skyfield.positionlib.ICRF.frame_xyz_and_velocity()`, and
+  :func:`~skyfield.positionlib.ICRF.frame_xyz_and_velocity()`,
+  :func:`~skyfield.positionlib.ICRF.frame_latlon()`, and
   :func:`~skyfield.positionlib.ICRF.from_time_and_frame_vectors()`
-  that work with new objects representing individual reference frames.
-  Together, these replace all the old unfortunate ad-hoc position methods
+  that work with a new library ``skyfield.framelib``
+  offering a number of familiar reference frames.
+  These replace the ad-hoc position methods
   for ecliptic and galactic coordinates.
   See :ref:`reference_frames`.
 
