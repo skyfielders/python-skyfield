@@ -35,7 +35,7 @@ ICRS_to_J2000 = build_matrix()
 del build_matrix
 
 def build_ecliptic_matrix(t):
-    """Build the matrix to rotate an ICRF vector into ecliptic coordinates."""
+    # Build the matrix to rotate an ICRF vector into ecliptic coordinates.
     _, d_eps = t._nutation_angles_radians
     true_obliquity = t._mean_obliquity_radians + d_eps
     return mxm(rot_x(- true_obliquity), t.M)
@@ -96,6 +96,13 @@ class itrs(object):
 
 itrs = itrs()
 
+class ecliptic_frame(object):
+    """Reference frame of the true ecliptic and equinox of date."""
+    def rotation_at(self, t):
+        return build_ecliptic_matrix(t)
+
+ecliptic_frame = ecliptic_frame()
+
 class InertialFrame(object):
     def __init__(self, doc, matrix):
         self.__doc__ = doc
@@ -105,7 +112,7 @@ class InertialFrame(object):
         return self._matrix
 
 ecliptic_J2000_frame = InertialFrame(
-    'Mean ecliptic and equinox of J2000 reference frame.',
+    'Reference frame of the true ecliptic and equinox at J2000.',
     _inertial_frames['ECLIPJ2000'],
 )
 galactic_frame = InertialFrame(

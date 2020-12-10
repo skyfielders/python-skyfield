@@ -321,8 +321,6 @@ All positions support a basic set of methods:
    ICRF.frame_xyz_and_velocity
    ICRF.frame_latlon
    ICRF.from_time_and_frame_vectors
-   ICRF.ecliptic_xyz
-   ICRF.ecliptic_latlon
    ICRF.is_sunlit
    ICRF.from_altaz
 
@@ -343,6 +341,9 @@ Reference frames
 
    skyfield.framelib.true_equator_and_equinox_of_date
    skyfield.framelib.itrs
+   skyfield.framelib.ecliptic_frame
+   skyfield.framelib.ecliptic_J2000_frame
+   skyfield.framelib.galactic_frame
 
 Constellations
 ==============

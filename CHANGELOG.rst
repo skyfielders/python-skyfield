@@ -5,13 +5,13 @@ Changelog
 v1.34 — Future
 --------------
 
-* Gave the position classes nw methods
+* Gave the position classes new methods
   :func:`~skyfield.positionlib.ICRF.frame_xyz()`,
   :func:`~skyfield.positionlib.ICRF.frame_xyz_and_velocity()`, and
   :func:`~skyfield.positionlib.ICRF.from_time_and_frame_vectors()`
-  along with two reference frames:
-  :data:`~skyfield.framelib.true_equator_and_equinox_of_date` and
-  :data:`~skyfield.framelib.itrs`.
+  that work with new objects representing individual reference frames.
+  Together, these replace all the old unfortunate ad-hoc position methods
+  for ecliptic and galactic coordinates.
   See :ref:`reference_frames`.
 
 * Added a method :meth:`~skyfield.toposlib.Topos.lst_hours_at()` that

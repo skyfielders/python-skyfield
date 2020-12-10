@@ -299,6 +299,8 @@ class ICRF(object):
 
         return Angle(radians=angle_between(u, v))
 
+    # TODO: build a reference frame for the following two methods.
+
     def cirs_xyz(self, epoch):
         """Compute cartesian CIRS coordinates at a given epoch (x,y,z).
 
@@ -335,54 +337,26 @@ class ICRF(object):
                 Angle(radians=dec, signed=True),
                 Distance(r_au))
 
+    # Deprecated methods, that have been replaced by `framelib.py` plus
+    # the "frame" methods in the next section.
+
     def ecliptic_xyz(self, epoch=None):
-        """Compute J2000 ecliptic position vector (x,y,z).
-
-        If you instead want the coordinates referenced to the dynamical
-        system defined by the Earth's true equator and equinox, provide
-        an epoch time.
-
-        """
         if epoch is None:
-            vector = mxv(_ECLIPJ2000, self.position.au)
-            return Distance(vector)
-
-        if isinstance(epoch, Time):
-            pass
-        elif isinstance(epoch, float):
-            epoch = Time(None, tt=epoch)
-        elif epoch == 'date':
-            epoch = self.t
-        else:
-            raise ValueError('the epoch= must be a Time object,'
-                             ' a floating point Terrestrial Time (TT),'
-                             ' or the string "date" for epoch-of-date')
-
-        rotation = framelib.build_ecliptic_matrix(epoch)
-        position_au = mxv(rotation, self.position.au)
-        return Distance(position_au)
-
+            return self.frame_xyz(framelib.ecliptic_J2000_frame)
+        return _Fake(self, epoch).frame_xyz(framelib.ecliptic_frame)
     def ecliptic_velocity(self):
-        return self.frame_xyz_and_velocity(framelib.ecliptic_J2000)[1]
-
+        return self.frame_xyz_and_velocity(framelib.ecliptic_J2000_frame)[1]
     def ecliptic_latlon(self, epoch=None):
-        """Compute J2000 ecliptic coordinates (lat, lon, distance)
+        if epoch is None:
+            return self.frame_latlon(framelib.ecliptic_J2000_frame)
+        return _Fake(self, epoch).frame_latlon(framelib.ecliptic_frame)
 
-        If you instead want the coordinates referenced to the dynamical
-        system defined by the Earth's true equator and equinox, provide
-        an epoch time.
-
-        """
-        #1/0
-        vector = self.ecliptic_xyz(epoch)
-        d, lat, lon = to_spherical(vector.au)
-        return (Angle(radians=lat, signed=True),
-                Angle(radians=lon),
-                Distance(au=d))
-
-    # Deprecated methods that have been replaced by `framelib.py`:
     def galactic_xyz(self): return self.frame_xyz(framelib.galactic_frame)
     def galactic_latlon(self): return self.frame_latlon(framelib.galactic_frame)
+    ecliptic_position = ecliptic_xyz  # old alias
+    galactic_position = galactic_xyz  # old alias
+
+    # New methods for converting to and from `framelib.py` reference frames.
 
     def frame_xyz(self, frame):
         """Return this position as an (x,y,z) vector in a reference frame.
@@ -392,8 +366,7 @@ class ICRF(object):
         `reference_frames`.
 
         """
-        R = frame.rotation_at(self.t)
-        return Distance(mxv(R, self.position.au))
+        return Distance(mxv(frame.rotation_at(self.t), self.position.au))
 
     def frame_xyz_and_velocity(self, frame):
         """Return (x,y,z) position and velocity vectors in a reference frame.
@@ -415,21 +388,19 @@ class ICRF(object):
         return Distance(r), Velocity(v)
 
     def frame_latlon(self, frame):
-        """Return as longitude, latitude, and distance in the given frame.
+        """Return longitude, latitude, and distance in the given frame.
 
-        See `reference_frames`.
+        Returns a 3-element tuple giving the latitude and longitude as a
+        pair of :class:`~skyfield.units.Angle` objects and the range to
+        the target as a :class:`~skyfield.units.Distance`.  See
+        `reference_frames`.
 
         """
-        R = frame.rotation_at(self.t)
-        vector = mxv(R, self.position.au)
+        vector = mxv(frame.rotation_at(self.t), self.position.au)
         d, lat, lon = to_spherical(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
-                Distance(au=d))
-
-    # Aliases; maybe someday turn into deprecations with warnings?
-    ecliptic_position = ecliptic_xyz
-    galactic_position = galactic_xyz
+                Distance(d))
 
     def to_skycoord(self, unit=None):
         """Convert this distance to an AstroPy ``SkyCoord`` object."""
@@ -826,6 +797,20 @@ _altaz_message = (
     ' specific Earth location or from a position on another body'
     ' loaded from a set of planetary constants'
 )
+
+class _Fake(ICRF):  # support for deprecated frame rotation methods above
+    def __init__(self, original, epoch):
+        self.position = original.position
+        if isinstance(epoch, Time):
+            self.t = epoch
+        elif isinstance(epoch, float):
+            self.t = Time(None, tt=epoch)
+        elif epoch == 'date':
+            self.t = original.t
+        else:
+            raise ValueError('the epoch= must be a Time object,'
+                             ' a floating point Terrestrial Time (TT),'
+                             ' or the string "date" for epoch-of-date')
 
 def ITRF_to_GCRS(t, rITRF):  # Deprecated; for compatibility with old versions.
     return mxv(_T(framelib.itrs.rotation_at(t)), rITRF)

@@ -39,12 +39,9 @@ together with all of the attributes and methods that they support:
      ├── `distance() <api-position.html#skyfield.positionlib.ICRF.distance>`_          →   distance
      ├── `separation_from(p2) <api-position.html#skyfield.positionlib.ICRF.separation_from>`_ →   angle
      │
-     ├── `ecliptic_xyz() <api-position.html#skyfield.positionlib.ICRF.ecliptic_xyz>`_      →   x, y, z
-     ├── `ecliptic_velocity() <api-position.html#skyfield.positionlib.ICRF.ecliptic_velocity>`_ →   xdot, ydot, zdot
-     ├── `ecliptic_latlon() <api-position.html#skyfield.positionlib.ICRF.ecliptic_latlon>`_   →   lat, lon, distance
-     ├── `galactic_xyz() <api-position.html#skyfield.positionlib.ICRF.galactic_xyz>`_      →   x, y, z
-     └── `galactic_latlon() <api-position.html#skyfield.positionlib.ICRF.galactic_latlon>`_   →   lat, lon, distance
-
+     ├── `frame_xyz(frame) <api-position.html#skyfield.positionlib.ICRF.frame_xyz>`_    →   `Distance <api-units.html#skyfield.units.Distance>`_
+     ├── `frame_xyz_and_velocity(frame) <api-position.html#skyfield.positionlib.ICRF.frame_xyz_and_velocity>`_ → `Distance <api-units.html#skyfield.units.Distance>`_, `Velocity <api-units.html#skyfield.units.Velocity>`_
+     └── `frame_latlon() <api-position.html#skyfield.positionlib.ICRF.frame_latlon>`_      →   lat, lon, distance
 
     Apparent position only
      │
@@ -681,6 +678,7 @@ Here are the reference frames defined in the ``framelib`` module
   instead of the degrees-of-longitude returned by ``frame_latlon()``.
 * `itrs`
 * :data:`~skyfield.framelib.ecliptic_J2000_frame`
+* :data:`~skyfield.framelib.ecliptic_frame`
 * :data:`~skyfield.framelib.galactic_frame`
 
 See also :doc:`planetary` for reference frames

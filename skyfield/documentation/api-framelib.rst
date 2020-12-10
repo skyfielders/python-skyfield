@@ -13,6 +13,8 @@ whose use is described in `reference_frames`.
 
 .. autodata:: itrs
 
+.. autodata:: ecliptic_frame
+
 .. autodata:: ecliptic_J2000_frame
 
 .. autodata:: galactic_frame
