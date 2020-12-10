@@ -3,7 +3,7 @@ import datetime as dt_module
 import re
 from collections import namedtuple
 from datetime import date, datetime
-from numpy import (array, concatenate, cos, float_, interp, isnan, nan,
+from numpy import (array, concatenate, cos, float_, int64, interp, isnan, nan,
                    ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like)
 from time import strftime, struct_time
 from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
@@ -559,7 +559,7 @@ class Time(object):
 
         """
         second, sfr, is_leap_second = self._utc_seconds(offset)
-        second = second.astype(int)
+        second = second.astype(int64)
         second -= is_leap_second
         jd, second = divmod(second + 12*60*60, 86400)
         cutoff = self.ts.julian_calendar_cutoff
