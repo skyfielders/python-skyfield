@@ -7,6 +7,8 @@ This document is a work in progress,
 that will be expanded into a full guide.
 Right now it covers only one topic.
 
+.. _polar motion:
+
 ------------
 Polar Motion
 ------------

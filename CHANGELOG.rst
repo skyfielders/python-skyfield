@@ -16,6 +16,8 @@ v1.34 — Future
   for ecliptic and galactic coordinates.
   See :ref:`reference_frames`.
 
+* Added support for IERS :ref:`polar motion` 𝑥 and 𝑦.
+
 * Added a method :meth:`~skyfield.toposlib.Topos.lst_hours_at()` that
   computes Local Sidereal Time.
 
