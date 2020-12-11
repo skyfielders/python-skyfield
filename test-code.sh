@@ -16,15 +16,24 @@ to install all of the tools and libraries for Skyfield development.
 EOF
     exit 2
 fi
+
+echo "assay command found"
+
 if grep ' $' $(git ls-files design examples skyfield | grep '\.py$')
 then
     echo
     echo 'Error: trailing whitespace detected on the above-listed lines'
     exit 1
 fi
+
+echo "searching for files with a whitespace done."
+
 if python --version | grep -q 'Python 3.6' && command -v pyflakes >/dev/null
 then
     d=$(python -c 'import skyfield as s; print(s.__file__.rsplit("/", 1)[0])')
     pyflakes $(find "$d" -name '*.py')
 fi
+
+echo "pyflakes executed"
+
 exec assay --batch skyfield.tests
