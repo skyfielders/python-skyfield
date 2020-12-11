@@ -460,6 +460,11 @@ def _dstr(degrees, places=1, signed=False):
     sign = '-' if sgn < 0.0 else '+' if signed else ''
     return '%s%02ddeg %02d\' %02d.%0*d"' % (sign, d, m, s, places, etc)
 
+def wms(whole, minutes=0.0, seconds=0.0):
+    """Return a quantity expressed with 1/60 minutes and 1/3600 seconds."""
+    return (whole
+            + copysign(minutes, whole) / 60.0
+            + copysign(seconds, whole) / 3600.0)
 
 def _unsexagesimalize(value):
     """Return `value` after interpreting a (units, minutes, seconds) tuple.
