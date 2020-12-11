@@ -20,6 +20,9 @@ fi
 echo "assay command found"
 
 git --version
+echo "ls-files, no args"
+git ls-files
+echo "ls-files, with args"
 git ls-files design examples skyfield
 
 if grep ' $' $(git ls-files design examples skyfield | grep '\.py$')
