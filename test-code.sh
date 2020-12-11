@@ -19,17 +19,7 @@ fi
 
 echo "assay command found"
 
-git --version
-echo "Am I in the repository?"
-pwd
-ls -al
-git status
-echo "ls-files, no args"
-git ls-files
-echo "ls-files, with args"
-git ls-files design examples skyfield
-
-if grep ' $' $(git ls-files design examples skyfield | grep '\.py$')
+if grep ' $' $(cd ..; git ls-files design examples skyfield | grep '\.py$')
 then
     echo
     echo 'Error: trailing whitespace detected on the above-listed lines'
