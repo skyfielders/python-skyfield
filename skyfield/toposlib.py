@@ -97,12 +97,6 @@ class Topos(VectorFunction):
         return 'Earth latitude {0} N longitude {1} E{2}'.format(
             self.latitude, self.longitude, e)
 
-    def _altaz_rotation(self, t):
-        """Compute the rotation from the ICRF into the alt-az system."""
-        R = itrs.rotation_at(t)
-        R = mxm(self._R_latlon, R)
-        return R
-
     def _at(self, t):
         """Compute the GCRS position and velocity of this Topos at time `t`."""
         r = self.itrs_position.au
@@ -141,5 +135,5 @@ class Topos(VectorFunction):
         return Angle(degrees=alt)
 
     def rotation_at(self, t):
-        """Compute the altazimuth rotation matrix for this location’s sky."""
-        return self._altaz_rotation(t)
+        """Compute rotation from ICRF to this location’s altazimuth system."""
+        return mxm(self._R_latlon, itrs.rotation_at(t))
