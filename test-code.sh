@@ -19,6 +19,9 @@ fi
 
 echo "assay command found"
 
+git --version
+git ls-files design examples skyfield
+
 if grep ' $' $(git ls-files design examples skyfield | grep '\.py$')
 then
     echo
