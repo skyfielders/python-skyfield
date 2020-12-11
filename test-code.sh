@@ -20,6 +20,10 @@ fi
 echo "assay command found"
 
 git --version
+echo "Am I in the repository?"
+pwd
+ls -al
+git status
 echo "ls-files, no args"
 git ls-files
 echo "ls-files, with args"
