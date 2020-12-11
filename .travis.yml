@@ -23,7 +23,7 @@ install:
   - "pip install --upgrade pip"
   - "pip install $(echo ../dist/skyfield-*.tar.gz)'[tests]'"
   - "pip install https://github.com/brandon-rhodes/assay/archive/master.zip"
-  - "if [[ $TRAVIS_PYTHON_VERSION < 3.7 ]] ; then pip install numpy==1.11.3 scipy==1.2.2 pandas==1.0.0 unittest2 ; else pip install pandas ; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION < 3.7 ]] ; then pip install numpy==1.11.3 scipy==1.2.2 pandas unittest2 ; else pip install pandas ; fi"
   - "python -c 'import pandas'"
 
 script:
