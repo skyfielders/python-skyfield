@@ -19,12 +19,17 @@ fi
 
 echo "assay command found"
 
-if grep ' $' $(cd ..; git ls-files design examples skyfield | grep '\.py$')
+current_dir=`pwd`
+git_root=`git rev-parse --show-toplevel`
+
+cd $git_root
+if grep ' $' $(git ls-files design examples skyfield | grep '\.py$')
 then
     echo
     echo 'Error: trailing whitespace detected on the above-listed lines'
     exit 1
 fi
+cd $current_dir
 
 echo "searching for files with a whitespace done."
 
