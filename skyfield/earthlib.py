@@ -13,19 +13,7 @@ one_minus_flattening_squared = one_minus_flattening * one_minus_flattening
 
 
 def terra(latitude, longitude, elevation, gast):
-    """Compute the position and velocity of a terrestrial observer.
-
-    `latitude` - Latitude in radians.
-    `longitude` - Longitude in radians.
-    `elevation` - Elevation above sea level in au.
-    `gast` - Hours of Greenwich Apparent Sidereal Time (can be an array).
-
-    The return value is a tuple of two 3-vectors `(pos, vel)` in the
-    dynamical reference system (the true equator and equinox of date)
-    whose components are measured in au with respect to the center of
-    the Earth.
-
-    """
+    """Deprecated conversion from lat,lon,t -> GCRS; neglects polar motion."""
     zero = zeros_like(gast)
     sinphi = sin(latitude)
     cosphi = cos(latitude)

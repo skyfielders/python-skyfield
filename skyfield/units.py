@@ -513,20 +513,11 @@ def _interpret_angle(name, angle_object, angle_float, unit='degrees'):
                      ' an Angle argument or supply the {0}_{1}= parameter'
                      ' with a numeric argument'.format(name, unit))
 
-def _interpret_ltude(value, name, psuffix, nsuffix):
-    """Interpret a string, float, or tuple as a latitude or longitude angle.
-
-    `value` - The string to interpret.
-    `name` - 'latitude' or 'longitude', for use in exception messages.
-    `positive` - The string that indicates a positive angle ('N' or 'E').
-    `negative` - The string that indicates a negative angle ('S' or 'W').
-
-    """
+def _ltude(value, name, psuffix, nsuffix):
+    # Support for old deprecated Topos argument interpretation.
     if not isinstance(value, str):
-        return Angle(degrees=_unsexagesimalize(value))
-
+        return _unsexagesimalize(value)
     value = value.strip().upper()
-
     if value.endswith(psuffix):
         sign = +1.0
     elif value.endswith(nsuffix):
@@ -534,11 +525,9 @@ def _interpret_ltude(value, name, psuffix, nsuffix):
     else:
         raise ValueError('your {0} string {1!r} does not end with either {2!r}'
                          ' or {3!r}'.format(name, value, psuffix, nsuffix))
-
     try:
         value = float(value[:-1])
     except ValueError:
         raise ValueError('your {0} string {1!r} cannot be parsed as a floating'
                          ' point number'.format(name, value))
-
-    return Angle(degrees=sign * value)
+    return sign * value

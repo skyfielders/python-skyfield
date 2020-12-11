@@ -2,56 +2,15 @@
 
 from numpy import array, cos, exp, sin, sqrt
 from .constants import ANGVEL, DAY_S, T0
-from .earthlib import refract, terra
+from .earthlib import refract
 from .framelib import itrs
 from .functions import _T, mxm, mxv, rot_y, rot_z
 from .descriptorlib import reify
-from .units import Angle, Distance, _interpret_ltude
+from .units import Angle, Distance, _ltude
 from .vectorlib import VectorFunction
 
-class EarthEllipsoid(object):
-    def __init__(self, name, radius_m, inverse_flattening):
-        self.name = name
-        self.radius = Distance(m=radius_m)
-        self.inverse_flattening = inverse_flattening
-        omf = (inverse_flattening - 1.0) / inverse_flattening
-        self._one_minus_flattening_squared = omf * omf
-
-    def latlon(self, latitude_degrees, longitude_degrees, elevation_m=0.0):
-        latitude = Angle(degrees=latitude_degrees)
-        longitude = Angle(degrees=longitude_degrees)
-        elevation = Distance(m=elevation_m)
-
-        lat = latitude.radians
-        lon = longitude.radians
-        radius_au = self.radius.au
-        elevation_au = elevation.au
-
-        sinphi = sin(lat)
-        cosphi = cos(lat)
-        c = 1.0 / sqrt(cosphi * cosphi +
-                       sinphi * sinphi * self._one_minus_flattening_squared)
-        s = self._one_minus_flattening_squared * c
-
-        ach = radius_au * c + elevation_au
-        ash = radius_au * s + elevation_au
-
-        sinst = sin(lon)
-        cosst = cos(lon)
-
-        ac = ach * cosphi
-        acsst = ac * sinst
-        accst = ac * cosst
-        r = array((accst, acsst, ash * sinphi))
-
-        return Topocentric(self, latitude, longitude, elevation, Distance(au=r))
-
-grs80 = EarthEllipsoid('GRS80', 6378137.0, 298.257222101)
-wgs84 = EarthEllipsoid('WGS84', 6378137.0, 298.257223563)
-iers2010 = EarthEllipsoid('IERS2010', 6378136.6, 298.25642)
-
 class Topocentric(VectorFunction):
-    """A vector function that knows the position of a place on Earth.
+    """A vector function for the position of a latitude and longitude on Earth.
 
     This class represents a geographic position on the Earth’s surface.
     Instead of instantiating this class directly, Skyfield users usually
@@ -98,7 +57,7 @@ class Topocentric(VectorFunction):
             self.model.name, self.latitude, self.longitude, e)
 
     def _at(self, t):
-        """Compute the GCRS position and velocity of this Topos at time `t`."""
+        """Compute GCRS position and velocity at time `t`."""
         r = self.itrs_position.au
         v = self._velocity_au_per_d
 
@@ -134,6 +93,50 @@ class Topocentric(VectorFunction):
         """Compute rotation from ICRF to this location’s altazimuth system."""
         return mxm(self._R_latlon, itrs.rotation_at(t))
 
+class EarthEllipsoid(object):
+    """An Earth model for turning latitudes and longitudes into positions."""
+
+    def __init__(self, name, radius_m, inverse_flattening):
+        self.name = name
+        self.radius = Distance(m=radius_m)
+        self.inverse_flattening = inverse_flattening
+        omf = (inverse_flattening - 1.0) / inverse_flattening
+        self._one_minus_flattening_squared = omf * omf
+
+    def latlon(self, latitude_degrees, longitude_degrees, elevation_m=0.0,
+               cls=Topocentric):
+        """Return a topocentric position for a given latitude and longitude."""
+        latitude = Angle(degrees=latitude_degrees)
+        longitude = Angle(degrees=longitude_degrees)
+        elevation = Distance(m=elevation_m)
+
+        lat = latitude.radians
+        lon = longitude.radians
+        radius_au = self.radius.au
+        elevation_au = elevation.au
+
+        sinphi = sin(lat)
+        cosphi = cos(lat)
+        omf2 = self._one_minus_flattening_squared
+        c = 1.0 / sqrt(cosphi * cosphi + sinphi * sinphi * omf2)
+        s = omf2 * c
+
+        ach = radius_au * c + elevation_au
+        ash = radius_au * s + elevation_au
+
+        ac = ach * cosphi
+        acsst = ac * sin(lon)
+        accst = ac * cos(lon)
+        r = array((accst, acsst, ash * sinphi))
+
+        return cls(self, latitude, longitude, elevation, Distance(au=r))
+
+grs80 = EarthEllipsoid('GRS80', 6378137.0, 298.257222101)
+wgs84 = EarthEllipsoid('WGS84', 6378137.0, 298.257223563)
+iers2010 = EarthEllipsoid('IERS2010', 6378136.6, 298.25642)
+
+# Compatibility with old versions of Skyfield:
+
 class Topos(Topocentric):
     model = EarthEllipsoid('Earth', 6378136.6, 298.25642)  # IERS2010 numbers
 
@@ -141,35 +144,33 @@ class Topos(Topocentric):
                  longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
 
         if latitude_degrees is not None:
-            latitude = Angle(degrees=latitude_degrees)
+            pass
+        elif isinstance(latitude, Angle):
+            latitude_degrees = latitude.degrees
         elif isinstance(latitude, (str, float, tuple)):
-            latitude = _interpret_ltude(latitude, 'latitude', 'N', 'S')
-        elif not isinstance(latitude, Angle):
+            latitude_degrees = _ltude(latitude, 'latitude', 'N', 'S')
+        else:
             raise TypeError('please provide either latitude_degrees=<float>'
                             ' or latitude=<skyfield.units.Angle object>'
                             ' with north being positive')
 
         if longitude_degrees is not None:
-            longitude = Angle(degrees=longitude_degrees)
+            pass
+        elif isinstance(longitude, Angle):
+            longitude_degrees = longitude.degrees
         elif isinstance(longitude, (str, float, tuple)):
-            longitude = _interpret_ltude(longitude, 'longitude', 'E', 'W')
-        elif not isinstance(longitude, Angle):
+            longitude_degrees = _ltude(longitude, 'longitude', 'E', 'W')
+        else:
             raise TypeError('please provide either longitude_degrees=<float>'
                             ' or longitude=<skyfield.units.Angle object>'
                             ' with east being positive')
 
-        self.latitude = latitude
-        self.longitude = longitude
-        self.elevation = elevation = Distance(m=elevation_m)
-
-        p, v = terra(latitude.radians, longitude.radians, elevation.au, 0.0)
-        self.itrs_position = Distance(p)
-        self._velocity_au_per_d = v
-
-        self._R_latlon = mxm(
-            rot_y(self.latitude.radians)[::-1],  # TODO: Why "::-1"?
-            rot_z(-self.longitude.radians),
-        )
+        # Sneaky: the model thinks it's creating an object when really
+        # it's just calling our superclass __init__() for us.  Alas, the
+        # crimes committed to avoid duplicating code!  (This is actually
+        # quite clean and clever compared to what it replaced.)
+        self.model.latlon(latitude_degrees, longitude_degrees, elevation_m,
+                          super(Topos, self).__init__)
 
     @reify
     def R_lat(self):
