@@ -9,12 +9,14 @@ from .descriptorlib import reify
 from .units import Angle, Distance, _ltude
 from .vectorlib import VectorFunction
 
-class Topocentric(VectorFunction):
-    """A vector function for the position of a latitude and longitude on Earth.
+class GeographicPosition(VectorFunction):
+    """The position of a latitude and longitude on Earth.
 
-    This class represents a geographic position on the Earth’s surface.
-    Instead of instantiating this class directly, Skyfield users usually
-    build an instance using an ellipsoidal model of the Earth::
+    This class represents a geographic position on the Earth’s surface,
+    measured as an x,y,z vector in the ITRS: the international standard
+    for an Earth-fixed Earth-centered (ECEF) reference frame.  Instead
+    of instantiating this class directly, Skyfield users usually supply
+    a longitude and latitude to an ellipsoidal model of the Earth::
 
         from skyfield.api import wgs84
         topos = wgs84.latlon(37.3414, -121.6429)
@@ -26,7 +28,7 @@ class Topocentric(VectorFunction):
     center = 399
 
     def __init__(self, model, latitude, longitude, elevation, itrs_position):
-        self.model = model
+        self.vector_name = model.name
         self.latitude = latitude
         self.longitude = longitude
         self.elevation = elevation
@@ -53,8 +55,8 @@ class Topocentric(VectorFunction):
     def target_name(self):
         m = self.elevation.m
         e = ' elevation {0:.0f} m'.format(m) if m else ''
-        return '{0} latitude {1} N longitude {2} E{3}'.format(
-            self.model.name, self.latitude, self.longitude, e)
+        return 'latitude {0} N longitude {1} E{2}'.format(
+            self.latitude, self.longitude, e)
 
     def _at(self, t):
         """Compute GCRS position and velocity at time `t`."""
@@ -104,8 +106,8 @@ class EarthEllipsoid(object):
         self._one_minus_flattening_squared = omf * omf
 
     def latlon(self, latitude_degrees, longitude_degrees, elevation_m=0.0,
-               cls=Topocentric):
-        """Return a topocentric position for a given latitude and longitude."""
+               cls=GeographicPosition):
+        """Return a geographic position for a given latitude and longitude."""
         latitude = Angle(degrees=latitude_degrees)
         longitude = Angle(degrees=longitude_degrees)
         elevation = Distance(m=elevation_m)
@@ -137,7 +139,8 @@ iers2010 = EarthEllipsoid('IERS2010', 6378136.6, 298.25642)
 
 # Compatibility with old versions of Skyfield:
 
-class Topos(Topocentric):
+class Topos(GeographicPosition):
+    """Deprecated."""
     model = EarthEllipsoid('Earth', 6378136.6, 298.25642)  # IERS2010 numbers
 
     def __init__(self, latitude=None, longitude=None, latitude_degrees=None,
@@ -168,7 +171,7 @@ class Topos(Topocentric):
         # Sneaky: the model thinks it's creating an object when really
         # it's just calling our superclass __init__() for us.  Alas, the
         # crimes committed to avoid duplicating code!  (This is actually
-        # quite clean and clever compared to what it replaced.)
+        # quite clean and clever compared to its alternatives.)
         self.model.latlon(latitude_degrees, longitude_degrees, elevation_m,
                           super(Topos, self).__init__)
 

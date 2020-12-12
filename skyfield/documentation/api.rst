@@ -226,11 +226,11 @@ that computes the location of any position on the Earth’s surface.
 
 .. autosummary::
 
-   Topos
-   Topos.at
-   Topos.lst_hours_at
-   Topos.refract
-   Topos.rotation_at
+   GeographicPosition
+   GeographicPosition.at
+   GeographicPosition.lst_hours_at
+   GeographicPosition.refract
+   GeographicPosition.rotation_at
 
 Kepler orbits
 =============

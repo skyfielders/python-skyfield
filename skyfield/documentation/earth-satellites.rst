@@ -97,7 +97,7 @@ which is listed in Celestrak’s ``stations.txt`` file:
 
 .. testcode::
 
-    from skyfield.api import Topos, load
+    from skyfield.api import load, wgs84
 
     stations_url = 'http://celestrak.com/NORAD/elements/stations.txt'
     satellites = load.tle_file(stations_url)
@@ -298,7 +298,7 @@ over the span of a single day:
 
 .. testcode::
 
-    bluffton = Topos('40.8939 N', '83.8917 W')
+    bluffton = wgs84.latlon(+40.8939, -83.8917)
     t0 = ts.utc(2014, 1, 23)
     t1 = ts.utc(2014, 1, 24)
     t, events = satellite.find_events(bluffton, t0, t1, altitude_degrees=30.0)
@@ -391,7 +391,7 @@ method of the geocentric position computed above.
 Finally, you might be most interested
 in whether the satellite is above or below the horizon
 from your own position as an observer.
-If you build a Topos object to represent your location,
+If you build an object to represent your latitude and longitude,
 you can use vector subtraction
 to ask “where will the satellite be *relative to* my location?”
 
@@ -403,7 +403,7 @@ to ask “where will the satellite be *relative to* my location?”
 .. testoutput::
 
     Sum of 2 vectors:
-     Reversed Topos Earth latitude 40deg 53' 38.0" N longitude -83deg 53' 30.1" E -> 399 EARTH
+     Reversed WGS84 latitude 40deg 53' 38.0" N longitude -83deg 53' 30.1" E -> 399 EARTH
      EarthSatellite 399 EARTH -> ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
 
 Every time you call this vector sum’s ``at()`` method,
@@ -423,7 +423,7 @@ just as you did for the position measured from the Earth’s center:
 
 .. testoutput::
 
-    [ 331.61876191  392.18479328 1049.76010254]
+    [ 331.61901192  392.18492744 1049.7597825 ]
 
 But the most popular approach is to ask the topocentric position
 for its altitude and azimuth coordinates,
@@ -464,7 +464,7 @@ or else in dynamical coordinates of the date you specify.
 .. testoutput::
 
     03h 19m 07.97s
-    +63deg 55' 47.3"
+    +63deg 55' 47.2"
 
 .. testcode::
 
@@ -476,7 +476,7 @@ or else in dynamical coordinates of the date you specify.
 .. testoutput::
 
     03h 20m 22.42s
-    +63deg 58' 45.3"
+    +63deg 58' 45.2"
 
 See :doc:`positions` to learn more about these possibilities.
 

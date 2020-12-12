@@ -21,8 +21,10 @@ and can combine them using addition and subtraction.
       ``3`` for the center of gravity of the Earth-Moon system,
       or ``0`` for the very center of the Solar System itself,
       though it might also be a specific object
-      like a :class:`~skyfield.toposlib.Topos` on the Earth’s surface
-      or an :class:`~skyfield.sgp4lib.EarthSatellite` in orbit around it.
+      like a :class:`~skyfield.toposlib.GeographicPosition`
+      on the Earth’s surface
+      or an :class:`~skyfield.sgp4lib.EarthSatellite`
+      in orbit around it.
 
    .. attribute:: target
 

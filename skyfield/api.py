@@ -22,11 +22,13 @@ from .toposlib import Topos, wgs84
 from .units import Angle, Distance, Velocity, wms
 
 load = Loader('.')
+N = E = +1.0
+S = W = -1.0
 
 __all__ = [
-    'Angle', 'B1950', 'Distance', 'EarthSatellite',
+    'Angle', 'B1950', 'Distance', 'E', 'EarthSatellite',
     'GREGORIAN_START', 'GREGORIAN_START_ENGLAND',
-    'Loader', 'PlanetaryConstants', 'Star',
+    'Loader', 'PlanetaryConstants', 'N', 'S', 'Star', 'W',
     'T0', 'Time', 'Timescale', 'Topos', 'Velocity',
     'datetime', 'load', 'load_constellation_map',
     'load_file', 'position_from_radec', 'position_of_radec',

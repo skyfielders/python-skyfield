@@ -114,7 +114,7 @@ or else by generating a whole series of positions.
 
   .. testcode::
 
-    from skyfield.api import Topos, load
+    from skyfield.api import N, W, load, wgs84
 
     ts = load.timescale()
     t = ts.now()
@@ -139,7 +139,7 @@ or else by generating a whole series of positions.
 
     # From a place on Earth (Topocentric)
 
-    boston = earth + Topos('42.3583 N', '71.0603 W', elevation_m=43)
+    boston = earth + wgs84.latlon(42.3583 * N, 71.0603 * W, elevation_m=43)
     astrometric = boston.at(t).observe(mars)
     apparent = boston.at(t).observe(mars).apparent()
 
@@ -160,12 +160,12 @@ or else by generating a whole series of positions.
 
   .. testcode::
 
-    from skyfield.api import Star, Topos, load
+    from skyfield.api import N, Star, W, load, wgs84
 
     ts = load.timescale()
     t = ts.now()
 
-    boston = earth + Topos('42.3583 N', '71.0603 W', elevation_m=43)
+    boston = earth + wgs84.latlon(42.3583 * N, 71.0603 * W, elevation_m=43)
     barnard = Star(ra_hours=(17, 57, 48.49803),
                    dec_degrees=(4, 41, 36.2072))
 
@@ -186,7 +186,7 @@ or else by generating a whole series of positions.
 
   .. testcode::
 
-    from skyfield.api import EarthSatellite, Topos, load
+    from skyfield.api import EarthSatellite, N, W, wgs84, load
 
     ts = load.timescale()
     t = ts.now()
@@ -194,7 +194,7 @@ or else by generating a whole series of positions.
     line1 = '1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082'
     line2 = '2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473'
 
-    boston = Topos('42.3583 N', '71.0603 W', elevation_m=43)
+    boston = wgs84.latlon(42.3583 * N, 71.0603 * W, elevation_m=43)
     satellite = EarthSatellite(line1, line2, name='ISS (ZARYA)')
 
     # Geocentric
@@ -515,13 +515,13 @@ that we have been generating so far:
 
     Traceback (most recent call last):
       ...
-    ValueError: to compute an apparent position, you must observe from a specific Earth location that you specify using a Topos instance
+    ValueError: to compute an apparent position, you must observe from a specific Earth location that you specify using a latitude and longitude
 
 Instead, you have to give Skyfield your geographic location.
 Astronomers use the term *topocentric*
 for a position measured relative to a specific location on Earth,
 so Skyfield represents Earth locations
-using :class:`~skyfield.toposlib.Topos` objects
+using :class:`~skyfield.toposlib.GeographicPosition` objects
 that you can add to an Earth object
 to generate a position relative to the center of the Solar System:
 
@@ -530,7 +530,7 @@ to generate a position relative to the center of the Solar System:
     # Altitude and azimuth in the sky of a
     # specific geographic location
 
-    boston = earth + Topos('42.3583 N', '71.0603 W', elevation_m=43)
+    boston = earth + wgs84.latlon(42.3583 * N, 71.0603 * W, elevation_m=43)
     astro = boston.at(ts.utc(1980, 3, 1)).observe(mars)
     app = astro.apparent()
 

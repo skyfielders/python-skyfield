@@ -5,7 +5,7 @@
 
 .. currentmodule:: skyfield.toposlib
 
-.. autoclass:: Topos
+.. autoclass:: GeographicPosition
    :members:
 
    .. attribute:: latitude

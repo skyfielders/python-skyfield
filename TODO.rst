@@ -25,12 +25,10 @@ Sprint Possibilities
   500 times less precise than the DUT1 numbers!  Therefore, we should
   design delta-T to use both TT floats.
 
-* Should the deflection routine really say this instead?:
+* Should the deflection routine really say this instead?::
 
-```
             limb_angle, nadir_angle = compute_limb_angle(
                 target_au + gcrs_position, gcrs_position)
-```
 
 * Improve the situation around “observer data”.
 

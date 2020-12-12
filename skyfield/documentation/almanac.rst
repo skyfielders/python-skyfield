@@ -105,9 +105,10 @@ so the ``March Equinox``, for example, is followed by the ``June Solstice``.
 Phases of the Moon
 ==================
 
-The phases of the Moon are the same for everyone on Earth, so no Topos
-is necessary but only an ephemeris object.  You can ask for the current
-phase of the Moon as an angle, where 0° is New Moon and 180° is Full:
+The phases of the Moon are the same for everyone on Earth, so you don’t
+need to specify the longitude and latitude of your location.  Simply ask
+for the current phase of the Moon as an angle, where 0° is New Moon and
+180° is Full:
 
 .. testcode::
 
@@ -230,7 +231,7 @@ and then the antimeridian on the opposite side of the celestial globe:
 
 .. testcode::
 
-    bluffton = api.Topos('40.8939 N', '83.8917 W')
+    bluffton = api.wgs84.latlon(+40.8939, -83.8917)
 
     t0 = ts.utc(2020, 11, 6)
     t1 = ts.utc(2020, 11, 7)
@@ -270,8 +271,7 @@ Sunrise and Sunset
 ==================
 
 Because sunrise and sunset differ depending on your location on the
-Earth’s surface, you first need to create a Topos object describing your
-geographic location.
+Earth’s surface, you will need to specify a latitude and longitude.
 
 Then you can create a start time and an end time and ask for all of the
 sunrises and sunsets in between.
@@ -313,7 +313,7 @@ interests you, and the return value will indicate whether the sun is up.
 
 .. testcode::
 
-    far_north = api.Topos('89 N', '80 W')
+    far_north = api.wgs84.latlon(89, -80)
     f = almanac.sunrise_sunset(eph, far_north)
     t, y = almanac.find_discrete(t0, t1, f)
 

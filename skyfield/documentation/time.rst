@@ -818,7 +818,7 @@ however, with two consequences:
   more than was predicted in Skyfield’s built-in UT1 tables,
   Skyfield’s idea of where the Earth is pointing will grow less accurate.
   This will affect both the position and direction
-  of each :class:`~skyfield.toposlib.Topos` geographic location —
+  of each :class:`~skyfield.toposlib.GeographicPosition` —
   whether used as an observer or a target —
   and will also affect Earth satellite positions.
 
@@ -970,7 +970,7 @@ by the :meth:`~skyfield.positionlib.ICRF.radec()`
 method when you use its  ``epoch=`` parameter
 to ask for a right ascension and declination
 in the dynamical reference system,
-and when you ask a :class:`~skyfield.toposlib.Topos` object
+and when you ask a :class:`~skyfield.toposlib.GeographicPosition` object
 for its position.
 
 .. _matplotlib: http://matplotlib.org/

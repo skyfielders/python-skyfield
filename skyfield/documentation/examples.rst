@@ -33,7 +33,7 @@ or how early I need to rise to see the morning sky:
     import datetime as dt
     from pytz import timezone
     from skyfield import almanac
-    from skyfield.api import Topos, load
+    from skyfield.api import N, W, wgs84, load
 
     # Figure out local midnight.
     zone = timezone('US/Eastern')
@@ -45,7 +45,7 @@ or how early I need to rise to see the morning sky:
     t0 = ts.from_datetime(midnight)
     t1 = ts.from_datetime(next_midnight)
     eph = load('de421.bsp')
-    bluffton = Topos('40.8939 N', '83.8917 W')
+    bluffton = wgs84.latlon(40.8939 * N, 83.8917 * W)
     f = almanac.dark_twilight_day(eph, bluffton)
     times, events = almanac.find_discrete(t0, t1, f)
 
@@ -119,7 +119,7 @@ and 270° if the Sun is to the right of the Moon.
 
 .. testcode::
 
-    from skyfield.api import load, Topos
+    from skyfield.api import N, W, load, wgs84
     from skyfield.trigonometry import position_angle_of
 
     ts = load.timescale()
@@ -127,7 +127,7 @@ and 270° if the Sun is to the right of the Moon.
 
     eph = load('de421.bsp')
     sun, moon, earth = eph['sun'], eph['moon'], eph['earth']
-    boston = earth + Topos('42.3583 N', '71.0636 W')
+    boston = earth + wgs84.latlon(42.3583 * N, 71.0636 * W)
 
     b = boston.at(t)
     m = b.observe(moon).apparent()
@@ -175,7 +175,7 @@ like the Sun, Moon, or one of the planets.
 
 .. testcode::
 
-    from skyfield.api import Star, Topos, load
+    from skyfield.api import N, Star, W, wgs84, load
     from skyfield.almanac import find_discrete, risings_and_settings
     from pytz import timezone
 
@@ -183,7 +183,7 @@ like the Sun, Moon, or one of the planets.
     t0 = ts.utc(2019, 1, 19)
     t1 = ts.utc(2019, 1, 21)
 
-    moab = Topos('38.5725 N', '109.54972238 W')
+    moab = wgs84.latlon(38.5725 * N, 109.54972238 * W)
     eph = load('de421.bsp')
     gc = Star(ra_hours=(17, 45, 40.04), dec_degrees=(-29, 0, 28.1))
 
@@ -216,8 +216,8 @@ then Skyfield can return its right ascension and declination.
 
     ts = api.load.timescale()
     t = ts.utc(2019, 9, 13, 20)
-    topos = api.Topos(latitude_degrees=42, longitude_degrees=-87)
-    observer = topos.at(t)
+    geographic = api.wgs84.latlon(latitude_degrees=42, longitude_degrees=-87)
+    observer = geographic.at(t)
     pos = observer.from_altaz(alt_degrees=90, az_degrees=0)
 
     ra, dec, distance = pos.radec()
@@ -295,17 +295,17 @@ to both Accra, Ghana, and the top of Mount Bierstadt in Colorado.
 
 .. testcode::
 
-   from skyfield.api import Topos, load
+   from skyfield.api import N, W, wgs84, load
    from skyfield.functions import length_of
 
    ts = load.timescale()
    t = ts.utc(2019, 1, 1)
 
-   bierstadt = Topos('39.5828 N', '105.6686 W', elevation_m=4287.012)
+   bierstadt = wgs84.latlon(39.5828 * N, 105.6686 * W, elevation_m=4287.012)
    m1 = length_of(bierstadt.at(t).position.m)
    print(int(m1))
 
-   accra = Topos('5.6037 N', '0.1870 W', elevation_m=61)
+   accra = wgs84.latlon(5.6037 * N, 0.1870 * W, elevation_m=61)
    m2 = length_of(accra.at(t).position.m)
    print(int(m2))
 
