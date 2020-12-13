@@ -50,11 +50,11 @@ def test_satellite_without_name():
 def test_topos():
     t = Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
     expected = dedent("""\
-        Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E
+        latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E
     """)
     assert str(t) == expected
     expected = dedent("""\
-        <Topos Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E>
+        <Topos latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E>
     """)
     assert repr(t) == expected
 
@@ -83,13 +83,13 @@ def test_topos_and_earth_satellite_vector_sum(eph):
     v = s - t
     expected = dedent("""\
         Sum of 2 vectors:
-         Reversed Topos Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
+         Reversed Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
          EarthSatellite 399 EARTH -> catalog #25544 epoch 2013-11-26 13:57:03 UTC
     """)
     assert str(v) == expected
     expected = dedent("""\
         <VectorSum of 2 vectors:
-         Reversed Topos Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
+         Reversed Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
          EarthSatellite 399 EARTH -> catalog #25544 epoch 2013-11-26 13:57:03 UTC>
     """)
     assert repr(v) == expected
