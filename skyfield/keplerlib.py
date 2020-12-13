@@ -396,6 +396,7 @@ def find_trunc():
 trunc = find_trunc()
 odd_factorials = array([math.factorial(i) for i in range(3, trunc*2, 2)])
 even_factorials = array([math.factorial(i) for i in range(2, trunc*2, 2)])
+exponents = arange(0, trunc-1)
 stumpff_bound = -(log(2) + log(dpmax))**2
 
 def stumpff(x):
@@ -427,17 +428,14 @@ def stumpff(x):
     c3[high] = (1 - c1[high])/x[high]
 
     mid = ~low * ~high
-    n = sum(mid)
-    exponents = tile(arange(0, trunc-1), [n, 1])
-    odd_denominators = tile(odd_factorials, [n, 1])
-    even_denominators = tile(even_factorials, [n, 1])
-    numerators = repeat(x[mid][newaxis].T, trunc-1, axis=1)
-    c3[mid] = (sum(power(numerators[:, ::2], exponents[:, ::2])/odd_denominators[:, ::2], axis=1)
-        - sum(power(numerators[:, 1::2], exponents[:, 1::2])/odd_denominators[:, 1::2], axis=1))
-    c2[mid] = (sum(power(numerators[:, ::2], exponents[:, ::2])/even_denominators[:, ::2], axis=1)
-        - sum(power(numerators[:, 1::2], exponents[:, 1::2])/even_denominators[:, 1::2], axis=1))
-    c1[mid] = 1 - x[mid]*c3[mid]
-    c0[mid] = 1 - x[mid]*c2[mid]
+    if sum(mid):
+        numerators = repeat(x[mid][newaxis].T, trunc-1, axis=1)
+        numerators[:, 1::2] *= -1
+        c3[mid] = sum(power(numerators, exponents)/odd_factorials, axis=1)        
+        c2[mid] = sum(power(numerators, exponents)/even_factorials, axis=1)
+
+        c1[mid] = 1 - x[mid]*c3[mid]
+        c0[mid] = 1 - x[mid]*c2[mid] # is this true for all cases? can it be done all at once?
 
     return c0, c1, c2, c3
 
