@@ -418,16 +418,12 @@ def stumpff(x):
     low = x < -1
     c0[low] = cosh(z[low])
     c1[low] = sinh(z[low])/z[low]
-    c2[low] = (1 - c0[low])/x[low]
-    c3[low] = (1 - c1[low])/x[low]
 
     high = x > 1
     c0[high] = cos(z[high])
     c1[high] = sin(z[high])/z[high]
-    c2[high] = (1 - c0[high])/x[high]
-    c3[high] = (1 - c1[high])/x[high]
 
-    mid = ~low * ~high
+    mid = ~(low|high)
     if sum(mid):
         numerators = repeat(x[mid][newaxis].T, trunc-1, axis=1)
         numerators[:, 1::2] *= -1
@@ -435,10 +431,13 @@ def stumpff(x):
         c2[mid] = sum(power(numerators, exponents)/even_factorials, axis=1)
 
         c1[mid] = 1 - x[mid]*c3[mid]
-        c0[mid] = 1 - x[mid]*c2[mid] # is this true for all cases? can it be done all at once?
+        c0[mid] = 1 - x[mid]*c2[mid]
+        
+    not_mid = ~mid
+    c2[not_mid] = (1 - c0[not_mid])/x[not_mid]
+    c3[not_mid] = (1 - c1[not_mid])/x[not_mid]
 
     return c0, c1, c2, c3
-
 
 def propagate(position, velocity, t0, t1, gm):
     """Propagates a position and velocity vector with an array of times.
