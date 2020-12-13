@@ -396,7 +396,7 @@ def find_trunc():
 trunc = find_trunc()
 odd_factorials = array([math.factorial(i) for i in range(3, trunc*2, 2)])
 even_factorials = array([math.factorial(i) for i in range(2, trunc*2, 2)])
-
+stumpff_bound = -(log(2) + log(dpmax))**2
 
 def stumpff(x):
     """Calculates Stumpff functions
@@ -404,7 +404,7 @@ def stumpff(x):
     Based on the function toolkit/src/spicelib/stmp03.f from the SPICE toolkit,
     which can be downloaded from naif.jpl.nasa.gov/naif/toolkit_FORTRAN.html
     """
-    if (x < (-(log(2) + log(dpmax))**2)).any():
+    if min(x) < stumpff_bound:
         raise ValueError('Argument below lower bound')
 
     z = sqrt(abs(x))
