@@ -1,11 +1,14 @@
 """Basic operations that are needed repeatedly throughout Skyfield."""
 
+import numpy as np
 from numpy import (
     arcsin, arctan2, array, cos, einsum, full_like,
     float_, load, rollaxis, sin, sqrt,
 )
 from pkgutil import get_data
 from skyfield.constants import tau
+
+_tiny = np.finfo(np.float64).tiny
 
 def dots(v, u):
     """Given one or more vectors in `v` and `u`, return their dot products.
@@ -74,7 +77,7 @@ def to_spherical(xyz):
     """
     r = length_of(xyz)
     x, y, z = xyz
-    theta = arcsin(z / r)
+    theta = arcsin(z / (r + _tiny))  # "+ _tiny" avoids division by zero
     phi = arctan2(y, x) % tau
     return r, theta, phi
 
