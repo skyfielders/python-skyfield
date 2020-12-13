@@ -404,7 +404,7 @@ def stumpff(x):
     Based on the function toolkit/src/spicelib/stmp03.f from the SPICE toolkit,
     which can be downloaded from naif.jpl.nasa.gov/naif/toolkit_FORTRAN.html
     """
-    if min(x) < stumpff_bound:
+    if x.min() < stumpff_bound:
         raise ValueError('Argument below lower bound')
 
     z = sqrt(abs(x))
