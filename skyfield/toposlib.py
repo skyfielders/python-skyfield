@@ -12,11 +12,12 @@ from .vectorlib import VectorFunction
 class GeographicPosition(VectorFunction):
     """The position of a latitude and longitude on Earth.
 
-    This class represents a geographic position on the Earth’s surface,
-    measured as an x,y,z vector in the ITRS: the international standard
-    for an Earth-fixed Earth-centered (ECEF) reference frame.  Instead
-    of instantiating this class directly, Skyfield users usually supply
-    a longitude and latitude to an ellipsoidal model of the Earth::
+    The x,y,z vector of a geographic position on (or above, or below)
+    the Earth’s surface, in the ITRS reference frame: the international
+    standard for an Earth-centered Earth-fixed (ECEF) reference frame.
+    Instead of instantiating this class directly, Skyfield users usually
+    supply a longitude and latitude to an ellipsoidal model of the
+    Earth::
 
         from skyfield.api import wgs84
         topos = wgs84.latlon(37.3414, -121.6429)
@@ -26,9 +27,10 @@ class GeographicPosition(VectorFunction):
 
     """
     center = 399
+    vector_name = 'Geodetic'
 
     def __init__(self, model, latitude, longitude, elevation, itrs_position):
-        self.vector_name = model.name
+        self.model = model
         self.latitude = latitude
         self.longitude = longitude
         self.elevation = elevation
@@ -55,8 +57,8 @@ class GeographicPosition(VectorFunction):
     def target_name(self):
         m = self.elevation.m
         e = ' elevation {0:.0f} m'.format(m) if m else ''
-        return 'latitude {0} N longitude {1} E{2}'.format(
-            self.latitude, self.longitude, e)
+        return '{0} latitude {1} N longitude {2} E{3}'.format(
+            self.model.name, self.latitude, self.longitude, e)
 
     def _at(self, t):
         """Compute GCRS position and velocity at time `t`."""
@@ -140,8 +142,7 @@ iers2010 = EarthEllipsoid('IERS2010', 6378136.6, 298.25642)
 # Compatibility with old versions of Skyfield:
 
 class Topos(GeographicPosition):
-    """Deprecated."""
-    model = EarthEllipsoid('Earth', 6378136.6, 298.25642)  # IERS2010 numbers
+    """Deprecated: use ``wgs84.latlon()`` or ``iers2010.latlon()`` instead."""
 
     def __init__(self, latitude=None, longitude=None, latitude_degrees=None,
                  longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
@@ -171,9 +172,9 @@ class Topos(GeographicPosition):
         # Sneaky: the model thinks it's creating an object when really
         # it's just calling our superclass __init__() for us.  Alas, the
         # crimes committed to avoid duplicating code!  (This is actually
-        # quite clean and clever compared to its alternatives.)
-        self.model.latlon(latitude_degrees, longitude_degrees, elevation_m,
-                          super(Topos, self).__init__)
+        # quite clean compared to the other alternatives I tried.)
+        iers2010.latlon(latitude_degrees, longitude_degrees, elevation_m,
+                        super(Topos, self).__init__)
 
     @reify
     def R_lat(self):

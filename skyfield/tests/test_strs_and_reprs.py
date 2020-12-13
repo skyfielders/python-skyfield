@@ -1,5 +1,5 @@
 import textwrap
-from ..api import Topos, load
+from ..api import Topos, load, wgs84
 from ..sgp4lib import EarthSatellite
 
 lines = [
@@ -47,14 +47,29 @@ def test_satellite_without_name():
     """)
     assert repr(s) == expected
 
-def test_topos():
-    t = Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
+def test_geographic_position():
+    t = wgs84.latlon(42.2, -88.1)
     expected = dedent("""\
-        latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E
+        WGS84 latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E
     """)
     assert str(t) == expected
     expected = dedent("""\
-        <Topos latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E>
+        <GeographicPosition WGS84 latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E>
+    """)
+    assert repr(t) == expected
+
+    t.target_name = 'Custom name'
+    assert str(t) == 'Custom name'
+    assert repr(t) == "<GeographicPosition Custom name>"
+
+def test_topos():
+    t = Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
+    expected = dedent("""\
+        IERS2010 latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E
+    """)
+    assert str(t) == expected
+    expected = dedent("""\
+        <Topos IERS2010 latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E>
     """)
     assert repr(t) == expected
 
@@ -77,19 +92,37 @@ def test_jpl_vector_sum(eph):
     """)
     assert repr(e) == expected
 
+
+def test_geographic_position_and_earth_satellite_vector_sum(eph):
+    s = EarthSatellite(lines[1], lines[2])
+    t = wgs84.latlon(42.2, -88.1)
+    v = s - t
+    expected = dedent("""\
+        Sum of 2 vectors:
+         Reversed Geodetic WGS84 latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
+         EarthSatellite 399 EARTH -> catalog #25544 epoch 2013-11-26 13:57:03 UTC
+    """)
+    assert str(v) == expected
+    expected = dedent("""\
+        <VectorSum of 2 vectors:
+         Reversed Geodetic WGS84 latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
+         EarthSatellite 399 EARTH -> catalog #25544 epoch 2013-11-26 13:57:03 UTC>
+    """)
+    assert repr(v) == expected
+
 def test_topos_and_earth_satellite_vector_sum(eph):
     s = EarthSatellite(lines[1], lines[2])
     t = Topos(latitude_degrees=42.2, longitude_degrees=-88.1)
     v = s - t
     expected = dedent("""\
         Sum of 2 vectors:
-         Reversed Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
+         Reversed Geodetic IERS2010 latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
          EarthSatellite 399 EARTH -> catalog #25544 epoch 2013-11-26 13:57:03 UTC
     """)
     assert str(v) == expected
     expected = dedent("""\
         <VectorSum of 2 vectors:
-         Reversed Earth latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
+         Reversed Geodetic IERS2010 latitude 42deg 12' 00.0" N longitude -88deg 06' 00.0" E -> 399 EARTH
          EarthSatellite 399 EARTH -> catalog #25544 epoch 2013-11-26 13:57:03 UTC>
     """)
     assert repr(v) == expected
