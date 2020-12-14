@@ -12,18 +12,18 @@ from .vectorlib import VectorFunction
 class GeographicPosition(VectorFunction):
     """The position of a latitude and longitude on Earth.
 
-    The x,y,z vector of a geographic position on (or above, or below)
-    the Earth’s surface, in the ITRS reference frame: the international
-    standard for an Earth-centered Earth-fixed (ECEF) reference frame.
-    Instead of instantiating this class directly, Skyfield users usually
-    supply a longitude and latitude to an ellipsoidal model of the
-    Earth::
+    Each instance of this class holds an x,y,z vector for a geographic
+    position on (or above, or below) the Earth’s surface, in the ITRS
+    reference frame: the international standard for an Earth-centered
+    Earth-fixed (ECEF) reference frame.  Instead of instantiating this
+    class directly, Skyfield users usually give a reference geoid the
+    longitude and latitude they are interested in::
 
         from skyfield.api import wgs84
         topos = wgs84.latlon(37.3414, -121.6429)
 
-    Once the object has been created, here are its attributes and
-    methods:
+    Once a geographic position has been created, here are its attributes
+    and methods:
 
     """
     center = 399
@@ -97,8 +97,8 @@ class GeographicPosition(VectorFunction):
         """Compute rotation from ICRF to this location’s altazimuth system."""
         return mxm(self._R_latlon, itrs.rotation_at(t))
 
-class EarthEllipsoid(object):
-    """An Earth model for turning latitudes and longitudes into positions."""
+class Geoid(object):
+    """An Earth ellipsoid; maps latitudes and longitudes to x,y,z positions."""
 
     def __init__(self, name, radius_m, inverse_flattening):
         self.name = name
@@ -109,7 +109,22 @@ class EarthEllipsoid(object):
 
     def latlon(self, latitude_degrees, longitude_degrees, elevation_m=0.0,
                cls=GeographicPosition):
-        """Return a geographic position for a given latitude and longitude."""
+        """Return the geographic position of a given latitude and longitude.
+
+        Longitude is positive towards the east, so supply a negative
+        number for west::
+
+            from skyfield.api import wgs84
+            topos = wgs84.latlon(37.3414, -121.6429)
+
+        Or use the direction constants that Skyfield supplies (each has
+        the value positive one or negative one), if you don’t want to
+        require readers to remember which is which::
+
+            from skyfield.api import N, S, E, W
+            topos = wgs84.latlon(37.3414 * N, 121.6429 * W)
+
+        """
         latitude = Angle(degrees=latitude_degrees)
         longitude = Angle(degrees=longitude_degrees)
         elevation = Distance(m=elevation_m)
@@ -135,9 +150,18 @@ class EarthEllipsoid(object):
 
         return cls(self, latitude, longitude, elevation, Distance(au=r))
 
-grs80 = EarthEllipsoid('GRS80', 6378137.0, 298.257222101)
-wgs84 = EarthEllipsoid('WGS84', 6378137.0, 298.257223563)
-iers2010 = EarthEllipsoid('IERS2010', 6378136.6, 298.25642)
+wgs84 = Geoid('WGS84', 6378137.0, 298.257223563)
+iers2010 = Geoid('IERS2010', 6378136.6, 298.25642)
+
+wgs84.__doc__ = """World Geodetic System 1984 `Geoid`.
+
+This is the standard geoid used by the GPS system,
+and is likely the standard that’s intended
+if you are supplied a latitude and longitude
+that don’t specify an alternative geoid.
+
+"""
+iers2010.__doc__ = 'International Earth Rotation Service 2010 `Geoid`.'
 
 # Compatibility with old versions of Skyfield:
 

@@ -490,19 +490,17 @@ The final result that many users seek
 is the altitude and azimuth of an object
 above their own local horizon.
 
-* *Altitude* measures the angle above or below the horizon,
-  with a positive number of degrees meaning “above”
-  and a negative number indicating that the object
-  is below the horizon (and impossible to view).
+* *Altitude* measures the angle above or below the horizon.
+  The great circle of the horizon itself has 0° altitude,
+  while a positive number gives the number of degrees above the horizon.
 
-* *Azimuth* measures the angle around the sky from the north pole,
-  so 0° means that the object is straight north,
-  90° indicates that the object lies to the east,
-  180° means south, and 270° means that the object is straight west.
+* *Azimuth* measures the angle around the sky from the north pole.
+  Thus 0° means that the object is exactly north,
+  90° directly east, 180° directly south, and 270° directly west.
 
 Altitude and azimuth are computed
 by calling the :meth:`~Apparent.altaz()` method on an apparent position.
-But because the method needs to know whose local horizon to use,
+But because the method needs to know which local horizon to use,
 it does not work
 on the plain geocentric (“Earth centered”) positions
 that we have been generating so far:
@@ -517,13 +515,20 @@ that we have been generating so far:
       ...
     ValueError: to compute an apparent position, you must observe from a specific Earth location that you specify using a latitude and longitude
 
-Instead, you have to give Skyfield your geographic location.
-Astronomers use the term *topocentric*
-for a position measured relative to a specific location on Earth,
-so Skyfield represents Earth locations
-using :class:`~skyfield.toposlib.GeographicPosition` objects
-that you can add to an Earth object
-to generate a position relative to the center of the Solar System:
+You can specify a location on Earth
+by giving its latitude and longitude
+to a standard “geodetic system” that models the Earth’s shape.
+The most popular model is WGS84,
+used by most modern maps
+and also by the Global Positioning System (GPS).
+If you are given a longitude and latitude without a datum specified,
+they are probably WGS84 coordinates.
+
+You can pass the latitude and longitude to a datum like WGS84
+by calling its :meth:`~skyfield.toposlib.Geoid.latlon()` method.
+Skyfield provides constants ``N``, ``S``, ``E``, and ``W``
+that are each positive one or negative one,
+in case you don’t want to remember which directions are positive.
 
 .. testcode::
 

@@ -2,6 +2,20 @@
 Changelog
 =========
 
+v1.35 — Future
+--------------
+
+* Deprecated the old ``Topos`` class,
+  which not only featured a clunky interface
+  but hid from users the fact that they were generating IERS2010 positions
+  when in fact nearly all users want WGS84 positions.
+  Users are now encouraged to supply latitude and longitude
+  to the :meth:`~skyfield.toposlib.Geoid.latlon()` method
+  of either the :data:`~skyfield.toposlib.wgs84` object
+  or the :data:`~skyfield.toposlib.iers2010` object.
+  Related discussion:
+  `#476 <https://github.com/skyfielders/python-skyfield/issues/476>`_
+
 v1.34 — 2020 December 10
 ------------------------
 

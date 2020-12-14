@@ -5,6 +5,12 @@
 
 .. currentmodule:: skyfield.toposlib
 
+.. autodata:: wgs84
+.. autodata:: iers2010
+
+.. autoclass:: Geoid
+   :members:
+
 .. autoclass:: GeographicPosition
    :members:
 
@@ -23,6 +29,12 @@
       A :class:`~skyfield.units.Distance` object
       specifying the elevation of the topocentric position
       above mean sea level on a WGS-84 globe.
+
+   .. attribute:: itrs_position
+
+      A :class:`~skyfield.units.Distance` object
+      giving the spatial x,y,z coordinates of this location
+      in the ITRS Earth-centered Earth-fixed (“ECEF”) reference frame.
 
    .. attribute:: center
 

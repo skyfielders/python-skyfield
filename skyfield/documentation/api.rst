@@ -223,6 +223,21 @@ Topocentric locations
 
 You can create a vector function
 that computes the location of any position on the Earth’s surface.
+Start with a reference model of the Earth’s exact shape:
+
+* `wgs84`
+* `iers2010`
+
+Then ask the model for the location of a given longitude and latitude:
+
+.. autosummary::
+
+   Geoid
+   Geoid.latlon
+
+Finally, the resulting geographic location
+can compute its position at any specified time
+by combining its coordinates with the orientation and rotation of the Earth:
 
 .. autosummary::
 
