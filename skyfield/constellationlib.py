@@ -24,7 +24,9 @@ declination, then look up the indexes in the grid.  Memory requirement:
     1k  constellation name abbreviations
 
 """
+import zlib
 from numpy import searchsorted
+from pkgutil import get_data
 from .functions import load_bundled_npy
 from .timelib import Time, julian_date_of_besselian_epoch
 
@@ -60,3 +62,9 @@ def load_constellation_map():
         return indexed_abbreviations[k]
 
     return constellation_at
+
+def load_constellation_names():
+    """Return a list of constellation name tuples like ``('Aql', 'Aquila')``."""
+    data = get_data('skyfield', 'data/constellations.gz')
+    data = zlib.decompress(data, wbits=zlib.MAX_WBITS+32)
+    return [line.decode('ascii').split(None, 1) for line in data.splitlines()]
