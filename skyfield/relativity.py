@@ -1,8 +1,7 @@
 from numpy import abs, einsum, sqrt, where
 
 from .constants import C, AU_M, C_AUDAY, GS
-from .functions import dots, length_of
-
+from .functions import _AVOID_DIVIDE_BY_ZERO, dots, length_of
 
 deflectors = ['sun', 'jupiter', 'saturn', 'moon', 'venus', 'uranus', 'neptune']
 rmasses = {
@@ -96,8 +95,6 @@ def add_deflection(position, observer, ephemeris, t,
         else:
             position[:] = deflected_position[:]
 
-#
-
 def light_time_difference(position, observer_position):
     """Returns the difference in light-time, for a star,
       between the barycenter of the solar system and the observer (or
@@ -108,15 +105,13 @@ def light_time_difference(position, observer_position):
     # source.
 
     dis = length_of(position)
-    u1 = position / dis
+    u1 = position / (dis + _AVOID_DIVIDE_BY_ZERO)
 
     # Light-time returned is the projection of vector 'pos_obs' onto the
     # unit vector 'u1' (formed from 'pos1'), divided by the speed of light.
 
     diflt = einsum('a...,a...', u1, observer_position) / C_AUDAY
     return diflt
-
-#
 
 def _add_deflection(position, observer, deflector, rmass):
     """Correct a position vector for how one particular mass deflects light.
@@ -165,8 +160,6 @@ def _add_deflection(position, observer, deflector, rmass):
     position += where(make_no_correction, 0.0,
                       fac1 * (pdotq * ehat - edotp * qhat) / fac2 * pmag)
 
-#
-
 def add_aberration(position, velocity, light_time):
     """Correct a relative position vector for aberration of light.
 
@@ -182,7 +175,7 @@ def add_aberration(position, velocity, light_time):
     beta = vemag / C_AUDAY
     dot = dots(position, velocity)
 
-    cosd = dot / (p1mag * vemag)
+    cosd = dot / (p1mag * vemag + _AVOID_DIVIDE_BY_ZERO)
     gammai = sqrt(1.0 - beta * beta)
     p = beta * cosd
     q = (1.0 + p / (1.0 + gammai)) * light_time

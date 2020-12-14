@@ -3,7 +3,7 @@
 
 from numpy import array, einsum, full, reshape, nan, nan_to_num
 from . import framelib
-from .constants import ANGVEL, AU_M, ERAD, DAY_S, RAD2DEG, tau
+from .constants import ANGVEL, AU_M, C, ERAD, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .descriptorlib import reify
 from .earthlib import compute_limb_angle, reverse_terra
@@ -101,6 +101,8 @@ class ICRF(object):
         self.velocity = Velocity(velocity_au_per_d)
         self.center = self._default_center if center is None else center
         self.target = target
+        if center == 0:
+            self.center_barycentric = self
 
     @classmethod
     def from_radec(cls, ra_hours, dec_degrees,
@@ -216,6 +218,11 @@ class ICRF(object):
 
         """
         return Velocity(length_of(self.velocity.au_per_d))
+
+    @reify
+    def light_time(self):
+        """Length of this vector in days of light travel time."""
+        return self.distance().m / C * DAY_S
 
     def radec(self, epoch=None):
         r"""Compute equatorial (RA, declination, distance)

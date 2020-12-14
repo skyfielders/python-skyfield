@@ -1,14 +1,13 @@
 """Basic operations that are needed repeatedly throughout Skyfield."""
 
-import numpy as np
 from numpy import (
-    arcsin, arctan2, array, cos, einsum, full_like,
-    float_, load, rollaxis, sin, sqrt,
+    arcsin, arctan2, array, cos, einsum, finfo, float64,
+    full_like, load, rollaxis, sin, sqrt,
 )
 from pkgutil import get_data
 from skyfield.constants import tau
 
-_tiny = np.finfo(np.float64).tiny
+_AVOID_DIVIDE_BY_ZERO = finfo(float64).tiny
 
 def dots(v, u):
     """Given one or more vectors in `v` and `u`, return their dot products.
@@ -77,7 +76,7 @@ def to_spherical(xyz):
     """
     r = length_of(xyz)
     x, y, z = xyz
-    theta = arcsin(z / (r + _tiny))  # "+ _tiny" avoids division by zero
+    theta = arcsin(z / (r + _AVOID_DIVIDE_BY_ZERO))
     phi = arctan2(y, x) % tau
     return r, theta, phi
 
@@ -135,7 +134,7 @@ def _to_array(value):
     elif hasattr(value, '__len__'):
         return array(value)
     else:
-        return float_(value)
+        return float64(value)
 
 def _reconcile(a, b):
     """Coerce two NumPy generics-or-arrays to the same number of dimensions."""

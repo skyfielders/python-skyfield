@@ -1,5 +1,6 @@
 """Basic tests of the Skyfield API module and its contents."""
 
+import numpy as np
 from assay import assert_raises
 from skyfield import api, positionlib
 from skyfield.api import Topos
@@ -130,3 +131,11 @@ def test_github_81(ts):
     t = ts.utc(1980, 1, 1)
     assert t == t
     assert (t == 61) is False  # used to die with AttributeError for "tt"
+
+def test_github_500_does_zero_position_trigger_numpy_warnings(ts):
+    zero_vector = np.array([0.0, 0.0, 0.0])
+    t = ts.utc(2020, 12, 14)
+    p = positionlib.Astrometric(zero_vector, zero_vector, t=t, center=0)
+    p._ephemeris = api.load('de421.bsp')
+    with np.errstate(all='raise'):
+        p.apparent().radec()
