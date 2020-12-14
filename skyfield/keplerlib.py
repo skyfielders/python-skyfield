@@ -4,7 +4,7 @@ import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh,
                   cross, exp, log, ndarray, newaxis, ones_like, pi, power,
-                  repeat, sin, sinh, sqrt, sum, tan, tanh, tile, zeros_like)
+                  repeat, sin, sinh, sqrt, sum, tan, tanh, zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
@@ -590,7 +590,7 @@ def propagate(position, velocity, t0, t1, gm):
         position_prop = pc*position + vc*velocity
         velocity_prop = pcdot*position + vcdot*velocity
     else:
-        position_prop = pc*tile(position[newaxis].T, dt.size) + vc*tile(velocity[newaxis].T, dt.size)
-        velocity_prop = pcdot*tile(position[newaxis].T, dt.size) + vcdot*tile(velocity[newaxis].T, dt.size)
+        position_prop = pc*position[newaxis].T + vc*velocity[newaxis].T
+        velocity_prop = pcdot*position[newaxis].T + vcdot*velocity[newaxis].T
 
     return position_prop, velocity_prop
