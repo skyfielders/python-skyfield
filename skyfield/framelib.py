@@ -87,7 +87,7 @@ class itrs(object):
         return R
 
     @staticmethod
-    def _twist_at(t):
+    def _dRdt_times_RT_at(t):
         # TODO: taking the derivative of the instantaneous angular
         # velocity provides a more accurate transform.
         return _itrs_angvel_matrix

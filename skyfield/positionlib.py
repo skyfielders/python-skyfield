@@ -125,10 +125,10 @@ class ICRF(object):
 
         """
         r, v = distance.au, velocity.au_per_d
-        twist_at = getattr(frame, '_twist_at', None)
-        if twist_at is not None:
-            RV = _T(twist_at(t))
-            v = v + mxv(RV, r)
+        at = getattr(frame, '_dRdt_times_RT_at', None)
+        if at is not None:
+            V = at(t)
+            v = v - mxv(V, r)  # subtract instead of transposing
         RT = _T(frame.rotation_at(t))
         r = mxv(RT, r)
         v = mxv(RT, v)
@@ -388,9 +388,9 @@ class ICRF(object):
         r, v = self.position.au, self.velocity.au_per_d
         r = mxv(R, r)
         v = mxv(R, v)
-        twist_at = getattr(frame, '_twist_at', None)
-        if twist_at is not None:
-            V = twist_at(self.t)
+        at = getattr(frame, '_dRdt_times_RT_at', None)
+        if at is not None:
+            V = at(self.t)
             v += mxv(V, r)
         return Distance(r), Velocity(v)
 
