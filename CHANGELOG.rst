@@ -16,6 +16,8 @@ v1.35 — Future
   Related discussion:
   `#476 <https://github.com/skyfielders/python-skyfield/issues/476>`_
 
+* Added :func:`~skyfield.api.load_constellation_names()`.
+
 v1.34 — 2020 December 10
 ------------------------
 

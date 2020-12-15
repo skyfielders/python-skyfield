@@ -364,6 +364,7 @@ Constellations
 ==============
 
 .. autofunction:: skyfield.api.load_constellation_map
+.. autofunction:: skyfield.api.load_constellation_names
 .. autofunction:: skyfield.data.stellarium.parse_constellations
 .. autofunction:: skyfield.data.stellarium.parse_star_names
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Constellation identification.
 
 Constellation identification is tradionally performed with:
@@ -64,7 +65,24 @@ def load_constellation_map():
     return constellation_at
 
 def load_constellation_names():
-    """Return a list of constellation name tuples like ``('Aql', 'Aquila')``."""
+    """Return a list of abbreviation-name tuples, like ``('Aql', 'Aquila')``.
+
+    You can pass the list to Python’s ``dict()`` to build a dictionary
+    that turns a constellation abbreviation into a full name:
+
+    >>> from skyfield.api import load_constellation_names
+    >>> d = dict(load_constellation_names())
+    >>> d['UMa']
+    'Ursa Major'
+
+    By swapping the order of the two items, you can map the other way,
+    from a full name back to an abbreviation:
+
+    >>> f = dict(reversed(item) for item in load_constellation_names())
+    >>> f['Ursa Major']
+    'UMa'
+
+    """
     data = get_data('skyfield', 'data/constellations.gz')
-    data = zlib.decompress(data, wbits=zlib.MAX_WBITS+32)
-    return [line.decode('ascii').split(None, 1) for line in data.splitlines()]
+    data = zlib.decompress(data, wbits=zlib.MAX_WBITS+32).decode('ascii')
+    return [line.split(' ', 1) for line in data.splitlines()]

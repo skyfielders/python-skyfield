@@ -8,7 +8,7 @@ way for most users to use Skyfield's main features.
 """
 from datetime import datetime
 from .constants import B1950, T0, pi, tau
-from .constellationlib import load_constellation_map
+from .constellationlib import load_constellation_map, load_constellation_names
 from .errors import DeprecationError
 from .iokit import Loader, load_file
 from .planetarylib import PlanetaryConstants
@@ -30,7 +30,7 @@ __all__ = [
     'GREGORIAN_START', 'GREGORIAN_START_ENGLAND',
     'Loader', 'PlanetaryConstants', 'N', 'S', 'Star', 'W',
     'T0', 'Time', 'Timescale', 'Topos', 'Velocity',
-    'datetime', 'load', 'load_constellation_map',
+    'datetime', 'load', 'load_constellation_map', 'load_constellation_names',
     'load_file', 'position_from_radec', 'position_of_radec',
     'utc', 'pi', 'tau', 'wgs84', 'wms',
 ]
