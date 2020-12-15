@@ -19,7 +19,7 @@ and their *Astronomical Almanac*
 to within 0.0005 arcseconds (half a “mas” or milliarcsecond).
 
 * Written in pure Python and installs without any compilation.
-* Supports Python 2.6–2.7 and Python 3.3–3.5.
+* Supports Python 2.6–2.7 and Python 3.3–3.9.
 * Has NumPy as its only binary dependency,
   the fundamental package for scientific computing with Python,
   whose vector operations make Skyfield efficient.
