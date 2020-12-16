@@ -9,7 +9,35 @@ from .descriptorlib import reify
 from .units import Angle, Distance, _ltude
 from .vectorlib import VectorFunction
 
-class GeographicPosition(VectorFunction):
+class ITRSPosition(VectorFunction):
+    """An x,y,z position in the Earth-centered Earth-fixed (ECEF) ITRS frame."""
+
+    center = 399
+
+    def __init__(self, itrs_xyz):
+        self.itrs_xyz = itrs_xyz
+        x, y, z = itrs_xyz.au
+        self._velocity_au_per_d = ANGVEL * DAY_S * array((-y, x, 0.0))
+
+    @property
+    def target(self):
+        # When used as a vector function, this Earth geographic location
+        # computes positions from the Earth's center to itself.  (This
+        # is a property, rather than an attribute, to avoid a circular
+        # reference that delays garbage collection.)
+        return self
+
+    def _at(self, t):
+        """Compute GCRS position and velocity at time `t`."""
+        r = self.itrs_xyz.au
+        v = self._velocity_au_per_d
+
+        RT = _T(itrs.rotation_at(t))
+        r = mxv(RT, r)
+        v = mxv(RT, v)
+        return r, v, r, None
+
+class GeographicPosition(ITRSPosition):
     """The position of a latitude and longitude on Earth.
 
     Each instance of this class holds an x,y,z vector for a geographic
@@ -26,32 +54,18 @@ class GeographicPosition(VectorFunction):
     and methods:
 
     """
-    center = 399
     vector_name = 'Geodetic'
 
-    def __init__(self, model, latitude, longitude, elevation, itrs_position):
+    def __init__(self, model, latitude, longitude, elevation, itrs_xyz):
+        super(GeographicPosition, self).__init__(itrs_xyz)
         self.model = model
         self.latitude = latitude
         self.longitude = longitude
         self.elevation = elevation
-        self.itrs_position = itrs_position
-
-        r = itrs_position.au
-        x, y = r[0], r[1]
-        self._velocity_au_per_d = ANGVEL * DAY_S * array((-y, x, 0.0))
-
         self._R_latlon = mxm(
             rot_y(latitude.radians)[::-1],  # TODO: Why "::-1"?
             rot_z(-longitude.radians),
         )
-
-    @property
-    def target(self):
-        # When used as a vector function, this Earth geographic location
-        # computes positions from the Earth's center to itself.  (This
-        # is a property, rather than an attribute, to avoid a circular
-        # reference that delays garbage collection.)
-        return self
 
     @reify  # not @property, so users have the option of overwriting it
     def target_name(self):
@@ -59,16 +73,6 @@ class GeographicPosition(VectorFunction):
         e = ' elevation {0:.0f} m'.format(m) if m else ''
         return '{0} latitude {1} N longitude {2} E{3}'.format(
             self.model.name, self.latitude, self.longitude, e)
-
-    def _at(self, t):
-        """Compute GCRS position and velocity at time `t`."""
-        r = self.itrs_position.au
-        v = self._velocity_au_per_d
-
-        RT = _T(itrs.rotation_at(t))
-        r = mxv(RT, r)
-        v = mxv(RT, v)
-        return r, v, r, None
 
     def lst_hours_at(self, t):
         """Return this position’s Local Sidereal Time in hours at time ``t``."""
@@ -205,4 +209,4 @@ class Topos(GeographicPosition):
         return rot_y(self.latitude.radians)[::-1]
 
     def itrf_xyz(self):
-        return self.itrs_position
+        return self.itrs_xyz

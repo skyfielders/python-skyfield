@@ -1,15 +1,22 @@
 from numpy import abs, sqrt
 
 from skyfield import constants
-from skyfield.api import load, wgs84, wms
+from skyfield.api import Distance, load, wgs84, wms
 from skyfield.functions import length_of
 from skyfield.positionlib import Apparent
-from skyfield.toposlib import iers2010
+from skyfield.toposlib import ITRSPosition, iers2010
 
 angle = (-15, 15, 35, 45)
 
 def ts():
     yield load.timescale()
+
+def test_raw_itrs_position():
+    d = Distance(au=[1, 2, 3])
+    p = ITRSPosition(d)
+    ts = load.timescale()
+    t = ts.utc(2020, 12, 16, 12, 59)
+    p.at(t)
 
 def test_velocity():
     # It looks like this is a sweet spot for accuracy: presumably a
@@ -41,7 +48,7 @@ def test_lst():
 def test_itrf_vector():
     top = wgs84.latlon(45.0, 0.0, elevation_m=constants.AU_M - constants.ERAD)
 
-    x, y, z = top.itrs_position.au
+    x, y, z = top.itrs_xyz.au
     assert abs(x - sqrt(0.5)) < 2e-7
     assert abs(y - 0.0) < 1e-14
     assert abs(z - sqrt(0.5)) < 2e-7
