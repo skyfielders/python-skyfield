@@ -4,7 +4,7 @@ import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh,
                   cross, exp, log, ndarray, newaxis, ones_like, pi, power,
-                  repeat, sin, sinh, sqrt, sum, tan, tanh, tile, zeros_like)
+                  repeat, sin, sinh, sqrt, sum, tan, tanh, zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
@@ -396,7 +396,8 @@ def find_trunc():
 trunc = find_trunc()
 odd_factorials = array([math.factorial(i) for i in range(3, trunc*2, 2)])
 even_factorials = array([math.factorial(i) for i in range(2, trunc*2, 2)])
-
+exponents = arange(0, trunc-1)
+stumpff_bound = -(log(2) + log(dpmax))**2
 
 def stumpff(x):
     """Calculates Stumpff functions
@@ -404,7 +405,7 @@ def stumpff(x):
     Based on the function toolkit/src/spicelib/stmp03.f from the SPICE toolkit,
     which can be downloaded from naif.jpl.nasa.gov/naif/toolkit_FORTRAN.html
     """
-    if (x < (-(log(2) + log(dpmax))**2)).any():
+    if x.min() < stumpff_bound:
         raise ValueError('Argument below lower bound')
 
     z = sqrt(abs(x))
@@ -417,30 +418,26 @@ def stumpff(x):
     low = x < -1
     c0[low] = cosh(z[low])
     c1[low] = sinh(z[low])/z[low]
-    c2[low] = (1 - c0[low])/x[low]
-    c3[low] = (1 - c1[low])/x[low]
 
     high = x > 1
     c0[high] = cos(z[high])
     c1[high] = sin(z[high])/z[high]
-    c2[high] = (1 - c0[high])/x[high]
-    c3[high] = (1 - c1[high])/x[high]
 
-    mid = ~low * ~high
-    n = sum(mid)
-    exponents = tile(arange(0, trunc-1), [n, 1])
-    odd_denominators = tile(odd_factorials, [n, 1])
-    even_denominators = tile(even_factorials, [n, 1])
-    numerators = repeat(x[mid][newaxis].T, trunc-1, axis=1)
-    c3[mid] = (sum(power(numerators[:, ::2], exponents[:, ::2])/odd_denominators[:, ::2], axis=1)
-        - sum(power(numerators[:, 1::2], exponents[:, 1::2])/odd_denominators[:, 1::2], axis=1))
-    c2[mid] = (sum(power(numerators[:, ::2], exponents[:, ::2])/even_denominators[:, ::2], axis=1)
-        - sum(power(numerators[:, 1::2], exponents[:, 1::2])/even_denominators[:, 1::2], axis=1))
-    c1[mid] = 1 - x[mid]*c3[mid]
-    c0[mid] = 1 - x[mid]*c2[mid]
+    mid = ~(low|high)
+    if sum(mid):
+        numerators = repeat(x[mid][newaxis].T, trunc-1, axis=1)
+        numerators[:, 1::2] *= -1
+        c3[mid] = sum(power(numerators, exponents)/odd_factorials, axis=1)
+        c2[mid] = sum(power(numerators, exponents)/even_factorials, axis=1)
+
+        c1[mid] = 1 - x[mid]*c3[mid]
+        c0[mid] = 1 - x[mid]*c2[mid]
+
+    not_mid = ~mid
+    c2[not_mid] = (1 - c0[not_mid])/x[not_mid]
+    c3[not_mid] = (1 - c1[not_mid])/x[not_mid]
 
     return c0, c1, c2, c3
-
 
 def propagate(position, velocity, t0, t1, gm):
     """Propagates a position and velocity vector with an array of times.
@@ -593,7 +590,7 @@ def propagate(position, velocity, t0, t1, gm):
         position_prop = pc*position + vc*velocity
         velocity_prop = pcdot*position + vcdot*velocity
     else:
-        position_prop = pc*tile(position[newaxis].T, dt.size) + vc*tile(velocity[newaxis].T, dt.size)
-        velocity_prop = pcdot*tile(position[newaxis].T, dt.size) + vcdot*tile(velocity[newaxis].T, dt.size)
+        position_prop = pc*position[newaxis].T + vc*velocity[newaxis].T
+        velocity_prop = pcdot*position[newaxis].T + vcdot*velocity[newaxis].T
 
     return position_prop, velocity_prop
