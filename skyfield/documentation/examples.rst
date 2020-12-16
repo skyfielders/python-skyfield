@@ -98,6 +98,72 @@ and 270° at the Last Quarter.
 
     149.4
 
+When is Venus at its greatest east and west elongations from the Sun?
+=====================================================================
+
+This example illustrates the several practical steps
+that are often required to both find events of interest
+and then to learn more details about them.
+
+* The concept of “elongation from the Sun” is here explained to Skyfield
+  with a function that for any given time ``t``
+  returns the separation between the Sun and Venus in the sky.
+
+* The ``find_maxima()`` routine is then set loose to find the moments
+  over the 3 years 2019–2021 at which the elongation of Venus from the Sun
+  reaches its maximum values.
+  Skyfield starts by computing the elongation every ``step_days`` = 15 days
+  between the search’s start time and end time,
+  then hones in everywhere it sees a local maximum:
+  a value that’s bigger than either of the two values next to it.
+
+* Finally, a ``for`` loop over the results not only displays each maximum
+  but computes and displays an extra fact:
+  whether the elongation is an east or west maximum elongation,
+  which is defined as whether Venus’s apparent ecliptic longitude
+  is ahead of or behind the Sun’s along the great circle of the ecliptic.
+
+This example can serve as a template for many other kinds of custom search:
+
+.. testcode::
+
+    from skyfield.api import load
+    from skyfield.framelib import ecliptic_frame
+    from skyfield.searchlib import find_maxima
+
+    ts = load.timescale()
+    t0 = ts.utc(2019)
+    t1 = ts.utc(2022)
+
+    eph = load('de421.bsp')
+    sun, earth, venus = eph['sun'], eph['earth'], eph['venus']
+
+    def elongation_at(t):
+        e = earth.at(t)
+        s = e.observe(sun).apparent()
+        v = e.observe(venus).apparent()
+        return s.separation_from(v).degrees
+
+    elongation_at.step_days = 15.0
+
+    times, elongations = find_maxima(t0, t1, elongation_at)
+
+    for t, elongation_degrees in zip(times, elongations):
+        e = earth.at(t)
+        _, slon, _ = e.observe(sun).apparent().frame_latlon(ecliptic_frame)
+        _, vlon, _ = e.observe(venus).apparent().frame_latlon(ecliptic_frame)
+        is_east = (vlon.degrees - slon.degrees) % 360.0 < 180.0
+        direction = 'east' if is_east else 'west'
+        print('{}  {:4.1f}° {} elongation'.format(
+            t.utc_strftime(), elongation_degrees, direction))
+
+.. testoutput::
+
+    2019-01-06 04:53:35 UTC  47.0° west elongation
+    2020-03-24 22:13:32 UTC  46.1° east elongation
+    2020-08-13 00:14:12 UTC  45.8° west elongation
+    2021-10-29 20:51:56 UTC  47.0° east elongation
+
 At what angle in the sky is the crescent Moon?
 ==============================================
 
