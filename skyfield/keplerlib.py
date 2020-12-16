@@ -427,12 +427,12 @@ def stumpff(x):
     if sum(mid):
         numerators = repeat(x[mid][newaxis].T, trunc-1, axis=1)
         numerators[:, 1::2] *= -1
-        c3[mid] = sum(power(numerators, exponents)/odd_factorials, axis=1)        
+        c3[mid] = sum(power(numerators, exponents)/odd_factorials, axis=1)
         c2[mid] = sum(power(numerators, exponents)/even_factorials, axis=1)
 
         c1[mid] = 1 - x[mid]*c3[mid]
         c0[mid] = 1 - x[mid]*c2[mid]
-        
+
     not_mid = ~mid
     c2[not_mid] = (1 - c0[not_mid])/x[not_mid]
     c3[not_mid] = (1 - c1[not_mid])/x[not_mid]
