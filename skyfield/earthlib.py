@@ -117,9 +117,7 @@ def compute_limb_angle(position_au, observer_au):
 
 
 def sidereal_time(t):
-    """Compute Greenwich sidereal time at the given ``Time``."""
-
-    # Compute the Earth Rotation Angle.  Time argument is UT1.
+    """Compute Greenwich Mean Sidereal Time (GMST) in hours at time ``t``."""
 
     theta = earth_rotation_angle(t.whole, t.ut1_fraction)
 
@@ -134,8 +132,6 @@ def sidereal_time(t):
              -    0.00000044   ) * t
              +    1.3915817    ) * t
              + 4612.156534     ) * t)
-
-    # Form the Greenwich sidereal time.
 
     return (st / 54000.0 + theta * 24.0) % 24.0
 

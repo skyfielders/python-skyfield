@@ -742,12 +742,12 @@ class Time(object):
 
     @reify
     def gmst(self):
-        """Greenwich Mean Sidereal Time as decimal hours."""
+        """Greenwich Mean Sidereal Time (GMST) in hours."""
         return sidereal_time(self)
 
     @reify
     def gast(self):
-        """Greenwich Apparent Sidereal Time as decimal hours."""
+        """Greenwich Apparent Sidereal Time (GAST) in hours."""
         d_psi, _ = self._nutation_angles_radians
         tt = self.tt
         # TODO: move this into an eqeq function?
