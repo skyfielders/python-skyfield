@@ -7,11 +7,12 @@ from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
                   repeat, sin, sinh, squeeze, sqrt, sum, tan, tanh, zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
-from skyfield.functions import dots, length_of, mxv, crosses
+from skyfield.functions import dots, length_of, mxv
 from skyfield.descriptorlib import reify
 from skyfield.elementslib import OsculatingElements, normpi
 from skyfield.units import Distance, Velocity
 from skyfield.vectorlib import VectorFunction
+from skyfield.sgp4lib import _cross
 
 _CONVERT_GM = DAY_S * DAY_S / AU_KM / AU_KM / AU_KM
 
@@ -486,13 +487,13 @@ def propagate(position, velocity, t0, t1, gm):
     r0 = length_of(position)
     rv = dots(position, velocity)
 
-    hvec = crosses(position, velocity)
+    hvec = _cross(position, velocity)
     h2 = dots(hvec, hvec)
 
     if (h2 == 0).any():
         raise ValueError('Motion is not conical')
 
-    eqvec = crosses(velocity, hvec)/gm + -position/r0
+    eqvec = _cross(velocity, hvec)/gm + -position/r0
     e = length_of(eqvec)
     q = h2 / (gm * (1+e))
 
