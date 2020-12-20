@@ -374,9 +374,21 @@ def ele_to_vec(p, e, i, Om, w, v, mu):
 
 dpmax = sys.float_info.max
 
+
 def bracket(num, end1, end2):
-    num[num<end1] = end1
-    num[num>end2] = end2
+    low = num<end1[:, newaxis]
+    high = num>end2[:, newaxis]
+
+    num[low] = repeat(end1, sum(low, axis=1))
+    num[high] = repeat(end2, sum(high, axis=1))
+    return num
+
+
+def bracket_1d(num, end1, end2):
+    too_low = num < end1
+    too_high = num > end2
+    num[too_low] = end1[too_low]
+    num[too_high] = end2[too_high]
     return num
 
 
@@ -508,14 +520,18 @@ def propagate(position, velocity, t0, t1, gm):
         bound = exp(logbound)
 
     def kepler(x):
-        c0, c1, c2, c3 = stumpff(f*x*x)
-        return x*(br0*c1 + x*(b2rv*c2 + x*(bq*c3)))
+        _, c1, c2, c3 = stumpff(x*x*f[:, newaxis])
+        return x*(c1*br0[:, newaxis] + x*(c2*b2rv[:, newaxis] + x*(c3*bq[:, newaxis])))
+
+    def kepler_1d(x, orb_inds):
+        _, c1, c2, c3 = stumpff(x*x*repeat(f, orb_inds))
+        return x*(c1*repeat(br0, orb_inds) + x*(c2*repeat(b2rv, orb_inds) + x*(c3*repeat(bq, orb_inds))))
 
     t1 = atleast_1d(t1)
     t0 = atleast_1d(t0)
     dt = t1 - t0[:, newaxis]
 
-    x = bracket(dt/bq, -bound, bound)
+    x = bracket(dt/bq[:, newaxis], -bound, bound)
     kfun = kepler(x)
 
     past = dt < 0
@@ -532,27 +548,29 @@ def propagate(position, velocity, t0, t1, gm):
         upper[past] = lower[past]
         lower[past] *= 2
         oldx[past] = x[past]
-        x[past] = bracket(lower[past], -bound, bound)
+        orb_ind = sum(past, axis=1)
+        x[past] = bracket_1d(lower[past], repeat(-bound, orb_ind), repeat(bound, orb_ind))
         if (x[past] == oldx[past]).any():
             raise ValueError('The input delta time (dt) has a value of {0}.'
                              'This is beyond the range of DT for which we '
                              'can reliably propagate states. The limits for '
                              'this GM and initial state are from {1}'
                              'to {2}.'.format(dt, kepler(-bound), kepler(bound)))
-        kfun[past] = kepler(x[past])
+        kfun[past] = kepler_1d(x[past], orb_ind)
 
     while (kfun[future] < dt[future]).any():
         lower[future] = upper[future]
         upper[future] *= 2
         oldx[future] = x[future]
-        x[future] = bracket(upper[future], -bound, bound)
+        orb_ind = sum(future, axis=1)
+        x[future] = bracket_1d(upper[future], repeat(-bound, orb_ind), repeat(bound, orb_ind))
         if (x[future] == oldx[future]).any():
             raise ValueError('The input delta time (dt) has a value of {0}.'
                              'This is beyond the range of DT for which we '
                              'can reliably propagate states. The limits for '
                              'this GM and initial state are from {1} '
                              'to {2}.'.format(dt, kepler(-bound), kepler(bound)))
-        kfun[future] = kepler(x[future])
+        kfun[future] = kepler_1d(x[future], orb_ind)
 
     x = amin(array([upper, amax(array([lower, (lower+upper)/2]), axis=0)]), axis=0)
 
@@ -561,7 +579,8 @@ def propagate(position, velocity, t0, t1, gm):
     not_done = (lower < x) * (x < upper)
 
     while not_done.any():
-        kfun[not_done] = kepler(x[not_done])
+        orb_inds = sum(not_done, axis=1)
+        kfun[not_done] = kepler_1d(x[not_done], orb_inds)
 
         high = (kfun > dt) * not_done
         low = (kfun < dt) * not_done
@@ -580,15 +599,15 @@ def propagate(position, velocity, t0, t1, gm):
         lcount += 1
         not_done = (lower < x) * (x < upper) * (lcount < mostc)
 
-    c0, c1, c2, c3 = stumpff(f*x*x)
-    br = br0*c0 + x*(b2rv*c1 + x*(bq*c2))
+    c0, c1, c2, c3 = stumpff(x*x*f[:, newaxis])
+    br = c0*br0[:, newaxis] + x*(c1*b2rv[:, newaxis] + x*(c2*bq[:, newaxis]))
 
-    pc = 1 - qovr0 * x**2 * c2
-    vc = dt - bq * x**3 * c3
-    pcdot = -qovr0 / br * x * c1
-    vcdot = 1 - bq / br * x**2 * c2
+    pc = 1 - x**2 * c2 * qovr0[:, newaxis]
+    vc = dt - x**3 * c3 * bq[:, newaxis]
+    pcdot = -qovr0[:, newaxis] / br * x * c1
+    vcdot = 1 - bq[:, newaxis] / br * x**2 * c2
 
-    position_prop = pc*position[:, newaxis] + vc*velocity[:, newaxis]
-    velocity_prop = pcdot*position[:, newaxis] + vcdot*velocity[:, newaxis]
+    position_prop = pc[newaxis, :, :]*position[:, :, newaxis] + vc[newaxis, :, :]*velocity[:, :, newaxis]
+    velocity_prop = pcdot[newaxis, :, :]*position[:, :, newaxis] + vcdot[newaxis, :, :]*velocity[:, :, newaxis]
 
     return squeeze(position_prop), squeeze(velocity_prop)
