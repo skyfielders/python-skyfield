@@ -2,9 +2,10 @@ from __future__ import division
 
 import sys
 import math
-from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d, atleast_2d, cos, cosh,
-                  exp, log, ndarray, newaxis, ones_like, pi, power,
-                  repeat, sin, sinh, squeeze, sqrt, sum, tan, tanh, zeros_like)
+from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
+                  atleast_2d, cos, cosh, exp, log, ndarray, newaxis,
+                  ones_like, pi, power, repeat, sin, sinh, squeeze, sqrt, sum,
+                  tan, tanh, zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv, crosses
