@@ -610,8 +610,8 @@ def propagate(position, velocity, t0, t1, gm):
     c0, c1, c2, c3 = stumpff(x*x*f)
     br = c0*br0 + x*(c1*b2rv + x*(c2*bq))
 
-    pc = 1 - x**2 * c2 * qovr0
-    vc = dt - x**3 * c3 * bq
+    pc = 1 - qovr0 * x**2 * c2
+    vc = dt - bq * x**3 * c3
     pcdot = -qovr0 / br * x * c1
     vcdot = 1 - bq / br * x**2 * c2
 
