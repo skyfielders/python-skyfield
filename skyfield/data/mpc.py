@@ -228,12 +228,11 @@ def comet_orbit(row, ts, gm_km3_s2):
     return comet
 
 def _comet_orbits(rows, ts, gm_km3_s2):
-    p = np.empty(len(rows))
     e = rows.eccentricity.values
+    p = 1 - e**2
     parabolic = (e == 1.0)
     p[parabolic] = rows.perihelion_distance_au.values[parabolic] * 2.0
-    a = rows.perihelion_distance_au.values[~parabolic]/ (1.0 - e[~parabolic])
-    p[~parabolic] = a * (1.0 - (e[~parabolic])**2)
+    p[~parabolic] *= rows.perihelion_distance_au.values[~parabolic]/ (1.0 - e[~parabolic])
 
     t_perihelion = ts.tt(rows.perihelion_year.values, rows.perihelion_month.values,
                          rows.perihelion_day.values)
