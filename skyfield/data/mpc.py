@@ -226,7 +226,7 @@ def comet_orbit(row, ts, gm_km3_s2):
     )
     comet._rotation = inertial_frames['ECLIPJ2000'].T
     return comet
-    
+
 def comet_orbits(rows, ts, gm_km3_s2):
     p = np.empty(len(rows))
     e = rows.eccentricity.values
