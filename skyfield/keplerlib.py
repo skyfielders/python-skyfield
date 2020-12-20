@@ -510,14 +510,16 @@ def propagate(position, velocity, t0, t1, gm):
                abs(bq),
                abs(qovr0/bq)]), axis=0)
 
-    if (f < 0).any():
-        fixed = log(dpmax/2) - log(maxc)
-        rootf = sqrt(-f)
-        logf = log(-f)
-        bound = amin(array([fixed/rootf, (fixed + 1.5*logf)/rootf]), axis=0)
-    else:
-        logbound = (log(1.5) + log(dpmax) - log(maxc)) / 3
-        bound = exp(logbound)
+    hyperbolic = (f<0)
+    bound = zeros_like(f)
+
+    fixed = log(dpmax/2) - log(maxc[hyperbolic])
+    rootf = sqrt(-f[hyperbolic])
+    logf = log(-f[hyperbolic])
+    bound[hyperbolic] = amin(array([fixed/rootf, (fixed + 1.5*logf)/rootf]), axis=0)
+
+    logbound = (log(1.5) + log(dpmax) - log(maxc[~hyperbolic])) / 3
+    bound[~hyperbolic] = exp(logbound)
 
     f = f[:, newaxis]
     bq = bq[:, newaxis]
@@ -526,14 +528,14 @@ def propagate(position, velocity, t0, t1, gm):
     qovr0 = qovr0[:, newaxis]
     bound = bound[:, newaxis]
 
-
     def kepler(x):
-        _, c1, c2, c3 = stumpff(x*x*f)
-        return x*(c1*br0 + x*(c2*b2rv + x*(c3*bq)))
+        _, c1, c2, c3 = stumpff(f*x*x)
+        return x*(br0*c1 + x*(b2rv*c2 + x*bq*c3))
 
     def kepler_1d(x, orb_inds):
         _, c1, c2, c3 = stumpff(x*x*repeat(f, orb_inds))
         return x*(c1*repeat(br0, orb_inds) + x*(c2*repeat(b2rv, orb_inds) + x*(c3*repeat(bq, orb_inds))))
+
 
     t1 = atleast_1d(t1)
     t0 = atleast_1d(t0)
