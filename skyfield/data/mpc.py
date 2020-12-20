@@ -5,7 +5,6 @@ import io
 import re
 
 import pandas as pd
-import numpy as np
 
 from ..data.spice import inertial_frames
 from ..keplerlib import _KeplerOrbit
