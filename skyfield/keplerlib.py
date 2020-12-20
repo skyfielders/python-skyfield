@@ -376,8 +376,8 @@ dpmax = sys.float_info.max
 
 
 def bracket(num, end1, end2):
-    low = num<end1[:, newaxis]
-    high = num>end2[:, newaxis]
+    low = num<end1
+    high = num>end2
 
     num[low] = repeat(end1, sum(low, axis=1))
     num[high] = repeat(end2, sum(high, axis=1))
@@ -531,7 +531,7 @@ def propagate(position, velocity, t0, t1, gm):
     t0 = atleast_1d(t0)
     dt = t1 - t0[:, newaxis]
 
-    x = bracket(dt/bq[:, newaxis], -bound, bound)
+    x = bracket(dt/bq[:, newaxis], -bound[:, newaxis], bound[:, newaxis])
     kfun = kepler(x)
 
     past = dt < 0
