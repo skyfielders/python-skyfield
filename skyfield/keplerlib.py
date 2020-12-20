@@ -2,12 +2,12 @@ from __future__ import division
 
 import sys
 import math
-from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh,
-                  cross, exp, log, ndarray, newaxis, ones_like, pi, power,
-                  repeat, sin, sinh, sqrt, sum, tan, tanh, zeros_like)
+from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d, atleast_2d, cos, cosh,
+                  exp, log, ndarray, newaxis, ones_like, pi, power,
+                  repeat, sin, sinh, squeeze, sqrt, sum, tan, tanh, zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
-from skyfield.functions import dots, length_of, mxv
+from skyfield.functions import dots, length_of, mxv, crosses
 from skyfield.descriptorlib import reify
 from skyfield.elementslib import OsculatingElements, normpi
 from skyfield.units import Distance, Velocity
@@ -458,23 +458,29 @@ def propagate(position, velocity, t0, t1, gm):
     gm : float
         Gravitational parameter in units that match the other arguments
     """
-    if gm <= 0:
+    gm = atleast_1d(gm)
+    if (gm <= 0).any():
         raise ValueError("'gm' should be positive")
-    if length_of(velocity) == 0:
+    if (length_of(velocity)).any() == 0:
         raise ValueError('Velocity vector has zero magnitude')
-    if length_of(position) == 0:
+    if (length_of(position)).any() == 0:
         raise ValueError('Position vector has zero magnitude')
+
+    if position.ndim == 1:
+        position = position[:, newaxis]
+    if velocity.ndim == 1:
+        velocity = velocity[:, newaxis]
 
     r0 = length_of(position)
     rv = dots(position, velocity)
 
-    hvec = cross(position, velocity)
+    hvec = crosses(position, velocity)
     h2 = dots(hvec, hvec)
 
-    if h2 == 0:
+    if (h2 == 0).any():
         raise ValueError('Motion is not conical')
 
-    eqvec = cross(velocity, hvec)/gm + -position/r0
+    eqvec = crosses(velocity, hvec)/gm + -position/r0
     e = length_of(eqvec)
     q = h2 / (gm * (1+e))
 
@@ -487,16 +493,16 @@ def propagate(position, velocity, t0, t1, gm):
     qovr0 = q / r0
 
 
-    maxc = max(abs(br0),
+    maxc = amax(array([abs(br0),
                abs(b2rv),
                abs(bq),
-               abs(qovr0/(bq)))
+               abs(qovr0/bq)]), axis=0)
 
-    if f < 0:
+    if (f < 0).any():
         fixed = log(dpmax/2) - log(maxc)
         rootf = sqrt(-f)
         logf = log(-f)
-        bound = min(fixed/rootf, (fixed + 1.5*logf)/rootf)
+        bound = amin(array([fixed/rootf, (fixed + 1.5*logf)/rootf]), axis=0)
     else:
         logbound = (log(1.5) + log(dpmax) - log(maxc)) / 3
         bound = exp(logbound)
@@ -505,13 +511,9 @@ def propagate(position, velocity, t0, t1, gm):
         c0, c1, c2, c3 = stumpff(f*x*x)
         return x*(br0*c1 + x*(b2rv*c2 + x*(bq*c3)))
 
-    dt = t1 - t0
-
-    if not isinstance(dt, ndarray):
-        dt = array([dt])
-        return_1d_array = True
-    else:
-        return_1d_array = False
+    t1 = atleast_1d(t1)
+    t0 = atleast_1d(t0)
+    dt = t1 - t0[:, newaxis]
 
     x = bracket(dt/bq, -bound, bound)
     kfun = kepler(x)
@@ -586,11 +588,7 @@ def propagate(position, velocity, t0, t1, gm):
     pcdot = -qovr0 / br * x * c1
     vcdot = 1 - bq / br * x**2 * c2
 
-    if return_1d_array:
-        position_prop = pc*position + vc*velocity
-        velocity_prop = pcdot*position + vcdot*velocity
-    else:
-        position_prop = pc*position[newaxis].T + vc*velocity[newaxis].T
-        velocity_prop = pcdot*position[newaxis].T + vcdot*velocity[newaxis].T
+    position_prop = pc*position[:, newaxis] + vc*velocity[:, newaxis]
+    velocity_prop = pcdot*position[:, newaxis] + vcdot*velocity[:, newaxis]
 
-    return position_prop, velocity_prop
+    return squeeze(position_prop), squeeze(velocity_prop)
