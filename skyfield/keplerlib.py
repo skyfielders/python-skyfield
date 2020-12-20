@@ -438,7 +438,7 @@ def stumpff(x):
 
     mid = ~(low|high)
     if sum(mid):
-        numerators = repeat(x[mid][newaxis].T, trunc-1, axis=1)
+        numerators = repeat(x[mid][:, newaxis], trunc-1, axis=1)
         numerators[:, 1::2] *= -1
         c3[mid] = sum(power(numerators, exponents)/odd_factorials, axis=1)
         c2[mid] = sum(power(numerators, exponents)/even_factorials, axis=1)
