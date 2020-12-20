@@ -519,9 +519,17 @@ def propagate(position, velocity, t0, t1, gm):
         logbound = (log(1.5) + log(dpmax) - log(maxc)) / 3
         bound = exp(logbound)
 
+    f = f[:, newaxis]
+    bq = bq[:, newaxis]
+    b2rv = b2rv[:, newaxis]
+    br0 = br0[:, newaxis]
+    qovr0 = qovr0[:, newaxis]
+    bound = bound[:, newaxis]
+
+
     def kepler(x):
-        _, c1, c2, c3 = stumpff(x*x*f[:, newaxis])
-        return x*(c1*br0[:, newaxis] + x*(c2*b2rv[:, newaxis] + x*(c3*bq[:, newaxis])))
+        _, c1, c2, c3 = stumpff(x*x*f)
+        return x*(c1*br0 + x*(c2*b2rv + x*(c3*bq)))
 
     def kepler_1d(x, orb_inds):
         _, c1, c2, c3 = stumpff(x*x*repeat(f, orb_inds))
@@ -531,7 +539,7 @@ def propagate(position, velocity, t0, t1, gm):
     t0 = atleast_1d(t0)
     dt = t1 - t0[:, newaxis]
 
-    x = bracket(dt/bq[:, newaxis], -bound[:, newaxis], bound[:, newaxis])
+    x = bracket(dt/bq, -bound, bound)
     kfun = kepler(x)
 
     past = dt < 0
@@ -599,13 +607,13 @@ def propagate(position, velocity, t0, t1, gm):
         lcount += 1
         not_done = (lower < x) * (x < upper) * (lcount < mostc)
 
-    c0, c1, c2, c3 = stumpff(x*x*f[:, newaxis])
-    br = c0*br0[:, newaxis] + x*(c1*b2rv[:, newaxis] + x*(c2*bq[:, newaxis]))
+    c0, c1, c2, c3 = stumpff(x*x*f)
+    br = c0*br0 + x*(c1*b2rv + x*(c2*bq))
 
-    pc = 1 - x**2 * c2 * qovr0[:, newaxis]
-    vc = dt - x**3 * c3 * bq[:, newaxis]
-    pcdot = -qovr0[:, newaxis] / br * x * c1
-    vcdot = 1 - bq[:, newaxis] / br * x**2 * c2
+    pc = 1 - x**2 * c2 * qovr0
+    vc = dt - x**3 * c3 * bq
+    pcdot = -qovr0 / br * x * c1
+    vcdot = 1 - bq / br * x**2 * c2
 
     position_prop = pc[newaxis, :, :]*position[:, :, newaxis] + vc[newaxis, :, :]*velocity[:, :, newaxis]
     velocity_prop = pcdot[newaxis, :, :]*position[:, :, newaxis] + vcdot[newaxis, :, :]*velocity[:, :, newaxis]
