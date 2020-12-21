@@ -48,12 +48,12 @@ You can protect your project from any abrupt API changes
 by pinning a specific version of Skyfield
 in your ``requirements.txt`` or ``setup.py`` or install instructions::
 
-    skyfield==1.26
+    skyfield==1.34
 
 By preventing Skyfield from getting accidentally upgraded
 until you are ready to advance the version number yourself,
-you can avoid being blindsided by improvements that take place
-between now and the eventual 1.0 version.
+you can avoid even slight changes in behavior and output coordinates
+that might result from an upgrade.
 If you find any problems or would like to suggest an improvement,
 simply create an issue on the project’s GitHub page:
 
