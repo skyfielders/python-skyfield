@@ -4,8 +4,8 @@ import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
                   clip, copy, copyto, cos, cosh, exp, full_like, log, ndarray,
-                  newaxis, ones_like, pi, power, repeat, sin, sinh, squeeze,
-                  sqrt, sum, tan, tanh, zeros_like)
+                  newaxis, pi, power, repeat, sin, sinh, squeeze, sqrt, sum,
+                  tan, tanh, zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
@@ -599,7 +599,7 @@ def propagate(position, velocity, t0, t1, gm):
 
         copyto(x, upper, where=(not_done & (lower>upper)))
         copyto(x, (upper+lower)/2, where=(not_done & (lower<=upper)))
-        
+
         lcount += 1
         not_done = (lower < x) & (x < upper) & (lcount < mostc)
 
