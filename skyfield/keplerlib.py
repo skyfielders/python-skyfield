@@ -522,6 +522,7 @@ def propagate(position, velocity, t0, t1, gm):
     logbound = (log(1.5) + log(dpmax) - log(maxc[~hyperbolic])) / 3
     bound[~hyperbolic] = exp(logbound)
 
+    # each of these arrays has 1 entry per orbit, so its shape is (#orbits, 1)
     f = f[:, newaxis]
     bq = bq[:, newaxis]
     b2rv = b2rv[:, newaxis]
@@ -540,6 +541,10 @@ def propagate(position, velocity, t0, t1, gm):
 
     t1 = atleast_1d(t1)
     t0 = atleast_1d(t0)
+    if len(t0) == 1:
+        t0 = repeat(t0, position.shape[1])
+
+    # shape of 2 dimensional arrays from here on out should be (#orbits, len(t1))
     dt = t1 - t0[:, newaxis]
 
     x = bracket(dt/bq, -bound, bound)
