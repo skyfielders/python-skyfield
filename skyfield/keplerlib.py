@@ -316,7 +316,7 @@ def true_anomaly_parabolic(p, gm, M):
     delta_t = sqrt(2 * p**3 / gm) * M # from http://www.bogan.ca/orbits/kepler/orbteqtn.html
     periapsis_distance = p / 2
     A = 3 / 2 * sqrt(gm / (2 * periapsis_distance**3)) * delta_t
-    B = (A + (A**2 + 1))**(1/3)
+    B = (A + (A*A + 1))**(1/3)
     return 2 * arctan(B - 1/B)
 
 
@@ -501,7 +501,7 @@ def propagate(position, velocity, t0, t1, gm):
     b = sqrt(q/gm)
 
     br0 = b * r0
-    b2rv = b**2 * rv
+    b2rv = b * b * rv
     bq = b * q
     qovr0 = q / r0
 
@@ -613,10 +613,10 @@ def propagate(position, velocity, t0, t1, gm):
     c0, c1, c2, c3 = stumpff(f*x*x)
     br = br0*c0 + x*(b2rv*c1 + x*(bq*c2))
 
-    pc = 1 - qovr0 * x**2 * c2
+    pc = 1 - qovr0 * x * x * c2
     vc = dt - bq * x**3 * c3
     pcdot = -qovr0 / br * x * c1
-    vcdot = 1 - bq / br * x**2 * c2
+    vcdot = 1 - bq / br * x * x * c2
 
     position_prop = pc[newaxis, :, :]*position[:, :, newaxis] + vc[newaxis, :, :]*velocity[:, :, newaxis]
     velocity_prop = pcdot[newaxis, :, :]*position[:, :, newaxis] + vcdot[newaxis, :, :]*velocity[:, :, newaxis]

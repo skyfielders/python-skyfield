@@ -228,7 +228,7 @@ def comet_orbit(row, ts, gm_km3_s2):
 
 def _comet_orbits(rows, ts, gm_km3_s2):
     e = rows.eccentricity.values
-    p = 1 - e**2
+    p = 1 - e*e
     parabolic = (e == 1.0)
     p[parabolic] = rows.perihelion_distance_au.values[parabolic] * 2.0
     p[~parabolic] *= rows.perihelion_distance_au.values[~parabolic]/ (1.0 - e[~parabolic])
