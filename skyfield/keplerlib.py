@@ -602,7 +602,7 @@ def propagate(position, velocity, t0, t1, gm):
         not_done = (lower < x) & (x < upper) & (lcount < mostc)
 
     c0, c1, c2, c3 = stumpff(f*x*x)
-    br = br0*c0 + x*(b2rv*c1 + x*(bq*c2))
+    br = br0*c0 + x*(b2rv*c1 + x*bq*c2)
 
     pc = 1 - qovr0 * x * x * c2
     vc = dt - bq * x**3 * c3
