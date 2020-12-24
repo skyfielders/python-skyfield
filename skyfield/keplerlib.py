@@ -3,7 +3,7 @@ from __future__ import division
 import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
-                  clip, copyto, cos, cosh, exp, full_like, log, ndarray,
+                  clip, copy, copyto, cos, cosh, exp, full_like, log, ndarray,
                   newaxis, ones_like, pi, power, repeat, sin, sinh, squeeze,
                   sqrt, sum, tan, tanh, zeros_like)
 
@@ -575,7 +575,8 @@ def propagate(position, velocity, t0, t1, gm):
                              'to {2}.'.format(dt, kepler(-bound), kepler(bound)))
         kfun[future] = kepler_1d(x[future], orb_ind)
 
-    x = amin(array([upper, amax(array([lower, (lower+upper)/2]), axis=0)]), axis=0)
+    x = copy(upper)
+    copyto(x, (upper+lower)/2, where=(lower<=upper))
 
     lcount = zeros_like(dt)
     mostc = full_like(dt, 1000)
@@ -596,8 +597,9 @@ def propagate(position, velocity, t0, t1, gm):
         mostc[condition] = 64
         lcount[condition] = 0
 
-        # vectorized version of min(upper, max(lower, (upper + lower)/2))
-        x[not_done] = amin(array([upper[not_done], amax(array([lower[not_done], (lower[not_done]+upper[not_done])/2]), axis=0)]), axis=0)
+        copyto(x, upper, where=(not_done & (lower>upper)))
+        copyto(x, (upper+lower)/2, where=(not_done & (lower<=upper)))
+        
         lcount += 1
         not_done = (lower < x) & (x < upper) & (lcount < mostc)
 
