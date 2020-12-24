@@ -3,9 +3,9 @@ from __future__ import division
 import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
-                  clip, cos, cosh, exp, log, ndarray, newaxis, ones_like, pi,
-                  power, repeat, sin, sinh, squeeze, sqrt, sum, tan, tanh,
-                  zeros_like)
+                  clip, copyto, cos, cosh, exp, full_like, log, ndarray,
+                  newaxis, ones_like, pi, power, repeat, sin, sinh, squeeze,
+                  sqrt, sum, tan, tanh, zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
@@ -550,13 +550,13 @@ def propagate(position, velocity, t0, t1, gm):
     lower = zeros_like(dt, dtype='float64')
     oldx = zeros_like(dt, dtype='float64')
 
-    lower[past] = x[past]
-    upper[future] = x[future]
+    copyto(lower, x, where=past)
+    copyto(upper, x, where=future)
 
     while (kfun[past] > dt[past]).any():
-        upper[past] = lower[past]
+        copyto(upper, lower, where=past)
         lower[past] *= 2
-        oldx[past] = x[past]
+        copyto(oldx, x, where=past)
         orb_ind = sum(past, axis=1)
         x[past] = clip(lower[past], repeat(-bound, orb_ind), repeat(bound, orb_ind))
         if (x[past] == oldx[past]).any():
@@ -568,9 +568,9 @@ def propagate(position, velocity, t0, t1, gm):
         kfun[past] = kepler_1d(x[past], orb_ind)
 
     while (kfun[future] < dt[future]).any():
-        lower[future] = upper[future]
+        copyto(lower, upper, where=future)
         upper[future] *= 2
-        oldx[future] = x[future]
+        copyto(oldx, x, where=future)
         orb_ind = sum(future, axis=1)
         x[future] = clip(upper[future], repeat(-bound, orb_ind), repeat(bound, orb_ind))
         if (x[future] == oldx[future]).any():
@@ -584,7 +584,7 @@ def propagate(position, velocity, t0, t1, gm):
     x = amin(array([upper, amax(array([lower, (lower+upper)/2]), axis=0)]), axis=0)
 
     lcount = zeros_like(dt)
-    mostc = ones_like(dt)*1000
+    mostc = full_like(dt, 1000)
     not_done = (lower < x) & (x < upper)
 
     while not_done.any():
@@ -595,9 +595,8 @@ def propagate(position, velocity, t0, t1, gm):
         low = (kfun < dt) & not_done
         same = (~high & ~low) & not_done
 
-        upper[high] = x[high]
-        lower[low] = x[low]
-        upper[same] = lower[same] = x[same]
+        copyto(upper, x, where=(high|same))
+        copyto(lower, x, where=(low|same))
 
         condition = not_done & (mostc > 64) & (upper != 0) & (lower != 0)
         mostc[condition] = 64
