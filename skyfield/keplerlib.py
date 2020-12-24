@@ -377,15 +377,6 @@ def ele_to_vec(p, e, i, Om, w, v, mu):
 dpmax = sys.float_info.max
 
 
-def bracket(num, end1, end2):
-    low = num<end1
-    high = num>end2
-
-    num[low] = repeat(end1, sum(low, axis=1))
-    num[high] = repeat(end2, sum(high, axis=1))
-    return num
-
-
 def find_trunc():
     denom = 2
     factr = 2
@@ -540,7 +531,10 @@ def propagate(position, velocity, t0, t1, gm):
     # shape of 2 dimensional arrays from here on out should be (#orbits, len(t1))
     dt = t1 - t0[:, newaxis]
 
-    x = bracket(dt/bq, -bound, bound)
+    x = dt/bq
+    copyto(x, -bound, where=(x<-bound))
+    copyto(x, bound, where=(x>bound))
+
     kfun = kepler(x)
 
     past = dt < 0
