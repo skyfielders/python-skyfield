@@ -587,28 +587,28 @@ def propagate(position, velocity, t0, t1, gm):
 
     lcount = zeros_like(dt)
     mostc = ones_like(dt)*1000
-    not_done = (lower < x) * (x < upper)
+    not_done = (lower < x) & (x < upper)
 
     while not_done.any():
         orb_inds = sum(not_done, axis=1)
         kfun[not_done] = kepler_1d(x[not_done], orb_inds)
 
-        high = (kfun > dt) * not_done
-        low = (kfun < dt) * not_done
-        same = (~high * ~low) * not_done
+        high = (kfun > dt) & not_done
+        low = (kfun < dt) & not_done
+        same = (~high & ~low) & not_done
 
         upper[high] = x[high]
         lower[low] = x[low]
         upper[same] = lower[same] = x[same]
 
-        condition = not_done * (mostc > 64) * (upper != 0) * (lower != 0)
+        condition = not_done & (mostc > 64) & (upper != 0) & (lower != 0)
         mostc[condition] = 64
         lcount[condition] = 0
 
         # vectorized version of min(upper, max(lower, (upper + lower)/2))
         x[not_done] = amin(array([upper[not_done], amax(array([lower[not_done], (lower[not_done]+upper[not_done])/2]), axis=0)]), axis=0)
         lcount += 1
-        not_done = (lower < x) * (x < upper) * (lcount < mostc)
+        not_done = (lower < x) & (x < upper) & (lcount < mostc)
 
     c0, c1, c2, c3 = stumpff(f*x*x)
     br = br0*c0 + x*(b2rv*c1 + x*(bq*c2))
