@@ -3,8 +3,9 @@ from __future__ import division
 import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
-                  cos, cosh, exp, log, ndarray, newaxis, ones_like, pi, power,
-                  repeat, sin, sinh, squeeze, sqrt, sum, tan, tanh, zeros_like)
+                  clip, cos, cosh, exp, log, ndarray, newaxis, ones_like, pi,
+                  power, repeat, sin, sinh, squeeze, sqrt, sum, tan, tanh,
+                  zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
@@ -385,14 +386,6 @@ def bracket(num, end1, end2):
     return num
 
 
-def bracket_1d(num, end1, end2):
-    too_low = num < end1
-    too_high = num > end2
-    num[too_low] = end1[too_low]
-    num[too_high] = end2[too_high]
-    return num
-
-
 def find_trunc():
     denom = 2
     factr = 2
@@ -565,7 +558,7 @@ def propagate(position, velocity, t0, t1, gm):
         lower[past] *= 2
         oldx[past] = x[past]
         orb_ind = sum(past, axis=1)
-        x[past] = bracket_1d(lower[past], repeat(-bound, orb_ind), repeat(bound, orb_ind))
+        x[past] = clip(lower[past], repeat(-bound, orb_ind), repeat(bound, orb_ind))
         if (x[past] == oldx[past]).any():
             raise ValueError('The input delta time (dt) has a value of {0}.'
                              'This is beyond the range of DT for which we '
@@ -579,7 +572,7 @@ def propagate(position, velocity, t0, t1, gm):
         upper[future] *= 2
         oldx[future] = x[future]
         orb_ind = sum(future, axis=1)
-        x[future] = bracket_1d(upper[future], repeat(-bound, orb_ind), repeat(bound, orb_ind))
+        x[future] = clip(upper[future], repeat(-bound, orb_ind), repeat(bound, orb_ind))
         if (x[future] == oldx[future]).any():
             raise ValueError('The input delta time (dt) has a value of {0}.'
                              'This is beyond the range of DT for which we '
