@@ -897,7 +897,7 @@ The two quantities are:
   is a big jump of 1.0 seconds
   every time a leap second passes.
 
-* ∆T — The difference between UTC and TT.
+* ∆T — The difference between TT and UT1.
   This is a much more straightforward value than DUT1,
   without all the ugly discontinuities caused by leap seconds.
   Because TT is a uniform timescale,
