@@ -226,6 +226,30 @@ def comet_orbit(row, ts, gm_km3_s2):
     comet._rotation = inertial_frames['ECLIPJ2000'].T
     return comet
 
+def _comet_orbits(rows, ts, gm_km3_s2):
+    e = rows.eccentricity.values
+    parabolic = (e == 1.0)
+    p = (1 - e*e) / (1.0 - e + parabolic)
+    p[parabolic] += 2.0
+    p *= rows.perihelion_distance_au.values
+
+    t_perihelion = ts.tt(rows.perihelion_year.values, rows.perihelion_month.values,
+                         rows.perihelion_day.values)
+
+    comet = _KeplerOrbit._from_periapsis(
+        p,
+        e,
+        rows.inclination_degrees.values,
+        rows.longitude_of_ascending_node_degrees.values,
+        rows.argument_of_perihelion_degrees.values,
+        t_perihelion,
+        gm_km3_s2,
+        10,
+        rows['designation'],
+    )
+    comet._rotation = inertial_frames['ECLIPJ2000'].T
+    return comet
+
 def unpack(designation_packed):
     def n(c):
         return ord(c) - (48 if c.isdigit() else 55)

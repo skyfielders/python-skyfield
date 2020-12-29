@@ -2,9 +2,10 @@ from __future__ import division
 
 import sys
 import math
-from numpy import(abs, amax, amin, arange, arccos, arctan, array, cos, cosh,
-                  cross, exp, log, ndarray, newaxis, ones_like, pi, power,
-                  repeat, sin, sinh, sqrt, sum, tan, tanh, zeros_like)
+from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
+                  clip, copy, copyto, cos, cosh, exp, full_like, log, ndarray,
+                  newaxis, pi, power, repeat, sin, sinh, squeeze, sqrt, sum,
+                  tan, tanh, zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
@@ -12,6 +13,7 @@ from skyfield.descriptorlib import reify
 from skyfield.elementslib import OsculatingElements, normpi
 from skyfield.units import Distance, Velocity
 from skyfield.vectorlib import VectorFunction
+from skyfield.sgp4lib import _cross
 
 _CONVERT_GM = DAY_S * DAY_S / AU_KM / AU_KM / AU_KM
 
@@ -315,7 +317,7 @@ def true_anomaly_parabolic(p, gm, M):
     delta_t = sqrt(2 * p**3 / gm) * M # from http://www.bogan.ca/orbits/kepler/orbteqtn.html
     periapsis_distance = p / 2
     A = 3 / 2 * sqrt(gm / (2 * periapsis_distance**3)) * delta_t
-    B = (A + (A**2 + 1))**(1/3)
+    B = (A + (A*A + 1))**(1/3)
     return 2 * arctan(B - 1/B)
 
 
@@ -374,11 +376,6 @@ def ele_to_vec(p, e, i, Om, w, v, mu):
 
 dpmax = sys.float_info.max
 
-def bracket(num, end1, end2):
-    num[num<end1] = end1
-    num[num>end2] = end2
-    return num
-
 
 def find_trunc():
     denom = 2
@@ -425,7 +422,7 @@ def stumpff(x):
 
     mid = ~(low|high)
     if sum(mid):
-        numerators = repeat(x[mid][newaxis].T, trunc-1, axis=1)
+        numerators = repeat(x[mid][:, newaxis], trunc-1, axis=1)
         numerators[:, 1::2] *= -1
         c3[mid] = sum(power(numerators, exponents)/odd_factorials, axis=1)
         c2[mid] = sum(power(numerators, exponents)/even_factorials, axis=1)
@@ -458,23 +455,29 @@ def propagate(position, velocity, t0, t1, gm):
     gm : float
         Gravitational parameter in units that match the other arguments
     """
-    if gm <= 0:
+    gm = atleast_1d(gm)
+    if (gm <= 0).any():
         raise ValueError("'gm' should be positive")
-    if length_of(velocity) == 0:
+    if (length_of(velocity)).any() == 0:
         raise ValueError('Velocity vector has zero magnitude')
-    if length_of(position) == 0:
+    if (length_of(position)).any() == 0:
         raise ValueError('Position vector has zero magnitude')
+
+    if position.ndim == 1:
+        position = position[:, newaxis]
+    if velocity.ndim == 1:
+        velocity = velocity[:, newaxis]
 
     r0 = length_of(position)
     rv = dots(position, velocity)
 
-    hvec = cross(position, velocity)
+    hvec = _cross(position, velocity)
     h2 = dots(hvec, hvec)
 
-    if h2 == 0:
+    if (h2 == 0).any():
         raise ValueError('Motion is not conical')
 
-    eqvec = cross(velocity, hvec)/gm + -position/r0
+    eqvec = _cross(velocity, hvec)/gm + -position/r0
     e = length_of(eqvec)
     q = h2 / (gm * (1+e))
 
@@ -482,38 +485,56 @@ def propagate(position, velocity, t0, t1, gm):
     b = sqrt(q/gm)
 
     br0 = b * r0
-    b2rv = b**2 * rv
+    b2rv = b * b * rv
     bq = b * q
     qovr0 = q / r0
 
 
-    maxc = max(abs(br0),
+    maxc = amax(array([abs(br0),
                abs(b2rv),
                abs(bq),
-               abs(qovr0/(bq)))
+               abs(qovr0/bq)]), axis=0)
 
-    if f < 0:
-        fixed = log(dpmax/2) - log(maxc)
-        rootf = sqrt(-f)
-        logf = log(-f)
-        bound = min(fixed/rootf, (fixed + 1.5*logf)/rootf)
-    else:
-        logbound = (log(1.5) + log(dpmax) - log(maxc)) / 3
-        bound = exp(logbound)
+    hyperbolic = (f<0)
+    bound = zeros_like(f)
+
+    fixed = log(dpmax/2) - log(maxc[hyperbolic])
+    rootf = sqrt(-f[hyperbolic])
+    logf = log(-f[hyperbolic])
+    bound[hyperbolic] = amin(array([fixed/rootf, (fixed + 1.5*logf)/rootf]), axis=0)
+
+    logbound = (log(1.5) + log(dpmax) - log(maxc[~hyperbolic])) / 3
+    bound[~hyperbolic] = exp(logbound)
+
+    # each of these arrays has 1 entry per orbit, so its shape is (#orbits, 1)
+    f = f[:, newaxis]
+    bq = bq[:, newaxis]
+    b2rv = b2rv[:, newaxis]
+    br0 = br0[:, newaxis]
+    qovr0 = qovr0[:, newaxis]
+    bound = bound[:, newaxis]
 
     def kepler(x):
-        c0, c1, c2, c3 = stumpff(f*x*x)
-        return x*(br0*c1 + x*(b2rv*c2 + x*(bq*c3)))
+        _, c1, c2, c3 = stumpff(f*x*x)
+        return x*(br0*c1 + x*(b2rv*c2 + x*bq*c3))
 
-    dt = t1 - t0
+    def kepler_1d(x, orb_inds):
+        _, c1, c2, c3 = stumpff(x*x*repeat(f, orb_inds))
+        return x*(c1*repeat(br0, orb_inds) + x*(c2*repeat(b2rv, orb_inds) + x*(c3*repeat(bq, orb_inds))))
 
-    if not isinstance(dt, ndarray):
-        dt = array([dt])
-        return_1d_array = True
-    else:
-        return_1d_array = False
 
-    x = bracket(dt/bq, -bound, bound)
+    t1 = atleast_1d(t1)
+    t0 = atleast_1d(t0)
+    if len(t0) == 1:
+        t0 = repeat(t0, position.shape[1])
+
+    # shape of 2 dimensional arrays from here on out should be (#orbits, len(t1))
+    dt = t1 - t0[:, newaxis]
+
+    x = dt/bq
+    copyto(x, -bound, where=(x<-bound))
+    copyto(x, bound, where=(x>bound))
+
     kfun = kepler(x)
 
     past = dt < 0
@@ -523,74 +544,74 @@ def propagate(position, velocity, t0, t1, gm):
     lower = zeros_like(dt, dtype='float64')
     oldx = zeros_like(dt, dtype='float64')
 
-    lower[past] = x[past]
-    upper[future] = x[future]
+    copyto(lower, x, where=past)
+    copyto(upper, x, where=future)
 
     while (kfun[past] > dt[past]).any():
-        upper[past] = lower[past]
+        copyto(upper, lower, where=past)
         lower[past] *= 2
-        oldx[past] = x[past]
-        x[past] = bracket(lower[past], -bound, bound)
+        copyto(oldx, x, where=past)
+        orb_ind = sum(past, axis=1)
+        x[past] = clip(lower[past], repeat(-bound, orb_ind), repeat(bound, orb_ind))
         if (x[past] == oldx[past]).any():
             raise ValueError('The input delta time (dt) has a value of {0}.'
                              'This is beyond the range of DT for which we '
                              'can reliably propagate states. The limits for '
                              'this GM and initial state are from {1}'
                              'to {2}.'.format(dt, kepler(-bound), kepler(bound)))
-        kfun[past] = kepler(x[past])
+        kfun[past] = kepler_1d(x[past], orb_ind)
 
     while (kfun[future] < dt[future]).any():
-        lower[future] = upper[future]
+        copyto(lower, upper, where=future)
         upper[future] *= 2
-        oldx[future] = x[future]
-        x[future] = bracket(upper[future], -bound, bound)
+        copyto(oldx, x, where=future)
+        orb_ind = sum(future, axis=1)
+        x[future] = clip(upper[future], repeat(-bound, orb_ind), repeat(bound, orb_ind))
         if (x[future] == oldx[future]).any():
             raise ValueError('The input delta time (dt) has a value of {0}.'
                              'This is beyond the range of DT for which we '
                              'can reliably propagate states. The limits for '
                              'this GM and initial state are from {1} '
                              'to {2}.'.format(dt, kepler(-bound), kepler(bound)))
-        kfun[future] = kepler(x[future])
+        kfun[future] = kepler_1d(x[future], orb_ind)
 
-    x = amin(array([upper, amax(array([lower, (lower+upper)/2]), axis=0)]), axis=0)
+    x = copy(upper)
+    copyto(x, (upper+lower)/2, where=(lower<=upper))
 
     lcount = zeros_like(dt)
-    mostc = ones_like(dt)*1000
-    not_done = (lower < x) * (x < upper)
+    mostc = full_like(dt, 1000)
+    not_done = (lower < x) & (x < upper)
 
     while not_done.any():
-        kfun[not_done] = kepler(x[not_done])
+        orb_inds = sum(not_done, axis=1)
+        kfun[not_done] = kepler_1d(x[not_done], orb_inds)
 
-        high = (kfun > dt) * not_done
-        low = (kfun < dt) * not_done
-        same = (~high * ~low) * not_done
+        high = (kfun > dt) & not_done
+        low = (kfun < dt) & not_done
+        same = (~high & ~low) & not_done
 
-        upper[high] = x[high]
-        lower[low] = x[low]
-        upper[same] = lower[same] = x[same]
+        copyto(upper, x, where=(high|same))
+        copyto(lower, x, where=(low|same))
 
-        condition = not_done * (mostc > 64) * (upper != 0) * (lower != 0)
+        condition = not_done & (mostc > 64) & (upper != 0) & (lower != 0)
         mostc[condition] = 64
         lcount[condition] = 0
 
-        # vectorized version of min(upper, max(lower, (upper + lower)/2))
-        x[not_done] = amin(array([upper[not_done], amax(array([lower[not_done], (lower[not_done]+upper[not_done])/2]), axis=0)]), axis=0)
+        copyto(x, upper, where=(not_done & (lower>upper)))
+        copyto(x, (upper+lower)/2, where=(not_done & (lower<=upper)))
+
         lcount += 1
-        not_done = (lower < x) * (x < upper) * (lcount < mostc)
+        not_done = (lower < x) & (x < upper) & (lcount < mostc)
 
     c0, c1, c2, c3 = stumpff(f*x*x)
-    br = br0*c0 + x*(b2rv*c1 + x*(bq*c2))
+    br = br0*c0 + x*(b2rv*c1 + x*bq*c2)
 
-    pc = 1 - qovr0 * x**2 * c2
+    pc = 1 - qovr0 * x * x * c2
     vc = dt - bq * x**3 * c3
     pcdot = -qovr0 / br * x * c1
-    vcdot = 1 - bq / br * x**2 * c2
+    vcdot = 1 - bq / br * x * x * c2
 
-    if return_1d_array:
-        position_prop = pc*position + vc*velocity
-        velocity_prop = pcdot*position + vcdot*velocity
-    else:
-        position_prop = pc*position[newaxis].T + vc*velocity[newaxis].T
-        velocity_prop = pcdot*position[newaxis].T + vcdot*velocity[newaxis].T
+    position_prop = pc[newaxis, :, :]*position[:, :, newaxis] + vc[newaxis, :, :]*velocity[:, :, newaxis]
+    velocity_prop = pcdot[newaxis, :, :]*position[:, :, newaxis] + vcdot[newaxis, :, :]*velocity[:, :, newaxis]
 
-    return position_prop, velocity_prop
+    return squeeze(position_prop), squeeze(velocity_prop)
