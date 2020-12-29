@@ -4,6 +4,7 @@
 import io
 import re
 
+import numpy as np
 import pandas as pd
 
 from ..data.spice import inertial_frames
@@ -105,6 +106,43 @@ def mpcorb_orbit(row, ts, gm_km3_s2):
     )
     minor_planet._rotation = inertial_frames['ECLIPJ2000'].T
     return minor_planet
+
+
+def _mpcorb_orbits(rows, ts, gm_km3_s2):
+    e = rows.eccentricity.values
+    a = rows.semimajor_axis_au.values
+    p = a * (1.0 - e*e)
+    def n(c):
+        x = np.array(c.astype('|S1').view(np.uint8), dtype=int)
+        is_digit = (x <= 57) & (x >= 48)
+        x[is_digit] -= 48
+        x[~is_digit] -= 55
+        return x
+
+    def d(s):
+        year = n(s.str[0:1].values) * 100 + s.str[1:3].values.astype(int)
+        month = n(s.str[3:4].values)
+        day = n(s.str[4:5].values)
+        return julian_day(year, month, day) - 0.5
+        
+    epoch_jd = d(rows.epoch_packed)
+    t_epoch = ts.tt_jd(epoch_jd)
+    
+    minor_planet = _KeplerOrbit._from_mean_anomalies(
+        p,
+        e,
+        rows.inclination_degrees.values,
+        rows.longitude_of_ascending_node_degrees.values,
+        rows.argument_of_perihelion_degrees.values,
+        rows.mean_anomaly_degrees.values,
+        t_epoch,
+        gm_km3_s2,
+        10,
+        rows.designation.values,
+    )
+    minor_planet._rotation = inertial_frames['ECLIPJ2000'].T
+    return minor_planet
+
 
 COMET_URL = 'https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt'
 

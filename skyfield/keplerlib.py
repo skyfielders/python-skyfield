@@ -2,7 +2,7 @@ from __future__ import division
 
 import sys
 import math
-from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
+from numpy import(abs, all, amax, amin, arange, arccos, arctan, array, atleast_1d,
                   clip, copy, copyto, cos, cosh, exp, full_like, log, ndarray,
                   newaxis, pi, power, repeat, sin, sinh, squeeze, sqrt, sum,
                   tan, tanh, zeros_like)
@@ -216,6 +216,78 @@ class _KeplerOrbit(VectorFunction):
             target,
         )
 
+
+    @classmethod
+    def _from_mean_anomalies(
+            cls,
+            semilatus_rectum_au,
+            eccentricity,
+            inclination_degrees,
+            longitude_of_ascending_node_degrees,
+            argument_of_perihelion_degrees,
+            mean_anomaly_degrees,
+            epoch,
+            gm_km3_s2,
+            center=None,
+            target=None,
+        ):
+        """ Creates a `KeplerOrbit` object from elements using mean anomaly
+
+        Parameters
+        ----------
+        p : Distance
+            Semi-Latus Rectum
+        e : float
+             Eccentricity
+        i : Angle
+            Inclination
+        Om : Angle
+            Longitude of Ascending Node
+        w : Angle
+            Argument of periapsis
+        M : Angle
+            Mean anomaly
+        epoch : Time
+            Time corresponding to `position` and `velocity`
+        mu_km_s : float
+            Value of mu (G * M) in km^3/s^2
+        mu_au3_d2 : float
+            Value of mu (G * M) in au^3/d^2
+        center : int
+            NAIF ID of the primary body, 399 for geocentric orbits, 10 for
+            heliocentric orbits
+        target : int
+            NAIF ID of the secondary body
+        """
+        M = DEG2RAD * mean_anomaly_degrees
+        gm_au3_d2 = gm_km3_s2 * _CONVERT_GM
+        v = zeros_like(eccentricity)
+        closed = eccentricity < 1.0
+        hyperbolic = eccentricity > 1.0
+        parabolic = eccentricity == 1.0
+
+        v[closed] = true_anomaly_closed(eccentricity[closed], eccentric_anomalies(eccentricity[closed], M[closed]))
+        v[hyperbolic] = true_anomaly_hyperbolic(eccentricity[hyperbolic], eccentric_anomalies(eccentricity[hyperbolic], M[hyperbolic]))
+        v[parabolic] = true_anomaly_parabolic(semilatus_rectum_au[parabolic], gm_au3_d2, M[parabolic])
+
+        pos, vel = ele_to_vec(
+            semilatus_rectum_au,
+            eccentricity,
+            DEG2RAD * inclination_degrees,
+            DEG2RAD * longitude_of_ascending_node_degrees,
+            DEG2RAD * argument_of_perihelion_degrees,
+            v,
+            gm_au3_d2,
+        )
+        return cls(
+            Distance(pos),
+            Velocity(vel),
+            epoch,
+            gm_au3_d2,
+            center,
+            target,
+        )
+
     def _at(self, time):
         """Propagate the KeplerOrbit to the given Time object
 
@@ -288,6 +360,25 @@ def eccentric_anomaly(e, M):
     else:
         raise ValueError('Failed to converge')
 
+def eccentric_anomalies(e, M):
+    """ Iterates to solve Kepler's equation to find eccentric anomaly
+
+    Based on the algorithm in section 8.10.2 of the Explanatory Supplement
+    to the Astronomical Almanac, 3rd ed.
+    """
+    M = normpi(M)
+    E = M + e*sin(M)
+
+    max_iters = 100
+    iters = 0
+    while iters < max_iters:
+        dM = M - (E - e*sin(E))
+        dE = dM/(1 - e*cos(E))
+        E += dE
+        if all(abs(dE) < 1e-14): return E
+        iters += 1
+    else:
+        raise ValueError('Failed to converge')
 
 def true_anomaly_hyperbolic(e, E):
     """Calculates true anomaly from eccentricity and eccentric anomaly.
