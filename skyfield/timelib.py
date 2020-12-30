@@ -491,7 +491,7 @@ class Time(object):
             return format % args
 
     def utc_jpl(self):
-        """Convert to a string like ``A.D. 2014-Jan-18 01:35:37.5000 UT``.
+        """Convert to a string like ``A.D. 2014-Jan-18 01:35:37.5000 UTC``.
 
         Returns a string for this date and time in UTC, in the format
         used by the JPL HORIZONS system.  If this time is an array of
@@ -505,7 +505,7 @@ class Time(object):
         bc = year < 1
         year = abs(year - bc)
         era = where(bc, 'B.C.', 'A.D.')
-        format = '%s %04d-%s-%02d %02d:%02d:%02d.%04d UT'
+        format = '%s %04d-%s-%02d %02d:%02d:%02d.%04d UTC'
         args = (era, year, _months[month], day, hour, minute, second, fraction)
 
         if self.shape:

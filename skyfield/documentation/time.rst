@@ -198,7 +198,7 @@ Here are several ways to specify the exact same time and date:
     2014-01-18T01:35:38Z
     2014-01-18 01:35:38 UTC
     On 2014 Jan 18 at 01:35:38
-    A.D. 2014-Jan-18 01:35:37.5000 UT
+    A.D. 2014-Jan-18 01:35:37.5000 UTC
 
 The 6 values returned by ``utc()``
 can be accessed as the attributes
@@ -235,7 +235,7 @@ and configured with the correct time zone):
 
 .. testoutput::
 
-    A.D. 2015-Oct-11 10:00:00.0000 UT
+    A.D. 2015-Oct-11 10:00:00.0000 UTC
 
 UTC and your timezone
 =====================
@@ -358,11 +358,11 @@ One recent leap second was in June 2012:
 
 .. testoutput::
 
-    A.D. 2012-Jun-30 23:59:58.0000 UT
-    A.D. 2012-Jun-30 23:59:59.0000 UT
-    A.D. 2012-Jun-30 23:59:60.0000 UT
-    A.D. 2012-Jul-01 00:00:00.0000 UT
-    A.D. 2012-Jul-01 00:00:01.0000 UT
+    A.D. 2012-Jun-30 23:59:58.0000 UTC
+    A.D. 2012-Jun-30 23:59:59.0000 UTC
+    A.D. 2012-Jun-30 23:59:60.0000 UTC
+    A.D. 2012-Jul-01 00:00:00.0000 UTC
+    A.D. 2012-Jul-01 00:00:01.0000 UTC
 
 Note that Skyfield has no problem with a calendar tuple
 that has hours, minutes, or — as in this case —

@@ -129,7 +129,7 @@ def test_epoch_date():
     s = appendix_c_example.replace('00179.78495062', '98001.00000000')
     lines = s.splitlines()
     sat = EarthSatellite(lines[1], lines[2], lines[0])
-    assert sat.epoch.utc_jpl() == 'A.D. 1998-Jan-01 00:00:00.0000 UT'
+    assert sat.epoch.utc_jpl() == 'A.D. 1998-Jan-01 00:00:00.0000 UTC'
 
 def test_target_number():
     s = EarthSatellite(line1, line2)

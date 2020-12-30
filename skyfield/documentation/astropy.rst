@@ -37,7 +37,7 @@ between the two libraries:
    .. testoutput::
 
       2010-01-01T00:00:00.000
-      A.D. 2010-Jan-01 00:00:00.0000 UT
+      A.D. 2010-Jan-01 00:00:00.0000 UTC
 
 2. A skyfield
    :class:`~skyfield.positionlib.Barycentric`,

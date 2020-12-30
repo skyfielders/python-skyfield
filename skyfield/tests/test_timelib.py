@@ -365,13 +365,13 @@ def test_iso_of_array_showing_fractions(ts):
 def test_jpl_format(ts):
     t = ts.utc(range(-300, 301, 100), 7, 1)
     assert t.utc_jpl() == [
-        'B.C. 0301-Jul-01 00:00:00.0000 UT',
-        'B.C. 0201-Jul-01 00:00:00.0000 UT',
-        'B.C. 0101-Jul-01 00:00:00.0000 UT',
-        'B.C. 0001-Jul-01 00:00:00.0000 UT',
-        'A.D. 0100-Jul-01 00:00:00.0000 UT',
-        'A.D. 0200-Jul-01 00:00:00.0000 UT',
-        'A.D. 0300-Jul-01 00:00:00.0000 UT',
+        'B.C. 0301-Jul-01 00:00:00.0000 UTC',
+        'B.C. 0201-Jul-01 00:00:00.0000 UTC',
+        'B.C. 0101-Jul-01 00:00:00.0000 UTC',
+        'B.C. 0001-Jul-01 00:00:00.0000 UTC',
+        'A.D. 0100-Jul-01 00:00:00.0000 UTC',
+        'A.D. 0200-Jul-01 00:00:00.0000 UTC',
+        'A.D. 0300-Jul-01 00:00:00.0000 UTC',
         ]
 
 def test_strftime_of_a_leap_second(ts):

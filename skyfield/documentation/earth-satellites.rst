@@ -221,7 +221,7 @@ in case your program wants to check how old the elements are:
 
 .. testoutput::
 
-    A.D. 2014-Jan-20 22:23:04.0004 UT
+    A.D. 2014-Jan-20 22:23:04.0004 UTC
 
 If the epoch is too far in the past,
 you can provide :meth:`~skyfield.iokit.Loader.tle_file()`
@@ -675,7 +675,7 @@ so it supports all of the standard Skyfield date methods:
 
 .. testoutput::
 
-    A.D. 2013-Nov-10 23:03:03.9479 UT
+    A.D. 2013-Nov-10 23:03:03.9479 UTC
 
 Skyfield is willing to generate positions
 for dates quite far from a satellite’s epoch,
@@ -798,7 +798,7 @@ call this special constructor:
 .. testoutput::
 
     Satellite number: 5
-    Epoch: A.D. 2000-Jun-27 18:50:24.0000 UT
+    Epoch: A.D. 2000-Jun-27 18:50:24.0000 UTC
 
 The result should be a satellite object that behaves
 exactly as though it had been loaded from TLE lines.
