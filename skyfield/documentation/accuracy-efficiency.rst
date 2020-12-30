@@ -29,7 +29,8 @@ of the polar motion parameters 𝑥 and 𝑦:
     from skyfield.api import load
     from skyfield.data import iers
 
-    with load.open('finals2000A.all') as f:
+    url = load.build_url('finals2000A.all')
+    with load.open(url) as f:
         finals_data = iers.parse_x_y_dut1_from_finals_all(f)
 
     ts = load.timescale()
