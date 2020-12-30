@@ -98,6 +98,45 @@ and 270° at the Last Quarter.
 
     149.4
 
+What is the angular diameter of a planet, given its radius?
+===========================================================
+
+Be careful to select the correct radius
+when predicting a planet’s angular diameter in the sky.
+Many web sites will quote some kind of “mean radius”
+that averages between a planet’s squat polar radius
+and its wide equatorial radius.
+But most astronomers instead want to know the maximum, not average, diameter
+across a planet’s visible face —
+so you will want to use the planet’s equatorial radius in your calculation.
+
+For example, a good current estimate of Neptune’s equatorial radius
+is 24,764 km.
+We would therefore predicts its angular diameter as:
+
+.. testcode::
+
+    import numpy as np
+    from skyfield.api import Angle, load
+
+    ts = load.timescale()
+    time = ts.utc(2020, 12, 30)
+
+    eph = load('de421.bsp')
+    earth, neptune = eph['earth'], eph['neptune barycenter']
+    radius_km = 24764.0
+
+    astrometric = earth.at(time).observe(neptune)
+    ra, dec, distance = astrometric.apparent().radec()
+    apparent_diameter = Angle(radians=np.arcsin(radius_km / distance.km) * 2.0)
+    print('{:.6f} arcseconds'.format(apparent_diameter.arcseconds()))
+
+.. testoutput::
+
+    2.257190 arcseconds
+
+This agrees exactly with the output of the NASA HORIZONS system.
+
 When is Venus at its greatest east and west elongations from the Sun?
 =====================================================================
 
