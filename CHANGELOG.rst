@@ -34,6 +34,10 @@ v1.35 — 2020 December 31
 
 * Added :func:`~skyfield.api.load_constellation_names()`.
 
+* The :meth:`~skyfield.timelib.Time.utc_jpl()` method now correctly
+  designates its return value as ``UTC`` instead of the ambiguious ``UT``.
+  `#515 <https://github.com/skyfielders/python-skyfield/issues/515>`_
+
 v1.34 — 2020 December 10
 ------------------------
 
