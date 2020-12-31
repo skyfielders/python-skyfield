@@ -23,10 +23,14 @@ v1.35 — Future
   for the :meth:`~skyfield.toposlib.Geoid.subpoint()` method —
   which was previously stranded
   over on the :class:`~skyfield.positionlib.Geocentric` class,
-  where it was impossible to apply to positions of other classes
+  where it couldn’t be used with positions of other classes
   that might be centered at the geocenter.
   (The old method will remain in place to support legacy code,
   but is discouraged in new applications.)
+
+* The effects of :ref:`Polar motion` — if configured — are now included
+  both when computing the position in space of an Earth latitude and longitude,
+  and when determining the latitude and longitude beneath a celestial position.
 
 * Added :func:`~skyfield.api.load_constellation_names()`.
 

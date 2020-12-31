@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from numpy import arctan2, array, cos, exp, sin, sqrt
-from .constants import ANGVEL, AU_M, DAY_S, DEG2RAD, T0, pi, tau
+from .constants import ANGVEL, AU_M, DAY_S, T0, pi, tau
 from .earthlib import refract
 from .framelib import itrs
 from .functions import _T, mxm, mxv, rot_y, rot_z
@@ -175,12 +175,11 @@ class Geoid(object):
                 ' measured from 399, the center of the Earth, but this'
                 ' position has center {0}'.format(position.center)
             )
-        t = position.t
-        xyz_au = mxv(t.M, position.position.au)
+        xyz_au = position.frame_xyz(itrs).au
         x, y, z = xyz_au
 
         R = sqrt(x*x + y*y)
-        lon = (arctan2(y, x) - 15 * DEG2RAD * t.gast - pi) % tau - pi
+        lon = (arctan2(y, x) - pi) % tau - pi
         lat = arctan2(z, R)
 
         a = self.radius.au
