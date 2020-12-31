@@ -52,8 +52,8 @@ v1.34 — 2020 December 10
 
 * Added support for IERS :ref:`polar motion` 𝑥 and 𝑦.
 
-* Added a method :meth:`~skyfield.toposlib.Topos.lst_hours_at()` that
-  computes Local Sidereal Time.
+* Added a method :meth:`~skyfield.toposlib.GeographicPosition.lst_hours_at()`
+  that computes Local Sidereal Time.
 
 * A new almanac routine :func:`~skyfield.almanac.moon_phase()` returns
   the Moon phase as an angle where 0° is New Moon, 90° is First Quarter,
@@ -103,9 +103,9 @@ v1.32 — 2020 November 16
   was, alas, a half-day off.
   `#466 <https://github.com/skyfielders/python-skyfield/issues/466>`_
 
-* Fix: the :class:`~skyfield.toposlib.Topos` constructor arguments ``x``
-  and ``y``, which never worked properly, have been deprecated and are
-  now ignored.
+* Fix: the ``Topos`` constructor arguments ``x`` and ``y``,
+  which never worked properly anyway,
+  have been deprecated and are now ignored.
 
 1.31 — 2020 October 24
 ----------------------
@@ -414,7 +414,7 @@ v1.32 — 2020 November 16
 * Added a new almanac routine for finding :ref:`lunar-nodes`.
   `#361 <https://github.com/skyfielders/python-skyfield/issues/361>`_
 
-* Gave topos objects a new :meth:`~skyfield.toposlib.Topos.itrf_xyz()`
+* Gave geographic location objects a new ``itrf_xyz()``
   method that returns their raw ITRF coordinates.
   `#354 <https://github.com/skyfielders/python-skyfield/issues/354>`_
 
