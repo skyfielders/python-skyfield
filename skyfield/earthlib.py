@@ -11,7 +11,6 @@ earth_radius_au = ERAD / AU_M
 one_minus_flattening = 1.0 - 1.0 / IERS_2010_INVERSE_EARTH_FLATTENING
 one_minus_flattening_squared = one_minus_flattening * one_minus_flattening
 
-
 def terra(latitude, longitude, elevation, gast):
     """Deprecated conversion from lat,lon,t -> GCRS; neglects polar motion."""
     zero = zeros_like(gast)
@@ -42,16 +41,8 @@ def terra(latitude, longitude, elevation, gast):
 
     return pos, vel
 
-
 def reverse_terra(xyz_au, gast, iterations=3):
-    """Convert a geocentric (x,y,z) at time `t` to latitude and longitude.
-
-    Returns a tuple of latitude, longitude, and elevation whose units
-    are radians and meters.  Based on Dr. T.S. Kelso's quite helpful
-    article "Orbital Coordinate Systems, Part III":
-    https://www.celestrak.com/columns/v02n03/
-
-    """
+    """Deprecated conversion from GCRS -> lat,lon,t; neglects polar motion."""
     x, y, z = xyz_au
     R = sqrt(x*x + y*y)
 
@@ -69,7 +60,6 @@ def reverse_terra(xyz_au, gast, iterations=3):
         lat = arctan2(z + a * C * e2 * sin(lat), R)
     elevation_m = ((R / cos(lat)) - a * C) * AU_M
     return lat, lon, elevation_m
-
 
 def compute_limb_angle(position_au, observer_au):
     """Determine the angle of an object above or below the Earth's limb.

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from numpy import array, cos, exp, sin, sqrt
-from .constants import ANGVEL, DAY_S, T0
+from numpy import arctan2, array, cos, exp, sin, sqrt
+from .constants import ANGVEL, AU_M, DAY_S, DEG2RAD, T0, pi, tau
 from .earthlib import refract
 from .framelib import itrs
 from .functions import _T, mxm, mxv, rot_y, rot_z
@@ -98,7 +98,7 @@ class GeographicPosition(ITRSPosition):
         return Angle(degrees=alt)
 
     def rotation_at(self, t):
-        """Compute rotation from ICRF to this location’s altazimuth system."""
+        """Compute rotation from GCRS to this location’s altazimuth system."""
         return mxm(self._R_latlon, itrs.rotation_at(t))
 
 class Geoid(object):
@@ -119,14 +119,14 @@ class Geoid(object):
         number for west::
 
             from skyfield.api import wgs84
-            topos = wgs84.latlon(37.3414, -121.6429)
+            observatory = wgs84.latlon(37.3414, -121.6429)
 
-        Or use the direction constants that Skyfield supplies (each has
-        the value positive one or negative one), if you don’t want to
-        require readers to remember which is which::
+        You can avoid remembering which directions are negative by using
+        Skyfield’s compass direction constants, which have the values +1
+        and −1::
 
             from skyfield.api import N, S, E, W
-            topos = wgs84.latlon(37.3414 * N, 121.6429 * W)
+            observatory = wgs84.latlon(37.3414 * N, 121.6429 * W)
 
         """
         latitude = Angle(degrees=latitude_degrees)
@@ -153,6 +153,52 @@ class Geoid(object):
         r = array((accst, acsst, ash * sinphi))
 
         return cls(self, latitude, longitude, elevation, Distance(au=r))
+
+    def subpoint(self, position):
+        """Return Earth latitude and longitude beneath a celestial ``position``.
+
+        The input ``position`` should have a center of 399, the
+        geocenter.  The return value is a `GeographicPosition` whose
+        ``latitude`` and ``longitude`` are the spot on the Earth’s
+        surface directly beneath the given ``position``, and whose
+        ``elevation`` is the position’s distance above (or depth below)
+        mean sea level.
+
+        The underlying computation is based on Dr. T.S. Kelso's quite
+        helpful article `Orbital Coordinate Systems, Part III
+        <https://www.celestrak.com/columns/v02n03/>`_.
+
+        """
+        if position.center != 399:
+            raise ValueError(
+                'a geographic subpoint can only be calculated for positions'
+                ' measured from 399, the center of the Earth, but this'
+                ' position has center {0}'.format(position.center)
+            )
+        t = position.t
+        xyz_au = mxv(t.M, position.position.au)
+        x, y, z = xyz_au
+
+        R = sqrt(x*x + y*y)
+        lon = (arctan2(y, x) - 15 * DEG2RAD * t.gast - pi) % tau - pi
+        lat = arctan2(z, R)
+
+        a = self.radius.au
+        f = 1.0 / self.inverse_flattening
+        e2 = 2.0*f - f*f
+        C = 1.0
+        for iteration in 0,1,2:
+            C = 1.0 / sqrt(1.0 - e2 * (sin(lat) ** 2.0))
+            lat = arctan2(z + a * C * e2 * sin(lat), R)
+        elevation_m = ((R / cos(lat)) - a * C) * AU_M
+
+        return GeographicPosition(
+            latitude=Angle(radians=lat),
+            longitude=Angle(radians=lon),
+            elevation=Distance(m=elevation_m),
+            itrs_xyz=Distance(au=xyz_au),
+            model=self,
+        )
 
 wgs84 = Geoid('WGS84', 6378137.0, 298.257223563)
 iers2010 = Geoid('IERS2010', 6378136.6, 298.25642)

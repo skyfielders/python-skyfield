@@ -18,7 +18,7 @@ from .sgp4lib import EarthSatellite
 from .timelib import (
     GREGORIAN_START, GREGORIAN_START_ENGLAND, Time, Timescale, utc
 )
-from .toposlib import Topos, wgs84
+from .toposlib import Topos, iers2010, wgs84
 from .units import Angle, Distance, Velocity, wms
 
 load = Loader('.')
@@ -30,8 +30,9 @@ __all__ = [
     'GREGORIAN_START', 'GREGORIAN_START_ENGLAND',
     'Loader', 'PlanetaryConstants', 'N', 'S', 'Star', 'W',
     'T0', 'Time', 'Timescale', 'Topos', 'Velocity',
-    'datetime', 'load', 'load_constellation_map', 'load_constellation_names',
-    'load_file', 'position_from_radec', 'position_of_radec',
+    'datetime', 'iers2010', 'load', 'load_constellation_map',
+    'load_constellation_names', 'load_file',
+    'position_from_radec', 'position_of_radec',
     'utc', 'pi', 'tau', 'wgs84', 'wms',
 ]
 

@@ -1,9 +1,10 @@
+from assay import assert_raises
 from numpy import abs, sqrt
 
 from skyfield import constants
 from skyfield.api import Distance, load, wgs84, wms
 from skyfield.functions import length_of
-from skyfield.positionlib import Apparent
+from skyfield.positionlib import Apparent, Barycentric
 from skyfield.toposlib import ITRSPosition, iers2010
 
 angle = (-15, 15, 35, 45)
@@ -111,13 +112,50 @@ def test_polar_motion_when_computing_altaz_coordinates(ts):
     assert abs(alt.degrees - novas_alt) < 1.9e-9
     assert abs(az.degrees - novas_az) < 1.3e-7
 
-def test_subpoint(ts, angle):
+def test_subpoint_with_wrong_center(ts, angle):
+    t = ts.utc(2020, 12, 31)
+    p = Barycentric([0,0,0], t=t)
+    with assert_raises(ValueError, 'a geographic subpoint can only be'
+                       ' calculated for positions measured from 399, the center'
+                       ' of the Earth, but this position has center 0'):
+        wgs84.subpoint(p)
+
+def test_iers2010_subpoint(ts, angle):
     t = ts.utc(2018, 1, 19, 14, 37, 55)
     # An elevation of 0 is more difficult for the routine's accuracy
     # than a very large elevation.
     top = iers2010.latlon(angle, angle, elevation_m=0.0)
     p = top.at(t)
-    b = p.subpoint()
+    b = iers2010.subpoint(p)
+
+    error_degrees = abs(b.latitude.degrees - angle)
+    error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
+    assert error_mas < 0.1
+
+    error_degrees = abs(b.longitude.degrees - angle)
+    error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
+    assert error_mas < 0.1
+
+def test_wgs84_subpoint(ts, angle):
+    t = ts.utc(2018, 1, 19, 14, 37, 55)
+    # An elevation of 0 is more difficult for the routine's accuracy
+    # than a very large elevation.
+    top = wgs84.latlon(angle, angle, elevation_m=0.0)
+    p = top.at(t)
+    b = wgs84.subpoint(p)
+
+    error_degrees = abs(b.latitude.degrees - angle)
+    error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
+    assert error_mas < 0.1
+
+    error_degrees = abs(b.longitude.degrees - angle)
+    error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
+    assert error_mas < 0.1
+
+def test_deprecated_position_subpoint_method(ts, angle):
+    t = ts.utc(2018, 1, 19, 14, 37, 55)
+    top = iers2010.latlon(angle, angle, elevation_m=0.0)
+    b = top.at(t).subpoint()
 
     error_degrees = abs(b.latitude.degrees - angle)
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees

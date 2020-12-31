@@ -340,10 +340,9 @@ What latitude and longitude is beneath this right ascension and declination?
 Most Skyfield calculations,
 like an observation of a planet or an Earth satellite,
 directly produce a vector position centered on the Earth.
-Calling the position’s
-:meth:`~skyfield.positionlib.Geocentric.subpoint()` method
-lets you compute the Earth latitude and longitude
-from which the position is directly overhead.
+You can pass such a vector
+to the :meth:`~skyfield.toposlib.Geoid.subpoint()` method
+of a standard geoid to compute latitude and longitude.
 
 But sometimes the right ascension and declination of the position
 are known already.
@@ -354,7 +353,7 @@ creating the position directly.
 
 .. testcode::
 
-    from skyfield.api import load
+    from skyfield.api import load, wgs84
     from skyfield.positionlib import position_of_radec
 
     ts = load.timescale()
@@ -364,7 +363,7 @@ creating the position directly.
     ra_hours = 3.79
     dec_degrees = 24.1167
     pleiades = position_of_radec(ra_hours, dec_degrees, t=t, center=earth)
-    subpoint = pleiades.subpoint()
+    subpoint = wgs84.subpoint(pleiades)
 
     print('Latitude:', subpoint.latitude)
     print('Longitude:', subpoint.longitude)

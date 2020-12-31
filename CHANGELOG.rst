@@ -7,14 +7,26 @@ v1.35 — Future
 
 * Deprecated the old ``Topos`` class,
   which not only featured a clunky interface
-  but hid from users the fact that they were generating IERS2010 positions
+  but hid from users the fact that Skyfield was generating IERS2010 positions
+  from latitude and longitude
   when in fact nearly all users want WGS84 positions.
   Users are now encouraged to supply latitude and longitude
   to the :meth:`~skyfield.toposlib.Geoid.latlon()` method
   of either the :data:`~skyfield.toposlib.wgs84` object
   or the :data:`~skyfield.toposlib.iers2010` object.
   Related discussion:
-  `#476 <https://github.com/skyfielders/python-skyfield/issues/476>`_
+  `#372 <https://github.com/skyfielders/python-skyfield/issues/372>`_
+
+* The two new geoid objects :data:`~skyfield.toposlib.wgs84`
+  and :data:`~skyfield.toposlib.iers2010`
+  have also provided a happy new home
+  for the :meth:`~skyfield.toposlib.Geoid.subpoint()` method —
+  which was previously stranded
+  over on the :class:`~skyfield.positionlib.Geocentric` class,
+  where it was impossible to apply to positions of other classes
+  that might be centered at the geocenter.
+  (The old method will remain in place to support legacy code,
+  but is discouraged in new applications.)
 
 * Added :func:`~skyfield.api.load_constellation_names()`.
 
@@ -32,6 +44,7 @@ v1.34 — 2020 December 10
   for ecliptic and galactic coordinates,
   which are now deprecated (but will continue to be supported).
   See :ref:`reference_frames`.
+  `#476 <https://github.com/skyfielders/python-skyfield/issues/476>`_
 
 * Added support for IERS :ref:`polar motion` 𝑥 and 𝑦.
 

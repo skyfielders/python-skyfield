@@ -6,7 +6,7 @@ from . import framelib
 from .constants import ANGVEL, AU_M, C, ERAD, DAY_S, RAD2DEG, tau
 from .data.spice import inertial_frames
 from .descriptorlib import reify
-from .earthlib import compute_limb_angle, reverse_terra
+from .earthlib import compute_limb_angle
 from .functions import (
     _T, _to_array, angle_between, from_spherical,
     length_of, mxm, mxv, rot_z, to_spherical,
@@ -565,6 +565,8 @@ class Barycentric(ICRF):
     Barycenter.
 
     """
+    _default_center = 0
+
     def observe(self, body):
         """Compute the `Astrometric` position of a body from this location.
 
@@ -742,35 +744,15 @@ class Geocentric(ICRF):
     _default_center = 399
 
     def itrf_xyz(self):
-        """Deprecated. Call ``.frame_xyz(itrs)``; see `reference_frames`."""
+        """Deprecated; instead, call ``.frame_xyz(itrs)``. \
+        See `reference_frames`."""
         return self.frame_xyz(framelib.itrs)
 
     def subpoint(self):
-        """Return the latitude and longitude directly beneath this position.
-
-        Returns a :class:`~skyfield.toposlib.Topos` whose ``longitude``
-        and ``latitude`` are those of the point on the Earth's surface
-        directly beneath this position, and whose ``elevation`` is the
-        height of this position above the Earth's surface.
-
-        """
-        if self.center != 399:  # TODO: should an __init__() check this?
-            raise ValueError("you can only ask for the geographic subpoint"
-                             " of a position measured from Earth's center")
-        t = self.t
-        xyz_au = mxv(t.M, self.position.au)
-        lat, lon, elevation_m = reverse_terra(xyz_au, t.gast)
-
-        # TODO. Move VectorFunction and Topos into this file, since the
-        # three kinds of class work together: Topos is-a VF; VF.at() can
-        # return a Geocentric position; and Geocentric.subpoint() should
-        # return a Topos. I'm deferring the refactoring for now, to get
-        # this new feature to users more quickly.
-        from .toposlib import Topos
-        return Topos(latitude=Angle(radians=lat),
-                     longitude=Angle(radians=lon),
-                     elevation_m=elevation_m)
-
+        """Deprecated; instead, call either ``iers2010.subpoint(pos)`` or \
+        ``wgs84.subpoint(pos)``."""
+        from .toposlib import iers2010
+        return iers2010.subpoint(self)
 
 def _to_altaz(position, temperature_C, pressure_mbar):
     """Compute (alt, az, distance) relative to the observer's horizon."""

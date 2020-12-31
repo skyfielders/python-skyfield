@@ -352,32 +352,14 @@ than those of the old J2000 system.)
 
     [-3918.87650458 -1887.64838745  5209.08801512]
 
-.. would love to be able to do this someday - see the SPICE source file
-   nearpt.f
-
-   But instead of printing the position as a GCRS vector like this,
-   you will probably want to answer the question
-   “where is the satellite at time *t*?”
-   with geographic coordinates instead:
-
-   lat, lon, altitude = geocentric.geographic_latlon()
-   print(lat)
-   print(lon)
-   print(altitude)
-
-   But most observers are less interested
-   in the satellite’s position relative to the Earth’s center
-   and instead want to know ...
-
 Another approach is to ask which point on the Earth’s globe
-is directly beneath the satellite.
-You can access this through the
-:meth:`~skyfield.positionlib.Geocentric.subpoint()`
-method of the geocentric position computed above.
+is directly beneath the satellite,
+using the :meth:`~skyfield.toposlib.Geoid.subpoint()` method
+of a standard geoid.
 
 .. testcode::
 
-    subpoint = geocentric.subpoint()
+    subpoint = wgs84.subpoint(geocentric)
     print('Latitude:', subpoint.latitude)
     print('Longitude:', subpoint.longitude)
     print('Elevation (m):', int(subpoint.elevation.m))
@@ -386,7 +368,7 @@ method of the geocentric position computed above.
 
     Latitude: 50deg 14' 37.4"
     Longitude: -86deg 23' 23.3"
-    Elevation (m): 420874
+    Elevation (m): 420873
 
 Finally, you might be most interested
 in whether the satellite is above or below the horizon

@@ -234,6 +234,7 @@ Then ask the model for the location of a given longitude and latitude:
 
    Geoid
    Geoid.latlon
+   Geoid.subpoint
 
 Finally, the resulting geographic location
 can compute its position at any specified time
@@ -347,7 +348,6 @@ Position methods specific to one class
    Barycentric.observe
    Astrometric.apparent
    Apparent.altaz
-   Geocentric.subpoint
 
 Reference frames
 ================

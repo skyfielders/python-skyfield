@@ -203,7 +203,7 @@ or else by generating a whole series of positions.
 
     # Geographic point beneath satellite
 
-    subpoint = geometry.subpoint()
+    subpoint = wgs84.subpoint(geometry)
     latitude = subpoint.latitude
     longitude = subpoint.longitude
     elevation = subpoint.elevation
