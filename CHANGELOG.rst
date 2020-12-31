@@ -2,8 +2,8 @@
 Changelog
 =========
 
-v1.35 — Future
---------------
+v1.35 — 2020 December 31
+------------------------
 
 * Deprecated the old ``Topos`` class,
   which not only featured a clunky interface
