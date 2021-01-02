@@ -203,50 +203,44 @@ def load_comets_dataframe_slow(fobj):
     return df
 
 def comet_orbit(row, ts, gm_km3_s2):
-    e = row.eccentricity
-    if e == 1.0:
-        p = row.perihelion_distance_au * 2.0
+    if isinstance(row, pd.Series):
+        e = row.eccentricity
+        if e == 1:
+            p = row.perihelion_distance_au * 2.0
+        else:
+            p = row.perihelion_distance_au / (1.0 - e) * (1.0 - e*e)
+        t_perihelion = ts.tt(row.perihelion_year, row.perihelion_month,
+                            row.perihelion_day)
+        comet = _KeplerOrbit._from_periapsis(
+            p,
+            e,
+            row.inclination_degrees,
+            row.longitude_of_ascending_node_degrees,
+            row.argument_of_perihelion_degrees,
+            t_perihelion,
+            gm_km3_s2,
+            10,
+            row['designation'],
+        )
     else:
-        a = row.perihelion_distance_au / (1.0 - e)
-        p = a * (1.0 - e*e)
-    t_perihelion = ts.tt(row.perihelion_year, row.perihelion_month,
-                         row.perihelion_day)
-
-    comet = _KeplerOrbit._from_periapsis(
-        p,
-        e,
-        row.inclination_degrees,
-        row.longitude_of_ascending_node_degrees,
-        row.argument_of_perihelion_degrees,
-        t_perihelion,
-        gm_km3_s2,
-        10,
-        row['designation'],
-    )
-    comet._rotation = inertial_frames['ECLIPJ2000'].T
-    return comet
-
-def _comet_orbits(rows, ts, gm_km3_s2):
-    e = rows.eccentricity.values
-    parabolic = (e == 1.0)
-    p = (1 - e*e) / (1.0 - e + parabolic)
-    p[parabolic] += 2.0
-    p *= rows.perihelion_distance_au.values
-
-    t_perihelion = ts.tt(rows.perihelion_year.values, rows.perihelion_month.values,
-                         rows.perihelion_day.values)
-
-    comet = _KeplerOrbit._from_periapsis(
-        p,
-        e,
-        rows.inclination_degrees.values,
-        rows.longitude_of_ascending_node_degrees.values,
-        rows.argument_of_perihelion_degrees.values,
-        t_perihelion,
-        gm_km3_s2,
-        10,
-        rows['designation'],
-    )
+        e = row.eccentricity.values
+        parabolic = (e == 1.0)
+        p = (1 - e*e) / (1.0 - e + parabolic)
+        p[parabolic] += 2.0
+        p *= row.perihelion_distance_au.values
+        t_perihelion = ts.tt(row.perihelion_year.values, row.perihelion_month.values,
+                            row.perihelion_day.values)
+        comet = _KeplerOrbit._from_periapsis(
+            p,
+            e,
+            row.inclination_degrees.values,
+            row.longitude_of_ascending_node_degrees.values,
+            row.argument_of_perihelion_degrees.values,
+            t_perihelion,
+            gm_km3_s2,
+            10,
+            row['designation'],
+        )
     comet._rotation = inertial_frames['ECLIPJ2000'].T
     return comet
 
