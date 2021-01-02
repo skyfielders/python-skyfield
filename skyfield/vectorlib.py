@@ -5,7 +5,7 @@ from numpy import max
 from .constants import C_AUDAY
 from .descriptorlib import reify
 from .errors import DeprecationError
-from .functions import length_of
+from .functions import length_of, _reconcile
 from .positionlib import build_position
 from .timelib import Time
 
@@ -215,8 +215,10 @@ class VectorSum(VectorFunction):
             p2, v2, another_gcrs_position, message = vf._at(t)
             if gcrs_position is None:  # TODO: so bootleg; rework whole idea
                 gcrs_position = another_gcrs_position
-            p += p2
-            v += v2
+            p, p2 = _reconcile(p, p2)
+            p = p + p2
+            v, v2 = _reconcile(v, v2)
+            v = v + v2
         return p, v, gcrs_position, message
 
 def _correct_for_light_travel_time(observer, target):
