@@ -26,8 +26,7 @@ This leaves several features of such files still unsupported, though.
 Skyfield:
 
 * *Cannot* yet support a planetary reference frame
-  whose orientation is described as a numeric series
-  directly a text file.
+  whose orientation is specified as a numeric series in a text file.
 
 * *Cannot* yet compute latitude and longitude positions
   on the surface of non-spherical objects,
