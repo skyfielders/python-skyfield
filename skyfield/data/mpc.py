@@ -5,6 +5,7 @@ import io
 import re
 
 import pandas as pd
+import numpy as np
 
 from ..data.spice import inertial_frames
 from ..keplerlib import _KeplerOrbit
@@ -75,34 +76,59 @@ def load_mpcorb_dataframe(fobj):
     return df
 
 def mpcorb_orbit(row, ts, gm_km3_s2):
-    a = row.semimajor_axis_au
-    e = row.eccentricity
-    p = a * (1.0 - e*e)
+    if isinstance(row, pd.Series):
+        a = row.semimajor_axis_au
+        e = row.eccentricity
+        p = a * (1.0 - e*e)
 
-    def n(c):
-        return ord(c) - (48 if c.isdigit() else 55)
+        def d(s):
+            year = 100 * int(s[0], 32) + int(s[1:3])
+            month = int(s[3], 32)
+            day = int(s[4], 32)
+            return julian_day(year, month, day) - 0.5
 
-    def d(s):
-        year = 100 * n(s[0]) + int(s[1:3])
-        month = n(s[3])
-        day = n(s[4])
-        return julian_day(year, month, day) - 0.5
+        epoch_jd = d(row.epoch_packed)
+        t_epoch = ts.tt_jd(epoch_jd)
 
-    epoch_jd = d(row.epoch_packed)
-    t_epoch = ts.tt_jd(epoch_jd)
+        minor_planet = _KeplerOrbit._from_mean_anomaly(
+            p,
+            e,
+            row.inclination_degrees,
+            row.longitude_of_ascending_node_degrees,
+            row.argument_of_perihelion_degrees,
+            row.mean_anomaly_degrees,
+            t_epoch,
+            gm_km3_s2,
+            10,
+            row.designation,
+        )
+    else:
+        a = row.semimajor_axis_au.values
+        e = row.eccentricity.values
+        p = a * (1.0 - e*e)
 
-    minor_planet = _KeplerOrbit._from_mean_anomaly(
-        p,
-        e,
-        row.inclination_degrees,
-        row.longitude_of_ascending_node_degrees,
-        row.argument_of_perihelion_degrees,
-        row.mean_anomaly_degrees,
-        t_epoch,
-        gm_km3_s2,
-        10,
-        row.designation,
-    )
+        def d(s):
+            year = 100 * int(s[0], 32) + int(s[1:3])
+            month = int(s[3], 32)
+            day = int(s[4], 32)
+            return julian_day(year, month, day) - 0.5
+
+        epoch_jd = np.array([d(epoch) for epoch in row.epoch_packed.values])
+        t_epoch = ts.tt_jd(epoch_jd)
+
+        minor_planet = _KeplerOrbit._from_mean_anomaly(
+            p,
+            e,
+            row.inclination_degrees.values,
+            row.longitude_of_ascending_node_degrees.values,
+            row.argument_of_perihelion_degrees.values,
+            row.mean_anomaly_degrees.values,
+            t_epoch,
+            gm_km3_s2,
+            10,
+            row.designation.values,
+        )
+
     minor_planet._rotation = inertial_frames['ECLIPJ2000'].T
     return minor_planet
 
