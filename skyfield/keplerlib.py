@@ -3,9 +3,9 @@ from __future__ import division
 import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
-                  clip, copy, copyto, cos, cosh, exp, full_like, log, ndarray,
-                  newaxis, pi, power, repeat, sin, sinh, squeeze, sqrt, sum,
-                  tan, tanh, zeros_like)
+                  clip, copy, copyto, cos, cosh, exp, float64, full_like, log,
+                  ndarray, newaxis, pi, power, repeat, sin, sinh, squeeze,
+                  sqrt, sum, tan, tanh, zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
@@ -187,16 +187,31 @@ class _KeplerOrbit(VectorFunction):
         target : int
             NAIF ID of the secondary body
         """
+        return_scalar = True if isinstance(eccentricity, (float, float64)) else False
+        eccentricity = atleast_1d(eccentricity)
+        mean_anomaly_degrees = atleast_1d(mean_anomaly_degrees)
+        semilatus_rectum_au = atleast_1d(semilatus_rectum_au)
+
         M = DEG2RAD * mean_anomaly_degrees
         gm_au3_d2 = gm_km3_s2 * _CONVERT_GM
-        if eccentricity < 1.0:
-            E = eccentric_anomaly(eccentricity, M)
-            v = true_anomaly_closed(eccentricity, E)
-        elif eccentricity > 1.0:
-            E = eccentric_anomaly(eccentricity, M)
-            v = true_anomaly_hyperbolic(eccentricity, E)
-        else:
-            v = true_anomaly_parabolic(semilatus_rectum_au, gm_au3_d2, M)
+
+        closed = eccentricity < 1.0
+        hyperbolic = eccentricity > 1.0
+        parabolic = ~closed & ~hyperbolic
+
+        v = zeros_like(eccentricity)
+
+        E = eccentric_anomaly(eccentricity[closed], M[closed])
+        v[closed] = true_anomaly_closed(eccentricity[closed], E)
+
+        E = eccentric_anomaly(eccentricity[hyperbolic], M[hyperbolic])
+        v[hyperbolic] = true_anomaly_hyperbolic(eccentricity[hyperbolic], E)
+
+        v[parabolic] = true_anomaly_parabolic(semilatus_rectum_au[parabolic], gm_au3_d2, M[parabolic])
+
+        if return_scalar:
+            v = v[0]
+            semilatus_rectum_au = semilatus_rectum_au[0]
 
         pos, vel = ele_to_vec(
             semilatus_rectum_au,
@@ -278,15 +293,22 @@ def eccentric_anomaly(e, M):
     E = M + e*sin(M)
 
     max_iters = 100
-    iters = 0
+    dM = M - (E - e*sin(E))
+    dE = dM/(1 - e*cos(E))
+    not_done = abs(dE) > 1e-14
+    iters = 1
     while iters < max_iters:
-        dM = M - (E - e*sin(E))
-        dE = dM/(1 - e*cos(E))
-        E = E + dE
-        if abs(dE) < 1e-14: return E
+        if not not_done.any():
+            break
+        dM[not_done] = M[not_done] - (E[not_done] - e[not_done]*sin(E[not_done]))
+        dE[not_done] = dM[not_done]/(1 - e[not_done]*cos(E[not_done]))
+        E[not_done] += dE[not_done]
         iters += 1
+        not_done = abs(dE) > 1e-14
+
     else:
-        raise ValueError('Failed to converge')
+        raise ValueError('failed to converge')
+    return E
 
 
 def true_anomaly_hyperbolic(e, E):
