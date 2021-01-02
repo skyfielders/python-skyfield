@@ -258,7 +258,17 @@ class Angle(object):
     def __str__(self):
         if self.radians.size == 0:
             return 'Angle []'
-        return self.dstr() if self.preference == 'degrees' else self.hstr()
+        if self.preference == 'degrees':
+            v = self._degrees
+            f = _dstr
+        else:
+            v = self._hours
+            f = _hstr
+        shape = getattr(v, 'shape', None)
+        if shape:
+            return "{0} values from {1} to {2}".format(
+                len(v), f(v[0]), f(v[-1]))
+        return f(v)
 
     def __repr__(self):
         if self.radians.size == 0:
@@ -302,16 +312,10 @@ https://rhodesmill.org/skyfield/api-units.html#skyfield.units.Angle''')
         """Convert to a string like ``12h 07m 30.00s``."""
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
-        if self.radians.size == 0:
-            return '<Angle []>'
         hours = self._hours
         shape = getattr(hours, 'shape', ())
-        if shape and shape != (1,):
-            return "{0} values from {1} to {2}".format(
-                len(hours),
-                _hstr(hours[0], places),
-                _hstr(hours[-1], places),
-                )
+        if shape:
+            return [_hstr(h, places) for h in hours]
         return _hstr(hours, places)
 
     def dms(self, warn=True):
@@ -340,17 +344,11 @@ https://rhodesmill.org/skyfield/api-units.html#skyfield.units.Angle''')
         """Convert to a string like ``181deg 52\' 30.0"``."""
         if warn and self.preference != 'degrees':
             raise WrongUnitError('dstr')
-        if self.radians.size == 0:
-            return '<Angle []>'
         degrees = self._degrees
         signed = self.signed
         shape = getattr(degrees, 'shape', ())
-        if shape and shape != (1,):
-            return "{0} values from {1} to {2}".format(
-                len(degrees),
-                _dstr(degrees[0], places, signed),
-                _dstr(degrees[-1], places, signed),
-                )
+        if shape:
+            return [_dstr(d, places, signed) for d in degrees]
         return _dstr(degrees, places, signed)
 
     def to(self, unit):

@@ -2,7 +2,9 @@
 
 from assay import assert_raises
 from numpy import array
-from skyfield.units import Angle, Distance, Velocity, UnpackingError
+from skyfield.units import (
+    Angle, Distance, Velocity, UnpackingError, WrongUnitError,
+)
 
 try:
     from astropy import units as u
@@ -43,12 +45,31 @@ def test_angle_scalar_strs():
     assert str(Angle(hours=array(12))) == '''12h 00m 00.00s'''
 
 def test_angle_array_strs():
-    assert str(Angle(degrees=array([90, 91, 92]))) == (
-        '''3 values from 90deg 00' 00.0" to 92deg 00' 00.0"'''
-        )
-    assert str(Angle(hours=array([11, 12, 13]))) == (
-        '''3 values from 11h 00m 00.00s to 13h 00m 00.00s'''
-        )
+    h = Angle(hours=array([11, 12, 13]))
+    d = Angle(degrees=h._degrees)
+
+    assert str(h) == '3 values from 11h 00m 00.00s to 13h 00m 00.00s'
+    assert str(d) == '''3 values from 165deg 00' 00.0" to 195deg 00' 00.0"'''
+
+    with assert_raises(WrongUnitError):
+        h.dstr()
+        d.hstr()
+
+    assert h.hstr() == d.hstr(warn=False) == [
+        '11h 00m 00.00s',
+        '12h 00m 00.00s',
+        '13h 00m 00.00s',
+    ]
+    assert d.dstr() == h.dstr(warn=False) == [
+        '165deg 00\' 00.0"',
+        '180deg 00\' 00.0"',
+        '195deg 00\' 00.0"',
+    ]
+
+    empty = Angle(radians=[])
+    assert str(empty) == 'Angle []'
+    assert empty.hstr(warn=False) == []
+    assert empty.dstr() == []
 
 def test_angle_sexagesimal_args():
     assert str(Angle(degrees=(90,))) == '''90deg 00' 00.0"'''
