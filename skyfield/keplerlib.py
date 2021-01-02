@@ -279,7 +279,7 @@ def true_anomaly(e, M, p, gm):
     v[closed] = true_anomaly_closed(e[closed], E)
 
     E = eccentric_anomaly(e[hyperbolic], M[hyperbolic])
-    v[hyperbolic] = true_anomaly_hyperbolic(e[hyperbolic], E)
+    v[hyperbolic] = 2.0 * arctan(sqrt((e[hyperbolic] + 1.0) / (e[hyperbolic] - 1.0)) * tanh(E/2))
 
     v[parabolic] = true_anomaly_parabolic(p[parabolic], gm, M[parabolic])
 
@@ -315,15 +315,6 @@ def eccentric_anomaly(e, M):
     else:
         raise ValueError('failed to converge')
     return E
-
-
-def true_anomaly_hyperbolic(e, E):
-    """Calculates true anomaly from eccentricity and eccentric anomaly.
-
-    Valid for hyperbolic orbits. Equations from the relevant Wikipedia entries.
-
-    """
-    return 2.0 * arctan(sqrt((e + 1.0) / (e - 1.0)) * tanh(E/2))
 
 
 def true_anomaly_closed(e, E):
