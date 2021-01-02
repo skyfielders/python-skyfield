@@ -611,7 +611,7 @@ def propagate(position, velocity, t0, t1, gm):
     pcdot = -qovr0 / br * x * c1
     vcdot = 1 - bq / br * x * x * c2
 
-    position_prop = pc[newaxis, :, :]*position[:, :, newaxis] + vc[newaxis, :, :]*velocity[:, :, newaxis]
-    velocity_prop = pcdot[newaxis, :, :]*position[:, :, newaxis] + vcdot[newaxis, :, :]*velocity[:, :, newaxis]
+    position_prop = pc.T[newaxis, :, :]*position[:, newaxis, :] + vc.T[newaxis, :, :]*velocity[:, newaxis, :]
+    velocity_prop = pcdot.T[newaxis, :, :]*position[:, newaxis, :] + vcdot.T[newaxis, :, :]*velocity[:, newaxis, :]
 
     return squeeze(position_prop), squeeze(velocity_prop)
