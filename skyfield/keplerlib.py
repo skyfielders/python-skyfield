@@ -187,31 +187,13 @@ class _KeplerOrbit(VectorFunction):
         target : int
             NAIF ID of the secondary body
         """
-        return_scalar = True if isinstance(eccentricity, (float, float64)) else False
-        eccentricity = atleast_1d(eccentricity)
-        mean_anomaly_degrees = atleast_1d(mean_anomaly_degrees)
-        semilatus_rectum_au = atleast_1d(semilatus_rectum_au)
-
-        M = DEG2RAD * mean_anomaly_degrees
         gm_au3_d2 = gm_km3_s2 * _CONVERT_GM
-
-        closed = eccentricity < 1.0
-        hyperbolic = eccentricity > 1.0
-        parabolic = ~closed & ~hyperbolic
-
-        v = zeros_like(eccentricity)
-
-        E = eccentric_anomaly(eccentricity[closed], M[closed])
-        v[closed] = true_anomaly_closed(eccentricity[closed], E)
-
-        E = eccentric_anomaly(eccentricity[hyperbolic], M[hyperbolic])
-        v[hyperbolic] = true_anomaly_hyperbolic(eccentricity[hyperbolic], E)
-
-        v[parabolic] = true_anomaly_parabolic(semilatus_rectum_au[parabolic], gm_au3_d2, M[parabolic])
-
-        if return_scalar:
-            v = v[0]
-            semilatus_rectum_au = semilatus_rectum_au[0]
+        v = true_anomaly(
+            eccentricity,
+            DEG2RAD * mean_anomaly_degrees,
+            semilatus_rectum_au,
+            gm_au3_d2,
+        )
 
         pos, vel = ele_to_vec(
             semilatus_rectum_au,
@@ -281,6 +263,30 @@ class _KeplerOrbit(VectorFunction):
 
     def __repr__(self):
         return '<{0}>'.format(str(self))
+
+
+def true_anomaly(e, M, p, gm):
+    return_scalar = True if isinstance(e, (float, float64)) else False
+    e, M, p = atleast_1d(e, M, p)
+
+    closed = e < 1.0
+    hyperbolic = e > 1.0
+    parabolic = ~closed & ~hyperbolic
+
+    v = zeros_like(e)
+
+    E = eccentric_anomaly(e[closed], M[closed])
+    v[closed] = true_anomaly_closed(e[closed], E)
+
+    E = eccentric_anomaly(e[hyperbolic], M[hyperbolic])
+    v[hyperbolic] = true_anomaly_hyperbolic(e[hyperbolic], E)
+
+    v[parabolic] = true_anomaly_parabolic(p[parabolic], gm, M[parabolic])
+
+    if return_scalar:
+        return v[0]
+    else:
+        return v
 
 
 def eccentric_anomaly(e, M):
