@@ -17,7 +17,7 @@ class ITRSPosition(VectorFunction):
     def __init__(self, itrs_xyz):
         self.itrs_xyz = itrs_xyz
         x, y, z = itrs_xyz.au
-        self._velocity_au_per_d = ANGVEL * DAY_S * array((-y, x, 0.0))
+        self._velocity_au_per_d = ANGVEL * DAY_S * array((-y, x, 0.0 * z))
 
     @property
     def target(self):
