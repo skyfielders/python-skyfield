@@ -275,11 +275,11 @@ def true_anomaly(e, M, p, gm):
 
     v = zeros_like(e)
 
-    E = eccentric_anomaly(e[closed], M[closed])
-    v[closed] = 2.0 * arctan(sqrt((1.0 + e[closed]) / (1.0 - e[closed])) * tan(E/2))
+    E_closed = eccentric_anomaly(e[closed], M[closed])
+    v[closed] = 2.0 * arctan(sqrt((1.0 + e[closed]) / (1.0 - e[closed])) * tan(E_closed/2))
 
-    E = eccentric_anomaly(e[hyperbolic], M[hyperbolic])
-    v[hyperbolic] = 2.0 * arctan(sqrt((e[hyperbolic] + 1.0) / (e[hyperbolic] - 1.0)) * tanh(E/2))
+    E_hyperbolic = eccentric_anomaly(e[hyperbolic], M[hyperbolic])
+    v[hyperbolic] = 2.0 * arctan(sqrt((e[hyperbolic] + 1.0) / (e[hyperbolic] - 1.0)) * tanh(E_hyperbolic/2))
 
     v[parabolic] = true_anomaly_parabolic(p[parabolic], gm, M[parabolic])
 
