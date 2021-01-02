@@ -245,11 +245,9 @@ def comet_orbit(row, ts, gm_km3_s2):
     return comet
 
 def unpack(designation_packed):
-    def n(c):
-        return ord(c) - (48 if c.isdigit() else 55)
     s = designation_packed
     s1 = s[1]
     if s1 == '/':
         return s
     return '{0[0]}/{1}{0[2]}{0[3]} {0[4]}{2}{3}'.format(
-        s, n(s1), int(s[5:7]), s[7].lstrip('0'))
+        s, int(s1, 32), int(s[5:7]), s[7].lstrip('0'))
