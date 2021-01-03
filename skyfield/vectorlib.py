@@ -241,6 +241,7 @@ def _correct_for_light_travel_time(observer, target):
 
     tposition, tvelocity, gcrs_position, message = target._at(t)
 
+    tposition, cposition = _reconcile(tposition, cposition)
     distance = length_of(tposition - cposition)
     light_time0 = 0.0
     for i in range(10):
