@@ -1,7 +1,7 @@
 """Vector functions and their composition."""
 
 from jplephem.names import target_names as _jpl_code_name_dict
-from numpy import max
+from numpy import max, newaxis, expand_dims
 from .constants import C_AUDAY
 from .descriptorlib import reify
 from .errors import DeprecationError
@@ -236,12 +236,19 @@ def _correct_for_light_travel_time(observer, target):
     whole = t.whole
     tdb_fraction = t.tdb_fraction
 
+    whole = whole[:, newaxis, newaxis]
+    tdb_fraction = tdb_fraction[:, newaxis, newaxis]
+
     cposition = observer.position.au
     cvelocity = observer.velocity.au_per_d
 
-    tposition, tvelocity, gcrs_position, message = target._at(t)
+    cposition = expand_dims(cposition, 2)
+    cvelocity = expand_dims(cvelocity, 2)
 
-    tposition, cposition = _reconcile(tposition, cposition)
+    tposition, tvelocity, gcrs_position, message = target._at(t)
+    tposition = expand_dims(tposition, 3)
+    tvelocity = expand_dims(tvelocity, 3)
+
     distance = length_of(tposition - cposition)
     light_time0 = 0.0
     for i in range(10):
