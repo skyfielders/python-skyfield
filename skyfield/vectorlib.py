@@ -237,23 +237,30 @@ def _correct_for_light_travel_time(observer, target):
     whole = t.whole
     tdb_fraction = t.tdb_fraction
 
+    num_times = len(t.tt)
+
     cposition = observer.position.au
     cvelocity = observer.velocity.au_per_d
+
+    num_observers = cposition.shape[2]
 
     cposition = expand_dims(cposition, 2)
     cvelocity = expand_dims(cvelocity, 2)
 
     tposition, tvelocity, gcrs_position, message = target._at(t)
+
+    num_targets = tposition.shape[2]
+
     tposition = expand_dims(tposition, 3)
     tvelocity = expand_dims(tvelocity, 3)
 
     distance = length_of(tposition - cposition)
     light_time0 = 0.0
 
-    whole = broadcast_to(whole[:, newaxis, newaxis], (len(t.tt), tposition.shape[2], cposition.shape[3]))
+    whole = broadcast_to(whole[:, newaxis, newaxis], (num_times, num_targets, num_observers))
     tdb_fraction = tdb_fraction[:, newaxis, newaxis]
 
-    tposition_out = zeros((3, len(t.tt), tposition.shape[2], cposition.shape[3]))
+    tposition_out = zeros((3, num_times, num_targets, num_observers))
     tvelocity_out = zeros_like(tposition_out)
 
     for i in range(10):
@@ -275,8 +282,8 @@ def _correct_for_light_travel_time(observer, target):
             target_i = target.vector_functions[0] + k_orbit(Distance(au=pos), Velocity(au_per_d=vel), ts.tt_jd(epoch), target.vector_functions[-1].mu_au3_d2, center=10)
             t2_i_flat = ts.tt_jd(t2.tt[:, i, :].flatten())
             tposition_i_flat, tvelocity_i_flat, _, _ = target_i._at(t2_i_flat)
-            tposition_out[:, :, i, :] = reshape(tposition_i_flat, (3,) + t2.tt[:, i, :].shape)
-            tvelocity_out[:, :, i, :] = reshape(tvelocity_i_flat, (3,) + t2.tt[:, i, :].shape)
+            tposition_out[:, :, i, :] = reshape(tposition_i_flat, (3, num_times, num_observers))
+            tvelocity_out[:, :, i, :] = reshape(tvelocity_i_flat, (3, num_times, num_observers))
 
         distance = length_of(tposition_out - cposition)
         light_time0 = light_time
