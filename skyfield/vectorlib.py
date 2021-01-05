@@ -1,13 +1,14 @@
 """Vector functions and their composition."""
 
 from jplephem.names import target_names as _jpl_code_name_dict
-from numpy import max, newaxis, expand_dims
+from numpy import max, newaxis, expand_dims, zeros, zeros_like, broadcast_to, reshape
 from .constants import C_AUDAY
 from .descriptorlib import reify
 from .errors import DeprecationError
 from .functions import length_of, _reconcile
 from .positionlib import build_position
 from .timelib import Time
+from .units import Distance, Velocity
 
 class VectorFunction(object):
     """Given a time, computes a corresponding position."""
@@ -236,9 +237,6 @@ def _correct_for_light_travel_time(observer, target):
     whole = t.whole
     tdb_fraction = t.tdb_fraction
 
-    whole = whole[:, newaxis, newaxis]
-    tdb_fraction = tdb_fraction[:, newaxis, newaxis]
-
     cposition = observer.position.au
     cvelocity = observer.velocity.au_per_d
 
@@ -251,6 +249,13 @@ def _correct_for_light_travel_time(observer, target):
 
     distance = length_of(tposition - cposition)
     light_time0 = 0.0
+
+    whole = broadcast_to(whole[:, newaxis, newaxis], (len(t.tt), tposition.shape[2], cposition.shape[3]))
+    tdb_fraction = tdb_fraction[:, newaxis, newaxis]
+
+    tposition_out = zeros((3, len(t.tt), tposition.shape[2], cposition.shape[3]))
+    tvelocity_out = zeros_like(tposition_out)
+
     for i in range(10):
         light_time = distance / C_AUDAY
         delta = light_time - light_time0
@@ -262,12 +267,22 @@ def _correct_for_light_travel_time(observer, target):
         # fraction, for adding to the whole and fraction of TDB.
         t2 = ts.tdb_jd(whole, tdb_fraction - light_time)
 
-        tposition, tvelocity, gcrs_position, message = target._at(t2)
-        distance = length_of(tposition - cposition)
+        for i, (pos, vel, epoch) in enumerate(zip(target.vector_functions[-1].position_at_epoch.au.T,
+                                       target.vector_functions[-1].velocity_at_epoch.au_per_d.T,
+                                       target.vector_functions[-1].epoch.tt,
+                                       )):
+            k_orbit = type(target.vector_functions[-1]) #avoid import loop?
+            target_i = target.vector_functions[0] + k_orbit(Distance(au=pos), Velocity(au_per_d=vel), ts.tt_jd(epoch), target.vector_functions[-1].mu_au3_d2, center=10)
+            t2_i_flat = ts.tt_jd(t2.tt[:, i, :].flatten())
+            tposition_i_flat, tvelocity_i_flat, _, _ = target_i._at(t2_i_flat)
+            tposition_out[:, :, i, :] = reshape(tposition_i_flat, (3,) + t2.tt[:, i, :].shape)
+            tvelocity_out[:, :, i, :] = reshape(tvelocity_i_flat, (3,) + t2.tt[:, i, :].shape)
+
+        distance = length_of(tposition_out - cposition)
         light_time0 = light_time
     else:
         raise ValueError('light-travel time failed to converge')
-    return tposition - cposition, tvelocity - cvelocity, t, light_time
+    return tposition_out - cposition, tvelocity_out - cvelocity, t, light_time
 
 def _jpl_name(target):
     if not isinstance(target, int):
