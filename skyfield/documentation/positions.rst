@@ -73,7 +73,7 @@ which explains each option in even greater detail.
 Quick reference to generating positions
 =======================================
 
-Skyfield already supports three kinds of object
+Skyfield already supports four kinds of object
 that can compute their position.
 Each object offers an ``at()`` method
 whose argument can be a :doc:`Time <time>` object
