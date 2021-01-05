@@ -101,7 +101,7 @@ class ICRF(object):
         self.velocity = Velocity(velocity_au_per_d)
         self.center = self._default_center if center is None else center
         self.target = target
-        if isinstance(center, int) and center == 0:
+        if center == 0:
             self.center_barycentric = self
 
     @classmethod

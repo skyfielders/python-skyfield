@@ -126,7 +126,6 @@ def mpcorb_orbit(row, ts, gm_km3_s2):
             t_epoch,
             gm_km3_s2,
             10,
-            row.designation.values,
         )
 
     minor_planet._rotation = inertial_frames['ECLIPJ2000'].T
@@ -265,7 +264,6 @@ def comet_orbit(row, ts, gm_km3_s2):
             t_perihelion,
             gm_km3_s2,
             10,
-            row['designation'],
         )
     comet._rotation = inertial_frames['ECLIPJ2000'].T
     return comet
