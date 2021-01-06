@@ -5,6 +5,7 @@ import io
 import re
 
 import pandas as pd
+import numpy as np
 
 from ..data.spice import inertial_frames
 from ..keplerlib import _KeplerOrbit
@@ -75,34 +76,59 @@ def load_mpcorb_dataframe(fobj):
     return df
 
 def mpcorb_orbit(row, ts, gm_km3_s2):
-    a = row.semimajor_axis_au
-    e = row.eccentricity
-    p = a * (1.0 - e*e)
+    if isinstance(row, pd.Series):
+        a = row.semimajor_axis_au
+        e = row.eccentricity
+        p = a * (1.0 - e*e)
 
-    def n(c):
-        return ord(c) - (48 if c.isdigit() else 55)
+        def d(s):
+            year = 100 * int(s[0], 32) + int(s[1:3])
+            month = int(s[3], 32)
+            day = int(s[4], 32)
+            return julian_day(year, month, day) - 0.5
 
-    def d(s):
-        year = 100 * n(s[0]) + int(s[1:3])
-        month = n(s[3])
-        day = n(s[4])
-        return julian_day(year, month, day) - 0.5
+        epoch_jd = d(row.epoch_packed)
+        t_epoch = ts.tt_jd(epoch_jd)
 
-    epoch_jd = d(row.epoch_packed)
-    t_epoch = ts.tt_jd(epoch_jd)
+        minor_planet = _KeplerOrbit._from_mean_anomaly(
+            p,
+            e,
+            row.inclination_degrees,
+            row.longitude_of_ascending_node_degrees,
+            row.argument_of_perihelion_degrees,
+            row.mean_anomaly_degrees,
+            t_epoch,
+            gm_km3_s2,
+            10,
+            row.designation,
+        )
+    else:
+        a = row.semimajor_axis_au.values
+        e = row.eccentricity.values
+        p = a * (1.0 - e*e)
 
-    minor_planet = _KeplerOrbit._from_mean_anomaly(
-        p,
-        e,
-        row.inclination_degrees,
-        row.longitude_of_ascending_node_degrees,
-        row.argument_of_perihelion_degrees,
-        row.mean_anomaly_degrees,
-        t_epoch,
-        gm_km3_s2,
-        10,
-        row.designation,
-    )
+        def d(s):
+            year = 100 * int(s[0], 32) + int(s[1:3])
+            month = int(s[3], 32)
+            day = int(s[4], 32)
+            return julian_day(year, month, day) - 0.5
+
+        epoch_jd = np.array([d(epoch) for epoch in row.epoch_packed.values])
+        t_epoch = ts.tt_jd(epoch_jd)
+
+        minor_planet = _KeplerOrbit._from_mean_anomaly(
+            p,
+            e,
+            row.inclination_degrees.values,
+            row.longitude_of_ascending_node_degrees.values,
+            row.argument_of_perihelion_degrees.values,
+            row.mean_anomaly_degrees.values,
+            t_epoch,
+            gm_km3_s2,
+            10,
+            row.designation.values,
+        )
+
     minor_planet._rotation = inertial_frames['ECLIPJ2000'].T
     return minor_planet
 
@@ -203,59 +229,51 @@ def load_comets_dataframe_slow(fobj):
     return df
 
 def comet_orbit(row, ts, gm_km3_s2):
-    e = row.eccentricity
-    if e == 1.0:
-        p = row.perihelion_distance_au * 2.0
+    if isinstance(row, pd.Series):
+        e = row.eccentricity
+        if e == 1:
+            p = row.perihelion_distance_au * 2.0
+        else:
+            p = row.perihelion_distance_au / (1.0 - e) * (1.0 - e*e)
+        t_perihelion = ts.tt(row.perihelion_year, row.perihelion_month,
+                            row.perihelion_day)
+        comet = _KeplerOrbit._from_periapsis(
+            p,
+            e,
+            row.inclination_degrees,
+            row.longitude_of_ascending_node_degrees,
+            row.argument_of_perihelion_degrees,
+            t_perihelion,
+            gm_km3_s2,
+            10,
+            row['designation'],
+        )
     else:
-        a = row.perihelion_distance_au / (1.0 - e)
-        p = a * (1.0 - e*e)
-    t_perihelion = ts.tt(row.perihelion_year, row.perihelion_month,
-                         row.perihelion_day)
-
-    comet = _KeplerOrbit._from_periapsis(
-        p,
-        e,
-        row.inclination_degrees,
-        row.longitude_of_ascending_node_degrees,
-        row.argument_of_perihelion_degrees,
-        t_perihelion,
-        gm_km3_s2,
-        10,
-        row['designation'],
-    )
-    comet._rotation = inertial_frames['ECLIPJ2000'].T
-    return comet
-
-def _comet_orbits(rows, ts, gm_km3_s2):
-    e = rows.eccentricity.values
-    parabolic = (e == 1.0)
-    p = (1 - e*e) / (1.0 - e + parabolic)
-    p[parabolic] += 2.0
-    p *= rows.perihelion_distance_au.values
-
-    t_perihelion = ts.tt(rows.perihelion_year.values, rows.perihelion_month.values,
-                         rows.perihelion_day.values)
-
-    comet = _KeplerOrbit._from_periapsis(
-        p,
-        e,
-        rows.inclination_degrees.values,
-        rows.longitude_of_ascending_node_degrees.values,
-        rows.argument_of_perihelion_degrees.values,
-        t_perihelion,
-        gm_km3_s2,
-        10,
-        rows['designation'],
-    )
+        e = row.eccentricity.values
+        parabolic = (e == 1.0)
+        p = (1 - e*e) / (1.0 - e + parabolic)
+        p[parabolic] += 2.0
+        p *= row.perihelion_distance_au.values
+        t_perihelion = ts.tt(row.perihelion_year.values, row.perihelion_month.values,
+                            row.perihelion_day.values)
+        comet = _KeplerOrbit._from_periapsis(
+            p,
+            e,
+            row.inclination_degrees.values,
+            row.longitude_of_ascending_node_degrees.values,
+            row.argument_of_perihelion_degrees.values,
+            t_perihelion,
+            gm_km3_s2,
+            10,
+            row['designation'].values,
+        )
     comet._rotation = inertial_frames['ECLIPJ2000'].T
     return comet
 
 def unpack(designation_packed):
-    def n(c):
-        return ord(c) - (48 if c.isdigit() else 55)
     s = designation_packed
     s1 = s[1]
     if s1 == '/':
         return s
     return '{0[0]}/{1}{0[2]}{0[3]} {0[4]}{2}{3}'.format(
-        s, n(s1), int(s[5:7]), s[7].lstrip('0'))
+        s, int(s1, 32), int(s[5:7]), s[7].lstrip('0'))
