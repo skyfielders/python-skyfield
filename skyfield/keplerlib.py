@@ -3,9 +3,9 @@ from __future__ import division
 import sys
 import math
 from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
-                  clip, copy, copyto, cos, cosh, exp, float64, full_like, log,
-                  ndarray, newaxis, pi, power, repeat, sin, sinh, squeeze,
-                  sqrt, sum, tan, tanh, zeros_like)
+                  clip, copy, copyto, cos, cosh, exp, full_like, log, ndarray,
+                  newaxis, pi, power, repeat, sin, sinh, squeeze, sqrt, sum,
+                  tan, tanh, zeros_like)
 
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
@@ -187,13 +187,16 @@ class _KeplerOrbit(VectorFunction):
         target : int
             NAIF ID of the secondary body
         """
+        M = DEG2RAD * mean_anomaly_degrees
         gm_au3_d2 = gm_km3_s2 * _CONVERT_GM
-        v = true_anomaly(
-            eccentricity,
-            DEG2RAD * mean_anomaly_degrees,
-            semilatus_rectum_au,
-            gm_au3_d2,
-        )
+        if eccentricity < 1.0:
+            E = eccentric_anomaly(eccentricity, M)
+            v = true_anomaly_closed(eccentricity, E)
+        elif eccentricity > 1.0:
+            E = eccentric_anomaly(eccentricity, M)
+            v = true_anomaly_hyperbolic(eccentricity, E)
+        else:
+            v = true_anomaly_parabolic(semilatus_rectum_au, gm_au3_d2, M)
 
         pos, vel = ele_to_vec(
             semilatus_rectum_au,
@@ -265,30 +268,6 @@ class _KeplerOrbit(VectorFunction):
         return '<{0}>'.format(str(self))
 
 
-def true_anomaly(e, M, p, gm):
-    return_scalar = True if isinstance(e, (float, float64)) else False
-    e, M, p = atleast_1d(e, M, p)
-
-    closed = e < 1.0
-    hyperbolic = e > 1.0
-    parabolic = ~closed & ~hyperbolic
-
-    v = zeros_like(e)
-
-    E_closed = eccentric_anomaly(e[closed], M[closed])
-    v[closed] = 2.0 * arctan(sqrt((1.0 + e[closed]) / (1.0 - e[closed])) * tan(E_closed/2))
-
-    E_hyperbolic = eccentric_anomaly(e[hyperbolic], M[hyperbolic])
-    v[hyperbolic] = 2.0 * arctan(sqrt((e[hyperbolic] + 1.0) / (e[hyperbolic] - 1.0)) * tanh(E_hyperbolic/2))
-
-    v[parabolic] = true_anomaly_parabolic(p[parabolic], gm, M[parabolic])
-
-    if return_scalar:
-        return v[0]
-    else:
-        return v
-
-
 def eccentric_anomaly(e, M):
     """ Iterates to solve Kepler's equation to find eccentric anomaly
 
@@ -299,22 +278,33 @@ def eccentric_anomaly(e, M):
     E = M + e*sin(M)
 
     max_iters = 100
-    dM = M - (E - e*sin(E))
-    dE = dM/(1 - e*cos(E))
-    not_done = abs(dE) > 1e-14
-    iters = 1
+    iters = 0
     while iters < max_iters:
-        if not not_done.any():
-            break
-        dM[not_done] = M[not_done] - (E[not_done] - e[not_done]*sin(E[not_done]))
-        dE[not_done] = dM[not_done]/(1 - e[not_done]*cos(E[not_done]))
-        E[not_done] += dE[not_done]
+        dM = M - (E - e*sin(E))
+        dE = dM/(1 - e*cos(E))
+        E = E + dE
+        if abs(dE) < 1e-14: return E
         iters += 1
-        not_done = abs(dE) > 1e-14
-
     else:
-        raise ValueError('failed to converge')
-    return E
+        raise ValueError('Failed to converge')
+
+
+def true_anomaly_hyperbolic(e, E):
+    """Calculates true anomaly from eccentricity and eccentric anomaly.
+
+    Valid for hyperbolic orbits. Equations from the relevant Wikipedia entries.
+
+    """
+    return 2.0 * arctan(sqrt((e + 1.0) / (e - 1.0)) * tanh(E/2))
+
+
+def true_anomaly_closed(e, E):
+    """Calculates true anomaly from eccentricity and eccentric anomaly.
+
+    Valid for closed orbits. Equations from the relevant Wikipedia entries.
+
+    """
+    return 2.0 * arctan(sqrt((1.0 + e) / (1.0 - e)) * tan(E/2))
 
 
 def true_anomaly_parabolic(p, gm, M):
@@ -621,7 +611,7 @@ def propagate(position, velocity, t0, t1, gm):
     pcdot = -qovr0 / br * x * c1
     vcdot = 1 - bq / br * x * x * c2
 
-    position_prop = pc.T[newaxis, :, :]*position[:, newaxis, :] + vc.T[newaxis, :, :]*velocity[:, newaxis, :]
-    velocity_prop = pcdot.T[newaxis, :, :]*position[:, newaxis, :] + vcdot.T[newaxis, :, :]*velocity[:, newaxis, :]
+    position_prop = pc[newaxis, :, :]*position[:, :, newaxis] + vc[newaxis, :, :]*velocity[:, :, newaxis]
+    velocity_prop = pcdot[newaxis, :, :]*position[:, :, newaxis] + vcdot[newaxis, :, :]*velocity[:, :, newaxis]
 
     return squeeze(position_prop), squeeze(velocity_prop)
