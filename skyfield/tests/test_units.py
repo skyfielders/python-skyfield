@@ -42,6 +42,7 @@ def test_degree_rounding():
 
 def test_angle_scalar_strs():
     assert str(Angle(degrees=array(91))) == '''91deg 00' 00.0"'''
+    assert str(Angle(degrees=array(91), signed=True)) == '''+91deg 00' 00.0"'''
     assert str(Angle(hours=array(12))) == '''12h 00m 00.00s'''
 
 def test_angle_array_strs():

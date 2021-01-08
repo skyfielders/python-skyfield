@@ -256,19 +256,21 @@ class Angle(object):
         return self._degrees * 3600000.0
 
     def __str__(self):
-        if self.radians.size == 0:
+        size = self.radians.size
+        if size == 0:
             return 'Angle []'
+        f = '{0} values from {1} to {2}'.format
         if self.preference == 'degrees':
+            signed = self.signed
             v = self._degrees
-            f = _dstr
+            if size < 2:
+                return _dstr(v, 1, signed)
+            return f(len(v), _dstr(v[0], 1, signed), _dstr(v[-1], 1, signed))
         else:
             v = self._hours
-            f = _hstr
-        shape = getattr(v, 'shape', None)
-        if shape:
-            return "{0} values from {1} to {2}".format(
-                len(v), f(v[0]), f(v[-1]))
-        return f(v)
+            if size < 2:
+                return _hstr(v)
+            return f(len(v), _hstr(v[0]), _hstr(v[-1]))
 
     def __repr__(self):
         if self.radians.size == 0:
