@@ -2,6 +2,15 @@
 Changelog
 =========
 
+v1.36 — ?
+---------
+
+* Fixed
+  :meth:`Angle.dstr() <skyfield.units.Angle.dstr>`
+  and
+  :meth:`Angle.hstr() <skyfield.units.Angle.hstr>`
+  to return an array of strings when the angle itself is an array.
+
 v1.35 — 2020 December 31
 ------------------------
 
