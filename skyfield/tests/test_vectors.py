@@ -75,16 +75,16 @@ Sum of 2 vectors:
 Sum of 3 vectors:
  'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
  'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH
- Geodetic 399 EARTH -> IERS2010 latitude 38deg 55' 17.4" N longitude -77deg 04' 00.8" E elevation 92 m"""
+ Geodetic 399 EARTH -> IERS2010 latitude +38.9215 N longitude -77.0669 E elevation 92.0 m"""
 
     assert repr(v) == """\
 <VectorSum of 3 vectors:
  'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
  'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH
- Geodetic 399 EARTH -> IERS2010 latitude 38deg 55' 17.4" N longitude -77deg 04' 00.8" E elevation 92 m>"""
+ Geodetic 399 EARTH -> IERS2010 latitude +38.9215 N longitude -77.0669 E elevation 92.0 m>"""
 
     assert str(v.at(t)) == """\
-<Barycentric BCRS position and velocity at date t center=0 target=IERS2010 latitude 38deg 55' 17.4" N longitude -77deg 04' 00.8" E elevation 92 m>"""
+<Barycentric BCRS position and velocity at date t center=0 target=IERS2010 latitude +38.9215 N longitude -77.0669 E elevation 92.0 m>"""
 
     v = earth - mars
 

@@ -385,7 +385,7 @@ to ask “where will the satellite be *relative to* my location?”
 .. testoutput::
 
     Sum of 2 vectors:
-     Reversed Geodetic WGS84 latitude 40deg 53' 38.0" N longitude -83deg 53' 30.1" E -> 399 EARTH
+     Reversed Geodetic WGS84 latitude +40.8939 N longitude -83.8917 E elevation 0.0 m -> 399 EARTH
      EarthSatellite 399 EARTH -> ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
 
 Every time you call this vector sum’s ``at()`` method,

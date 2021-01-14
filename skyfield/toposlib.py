@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
 
-from numpy import arctan2, array, cos, exp, sin, sqrt
+from numpy import arctan2, array, array2string, cos, exp, sin, sqrt
 from .constants import ANGVEL, AU_M, DAY_S, T0, pi, tau
 from .earthlib import refract
 from .framelib import itrs
-from .functions import _T, mxm, mxv, rot_y, rot_z
+from .functions import _T, _to_array, mxm, mxv, rot_y, rot_z
 from .descriptorlib import reify
 from .units import Angle, Distance, _ltude
 from .vectorlib import VectorFunction
+
+_lat_options = {'precision': 4, 'floatmode': 'fixed', 'sign': '+',
+                'threshold': 5, 'edgeitems': 2}
+_lon_options = {'precision': 4, 'floatmode': 'fixed',
+                'threshold': 5, 'edgeitems': 2}
+_elev_options = {'precision': 1, 'floatmode': 'fixed',
+                 'threshold': 5, 'edgeitems': 2}
 
 class ITRSPosition(VectorFunction):
     """An x,y,z position in the Earth-centered Earth-fixed (ECEF) ITRS frame."""
@@ -69,10 +76,11 @@ class GeographicPosition(ITRSPosition):
 
     @reify  # not @property, so users have the option of overwriting it
     def target_name(self):
-        m = self.elevation.m
-        e = ' elevation {0:.0f} m'.format(m) if m else ''
-        return '{0} latitude {1} N longitude {2} E{3}'.format(
-            self.model.name, self.latitude, self.longitude, e)
+        return '{0} latitude {1} N longitude {2} E elevation {3} m'.format(
+            self.model.name,
+            array2string(self.latitude.degrees, **_lat_options),
+            array2string(self.longitude.degrees, **_lon_options),
+            array2string(self.elevation.m, **_elev_options))
 
     def lst_hours_at(self, t):
         """Return this position’s Local Sidereal Time in hours at time ``t``."""
@@ -131,7 +139,7 @@ class Geoid(object):
         """
         latitude = Angle(degrees=latitude_degrees)
         longitude = Angle(degrees=longitude_degrees)
-        elevation = Distance(m=elevation_m)
+        elevation = Distance(m=_to_array(elevation_m))
 
         lat = latitude.radians
         lon = longitude.radians

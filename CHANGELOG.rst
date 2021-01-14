@@ -5,6 +5,17 @@ Changelog
 v1.36 — ?
 ---------
 
+* The default ``str()`` and ``repr()`` strings
+  for geographic positions have been streamlined,
+  and no longer raise ``ValueError`` when elevation is an array.
+  They now show simple decimals
+  instead of splitting degrees of longitude and latitude
+  into minutes and seconds;
+  always show elevation, even if zero;
+  properly format NumPy arrays;
+  and abbreviate long arrays.
+  `#524 <https://github.com/skyfielders/python-skyfield/issues/524>`_
+
 * Fixed
   :meth:`Angle.dstr() <skyfield.units.Angle.dstr>`
   and

@@ -1,5 +1,5 @@
 from assay import assert_raises
-from numpy import abs, sqrt
+from numpy import abs, arange, sqrt
 
 from skyfield import constants
 from skyfield.api import Distance, load, wgs84, wms
@@ -12,6 +12,29 @@ angle = (-15, 15, 35, 45)
 def ts():
     yield load.timescale()
 
+def test_latitude_longitude_elevation_str_and_repr():
+    w = wgs84.latlon(36.7138, -112.2169, 2400.0)
+    assert str(w) == ('WGS84 latitude +36.7138 N'
+                      ' longitude -112.2169 E elevation 2400.0 m')
+    assert repr(w) == ('<GeographicPosition WGS84 latitude +36.7138 N'
+                       ' longitude -112.2169 E elevation 2400.0 m>')
+
+    w = wgs84.latlon([1.0, 2.0], [3.0, 4.0], [5.0, 6.0])
+    assert str(w) == (
+        'WGS84 latitude [+1.0000 +2.0000] N'
+        ' longitude [3.0000 4.0000] E'
+        ' elevation [5.0 6.0] m'
+    )
+    assert repr(w) == '<GeographicPosition {0}>'.format(w)
+
+    w = wgs84.latlon(arange(6.0), arange(10.0, 16.0), arange(20.0, 26.0))
+    assert str(w) == (
+        'WGS84 latitude [+0.0000 +1.0000 ... +4.0000 +5.0000] N'
+        ' longitude [10.0000 11.0000 ... 14.0000 15.0000] E'
+        ' elevation [20.0 21.0 ... 24.0 25.0] m'
+    )
+    assert repr(w) == '<GeographicPosition {0}>'.format(w)
+
 def test_raw_itrs_position():
     d = Distance(au=[1, 2, 3])
     p = ITRSPosition(d)
@@ -19,7 +42,7 @@ def test_raw_itrs_position():
     t = ts.utc(2020, 12, 16, 12, 59)
     p.at(t)
 
-def test_velocity():
+def test_wgs84_velocity_matches_actual_motion():
     # It looks like this is a sweet spot for accuracy: presumably a
     # short enough fraction of a second that the vector does not time to
     # change direction much, but long enough that the direction does not
@@ -46,7 +69,7 @@ def test_lst():
     difference_mas -= horizons_ra_offset_mas
     assert abs(difference_mas) < 1.0
 
-def test_itrf_vector():
+def test_itrs_xyz_attribute_and_itrf_xyz_method():
     top = wgs84.latlon(45.0, 0.0, elevation_m=constants.AU_M - constants.ERAD)
 
     x, y, z = top.itrs_xyz.au
