@@ -47,6 +47,7 @@ clean:
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	rm $(BUILDDIR)/html/searchindex.js
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
