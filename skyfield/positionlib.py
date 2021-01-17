@@ -149,7 +149,7 @@ class ICRF(object):
         center = self.center
         target = self.target
 
-        center_name = getattr(center, 'center_name', None)
+        center_name = getattr(center, 'target_name', None)
         if center_name is None:
             center_name = str(center)
 

@@ -205,6 +205,13 @@ def test_hadec():
     difference_mas = (ha.hours - expected_ha) * 15 * 3600 * 1e3
     assert abs(difference_mas) < 0.03
 
+    # Drive-by test of position repr.
+    assert repr(a) == (
+        '<Apparent ICRS position and velocity at date t'
+        ' center=WGS84 latitude -22.9597 N longitude -67.7873 E'
+        ' elevation 5186.0 m target=301>'
+    )
+
 # Test that the CIRS coordinate of the TIO is consistent with the Earth Rotation Angle
 # This is mostly an internal consistency check
 def test_cirs_era():
