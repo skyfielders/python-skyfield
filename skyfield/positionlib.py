@@ -286,6 +286,9 @@ class ICRF(object):
         different than the declination returned by ``radec()`` if you
         have loaded a :ref:`polar motion` file.
 
+        The coordinates are not adjusted for atmospheric refraction near
+        the horizon.
+
         """
         R = framelib.itrs.rotation_at(self.t)
         r = mxv(R, self.position.au)
