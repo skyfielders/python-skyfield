@@ -3,7 +3,7 @@
 
 from numpy import array, einsum, full, reshape, nan, nan_to_num
 from . import framelib
-from .constants import ANGVEL, AU_M, C, ERAD, DAY_S, RAD2DEG, tau
+from .constants import ANGVEL, AU_M, C, ERAD, DAY_S, RAD2DEG, pi, tau
 from .data.spice import inertial_frames
 from .descriptorlib import reify
 from .earthlib import compute_limb_angle
@@ -269,6 +269,34 @@ class ICRF(object):
         return (Angle(radians=ra, preference='hours'),
                 Angle(radians=dec, signed=True),
                 Distance(r_au))
+
+    def hadec(self):
+        """Compute hour angle, declination, and distance.
+
+        Returns a tuple of two :class:`~skyfield.units.Angle` objects
+        plus the :class:`~skyfield.units.Distance` to the target.  The
+        angles are the hour angle (±12 hours) east or west of your
+        meridian along the ITRS celestial equator, and the declination
+        (±90 degees) above or below it.  This only works for positions
+        whose center is a geographic location; otherwise, there is no
+        local meridian from which to measure the hour angle.
+
+        Because this declination is measured from the plane of the
+        Earth’s physical geographic equator, it will be slightly
+        different than the declination returned by ``radec()`` if you
+        have loaded a :ref:`polar motion` file.
+
+        """
+        R = framelib.itrs.rotation_at(self.t)
+        r = mxv(R, self.position.au)
+        au, dec, sublongtiude = to_spherical(r)
+        ha = self.center.longitude.radians - sublongtiude
+        ha += pi
+        ha %= tau
+        ha -= pi
+        return (Angle(radians=ha, preference='hours', signed=True),
+                Angle(radians=dec, signed=True),
+                Distance(au))
 
     def separation_from(self, another_icrf):
         """Return the angle between this position and another.

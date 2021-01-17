@@ -5,6 +5,9 @@ Changelog
 v1.36 — ?
 ---------
 
+* Added :meth:`~skyfield.positionlib.ICRF.hadec()` position method that
+  returns hour angle and declination.
+
 * The default ``str()`` and ``repr()`` strings
   for geographic positions have been streamlined,
   and no longer raise ``ValueError`` when elevation is an array.

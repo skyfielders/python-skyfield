@@ -182,6 +182,29 @@ def test_velocity_in_ITRF_to_GCRS2():
     acceptable_error = 4e-12
     assert relative_error < acceptable_error
 
+def test_hadec():
+    # If the DE430 ephemeris excerpt is avaiable, this test can run
+    # locally against the HA number from first line of
+    # `moon_topo_4_6_2017_mkb_sf_v5_hadec.csv.txt` at:
+    # https://github.com/skyfielders/python-skyfield/issues/510
+    #planets = api.load('de430_1850-2150.bsp')
+    #expected_ha = -0.660078756021
+
+    # But in CI, we use DE421 for space and speed.
+    planets = api.load('de421.bsp')
+    expected_ha = -0.660078752
+
+    ts = api.load.timescale()
+    ts.polar_motion_table = [0.0], [0.009587], [0.384548]
+    t = ts.utc(2017, 4, 6)
+    topos = api.wgs84.latlon(-22.959748, -67.787260, elevation_m=5186.0)
+    earth = planets['Earth']
+    moon = planets['Moon']
+    a = (earth + topos).at(t).observe(moon).apparent()
+    ha, dec, distance = a.hadec()
+    difference_mas = (ha.hours - expected_ha) * 15 * 3600 * 1e3
+    assert abs(difference_mas) < 0.03
+
 # Test that the CIRS coordinate of the TIO is consistent with the Earth Rotation Angle
 # This is mostly an internal consistency check
 def test_cirs_era():

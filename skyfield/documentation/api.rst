@@ -332,6 +332,7 @@ All positions support a basic set of methods:
    ICRF.distance
    ICRF.speed
    ICRF.radec
+   ICRF.hadec
    ICRF.separation_from
    ICRF.frame_xyz
    ICRF.frame_xyz_and_velocity
