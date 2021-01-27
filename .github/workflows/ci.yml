@@ -4,11 +4,11 @@ name: ci
 on:
   push:
     branches:
-      - action
+      - master
 
-  # pull_request:
-  #   branches:
-  #     - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   doctest-and-lint:
