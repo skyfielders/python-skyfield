@@ -47,7 +47,26 @@ clean:
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
-	rm $(BUILDDIR)/html/searchindex.js
+	cd $(BUILDDIR)/html/_static && rm -f \
+		ajax-loader.gif \
+		comment-bright.png \
+		comment-close.png \
+		comment.png \
+		doctools.js \
+		down-pressed.png \
+		down.png \
+		file.png \
+		jquery.js \
+		minus.png \
+		plus.png \
+		pygments.css \
+		searchtools.js \
+		sidebar.js \
+		underscore-1.3.1.js \
+		underscore.js \
+		up-pressed.png \
+		up.png \
+		websupport.js
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
