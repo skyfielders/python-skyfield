@@ -2,11 +2,21 @@
 Changelog
 =========
 
-v1.36 — ?
----------
+v1.36 — 2021 January 26
+-----------------------
+
+* Tweaked several lines of code that build NumPy arrays
+  to avoid a new deprecation warning
+  ``Creating an ndarray from ragged nested sequences
+  (which is a list-or-tuple of lists-or-tuples-or ndarrays
+  with different lengths or shapes) is deprecated``.
+  NumPy no longer wants to accept a simple constant like ``0.0``
+  where the resulting array needs a whole row of zeros.
+  `#536 <https://github.com/skyfielders/python-skyfield/issues/536>`_
 
 * Added :meth:`~skyfield.positionlib.ICRF.hadec()` position method that
   returns hour angle and declination.
+  `#510 <https://github.com/skyfielders/python-skyfield/issues/510>`_
 
 * The default ``str()`` and ``repr()`` strings
   for geographic positions have been streamlined,
@@ -24,6 +34,7 @@ v1.36 — ?
   and
   :meth:`Angle.hstr() <skyfield.units.Angle.hstr>`
   to return an array of strings when the angle itself is an array.
+  `#527 <https://github.com/skyfielders/python-skyfield/issues/527>`_
 
 v1.35 — 2020 December 31
 ------------------------
