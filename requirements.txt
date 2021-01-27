@@ -12,4 +12,3 @@ pytz
 sphinx==1.7.2
 spktype21
 https://github.com/brandon-rhodes/assay/archive/master.zip
--e .

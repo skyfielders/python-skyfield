@@ -25,7 +25,7 @@ then
     echo 'Error: trailing whitespace detected on the above-listed lines'
     exit 1
 fi
-if python --version | grep -q 'Python 3.6' && command -v pyflakes >/dev/null
+if python --version | grep -q 'Python 3' && command -v pyflakes >/dev/null
 then
     d=$(python -c 'import skyfield as s; print(s.__file__.rsplit("/", 1)[0])')
     pyflakes $(find "$d" -name '*.py')

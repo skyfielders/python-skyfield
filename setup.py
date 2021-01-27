@@ -4,13 +4,6 @@ from distutils.command.sdist import sdist
 
 import skyfield  # safe, because __init__.py contains no import statements
 
-extras = {
-    'tests': [
-        # TODO: add assay
-        'pytz',
-    ],
-}
-
 class my_sdist(sdist):
     def make_distribution(self):
         # See https://github.com/skyfielders/python-skyfield/issues/378
@@ -62,5 +55,4 @@ setup(
         'numpy',
         'sgp4>=2.2',
         ],
-    extras_require=extras,          # support "pip install skyfield[tests]"
 )
