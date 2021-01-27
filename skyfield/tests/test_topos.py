@@ -95,9 +95,9 @@ def test_polar_motion_when_computing_topos_position(ts):
     # "expected" comes from:
     # from novas.compat import ter2cel
     # print(ter2cel(t.whole, t.ut1_fraction, t.delta_t, xp_arcseconds,
-    #               yp_arcseconds, top.itrs_position.km, method=1))
+    #               yp_arcseconds, top.itrs_xyz.km, method=1))
 
-    expected = (3146.221313017412, -3525.955228249315, 4269.301880718039)
+    expected = (3146.2195129329143, -3525.956830124431, 4269.3018843067675)
     assert max(abs(top.at(t).position.km - expected)) < 6e-11
 
 def test_polar_motion_when_computing_altaz_coordinates(ts):
@@ -128,9 +128,10 @@ def test_polar_motion_when_computing_altaz_coordinates(ts):
     #     ra_hours, dec_degrees, 0,
     # )
     # novas_alt = 90.0 - novas_zd
+    # print(novas_alt, novas_az)
 
-    novas_alt = -58.091982532734704
-    novas_az = 1.887311822537328
+    novas_alt = -58.091983295564205
+    novas_az = 1.8872567543791035
 
     assert abs(alt.degrees - novas_alt) < 1.9e-9
     assert abs(az.degrees - novas_az) < 1.3e-7
