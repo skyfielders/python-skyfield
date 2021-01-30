@@ -310,6 +310,13 @@ def test_utc_datetime_microseconds_round_trip(ts):
     assert dt2 == dt
     assert leap_second == 0
 
+def test_utc_datetime_agrees_with_public_utc_tuple(ts):
+    # https://github.com/skyfielders/python-skyfield/issues/542
+    # The %j day-of-year was advancing to the next day before strftime.
+    t = ts.utc(2021, 1, 1, 23, 59, 59.9999798834251798497)
+    assert t.utc[:5] == (2021, 1, 1, 23, 59)
+    assert t.utc_strftime("%j") == '001'
+
 def test_iso_of_decimal_that_rounds_up(ts):
     t = ts.utc(1915, 12, 2, 3, 4, 5.6786786)
     assert t.utc_iso(places=0) == '1915-12-02T03:04:06Z'

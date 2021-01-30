@@ -539,14 +539,15 @@ class Time(object):
         Otherwise the value is truncated rather than rounded.
 
         """
-        seconds, fr, is_leap_second = self._utc_seconds(0.0)
-        seconds -= is_leap_second
-        whole, fraction = divmod(seconds, DAY_S)
-        whole2, fraction = divmod((fraction + fr) / DAY_S, 1.0)
-        whole += whole2
-        return self.ts._strftime(format, whole, fraction, is_leap_second)
+        offset, uses_ms = _strftime_offset_seconds(format)
+        year, month, day, hour, minute, second, jd = self._utc_tuple(offset, 1)
+        start_of_year = julian_day(year, 1, 1, self.ts.julian_calendar_cutoff)
+        weekday = jd % 7
+        yday = jd + 1 - start_of_year
+        return _strftime(format, year, month, day, hour, minute, second,
+                         weekday, yday, uses_ms)
 
-    def _utc_tuple(self, offset):
+    def _utc_tuple(self, offset, return_jd=False):
         """Return UTC as (year, month, day, hour, minute, second.fraction).
 
         The `offset` in seconds is added to the UTC time before it is
@@ -561,14 +562,15 @@ class Time(object):
         second, sfr, is_leap_second = self._utc_seconds(offset)
         second = second.astype(int64)
         second -= is_leap_second
-        jd, second = divmod(second + 12*60*60, 86400)
+        jd, second = divmod(second + 43200, 86400)
         cutoff = self.ts.julian_calendar_cutoff
         year, month, day = compute_calendar_date(jd, cutoff)
-        minute, second = divmod(second, 60.0)
-        minute = minute.astype(int)
+        minute, second = divmod(second, 60)
         hour, minute = divmod(minute, 60)
         second += is_leap_second
-        return year, month, day, hour, minute, second + sfr
+        if not return_jd:
+            return year, month, day, hour, minute, second + sfr
+        return year, month, day, hour, minute, second + sfr, jd
 
     def _utc_float(self, offset):
         # TODO rm
@@ -1016,6 +1018,44 @@ def _normalize_jd_and_fraction(jd, fraction):
     else:
         jd, fraction = _reconcile(jd, _to_array(fraction))
     return jd, fraction
+
+def _strftime_offset_seconds(format):
+    uses_ms = _format_uses_milliseconds(format)
+    if uses_ms:
+        offset = 1e-16  # encourage .0 to not turn into .999999
+    elif _format_uses_seconds(format):
+        offset = 0.5
+    elif _format_uses_minutes(format):
+        offset = 30.0
+    else:
+        offset = 0.0
+    return offset, uses_ms
+
+def _strftime(format, year, month, day, hour, minute, second,
+              weekday, yday, uses_ms):
+    zero = year * 0
+
+    # TODO: avoid computing yday if this is false:
+    #_format_uses_day_of_year(format)
+
+    if uses_ms:
+        format = format[:uses_ms.start()] + '%Z' + format[uses_ms.end():]
+        second = (second * 1e6).astype(int)
+        second, usec = divmod(second, 1000000)
+        if getattr(year, 'ndim', 0):
+            u = ['%06d' % u for u in usec]
+            tup = (year, month, day, hour, minute, second,
+                   weekday, yday, zero, u)
+            return [strftime(format, struct_time(t)) for t in zip(*tup)]
+        u = '%06d' % usec
+        tup = year, month, day, hour, minute, second, weekday, yday, zero, u
+        return strftime(format, struct_time(tup))
+    else:
+        second = second.astype(int)
+        tup = year, month, day, hour, minute, second, weekday, yday, zero
+        if getattr(year, 'ndim', 0):
+            return [strftime(format, item) for item in zip(*tup)]
+        return strftime(format, tup)
 
 _JulianDate_deprecation_message = """Skyfield no longer supports direct\
  instantiation of JulianDate objects (which are now called Time objects)
