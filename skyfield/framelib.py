@@ -67,6 +67,30 @@ _itrs_angvel_matrix = array((
     (0.0, 0.0, 0.0),
 ))
 
+class tirs(object):
+    """The Terrestrial Intermediate Reference System (TIRS).
+
+    This Earth-centered Earth-fixed (ECEF) coordinate system measures
+    from the axis and equator of the Earth’s rotation, ignoring the few
+    tenths of an arcsecond by which the Earth’s actual crust and its
+    continents might be askance from the axis — a difference of a few
+    tenths of an arcsecond called “polar motion”.  (More precisely: this
+    frame differs from the ITRS frame by polar motion and the CIO
+    locator.)
+
+    """
+    @staticmethod
+    def rotation_at(t):
+        return mxm(rot_z(-t.gast * tau / 24.0), t.M)
+
+    @staticmethod
+    def _dRdt_times_RT_at(t):
+        # TODO: taking the derivative of the instantaneous angular
+        # velocity provides a more accurate transform.
+        return _itrs_angvel_matrix
+
+tirs = tirs()
+
 class itrs(object):
     """The International Terrestrial Reference System (ITRS).
 
