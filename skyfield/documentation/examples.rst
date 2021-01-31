@@ -199,9 +199,9 @@ This example can serve as a template for many other kinds of custom search:
 .. testoutput::
 
     2019-01-06 04:53:35 UTC  47.0° west elongation
-    2020-03-24 22:13:33 UTC  46.1° east elongation
+    2020-03-24 22:13:32 UTC  46.1° east elongation
     2020-08-13 00:14:12 UTC  45.8° west elongation
-    2021-10-29 20:51:55 UTC  47.0° east elongation
+    2021-10-29 20:51:56 UTC  47.0° east elongation
 
 At what angle in the sky is the crescent Moon?
 ==============================================
