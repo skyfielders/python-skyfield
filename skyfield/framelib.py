@@ -75,7 +75,7 @@ class tirs(object):
     the few tenths of an arcsecond by which the Earth’s actual crust and
     continents might be askance from the axis.  (More precisely: like
     the ITRS this frame accounts for precession and nutation, but
-    neglects polar motion and the CIO locator.)
+    neglects polar motion and the TIO locator.)
 
     """
     @staticmethod
