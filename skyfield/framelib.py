@@ -70,13 +70,12 @@ _itrs_angvel_matrix = array((
 class tirs(object):
     """The Terrestrial Intermediate Reference System (TIRS).
 
-    This Earth-centered Earth-fixed (ECEF) coordinate system measures
-    from the axis and equator of the Earth’s rotation, ignoring the few
-    tenths of an arcsecond by which the Earth’s actual crust and its
-    continents might be askance from the axis — a difference of a few
-    tenths of an arcsecond called “polar motion”.  (More precisely: this
-    frame differs from the ITRS frame by polar motion and the CIO
-    locator.)
+    Coordinates in this Earth-centered Earth-fixed (ECEF) system are
+    measured from the axis and equator of the Earth’s rotation, ignoring
+    the few tenths of an arcsecond by which the Earth’s actual crust and
+    continents might be askance from the axis.  (More precisely: like
+    the ITRS this frame accounts for precession and nutation, but
+    neglects polar motion and the CIO locator.)
 
     """
     @staticmethod
