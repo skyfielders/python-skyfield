@@ -34,6 +34,21 @@ def build_matrix():
 ICRS_to_J2000 = build_matrix()
 del build_matrix
 
+_identity = array([(1,0,0), (0,1,0), (0,0,1)])
+
+class ICRS(object):
+    """The International Coordinate Reference System (ICRS).
+
+    The ICRS is a permanent reference frame which has replaced J2000,
+    with which its axes agree to within 0.02 arcseconds (closer than the
+    precision of J2000 itself).  The ICRS also supersedes older
+    equinox-based systems like B1900 and B1950.
+
+    """
+    @staticmethod
+    def rotation_at(t):
+        return _identity
+
 def build_ecliptic_matrix(t):
     # Build the matrix to rotate an ICRF vector into ecliptic coordinates.
     _, d_eps = t._nutation_angles_radians

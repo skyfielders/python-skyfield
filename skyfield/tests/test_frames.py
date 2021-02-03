@@ -1,9 +1,26 @@
 from skyfield import framelib
-from skyfield.api import Topos, load
+from skyfield.api import Topos, load, wgs84
 from skyfield.constants import ERAD
 from skyfield.positionlib import Geocentric
 
-def test_frame_rotation():
+def test_radec_and_altaz_angles_and_rates():
+    # HORIZONS test data in Skyfield repository: authorities/radec-altaz-rates
+    ts = load.timescale()
+    t = ts.utc(2021, 2, 3)
+    top = wgs84.latlon(35.1844866, 248.347300, elevation_m=2106.9128)
+    planets = load('de421.bsp')
+    a = (planets['earth'] + top).at(t).observe(planets['mars']).apparent()
+    # ra, dec, distance = a.radec('date')
+    # print(ra._degrees)
+    # print(dec._degrees)
+    frame = framelib.true_equator_and_equinox_of_date
+    dec, ra, distance = a.frame_latlon(frame)
+    arcseconds = 3600.0
+    assert abs((ra.degrees - 40.75836) * arcseconds) < 0.04
+    assert abs((dec.degrees - 17.16791) * arcseconds) < 0.005
+    # 2021-Feb-03 00:00 *    40.75836  17.16791 75.15571  25.61352 131.8839  65.2758   663.55    548.66
+
+def test_frame_round_trip():
     # Does a frame's rotation and twist get applied in the right
     # directions?  Let's test whether the position and velocity of an
     # ITRS vector (ERAD,0,0) are restored to the proper orientation.

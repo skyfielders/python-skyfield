@@ -1,0 +1,127 @@
+*******************************************************************************
+Ephemeris / WWW_USER Wed Feb  3 07:28:26 2021 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: Mars (499)                      {source: mar097}
+Center body name: Earth (399)                     {source: mar097}
+Center-site name: Northern Arizona U., Flagstaff
+*******************************************************************************
+Start time      : A.D. 2021-Feb-03 00:00:00.0000 UT
+Stop  time      : A.D. 2021-Feb-04 00:00:00.0000 UT
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : IAU_MARS                        {West-longitude positive}
+Target radii    : 3396.2 x 3396.2 x 3376.2 km     {Equator, meridian, pole}
+Center geodetic : 248.347300,35.1844866,2.1069128 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 248.347300,5220.38226,3655.8279 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : High-precision EOP model        {East-longitude positive}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: mar097}
+Rel. light bend : Sun, EARTH                      {source: mar097}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
+Atmos refraction: NO (AIRLESS)
+RA format       : DEG
+Time format     : CAL
+EOP file        : eop.210202.p210426
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2021-FEB-02. PREDICTS-> 2021-APR-25
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
+**************************************************************************************************
+ Date__(UT)__HR:MN     R.A._(a-appar)_DEC. dRA*cosD d(DEC)/dt Azi_(a-appr)_Elev dAZ*cosE d(ELV)/dt
+**************************************************************************************************
+$$SOE
+ 2021-Feb-03 00:00 *    40.75836  17.16791 75.15571  25.61352 131.8839  65.2758   663.55    548.66
+ 2021-Feb-04 00:00 *    41.29447  17.33718 75.52426  25.46823 132.4246  65.6790   666.35    543.99
+$$EOE
+**************************************************************************************************
+Column meaning:
+
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion from TDB on Earth
+regardless of observer location within the solar system, although clock
+rates may differ due to the local gravity field and no analog to "UT"
+may be defined for that location.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+
+SOLAR PRESENCE (OBSERVING SITE)
+  Time tag is followed by a blank, then a solar-presence symbol:
+
+        '*'  Daylight (refracted solar upper-limb on or above apparent horizon)
+        'C'  Civil twilight/dawn
+        'N'  Nautical twilight/dawn
+        'A'  Astronomical twilight/dawn
+        ' '  Night OR geocentric ephemeris
+
+LUNAR PRESENCE (OBSERVING SITE)
+  The solar-presence symbol is immediately followed by a lunar-presence symbol:
+
+        'm'  Refracted upper-limb of Moon on or above apparent horizon
+        ' '  Refracted upper-limb of Moon below apparent horizon OR geocentric
+             ephemeris
+
+ 'R.A._(a-appar)_DEC.' =
+  Airless apparent right ascension and declination of the target center with
+respect to an instantaneous reference frame defined by the Earth equator of-dat
+(z-axis) and meridian containing the Earth equinox of-date (x-axis, EOP-correct
+IAU76/80). Compensated for down-leg light-time delay, gravitational deflection
+of light, stellar aberration, precession & nutation. Note: equinox (RA origin)
+is offset -53 mas from the of-date frame defined by the IAU06/00a P & N system.
+
+  Units: RA  in decimal degrees, ddd.fffff{ffff}
+         DEC in decimal degrees  sdd.fffff{ffff}
+
+
+ 'dRA*cosD d(DEC)/dt' =
+  The angular rate of change in aparent RA and DEC of the target. This is
+with respect to the non-inertial IAU76/80 Earth true equator and equinox
+of-date reference frame.  d(RA)/dt is multiplied by the cosine of declination
+to provide a linear rate in the plane-of-sky. Units: ARCSECONDS PER HOUR
+
+ 'Azi_(a-appr)_Elev' =
+  Airless apparent azimuth and elevation of target center. Compensated
+for light-time, the gravitational deflection of light, stellar aberration,
+precession and nutation. Azimuth is measured clockwise from north:
+
+  North(0) -> East(90) -> South(180) -> West(270) -> North (360)
+
+Elevation angle is with respect to a plane perpendicular to the reference
+surface local zenith direction. TOPOCENTRIC ONLY.  Units: DEGREES
+
+ 'dAZ*cosE d(ELV)/dt' =
+   The rate of change of target center apparent azimuth and elevation
+(airless). d(AZ)/dt is multiplied by the cosine of the elevation angle.
+TOPOCENTRIC ONLY. Units: ARCSECOND PER MINUTE
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information  : https://ssd.jpl.nasa.gov/
+     Documentation: https://ssd.jpl.nasa.gov/?horizons_doc
+     Connect      : https://ssd.jpl.nasa.gov/?horizons (browser)
+                    telnet ssd.jpl.nasa.gov 6775       (command-line)
+                    e-mail command interface available
+                    Script and CGI interfaces available
+     Author       : Jon.D.Giorgini@jpl.nasa.gov
+
+**************************************************************************************************
