@@ -7,17 +7,44 @@ def test_radec_and_altaz_angles_and_rates():
     # HORIZONS test data in Skyfield repository: authorities/radec-altaz-rates
     ts = load.timescale()
     t = ts.utc(2021, 2, 3)
+
+    # Start with a sanity check: verify that RA and dec agree.
+
     top = wgs84.latlon(35.1844866, 248.347300, elevation_m=2106.9128)
     planets = load('de421.bsp')
     a = (planets['earth'] + top).at(t).observe(planets['mars']).apparent()
-    # ra, dec, distance = a.radec('date')
-    # print(ra._degrees)
-    # print(dec._degrees)
     frame = framelib.true_equator_and_equinox_of_date
     dec, ra, distance = a.frame_latlon(frame)
     arcseconds = 3600.0
     assert abs((ra.degrees - 40.75836) * arcseconds) < 0.04
     assert abs((dec.degrees - 17.16791) * arcseconds) < 0.005
+
+    # Angle rates of change.
+
+    from numpy import cos, sqrt
+    from skyfield.constants import tau
+
+    r, v = a.frame_xyz_and_velocity(frame)
+    x, y, z = r.km
+    xdot, ydot, zdot = v.km_per_s
+
+    # from skyfield.functions import dots, length_of
+    # radial_velocity = dots(r.km, v.km_per_s) / length_of(r.km)
+
+    x2 = x * x
+    y2 = y * y
+    x2_plus_y2 = x2 + y2
+    alt_velocity = (x2_plus_y2 * zdot - z * (x * xdot + y * ydot)) / (
+        (x2_plus_y2 + z*z) * sqrt(x2_plus_y2))
+    az_velocity = (x * ydot - xdot * y) / x2_plus_y2
+
+    arcseconds_per_hour = (
+        360.0 * 3600.0 / tau # radians to arcseconds
+        * 3600.0  # time seconds to time hours (moves farther in an hour)
+    )
+    assert round(alt_velocity * arcseconds_per_hour, 5) == 25.61352
+    assert round(az_velocity * cos(dec.radians) * arcseconds_per_hour, 4
+                 ) == round(75.15571, 4)  # TODO: get last digit to agree?
     # 2021-Feb-03 00:00 *    40.75836  17.16791 75.15571  25.61352 131.8839  65.2758   663.55    548.66
 
 def test_frame_round_trip():

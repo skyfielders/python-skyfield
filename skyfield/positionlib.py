@@ -692,7 +692,11 @@ class Astrometric(ICRF):
 
         add_aberration(target_au, bcrs_velocity, self.light_time)
 
-        apparent = Apparent(target_au, None, t, self.center, self.target)
+        v = self.velocity.au_per_d
+        if v is not None:
+            pass  # TODO: how to apply aberration and deflection to velocity?
+
+        apparent = Apparent(target_au, v, t, self.center, self.target)
         apparent.center_barycentric = self.center_barycentric
         apparent._observer_gcrs_au = observer_gcrs_au
         return apparent
