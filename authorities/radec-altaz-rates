@@ -1,5 +1,5 @@
 *******************************************************************************
-Ephemeris / WWW_USER Wed Feb  3 07:28:26 2021 Pasadena, USA      / Horizons
+Ephemeris / WWW_USER Wed Feb  3 09:27:04 2021 Pasadena, USA      / Horizons
 *******************************************************************************
 Target body name: Mars (499)                      {source: mar097}
 Center body name: Earth (399)                     {source: mar097}
@@ -28,14 +28,14 @@ Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
 Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
 Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
 Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
-**************************************************************************************************
- Date__(UT)__HR:MN     R.A._(a-appar)_DEC. dRA*cosD d(DEC)/dt Azi_(a-appr)_Elev dAZ*cosE d(ELV)/dt
-**************************************************************************************************
+*******************************************************************************************************************************
+ Date__(UT)__HR:MN     R.A._(a-appar)_DEC. dRA*cosD d(DEC)/dt Azi_(a-appr)_Elev dAZ*cosE d(ELV)/dt            delta      deldot
+*******************************************************************************************************************************
 $$SOE
- 2021-Feb-03 00:00 *    40.75836  17.16791 75.15571  25.61352 131.8839  65.2758   663.55    548.66
- 2021-Feb-04 00:00 *    41.29447  17.33718 75.52426  25.46823 132.4246  65.6790   666.35    543.99
+ 2021-Feb-03 00:00 *    40.75836  17.16791 75.15571  25.61352 131.8839  65.2758   663.55    548.66 1.21164331503552  16.7926932
+ 2021-Feb-04 00:00 *    41.29447  17.33718 75.52426  25.46823 132.4246  65.6790   666.35    543.99 1.22141536016302  16.8117398
 $$EOE
-**************************************************************************************************
+*******************************************************************************************************************************
 Column meaning:
 
 TIME
@@ -111,6 +111,12 @@ surface local zenith direction. TOPOCENTRIC ONLY.  Units: DEGREES
 (airless). d(AZ)/dt is multiplied by the cosine of the elevation angle.
 TOPOCENTRIC ONLY. Units: ARCSECOND PER MINUTE
 
+ 'delta      deldot' =
+   Apparent range ("delta", light-time aberrated) and range-rate ("delta-dot")
+of the target center relative to the observer. A positive "deldot" means the
+target center is moving away from the observer, negative indicates movement
+toward the observer.  Units: AU and KM/S
+
 
  Computations by ...
      Solar System Dynamics Group, Horizons On-Line Ephemeris System
@@ -124,4 +130,4 @@ TOPOCENTRIC ONLY. Units: ARCSECOND PER MINUTE
                     Script and CGI interfaces available
      Author       : Jon.D.Giorgini@jpl.nasa.gov
 
-**************************************************************************************************
+*******************************************************************************************************************************

@@ -1,6 +1,6 @@
 from skyfield import framelib
 from skyfield.api import Topos, load, wgs84
-from skyfield.constants import ERAD
+from skyfield.constants import AU_M, ERAD
 from skyfield.positionlib import Geocentric
 
 def test_radec_and_altaz_angles_and_rates():
@@ -15,9 +15,11 @@ def test_radec_and_altaz_angles_and_rates():
     a = (planets['earth'] + top).at(t).observe(planets['mars']).apparent()
     frame = framelib.true_equator_and_equinox_of_date
     dec, ra, distance = a.frame_latlon(frame)
+
     arcseconds = 3600.0
     assert abs((ra.degrees - 40.75836) * arcseconds) < 0.04
     assert abs((dec.degrees - 17.16791) * arcseconds) < 0.005
+    assert abs(distance.m - 1.21164331503552 * AU_M) < 120.0
 
     # Angle rates of change.
 
@@ -25,12 +27,15 @@ def test_radec_and_altaz_angles_and_rates():
     from skyfield.constants import tau
 
     r, v = a.frame_xyz_and_velocity(frame)
-    x, y, z = r.km
-    xdot, ydot, zdot = v.km_per_s
+    r = r.km
+    v = v.km_per_s
 
-    # from skyfield.functions import dots, length_of
-    # radial_velocity = dots(r.km, v.km_per_s) / length_of(r.km)
+    x, y, z = r
+    xdot, ydot, zdot = v
 
+    from skyfield.functions import dots, length_of
+
+    radial_velocity_m_per_s = dots(r, v) / length_of(r)
     x2 = x * x
     y2 = y * y
     x2_plus_y2 = x2 + y2
@@ -45,7 +50,7 @@ def test_radec_and_altaz_angles_and_rates():
     assert round(alt_velocity * arcseconds_per_hour, 5) == 25.61352
     assert round(az_velocity * cos(dec.radians) * arcseconds_per_hour, 4
                  ) == round(75.15571, 4)  # TODO: get last digit to agree?
-    # 2021-Feb-03 00:00 *    40.75836  17.16791 75.15571  25.61352 131.8839  65.2758   663.55    548.66
+    assert abs(radial_velocity_m_per_s - 16.7926932) < 2e-5
 
 def test_frame_round_trip():
     # Does a frame's rotation and twist get applied in the right
