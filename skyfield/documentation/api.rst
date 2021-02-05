@@ -337,6 +337,7 @@ All positions support a basic set of methods:
    ICRF.frame_xyz
    ICRF.frame_xyz_and_velocity
    ICRF.frame_latlon
+   ICRF.frame_latlon_and_rates
    ICRF.from_time_and_frame_vectors
    ICRF.is_sunlit
    ICRF.from_altaz

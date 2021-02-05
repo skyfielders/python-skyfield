@@ -443,7 +443,8 @@ class ICRF(object):
     def frame_latlon_and_rates(self, frame):
         """Return a reference frame longitude, latitude, range, and rates.
 
-        Returns a 6-element tuple:
+        Returns a 6-element tuple of 3 coordinates and 3 coordinate
+        rates-of-change for this position in the given reference frame:
 
         * Latitude :class:`~skyfield.units.Angle` from +90° north to −90° south
         * Longitude :class:`~skyfield.units.Angle` 0°–360° east
@@ -451,6 +452,13 @@ class ICRF(object):
         * Latitude :class:`~skyfield.units.AngleRate`
         * Longnitude :class:`~skyfield.units.AngleRate`
         * Radial :class:`~skyfield.units.Velocity`
+
+        If the reference frame is the ICRS, or is J2000, or otherwise
+        involves the celestial equator and pole, then the latitude and
+        longitude returned will measure what are more commonly called
+        “declination” and “right ascension”.  Note that right ascension
+        is usually expressed as hours (24 in a circle), rather than in
+        the degrees that this routine will return.
 
         """
         r, v = self.frame_xyz_and_velocity(frame)
