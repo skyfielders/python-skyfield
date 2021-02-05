@@ -19,3 +19,9 @@ they return instances of the following classes.
 
 .. autoclass:: Angle
    :members:
+
+.. autoclass:: AngleRate
+   :members:
+
+.. autoclass:: Rate
+   :members:

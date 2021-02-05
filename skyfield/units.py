@@ -195,22 +195,27 @@ class AngleRate(object):
 
     @reify
     def radians(self):
+        """:class:`Rate` of change in radians."""
         return Rate._from_per_day(self._radians_per_day)
 
     @reify
     def degrees(self):
+        """:class:`Rate` of change in degrees."""
         return Rate._from_per_day(self._radians_per_day / tau * 360.0)
 
     @reify
     def arcminutes(self):
+        """:class:`Rate` of change in arcminutes."""
         return Rate._from_per_day(self._radians_per_day / tau * 21600.0)
 
     @reify
     def arcseconds(self):
+        """:class:`Rate` of change in arcseconds."""
         return Rate._from_per_day(self._radians_per_day / tau * 1296000.0)
 
     @reify
     def mas(self):
+        """:class:`Rate` of change in milliarcseconds."""
         return Rate._from_per_day(self._radians_per_day / tau * 1.296e9)
 
     # TODO: str; repr; conversion to AstroPy units
@@ -228,18 +233,22 @@ class Rate(object):
 
     @reify
     def per_day(self):
+        """Units per day of Terrestrial Time."""
         return self._per_day
 
     @reify
     def per_hour(self):
+        """Units per hour of Terrestrial Time."""
         return self._per_day / 24.0
 
     @reify
     def per_minute(self):
+        """Units per minute of Terrestrial Time."""
         return self._per_day / 1440.0
 
     @reify
     def per_second(self):
+        """Units per second of Terrestrial Time."""
         return self._per_day / 86400.0
 
 _iter_message = """\

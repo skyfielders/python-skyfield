@@ -422,6 +422,7 @@ Units
 `Distance`            Distance
 `Velocity`            Velocity
 `Angle`               Angle
+`AngleRate`           Rate at which an angle is changing
 ===================== ==================================================
 
 All three kinds of quantity support one or more methods.
@@ -451,6 +452,15 @@ All three kinds of quantity support one or more methods.
    Angle.dms
    Angle.signed_dms
    Angle.dstr
+   AngleRate.radians
+   AngleRate.degrees
+   AngleRate.arcminutes
+   AngleRate.arcseconds
+   AngleRate.mas
+   Rate.per_day
+   Rate.per_hour
+   Rate.per_minute
+   Rate.per_second
 
 Trigonometry
 ============
