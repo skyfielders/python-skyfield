@@ -1,3 +1,4 @@
+from numpy import cos
 from skyfield import framelib
 from skyfield.api import Topos, load, wgs84
 from skyfield.constants import AU_M, ERAD
@@ -14,7 +15,8 @@ def test_radec_and_altaz_angles_and_rates():
     planets = load('de421.bsp')
     a = (planets['earth'] + top).at(t).observe(planets['mars']).apparent()
     frame = framelib.true_equator_and_equinox_of_date
-    dec, ra, distance = a.frame_latlon(frame)
+    dec, ra, distance, dec_rate, ra_rate, range_rate = (
+        a.frame_latlon_and_rates(frame))
 
     arcseconds = 3600.0
     assert abs((ra.degrees - 40.75836) * arcseconds) < 0.04
@@ -23,34 +25,10 @@ def test_radec_and_altaz_angles_and_rates():
 
     # Angle rates of change.
 
-    from numpy import cos, sqrt
-    from skyfield.constants import tau
-
-    r, v = a.frame_xyz_and_velocity(frame)
-    r = r.km
-    v = v.km_per_s
-
-    x, y, z = r
-    xdot, ydot, zdot = v
-
-    from skyfield.functions import dots, length_of
-
-    radial_velocity_m_per_s = dots(r, v) / length_of(r)
-    x2 = x * x
-    y2 = y * y
-    x2_plus_y2 = x2 + y2
-    alt_velocity = (x2_plus_y2 * zdot - z * (x * xdot + y * ydot)) / (
-        (x2_plus_y2 + z*z) * sqrt(x2_plus_y2))
-    az_velocity = (x * ydot - xdot * y) / x2_plus_y2
-
-    arcseconds_per_hour = (
-        360.0 * 3600.0 / tau # radians to arcseconds
-        * 3600.0  # time seconds to time hours (moves farther in an hour)
-    )
-    assert round(alt_velocity * arcseconds_per_hour, 5) == 25.61352
-    assert round(az_velocity * cos(dec.radians) * arcseconds_per_hour, 4
-                 ) == round(75.15571, 4)  # TODO: get last digit to agree?
-    assert abs(radial_velocity_m_per_s - 16.7926932) < 2e-5
+    assert round(dec_rate.arcseconds.per_hour, 5) == 25.61352
+    assert round(ra_rate.arcseconds.per_hour * cos(dec.radians),
+                 4) == round(75.15571, 4)  # TODO: get last digit to agree?
+    assert abs(range_rate.km_per_s - 16.7926932) < 2e-5
 
 def test_frame_round_trip():
     # Does a frame's rotation and twist get applied in the right

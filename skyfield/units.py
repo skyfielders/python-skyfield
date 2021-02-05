@@ -124,6 +124,8 @@ class Velocity(object):
     """
     _warned = False
 
+    # TODO: consider reworking this class to return a Rate object.
+
     def __init__(self, au_per_d=None, km_per_s=None):
         if km_per_s is not None:
             au_per_d = km_per_s * DAY_S / AU_KM
@@ -166,6 +168,66 @@ class Velocity(object):
         """Convert this velocity to the given AstroPy unit."""
         from astropy.units import au, d
         return (self.au_per_d * au / d).to(unit)
+
+class AngleRate(object):
+    """The rate at which an angle is changing."""
+
+    # TODO: design and implement public constructor.
+
+    @classmethod
+    def _from_radians_per_day(cls, radians_per_day):
+        ar = cls()
+        ar._radians_per_day = radians_per_day
+        return ar
+
+    @reify
+    def radians(self):
+        return Rate._from_per_day(self._radians_per_day)
+
+    @reify
+    def degrees(self):
+        return Rate._from_per_day(self._radians_per_day / tau * 360.0)
+
+    @reify
+    def arcminutes(self):
+        return Rate._from_per_day(self._radians_per_day / tau * 21600.0)
+
+    @reify
+    def arcseconds(self):
+        return Rate._from_per_day(self._radians_per_day / tau * 1296000.0)
+
+    @reify
+    def mas(self):
+        return Rate._from_per_day(self._radians_per_day / tau * 1.296e9)
+
+    # TODO: str; repr; conversion to AstroPy units
+
+class Rate(object):
+    """Measurement whose denominator is time."""
+
+    # TODO: design and implement public constructor.
+
+    @classmethod
+    def _from_per_day(cls, per_day):
+        r = cls()
+        r._per_day = per_day
+        return r
+
+    @reify
+    def per_day(self):
+        return self._per_day
+
+    @reify
+    def per_hour(self):
+        return self._per_day / 24.0
+
+    @reify
+    def per_minute(self):
+        return self._per_day / 1440.0
+
+    @reify
+    def per_second(self):
+        return self._per_day / 86400.0
 
 _iter_message = """\
 cannot directly unpack a {cls} into several values

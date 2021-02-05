@@ -8,13 +8,13 @@ from .data.spice import inertial_frames
 from .descriptorlib import reify
 from .earthlib import compute_limb_angle
 from .functions import (
-    _T, _to_array, angle_between, from_spherical,
+    _T, _to_array, _to_spherical_and_rates, angle_between, from_spherical,
     length_of, mxm, mxv, rot_z, to_spherical,
 )
 from .geometry import intersect_line_and_sphere
 from .relativity import add_aberration, add_deflection
 from .timelib import Time
-from .units import Angle, Distance, Velocity, _interpret_angle
+from .units import Angle, AngleRate, Distance, Velocity, _interpret_angle
 
 _ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GIGAPARSEC_AU = 206264806247096.38  # 1e9 * 360 * 3600 / tau
@@ -439,6 +439,30 @@ class ICRF(object):
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
                 Distance(d))
+
+    def frame_latlon_and_rates(self, frame):
+        """Return a reference frame longitude, latitude, range, and rates.
+
+        Returns a 6-element tuple:
+
+        * Latitude :class:`~skyfield.units.Angle` from +90° north to −90° south
+        * Longitude :class:`~skyfield.units.Angle` 0°–360° east
+        * Radial :class:`~skyfield.units.Distance`
+        * Latitude :class:`~skyfield.units.AngleRate`
+        * Longnitude :class:`~skyfield.units.AngleRate`
+        * Radial :class:`~skyfield.units.Velocity`
+
+        """
+        r, v = self.frame_xyz_and_velocity(frame)
+        r = r.au
+        v = v.au_per_d
+        d, lat, lon, d_rate, lat_rate, lon_rate = _to_spherical_and_rates(r, v)
+        return (Angle(radians=lat, signed=True),
+                Angle(radians=lon),
+                Distance(d),
+                AngleRate._from_radians_per_day(lat_rate),
+                AngleRate._from_radians_per_day(lon_rate),
+                Velocity(d_rate))
 
     def to_skycoord(self, unit=None):
         """Convert this distance to an AstroPy ``SkyCoord`` object."""

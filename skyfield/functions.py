@@ -80,6 +80,25 @@ def to_spherical(xyz):
     phi = arctan2(y, x) % tau
     return r, theta, phi
 
+def _to_spherical_and_rates(r, v):
+    # Convert Cartesian rate and velocity vectors to angles and rates.
+    x, y, z = r
+    xdot, ydot, zdot = v
+
+    length = length_of(r)
+    lat = arcsin(z / (length + _AVOID_DIVIDE_BY_ZERO))
+    lon = arctan2(y, x) % tau
+    range_rate = dots(r, v) / length_of(r)
+
+    x2 = x * x
+    y2 = y * y
+    x2_plus_y2 = x2 + y2 + _AVOID_DIVIDE_BY_ZERO
+    lat_rate = (x2_plus_y2 * zdot - z * (x * xdot + y * ydot)) / (
+        (x2_plus_y2 + z*z) * sqrt(x2_plus_y2))
+    lon_rate = (x * ydot - xdot * y) / x2_plus_y2
+
+    return length, lat, lon, range_rate, lat_rate, lon_rate
+
 def from_spherical(r, theta, phi):
     """Convert ``(r, theta, phi)`` to Cartesian coordinates ``[x y z]``.
 
