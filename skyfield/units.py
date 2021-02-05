@@ -46,6 +46,7 @@ class Distance(object):
     def __init__(self, au=None, km=None, m=None):
         if au is not None:
             self.au = _to_array(au)
+            """Astronomical units."""
         elif km is not None:
             self.km = _to_array(km)
             self.au = km / AU_KM
@@ -62,11 +63,17 @@ class Distance(object):
         return self
 
     @reify
+    def au(self):  # Empty property to provide Sphinx docstring.
+        """Astronomical units."""
+
+    @reify
     def km(self):
+        """Kilometers."""
         return self.au * AU_KM
 
     @reify
     def m(self):
+        """Meters."""
         return self.au * AU_M
 
     @reify
@@ -132,11 +139,17 @@ class Velocity(object):
         self.au_per_d = _to_array(au_per_d)
 
     @reify
+    def au_per_d(self):  # Empty property to provide Sphinx docstring.
+        """Astronomical units per day."""
+
+    @reify
     def km_per_s(self):
+        """Kilometers per second."""
         return self.au_per_d * AU_KM / DAY_S
 
     @reify
     def m_per_s(self):
+        """Meters per second."""
         return self.au_per_d * AU_M / DAY_S
 
     @reify
@@ -286,6 +299,10 @@ class Angle(object):
         return self
 
     @reify
+    def radians(self):  # Empty property to provide Sphinx docstring.
+        """Radians (𝜏 = 2𝜋 in a circle)."""
+
+    @reify
     def _hours(self):
         return self.radians * 24.0 / tau
 
@@ -295,12 +312,14 @@ class Angle(object):
 
     @reify
     def hours(self):
+        """Hours (24 in a circle)."""
         if self.preference != 'hours':
             raise WrongUnitError('hours')
         return self._hours
 
     @reify
     def degrees(self):
+        """Degrees (360° in a circle)."""
         if self.preference != 'degrees':
             raise WrongUnitError('degrees')
         return self._degrees

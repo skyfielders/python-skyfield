@@ -419,27 +419,28 @@ Units
 .. currentmodule:: skyfield.units
 
 ===================== ==================================================
-`Distance`            Distance measure.
-``Distance.au``       Astronomical Units.
-``Distance.km``       Kilometers.
-``Distance.m``        Meters.
-`Velocity`            Velocity measure.
-``Velocity.au_per_d`` Astronomical Units.
-``Velocity.km_per_s`` Kilometers.
-`Angle`               Angle measure.
-``Angle.degrees``     Degrees of arc (360 in a complete circle).
-``Angle.hours``       Hours of arc (24 in a complete circle).
-``Angle.radians``     Radians (τ = 2π in a complete circle).
+`Distance`            Distance
+`Velocity`            Velocity
+`Angle`               Angle
 ===================== ==================================================
 
 All three kinds of quantity support one or more methods.
 
 .. autosummary::
 
+   Distance.au
+   Distance.km
+   Distance.m
    Distance.length
    Distance.light_seconds
    Distance.to
+   Velocity.au_per_d
+   Velocity.km_per_s
+   Velocity.m_per_s
    Velocity.to
+   Angle.radians
+   Angle.hours
+   Angle.degrees
    Angle.arcminutes
    Angle.arcseconds
    Angle.mas
