@@ -146,14 +146,11 @@ def compute_constellation(ra, dec, sorted_ra, sorted_dec, sorted_consts, grid):
 def extend(s):
     """Return a float for `s` extended to machine precision.
 
-    Takes a string like '13.6667', extends it to >30 digits by
-    duplicating the second-to-last character ('6' and not '7' because
-    the '7' in many cases will have been rounded), and passes it to
-    `float()`.
+    Takes a string like '13.6667', passes it to `float()`,
+    and snaps it to the nearest whole second.
 
     """
-    s = s[:-2] + 30 * s[-2:-1] + s[-1:]
-    return float(s)
+    return round(3600 * float(s)) / 3600.
 
 # Some discarded code that I might want to revive someday: how to grow
 # and shrink a list of segments as new ones supersede old ones on the
