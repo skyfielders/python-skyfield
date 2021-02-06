@@ -8,12 +8,12 @@ def test_radec_and_altaz_angles_and_rates():
     # HORIZONS test data in Skyfield repository: authorities/radec-altaz-rates
     ts = load.timescale()
     t = ts.utc(2021, 2, 3)
-
-    # Start with a sanity check: verify that RA and dec agree.
-
     top = wgs84.latlon(35.1844866, 248.347300, elevation_m=2106.9128)
     planets = load('de421.bsp')
     a = (planets['earth'] + top).at(t).observe(planets['mars']).apparent()
+
+    # First, verify RA and declination.
+
     frame = framelib.true_equator_and_equinox_of_date
     dec, ra, distance, dec_rate, ra_rate, range_rate = (
         a.frame_latlon_and_rates(frame))
@@ -23,12 +23,28 @@ def test_radec_and_altaz_angles_and_rates():
     assert abs((dec.degrees - 17.16791) * arcseconds) < 0.005
     assert abs(distance.m - 1.21164331503552 * AU_M) < 120.0
 
-    # Angle rates of change.
+    # Verify RA and declination rates of change.
 
     assert round(dec_rate.arcseconds.per_hour, 5) == 25.61352
     assert round(ra_rate.arcseconds.per_hour * cos(dec.radians),
                  4) == round(75.15571, 4)  # TODO: get last digit to agree?
     assert abs(range_rate.km_per_s - 16.7926932) < 2e-5
+
+    # Verify altitude and azimuth.
+
+    frame = top
+    alt, az, distance, alt_rate, az_rate, range_rate = (
+        a.frame_latlon_and_rates(frame))
+
+    assert round(alt.degrees, 4) == 65.2758
+    assert round(az.degrees, 4) == 131.8839
+    assert abs(distance.m - 1.21164331503552 * AU_M) < 120.0
+
+    # Verify altitude and azimuth rates of change.
+
+    assert abs(range_rate.km_per_s - 16.7926932) < 2e-5
+    assert round(alt_rate.arcseconds.per_minute, 2) == 548.66
+    assert round(az_rate.arcseconds.per_minute * cos(alt.radians), 2) == 663.55
 
 def test_frame_round_trip():
     # Does a frame's rotation and twist get applied in the right

@@ -4,10 +4,14 @@ from numpy import arctan2, array, array2string, cos, exp, sin, sqrt
 from .constants import ANGVEL, AU_M, DAY_S, T0, pi, tau
 from .earthlib import refract
 from .framelib import itrs
-from .functions import _T, _to_array, mxm, mxv, rot_y, rot_z
+from .functions import (
+    _T, _to_array, angular_velocity_matrix, mxm, mxv, rot_y, rot_z,
+)
 from .descriptorlib import reify
 from .units import Angle, Distance, _ltude
 from .vectorlib import VectorFunction
+
+_EARTH_ANGULAR_VELOCITY_VECTOR = array((0, 0, -DAY_S * ANGVEL))
 
 _lat_options = {'precision': 4, 'floatmode': 'fixed', 'sign': '+',
                 'threshold': 5, 'edgeitems': 2}
@@ -108,6 +112,12 @@ class GeographicPosition(ITRSPosition):
     def rotation_at(self, t):
         """Compute rotation from GCRS to this location’s altazimuth system."""
         return mxm(self._R_latlon, itrs.rotation_at(t))
+
+    def _dRdt_times_RT_at(self, t):
+        # TODO: taking the derivative of the instantaneous angular
+        # velocity would provide a more accurate transform.
+        R = -rot_y(self.latitude.radians)[::-1]
+        return angular_velocity_matrix(mxv(R, _EARTH_ANGULAR_VELOCITY_VECTOR))
 
 class Geoid(object):
     """An Earth ellipsoid; maps latitudes and longitudes to x,y,z positions."""

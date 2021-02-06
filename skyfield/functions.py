@@ -140,6 +140,11 @@ def rot_z(theta):
     one = zero + 1.0
     return array(((c, -s, zero), (s, c, zero), (zero, zero, one)))
 
+def angular_velocity_matrix(angular_velocity_vector):
+    x, y, z = angular_velocity_vector
+    zero = x * 0.0
+    return array(((zero, -z, y), (z, zero, -x), (-y, x, zero)))
+
 def _to_array(value):
     """Convert plain Python sequences into NumPy arrays.
 
