@@ -443,14 +443,14 @@ class ICRF(object):
     def frame_latlon_and_rates(self, frame):
         """Return a reference frame longitude, latitude, range, and rates.
 
-        Returns a 6-element tuple of 3 coordinates and 3 coordinate
-        rates-of-change for this position in the given reference frame:
+        Return a 6-element tuple of 3 coordinates and 3 rates-of-change
+        for this position in the given reference ``frame``:
 
         * Latitude :class:`~skyfield.units.Angle` from +90° north to −90° south
         * Longitude :class:`~skyfield.units.Angle` 0°–360° east
         * Radial :class:`~skyfield.units.Distance`
         * Latitude :class:`~skyfield.units.AngleRate`
-        * Longnitude :class:`~skyfield.units.AngleRate`
+        * Longitude :class:`~skyfield.units.AngleRate`
         * Radial :class:`~skyfield.units.Velocity`
 
         If the reference frame is the ICRS, or is J2000, or otherwise
