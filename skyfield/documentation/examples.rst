@@ -12,6 +12,58 @@ to solve a general problem,
 that should provide readers with a basis
 for solving other similar problems of their own.
 
+.. testsetup::
+
+   __import__('skyfield.tests.fixes').tests.fixes.setup(
+       (2020, 4, 19, 17, 58))
+
+What time is solar noon, when the Sun transits the meridian?
+============================================================
+
+The Earth travels fastest in its orbit
+when closest to the Sun in January,
+and slowest in July when they are farthest apart.
+This stretches out January days by around 10 seconds,
+shortens July days by the same amount,
+and means that your watch never reads exactly 12:00
+when the Sun transits your meridian at “solar noon”.
+
+You can compute solar noon
+by asking at what time the Sun transits the meridian at your location.
+To learn the time of solar noon today, for example, you might do this:
+
+.. testcode::
+
+    import datetime as dt
+    from pytz import timezone
+    from skyfield import almanac
+    from skyfield.api import N, W, wgs84, load
+
+    zone = timezone('US/Eastern')
+    now = zone.localize(dt.datetime.now())
+    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    next_midnight = midnight + dt.timedelta(days=1)
+
+    ts = load.timescale()
+    t0 = ts.from_datetime(midnight)
+    t1 = ts.from_datetime(next_midnight)
+    eph = load('de421.bsp')
+    bluffton = wgs84.latlon(40.8939 * N, 83.8917 * W)
+
+    f = almanac.meridian_transits(eph, eph['Sun'], bluffton)
+    times, events = almanac.find_discrete(t0, t1, f)
+
+    # Select transits instead of antitransits.
+    times = times[events == 1]
+
+    t = times[0]
+    tstr = str(t.astimezone(zone))[:19]
+    print('Solar noon:', tstr)
+
+.. testoutput::
+
+    Solar noon: 2020-04-19 13:34:33
+
 When will it get dark tonight?
 ==============================
 
@@ -22,11 +74,6 @@ to see the stars —
 or how early I need to rise to see the morning sky:
 
 .. TODO Figure out how to use the timezone itself to find day start/end.
-
-.. testsetup::
-
-   __import__('skyfield.tests.fixes').tests.fixes.setup(
-       (2020, 4, 19, 17, 58))
 
 .. testcode::
 
