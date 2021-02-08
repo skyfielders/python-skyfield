@@ -142,5 +142,5 @@ def solar_terms(ephemeris):
         _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
         return (slon.radians // (tau / 24) % 24).astype(int)
 
-    solar_term_at.rough_period = 15.0
+    solar_term_at.step_days = 14.0
     return solar_term_at

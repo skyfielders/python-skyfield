@@ -43,7 +43,7 @@ def f(t):
     t._nutation_angles = iau2000b(t.tt)
     return sat.at(t).is_sunlit(eph)
 
-f.rough_period = 0.001
+f.step_days = 0.001
 
 T0 = time()
 t2, y2 = almanac.find_discrete(pass_start, pass_end, f, epsilon=half_second)

@@ -230,19 +230,17 @@ class EarthSatellite(VectorFunction):
         orbits_per_minute = self.model.no_kozai / tau
         orbits_per_day = 24 * 60 * orbits_per_minute
 
-        # Note the protection against zero orbits_per_day.  I have not
-        # yet learned with which satellite caused a user to run into a
-        # ZeroDivisionError here, and without a concrete example I have
-        # little sense of whether 1.0 is a good fallback value or not.
-        rough_period = 1.0 / orbits_per_day if orbits_per_day else 1.0
+        # Note the protection against zero orbits_per_day.
+        # TODO: why isn't 3 samples per orbit enough?
+        step_days = 0.05 / max(orbits_per_day, 1.0)
 
         # Long-period satellites might rise each day not because of
         # their own motion, but because the Earth rotates under them, so
         # check position at least each quarter-day.  We might need to
         # tighten this even further if experience someday shows it
         # missing a pass of a particular satellite.
-        if rough_period > 0.25:
-            rough_period = 0.25
+        if step_days > 0.25:
+            step_days = 0.25
 
         def cheat(t):
             """Avoid computing expensive values that cancel out anyway."""
@@ -253,7 +251,7 @@ class EarthSatellite(VectorFunction):
             cheat(t)
             return at(t).altaz()[0].degrees
 
-        altitude_at.rough_period = rough_period
+        altitude_at.step_days = step_days
         tmax, altitude = find_maxima(t0, t1, altitude_at, half_second, 12)
         if not tmax:
             return tmax, ones_like(tmax)

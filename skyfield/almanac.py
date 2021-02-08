@@ -87,7 +87,7 @@ def seasons(ephemeris):
         _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
         return (slon.radians // (tau / 4) % 4).astype(int)
 
-    season_at.rough_period = 90.0
+    season_at.step_days = 90.0
     return season_at
 
 MOON_PHASES = [
@@ -132,7 +132,7 @@ def moon_phases(ephemeris):
         _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
         return ((mlon.radians - slon.radians) // (tau / 4) % 4).astype(int)
 
-    moon_phase_at.rough_period = 7.0  # one lunar phase per week
+    moon_phase_at.step_days = 7.0  # one lunar phase per week
     return moon_phase_at
 
 MOON_NODES = [
@@ -157,7 +157,7 @@ def moon_nodes(ephemeris):
         lat, _, _ = e.observe(moon).apparent().ecliptic_latlon('date')
         return lat.radians > 0.0
 
-    moon_node_at.rough_period = 14.0  # one node each half lunar month
+    moon_node_at.step_days = 14.0  # one node each half lunar month
     return moon_node_at
 
 CONJUNCTIONS = [
@@ -182,7 +182,7 @@ def oppositions_conjunctions(ephemeris, target):
         _, tlon, _ = e.observe(target).apparent().ecliptic_latlon()
         return ((slon.radians - tlon.radians) / pi % 2.0).astype('int8')
 
-    leading_or_trailing.rough_period = 60  # Mercury
+    leading_or_trailing.step_days = 40  # Mercury
     return leading_or_trailing
 
 MERIDIAN_TRANSITS = ['Antimeridian transit', 'Meridian transit']
@@ -210,7 +210,7 @@ def meridian_transits(ephemeris, target, topos):
         ra2, _, _ = topos_at(t).observe(target).apparent().radec(epoch='date')
         return (ra1.radians - ra2.radians) % tau < pi
 
-    west_of_meridian_at.rough_period = 0.5  # twice a day
+    west_of_meridian_at.step_days = 0.4  # twice a day
     return west_of_meridian_at
 
 def sunrise_sunset(ephemeris, topos):
@@ -246,7 +246,7 @@ def sunrise_sunset(ephemeris, topos):
         t._nutation_angles_radians = iau2000b_radians(t)
         return topos_at(t).observe(sun).apparent().altaz()[0].degrees >= -0.8333
 
-    is_sun_up_at.rough_period = 0.5  # twice a day
+    is_sun_up_at.step_days = 0.15  # catch days at least 4 hours long
     return is_sun_up_at
 
 TWILIGHTS = {
@@ -284,7 +284,7 @@ def dark_twilight_day(ephemeris, topos):
         r[degrees >= -0.8333] = 4
         return r
 
-    is_it_dark_twilight_day_at.rough_period = 0.5  # twice a day
+    is_it_dark_twilight_day_at.step_days = 0.15  # see "is_sun_up_at()" above
     return is_it_dark_twilight_day_at
 
 def risings_and_settings(ephemeris, target, topos,
@@ -307,5 +307,5 @@ def risings_and_settings(ephemeris, target, topos,
         t._nutation_angles_radians = iau2000b_radians(t)
         return topos_at(t).observe(target).apparent().altaz()[0].degrees > h
 
-    is_body_up_at.rough_period = 0.5  # twice a day
+    is_body_up_at.step_days = 0.25
     return is_body_up_at

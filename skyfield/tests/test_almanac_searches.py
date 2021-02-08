@@ -19,7 +19,7 @@ def make_stairstep_f(steps):
     def f(t):
         # For each time, sum how many of the values in `steps` it surpasses.
         return np.greater_equal.outer(t.tt, steps).sum(axis=1)
-    f.rough_period = 1.0
+    f.step_days = 0.3
     return f
 
 def is_close(value, expected):
@@ -72,14 +72,14 @@ def make_mountain_range_f(peaks):
     def f(t):
         # For each time, sum how many of the values in `steps` it surpasses.
         return -abs(np.subtract.outer(t.tt, peaks)).min(axis=1)
-    f.rough_period = 1.0
+    f.step_days = 0.3
     return f
 
 def test_finding_enough_maxima():
-    # If the rough period is close, no maxima should be skipped.
+    # If the step size is small enough, no maxima should be skipped.
     t0, t1 = make_t()
     f = make_mountain_range_f(np.linspace(0.01, 0.99, 30))
-    f.rough_period = 1.0 / 30.0
+    f.step_days = 0.03 / 2.0  # Half of the expected period
     t, y = find_maxima(t0, t1, f, epsilon, 12)
     assert len(t) == len(y) == 30
 
