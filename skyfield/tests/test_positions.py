@@ -4,14 +4,17 @@ from skyfield.constants import DAY_S, tau
 from skyfield.earthlib import earth_rotation_angle
 from skyfield.framelib import true_equator_and_equinox_of_date
 from skyfield.functions import from_spherical, length_of, mxv, rot_z
-from skyfield.positionlib import ICRF, ITRF_to_GCRS2, _GIGAPARSEC_AU
+from skyfield.positionlib import Geocentric, ICRF, ITRF_to_GCRS2, _GIGAPARSEC_AU
 from skyfield.starlib import Star
 from .fixes import low_precision_ERA
 
 def test_subtraction():
-    p0 = ICRF((10,20,30), (40,50,60))
-    p1 = ICRF((1,2,3), (4,5,6))
+    p0 = ICRF((10,20,30), (40,50,60), center=0, target=499)
+    p1 = ICRF((1,2,3), (4,5,6), center=0, target=399)
     p = p0 - p1
+    assert p.center == 399
+    assert p.target == 499
+    assert isinstance(p, Geocentric)
     assert tuple(p.position.au) == (9, 18, 27)
     assert tuple(p.velocity.au_per_d) == (36, 45, 54)
 

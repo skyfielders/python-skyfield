@@ -168,13 +168,12 @@ class ICRF(object):
 
     def __sub__(self, body):
         """Subtract two ICRF vectors to produce a third."""
-        # TODO: set center and target of result
         p = self.position.au - body.position.au
         if self.velocity is None or body.velocity is None:
             v = None
         else:
             v = self.velocity.au_per_d - body.velocity.au_per_d
-        return ICRF(p, v, self.t)
+        return build_position(p, v, self.t, body.target, self.target)
 
     def __getitem__(self, i):
         return type(self)(
