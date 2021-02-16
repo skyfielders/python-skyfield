@@ -1,10 +1,7 @@
 """Simple distance, velocity, and angle support for Skyfield.
 
 """
-from __future__ import print_function
-
 import numpy as np
-import sys
 from numpy import abs, array, copysign, isnan
 from .constants import AU_KM, AU_M, C, DAY_S, tau
 from .descriptorlib import reify
@@ -90,15 +87,6 @@ class Distance(Unit):
         """Meters."""
         return self.au * AU_M
 
-    @reify
-    def AU(self):
-        if not Distance._warned:
-            print('WARNING: the IAU has renamed the astronomical unit to'
-                  ' lowercase "au" so Skyfield will soon remove uppercase'
-                  ' "AU" from Distance objects', file=sys.stdout)
-            Distance._warned = True
-        return self.au
-
     def __str__(self):
         n = self.au
         return ('{0} au' if getattr(n, 'shape', 0) else '{0:.6} au').format(n)
@@ -158,16 +146,6 @@ class Velocity(Unit):
     def m_per_s(self):
         """Meters per second."""
         return self.au_per_d * AU_M / DAY_S
-
-    @reify
-    def AU_per_d(self):
-        if not Velocity._warned:
-            print('WARNING: the IAU has renamed the astronomical unit to'
-                  ' lowercase "au" so Skyfield will soon remove'
-                  ' "AU_per_day" in favor of "au_per_day"',
-                  file=sys.stdout)
-            Velocity._warned = True
-        return self.au_per_d
 
     def __str__(self):
         n = self.au_per_d
