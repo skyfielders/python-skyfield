@@ -11,7 +11,7 @@ from .descriptorlib import reify
 from .units import Angle, Distance, _ltude
 from .vectorlib import VectorFunction
 
-_EARTH_ANGULAR_VELOCITY_VECTOR = array((0, 0, -DAY_S * ANGVEL))
+_EARTH_ANGULAR_VELOCITY_VECTOR = array((0, 0, DAY_S * ANGVEL))
 
 _lat_options = {'precision': 4, 'floatmode': 'fixed', 'sign': '+',
                 'threshold': 5, 'edgeitems': 2}
@@ -73,10 +73,8 @@ class GeographicPosition(ITRSPosition):
         self.latitude = latitude
         self.longitude = longitude
         self.elevation = elevation
-        self._R_latlon = mxm(
-            rot_y(latitude.radians)[::-1],  # TODO: Why "::-1"?
-            rot_z(-longitude.radians),
-        )
+        self._R_lat = _R_lat = rot_y(latitude.radians)[::-1]
+        self._R_latlon = mxm(_R_lat, rot_z(-longitude.radians))
 
     @reify  # not @property, so users have the option of overwriting it
     def target_name(self):
@@ -116,8 +114,8 @@ class GeographicPosition(ITRSPosition):
     def _dRdt_times_RT_at(self, t):
         # TODO: taking the derivative of the instantaneous angular
         # velocity would provide a more accurate transform.
-        R = -rot_y(self.latitude.radians)[::-1]
-        return angular_velocity_matrix(mxv(R, _EARTH_ANGULAR_VELOCITY_VECTOR))
+        R = mxv(self._R_lat, _EARTH_ANGULAR_VELOCITY_VECTOR)
+        return angular_velocity_matrix(R)
 
 class Geoid(object):
     """An Earth ellipsoid; maps latitudes and longitudes to x,y,z positions."""
@@ -267,9 +265,7 @@ class Topos(GeographicPosition):
         iers2010.latlon(latitude_degrees, longitude_degrees, elevation_m,
                         super(Topos, self).__init__)
 
-    @reify
-    def R_lat(self):
-        return rot_y(self.latitude.radians)[::-1]
+        self.R_lat = self._R_lat  # On this old class, it was public.
 
     def itrf_xyz(self):
         return self.itrs_xyz
