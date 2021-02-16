@@ -147,6 +147,11 @@ class InertialFrame(object):
     def rotation_at(self, t):
         return self._matrix
 
+equatorial_B1950_frame = InertialFrame(
+    'Reference frame of the Earth’s mean equator and equinox at B1950.',
+    _inertial_frames['B1950'],
+)
+
 ecliptic_J2000_frame = InertialFrame(
     'Reference frame of the true ecliptic and equinox at J2000.',
     _inertial_frames['ECLIPJ2000'],

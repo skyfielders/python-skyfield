@@ -2,10 +2,9 @@
 
 import os
 from numpy import max
-from skyfield import api
+from skyfield import api, framelib
 from skyfield.api import Topos
 from skyfield.constants import AU_M
-from skyfield.framelib import galactic_frame
 from skyfield.trigonometry import position_angle_of
 
 def _data_path(filename):
@@ -56,7 +55,7 @@ def test_ecliptic_for_epoch_of_date_array(ts):
 def test_fk4_frame(ts):
     e = api.load('de421.bsp')
     astrometric = e['earth'].at(ts.utc(1980, 1, 1, 0, 0)).observe(e['moon'])
-    ra, dec, d = astrometric._to_spice_frame('B1950')
+    dec, ra, d = astrometric.frame_latlon(framelib.equatorial_B1950_frame)
     print(ra._degrees, dec.degrees)
     compare(ra._degrees, 82.36186, 0.00006) # TODO: why is this not 0.00001?
     compare(dec.degrees, 18.53432, 0.00006)
@@ -64,7 +63,7 @@ def test_fk4_frame(ts):
 def test_galactic_frame(ts):
     e = api.load('de421.bsp')
     astrometric = e['earth'].at(ts.utc(1980, 1, 1, 0, 0)).observe(e['moon'])
-    glat, glon, d = astrometric.frame_latlon(galactic_frame)
+    glat, glon, d = astrometric.frame_latlon(framelib.galactic_frame)
     print(glat, glat.degrees, glon, glon.degrees)
     compare(glat.degrees, -8.047315, 0.005)  # TODO: awful! Track this down.
     compare(glon.degrees, 187.221794, 0.005)

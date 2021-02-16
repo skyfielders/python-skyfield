@@ -4,7 +4,6 @@
 from numpy import array, einsum, full, reshape, nan, nan_to_num
 from . import framelib
 from .constants import ANGVEL, AU_M, C, ERAD, DAY_S, RAD2DEG, pi, tau
-from .data.spice import inertial_frames
 from .descriptorlib import reify
 from .earthlib import compute_limb_angle
 from .functions import (
@@ -16,7 +15,6 @@ from .relativity import add_aberration, add_deflection
 from .timelib import Time
 from .units import Angle, AngleRate, Distance, Velocity, _interpret_angle
 
-_ECLIPJ2000 = inertial_frames['ECLIPJ2000']
 _GIGAPARSEC_AU = 206264806247096.38  # 1e9 * 360 * 3600 / tau
 
 def build_position(position_au, velocity_au_per_d=None, t=None,
@@ -477,14 +475,6 @@ class ICRF(object):
         from astropy.units import au
         x, y, z = self.position.au
         return SkyCoord(representation_type='cartesian', x=x, y=y, z=z, unit=au)
-
-    def _to_spice_frame(self, name):
-        vector = self.position.au
-        vector = inertial_frames[name].dot(vector)
-        d, dec, ra = to_spherical(vector)
-        return (Angle(radians=ra, preference='hours', signed=True),
-                Angle(radians=dec),
-                Distance(au=d))
 
     def is_sunlit(self, ephemeris):
         """Return whether a position in Earth orbit is in sunlight.
