@@ -2,6 +2,34 @@
 Changelog
 =========
 
+.. TODO After finding how to test TIRS reference frame, add it to changelog.
+        And double-check the constellation boundaries array.
+
+v1.37 — 2021 February 15
+------------------------
+
+* Added a :meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` method
+  that can compute the rates at which angles like altitude and azimuth,
+  or right ascension and declination,
+  are changing.
+
+* Accepted a contributor’s helpful fix for a rounding error
+  that had slightly shifted a few constellation boundaries.
+  `#548 <https://github.com/skyfielders/python-skyfield/issues/548>`_
+
+* The :class:`~skyfield.timelib.Time`
+  tuple :data:`~skyfield.timelib.Time.utc`
+  and method :data:`~skyfield.timelib.Time.utc_strftime()`
+  are now backed by the same math,
+  so they always advance to the next calendar day at the same moment.
+  This makes it safe to mix values returned by one of them
+  with values returned by the other.
+  `#542 <https://github.com/skyfielders/python-skyfield/issues/542>`_
+
+* Vector subtraction now returns the position subclass
+  specific to the resulting vector’s center.
+  `#549 <https://github.com/skyfielders/python-skyfield/issues/549>`_
+
 v1.36 — 2021 January 26
 -----------------------
 
@@ -14,7 +42,7 @@ v1.36 — 2021 January 26
   where the resulting array needs a whole row of zeros.
   `#536 <https://github.com/skyfielders/python-skyfield/issues/536>`_
 
-* Added :meth:`~skyfield.positionlib.ICRF.hadec()` position method that
+* Added an :meth:`~skyfield.positionlib.ICRF.hadec()` position method that
   returns hour angle and declination.
   `#510 <https://github.com/skyfielders/python-skyfield/issues/510>`_
 
