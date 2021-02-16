@@ -183,8 +183,16 @@ doctest:
 
 sync: html
 	rm -rf _build/html/_sources
+	rm \
+		_build/html/_static/basic.css \
+		_build/html/_static/classic.css \
+		_build/html/_static/default.css \
+		_build/html/_static/documentation_options.js \
+		_build/html/_static/jquery-3.2.1.js
 	rsync -r _build/html/ ~/rhodesmill.org/skyfield
 	,push
+
+
 
 # Runs web server outside _build, for when I need to "rm -r" clean-slate it:
 serve:
