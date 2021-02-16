@@ -22,7 +22,21 @@ def _to_array(value):
 class UnpackingError(Exception):
     """You cannot iterate directly over a Skyfield measurement object."""
 
-class Distance(object):
+class Unit(object):
+    """A measurement that can be expressed in several choices of unit."""
+
+    def __getitem__(self, *args):
+        cls = self.__class__
+        name = cls.__name__
+        s = 'to use this {0}, ask for its value in a particular unit:\n\n{1}'
+        attrs = sorted(k for k, v in cls.__dict__.items()
+                       if k[0].islower() and isinstance(v, reify))
+        examples = ['    {0}.{1}'.format(name.lower(), attr) for attr in attrs]
+        raise UnpackingError(s.format(name, '\n'.join(examples)))
+
+    __iter__ = __getitem__   # give advice about both foo[i] and "x,y,z = foo"
+
+class Distance(Unit):
     """A distance, stored internally as au and available in other units.
 
     You can initialize a ``Distance`` by providing a single float or a
@@ -64,11 +78,11 @@ class Distance(object):
 
     @reify
     def au(self):  # Empty property to provide Sphinx docstring.
-        """Astronomical units."""
+        """Astronomical units (the Earth-Sun distance of 149,597,870,700 m)."""
 
     @reify
     def km(self):
-        """Kilometers."""
+        """Kilometers (1,000 meters)."""
         return self.au * AU_KM
 
     @reify
@@ -91,13 +105,6 @@ class Distance(object):
 
     def __repr__(self):
         return '<{0} {1}>'.format(type(self).__name__, self)
-
-    def __iter__(self):
-        cn = self.__class__.__name__
-        raise UnpackingError(_iter_message.format(
-            cls=cn, object=cn.lower(), values='x, y, z',
-            attr1='au', attr2='km',
-        ))
 
     def length(self):
         """Compute the length when this is an x,y,z vector.
@@ -122,7 +129,7 @@ class Distance(object):
         from astropy.units import au
         return (self.au * au).to(unit)
 
-class Velocity(object):
+class Velocity(Unit):
     """A velocity, stored internally as au/day and available in other units.
 
     You can initialize a ``Velocity`` by providing a float or float
@@ -169,13 +176,6 @@ class Velocity(object):
 
     def __repr__(self):
         return '<{0} {1}>'.format(type(self).__name__, self)
-
-    def __iter__(self):
-        cn = self.__class__.__name__
-        raise UnpackingError(_iter_message.format(
-            cls=cn, object=cn.lower(), values='xdot, ydot, zdot',
-            attr1='au_per_d', attr2='km_per_s',
-        ))
 
     def to(self, unit):
         """Convert this velocity to the given AstroPy unit."""
@@ -251,17 +251,6 @@ class Rate(object):
         """Units per second of Terrestrial Time."""
         return self._per_day / 86400.0
 
-_iter_message = """\
-cannot directly unpack a {cls} into several values
-
-To unpack a {cls} into three components, you need to ask for its
-value in specific units through an attribute or method:
-
-    {values} = {object}.{attr1}
-    {values} = {object}.{attr2}
-    {values} = {object}.to(astropy_unit)
-"""
-
 # Angle units.
 
 _instantiation_instructions = """to instantiate an Angle, try one of:
@@ -274,7 +263,7 @@ Angle(hours=value)
 where `value` can be either a Python float, a list of Python floats,
 or a NumPy array of floats"""
 
-class Angle(object):
+class Angle(Unit):
 
     def __init__(self, angle=None, radians=None, degrees=None, hours=None,
                  preference=None, signed=False):
@@ -367,16 +356,6 @@ class Angle(object):
             return '<{0} []>'.format(type(self).__name__)
         else:
             return '<{0} {1}>'.format(type(self).__name__, self)
-
-    def __iter__(self):
-        raise ValueError(
-            '''choose a specific Angle unit to iterate over
-
-Instead of iterating over this Angle object, try iterating over one of
-its unit-specific arrays like .degrees, .hours, or .radians, or else over
-the output of one of its methods like .hstr(), .dstr(), .arcminutes(),
-.arcseconds(), or .mas().  For all of the possibilities see:
-https://rhodesmill.org/skyfield/api-units.html#skyfield.units.Angle''')
 
     def hms(self, warn=True):
         """Convert to a tuple (hours, minutes, seconds).

@@ -103,47 +103,54 @@ def test_stringifying_vector_distance():
         # Every other version of Python.
         assert s == '[ 1.23  4.56] au'
 
-def test_iterating_over_raw_measurement():
-    distance = Distance(au=1.234)
+def test_helpful_exceptions():
+    distance = Distance(1.234)
+    expect = '''\
+to use this Distance, ask for its value in a particular unit:
+
+    distance.au
+    distance.km
+    distance.m'''
+
     with assert_raises(UnpackingError) as a:
         x, y, z = distance
-    assert str(a.exception) == '''\
-cannot directly unpack a Distance into several values
+    assert str(a.exception) == expect
 
-To unpack a Distance into three components, you need to ask for its
-value in specific units through an attribute or method:
+    with assert_raises(UnpackingError) as a:
+        distance[0]
+    assert str(a.exception) == expect
 
-    x, y, z = distance.au
-    x, y, z = distance.km
-    x, y, z = distance.to(astropy_unit)
-'''
+    velocity = Velocity(1.234)
+    expect = '''\
+to use this Velocity, ask for its value in a particular unit:
 
-def test_iterating_over_raw_velocity():
-    velocity = Velocity(au_per_d=1.234)
+    velocity.au_per_d
+    velocity.km_per_s
+    velocity.m_per_s'''
+
     with assert_raises(UnpackingError) as a:
         x, y, z = velocity
-    assert str(a.exception) == '''\
-cannot directly unpack a Velocity into several values
+    assert str(a.exception) == expect
 
-To unpack a Velocity into three components, you need to ask for its
-value in specific units through an attribute or method:
+    with assert_raises(UnpackingError) as a:
+        velocity[0]
+    assert str(a.exception) == expect
 
-    xdot, ydot, zdot = velocity.au_per_d
-    xdot, ydot, zdot = velocity.km_per_s
-    xdot, ydot, zdot = velocity.to(astropy_unit)
-'''
+    angle = Angle(radians=1.234)
+    expect = '''\
+to use this Angle, ask for its value in a particular unit:
 
-def test_iterating_over_raw_angle():
-    angle = Angle(degrees=4.5)
-    with assert_raises(ValueError) as a:
-        iter(angle)
-    assert str(a.exception) == '''choose a specific Angle unit to iterate over
+    angle.degrees
+    angle.hours
+    angle.radians'''
 
-Instead of iterating over this Angle object, try iterating over one of
-its unit-specific arrays like .degrees, .hours, or .radians, or else over
-the output of one of its methods like .hstr(), .dstr(), .arcminutes(),
-.arcseconds(), or .mas().  For all of the possibilities see:
-https://rhodesmill.org/skyfield/api-units.html#skyfield.units.Angle'''
+    with assert_raises(UnpackingError) as a:
+        x, y, z = angle
+    assert str(a.exception) == expect
+
+    with assert_raises(UnpackingError) as a:
+        angle[0]
+    assert str(a.exception) == expect
 
 def test_converting_from_km_to_m():
     distance = Distance(km=1.234)
