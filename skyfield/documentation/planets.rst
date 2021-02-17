@@ -1,13 +1,15 @@
 
-====================================
- Planets, and Choosing an Ephemeris
-====================================
+==============================================
+ Planets and their moons: JPL ephemeris files
+==============================================
 
-If you are interested in observing the planets,
-the Jet Propulsion Laboratory (JPL)
-offers high accuracy tables of planet positions
-over time spans ranging from decades to centuries.
-You can use ``load()`` to download a JPL ephemeris:
+.. Big list of files is at ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp
+
+If you are interested in observing the planets or their moons,
+NASA’s Jet Propulsion Laboratory (JPL)
+offers high accuracy tables of positions
+covering time periods that range from decades to centuries.
+You can use ``load()`` to download and open a JPL ephemeris:
 
 .. testsetup::
 
@@ -18,24 +20,31 @@ You can use ``load()`` to download a JPL ephemeris:
     from skyfield.api import load
     planets = load('de421.bsp')
 
-See :doc:`files` to learn more about downloading files.
+See :doc:`files` to learn more about downloading files
+and choosing the directory to which they are saved.
+Ephemeris files never receive updates,
+so once you have a file like ``de421.bsp`` on disk
+you won’t need to download it again.
 
-Here are several popular ephemerides that you can use with Skyfield.
-The filenames matching ``de*``
-predict the positions of many or all of the major planets,
-while ``jup310.bsp`` focuses on Jupiter and its major moons:
+Choosing an Ephemeris
+=====================
 
-==========  ====== =============== ======
-File         Size        Years     Issued
-==========  ====== =============== ======
-de405.bsp    63 MB   1600 to 2200  1997
-de406.bsp   287 MB  −3000 to 3000  1997
-de421.bsp    17 MB   1900 to 2050  2008
-de422.bsp   623 MB  −3000 to 3000  2009
-de430t.bsp  128 MB   1550 to 2650  2013
-de431t.bsp  3.5 GB –13200 to 17191 2013
-jup310.bsp  932 MB   1900 to 2100  2013
-==========  ====== =============== ======
+Here are the most popular general-purpose ephemeris files,
+from the JPL’s famous “Development Ephemeris” = “DE” series.
+
+==== ============================= ====== ================================ ======
+Year Short-term ephemeris          Size   Long-term ephemeris              Size
+==== ============================= ====== ================================ ======
+1997 ``de405.bsp`` (1600 to 2200)  63 MB  ``de406.bsp`` (−3000 to 3000)    287 MB
+2008 ``de421.bsp`` (1900 to 2050)  17 MB  ``de422.bsp`` (−3000 to 3000)    623 MB
+2013 ``de430t.bsp`` (1550 to 2650) 128 MB ``de431t.bsp`` (–13200 to 17191) 3.5 GB
+     ``de430_1850-2150.bsp``       31 MB
+2020 ``de440.bsp`` (1550 to 2650)  114 MB ``de441.bsp`` (−13200 to 17191)  3.1 GB
+     ``de440s.bsp`` (1849 to 2150) 32 MB
+==== ============================= ====== ================================ ======
+
+If you are interested in seeing the full range of ephemeris files available,
+check out the :doc:`Ephemeris bibliography` at the end of this page.
 
 You can think of negative years, as cited in the above table,
 as being almost like years BC except that they are off by one.
@@ -50,11 +59,7 @@ be careful to ask an astronomer about the year −43 instead.
 A popular choice of ephemeris is DE421.
 It is recent, has good precision,
 was designed for general-purpose use,
-and is only 17 MB in size:
-
-Once an ephemeris file has been downloaded to your current directory,
-re-running your program will simply reuse the copy on disk
-instead of downloading it all over again.
+and is only 17 MB in size.
 
 After you have loaded an ephemeris and have used a statement like:
 
@@ -334,8 +339,22 @@ will be sufficient for projects that need them,
 until there is time for a Skyfield contributor
 to integrate such support into Skyfield itself.
 
+.. _Ephemeris bibliography:
+
 Ephemeris bibliography
 ======================
+
+Download directories
+
+* For planets:
+
+  | ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/
+  | https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/
+
+* For planet moons:
+
+  | ftp://ssd.jpl.nasa.gov/pub/eph/satellites/bsp/
+  | https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/
 
 DE405 / DE406
 
@@ -373,6 +392,12 @@ DE430 / DE431
 * `DE430 Lunar Orbit, Physical Librations and Surface Coordinates
   <https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430_moon_coord.pdf>`_
   (Williams, Boggs, Folkner 2013)
+
+DE440 / DE441
+
+* `The JPL Planetary and Lunar Ephemerides DE440 and DE441
+  <https://iopscience.iop.org/article/10.3847/1538-3881/abd414>`_
+  (Park, Folkner, Williams, and Boggs 2021)
 
 Analysis mentioning several ephemerides
 
