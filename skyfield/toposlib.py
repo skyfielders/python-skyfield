@@ -5,7 +5,7 @@ from .constants import ANGVEL, AU_M, DAY_S, T0, pi, tau
 from .earthlib import refract
 from .framelib import itrs
 from .functions import (
-    _T, _to_array, angular_velocity_matrix, mxm, mxv, rot_y, rot_z,
+    _T, angular_velocity_matrix, mxm, mxv, rot_y, rot_z,
 )
 from .descriptorlib import reify
 from .units import Angle, Distance, _ltude
@@ -147,7 +147,7 @@ class Geoid(object):
         """
         latitude = Angle(degrees=latitude_degrees)
         longitude = Angle(degrees=longitude_degrees)
-        elevation = Distance(m=_to_array(elevation_m))
+        elevation = Distance(m=elevation_m)
 
         lat = latitude.radians
         lon = longitude.radians
