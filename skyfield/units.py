@@ -2,19 +2,10 @@
 
 """
 import numpy as np
-from numpy import abs, array, copysign, isnan
+from numpy import abs, copysign, isnan
 from .constants import AU_KM, AU_M, C, DAY_S, tau
 from .descriptorlib import reify
-from .functions import length_of
-
-def _to_array(value):
-    """As a convenience, turn Python lists and tuples into NumPy arrays."""
-    if isinstance(value, (tuple, list)):
-        return array(value)
-    elif isinstance(value, (float, int)):
-        return np.float64(value)
-    else:
-        return value
+from .functions import _to_array, length_of
 
 class UnpackingError(Exception):
     """You cannot iterate directly over a Skyfield measurement object."""
