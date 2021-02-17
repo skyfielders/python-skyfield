@@ -50,10 +50,10 @@ class Distance(Unit):
             self.au = _to_array(au)
             """Astronomical units."""
         elif km is not None:
-            self.km = _to_array(km)
+            self.km = km = _to_array(km)
             self.au = km / AU_KM
         elif m is not None:
-            self.m = _to_array(m)
+            self.m = m = _to_array(m)
             self.au = m / AU_M
         else:
             raise ValueError('to construct a Distance provide au, km, or m')
@@ -121,8 +121,13 @@ class Velocity(Unit):
 
     def __init__(self, au_per_d=None, km_per_s=None):
         if km_per_s is not None:
-            au_per_d = km_per_s * DAY_S / AU_KM
-        self.au_per_d = _to_array(au_per_d)
+            self.km_per_s = km_per_s = _to_array(km_per_s)
+            self.au_per_d = km_per_s * DAY_S / AU_KM
+        elif au_per_d is not None:
+            self.au_per_d = _to_array(au_per_d)
+        else:
+            raise ValueError('to construct a Velocity provide'
+                             ' au_per_d or km_per_s')
 
     @reify
     def au_per_d(self):  # Empty property to provide Sphinx docstring.

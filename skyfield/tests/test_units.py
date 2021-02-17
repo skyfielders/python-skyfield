@@ -152,6 +152,13 @@ to use this Angle, ask for its value in a particular unit:
         angle[0]
     assert str(a.exception) == expect
 
+def test_constructors_accept_plain_lists():
+    Distance(au=[1,2,3])
+    Distance(km=[1,2,3])
+    Distance(m=[1,2,3])
+    Velocity(au_per_d=[1,2,3])
+    Velocity(km_per_s=[1,2,3])
+
 def test_converting_from_km_to_m():
     distance = Distance(km=1.234)
     assert abs(distance.m - 1234.0) < 1e-15
