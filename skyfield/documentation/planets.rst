@@ -25,17 +25,17 @@ The filenames matching ``de*``
 predict the positions of many or all of the major planets,
 while ``jup310.bsp`` focuses on Jupiter and its major moons:
 
-==========  ====== =============== ======
-File         Size        Years     Issued
-==========  ====== =============== ======
+==========  ====== =============== ====== ============ ========
+File         Size        Years     Issued Moon         Inner
+==========  ====== =============== ====== ============ ========
 de405.bsp    63 MB   1600 to 2200  1997
 de406.bsp   287 MB  −3000 to 3000  1997
 de421.bsp    17 MB   1900 to 2050  2008
 de422.bsp   623 MB  −3000 to 3000  2009
-de430t.bsp  128 MB   1550 to 2650  2013
+de430t.bsp  128 MB   1550 to 2650  2013   0″.0005 – 1″ 0″.0002
 de431t.bsp  3.5 GB –13200 to 17191 2013
 jup310.bsp  932 MB   1900 to 2100  2013
-==========  ====== =============== ======
+==========  ====== =============== ====== ============ ========
 
 You can think of negative years, as cited in the above table,
 as being almost like years BC except that they are off by one.
@@ -370,9 +370,39 @@ DE430 / DE431
   <https://ipnpr.jpl.nasa.gov/progress_report/42-196/196C.pdf>`_
   (Folkner, Williams, Boggs, Park, Kuchynka 2014)
 
+  » *Very long baseline interferometry measurements of spacecraft at
+  Mars allow the orientation of the ephemeris to be tied to the
+  International Celestial Reference Frame with an accuracy of
+  0″.0002. This orientation is the limiting error source for the orbits
+  of the terrestrial planets, and corresponds to orbit uncertainties of
+  a few hundred meters.*
+
+  » *The DE431 time span from the year –13,200 to the year 17,191
+  extends far beyond historical times and caveats are offered.  For the
+  planets, uncertainties in the initial conditions of the orbits will
+  cause errors in the along-track directions that increase at least
+  linearly with time away from the present. … For the Moon, the
+  uncertainty given for the tidal acceleration causes a 28 m/century²
+  along-track uncertainty*
+
 * `DE430 Lunar Orbit, Physical Librations and Surface Coordinates
   <https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430_moon_coord.pdf>`_
   (Williams, Boggs, Folkner 2013)
+
+  » *The right ascension and declination differences reach up to ~1 m
+  perpendicular to the radius, or up to ~1/2 milliarcsecond (mas) in
+  angle … over the 1970-2012 span of lunar laser ranging data. DE430
+  agrees well with DE421.*
+
+  » *From a comparison of different integrations, it appears that the
+  error in the DE430 orbit at 1800 is ~0.1″ and the error at 1600 is
+  ~1″*
+
+.. Also ftp://ssd.jpl.nasa.gov/pub/eph/planets/ioms/de434.iom.pdf
+
+.. Also ftp://ssd.jpl.nasa.gov/pub/eph/planets/ioms/de435.iom.pdf
+
+.. Also https://naif.jpl.nasa.gov/pub/naif/JUNO/kernels/spk/de438s.bsp.lbl
 
 Analysis mentioning several ephemerides
 
@@ -380,3 +410,8 @@ Analysis mentioning several ephemerides
   for Robust Gravitational-Wave Searches with Pulsar Timing Arrays
   <https://arxiv.org/pdf/2001.00595.pdf>`_
   (The NANOGrav Collaboration 2020)
+
+  » *Crucially, the ephemerides do not generally provide usable error
+  representations. … Our model complements published SSEs [Solar System
+  Ephemerides], which do not generally include usable time-domain
+  representations of orbit uncertainties.*
