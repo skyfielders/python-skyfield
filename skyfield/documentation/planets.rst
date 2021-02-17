@@ -1,23 +1,13 @@
+
 ====================================
  Planets, and Choosing an Ephemeris
 ====================================
 
 If you are interested in observing the planets,
 the Jet Propulsion Laboratory (JPL)
-has prepared long tables that predict the positions of the planets
-both in the the distant past and out into the future.
-A table of positions is called an *ephemeris*
-and those supplied by the JPL are of very high accuracy.
-
-You can ask Skyfield to download an ephemeris from the JPL
-by giving ``load()`` a filename.
-Or you can load an ephemeris that you’ve already saved to disk
-with :func:`~skyfield.iokit.load_file()`.
-
-A popular choice of ephemeris is DE421.
-It is recent, has good precision,
-was designed for general-purpose use,
-and is only 17 MB in size:
+offers high accuracy tables of planet positions
+over time spans ranging from decades to centuries.
+You can use ``load()`` to download a JPL ephemeris:
 
 .. testsetup::
 
@@ -27,6 +17,40 @@ and is only 17 MB in size:
 
     from skyfield.api import load
     planets = load('de421.bsp')
+
+See :doc:`files` to learn more about downloading files.
+
+Here are several popular ephemerides that you can use with Skyfield.
+The filenames matching ``de*``
+predict the positions of many or all of the major planets,
+while ``jup310.bsp`` focuses on Jupiter and its major moons:
+
+==========  ====== =============== ======
+File         Size        Years     Issued
+==========  ====== =============== ======
+de405.bsp    63 MB   1600 to 2200  1997
+de406.bsp   287 MB  −3000 to 3000  1997
+de421.bsp    17 MB   1900 to 2050  2008
+de422.bsp   623 MB  −3000 to 3000  2009
+de430t.bsp  128 MB   1550 to 2650  2013
+de431t.bsp  3.5 GB –13200 to 17191 2013
+jup310.bsp  932 MB   1900 to 2100  2013
+==========  ====== =============== ======
+
+You can think of negative years, as cited in the above table,
+as being almost like years BC except that they are off by one.
+Historians invented our calendar back before zero was a counting number,
+so AD 1 was immediately preceded by 1 BC without a year in between.
+But astronomers count backwards AD 2, AD 1, 0, −1, −2, and so forth.
+
+So if you are curious about the positions of the planets back in 44 BC,
+when Julius Caesar was assassinated,
+be careful to ask an astronomer about the year −43 instead.
+
+A popular choice of ephemeris is DE421.
+It is recent, has good precision,
+was designed for general-purpose use,
+and is only 17 MB in size:
 
 Once an ephemeris file has been downloaded to your current directory,
 re-running your program will simply reuse the copy on disk
@@ -113,35 +137,6 @@ over the given two-week period::
 
 You can load and use it directly off of disk
 with :func:`~skyfield.iokit.load_file()`.
-
-Popular ephemerides
-===================
-
-Here are several popular ephemerides that you can use with Skyfield.
-The filenames matching ``de*``
-predict the positions of many or all of the major planets,
-while ``jup310.bsp`` focuses on Jupiter and its major moons:
-
-==========  ====== ============= ==============
-Ephemeris    Size      Years        Issued
-==========  ====== ============= ==============
-de405.bsp    63 MB  1600 to 2200 May 1997
-de406.bsp   287 MB −3000 to 3000 May 1997
-de421.bsp    17 MB  1900 to 2050 February 2008
-de422.bsp   623 MB −3000 to 3000 September 2009
-de430t.bsp  128 MB  1550 to 2650 February 2010
-jup310.bsp  932 MB  1900 to 2100 December 2013
-==========  ====== ============= ==============
-
-You can think of negative years, as cited in the above table,
-as being almost like years BC except that they are off by one.
-Historians invented our calendar back before zero was a counting number,
-so AD 1 was immediately preceded by 1 BC without a year in between.
-But astronomers count backwards AD 2, AD 1, 0, −1, −2, and so forth.
-
-So if you are curious about the positions of the planets back in 44 BC,
-when Julius Caesar was assassinated,
-be careful to ask an astronomer about the year −43 instead.
 
 How segments are linked to predict positions
 ============================================
@@ -338,3 +333,50 @@ for Type 1 and Type 23 SPK ephemeris segments
 will be sufficient for projects that need them,
 until there is time for a Skyfield contributor
 to integrate such support into Skyfield itself.
+
+Ephemeris bibliography
+======================
+
+DE405 / DE406
+
+* `JPL Planetary and Lunar Ephemerides, DE405/LE405
+  <ftp://ssd.jpl.nasa.gov/pub/eph/planets/ioms/de405.iom.pdf>`_
+  (Standish 1998)
+
+* `Check on JPL DE405 using modern optical observations
+  <https://aas.aanda.org/articles/aas/pdf/1998/18/ds1546.pdf>`_
+  (Morrison and Evans 1998)
+
+* `CCD Positions for the Outer Planets in 1996–1997
+  Determined in the Extragalactic Reference Frame
+  <https://iopscience.iop.org/article/10.1086/300507/fulltext/>`_
+  (Stone 1998)
+
+* `Astrometry of Pluto and Saturn
+  with the CCD meridian instruments of Bordeaux and Valinhos
+  <https://www.aanda.org/articles/aa/full/2002/09/aa1965/aa1965.html>`_
+  (Rapaport, Teixeira, Le Campion, Ducourant1, Camargo,
+  Benevides-Soares 2002)
+
+DE421
+
+* `The Planetary and Lunar Ephemeris DE421
+  <https://ipnpr.jpl.nasa.gov/progress_report/42-178/178C.pdf>`_
+  (Folkner, Williams, Boggs 2009)
+
+DE430 / DE431
+
+* `The Planetary and Lunar Ephemerides DE430 and DE431
+  <https://ipnpr.jpl.nasa.gov/progress_report/42-196/196C.pdf>`_
+  (Folkner, Williams, Boggs, Park, Kuchynka 2014)
+
+* `DE430 Lunar Orbit, Physical Librations and Surface Coordinates
+  <https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430_moon_coord.pdf>`_
+  (Williams, Boggs, Folkner 2013)
+
+Analysis mentioning several ephemerides
+
+* `Modeling the Uncertainties of Solar-System Ephemerides
+  for Robust Gravitational-Wave Searches with Pulsar Timing Arrays
+  <https://arxiv.org/pdf/2001.00595.pdf>`_
+  (The NANOGrav Collaboration 2020)
