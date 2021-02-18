@@ -170,6 +170,10 @@ class EarthSatellite(VectorFunction):
 
     def ITRF_position_velocity_error(self, t):
         """Deprecated: use the TEME and ITRS frame objects instead."""
+        # TODO: can we teach frame objects to figure out that the
+        # transform TEME -> ITRS can not only skip the t.M rotation, but
+        # can also subtract the angles of their two competing z-axis
+        # rotations and call rot_z() only once instead of twice?
         rTEME, vTEME, error = self._position_and_velocity_TEME_km(t)
         rTEME /= AU_KM
         vTEME /= AU_KM
