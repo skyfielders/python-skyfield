@@ -7,8 +7,7 @@ from numpy import (
 from sgp4.api import SGP4_ERRORS, Satrec
 
 from .constants import AU_KM, DAY_S, T0, tau
-from .framelib import itrs
-from .functions import _T, mxv, rot_x, rot_y, rot_z
+from .functions import _T, mxm, mxv, rot_x, rot_y, rot_z
 from .searchlib import _find_discrete, find_maxima
 from .timelib import compute_calendar_date
 from .vectorlib import VectorFunction
@@ -159,10 +158,6 @@ class EarthSatellite(VectorFunction):
         """
         sat = self.model
         jd, fraction, is_leap_second = t._utc_float(0.0)
-        # seconds, fraction, is_leap_second = t._utc_seconds(0.0)
-        # jd = (seconds + fraction) / DAY_S
-        # fraction = jd * 0.0
-        # print(min(jd), len(jd), max(jd))
 
         if getattr(jd, 'shape', None):
             e, r, v = sat.sgp4_array(jd, fraction)
@@ -174,13 +169,7 @@ class EarthSatellite(VectorFunction):
             return array(position), array(velocity), message
 
     def ITRF_position_velocity_error(self, t):
-        """Return the ITRF position, velocity, and error at time `t`.
-
-        The position is an x,y,z vector measured in au, the velocity is
-        an x,y,z vector measured in au/day, and the error is a vector of
-        possible error messages for the time or vector of times `t`.
-
-        """
+        """Deprecated: use the TEME and ITRS frame objects instead."""
         rTEME, vTEME, error = self._position_and_velocity_TEME_km(t)
         rTEME /= AU_KM
         vTEME /= AU_KM
@@ -191,12 +180,13 @@ class EarthSatellite(VectorFunction):
 
     def _at(self, t):
         """Compute this satellite's GCRS position and velocity at time `t`."""
-        r, v, error = self.ITRF_position_velocity_error(t)
-        RT = _T(itrs.rotation_at(t))
-        V = itrs._dRdt_times_RT_at(t)
-        v -= mxv(V, r)  # subtract instead of transposing
-        v = mxv(RT, v)
-        r = mxv(RT, r)
+        r, v, error = self._position_and_velocity_TEME_km(t)
+        r /= AU_KM
+        v /= AU_KM
+        v *= DAY_S
+        R = _T(TEME.rotation_at(t))
+        r = mxv(R, r)
+        v = mxv(R, v)
         return r, v, r, error
 
     def find_events(self, topos, t0, t1, altitude_degrees=0.0):
@@ -286,6 +276,23 @@ class EarthSatellite(VectorFunction):
         i = jd.argsort()
         return ts.tt_jd(jd[i]), v[i]
 
+class TEME(object):
+    """The SGP4-specific True Equator Mean Equinox frame of reference.
+
+    Described in AIAA 2006-6753 Appendix C.  See :ref:`reference_frames`
+    for a guide to using Skyfield reference frames like this one.
+
+    """
+    @staticmethod
+    def rotation_at(t):
+        theta, theta_dot = theta_GMST1982(t.whole, t.ut1_fraction)
+        angle = theta - t.gast / 24.0 * tau
+        return mxm(rot_z(angle), t.M)
+
+    # TODO: Are there any applications that will need us to include the
+    # tiny affect on velocity of the rate of change of the difference
+    # between GMST1982 and GAST?
+
 def theta_GMST1982(jd_ut1, fraction_ut1=0.0):
     """Return the angle of Greenwich Mean Standard Time 1982 given the JD.
 
@@ -314,19 +321,7 @@ def _cross(a, b):
     return a[_cross120] * b[_cross201] - a[_cross201] * b[_cross120]
 
 def TEME_to_ITRF(jd_ut1, rTEME, vTEME, xp=0.0, yp=0.0, fraction_ut1=0.0):
-    """Convert TEME position and velocity into standard ITRS coordinates.
-
-    This converts a position and velocity vector in the idiosyncratic
-    True Equator Mean Equinox (TEME) frame of reference used by the SGP4
-    theory into vectors into the more standard ITRS frame of reference.
-    The velocity should be provided in units per day, not per second.
-
-    From AIAA 2006-6753 Appendix C.
-
-    """
-    # TODO: are xp and yp the values from the IERS?  Or from general
-    # nutation theory?
-
+    """Deprecated: use the TEME and ITRS frame objects instead."""
     theta, theta_dot = theta_GMST1982(jd_ut1, fraction_ut1)
     angular_velocity = multiply.outer(_zero_zero_minus_one, theta_dot)
 

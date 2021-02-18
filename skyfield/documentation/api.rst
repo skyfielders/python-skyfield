@@ -268,6 +268,7 @@ See :doc:`earth-satellites`.
 
    EarthSatellite
    EarthSatellite.from_satrec
+   TEME
 
 Stars and other distant objects
 ===============================

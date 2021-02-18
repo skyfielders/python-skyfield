@@ -5,6 +5,12 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+v1.38 — ?
+---------
+
+* Added a reference frame class for the :class:`~skyfield.sgp4lib.TEME`
+  frame used by SGP4 Earth satellite elements.
+
 v1.37 — 2021 February 15
 ------------------------
 

@@ -10,3 +10,5 @@ satellite data and computing their positions with Skyfield.
 
 .. autoclass:: EarthSatellite
    :members:
+
+.. autoclass:: TEME
