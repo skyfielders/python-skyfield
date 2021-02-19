@@ -32,7 +32,7 @@ def main():
     # The above maneuvers work fine even with the old version of the
     # routine.  But to proceed from here, we need to switch.
 
-    print('==== N times, one observers, M targets ====')
+    print('==== N times, one observers, M targets [TRY: RIGHT SIDE UP] ====')
 
     t = ts.utc(2021, 2, 19, 13, [46, 47, 48, 49])
     planets = load('de421.bsp')
@@ -53,6 +53,35 @@ def main():
     print('t', t.shape)
 
     r, v, t2, light_time = _correct_for_light_travel_time2(observer, target)
+    print(t.shape, observer.position.km.shape, '->', r.shape)
+
+    print('Does it look like a second planet 1 AU away at the same 4 times?')
+    print('First planet:')
+    print(r[:,:,0])
+    print('Second planet:')
+    print(r[:,:,1])
+
+    print('==== N times, one observers, M targets [TRY: UPSIDE DOWN] ====')
+
+    t = ts.utc(2021, 2, 19, 13, [46, 47, 48, 49])
+    planets = load('de421.bsp')
+
+    earth = planets['earth']
+    if 0:
+        # Turn Earth into two observation positions.
+        earth = planets['earth']
+        earth._at = build_multi_at(earth._at)
+    observer = earth.at(t)
+    print('observer', observer.position.au.shape)
+
+    target = planets['mars']
+    target._at = build_multi_at(target._at)  # Turn Mars into 2 planets.
+    print('target', target.at(t).position.au.shape)
+
+    t = ts.tt(t.tt[:,None])  # What if we add a dimension to t?
+    print('t', t.shape)
+
+    r, v, t2, light_time = _correct_for_light_travel_time3(observer, target)
     print(t.shape, observer.position.km.shape, '->', r.shape)
 
     print('Does it look like a second planet 1 AU away at the same 4 times?')
@@ -135,15 +164,11 @@ def sub(a, b):
     return (a.T - b.T).T
 
 def _correct_for_light_travel_time2(observer, target):
-    """Return a light-time corrected astrometric position and velocity.
-
-    Given an `observer` that is a `Barycentric` position somewhere in
-    the solar system, compute where in the sky they will see the body
-    `target`, by computing the light-time between them and figuring out
-    where `target` was back when the light was leaving it that is now
-    reaching the eyes or instruments of the `observer`.
-
-    """
+    #
+    # This version makes subtraction work by replacing normal NumPy
+    # broadcasting subtraction with a sub() function of our own that
+    # broadcasts in the other direction.
+    #
     t = observer.t
     ts = t.ts
     whole = t.whole
@@ -187,6 +212,55 @@ def _correct_for_light_travel_time2(observer, target):
     else:
         raise ValueError('light-travel time failed to converge')
     return sub(tposition, cposition), sub(tvelocity, cvelocity), t, light_time
+
+# What if we turn things upside down and then do normal subtraction?
+
+def _correct_for_light_travel_time3(observer, target):
+    #
+    # This version uses normal NumPy subtraction with its default
+    # broadcasting, which it makes work by always turning the position
+    # vectors upside down when it receives them from other parts of
+    # Skyfield, then turning them back over when its own computations
+    # are done.
+    #
+    t = observer.t
+    ts = t.ts
+    whole = t.whole
+    tdb_fraction = t.tdb_fraction
+
+    cposition = observer.position.au
+    cvelocity = observer.velocity.au_per_d
+
+    cposition = cposition.T
+    cvelocity = cvelocity.T
+
+    tposition, tvelocity, gcrs_position, message = target._at(t)
+    tposition = tposition.T
+    tvelocity = tvelocity.T
+
+    distance = length_of((tposition - cposition).T).T
+    light_time0 = 0.0
+    for i in range(10):
+        light_time = distance / C_AUDAY
+        delta = light_time - light_time0
+        if abs(max(delta)) < 1e-12:
+            break
+
+        # We assume a light travel time of at most a couple of days.  A
+        # longer light travel time would best be split into a whole and
+        # fraction, for adding to the whole and fraction of TDB.
+        t2 = ts.tdb_jd(whole, (tdb_fraction - light_time).T)
+
+        tposition, tvelocity, gcrs_position, message = target._at(t2)
+        tposition = tposition.T
+        tvelocity = tvelocity.T
+        distance = length_of((tposition - cposition).T).T
+        light_time0 = light_time
+    else:
+        raise ValueError('light-travel time failed to converge')
+    tposition = tposition - cposition
+    tvelocity = tvelocity - cvelocity
+    return tposition.T, tvelocity.T, t, light_time
 
 _reconcile  # So CI will think we used it, whether use above is commented or not
 
