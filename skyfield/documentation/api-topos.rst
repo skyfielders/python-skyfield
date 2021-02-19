@@ -30,7 +30,7 @@
       specifying the elevation of the topocentric position
       above mean sea level on a WGS-84 globe.
 
-   .. attribute:: itrs_position
+   .. attribute:: itrs_xyz
 
       A :class:`~skyfield.units.Distance` object
       giving the spatial x,y,z coordinates of this location
