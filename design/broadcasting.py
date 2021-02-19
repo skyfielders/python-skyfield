@@ -8,6 +8,7 @@ def main():
 
     cfltt = _correct_for_light_travel_time   # the original
     #cfltt = _correct_for_light_travel_time2   # possible replacement
+    fcfltt = _correct_for_light_travel_time4   # possible replacement
 
     print('==== One time, one observer, one target ====')
 
@@ -42,6 +43,7 @@ def main():
         # Turn Earth into two observation positions.
         earth = planets['earth']
         earth._at = build_multi_at(earth._at)
+
     observer = earth.at(t)
     print('observer', observer.position.au.shape)
 
@@ -49,8 +51,8 @@ def main():
     target._at = build_multi_at(target._at)  # Turn Mars into 2 planets.
     print('target', target.at(t).position.au.shape)
 
-    t = ts.tt(t.tt[:,None])  # What if we add a dimension to t?
-    print('t', t.shape)
+    # t = ts.tt(t.tt[:,None])  # What if we add a dimension to t?
+    # print('t', t.shape)
 
     r, v, t2, light_time = _correct_for_light_travel_time2(observer, target)
     print(t.shape, observer.position.km.shape, '->', r.shape)
@@ -78,11 +80,57 @@ def main():
     target._at = build_multi_at(target._at)  # Turn Mars into 2 planets.
     print('target', target.at(t).position.au.shape)
 
-    t = ts.tt(t.tt[:,None])  # What if we add a dimension to t?
-    print('t', t.shape)
+    # t = ts.tt(t.tt[:,None])  # What if we add a dimension to t?
+    # print('t', t.shape)
 
     r, v, t2, light_time = _correct_for_light_travel_time3(observer, target)
     print(t.shape, observer.position.km.shape, '->', r.shape)
+
+    print('Does it look like a second planet 1 AU away at the same 4 times?')
+    print('First planet:')
+    print(r[:,:,0])
+    print('Second planet:')
+    print(r[:,:,1])
+
+    # Okay, so, the whole problem of broadcasting: is the only reason it
+    # comes up because we have more targets than observers?  What if we
+    # ask folks to expand the observers array dimensions as well, so
+    # that NumPy is never faced with arrays of different numbers of
+    # dimensions, which is what triggers its unfortunate decision to
+    # start matching at the ends of the arrays instead of their
+    # beginnings?
+
+    print('==== N times, one observers, M targets'
+          ' [TRY: EXTRA OBSERVER DIMENSION] ====')
+
+    # So: time has its usual extra dimension to accommodate 4 times.
+    t = ts.utc(2021, 2, 19, 13, [46, 47, 48, 49])
+    planets = load('de421.bsp')
+
+    earth = planets['earth']
+    observer = earth.at(t)
+    print('observer', observer.position.au.shape)
+    print('Supplementing dimensions')
+    observer.position.au = observer.position.au[:,:,None]
+    observer.velocity.au_per_d = observer.velocity.au_per_d[:,:,None]
+    print('observer', observer.position.au.shape)
+
+    target = planets['mars']
+    target._at = build_multi_at(target._at)  # Turn Mars into 2 planets.
+    print('target', target.at(t).position.au.shape)
+
+    # TODO: if we work out how we can expand the time's dimensions, as
+    # in the following line, before earth.at(t) without raising an
+    # exception, then the observer time would not be lacking a dimension
+    # that would need to be expanded in
+
+    t = ts.tt(t.tt[:,None])  # What if we add a dimension to t?
+    # print('t !!!!!!!!!!!!!!', t.shape)
+    # print('t !!!!!!!!!!!!!!', t.whole.shape)
+    # print('t !!!!!!!!!!!!!!', t.tdb_fraction.shape)
+
+    r, v, t2, light_time = _correct_for_light_travel_time4(observer, target)
+    print(t.shape, observer.position.au.shape, '->', r.shape)
 
     print('Does it look like a second planet 1 AU away at the same 4 times?')
     print('First planet:')
@@ -261,6 +309,55 @@ def _correct_for_light_travel_time3(observer, target):
     tposition = tposition - cposition
     tvelocity = tvelocity - cvelocity
     return tposition.T, tvelocity.T, t, light_time
+
+# What if the observer had an extra dimension so it matches too?
+
+def _correct_for_light_travel_time4(observer, target):
+    """Return a light-time corrected astrometric position and velocity.
+
+    Given an `observer` that is a `Barycentric` position somewhere in
+    the solar system, compute where in the sky they will see the body
+    `target`, by computing the light-time between them and figuring out
+    where `target` was back when the light was leaving it that is now
+    reaching the eyes or instruments of the `observer`.
+
+    """
+    t = observer.t
+    ts = t.ts
+    whole = t.whole
+    tdb_fraction = t.tdb_fraction
+
+    cposition = observer.position.au
+    cvelocity = observer.velocity.au_per_d
+
+    print('======', cposition.shape)
+    # ?
+    print('tdb_fraction before:', tdb_fraction.shape)
+    tdb_fraction = tdb_fraction[:,None]
+    print('tdb_fraction after:', tdb_fraction.shape)
+
+    tposition, tvelocity, gcrs_position, message = target._at(t)
+
+    distance = length_of(tposition - cposition)
+    light_time0 = 0.0
+    for i in range(10):
+        print('i =', i)
+        light_time = distance / C_AUDAY
+        delta = light_time - light_time0
+        if abs(max(delta)) < 1e-12:
+            break
+
+        # We assume a light travel time of at most a couple of days.  A
+        # longer light travel time would best be split into a whole and
+        # fraction, for adding to the whole and fraction of TDB.
+        t2 = ts.tdb_jd(whole, tdb_fraction - light_time)
+
+        tposition, tvelocity, gcrs_position, message = target._at(t2)
+        distance = length_of(tposition - cposition)
+        light_time0 = light_time
+    else:
+        raise ValueError('light-travel time failed to converge')
+    return tposition - cposition, tvelocity - cvelocity, t, light_time
 
 _reconcile  # So CI will think we used it, whether use above is commented or not
 
