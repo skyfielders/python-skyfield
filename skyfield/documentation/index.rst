@@ -34,11 +34,15 @@ Computing the position of Mars in the sky is as easy as:
 
     from skyfield.api import load
 
+    # Create a timescale and ask the current time.
+    ts = load.timescale()
+    t = ts.now()
+
+    # Load the JPL ephemeris DE421 (covers 1900-2050).
     planets = load('de421.bsp')
     earth, mars = planets['earth'], planets['mars']
 
-    ts = load.timescale()
-    t = ts.now()
+    # What's the position of Mars, viewed from Earth?
     astrometric = earth.at(t).observe(mars)
     ra, dec, distance = astrometric.radec()
 
@@ -73,10 +77,10 @@ on the Earth’s surface:
     25deg 27' 54.0"
     101deg 33' 44.1"
 
-Skyfield does not depend on the `AstroPy`_ project
-or its compiled libraries.
-But it accepts AstroPy time objects as input,
-and can return results in native AstroPy units:
+While it does not need the `AstroPy`_ library to be installed,
+Skyfield is designed to interoperate
+by accepting AstroPy time objects as input
+and returning results in native AstroPy units:
 
 .. testcode::
 
@@ -110,11 +114,10 @@ Skyfield’s documentation lives here at the main Skyfield web site:
 
 But the source code and issue tracker live on other web sites:
 
-* `Skyfield on the Python Package Index <https://pypi.python.org/pypi/skyfield>`_
-
-* `GitHub repository <https://github.com/skyfielders/python-skyfield/>`_
-
-* `GitHub issue tracker <https://github.com/skyfielders/python-skyfield/issues>`_
+* `Packages: at the Python Package Index <https://pypi.python.org/pypi/skyfield>`_
+* `Source: on GitHub <https://github.com/skyfielders/python-skyfield/>`_
+* `Discussion: on GitHub <https://github.com/skyfielders/python-skyfield/discussions>`_
+* `Issues: on GitHub <https://github.com/skyfielders/python-skyfield/issues>`_
 
 See the :ref:`changelog` for the current version’s release notes —
 and also for the updates that landed with each previous version!
