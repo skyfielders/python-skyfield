@@ -1,7 +1,7 @@
 """Vector functions and their composition."""
 
 from jplephem.names import target_names as _jpl_code_name_dict
-from numpy import max, newaxis, expand_dims, zeros, zeros_like, broadcast_to, diagonal
+from numpy import max, newaxis, expand_dims, broadcast_to, diagonal, squeeze
 from .constants import C_AUDAY
 from .descriptorlib import reify
 from .errors import DeprecationError
@@ -270,7 +270,7 @@ def _correct_for_light_travel_time(observer, target):
         light_time0 = light_time
     else:
         raise ValueError('light-travel time failed to converge')
-    return tposition - cposition, tvelocity - cvelocity, t, light_time
+    return squeeze(tposition - cposition), squeeze(tvelocity - cvelocity), t, light_time
 
 def _jpl_name(target):
     if not isinstance(target, int):
