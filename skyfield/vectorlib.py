@@ -244,7 +244,7 @@ def _correct_for_light_travel_time(observer, target):
     for i in range(10):
         light_time = distance / C_AUDAY
         delta = light_time - light_time0
-        if abs(max(delta)) < 1e-12:
+        if max(abs(delta)) < 1e-12:
             break
 
         # We assume a light travel time of at most a couple of days.  A
