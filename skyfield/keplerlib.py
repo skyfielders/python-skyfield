@@ -266,7 +266,7 @@ class _KeplerOrbit(VectorFunction):
 
 
 def true_anomaly(e, M, p, gm):
-    return_scalar = True if isinstance(e, (float, float64)) else False
+    return_scalar = isinstance(e, (float, float64))
     e, M, p = atleast_1d(e, M, p)
 
     closed = e < 1.0
