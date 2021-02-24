@@ -283,10 +283,7 @@ def true_anomaly(e, M, p, gm):
 
     v[parabolic] = true_anomaly_parabolic(p[parabolic], gm, M[parabolic])
 
-    if return_scalar:
-        return v[0]
-    else:
-        return v
+    return v[0] if return_scalar else v
 
 
 def eccentric_anomaly(e, M):
