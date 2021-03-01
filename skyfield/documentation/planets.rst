@@ -3,8 +3,6 @@
  Planets and their moons: JPL ephemeris files
 ==============================================
 
-.. Big list of files is at ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp
-
 For planets and their moons,
 NASA’s Jet Propulsion Laboratory (JPL)
 offers high accuracy tables of positions
@@ -60,24 +58,113 @@ Choosing an Ephemeris
 Here are the most popular general-purpose ephemeris files,
 from the JPL’s famous “DE” Development Ephemeris series.
 
-==== =============================== ====== ================================ ======
-Year Short-term ephemeris            Size   Long-term ephemeris              Size
-==== =============================== ====== ================================ ======
-1997 ``de405.bsp`` (1600 to 2200)    63 MB  ``de406.bsp`` (−3000 to 3000)    287 MB
-2008 ``de421.bsp`` (1900 to 2050)    17 MB  ``de422.bsp`` (−3000 to 3000)    623 MB
-2013 | ``de430t.bsp`` (1550 to 2650) 128 MB ``de431t.bsp`` (–13200 to 17191) 3.5 GB
-     | ``de430_1850-2150.bsp``       31 MB
-2020 | ``de440.bsp`` (1550 to 2650)  114 MB ``de441.bsp`` (−13200 to 17191)  3.1 GB
-     | ``de440s.bsp`` (1849 to 2150) 32 MB
-==== =============================== ====== ================================ ======
+====== ========================= ================ =================
+Issued Short                     Medium           Long
+====== ========================= ================ =================
+1997                             | ``de405.bsp``  | ``de406.bsp``
+                                 | 1600 to 2200   | −3000 to 3000
+                                 | 63 MB          | 287 MB
+2008   | ``de421.bsp``                            | ``de422.bsp``
+       | 1900 to 2050                             | −3000 to 3000
+       | 17 MB                                    | 623 MB
+2013   | ``de430_1850-2150.bsp`` | ``de430t.bsp`` | ``de431t.bsp``
+       | 1850 to 2150            | 1550 to 2650   | –13200 to 17191
+       | 31 MB                   | 128 MB         | 3.5 GB
+2020   | ``de440s.bsp``          | ``de440.bsp``  | ``de441.bsp``
+       | 1849 to 2150            | 1550 to 2650   | −13200 to 17191
+       | 32 MB                   | 114 MB         | 3.1 GB
+====== ========================= ================ =================
+
+You can find even more ephemeris files on the Internet
+at the various :ref:`Ephemeris download links`
+listed near the bottom of this page.
 
 .. TODO Link to a discussion of negative years.
 
 How can you choose the right ephemeris for your project?
-TODO: How many points below?
 
-1. Does the ephemeris include the planets you need?
----------------------------------------------------
+1. Make sure that the planets, moons, or other bodies you want to observe
+   are among the targets supported by the ephemeris.
+   See :ref:`Listing ephemeris targets` below
+   if you want to download ephemeris files
+   and examine their contents yourself.
+   Some online ephemeris directories include an index
+   that lists the content of each ephemeris in the directory;
+   look for a file with a name like ``README.txt`` or ``aa_summaries.txt``.
+
+2. Choose the shortest ephemeris
+   that will cover the dates your project needs.
+   Not only will a shorter file save download time and disk space,
+   but the most recent short-term ephemerides DE430 and DE440
+   are more accurate than their long-term counterparts DE431 and DE441
+   because the shorter files include the effect of the Moon’s liquid core,
+   an effect that’s
+   “not suitable for backward integration of more than a few centuries.”
+
+   If you need a specific range of ancient dates
+   but find a long-term ephemeris too large,
+   read the section below about :ref:`Making an ephemeris excerpt` —
+   you should be able to generate a smaller file
+   that includes only the range of dates you need.
+
+3. The most recent ephemeris files should be the most accurate
+   because they are built using the highest accuracy data
+   from humankind’s telescopes and spacecraft.
+
+Note that ephemeris files don’t provide numbers
+for how accurate their planet positions are.
+Sometimes you can find ballpark estimates of accuracy
+in an ephemeris file’s official report.
+The report *The Planetary and Lunar Ephemerides DE430 and DE431*,
+for example, states that:
+
+* “The orbits of the inner planets are known to subkilometer accuracy”
+* “an accuracy of 0″.0002 …
+  is the limiting error source for the orbits of the terrestrial planets,
+  and corresponds to orbit uncertainties of a few hundred meters.”
+* “The orbits of Jupiter and Saturn
+  are determined to accuracies of tens of kilometers”
+* “Uranus, Neptune, and Pluto … observations …
+  limit position accuracies to several thousand kilometers.”
+
+You can find links to the various ephemeris reports
+in the :ref:`Ephemeris bibliography` at the bottom of this page.
+Some ephemeris files also have a built-in text summary
+you can print to the screen:
+
+.. testcode::
+
+    print(planets.spk.daf.comments())
+
+.. testoutput::
+
+    ; de421.bsp LOG FILE
+    ;
+    ; Created 2008-02-12/11:33:34.00.
+    ...
+
+The more recent ephemeris files tend to have the most informative comment texts.
+
+I myself use DE421 and DE422
+because they’re small, accurate, and cover long enough time periods
+for all of my projects.
+When the time comes to upgrade,
+I’ll probably move next to DE440;
+its short-term ``de440s.bsp`` file is especially attractive
+because it’s only twice the size of DE421
+while delivering higher accuracy plus an extra century of data.
+
+To find out what difference the choice of ephemeris makes,
+simply run a sample calculation with one ephemeris then again using another.
+The difference will usually be far below the resolution of your instruments
+unless (a) you’re doing radio astronomy
+or (b) you’re planning to place an actual payload
+in orbit around the target body.
+
+.. _Listing ephemeris targets:
+
+Listing the targets that an ephemeris supports
+==============================================
 
 You can use ``print()`` to check whether an ephemeris
 lists a specific planet or moon.
@@ -110,7 +197,8 @@ Here, for example, are the targets supported by DE421:
 Skyfield can generate positions
 for any body that an ephemeris links to target zero,
 the Solar System barycenter.
-This ephemeris DE421, as you can see above,
+For example,
+DE421 — as you can see above —
 provides a segment directly linking the Solar System barycenter
 with the Sun:
 
@@ -124,7 +212,8 @@ with the Sun:
     'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 10 SUN
 
 By contrast,
-generating a position for the Moon with DE421 requires two segments.
+generating a position for the Moon with DE421
+requires Skyfield to add together two segments behind the scenes.
 The first segment provides the position of the Earth-Moon center of gravity,
 while the second segment provides the offset from there to the Moon.
 
@@ -152,80 +241,7 @@ their common barycenter is always inside the Earth.
 Only Pluto has a satellite so massive and so distant
 that the Pluto-Charon barycenter is in space between them.
 
-.. TODO Restore discussion of the “segments” list?
-
-2. What dates do you need?
---------------------------
-
-Most JPL ephemeris files are mission-specific
-and usually less than two centuries in length —
-DE418, for example,
-was `issued in support of the 2015 New Horizons Pluto encounter
-<https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de418_announcement.pdf>`_
-and covers only the 150 years from 1900 to 2050.
-
-But once or twice a decade
-the JPL releases general-purpose ephemeris files
-that are not tied to a specific mission.
-These tend to come in pairs:
-a short-term ephemeris and a long-term ephemeris
-produced from the same data.
-You can see several examples in the table above.
-The most recent example is the short-term DE440 and the long-term DE441.
-
-The most obvious tradeoff
-between a short-term ephemeris
-and its long-term counterpart is file size.
-
-But there is also a less obvious tradeoff:
-the most recent short-term ephemeris files
-feature more accurate Moon positions
-than the long-term ephemeris files,
-because each short term ephemeris
-models the effect of the Moon’s recently discovered fluid core.
-The long-term ephemeris files
-can’t include this detail because the correction is
-“not suitable for backward integration of more than a few centuries”
-(in the words of the DE430/DE431 report)
-and would reduce the accuracy of positions in the far past or future.
-
-3. How big a difference does the ephemeris make?
-------------------------------------------------
-
-You can always expect more recent JPL ephemeris files to be more accurate.
-But how much more accurate are they?
-
-It might surprise you to learn that JPL ephemeris files
-don’t offer hard numbers for the outer limits of their accuracy.
-Instead, the official reports —
-listed below in the :ref:`Ephemeris bibliography` —
-offer statements like these from the report on DE430 and DE431:
-
-* “The orbits of the inner planets are known to subkilometer accuracy”
-* “an accuracy of 0″.0002 …
-  is the limiting error source for the orbits of the terrestrial planets,
-  and corresponds to orbit uncertainties of a few hundred meters.”
-* “The orbits of Jupiter and Saturn
-  are determined to accuracies of tens of kilometers”
-* “Uranus, Neptune, and Pluto … observations …
-  limit position accuracies to several thousand kilometers.”
-
-A recent paper by Nanograv Collaboration
-makes the stark admission that
-`“the ephemerides do not generally provide usable error representations.”
-<https://arxiv.org/pdf/2001.00595.pdf>`_.
-
-Instead, you will need to switch questions.
-
-The key is to realize that the choice before you is never
-“would I rather use the ephemeris DE430
-or instead use the real position of Jupiter?”
-Since you have no access to the real position,
-your choice is always a choice between ephemeris files themselves:
-“would I rather use DE430 or DE440?”
-And this, happily, is a choice that can be quantified.
-You can use Skyfield to try out both ephemeris files
-and see how big the difference is.
+.. _Making an ephemeris excerpt:
 
 Making an excerpt of an ephemeris
 =================================
@@ -395,14 +411,20 @@ will be sufficient for projects that need them,
 until there is time for a Skyfield contributor
 to integrate such support into Skyfield itself.
 
-.. _Ephemeris bibliography:
+.. _Ephemeris download links:
 
-Ephemeris bibliography
-======================
+Ephemeris download links
+========================
 
-.. TODO Mention python -m ... to show comment
+Skyfield knows a URL for each of the most popular ephemeris files —
+so you can simply ``load('de421.bsp')``
+and Skyfield will know where to download the file
+if you don’t already have it on disk.
+But for more obscure ephemeris files
+you might need to give ``load()`` the full URL instead.
 
-Download directories
+Here are some common sites
+from which you can download official ephemeris files:
 
 * For planets:
 
@@ -413,6 +435,11 @@ Download directories
 
   | ftp://ssd.jpl.nasa.gov/pub/eph/satellites/bsp/
   | https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/
+
+.. _Ephemeris bibliography:
+
+Ephemeris bibliography
+======================
 
 DE405 / DE406
 
