@@ -5,11 +5,14 @@
 
 .. Big list of files is at ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp
 
-If you are interested in observing the planets or their moons,
+For planets and their moons,
 NASA’s Jet Propulsion Laboratory (JPL)
 offers high accuracy tables of positions
-covering time periods that range from decades to centuries.
-You can use ``load()`` to download and open a JPL ephemeris:
+for time spans ranging from decades to centuries.
+Each table is called an *ephemeris*,
+from the ancient Greek word for *daily*.
+Here’s how to download and open the JPL ephemeris DE421
+and ask for the position of Mars:
 
 .. testsetup::
 
@@ -18,85 +21,211 @@ You can use ``load()`` to download and open a JPL ephemeris:
 .. testcode::
 
     from skyfield.api import load
-    planets = load('de421.bsp')
 
-See :doc:`files` to learn more about downloading files
-and choosing the directory to which they are saved.
-Ephemeris files never receive updates,
-so once you have a file like ``de421.bsp`` on disk
-you won’t need to download it again.
+    ts = load.timescale()
+    t = ts.utc(2021, 2, 26, 15, 19)
+
+    planets = load('de421.bsp')  # ephemeris DE421
+    mars = planets['Mars Barycenter']
+    barycentric = mars.at(t)
+
+Or you can compute the position of Mars
+from another vantage point in the Solar System:
+
+.. testcode::
+
+    earth = planets['Earth']
+    astrometric = earth.at(t).observe(mars)
+
+For details:
+
+* See :doc:`files` to learn more about the ``load()`` routine
+  and how you can choose the directory
+  to which it downloads files.
+  Note that ephemeris files never receive updates,
+  so once you have a file like ``de421.bsp`` on disk
+  you never need to download it again.
+
+* See :doc:`positions` to learn what you can do
+  with the ``barycentric`` and ``astrometric`` positions
+  computed in the code above.
+
+.. TODO “go see PLACE to learn more about vector functions”?
+
+To learn more about ephemeris files themselves, keep reading here.
 
 Choosing an Ephemeris
 =====================
 
 Here are the most popular general-purpose ephemeris files,
-from the JPL’s famous “Development Ephemeris” = “DE” series.
+from the JPL’s famous “DE” Development Ephemeris series.
 
-==== ============================= ====== ================================ ======
-Year Short-term ephemeris          Size   Long-term ephemeris              Size
-==== ============================= ====== ================================ ======
-1997 ``de405.bsp`` (1600 to 2200)  63 MB  ``de406.bsp`` (−3000 to 3000)    287 MB
-2008 ``de421.bsp`` (1900 to 2050)  17 MB  ``de422.bsp`` (−3000 to 3000)    623 MB
-2013 ``de430t.bsp`` (1550 to 2650) 128 MB ``de431t.bsp`` (–13200 to 17191) 3.5 GB
-     ``de430_1850-2150.bsp``       31 MB
-2020 ``de440.bsp`` (1550 to 2650)  114 MB ``de441.bsp`` (−13200 to 17191)  3.1 GB
-     ``de440s.bsp`` (1849 to 2150) 32 MB
-==== ============================= ====== ================================ ======
+==== =============================== ====== ================================ ======
+Year Short-term ephemeris            Size   Long-term ephemeris              Size
+==== =============================== ====== ================================ ======
+1997 ``de405.bsp`` (1600 to 2200)    63 MB  ``de406.bsp`` (−3000 to 3000)    287 MB
+2008 ``de421.bsp`` (1900 to 2050)    17 MB  ``de422.bsp`` (−3000 to 3000)    623 MB
+2013 | ``de430t.bsp`` (1550 to 2650) 128 MB ``de431t.bsp`` (–13200 to 17191) 3.5 GB
+     | ``de430_1850-2150.bsp``       31 MB
+2020 | ``de440.bsp`` (1550 to 2650)  114 MB ``de441.bsp`` (−13200 to 17191)  3.1 GB
+     | ``de440s.bsp`` (1849 to 2150) 32 MB
+==== =============================== ====== ================================ ======
 
-If you are interested in seeing the full range of ephemeris files available,
-check out the :doc:`Ephemeris bibliography` at the end of this page.
+.. TODO Link to a discussion of negative years.
 
-You can think of negative years, as cited in the above table,
-as being almost like years BC except that they are off by one.
-Historians invented our calendar back before zero was a counting number,
-so AD 1 was immediately preceded by 1 BC without a year in between.
-But astronomers count backwards AD 2, AD 1, 0, −1, −2, and so forth.
+How can you choose the right ephemeris for your project?
+TODO: How many points below?
 
-So if you are curious about the positions of the planets back in 44 BC,
-when Julius Caesar was assassinated,
-be careful to ask an astronomer about the year −43 instead.
+1. Does the ephemeris include the planets you need?
+---------------------------------------------------
 
-A popular choice of ephemeris is DE421.
-It is recent, has good precision,
-was designed for general-purpose use,
-and is only 17 MB in size.
-
-After you have loaded an ephemeris and have used a statement like:
+You can use ``print()`` to check whether an ephemeris
+lists a specific planet or moon.
+Here, for example, are the targets supported by DE421:
 
 .. testcode::
 
-    mars = planets['Mars']
-
-— to retrieve a planet, consult the chapter :doc:`positions`
-to learn about all the positions that you can use it to generate.
-
-If you want to examine the segments that make up the ephemeris,
-you can loop over its ``segments`` list.
-You can ``print()`` a segment to see a textual description,
-or access segment attributes that give its center, target,
-and the dates over which it provides valid positions:
-
-.. testcode::
-
-    ts = load.timescale()
-
-    segment = planets.segments[0]
-    start, end = segment.time_range(ts)
-
-    print('Center:', segment.center_name)
-    print('Target:', segment.target_name)
-    print('Date range:', start.tdb_strftime(), '-', end.tdb_strftime())
+    print(planets)
 
 .. testoutput::
 
-    Center: 0 SOLAR SYSTEM BARYCENTER
-    Target: 1 MERCURY BARYCENTER
-    Date range: 1899-07-29 00:00:00 TDB - 2053-10-09 00:00:00 TDB
+    SPICE kernel file 'de421.bsp' has 15 segments
+      JD 2414864.50 - JD 2471184.50  (1899-07-28 through 2053-10-08)
+          0 -> 1    SOLAR SYSTEM BARYCENTER -> MERCURY BARYCENTER
+          0 -> 2    SOLAR SYSTEM BARYCENTER -> VENUS BARYCENTER
+          0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
+          0 -> 4    SOLAR SYSTEM BARYCENTER -> MARS BARYCENTER
+          0 -> 5    SOLAR SYSTEM BARYCENTER -> JUPITER BARYCENTER
+          0 -> 6    SOLAR SYSTEM BARYCENTER -> SATURN BARYCENTER
+          0 -> 7    SOLAR SYSTEM BARYCENTER -> URANUS BARYCENTER
+          0 -> 8    SOLAR SYSTEM BARYCENTER -> NEPTUNE BARYCENTER
+          0 -> 9    SOLAR SYSTEM BARYCENTER -> PLUTO BARYCENTER
+          0 -> 10   SOLAR SYSTEM BARYCENTER -> SUN
+          3 -> 301  EARTH BARYCENTER -> MOON
+          3 -> 399  EARTH BARYCENTER -> EARTH
+          1 -> 199  MERCURY BARYCENTER -> MERCURY
+          2 -> 299  VENUS BARYCENTER -> VENUS
+          4 -> 499  MARS BARYCENTER -> MARS
 
-For example, you can see above
-that the first segment of the ephemeris DE421
-provides the position of Mercury relative to the center of the Solar System
-over the entire twentieth century and half of the twenty-first.
+Skyfield can generate positions
+for any body that an ephemeris links to target zero,
+the Solar System barycenter.
+This ephemeris DE421, as you can see above,
+provides a segment directly linking the Solar System barycenter
+with the Sun:
+
+.. testcode::
+
+    sun = planets['Sun']
+    print(sun)
+
+.. testoutput::
+
+    'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 10 SUN
+
+By contrast,
+generating a position for the Moon with DE421 requires two segments.
+The first segment provides the position of the Earth-Moon center of gravity,
+while the second segment provides the offset from there to the Moon.
+
+.. testcode::
+
+    moon = planets['Moon']
+    print(moon)
+
+.. testoutput::
+
+    Sum of 2 vectors:
+     'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+     'de421.bsp' segment 3 EARTH BARYCENTER -> 301 MOON
+
+Note that most planets are so massive compared to their moons
+that you can ignore the difference
+between the planet and its system barycenter.
+If you want to observe Mars or Jupiter from elsewhere in the Solar System,
+just ask for the ``Mars Barycenter``
+or ``Jupiter Barycenter`` position instead.
+The Earth-Moon system is unusual
+for featuring a satellite with so much mass —
+though even in that case,
+their common barycenter is always inside the Earth.
+Only Pluto has a satellite so massive and so distant
+that the Pluto-Charon barycenter is in space between them.
+
+.. TODO Restore discussion of the “segments” list?
+
+2. What dates do you need?
+--------------------------
+
+Most JPL ephemeris files are mission-specific
+and usually less than two centuries in length —
+DE418, for example,
+was `issued in support of the 2015 New Horizons Pluto encounter
+<https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de418_announcement.pdf>`_
+and covers only the 150 years from 1900 to 2050.
+
+But once or twice a decade
+the JPL releases general-purpose ephemeris files
+that are not tied to a specific mission.
+These tend to come in pairs:
+a short-term ephemeris and a long-term ephemeris
+produced from the same data.
+You can see several examples in the table above.
+The most recent example is the short-term DE440 and the long-term DE441.
+
+The most obvious tradeoff
+between a short-term ephemeris
+and its long-term counterpart is file size.
+
+But there is also a less obvious tradeoff:
+the most recent short-term ephemeris files
+feature more accurate Moon positions
+than the long-term ephemeris files,
+because each short term ephemeris
+models the effect of the Moon’s recently discovered fluid core.
+The long-term ephemeris files
+can’t include this detail because the correction is
+“not suitable for backward integration of more than a few centuries”
+(in the words of the DE430/DE431 report)
+and would reduce the accuracy of positions in the far past or future.
+
+3. How big a difference does the ephemeris make?
+------------------------------------------------
+
+You can always expect more recent JPL ephemeris files to be more accurate.
+But how much more accurate are they?
+
+It might surprise you to learn that JPL ephemeris files
+don’t offer hard numbers for the outer limits of their accuracy.
+Instead, the official reports —
+listed below in the :ref:`Ephemeris bibliography` —
+offer statements like these from the report on DE430 and DE431:
+
+* “The orbits of the inner planets are known to subkilometer accuracy”
+* “an accuracy of 0″.0002 …
+  is the limiting error source for the orbits of the terrestrial planets,
+  and corresponds to orbit uncertainties of a few hundred meters.”
+* “The orbits of Jupiter and Saturn
+  are determined to accuracies of tens of kilometers”
+* “Uranus, Neptune, and Pluto … observations …
+  limit position accuracies to several thousand kilometers.”
+
+A recent paper by Nanograv Collaboration
+makes the stark admission that
+`“the ephemerides do not generally provide usable error representations.”
+<https://arxiv.org/pdf/2001.00595.pdf>`_.
+
+Instead, you will need to switch questions.
+
+The key is to realize that the choice before you is never
+“would I rather use the ephemeris DE430
+or instead use the real position of Jupiter?”
+Since you have no access to the real position,
+your choice is always a choice between ephemeris files themselves:
+“would I rather use DE430 or DE440?”
+And this, happily, is a choice that can be quantified.
+You can use Skyfield to try out both ephemeris files
+and see how big the difference is.
 
 Making an excerpt of an ephemeris
 =================================
@@ -143,81 +272,16 @@ over the given two-week period::
 You can load and use it directly off of disk
 with :func:`~skyfield.iokit.load_file()`.
 
-How segments are linked to predict positions
-============================================
-
-You can ``print()`` an ephemeris to learn which objects it supports.
-
-.. testcode::
-
-    print(planets)
-
-.. testoutput::
-
-    SPICE kernel file 'de421.bsp' has 15 segments
-      JD 2414864.50 - JD 2471184.50  (1899-07-28 through 2053-10-08)
-          0 -> 1    SOLAR SYSTEM BARYCENTER -> MERCURY BARYCENTER
-          0 -> 2    SOLAR SYSTEM BARYCENTER -> VENUS BARYCENTER
-          0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
-          0 -> 4    SOLAR SYSTEM BARYCENTER -> MARS BARYCENTER
-          0 -> 5    SOLAR SYSTEM BARYCENTER -> JUPITER BARYCENTER
-          0 -> 6    SOLAR SYSTEM BARYCENTER -> SATURN BARYCENTER
-          0 -> 7    SOLAR SYSTEM BARYCENTER -> URANUS BARYCENTER
-          0 -> 8    SOLAR SYSTEM BARYCENTER -> NEPTUNE BARYCENTER
-          0 -> 9    SOLAR SYSTEM BARYCENTER -> PLUTO BARYCENTER
-          0 -> 10   SOLAR SYSTEM BARYCENTER -> SUN
-          3 -> 301  EARTH BARYCENTER -> MOON
-          3 -> 399  EARTH BARYCENTER -> EARTH
-          1 -> 199  MERCURY BARYCENTER -> MERCURY
-          2 -> 299  VENUS BARYCENTER -> VENUS
-          4 -> 499  MARS BARYCENTER -> MARS
-
-Bodies in JPL ephemeris files are each identified by an integer,
-but Skyfield translates them so that you do not have to remember
-that a code like 399 stands for the Earth and 499 for Mars.
-
-Each ephemeris segment predicts the position of one body
-with respect to another.
-Sometimes several segments sometimes have to be combined
-to generate a complete position.
-The DE421 ephemeris shown above, for example,
-can produce the position of the Sun directly.
-But if you ask it for the position of Earth
-then it will have to add together two distances:
-
-* From the Solar System’s center (0) to the Earth-Moon barycenter (3)
-* From the Earth-Moon barycenter (3) to the Earth itself (399)
-
-This happens automatically behind the scenes.
-All you have to say is ``planets[399]`` or ``planets['Earth']``
-and Skyfield will put together a solution using the segments provided.
-
-.. testcode::
-
-    earth = planets['earth']
-    print(earth)
-
-.. testoutput::
-
-    Sum of 2 vectors:
-     'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
-     'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH
-
-Each time you ask this ``earth`` object for its position at a given time,
-Skyfield will compute both of these underlying vectors
-and add them together to generate the position.
-
-Closing the file automatically
-==============================
+Closing the ephemeris file automatically
+========================================
 
 If you need to close files as you finish using them
 instead of waiting until the application exits,
 each Skyfield ephemeris offers a
 :meth:`~skyfield.jpllib.SpiceKernel.close()` method.
-It can either be called manually when you are done with an ephemeris,
-or you can use Python’s |closing|_ context manager
-to call the method automatically
-at the completion of a ``with`` statement:
+You can either call it manually,
+or use Python’s |closing|_ context manager
+to call ``close()`` automatically when a block of code finishes:
 
 .. |closing| replace:: ``closing()``
 .. _closing: https://docs.python.org/3/library/contextlib.html#contextlib.closing
@@ -231,14 +295,6 @@ at the completion of a ``with`` statement:
 
     with closing(planets):
         planets['venus'].at(t)  # Ephemeris can be used here
-
-    planets['venus'].at(t)  # But it’s closed outside the “with”
-
-.. testoutput::
-
-    Traceback (most recent call last):
-      ...
-    ValueError: seek of closed file
 
 .. testcleanup::
 
@@ -344,6 +400,8 @@ to integrate such support into Skyfield itself.
 Ephemeris bibliography
 ======================
 
+.. TODO Mention python -m ... to show comment
+
 Download directories
 
 * For planets:
@@ -405,3 +463,13 @@ Analysis mentioning several ephemerides
   for Robust Gravitational-Wave Searches with Pulsar Timing Arrays
   <https://arxiv.org/pdf/2001.00595.pdf>`_
   (The NANOGrav Collaboration 2020)
+
+File format ``.bsp`` documentation
+
+* `SPICE toolkit: SPK Required Reading
+  <https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/spk.html>`_
+  (describes ``.bsp`` files)
+
+* `SPICE toolkit: Double Precision Array Files (DAF)
+  <https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/daf.html>`_
+  (describes binary format)

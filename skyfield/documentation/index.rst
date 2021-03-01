@@ -77,10 +77,9 @@ on the Earth’s surface:
     25deg 27' 54.0"
     101deg 33' 44.1"
 
-While it does not need the `AstroPy`_ library to be installed,
-Skyfield is designed to interoperate
-by accepting AstroPy time objects as input
-and returning results in native AstroPy units:
+While Skyfield itself has no dependency on the `AstroPy`_ library,
+it’s willing to accept AstroPy time objects as input
+and return results in native AstroPy units:
 
 .. testcode::
 
@@ -105,7 +104,7 @@ or
 Documentation
 =============
 
-Skyfield’s documentation lives here at the main Skyfield web site:
+Skyfield’s documentation lives here on the main Skyfield web site:
 
 * :doc:`toc`
 * :doc:`installation`

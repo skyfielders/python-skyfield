@@ -8,8 +8,9 @@ Changelog
 v1.38 — ?
 ---------
 
-* Added a reference frame class for the :class:`~skyfield.sgp4lib.TEME`
-  frame used by SGP4 Earth satellite elements.
+* Added a full reference frame object
+  for the :class:`~skyfield.sgp4lib.TEME` reference frame
+  used by SGP4 Earth satellite elements.
 
 v1.37 — 2021 February 15
 ------------------------
