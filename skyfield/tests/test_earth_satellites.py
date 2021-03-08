@@ -118,8 +118,9 @@ def test_appendix_c_satellite():
     assert abs(4658.70952502 - rTEME[1]) < epsilon
     assert abs(813.68673153 - rTEME[2]) < epsilon
 
-    # TODO: Similar to the above, this used to be 1e-9.
-    epsilon = 1e-8
+    # TODO: Similar to the above, this used to be 1e-9.  Then the Time
+    # object started storing UTC as seconds, and it got worse.
+    epsilon = 5e-8
     assert abs(-2.232832783 - vTEME[0]) < epsilon
     assert abs(-4.110453490 - vTEME[1]) < epsilon
     assert abs(-3.157345433 - vTEME[2]) < epsilon

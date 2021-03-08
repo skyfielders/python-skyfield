@@ -94,13 +94,19 @@ class Timescale(object):
         self.julian_calendar_cutoff = None
 
         # Work-in-progress: make a less crazy leap-second table, that
-        # does not need the -inf and +inf at the ends.
+        # does not need the -inf and +inf at the ends.  The table has
+        # three columns:
+        #
+        # _leap_utc      Integer UTC seconds since JD 0 w/leap seconds missing.
+        # _leap_offsets  Integer offset between UTC and TAI.
+        # _leap_tai      Integer TAI seconds since JD 0.
 
         leap_dates = leap_dates[2:-1]
         leap_offsets = leap_offsets[3:]
 
-        self._leap_utc = (leap_dates[:,None] * DAY_S + [[-1,0]]).flatten()
-        self._leap_offsets = (leap_offsets[:,None] + [[-1,0]]).flatten()
+        one_zero = [[-1,0]]
+        self._leap_utc = (leap_dates[:,None] * DAY_S + one_zero).flatten()
+        self._leap_offsets = (leap_offsets[:,None] + one_zero).flatten()
         self._leap_tai = self._leap_utc + self._leap_offsets
 
     def now(self):
@@ -149,13 +155,28 @@ class Timescale(object):
         return self._utc(tup)
 
     def _utc(self, tup):
+        # Build a Time from a UTC tuple, carefully preserving its exact
+        # second number in the Time's hidden TAI seconds field.
         year, month, day, hour, minute, second = tup
-        whole, fraction = self._jd(year, month, day, hour, minute, 0.0)
-        i = searchsorted(self.leap_dates, whole + fraction, 'right')
-        fraction += (self.leap_offsets[i] + second) / DAY_S
-        whole, fraction = _reconcile(whole, fraction)  # second could be array
+        a = _to_array
+        cutoff = self.julian_calendar_cutoff
+
+        # Figure out exactly the TAI second number.
+        seconds = (julian_day(a(year), a(month), a(day), cutoff) - 0.5) * DAY_S
+        seconds, sfr = divmod(seconds, 1.0)  # in case there were any fractions
+        seconds += interp(seconds, self._leap_utc, self._leap_offsets)
+        more = a(hour) * 3600.0 + a(minute) * 60.0 + a(second)
+        seconds2, sfr = divmod(sfr + more, 1.0)
+        seconds += seconds2
+
+        # For the other timescales, use the usual Julian date + fraction.
+        whole, fraction = divmod(seconds, DAY_S)
+        fraction += sfr
+        fraction /= DAY_S
+
         t = Time(self, whole, fraction + tt_minus_tai)
         t.tai_fraction = fraction
+        t._tai_seconds = seconds, sfr
         return t
 
     def _jd(self, year, month, day, hour, minute, second):
@@ -739,6 +760,7 @@ class Time(object):
 
     @reify
     def dut1(self):
+        # TODO: migrate to new leap second table
         ts = self.ts
         i = searchsorted(ts._leap_reverse_dates, self.tai, 'right')
         return 32.184 + ts.leap_offsets[i] - self.delta_t
