@@ -593,15 +593,6 @@ class Time(object):
             return year, month, day, hour, minute, second + sfr
         return year, month, day, hour, minute, second + sfr, jd
 
-    def _utc_float(self, offset):
-        # TODO rm
-        ts = self.ts
-        i = searchsorted(ts._leap_reverse_dates, self.tai + offset, 'right')
-        whole = self.whole
-        fraction = offset - ts.leap_offsets[i] / DAY_S + self.tai_fraction
-        is_leap_second = (whole + fraction) < ts.leap_dates[i-1]
-        return whole, fraction, is_leap_second
-
     def _utc_seconds(self, offset):
         """Return integer seconds since JD 0.0, plus a 0 ≤ fraction < 1."""
         seconds, fr = self._tai_seconds
@@ -620,6 +611,12 @@ class Time(object):
         seconds2, fr = divmod(fr + self.tai_fraction * DAY_S, 1.0)
         seconds += seconds2
         return seconds, fr
+
+    def _leap_seconds(self):
+        # TODO: should this be reified and made the only place it's calculated?
+        ts = self.ts
+        seconds, fr = self._tai_seconds
+        return interp(seconds, ts._leap_tai, ts._leap_offsets)
 
     # Calendar tuples.
 

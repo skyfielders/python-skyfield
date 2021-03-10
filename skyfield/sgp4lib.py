@@ -157,7 +157,8 @@ class EarthSatellite(VectorFunction):
 
         """
         sat = self.model
-        jd, fraction, is_leap_second = t._utc_float(0.0)
+        jd = t.whole
+        fraction = t.tai_fraction - t._leap_seconds() / DAY_S
 
         if getattr(jd, 'shape', None):
             e, r, v = sat.sgp4_array(jd, fraction)

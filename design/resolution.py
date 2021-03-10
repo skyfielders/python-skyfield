@@ -6,7 +6,6 @@ from skyfield.api import Time, load
 ATTRIBUTES = (
     'J', 'delta_t', 'dut1', 'gmst',
     # (lambda t: t.toordinal()),
-    # (lambda t: t._utc_float(0.0)),
     'tai_fraction', 'tdb_fraction', 'ut1_fraction',
 )
 
