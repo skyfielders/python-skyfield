@@ -7,6 +7,8 @@ from numpy import (add, append, argsort, bool_, concatenate, diff, flatnonzero,
 from .constants import DAY_S
 EPSILON = 0.001 / DAY_S
 
+_trace = None  # User can replace with a routine to save search iterations.
+
 def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
     """Find the times at which a discrete function of time changes value.
 
@@ -159,6 +161,9 @@ def find_maxima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
             break
 
         left, right = _choose_brackets(y)
+
+        if _trace is not None:
+            _trace((t, y, left, right))
 
         if not len(left):
             # No maxima found.
