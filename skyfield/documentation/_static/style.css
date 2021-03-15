@@ -109,6 +109,9 @@ h1, h2, h3 {
     padding-bottom: 0.75em;
     border-bottom: 1px solid black;
 }
+.versionmodified {
+    font-style: italic;
+}
 code, pre, tt, dt {
     font-family: "Ubuntu Mono Custom", monospace, serif;
     font-size: 0.83333333em;

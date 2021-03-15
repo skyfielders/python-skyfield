@@ -129,7 +129,7 @@ class Timescale(object):
         return self._utc(_datetime_to_utc_tuple(datetime))
 
     def from_datetimes(self, datetime_list):
-        """Return a `Time` for a list of Python ``datetime``\ s.
+        """Return a `Time` for a list of Python ``datetime`` objects.
 
         The ``datetime`` objects must each be “timezone-aware”: they
         must each have a time zone object as their ``tzinfo`` attribute
@@ -140,7 +140,16 @@ class Timescale(object):
         return self._utc(array(value) for value in zip(*tuples))
 
     def utc(self, year, month=1, day=1, hour=0, minute=0, second=0.0):
-        """Build a `Time` from a UTC `calendar date`."""
+        """Build a `Time` from a UTC `calendar date`.
+
+        .. versionadded:: 1.24
+           Passing a Python ``datetime`` or a list of datetimes as the
+           first argument has been deprecated (and was never supported
+           for the other time scale methods).  Instead, use the methods
+           :meth:`~skyfield.timelib.Timescale.from_datetime()` and
+           :meth:`~skyfield.timelib.Timescale.from_datetimes()`.
+
+        """
         # TODO: someday deprecate passing datetime objects here, as
         # there are now separate constructors for them.
         if isinstance(year, datetime):
@@ -245,7 +254,13 @@ class Timescale(object):
 
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
-        """Build a `Time` from an International Atomic Time `calendar date`."""
+        """Build a `Time` from an International Atomic Time `calendar date`.
+
+        .. versionadded:: 1.6
+           Passing a Julian date with ``jd=`` has been deprecated;
+           instead, use :meth:`~skyfield.timelib.Timescale.tai_jd()`.
+
+        """
         if jd is not None:
             return self.tai_jd(jd)  # deprecate someday
         whole, fraction = self._jd(year, month, day, hour, minute, second)
@@ -262,7 +277,13 @@ class Timescale(object):
 
     def tt(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
            jd=None):
-        """Build a `Time` from a Terrestrial Time `calendar date`."""
+        """Build a `Time` from a Terrestrial Time `calendar date`.
+
+        .. versionadded:: 1.6
+           Passing a Julian date with ``jd=`` has been deprecated;
+           instead, use :meth:`~skyfield.timelib.Timescale.tt_jd()`.
+
+        """
         if jd is not None:
             return self.tt_jd(jd)  # deprecate someday
         whole, fraction = self._jd(year, month, day, hour, minute, second)
@@ -286,7 +307,13 @@ class Timescale(object):
 
     def tdb(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
-        """Build a `Time` from a Barycentric Dynamical Time `calendar date`."""
+        """Build a `Time` from a Barycentric Dynamical Time `calendar date`.
+
+        .. versionadded:: 1.6
+           Passing a Julian date with ``jd=`` has been deprecated;
+           instead, use :meth:`~skyfield.timelib.Timescale.tdb_jd()`.
+
+        """
         if jd is not None:
             return self.tdb_jd(jd)  # deprecate someday
         whole, fraction = self._jd(year, month, day, hour, minute, second)
@@ -294,7 +321,7 @@ class Timescale(object):
         return Time(self, jd, - tdb_minus_tt(jd) / DAY_S)
 
     def tdb_jd(self, jd, fraction=None):
-        """Build `Time` from a Barycentric Dynamical Time Julian date."""
+        """Build a `Time` from a Barycentric Dynamical Time Julian date."""
         jd, fraction = _normalize_jd_and_fraction(jd, fraction)
         t = Time(self, jd, fraction - tdb_minus_tt(jd, fraction) / DAY_S)
         t.tdb_fraction = fraction
@@ -302,7 +329,13 @@ class Timescale(object):
 
     def ut1(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
-        """Build a `Time` from a UT1 Universal Time `calendar date`."""
+        """Build a `Time` from a UT1 Universal Time `calendar date`.
+
+        .. versionadded:: 1.6
+           Passing a Julian date with ``jd=`` has been deprecated;
+           instead, use :meth:`~skyfield.timelib.Timescale.ut1_jd()`.
+
+        """
         if jd is None:  # TODO: deprecate the jd parameter to this method
             whole, fraction = self._jd(year, month, day, hour, minute, second)
             jd = whole + fraction  # TODO: can we pass high precision on?
