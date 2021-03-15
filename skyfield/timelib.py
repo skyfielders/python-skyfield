@@ -88,7 +88,6 @@ class Timescale(object):
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
         self.delta_t_table = build_delta_t_table(delta_t_recent)
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
-        self._leap_reverse_dates = leap_dates + leap_offsets / DAY_S
         self.J2000 = Time(self, float_(T0))
         self.B1950 = Time(self, float_(B1950))
         self.julian_calendar_cutoff = None
@@ -613,7 +612,7 @@ class Time(object):
         return seconds, fr
 
     def _leap_seconds(self):
-        # TODO: should this be reified and made the only place it's calculated?
+        # TODO: should this be reified?
         ts = self.ts
         seconds, fr = self._tai_seconds
         return interp(seconds, ts._leap_tai, ts._leap_offsets)
@@ -757,10 +756,7 @@ class Time(object):
 
     @reify
     def dut1(self):
-        # TODO: migrate to new leap second table
-        ts = self.ts
-        i = searchsorted(ts._leap_reverse_dates, self.tai, 'right')
-        return 32.184 + ts.leap_offsets[i] - self.delta_t
+        return 32.184 + self._leap_seconds() - self.delta_t
 
     @reify
     def gmst(self):
