@@ -43,6 +43,10 @@ def position_of_radec(ra_hours, dec_degrees, distance_au=_GIGAPARSEC_AU,
     to be in the dynamical system of that particular date.  Otherwise,
     they will be assumed to be ICRS (the modern replacement for J2000).
 
+    .. versionadded:: 1.21
+       This replaces a deprecated function ``position_from_radec()``
+       whose ``distance`` argument was not as well designed.
+
     """
     theta = _to_array(dec_degrees) / 360.0 * tau
     phi = _to_array(ra_hours) / 24.0 * tau
