@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Simple distance, velocity, and angle support for Skyfield.
 
 """

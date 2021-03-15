@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime as dt_module
 import re
+import sys
 from collections import namedtuple
 from datetime import date, datetime
 from numpy import (array, concatenate, cos, float_, int64, interp, isnan, nan,
@@ -20,6 +21,7 @@ from .precessionlib import compute_precession
 
 GREGORIAN_START = 2299161
 GREGORIAN_START_ENGLAND = 2361222
+_OLD_PYTHON = sys.version_info < (2, 7)
 
 CalendarTuple = namedtuple('CalendarTuple', 'year month day hour minute second')
 
@@ -206,15 +208,8 @@ class Timescale(object):
         # the routines supported by this function never use time zones.
         # What could go wrong?
 
-        ms = _format_uses_milliseconds(format)
-
-        if ms:
-            fraction = fraction + 1e-16  # encourage .0 to not turn into .999999
-        elif _format_uses_seconds(format):
-            fraction = fraction + _half_second
-        elif _format_uses_minutes(format):
-            fraction = fraction + _half_minute
-
+        offset, ms = _strftime_offset_seconds(format)
+        fraction = fraction + offset / DAY_S
         year, month, day, hour, minute, second = self._cal(jd, fraction)
         z = year * 0
 
@@ -1071,6 +1066,8 @@ def _normalize_jd_and_fraction(jd, fraction):
 def _strftime_offset_seconds(format):
     uses_ms = _format_uses_milliseconds(format)
     if uses_ms:
+        if _OLD_PYTHON:
+            raise ValueError('strftime() "%f" not supported under Python 2')
         offset = 1e-16  # encourage .0 to not turn into .999999
     elif _format_uses_seconds(format):
         offset = 0.5
