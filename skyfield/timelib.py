@@ -57,9 +57,6 @@ else:
 # Much of the following code is adapted from the USNO's "novas.c".
 
 _time_zero = dt_module.time(tzinfo=utc)
-_half_minute = 30.0 / DAY_S
-_half_second = 0.5 / DAY_S
-_half_microsecond = 0.5e-6 / DAY_S
 _months = array(['Month zero', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
 
