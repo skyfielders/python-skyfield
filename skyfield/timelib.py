@@ -124,6 +124,8 @@ class Timescale(object):
         The ``datetime`` must be “timezone-aware”: it must have a time
         zone object as its ``tzinfo`` attribute instead of ``None``.
 
+        .. versionadded:: 1.24
+
         """
         return self._utc(_datetime_to_utc_tuple(datetime))
 
@@ -133,6 +135,8 @@ class Timescale(object):
         The ``datetime`` objects must each be “timezone-aware”: they
         must each have a time zone object as their ``tzinfo`` attribute
         instead of ``None``.
+
+        .. versionadded:: 1.24
 
         """
         tuples = (_datetime_to_utc_tuple(d) for d in datetime_list)
