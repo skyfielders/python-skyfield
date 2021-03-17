@@ -7,6 +7,19 @@ Quick links to the sections below:
 
 .. contents:: :local:
 
+Version
+=======
+
+Skyfield offers a tuple ``skyfield.VERSION``
+that lets your code determine the installed version of Skyfield.
+
+::
+
+    import skyfield
+    print(skyfield.VERSION)
+
+See :ref:`Skyfield VERSION constant`.
+
 Opening files
 =============
 

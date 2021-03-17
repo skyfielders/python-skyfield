@@ -61,6 +61,36 @@ simply create an issue on the project’s GitHub page:
 
 Good luck!
 
+.. _Skyfield VERSION constant:
+
+Checking your Skyfield version
+==============================
+
+The Skyfield package offers a ``VERSION`` tuple
+that your code can use to test which version of Skyfield is running.
+For example,
+this code checks whether Skyfield is at least at version 1.24::
+
+    import skyfield
+
+    if skyfield.VERSION < (1, 24):
+        print('Too old')
+
+A new featured added in Skyfield 1.36 (released January 2021)
+is that you can invoke the ``skyfield`` module from the command line
+to display its version::
+
+ $ python -m skyfield
+
+ Skyfield version: 1.37
+ jplephem version: 2.14
+ sgp4 version: 2.17
+ Built-in leap seconds table ends with leap second at: 2016-12-31 23:59:60 UTC
+ Built-in ∆T table from finals2000A.all covers: 1973-01-01 to 2022-01-29
+
+Also displayed are the versions of the libraries Skyfield depends on,
+and the start and end dates of its built-in timescale tables.
+
 .. _citing-skyfield:
 
 Citing Skyfield
