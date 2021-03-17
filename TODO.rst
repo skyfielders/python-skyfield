@@ -102,6 +102,12 @@ Sprint Possibilities
 
 * Solar eclipses.
 
+* Some users need to add offsets to vectors like .position and .velocity
+  so should there be some official way to do so?  We should either
+  document the maneuver ``.position = Distance(au=old_position.au +
+  xyz)`` or (gulp!) make ``Distance`` objects susceptible of being
+  modified in-place without their various units going out of sync.
+
 Adding more smarts to ephemeris handling
 ========================================
 
