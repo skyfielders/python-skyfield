@@ -13,9 +13,6 @@ Choosing a source for ∆T
   1 millisecond of time = 15 mas.
 
 """
-import argparse
-import csv
-import re
 import sys
 from time import time
 
@@ -28,6 +25,99 @@ from skyfield.data import iers
 inf = float('inf')
 
 def main(argv):
+    try_adjusting_spline()
+    #try_solving_spline()
+    #try_out_different_interpolation_techniques()
+
+def try_adjusting_spline():
+    k0, k1 = -720.0, -100.0
+    a0, a1, a2, a3 = 20371.848, -9999.586, 776.247, 409.160
+    j0, j1 = -800, -700
+
+    # Problem: generate new b0..b3 for j0,j1.
+
+    u0 = a1/(k0 - k1)
+    u1 = k0**2
+    u2 = k1**2
+    u3 = 2*k0
+    u4 = a2/(-k1*u3 + u1 + u2)
+    u5 = k0**3
+    u6 = 3*k0
+    u7 = 3*u1
+    u8 = a3/(-k1**3 - k1*u7 + u2*u6 + u5)
+    u9 = j0*u0
+    u10 = j0**3
+    u11 = u10*u8
+    u12 = u7*u8
+    u13 = j0*u12
+    u14 = u3*u4
+    u15 = j0*u14
+    u16 = j0**2
+    u17 = u16*u4
+    u18 = u16*u8
+    u19 = u17 + u18*u6
+    u20 = j0*j1
+    u21 = 2*u20*u4
+    u22 = 3*u11
+    u23 = 6*k0
+    u24 = u20*u23*u8
+    u25 = j1*u16
+    u26 = 3*u25
+    u27 = j1**2
+    u28 = 3*j0*u27
+
+    b0 = a0 + k0*u0 + u1*u4 - u11 - u13 - u15 + u19 + u5*u8 - u9
+    b1 = -j1*u0 - j1*u12 - j1*u14 + u13 + u15 - 2*u17 - u18*u23 + u21 + u22 + u24 - u26*u8 + u9
+    b2 = u19 - u21 - u22 - u24 + 6*u25*u8 + u27*u4 + u27*u6*u8 - u28*u8
+    b3 = u8*(-j1**3 + u10 - u26 + u28)
+
+    print(a0, a1, a2, a3)
+    print(b0, b1, b2, b3)
+
+    # Try out the new parameters:
+
+    years = np.array([-720, -710, -700])
+
+    t = (years - k0) / (k1 - k0)
+    d = (((a3 * t + a2) * t) + a1) * t + a0
+    print(d)
+
+    t = (years - j0) / (j1 - j0)
+    d = (((b3 * t + b2) * t) + b1) * t + b0
+    print(d)
+
+def try_solving_spline():
+    import sympy as sy
+    sy.init_printing()
+
+    a0, a1, a2, a3, k0, k1, j0, j1, new_t = sy.symbols(
+        'a0, a1, a2, a3, k0, k1, j0, j1, new_t')
+    years = new_t * (j1 - j0) + j0
+    old_t = (years - k0) / (k1 - k0)
+    d = (((a3 * old_t + a2) * old_t) + a1) * old_t + a0
+
+    #d = sy.simplify(d)
+    #d = sy.factor(d)
+    d = sy.expand(d)
+    d = sy.collect(d, new_t)
+
+    b0 = d.coeff(new_t, 0)
+    b1 = d.coeff(new_t, 1)
+    b2 = d.coeff(new_t, 2)
+    b3 = d.coeff(new_t, 3)
+
+    commons, outputs = sy.cse(
+        [b0, b1, b2, b3],
+        sy.numbered_symbols('u'),
+        optimizations='basic',
+    )
+    for symbol, expr in commons:
+        print(symbol, '=', expr)
+    print()
+    for i, expr in enumerate(outputs):
+        print('b{} = {}'.format(i, expr))
+
+def try_out_different_interpolation_techniques():
     url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
     with load.open(url) as f:
         columns = load_table_S15(f)
