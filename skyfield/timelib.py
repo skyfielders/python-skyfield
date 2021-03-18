@@ -4,8 +4,10 @@ import re
 import sys
 from collections import namedtuple
 from datetime import date, datetime
-from numpy import (array, concatenate, cos, float_, int64, interp, isnan, nan,
-                   ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like)
+from numpy import (
+    array, concatenate, cos, float_, int64, interp, isnan, isinf,
+    nan, ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like,
+)
 from time import strftime, struct_time
 from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .descriptorlib import reify
@@ -91,16 +93,16 @@ class Timescale(object):
         self.B1950 = Time(self, float_(B1950))
         self.julian_calendar_cutoff = None
 
-        # Work-in-progress: make a less crazy leap-second table, that
-        # does not need the -inf and +inf at the ends.  The table has
-        # three columns:
+        # Our internal leap-second table has three columns:
         #
         # _leap_utc      Integer UTC seconds since JD 0 w/leap seconds missing.
         # _leap_offsets  Integer offset between UTC and TAI.
         # _leap_tai      Integer TAI seconds since JD 0.
 
-        leap_dates = leap_dates[2:-1]
-        leap_offsets = leap_offsets[3:]
+        is_legacy_table = isinf(leap_dates[-1])
+        if is_legacy_table:
+            leap_dates = leap_dates[2:-1]
+            leap_offsets = leap_offsets[3:]
 
         one_zero = [[-1,0]]
         self._leap_utc = (leap_dates[:,None] * DAY_S + one_zero).flatten()

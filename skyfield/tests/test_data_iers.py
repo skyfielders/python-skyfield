@@ -1,4 +1,4 @@
-from numpy import array, inf
+from numpy import array
 from skyfield.data.iers import _build_timescale_arrays
 from skyfield.timelib import Timescale
 
@@ -12,11 +12,12 @@ def test_build_timescale_arrays():
                               2442048.500522963, 2442049.500522963]
     assert list(column_2) == [44.4782581, 44.481142399999996,
                               44.4840562, 44.4869461]
-    assert list(leap_dates) == [-inf, 2441317.5, 2441499.5, 2441683.5,
-                                2442048.5, inf]
-    assert list(leap_offsets) == [10, 10, 10, 11, 12, 13]
+    assert list(leap_dates) == [2441317.5, 2441499.5, 2441683.5, 2442048.5]
+    assert list(leap_offsets) == [10, 11, 12, 13]
 
     ts = Timescale(delta_t, leap_dates, leap_offsets)
     t = ts.tai(1973, 1, 1, 0, 0, [11, 12])
-    assert t.utc_strftime() == ['1972-12-31 23:59:60 UTC',
-                                '1973-01-01 00:00:00 UTC']
+    assert t.utc.T.tolist() == [
+        [1972, 12, 31, 23, 59, 60],
+        [1973, 1, 1, 0, 0, 0],
+    ]
