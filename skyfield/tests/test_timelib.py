@@ -4,11 +4,12 @@ import numpy as np
 import sys
 from assay import assert_raises
 from pytz import timezone
+from numpy import array, inf
 from skyfield import api
 from skyfield.constants import DAY_S, T0
 from skyfield.data import iers
 from skyfield.timelib import (
-    GREGORIAN_START, GREGORIAN_START_ENGLAND, Time,
+    GREGORIAN_START, GREGORIAN_START_ENGLAND, Time, Timescale,
     calendar_tuple, compute_calendar_date, julian_date, julian_day, utc,
 )
 from datetime import datetime
@@ -19,6 +20,20 @@ epsilon = one_second * 42.0e-6  # 20.1e-6 is theoretical best precision
 continuous_timescale = ['tai', 'tt', 'tdb', 'ut1']
 time_scale_name = ['utc', 'tai', 'tt', 'tdb', 'ut1']
 time_value = [(1973, 1, 18, 1, 35, 37.5), 2441700.56640625]
+
+def test_timescale_with_old_fashioned_leap_second_table():
+    # Skyfield no longer uses the awkward old-style leap second table,
+    # written before I knew better, with inf's on both ends; but in case
+    # any users built such tables and supplied them manually:
+    delta_t = array([[2442046.5005113888], [44.4782581]])
+    leap_dates = array([-inf, 2441317.5, 2441499.5, 2441683.5, 2442048.5, inf])
+    leap_offsets = array([10, 10, 10, 11, 12, 13])
+    ts = Timescale(delta_t, leap_dates, leap_offsets)
+    t = ts.tai(1973, 1, 1, 0, 0, [11, 12])
+    assert t.utc.T.tolist() == [
+        [1972, 12, 31, 23, 59, 60],
+        [1973, 1, 1, 0, 0, 0],
+    ]
 
 def ts():
     yield api.load.timescale()
