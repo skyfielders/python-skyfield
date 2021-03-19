@@ -12,6 +12,15 @@ Choosing a source for ∆T
   1 second of time = 15 arcseconds.
   1 millisecond of time = 15 mas.
 
+TODO:
+
+[ ] Build reader for long-term file.
+[ ] Build polynomial interpolation function.
+[ ] Build translator between the two.
+[ ] Build translator between finals2000A and interpolator.
+[ ] Build combiner.
+[ ] Save combined table in Skyfield?  Or too big with all those 0's?
+
 """
 import sys
 from time import time
@@ -25,9 +34,80 @@ from skyfield.data import iers
 inf = float('inf')
 
 def main(argv):
-    try_adjusting_spline()
+    compare_splines_to_finals2000_error_bars()
+    #try_adjusting_spline()
     #try_solving_spline()
     #try_out_different_interpolation_techniques()
+
+def compare_splines_to_finals2000_error_bars():
+    url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
+    with load.open(url) as f:
+        columns = load_table_S15(f)
+    i, start_year, end_year, a0, a1, a2, a3 = columns
+
+    f = load.open('finals2000A.all')
+    mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+    delta_t_recent, leap_dates, leap_offsets = (
+        iers._build_timescale_arrays(mjd_utc, dut1)
+    )
+
+    print(delta_t_recent.shape)
+    print(i.shape)
+
+    #year = [-720, 400, 700]
+    #year = np.arange(-720, 2010)
+    #year = np.arange(1800, 2010)
+    #year = np.arange(1980, 2010)
+    year = np.arange(1980, 2010, 0.1)
+    s15_curve = interpolate(year, start_year, a3, a2, a1, a0)
+
+    finals_tt, finals_delta_t = delta_t_recent
+    ts = load.timescale()
+    t = ts.utc(year)
+    tt = t.tt
+    print(tt)
+    print(finals_tt)
+    finals_curve = interpolate(
+        tt, finals_tt,
+        finals_delta_t[1:] - finals_delta_t[:-1],
+        finals_delta_t[:-1],
+    )
+
+    print(finals_curve)
+
+    diff = max(abs(s15_curve - finals_curve))
+    print('Max difference (s):', diff, diff * 15)
+
+    if 1:
+        fig, (ax, ax2) = plt.subplots(2, 1)
+        ax.plot(year, s15_curve, label='label', linestyle='--')
+        ax.plot(year, finals_curve, label='label')
+        ax.grid()
+
+        ax2.plot(year, finals_curve - s15_curve, label='label')
+        ax2.grid()
+
+        #plt.legend()
+        fig.savefig('tmp.png')
+
+def interpolate(t, t_barriers, c, *coefficients):
+    i_array = np.arange(len(t_barriers))
+    i = np.interp(t, t_barriers, i_array)
+    print(i)
+    # x = i % 1.0
+    # print(x)
+    i = i.astype(int)
+    print(i)
+    left = t_barriers[i]
+    right = t_barriers[i+1]
+    print(left, right)
+    little_t = (t - left) / (right - left)
+    print(little_t)
+    value = c[i]
+    for c in coefficients:
+        value *= little_t
+        value += c[i]
+    return value
 
 def try_adjusting_spline():
     k0, k1 = -720.0, -100.0
@@ -36,40 +116,40 @@ def try_adjusting_spline():
 
     # Problem: generate new b0..b3 for j0,j1.
 
-    u0 = a1/(k0 - k1)
-    u1 = k0**2
-    u2 = k1**2
-    u3 = 2*k0
-    u4 = a2/(-k1*u3 + u1 + u2)
-    u5 = k0**3
-    u6 = 3*k0
-    u7 = 3*u1
-    u8 = a3/(-k1**3 - k1*u7 + u2*u6 + u5)
-    u9 = j0*u0
-    u10 = j0**3
-    u11 = u10*u8
-    u12 = u7*u8
-    u13 = j0*u12
-    u14 = u3*u4
-    u15 = j0*u14
-    u16 = j0**2
-    u17 = u16*u4
-    u18 = u16*u8
-    u19 = u17 + u18*u6
-    u20 = j0*j1
-    u21 = 2*u20*u4
-    u22 = 3*u11
-    u23 = 6*k0
-    u24 = u20*u23*u8
-    u25 = j1*u16
-    u26 = 3*u25
-    u27 = j1**2
+    u0 = a1/(-k0 + k1)
+    u1 = j0*u0
+    u2 = k0**2
+    u3 = k1**2
+    u4 = 2*k0
+    u5 = a2/(-k1*u4 + u2 + u3)
+    u6 = k0**3
+    u7 = 3*k0
+    u8 = 3*u2
+    u9 = a3/(k1**3 + k1*u8 - u3*u7 - u6)
+    u10 = j0**3*u9
+    u11 = u4*u5
+    u12 = j0*u11
+    u13 = u8*u9
+    u14 = j0*u13
+    u15 = j0**2
+    u16 = u15*u5
+    u17 = u15*u9
+    u18 = u16 - u17*u7
+    u19 = j0*j1
+    u20 = 2*u19*u5
+    u21 = 3*u10
+    u22 = 6*k0
+    u23 = u19*u22*u9
+    u24 = j1*u17
+    u25 = 3*u24
+    u26 = j1**2
+    u27 = u26*u9
     u28 = 3*j0*u27
 
-    b0 = a0 + k0*u0 + u1*u4 - u11 - u13 - u15 + u19 + u5*u8 - u9
-    b1 = -j1*u0 - j1*u12 - j1*u14 + u13 + u15 - 2*u17 - u18*u23 + u21 + u22 + u24 - u26*u8 + u9
-    b2 = u19 - u21 - u22 - u24 + 6*u25*u8 + u27*u4 + u27*u6*u8 - u28*u8
-    b3 = u8*(-j1**3 + u10 - u26 + u28)
+    b0 = a0 - k0*u0 + u1 + u10 - u12 + u14 + u18 + u2*u5 - u6*u9
+    b1 = j1*u0 - j1*u11 + j1*u13 - u1 + u12 - u14 - 2*u16 + u17*u22 + u20 - u21 - u23 + u25
+    b2 = u18 - u20 + u21 + u23 - 6*u24 + u26*u5 - u27*u7 + u28
+    b3 = j1**3*u9 - u10 + u25 - u28
 
     print(a0, a1, a2, a3)
     print(b0, b1, b2, b3)
@@ -92,12 +172,18 @@ def try_solving_spline():
 
     a0, a1, a2, a3, k0, k1, j0, j1, new_t = sy.symbols(
         'a0, a1, a2, a3, k0, k1, j0, j1, new_t')
+
+    # Q: How much simpler is it if we only move one end?
+    #j0 = k0  # A: Wow, much simpler!  30+ ops instead of 80+
+    #j1 = k1  # A: GADS, not much simpler at all, still 80+ operations.
+
     years = new_t * (j1 - j0) + j0
     old_t = (years - k0) / (k1 - k0)
     d = (((a3 * old_t + a2) * old_t) + a1) * old_t + a0
 
-    #d = sy.simplify(d)
     #d = sy.factor(d)
+    #d = sy.expand(d)
+    #d = sy.simplify(d)
     d = sy.expand(d)
     d = sy.collect(d, new_t)
 
@@ -109,13 +195,17 @@ def try_solving_spline():
     commons, outputs = sy.cse(
         [b0, b1, b2, b3],
         sy.numbered_symbols('u'),
-        optimizations='basic',
+        #optimizations='basic',
     )
+    n = 0
     for symbol, expr in commons:
+        n += sy.count_ops(expr)
         print(symbol, '=', expr)
     print()
     for i, expr in enumerate(outputs):
+        n += sy.count_ops(expr)
         print('b{} = {}'.format(i, expr))
+    print('Total operations: {}'.format(n))
 
 def try_out_different_interpolation_techniques():
     url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
