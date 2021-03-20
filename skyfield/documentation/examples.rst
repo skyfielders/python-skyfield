@@ -64,6 +64,8 @@ To learn the time of solar noon today, for example, you might do this:
 
     Solar noon: 2020-04-19 13:34:33
 
+.. _dark_twilight_day() example:
+
 When will it get dark tonight?
 ==============================
 
@@ -72,8 +74,6 @@ are all available through the :doc:`almanac` module.
 Here’s the script I use when I want to know when it will be dark enough
 to see the stars —
 or how early I need to rise to see the morning sky:
-
-.. TODO Figure out how to use the timezone itself to find day start/end.
 
 .. testcode::
 
@@ -96,9 +96,14 @@ or how early I need to rise to see the morning sky:
     f = almanac.dark_twilight_day(eph, bluffton)
     times, events = almanac.find_discrete(t0, t1, f)
 
+    previous_e = f(t0)
     for t, e in zip(times, events):
         tstr = str(t.astimezone(zone))[:16]
-        print(tstr, ' ', almanac.TWILIGHTS[e], 'starts')
+        if previous_e < e:
+            print(tstr, ' ', almanac.TWILIGHTS[e], 'starts')
+        else:
+            print(tstr, ' ', almanac.TWILIGHTS[previous_e], 'ends')
+        previous_e = e
 
 .. testoutput::
 
@@ -106,10 +111,20 @@ or how early I need to rise to see the morning sky:
     2020-04-19 05:46   Nautical twilight starts
     2020-04-19 06:20   Civil twilight starts
     2020-04-19 06:49   Day starts
-    2020-04-19 20:20   Civil twilight starts
-    2020-04-19 20:48   Nautical twilight starts
-    2020-04-19 21:23   Astronomical twilight starts
-    2020-04-19 22:00   Night starts
+    2020-04-19 20:20   Day ends
+    2020-04-19 20:48   Civil twilight ends
+    2020-04-19 21:23   Nautical twilight ends
+    2020-04-19 22:00   Astronomical twilight ends
+
+As you can see from the above code,
+if the new light level is brighter
+then we say that the new level “starts”,
+but if the new level is darker
+then we say the previous level “ends” —
+so instead of saying “astronomical twilight *starts* at 21:23”
+we say “nautical twilight *ends* at 21:23.”
+That’s why the code keeps up with ``previous_e``
+and compares it to the new level of twilight.
 
 What phase is the Moon tonight?
 ===============================

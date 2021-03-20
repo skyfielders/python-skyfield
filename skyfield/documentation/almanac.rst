@@ -331,8 +331,9 @@ interests you, and the return value will indicate whether the sun is up.
 Twilight
 ========
 
-An expanded version of the sunrise-sunset routine separately codes each
-of the phases of twilight using integers:
+An expanded version of the sunrise-sunset routine
+named :func:`~skyfield.almanac.dark_twilight_day()`
+returns a separate code for each of the phases of twilight:
 
 0. Dark of night.
 1. Astronomical twilight.
@@ -340,26 +341,8 @@ of the phases of twilight using integers:
 3. Civil twilight.
 4. Daytime.
 
-.. testcode::
-
-    t0 = ts.utc(2019, 11, 8, 5)
-    t1 = ts.utc(2019, 11, 9, 5)
-    f = almanac.dark_twilight_day(eph, bluffton)
-    t, y = almanac.find_discrete(t0, t1, f)
-
-    for ti, yi in zip(t, y):
-        print(yi, ti.utc_iso(), ' Start of', almanac.TWILIGHTS[yi])
-
-.. testoutput::
-
-    1 2019-11-08T10:40:19Z  Start of Astronomical twilight
-    2 2019-11-08T11:12:31Z  Start of Nautical twilight
-    3 2019-11-08T11:45:18Z  Start of Civil twilight
-    4 2019-11-08T12:14:15Z  Start of Day
-    3 2019-11-08T22:23:52Z  Start of Civil twilight
-    2 2019-11-08T22:52:48Z  Start of Nautical twilight
-    1 2019-11-08T23:25:34Z  Start of Astronomical twilight
-    0 2019-11-08T23:57:44Z  Start of Night
+You can find a full example of its use
+at the :ref:`dark_twilight_day() example`.
 
 .. _risings-and-settings:
 
