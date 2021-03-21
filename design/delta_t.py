@@ -12,6 +12,20 @@ Choosing a source for ∆T
   1 second of time = 15 arcseconds.
   1 millisecond of time = 15 mas.
 
+Oh, look, they came out with a new paper!
+
+https://royalsocietypublishing.org/doi/10.1098/rspa.2020.0776
+
+Its data:
+
+https://rs.figshare.com/collections/Supplementary_material_from_Addendum_2020_to_Measurement_of_the_Earth_s_rotation_720_BC_to_AD_2015_/5300925
+
+http://astro.ukho.gov.uk/nao/lvm/Table-S15.2020.txt
+
+Their long-term formula:
+
+lod = +1.72 t − 3.5 sin(2π(t+0.75)/14)
+
 TODO:
 
 [ ] Build reader for long-term file.
@@ -142,7 +156,8 @@ def compare_splines_to_finals2000_error_bars():
     print(finals_curve)
 
     diff = max(abs(s15_curve - finals_curve))
-    print('Max difference (s):', diff, diff * 15)
+    print('Max difference between long-term splines and finals2000A.all:\n',
+          diff, 'seconds =', diff * 15, 'arcseconds')
 
     if 1:
         fig, (ax, ax2) = plt.subplots(2, 1)
