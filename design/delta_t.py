@@ -67,22 +67,79 @@ def try_cubic_splines_of_various_sparseness():
 
     from scipy import interpolate
 
-    x = np.linspace(-1, 8.999, 100)
+    # x_points = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    # y_points = [12,14,22,39,58, 77,89,95,98,99]
 
-    x_points = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    y_points = [12,14,22,39,58, 77,89,95,98,99]
+    x_points, y_points = delta_t
 
-    if 0:
-        extra = 0
-        extended_x = x_points
-        extended_y = y_points
-    else:
-        extra = 1
-        extended_x = cat([[-1], x_points, [10]])
-        extended_y = cat([y_points[:1], y_points, y_points[-1:]])
+    # if 1:
+    #     extra = 0
+    #     extended_x = x_points
+    #     extended_y = y_points
+    # else:
+    #     extra = 1
+    #     extended_x = cat([[-1], x_points, [10]])
+    #     extended_y = cat([y_points[:1], y_points, y_points[-1:]])
 
-    t, c, k = interpolate.splrep(extended_x, extended_y)
+    # t, c, k = interpolate.splrep(extended_x, extended_y)
+    # pp = interpolate.PPoly.from_spline((t, c, k))
+
+    # # Let SciPy do the interpolation.
+
+    # #y = interpolate.splev(x, (t, c, k))
+    # #y2 = pp(x)
+
+    # # Do it ourselves.
+
+    # print(pp)
+    # print(pp.c)
+    # print(pp.x)
+    # # print(pp.c.shape, 'vs', len(x_points))
+    # trim_n = 3 #+ extra
+    # trim = slice(trim_n, -trim_n)
+    # breaks = pp.x[trim]
+    # coeffs = pp.c[:,trim]
+    # print(breaks)
+    # print(coeffs)
+
+    step = 2
+    dtp = build_splines(x_points[::step], y_points[::step])
+
+    x = np.linspace(x_points[0], x_points[-2-step], 1000)
+    y2 = dtp(x)
+
+    np.savez_compressed(
+        'tmp.npz',
+        b=dtp._b,
+        c=dtp._c,
+    )
+
+    diff = max(abs(y_points[:-1-step] - dtp(x_points[:-1-step])))
+
+    print('Max difference between y and y2:\n',
+          diff, 'seconds =', diff * 15, 'arcseconds')
+
+    return
+
+    fig, ax = plt.subplots()
+    ax.plot(x_points, y_points, linestyle='--')
+    # ax.plot(x, y)
+    ax.plot(x, y2)
+    ax.grid()
+    fig.savefig('tmp.png')
+
+def build_splines(x, y):
+    from scipy import interpolate
+    t, c, k = interpolate.splrep(x, y)
     pp = interpolate.PPoly.from_spline((t, c, k))
+
+    # Let SciPy do the interpolation.
+
+    #y = interpolate.splev(x, (t, c, k))
+    #y2 = pp(x)
+
+    # Do it ourselves.
+
     print(pp)
     print(pp.c)
     print(pp.x)
@@ -94,30 +151,25 @@ def try_cubic_splines_of_various_sparseness():
     print(breaks)
     print(coeffs)
 
-    y = interpolate.splev(x, (t, c, k))
-    y2 = pp(x)
+    return DeltaTPolynomial(breaks, coeffs)
 
-    if 1:
-        i_array = np.arange(len(breaks))
-        i_float = np.interp(x, breaks, i_array)
-        i, across = divmod(i_float, 1.0)
+class DeltaTPolynomial(object):
+    def __init__(self, breaks, coefficients):
+        self._b = breaks
+        self._c = coefficients
+        self._i = np.arange(len(breaks))
+
+    def __call__(self, x):
+        i = np.interp(x, self._b, self._i)
+        i, t = divmod(i, 1.0)  # t: polynomial parameter, not raw time
         i = i.astype(int)
-        across = x - breaks[i]
-
-        y2 = 0 * x
-        for cn in coeffs:
-            #print(cn)
-            c = cn[i]
-            y2 *= across
-            print(y2.shape, c.shape)
-            y2 += c
-
-    fig, ax = plt.subplots()
-    ax.plot(x, y, '+')
-    ax.plot(x, y2)
-    ax.plot(x_points, y_points, 'o')
-    ax.grid()
-    fig.savefig('tmp.png')
+        across = x - self._b[i]  # TODO: long-term polynomials scale to [0,1)
+        c = iter(self._c)
+        y = next(c)[i]
+        for ci in c:
+            y *= across
+            y += ci[i]
+        return y
 
 def compare_splines_to_finals2000_error_bars():
     url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
