@@ -246,7 +246,7 @@ def sunrise_sunset(ephemeris, topos):
         t._nutation_angles_radians = iau2000b_radians(t)
         return topos_at(t).observe(sun).apparent().altaz()[0].degrees >= -0.8333
 
-    is_sun_up_at.step_days = 0.15  # catch days at least 4 hours long
+    is_sun_up_at.step_days = 0.04  # catch days at least an hour long
     return is_sun_up_at
 
 TWILIGHTS = {
@@ -284,7 +284,7 @@ def dark_twilight_day(ephemeris, topos):
         r[degrees >= -0.8333] = 4
         return r
 
-    is_it_dark_twilight_day_at.step_days = 0.15  # see "is_sun_up_at()" above
+    is_it_dark_twilight_day_at.step_days = 0.04  # catch days at least an hour long
     return is_it_dark_twilight_day_at
 
 def risings_and_settings(ephemeris, target, topos,

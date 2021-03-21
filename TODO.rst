@@ -108,6 +108,18 @@ Sprint Possibilities
   xyz)`` or (gulp!) make ``Distance`` objects susceptible of being
   modified in-place without their various units going out of sync.
 
+* The almanac routines ``sunrise_sunset()`` and ``dark_twilight_day()``
+  currently use an expensive step size — with 25 steps per day — to
+  catch even brief days near the poles; see `Issue 571
+  <https://github.com/skyfielders/python-skyfield/issues/571>`_ for a
+  user who noticed when we tried adjusting to 6⅔ steps per day.  But
+  what if instead we used the very uniform rate of the Earth’s rotation
+  to zero in first on noon and midnight?  Both noon and midnight could
+  surely be found within, say, one second, with a single round of
+  search, right?  Then the iterative search could look for the
+  transition, with zero chance of missing a, say, one-minute arctic day
+  or night.
+
 Adding more smarts to ephemeris handling
 ========================================
 
