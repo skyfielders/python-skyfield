@@ -20,6 +20,7 @@ TODO:
 [ ] Build translator between finals2000A and interpolator.
 [ ] Build combiner.
 [ ] Save combined table in Skyfield?  Or too big with all those 0's?
+[ ] Can we make the IERS table more sparse without loosing too much precision?
 
 """
 import sys
@@ -27,6 +28,7 @@ from time import time
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy import concatenate as cat
 from skyfield import functions, timelib
 from skyfield.api import load, Loader
 from skyfield.data import iers
@@ -34,10 +36,74 @@ from skyfield.data import iers
 inf = float('inf')
 
 def main(argv):
-    compare_splines_to_finals2000_error_bars()
+    try_cubic_splines_of_various_sparseness()
+    #compare_splines_to_finals2000_error_bars()
     #try_adjusting_spline()
     #try_solving_spline()
     #try_out_different_interpolation_techniques()
+
+def try_cubic_splines_of_various_sparseness():
+    f = load.open('finals2000A.all')
+    mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+    delta_t, leap_dates, leap_offsets = (
+        iers._build_timescale_arrays(mjd_utc, dut1)
+    )
+
+    table_tt, table_delta_t = delta_t
+
+    from scipy import interpolate
+
+    x = np.linspace(-1, 8.999, 100)
+
+    x_points = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    y_points = [12,14,22,39,58, 77,89,95,98,99]
+
+    if 0:
+        extra = 0
+        extended_x = x_points
+        extended_y = y_points
+    else:
+        extra = 1
+        extended_x = cat([[-1], x_points, [10]])
+        extended_y = cat([y_points[:1], y_points, y_points[-1:]])
+
+    t, c, k = interpolate.splrep(extended_x, extended_y)
+    pp = interpolate.PPoly.from_spline((t, c, k))
+    print(pp)
+    print(pp.c)
+    print(pp.x)
+    # print(pp.c.shape, 'vs', len(x_points))
+    trim_n = 3 #+ extra
+    trim = slice(trim_n, -trim_n)
+    breaks = pp.x[trim]
+    coeffs = pp.c[:,trim]
+    print(breaks)
+    print(coeffs)
+
+    y = interpolate.splev(x, (t, c, k))
+    y2 = pp(x)
+
+    if 1:
+        i_array = np.arange(len(breaks))
+        i_float = np.interp(x, breaks, i_array)
+        i, across = divmod(i_float, 1.0)
+        i = i.astype(int)
+        across = x - breaks[i]
+
+        y2 = 0 * x
+        for cn in coeffs:
+            #print(cn)
+            c = cn[i]
+            y2 *= across
+            print(y2.shape, c.shape)
+            y2 += c
+
+    fig, ax = plt.subplots()
+    ax.plot(x, y, '+')
+    ax.plot(x, y2)
+    ax.plot(x_points, y_points, 'o')
+    ax.grid()
+    fig.savefig('tmp.png')
 
 def compare_splines_to_finals2000_error_bars():
     url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
