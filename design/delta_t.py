@@ -50,7 +50,8 @@ from skyfield.data import iers
 inf = float('inf')
 
 def main(argv):
-    try_cubic_splines_of_various_sparseness()
+    #try_cubic_splines_of_various_sparseness()
+    can_we_use_sparse_cubic_splines()
     #compare_splines_to_finals2000_error_bars()
     #try_adjusting_spline()
     #try_solving_spline()
@@ -102,22 +103,22 @@ def try_cubic_splines_of_various_sparseness():
     # print(breaks)
     # print(coeffs)
 
-    step = 2
-    dtp = build_splines(x_points[::step], y_points[::step])
+    dtp = build_splines(x_points, y_points)
 
-    x = np.linspace(x_points[0], x_points[-2-step], 1000)
+    x = np.linspace(x_points[0], x_points[-2], 1000)
     y2 = dtp(x)
 
     np.savez_compressed(
         'tmp.npz',
-        b=dtp._b,
+        # b=dtp._b,  # Don't need to save all breaks, if uniform
         c=dtp._c,
     )
 
-    diff = max(abs(y_points[:-1-step] - dtp(x_points[:-1-step])))
+    diff = max(abs(y_points[10:-10] - dtp(x_points[10:-10])))
 
     print('Max difference between y and y2:\n',
-          diff, 'seconds =', diff * 15, 'arcseconds')
+          '%.7f' % diff, 'seconds =', diff * 15, 'arcseconds')
+    print(' 0.0000084')
 
     return
 
@@ -128,9 +129,42 @@ def try_cubic_splines_of_various_sparseness():
     ax.grid()
     fig.savefig('tmp.png')
 
+def can_we_use_sparse_cubic_splines():
+    f = load.open('finals2000A.all')
+    mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+    delta_t, leap_dates, leap_offsets = (
+        iers._build_timescale_arrays(mjd_utc, dut1)
+    )
+
+    table_tt, table_delta_t = delta_t
+
+    x = table_tt
+    y = table_delta_t
+
+    from scipy import interpolate
+
+    if 0:
+        tck = interpolate.splrep(x, y)
+    else:
+        step = 2
+        knots = x[step//2:-step//2:step] #+ 0.5
+        tck = interpolate.splrep(x, y, task=-1, t=knots, s=0)
+
+    y2 = interpolate.splev(x, tck)
+
+    trim = 10
+    diff = max(abs(y2[trim:-trim] - y[trim:-trim]))
+    print(f'Max difference: {diff:.7f} seconds = {diff * 15:.7f} arcseconds')
+    print('                0.0000084 = typical error bar of finals2000A.all')
+
 def build_splines(x, y):
     from scipy import interpolate
-    t, c, k = interpolate.splrep(x, y)
+    if 0:
+        t, c, k = interpolate.splrep(x, y)
+    else:
+        step = 2
+        knots = x[step//2:-step//2:step] #+ 0.5
+        t, c, k = interpolate.splrep(x, y, task=-1, t=knots, s=0)
     pp = interpolate.PPoly.from_spline((t, c, k))
 
     # Let SciPy do the interpolation.
