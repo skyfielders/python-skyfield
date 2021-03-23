@@ -1,7 +1,7 @@
 'Auto-generated accuracy tests vs NOVAS (see build_novas_tests.py).'
 
 from numpy import abs, array, einsum, max
-from skyfield import (earthlib, framelib, nutationlib, positionlib,
+from skyfield import (earthlib, framelib, nutationlib,
                       precessionlib, starlib, timelib)
 from skyfield.api import Topos, load
 from skyfield.constants import AU_KM, AU_M
@@ -41,18 +41,6 @@ def reduce_precision(t):
     t.whole = t.tdb
     t.tt_fraction = delta
     t.tdb_fraction = 0.0
-
-def test_calendar_date_0():
-    compare(timelib.compute_calendar_date(2440423), array((1969, 7, 20.0)), 0.0)
-
-def test_calendar_date_1():
-    compare(timelib.compute_calendar_date(2448031), array((1990, 5, 19.0)), 0.0)
-
-def test_calendar_date_2():
-    compare(timelib.compute_calendar_date(2451545), array((2000, 1, 1.0)), 0.0)
-
-def test_calendar_date_3():
-    compare(timelib.compute_calendar_date(2456164), array((2012, 8, 24.0)), 0.0)
 
 def test_earth_rotation_angle_date0():
     compare(earthlib.earth_rotation_angle(2440423.345833333) * 360.0, 243.3216078027496,
@@ -155,27 +143,6 @@ def test_iau2000b_date2():
 def test_iau2000b_date3():
     compare(nutationlib.iau2000b(2456164.5),
             array([159765584.29895684, -42598702.03944705]), 0.001)
-
-def test_julian_date_function_date0():
-    compare(timelib.julian_date(-4712, 1, 1, 0.0), 37.5, 0.0)
-
-def test_julian_date_function_date1():
-    compare(timelib.julian_date(-4712, 3, 1, 0.0), 97.5, 0.0)
-
-def test_julian_date_function_date2():
-    compare(timelib.julian_date(-4712, 12, 31, 0.5), 402.5208333333333, 0.0)
-
-def test_julian_date_function_date3():
-    compare(timelib.julian_date(-241, 3, 25, 19.0), 1633120.2916666667, 0.0)
-
-def test_julian_date_function_date4():
-    compare(timelib.julian_date(530, 9, 27, 23.5), 1914908.4791666667, 0.0)
-
-def test_julian_date_function_date5():
-    compare(timelib.julian_date(1976, 3, 7, 12.5), 2442845.0208333335, 0.0)
-
-def test_julian_date_function_date6():
-    compare(timelib.julian_date(2000, 1, 1, 0.0), 2451544.5, 0.0)
 
 def test_mean_obliquity_date0():
     compare(nutationlib.mean_obliquity(2440423.345833333),
@@ -457,30 +424,6 @@ def test_from_altaz_7(earth):
     ra, dec, distance = a.radec(epoch=jd)
     compare(ra.hours, 12.34, 1e-9 * arcsecond)
     compare(dec.degrees, -67.89, 1e-9 * arcsecond)
-
-def test_ITRF_to_GCRS_conversion_on_date0():
-    jd = load.timescale(delta_t=39.707).tt_jd(2440423.345833333)
-    with low_precision_ERA():
-        position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
-    compare(position, (0.5701172053658128, -1.5232987806096392, 1.3017400651201707), 1e-13)
-
-def test_ITRF_to_GCRS_conversion_on_date1():
-    jd = load.timescale(delta_t=57.1136).tt_jd(2448031.5)
-    with low_precision_ERA():
-        position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
-    compare(position, (0.41362649279562963, -1.5741081933652488, 1.3004216700893525), 1e-13)
-
-def test_ITRF_to_GCRS_conversion_on_date2():
-    jd = load.timescale(delta_t=63.8285).tt_jd(2451545.0)
-    with low_precision_ERA():
-        position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
-    compare(position, (1.3757008573963405, -0.8702954291925735, 1.3000126987400913), 1e-13)
-
-def test_ITRF_to_GCRS_conversion_on_date3():
-    jd = load.timescale(delta_t=66.7846).tt_jd(2456164.5)
-    with low_precision_ERA():
-        position = positionlib.ITRF_to_GCRS(jd, [1.1, 1.2, 1.3])
-    compare(position, (1.5243574049688486, 0.5755748855663746, 1.2980940077752074), 1e-13)
 
 def test_tdb_minus_tt_on_date0():
     result = timelib.tdb_minus_tt(2440423.345833333)

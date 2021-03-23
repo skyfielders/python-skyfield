@@ -35,7 +35,7 @@ def main():
         'Auto-generated accuracy tests vs NOVAS (see build_novas_tests.py).'
 
         from numpy import abs, array, einsum, max
-        from skyfield import (earthlib, framelib, nutationlib, positionlib,
+        from skyfield import (earthlib, framelib, nutationlib,
                               precessionlib, starlib, timelib)
         from skyfield.api import Topos, load
         from skyfield.constants import AU_KM, AU_M
@@ -101,14 +101,6 @@ def output_subroutine_tests(dates):
         return y, m, d + h / 24.0 - 0.5
 
     for i, jd in enumerate(date_floats):
-        jdi = int(jd)
-        cal_date = call(shorter_cal_date, jdi)
-        output(locals(), """\
-            def test_calendar_date_{i}():
-                compare(timelib.compute_calendar_date({jdi!r}), array({cal_date}), 0.0)
-            """)
-
-    for i, jd in enumerate(date_floats):
         angle = novas.era(jd)
         output(locals(), """\
             def test_earth_rotation_angle_date{i}():
@@ -170,21 +162,6 @@ def output_subroutine_tests(dates):
             def test_iau2000b_date{i}():
                 compare(nutationlib.iau2000b({jd!r}),
                         array([{psi!r}, {eps!r}]), 0.001)
-            """)
-
-    for i, args in enumerate([
-          (-4712, 1, 1, 0.0),
-          (-4712, 3, 1, 0.0),
-          (-4712, 12, 31, 0.5),
-          (-241, 3, 25, 19.0),
-          (530, 9, 27, 23.5),
-          (1976, 3, 7, 12.5),
-          (2000, 1, 1, 0.0),
-          ]):
-        jd = novas.julian_date(*args)
-        output(locals(), """\
-            def test_julian_date_function_date{i}():
-                compare(timelib.julian_date{args}, {jd!r}, 0.0)
             """)
 
     for i, jd in enumerate(date_floats):
@@ -284,19 +261,6 @@ def output_subroutine_tests(dates):
                 ra, dec, distance = a.radec(epoch=jd)
                 compare(ra.hours, {ra!r}, 1e-9 * arcsecond)
                 compare(dec.degrees, {dec!r}, 1e-9 * arcsecond)
-            """)
-
-    for i, (tt, delta_t) in enumerate(zip(date_floats, delta_t_floats)):
-        jd_low = xp = yp = 0.0
-        vector = [1.1, 1.2, 1.3]
-        ut1 = tt - delta_t * one_second
-        result = novas.ter2cel(ut1, jd_low, delta_t, xp, yp, vector)
-        output(locals(), """\
-            def test_ITRF_to_GCRS_conversion_on_date{i}():
-                jd = load.timescale(delta_t={delta_t!r}).tt_jd({tt!r})
-                with low_precision_ERA():
-                    position = positionlib.ITRF_to_GCRS(jd, {vector!r})
-                compare(position, {result!r}, 1e-13)
             """)
 
     for i, jd_tdb in enumerate(date_floats):
