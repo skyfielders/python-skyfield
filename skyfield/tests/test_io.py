@@ -24,6 +24,11 @@ old_content = (b' 2015 10  1  67.9546\n'
                b' 2016  1  1  68.1024\n')
 new_content = (old_content +
                b' 2016  2  1  68.1577\n')
+leap_second_text = (
+    b'#  File expires on 28 June 2021\n'
+    b'    41317.0    1  1 1972       10\n'
+    b'    41499.0    1  7 1972       11\n'
+)
 
 def load():
     path = tempfile.mkdtemp()
@@ -41,8 +46,8 @@ def file_contents(load, path):
         return f.read()
 
 @contextmanager
-def fake_download(load):
-    download = lambda *args, **kw: save_file(load, 'deltat.data', new_content)
+def fake_download(load, filename, content):
+    download = lambda *args, **kw: save_file(load, filename, content)
     with patch('skyfield.iokit.download', download):
         yield
 
@@ -68,10 +73,10 @@ def test_open_in_subdirectory(load):
     assert data == b'example text\n'
 
 def test_missing_file_gets_downloaded(load):
-    with fake_download(load):
-        data = load('deltat.data')
-    assert file_contents(load, 'deltat.data').endswith(b' 68.1577\n')
-    assert data[1][-1] == 68.1577
+    with fake_download(load, 'Leap_Second.dat', leap_second_text):
+        data = load('Leap_Second.dat')
+    assert file_contents(load, 'Leap_Second.dat') == leap_second_text
+    assert list(data[1][1]) == [10, 10, 10, 11]
 
 def test_builtin_timescale_uses_recent_IERS_data(load):
     ts = load.timescale()
@@ -79,17 +84,15 @@ def test_builtin_timescale_uses_recent_IERS_data(load):
     assert abs(ts.utc(2020, 1, 1).dut1 - (-0.1771554)) < 1e-8
 
 def test_non_builtin_timescale_prefers_USNO_files(load):
-    with open(os.path.join(data_dir, 'deltat.preds'), 'rb') as f:
-        preds = f.read()
-    with open(os.path.join(data_dir, 'Leap_Second.dat'), 'rb') as f:
-        leaps = f.read()
-
     save_file(load, 'deltat.data',
               b' 1973  2  1  111.1\n'
               b' 1973  3  1  222.2\n'
               b' 1973  4  1  333.3\n')
-    save_file(load, 'deltat.preds', preds)
-    save_file(load, 'Leap_Second.dat', leaps)
+    save_file(load, 'deltat.preds',
+              b'   MJD        YEAR    TT-UT Pred  UT1-UTC Pred  ERROR\n'
+              b'   58484.000  2019.00   69.34      -0.152       0.117\n'
+              b'   58575.000  2019.25   69.48      -0.295       0.162\n')
+    save_file(load, 'Leap_Second.dat', leap_second_text)
     save_file(load, 'finals2000A.all', b'invalid data')
 
     ts = load.timescale(builtin=False)
@@ -123,8 +126,8 @@ def test_concurrent_downloads(load):
 
     c1 = FakeConnection()
     c2 = FakeConnection()
-    t1 = Thread(target=load, args=('deltat.data',))
-    t2 = Thread(target=load, args=('deltat.data',))
+    t1 = Thread(target=load, args=('Leap_Second.dat',))
+    t2 = Thread(target=load, args=('Leap_Second.dat',))
     t1.daemon = True
     t2.daemon = True
 
@@ -136,15 +139,15 @@ def test_concurrent_downloads(load):
         c2.control.get()  # has reached its first read()
 
     assert sorted(os.listdir(load.directory)) == [
-        'deltat.data.download', 'deltat.data.download2',
+        'Leap_Second.dat.download', 'Leap_Second.dat.download2',
     ]
     c1.blocks.put(data)
     c1.blocks.put(eof)
     t1.join()
     assert sorted(os.listdir(load.directory)) == [
-        'deltat.data', 'deltat.data.download2',
+        'Leap_Second.dat', 'Leap_Second.dat.download2',
     ]
     c2.blocks.put(data)
     c2.blocks.put(eof)
     t2.join()
-    assert sorted(os.listdir(load.directory)) == ['deltat.data']
+    assert sorted(os.listdir(load.directory)) == ['Leap_Second.dat']

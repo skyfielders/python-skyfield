@@ -45,8 +45,7 @@ setup(
         ],
     package_data = {
         'skyfield': ['documentation/*.rst'],
-        'skyfield.data': ['Leap_Second.dat', 'deltat.data', 'deltat.preds',
-                          '*.gz', '*.npy', '*.npz'],
+        'skyfield.data': ['*.gz', '*.npy', '*.npz'],
         'skyfield.tests': ['data/*'],
         },
     install_requires=[
