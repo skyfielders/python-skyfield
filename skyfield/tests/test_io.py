@@ -17,13 +17,6 @@ except ImportError:
 from assay import assert_raises
 from skyfield import api
 
-data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data'))
-old_content = (b' 2015 10  1  67.9546\n'
-               b' 2015 11  1  68.0055\n'
-               b' 2015 12  1  68.0514\n'
-               b' 2016  1  1  68.1024\n')
-new_content = (old_content +
-               b' 2016  2  1  68.1577\n')
 leap_second_text = (
     b'#  File expires on 28 June 2021\n'
     b'    41317.0    1  1 1972       10\n'
@@ -37,7 +30,7 @@ def load():
     finally:
         shutil.rmtree(path)
 
-def save_file(load, path, content=old_content):
+def save_file(load, path, content):
     with open(load.path_to(path), 'wb') as f:
         f.write(content)
 
