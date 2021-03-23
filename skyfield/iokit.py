@@ -63,7 +63,6 @@ _IERS2 = 'ftp://ftp.iers.org/products/eop/rapid/standard/'
 _JPL = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/'
 _NAIF_KERNELS = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/'
 _NAIF = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
-_CDDIS = 'ftp://cddis.nasa.gov/products/iers/'
 
 def _open_binary(path):
     return open(path, mode='rb')
@@ -117,8 +116,6 @@ class Loader(object):
         # without changing the behavior of other Loader objects:
 
         self.urls = {
-            'deltat.data': _CDDIS,
-            'deltat.preds': _CDDIS,
             'finals2000A.all': _IERS2,
             'Leap_Second.dat': _IERS,
             'moon_080317.tf': _NAIF_KERNELS + 'fk/satellites/',
