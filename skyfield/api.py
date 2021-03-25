@@ -9,7 +9,6 @@ way for most users to use Skyfield's main features.
 from datetime import datetime
 from .constants import B1950, T0, pi, tau
 from .constellationlib import load_constellation_map, load_constellation_names
-from .errors import DeprecationError
 from .iokit import Loader, load_file
 from .planetarylib import PlanetaryConstants
 from .positionlib import position_from_radec, position_of_radec
@@ -35,32 +34,3 @@ __all__ = [
     'position_from_radec', 'position_of_radec',
     'utc', 'pi', 'tau', 'wgs84', 'wms',
 ]
-
-# An attempt at friendliest-possible deprecations:
-
-def now():
-    raise DeprecationError("""Skyfield no longer supports a standalone now() function
-
-If you need to quickly get an old Skyfield script working again, simply
-downgrade to Skyfield version 0.6.1 using a command like:
-
-        pip install skyfield==0.6.1
-
-Skyfield used to provide a now() method returning the current time:
-
-        t = now()                      # the old way
-
-But this forced Skyfield to maintain secret global copies of several
-time scale data files, that need to be downloaded and kept up to date.
-Skyfield now makes the collection of data files explicit, and calls the
-bundle of files a "Timescale" object.  You can create one with the
-"load.timescale()" method and then call its now() method:
-
-        from skyfield.api import load
-        ts = load.timescale()
-        t = ts.now()                   # the new way""")
-
-class JulianDate(object):
-    def __init__(self, *args, **kw):
-        from skyfield.timelib import _JulianDate_deprecation_message
-        raise DeprecationError(_JulianDate_deprecation_message)

@@ -1111,35 +1111,6 @@ def _strftime(format, year, month, day, hour, minute, second,
             return [strftime(format, item) for item in zip(*tup)]
         return strftime(format, tup)
 
-_JulianDate_deprecation_message = """Skyfield no longer supports direct\
- instantiation of JulianDate objects (which are now called Time objects)
-
-If you need to quickly get an old Skyfield script working again, simply
-downgrade to Skyfield version 0.6.1 using a command like:
-
-        pip install skyfield==0.6.1
-
-Skyfield used to let you build JulianDate objects directly:
-
-        t = JulianDate(utc=(1980, 4, 20))   # the old way
-
-But this forced Skyfield to maintain secret global copies of several
-time scale data files, that need to be downloaded and kept up to date
-for Time objects to work.  Skyfield now makes this collection of data
-files explicit, and calls the bundle of files a "Timescale" object.  You
-can create one with the "load.timescale()" method and then build times
-using its methods, which let you either specify a calendar date or else
-supply a raw Julian date value with the "jd" keyword:
-
-        from skyfield.api import load
-        ts = load.timescale()
-        t = ts.utc(1980, 4, 20)       # the new way
-
-        t = ts.tt(jd=2444349.500592)  # jd is also supported for tai, tt, tdb
-
-See http://rhodesmill.org/skyfield/time.html for more details."""
-
-
 _naive_complaint = """cannot interpret a datetime that lacks a timezone
 
 You must either specify that your datetime is in UTC:
