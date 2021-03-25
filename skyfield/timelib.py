@@ -88,6 +88,7 @@ class Timescale(object):
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
         self.delta_t_table = build_delta_t_table(delta_t_recent)
+        self._delta_t_function = _build_legacy_delta_t(self)
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
         self.J2000 = Time(self, float_(T0))
         self.B1950 = Time(self, float_(B1950))
@@ -345,12 +346,12 @@ class Timescale(object):
 
         # Estimate TT = UT1, to get a rough Delta T estimate.
         tt_approx = ut1
-        delta_t_approx = interpolate_delta_t(self.delta_t_table, tt_approx)
+        delta_t_approx = self._delta_t_function(tt_approx)
 
         # Use the rough Delta T to make a much better estimate of TT,
         # then generate an even better Delta T.
         tt_approx = ut1 + delta_t_approx / DAY_S
-        delta_t_approx = interpolate_delta_t(self.delta_t_table, tt_approx)
+        delta_t_approx = self._delta_t_function(tt_approx)
 
         # We can now estimate TT with an error of < 1e-9 seconds within
         # 10 centuries of either side of the present; for details, see:
@@ -782,8 +783,7 @@ class Time(object):
 
     @reify
     def delta_t(self):
-        table = self.ts.delta_t_table
-        return interpolate_delta_t(table, self.tt)
+        return self.ts._delta_t_function(self.tt)
 
     @reify
     def dut1(self):
@@ -974,6 +974,11 @@ def tdb_minus_tt(jd_tdb, fraction_tdb=0.0):
           + 0.000005 * sin (  52.9691 * t + 0.4444)
           + 0.000002 * sin (  21.3299 * t + 5.5431)
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
+
+def _build_legacy_delta_t(ts):
+    def _delta_t_function(tt_jd):
+        return interpolate_delta_t(ts.delta_t_table, tt_jd)
+    return _delta_t_function
 
 def interpolate_delta_t(delta_t_table, tt):
     """Return interpolated Delta T values for the times in `tt`.
