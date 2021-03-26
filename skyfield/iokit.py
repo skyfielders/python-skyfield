@@ -359,10 +359,10 @@ class Loader(object):
             delta_t_recent, leap_dates, leap_offsets = (
                 iers._build_timescale_arrays(mjd_utc, dut1))
 
-        ts = Timescale(delta_t_recent, leap_dates, leap_offsets)
-
         if delta_t is not None:
-            ts.delta_t_table = np.array(((-1e99, 1e99), (delta_t, delta_t)))
+            delta_t_recent = np.array(((-1e99, 1e99), (delta_t, delta_t)))
+
+        ts = Timescale(delta_t_recent, leap_dates, leap_offsets)
 
         return ts
 

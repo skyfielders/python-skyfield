@@ -87,8 +87,8 @@ class Timescale(object):
     polar_motion_table = None
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
-        self.delta_t_table = build_delta_t_table(delta_t_recent)
-        self._delta_t_function = _build_legacy_delta_t(self)
+        (self.delta_t_table,
+         self._delta_t_function) = _build_legacy_delta_t(delta_t_recent)
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
         self.J2000 = Time(self, float_(T0))
         self.B1950 = Time(self, float_(B1950))
@@ -975,10 +975,11 @@ def tdb_minus_tt(jd_tdb, fraction_tdb=0.0):
           + 0.000002 * sin (  21.3299 * t + 5.5431)
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
 
-def _build_legacy_delta_t(ts):
+def _build_legacy_delta_t(delta_t_recent):
+    delta_t_table = build_delta_t_table(delta_t_recent)
     def _delta_t_function(tt_jd):
-        return interpolate_delta_t(ts.delta_t_table, tt_jd)
-    return _delta_t_function
+        return interpolate_delta_t(delta_t_table, tt_jd)
+    return delta_t_table, _delta_t_function
 
 def interpolate_delta_t(delta_t_table, tt):
     """Return interpolated Delta T values for the times in `tt`.
