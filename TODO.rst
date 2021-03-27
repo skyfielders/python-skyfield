@@ -10,6 +10,12 @@ forget.
 Sprint Possibilities
 ====================
 
+* Incorporate historical polar x and y (link shared in #372):
+  https://datacenter.iers.org/data/latestVersion/186_EOP_C01_2000.1846_NOW_V2013_01186.txt
+
+* Switch to a cube-root falloff, rather than a discontinuity, for Earth
+  deflection.
+
 * The “finals2000A.all” file expresses DUT1 like ``0.8084178`` with 7
   digits after the decimal place.  How accurate is that?  It goes down
   to tenths of microseconds.  Roughly how much arc does the Earth rotate
