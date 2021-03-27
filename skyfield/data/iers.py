@@ -44,9 +44,9 @@ def _build_timescale_arrays(mjd_utc, dut1):
     delta_t_recent = np.array([tt_jd, delta_t])
 
     leap_dates = mjd_utc[leap_second_mask]
-    leap_dates = np.concatenate([[41317.0, 41499.0, 41683.0], leap_dates])
+    leap_dates = np.concatenate([[41499.0, 41683.0], leap_dates])
     leap_dates += 2400000.5
-    leap_offsets = np.arange(10.0, len(leap_dates) + 10.0)
+    leap_offsets = np.arange(11.0, len(leap_dates) + 11.0)
 
     return delta_t_recent, leap_dates, leap_offsets
 

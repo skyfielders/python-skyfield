@@ -91,6 +91,11 @@ def test_non_builtin_timescale_prefers_USNO_files(load):
     ts = load.timescale(builtin=False)
     assert abs(ts.utc(1973, 3, 1).delta_t - 222.2) < 1e-2
 
+    # Did we correctly convert the old leap second table to the new
+    # format? The offset prior to the first leap second should be +10.
+    t = ts.tai(1970, 1, 1)
+    assert t.utc == (1969, 12, 31, 23, 59, 50)
+
 def test_non_builtin_timescale_tries_to_load_finals2000A_all(load):
     save_file(load, 'finals2000A.all', b'invalid data')
     with assert_raises(IndexError):

@@ -35,8 +35,23 @@ def test_timescale_with_old_fashioned_leap_second_table():
         [1973, 1, 1, 0, 0, 0],
     ]
 
+    # The offset prior to the first leap second should be +10.
+    t = ts.tai(1970, 1, 1)
+    assert t.utc == (1969, 12, 31, 23, 59, 50)
+
 def ts():
     yield api.load.timescale()
+
+def ts_either():
+    # This fixture is for "tests that should pass given *either* a
+    # built-in Timescale or one loaded from a file."  Without a few such
+    # tests, an adjustment to the loading scheme can introduce a bug
+    # that no tests catch, because most tests use the builtin tables
+    # intead of loading from a file.  The tests below that use this
+    # fixture are ones that broke in the past when the loader code and
+    # timescale disagreed about something.
+    yield api.load.timescale()
+    yield api.load.timescale(builtin=False)
 
 def a(*args):
     return np.array(args)
@@ -129,10 +144,11 @@ def test_is_time_iterable(ts, time_scale_name):
     for item in t:
         pass
 
-def test_strftime_on_prehistoric_dates(ts):
+def test_strftime_on_prehistoric_dates(ts_either):
     if sys.version_info <= (3,):
         return  # Python 2 time.strftime() complains about negative years
 
+    ts = ts_either
     t = ts.tt(-746, 2, 26)
     assert t.utc_strftime('%Y %S') == '-746 18'
     assert t.ut1_strftime('%Y %S') == '-746 14'
@@ -147,10 +163,11 @@ def test_strftime_on_prehistoric_dates(ts):
     assert t.tt_strftime('%Y %S') == ['-746 00'] * 2
     assert t.tdb_strftime('%Y %S') == ['-746 00'] * 2
 
-def test_strftime_with_microseconds(ts):
+def test_strftime_with_microseconds(ts_either):
     if sys.version_info <= (3,):
         return  # we do not currently support %f under Python 2
 
+    ts = ts_either
     t = ts.tt(1980, 9, 12)
     assert t.utc_strftime('%Y %S %f') == '1980 08 816000'
     assert t.ut1_strftime('%Y %S %f') == '1980 08 892775'
@@ -285,7 +302,8 @@ def test_slicing_time(ts):
     assert (t.ut1[2:4] == t24.ut1).all()
     assert (t.delta_t[2:4] == t24.delta_t).all()
 
-def test_early_utc(ts):
+def test_early_utc(ts_either):
+    ts = ts_either
     t = ts.utc(1915, 12, 2, 3, 4, 5.6786786)
     assert abs(t.tt - 2420833.6283317441) < epsilon
     assert t.utc_iso() == '1915-12-02T03:04:06Z'

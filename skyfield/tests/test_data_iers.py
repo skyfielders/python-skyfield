@@ -12,8 +12,8 @@ def test_build_timescale_arrays():
                               2442048.500522963, 2442049.500522963]
     assert list(column_2) == [44.4782581, 44.481142399999996,
                               44.4840562, 44.4869461]
-    assert list(leap_dates) == [2441317.5, 2441499.5, 2441683.5, 2442048.5]
-    assert list(leap_offsets) == [10, 11, 12, 13]
+    assert list(leap_dates) == [2441499.5, 2441683.5, 2442048.5]
+    assert list(leap_offsets) == [11, 12, 13]
 
     ts = Timescale(delta_t, leap_dates, leap_offsets)
     t = ts.tai(1973, 1, 1, 0, 0, [11, 12])
