@@ -151,19 +151,19 @@ def test_strftime_with_microseconds(ts):
     if sys.version_info <= (3,):
         return  # we do not currently support %f under Python 2
 
-    t = ts.tt(2020, 9, 12)
-    assert t.utc_strftime('%Y %S %f') == '2020 50 816000'
-    assert t.ut1_strftime('%Y %S %f') == '2020 50 638465'
-    assert t.tai_strftime('%Y %S %f') == '2020 27 816000'
-    assert t.tt_strftime('%Y %S %f') == '2020 00 000000'
-    assert t.tdb_strftime('%Y %S %f') == '2020 59 998446'
+    t = ts.tt(1980, 9, 12)
+    assert t.utc_strftime('%Y %S %f') == '1980 08 816000'
+    assert t.ut1_strftime('%Y %S %f') == '1980 08 892775'
+    assert t.tai_strftime('%Y %S %f') == '1980 27 816000'
+    assert t.tt_strftime('%Y %S %f') == '1980 00 000000'
+    assert t.tdb_strftime('%Y %S %f') == '1980 59 998471'
 
-    t = ts.tt(2020, 9, [12, 12])
-    assert t.utc_strftime('%Y %S %f') == ['2020 50 816000'] * 2
-    assert t.ut1_strftime('%Y %S %f') == ['2020 50 638465'] * 2
-    assert t.tai_strftime('%Y %S %f') == ['2020 27 816000'] * 2
-    assert t.tt_strftime('%Y %S %f') == ['2020 00 000000'] * 2
-    assert t.tdb_strftime('%Y %S %f') == ['2020 59 998446'] * 2
+    t = ts.tt(1980, 9, [12, 12])
+    assert t.utc_strftime('%Y %S %f') == ['1980 08 816000'] * 2
+    assert t.ut1_strftime('%Y %S %f') == ['1980 08 892775'] * 2
+    assert t.tai_strftime('%Y %S %f') == ['1980 27 816000'] * 2
+    assert t.tt_strftime('%Y %S %f') == ['1980 00 000000'] * 2
+    assert t.tdb_strftime('%Y %S %f') == ['1980 59 998471'] * 2
 
 def test_tai_fraction_loses_no_precision(ts):
     t = ts.tai_jd(2459008.0, 0.0123456789)
