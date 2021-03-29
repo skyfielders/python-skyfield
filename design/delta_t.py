@@ -14,8 +14,8 @@ Choosing a source for ∆T
 
 TODO:
 
-[ ] Build reader for long-term file.
-[ ] Build polynomial interpolation function.
+[X] Build reader for long-term file.
+[X] Build polynomial interpolation function.
 [ ] Build translator between the two.
 [ ] Build translator between finals2000A and interpolator.
 [ ] Build combiner.
@@ -30,6 +30,7 @@ import numpy as np
 from skyfield import functions, timelib
 from skyfield.api import load, Loader
 from skyfield.data import iers
+from skyfield.data.earth_orientation import parse_S15_table
 
 inf = float('inf')
 
@@ -40,9 +41,11 @@ def main(argv):
     #try_out_different_interpolation_techniques()
 
 def compare_splines_to_finals2000_error_bars():
-    url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
+    #url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
+    url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15.2020.txt'
     with load.open(url) as f:
-        columns = load_table_S15(f)
+        names, columns = parse_S15_table(f)
+
     i, start_year, end_year, a0, a1, a2, a3 = columns
 
     f = load.open('finals2000A.all')
@@ -51,32 +54,40 @@ def compare_splines_to_finals2000_error_bars():
         iers._build_timescale_arrays(mjd_utc, dut1)
     )
 
-    print(delta_t_recent.shape)
-    print(i.shape)
+    print('Size of IERS table:', delta_t_recent.shape)
+    print('Number of splines:', i.shape)
 
     #year = [-720, 400, 700]
     #year = np.arange(-720, 2010)
     #year = np.arange(1800, 2010)
     #year = np.arange(1980, 2010)
     year = np.arange(1980, 2010, 0.1)
-    s15_curve = interpolate(year, start_year, a3, a2, a1, a0)
+    interpolate = prep_interpolate(start_year, a3, a2, a1, a0)
+    s15_curve = interpolate(year)
 
     finals_tt, finals_delta_t = delta_t_recent
     ts = load.timescale()
     t = ts.utc(year)
     tt = t.tt
-    print(tt)
-    print(finals_tt)
-    finals_curve = interpolate(
-        tt, finals_tt,
+
+    interpolate = prep_interpolate(
+        finals_tt,
         finals_delta_t[1:] - finals_delta_t[:-1],
         finals_delta_t[:-1],
     )
 
-    print(finals_curve)
+    T0 = time()
+    finals_curve = interpolate(tt)
+    print(time() - T0, 's for interpolate()')
+
+    T0 = time()
+    finals_curve2 = np.interp(tt, finals_tt, finals_delta_t)
+    print(time() - T0, 's for interp()')
+
+    assert (finals_curve == finals_curve2).all()
 
     diff = max(abs(s15_curve - finals_curve))
-    print('Max difference (s):', diff, diff * 15)
+    print('Max difference (seconds, arcseconds):', diff, diff * 15)
 
     if 1:
         fig, (ax, ax2) = plt.subplots(2, 1)
@@ -90,24 +101,20 @@ def compare_splines_to_finals2000_error_bars():
         #plt.legend()
         fig.savefig('tmp.png')
 
-def interpolate(t, t_barriers, c, *coefficients):
+def prep_interpolate(t_barriers, c0, *coefficients):
     i_array = np.arange(len(t_barriers))
-    i = np.interp(t, t_barriers, i_array)
-    print(i)
-    # x = i % 1.0
-    # print(x)
-    i = i.astype(int)
-    print(i)
-    left = t_barriers[i]
-    right = t_barriers[i+1]
-    print(left, right)
-    little_t = (t - left) / (right - left)
-    print(little_t)
-    value = c[i]
-    for c in coefficients:
-        value *= little_t
-        value += c[i]
-    return value
+    def interpolate(t):
+        i = np.interp(t, t_barriers, i_array)
+        i = i.astype(int)
+        left = t_barriers[i]
+        right = t_barriers[i+1]
+        little_t = (t - left) / (right - left)
+        value = c0[i]
+        for c in coefficients:
+            value *= little_t
+            value += c[i]
+        return value
+    return interpolate
 
 def try_adjusting_spline():
     k0, k1 = -720.0, -100.0
@@ -210,7 +217,7 @@ def try_solving_spline():
 def try_out_different_interpolation_techniques():
     url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
     with load.open(url) as f:
-        columns = load_table_S15(f)
+        names, columns = parse_S15_table(f)
     i, start_year, end_year, a0, a1, a2, a3 = columns
     report = []
     print('Table start and end years:', start_year[0], end_year[-1])
@@ -475,14 +482,6 @@ def try_out_different_interpolation_techniques():
 
     is_2050_to_2150_polynomial_worth_it()
 
-def load_table_S15(f):
-    # http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt
-    content = f.read()
-    banner = b'- ' * 36 + b'-\n'
-    sections = content.split(banner)
-    table = np.loadtxt(sections[2].splitlines())
-    return table.T
-
 def is_2050_to_2150_polynomial_worth_it():
     # How different is the polynomial at:
     # https://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html
@@ -565,4 +564,3 @@ Example line from finals.all, for crafting our RE:
 
 if __name__ == '__main__':
     main(sys.argv[1:])
-
