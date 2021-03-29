@@ -163,21 +163,21 @@ def test_strftime_on_prehistoric_dates(ts_either):
     assert t.tt_strftime('%Y %S') == ['-746 00'] * 2
     assert t.tdb_strftime('%Y %S') == ['-746 00'] * 2
 
-def test_strftime_with_microseconds(ts_either):
+def test_strftime_with_microseconds():
     if sys.version_info <= (3,):
         return  # we do not currently support %f under Python 2
 
-    ts = ts_either
+    ts = api.load.timescale(builtin=False)  # load "ci/finals2000A.all"
     t = ts.tt(1980, 9, 12)
     assert t.utc_strftime('%Y %S %f') == '1980 08 816000'
-    assert t.ut1_strftime('%Y %S %f') == '1980 08 892775'
+    assert t.ut1_strftime('%Y %S %f') == '1980 08 890216'
     assert t.tai_strftime('%Y %S %f') == '1980 27 816000'
     assert t.tt_strftime('%Y %S %f') == '1980 00 000000'
     assert t.tdb_strftime('%Y %S %f') == '1980 59 998471'
 
     t = ts.tt(1980, 9, [12, 12])
     assert t.utc_strftime('%Y %S %f') == ['1980 08 816000'] * 2
-    assert t.ut1_strftime('%Y %S %f') == ['1980 08 892775'] * 2
+    assert t.ut1_strftime('%Y %S %f') == ['1980 08 890216'] * 2
     assert t.tai_strftime('%Y %S %f') == ['1980 27 816000'] * 2
     assert t.tt_strftime('%Y %S %f') == ['1980 00 000000'] * 2
     assert t.tdb_strftime('%Y %S %f') == ['1980 59 998471'] * 2

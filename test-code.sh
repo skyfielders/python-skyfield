@@ -1,8 +1,7 @@
 #!/bin/bash
-#
-# This script should not change directory, because CI strategically runs
-# it from somewhere besides the repository root to prevent Skyfield from
-# being imported directly from its source tree.
+
+cd "$(readlink -f $(dirname "${BASH_SOURCE[0]}"))"/ci
+echo 'Changing to CI directory: cd' $(pwd)
 
 set -e
 if ! command -v assay >/dev/null
