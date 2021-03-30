@@ -27,18 +27,76 @@ from time import time
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy import concatenate, maximum as clip_upper, nan
 from skyfield import functions, timelib
 from skyfield.api import load, Loader
 from skyfield.data import iers
 from skyfield.data.earth_orientation import parse_S15_table
 
+def cat(*args):
+    return concatenate(args)
+
 inf = float('inf')
 
 def main(argv):
-    compare_splines_to_finals2000_error_bars()
+    try_out_new_class()
+    #compare_splines_to_finals2000_error_bars()
     #try_adjusting_spline()
     #try_solving_spline()
     #try_out_different_interpolation_techniques()
+
+def try_out_new_class():
+    f = load.open('finals2000A.all')
+    mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+    delta_t_recent, leap_dates, leap_offsets = (
+        iers._build_timescale_arrays(mjd_utc, dut1)
+    )
+    daily_tt, daily_delta_t = delta_t_recent
+
+    ts = load.timescale()
+    #daily_t = ts.tt_jd(daily_tt)
+
+    url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15.2020.txt'
+    with load.open(url) as f:
+        names, columns = parse_S15_table(f)
+    s15 = dict(zip(names, columns))
+    i, start_year, end_year, a0, a1, a2, a3 = columns
+    long_term_curve = prep_interpolate(
+        s15['K_i'], s15['K_{i+1}'],
+        s15['a_3'], s15['a_2'], s15['a_1'], s15['a_0'],
+    )
+
+    daily_tt, daily_delta_t = extend(ts, daily_tt, daily_delta_t, long_term_curve, 180)
+
+    delta_t_function = DeltaT(daily_tt, daily_delta_t, long_term_curve)
+    #year = np.arange(1980, 2010, 0.1)
+    #year = np.arange(-720, 2000)
+    #year = np.arange(-720, 2020)
+    #year = np.arange(-800, 2020)
+
+    fig, axes = plt.subplots(3, 1)
+    axes = iter(axes)
+
+    do_plot(next(axes), ts.J(np.linspace(-800, 2020)), delta_t_function)
+
+    days = 360
+
+    tt = np.linspace(daily_tt[0] - days, daily_tt[0] + days)
+    do_plot(next(axes), ts.tt_jd(tt), delta_t_function)
+
+    tt = np.linspace(daily_tt[-1] - days, daily_tt[-1] + days)
+    do_plot(next(axes), ts.tt_jd(tt), delta_t_function)
+
+    # ax.plot(t.J, delta_t)
+    # ax.grid()
+    # ax2.plot(t.J[1:], np.diff(delta_t))
+    # ax2.grid()
+    fig.savefig('tmp.png')
+
+def do_plot(ax, t, delta_t_function):
+    ax.plot(t.J, delta_t_function(t))
+    ax.plot(t.J, delta_t_function.long_term_curve(t.J))
+    ax.grid()
 
 def compare_splines_to_finals2000_error_bars():
     #url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
@@ -89,27 +147,57 @@ def compare_splines_to_finals2000_error_bars():
     diff = max(abs(s15_curve - finals_curve))
     print('Max difference (seconds, arcseconds):', diff, diff * 15)
 
-    if 1:
-        fig, (ax, ax2) = plt.subplots(2, 1)
-        ax.plot(year, s15_curve, label='label', linestyle='--')
-        ax.plot(year, finals_curve, label='label')
-        ax.grid()
+    compare_interpolations(t, finals_curve, s15_curve)
 
-        ax2.plot(year, finals_curve - s15_curve, label='label')
-        ax2.grid()
+def compare_interpolations(t, f1, f2):
+    dt1 = f1#(t)
+    dt2 = f2#(t)
 
-        #plt.legend()
-        fig.savefig('tmp.png')
+    diff = dt2 - dt1
+    print('Biggest difference:', np.max(np.abs(diff)), 'seconds')
 
-def prep_interpolate(t_barriers, c0, *coefficients):
-    i_array = np.arange(len(t_barriers))
+    fig, (ax, ax2) = plt.subplots(2, 1)
+    ax.plot(t.J, dt1, linestyle='--')
+    ax.plot(t.J, dt2)
+    ax.grid()
+
+    ax2.plot(t.J, diff)
+    ax2.grid()
+
+    fig.savefig('tmp.png')
+
+def extend(ts, daily_tt, daily_delta_t, long_term_curve, days):
+    t_left = ts.tt_jd(daily_tt[0] - days)
+    t_right = ts.tt_jd(daily_tt[-1] + days)
+    y_left = long_term_curve(t_left.J)
+    y_right = long_term_curve(t_right.J)
+    return (cat([t_left.tt], daily_tt, [t_right.tt]),
+            cat([y_left], daily_delta_t, [y_right]))
+
+class DeltaT(object):
+    def __init__(self, daily_tt, daily_delta_t, long_term_curve):
+        self.daily_tt = daily_tt
+        self.daily_delta_t = daily_delta_t
+        self.long_term_curve = long_term_curve
+
+    def __call__(self, t):
+        delta_t = np.interp(t.tt, self.daily_tt, self.daily_delta_t, nan, nan)
+        nan_indexes = np.argwhere(np.isnan(delta_t))
+        print('nan_indexes:', nan_indexes)
+        if len(nan_indexes):
+            delta_t[nan_indexes] = self.long_term_curve(t.J[nan_indexes])
+        return delta_t
+
+def prep_interpolate(left, right, cn, *coefficients):
+    i_array = np.arange(len(left))
+    widths = right - left
     def interpolate(t):
-        i = np.interp(t, t_barriers, i_array)
+        print('t:', t)
+        i = np.interp(t, left, i_array)
         i = i.astype(int)
-        left = t_barriers[i]
-        right = t_barriers[i+1]
-        little_t = (t - left) / (right - left)
-        value = c0[i]
+        print(i, len(cn))
+        little_t = (t - left[i]) / widths[i]
+        value = cn[i]
         for c in coefficients:
             value *= little_t
             value += c[i]
@@ -192,8 +280,8 @@ def try_solving_spline():
     #d = sy.expand(d)
     #d = sy.simplify(d)
     d = sy.expand(d)
-    d = sy.collect(d, new_t)
 
+    d = sy.collect(d, new_t)
     b0 = d.coeff(new_t, 0)
     b1 = d.coeff(new_t, 1)
     b2 = d.coeff(new_t, 2)
@@ -302,14 +390,13 @@ def try_out_different_interpolation_techniques():
     z = np.zeros_like(iers_tt)
     #iers_end_year =
 
-    cat = np.concatenate
     c = cutoff_index
     start_tt = cat([to_tt(start_year[:c]), to_tt(end_year[-1:]), iers_tt[:-1]])
-    end_tt = cat([to_tt(end_year[:c]), iers_tt])
-    a0 = cat([a0[:c], [0], iers_delta_t[:-1]])
-    a1 = cat([a1[:c], iers_delta_t - a0[-len(iers_delta_t):]])
-    a2 = cat([a2[:c], z])
-    a3 = cat([a3[:c], z])
+    end_tt = cat(to_tt(end_year[:c]), iers_tt)
+    a0 = cat(a0[:c], [0], iers_delta_t[:-1])
+    a1 = cat(a1[:c], iers_delta_t - a0[-len(iers_delta_t):])
+    a2 = cat(a2[:c], z)
+    a3 = cat(a3[:c], z)
 
     # Try using combined splines.
 
@@ -427,140 +514,6 @@ def try_out_different_interpolation_techniques():
 
     for args in report:
         print(*args)
-
-    return
-
-    # parser = argparse.ArgumentParser(description=put description here)
-    # parser.add_argument('integers', metavar='N', type=int, nargs='+',
-    #                     help='an integer for the accumulator')
-    # parser.add_argument('--sum', dest='accumulate', action='store_const',
-    #                     const=sum, default=max,
-    #                     help='sum the integers (default: find the max)')
-    # args = parser.parse_args(argv)
-    # print(args.accumulate(args.integers))
-
-    #draw_plot_comparing_USNO_and_IERS_data()
-
-    f = load.open('finals2000A.all')
-    mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
-    delta_t_recent, leap_dates, leap_offsets = (
-        iers._build_timescale_arrays(mjd_utc, dut1)
-    )
-
-    ts = load.timescale()
-
-    print('TT 2050:', ts.J(2050).tt)
-
-    fig, ax = plt.subplots()
-
-    # jd = mjd_utc + 2400000.5
-    # t = ts.tt_jd(jd)
-    # ax.plot(t.J, t.delta_t)
-
-    t = ts.J(range(1600, 2150))
-    ax.plot(t.J, t.delta_t, label='Skyfield')
-
-    t = ts.J(range(2150, 2190))
-    ms2004 = timelib.delta_t_formula_morrison_and_stephenson_2004(t.tt)
-    ax.plot(t.J, ms2004, label='M&S 2004 long-term parabola')
-
-    y = np.arange(2005, 2050)
-    t = y - 2000
-    ax.plot(y, 62.92 + 0.32217 * t + 0.005589 * t * t,
-            label='M&S 2004 polynomial 2005-2050')
-
-    y = np.arange(2050, 2150)
-    ax.plot(y, -20 + 32 * ((y-1820)/100)**2 - 0.5628 * (2150 - y),
-            label='M&S 2004 polynomial 2050-2150')
-    # y = np.array([2050, 2149])
-    # ax.plot(y, -20 + 32 * ((y-1820)/100)**2 - 0.5628 * (2150 - y))
-
-    ax.set(xlabel='Year', ylabel='∆T')
-    ax.grid()
-    ax.legend()
-    fig.savefig('tmp.png')
-
-    is_2050_to_2150_polynomial_worth_it()
-
-def is_2050_to_2150_polynomial_worth_it():
-    # How different is the polynomial at:
-    # https://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html
-    # from simply doing a linear interpolation from the endpoints?
-    y = np.arange(2050, 2150)
-    delta_t = -20 + 32 * ((y-1820)/100)**2 - 0.5628 * (2150 - y)
-    linear_approximation = np.linspace(delta_t[0], delta_t[-1], len(delta_t))
-    print('Maximum difference:', max(abs(delta_t - linear_approximation)), 's')
-
-def draw_plot_comparing_USNO_and_IERS_data():
-    f = load.open('finals.all')
-    year, month, day, dut1 = iers.parse_dut1_from_finals_all(f)
-
-    # auto-detect leap seconds
-    leap_seconds = np.diff(dut1) > 0.9
-    #x = np.append(leap_seconds > 0.9, False)
-    #x = np.prepend(leap_seconds > 0.9, False)
-    #x = np.concatenate([leap_seconds > 0.9, [False]]).astype(bool)
-    x = np.concatenate([[False], leap_seconds, ])
-    print(x)
-    print(x, sum(x))
-    print(year[x])
-    print(month[x])
-    print(day[x])
-
-    delta_t = dut1 - np.cumsum(x)
-
-    ts = load.timescale()
-    t = ts.utc(year, month, day)
-    y_new = dut1
-    y_old = t.dut1
-
-
-
-    # and: figure out error cost of interpolating weeks or months
-    all_points = np.arange(len(delta_t))
-    samples = all_points[::600] + 0.001
-    print(f'{len(samples)} samples')
-
-    for skip in range(1, 40):
-        index = np.arange(0, len(delta_t), skip)
-        excerpt = delta_t[index]
-        interpolated = np.interp(all_points, index, excerpt)
-        difference_seconds = abs(interpolated - delta_t).max()
-        difference_arcseconds = difference_seconds / 24.0 * 360.0
-        storage = 4 * len(excerpt)
-
-        t0 = time()
-        np.interp(samples, index, excerpt)
-        duration = time() - t0
-
-        fmt = '{:2} days  {:10.6f} s   {:10.6f} arcseconds  {} bytes  {:.6f} s'
-        print(fmt.format(
-            skip, difference_seconds, difference_arcseconds, storage, duration,
-        ))
-    #print(dut1)
-
-    fig, ax = plt.subplots()
-    ax.set(xlabel='Year', title='UT1 minus UTC')
-    # ax.plot(t.J, y_old, '-', label='deltat.dat')
-    # ax.plot(t.J, y_new, ',', label='finals.all')
-    ax.plot(delta_t)
-    ax.plot(np.diff(delta_t))
-    ax.grid()
-    plt.legend()
-    fig.savefig('tmp.png')
-
-    print(len(y_new))
-    np.savez_compressed(
-        'test.npz',
-        time=t.J,
-        ut1_minus_utc=y_new,
-    )
-
-"""
-Example line from finals.all, for crafting our RE:
-
-73 1 2 41684.00 I  0.120733 0.009786  0.136966 0.015902  I 0.8084178 0.0002710  0.0000 0.1916  P    44.969     .500     2.839     .300   .143000   .137000   .8075000      .000      .000  \n\\
-"""
 
 if __name__ == '__main__':
     main(sys.argv[1:])
