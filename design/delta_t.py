@@ -36,6 +36,9 @@ from skyfield.data.earth_orientation import parse_S15_table
 def cat(*args):
     return concatenate(args)
 
+def cat1(*args):
+    return concatenate(args, axis=1)
+
 inf = float('inf')
 
 def main(argv):
@@ -43,6 +46,7 @@ def main(argv):
     #compare_splines_to_finals2000_error_bars()
     #try_adjusting_spline()
     #try_solving_spline()
+    # solve_spline_specified_by_endpoints_and_slopes()
     #try_out_different_interpolation_techniques()
 
 def try_out_new_class():
@@ -58,39 +62,40 @@ def try_out_new_class():
 
     url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15.2020.txt'
     with load.open(url) as f:
-        names, columns = parse_S15_table(f)
+        names, spline_table = parse_S15_table(f)
     #s15 = dict(zip(names, columns))
-    i, start_year, end_year, a0, a1, a2, a3 = columns
+    #start_year, end_year, a0, a1, a2, a3 = spline_table
+
+    spline_table = spline_table[[1,2,6,5,4,3]]
+
+    s15_curve = Splines(spline_table)
 
     parabola = stephenson_morrison_hohenkerk_2016_parabola
-    print(move_spline_endpoints(100, 200, parabola.left, parabola.right,
-                                *parabola.coefficients))
-    print(move_spline_endpoints(0, 1, parabola.left, parabola.right,
-                                *parabola.coefficients))
+    # print(move_spline_endpoints(100, 200, parabola.table[:,0]))
 
-    b3, b2, b1, b0 = move_spline_endpoints(
-        -721, -720, parabola.left[0], parabola.right[0],
-        *[c[0] for c in parabola.coefficients],
-    )
-    print(b3, b2, b1, b0)
+    aa = move_spline_endpoints(-722, -721, parabola.table[:,0])
+    print(aa)
 
-    c3, c2, c1, c0 = move_spline_endpoints(
-        2019, 2020, parabola.left[0], parabola.right[0],
-        *[c[0] for c in parabola.coefficients],
+    # bb = move_spline_endpoints(-721, -720, parabola.table[:,0])
+    # build_spline(y0, y1, slope0, slope1)
+    # bb = adjust_spline_right(bb, s15_curve(-720))
+    print('diff:', parabola.derivative(-721))
+    print('diff:', parabola.derivative(-720))
+    b2 = build_spline(
+        parabola(-721),
+        s15_curve(-720),
+        parabola.derivative(-721),
+        s15_curve.derivative(-720),
     )
-    print(c3, c2, c1, c0)
+    print('b2:', b2)
+    bb = (-721, -720) + b2
 
-    long_term_curve = Splines(
-        cat([-721], start_year, [2019]),
-        cat([-720], end_year, [2020]),
-        cat([b3], a3, [c3]),
-        cat([b2], a2, [c2]),
-        cat([b1], a1, [c1]),
-        cat([b0], a0, [c0]),
-    )
-    #     s15['K_i'], s15['K_{i+1}'],
-    #     s15['a_3'], s15['a_2'], s15['a_1'], s15['a_0'],
-    # )
+    cc = move_spline_endpoints(2019, 2020, parabola.table[:,0])
+    print(cc)
+
+    bigger_table = cat([aa, bb], spline_table.T, [cc]).T
+    #print(bigger_table)
+    long_term_curve = Splines(bigger_table)
 
     daily_tt, daily_delta_t = extend(ts, daily_tt, daily_delta_t, long_term_curve, 180)
 
@@ -110,7 +115,7 @@ def try_out_new_class():
     ax.plot(t.J, stephenson_morrison_hohenkerk_2016_parabola(t.J), linestyle='--')
 
     #do_plot(next(axes), ts.J(np.linspace(-800, 2020)), delta_t_function)
-    do_plot(next(axes), ts.J(np.linspace(-730, -710)), delta_t_function)
+    do_plot(next(axes), ts.J(np.linspace(-730, -710, 1000)), delta_t_function)
 
     days = 360
 
@@ -218,21 +223,23 @@ class DeltaT(object):
     def __call__(self, t):
         delta_t = np.interp(t.tt, self.daily_tt, self.daily_delta_t, nan, nan)
         [nan_indexes] = np.nonzero(np.isnan(delta_t))  # Or np.argwhere()?
-        #print('nan_indexes:', nan_indexes)
         if len(nan_indexes):
             delta_t[nan_indexes] = self.long_term_curve(t.J[nan_indexes])
         return delta_t
 
 def _a(a):
-    return a if hasattr(a, 'shape') else np.array((a,))
+    return a if hasattr(a, 'shape') else np.array(a)
 
 class Splines(object):
-    def __init__(self, left, right, *coefficients):
-        self.left = left = _a(left)
-        self.right = right = _a(right)
+    def __init__(self, table):
+        self.table = table = _a(table)
+        if len(table.shape) < 2:
+            table.shape = table.shape + (1,)
+        self.left = left = table[0]
+        self.right = right = table[1]
         self._width = right - left
         self.n = np.arange(len(left))
-        self.coefficients = [_a(c) for c in coefficients]
+        self.coefficients = table[2:]
 
     def __call__(self, x):
         i = np.interp(x, self.left, self.n)
@@ -245,11 +252,22 @@ class Splines(object):
             value += c[i]
         return value
 
-stephenson_morrison_hohenkerk_2016_parabola = Splines(
-    1825.0, 1925.0, 0.0, 32.5, 0.0, -320.0)
+    #@reify
+    @property
+    def derivative(self):
+        columns = [self.table[0], self.table[1]]
+        coefficients = self.table[2:-1]
+        for i, c in enumerate(coefficients):
+            n = len(coefficients) - i
+            columns.append(n * c / self._width ** n)
+        return Splines(columns)
 
-def move_spline_endpoints(new_left, new_right, old_left, old_right,
-                          a3, a2, a1, a0):
+stephenson_morrison_hohenkerk_2016_parabola = Splines(
+    [1825.0, 1925.0, 0.0, 32.5, 0.0, -320.0])
+
+def move_spline_endpoints(new_left, new_right, table_row):
+    old_left, old_right, a3, a2, a1, a0 = table_row
+
     k0, k1 = old_left, old_right
     j0, j1 = new_left, new_right
 
@@ -287,9 +305,21 @@ def move_spline_endpoints(new_left, new_right, old_left, old_right,
     b1 = j1*u0 - j1*u11 + j1*u13 - u1 + u12 - u14 - 2*u16 + u17*u22 + u20 - u21 - u23 + u25
     b2 = u18 - u20 + u21 + u23 - 6*u24 + u26*u5 - u27*u7 + u28
     b3 = j1**3*u9 - u10 + u25 - u28
-    return b3, b2, b1, b0
+    return new_left, new_right, b3, b2, b1, b0
 
-def try_solving_spline():
+def adjust_spline_right(spline, y):
+    x_left, x_right, a3, a2, a1, a0 = spline
+    a1 = y - a3 - a2 - a0
+    return x_left, x_right, a3, a2, a1, a0
+
+def build_spline(y0, y1, slope0, slope1):
+    a0 = y0
+    a1 = slope0
+    a2 = -2*slope0 - slope1 - 3*y0 + 3*y1
+    a3 = slope0 + slope1 + 2*y0 - 2*y1
+    return a3, a2, a1, a0
+
+def try_solving_moving_endpoints_of_spline():
     import sympy as sy
     sy.init_printing()
 
@@ -329,6 +359,25 @@ def try_solving_spline():
         n += sy.count_ops(expr)
         print('b{} = {}'.format(i, expr))
     print('Total operations: {}'.format(n))
+
+def solve_spline_specified_by_endpoints_and_slopes():
+    import sympy as sy
+    sy.init_printing()
+
+    a0, a1, a2, a3, t, y0, y1, slope0, slope1 = sy.symbols(
+        'a0, a1, a2, a3, t, y0, y1, slope0, slope1')
+
+    x = a3 * t**3 + a2 * t**2 + a1 * t + a0
+    slope = sy.diff(x, t)
+
+    soln = sy.solve([
+        x.subs(t, 0) - y0,
+        x.subs(t, 1) - y1,
+        slope.subs(t, 0) - slope0,
+        slope.subs(t, 1) - slope1,
+    ], [a0, a1, a2, a3])
+    sy.pprint(soln)
+    #print(soln)
 
 def try_out_different_interpolation_techniques():
     url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
