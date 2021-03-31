@@ -59,12 +59,38 @@ def try_out_new_class():
     url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15.2020.txt'
     with load.open(url) as f:
         names, columns = parse_S15_table(f)
-    s15 = dict(zip(names, columns))
+    #s15 = dict(zip(names, columns))
     i, start_year, end_year, a0, a1, a2, a3 = columns
-    long_term_curve = prep_interpolate(
-        s15['K_i'], s15['K_{i+1}'],
-        s15['a_3'], s15['a_2'], s15['a_1'], s15['a_0'],
+
+    parabola = stephenson_morrison_hohenkerk_2016_parabola
+    print(move_spline_endpoints(100, 200, parabola.left, parabola.right,
+                                *parabola.coefficients))
+    print(move_spline_endpoints(0, 1, parabola.left, parabola.right,
+                                *parabola.coefficients))
+
+    b3, b2, b1, b0 = move_spline_endpoints(
+        -721, -720, parabola.left[0], parabola.right[0],
+        *[c[0] for c in parabola.coefficients],
     )
+    print(b3, b2, b1, b0)
+
+    c3, c2, c1, c0 = move_spline_endpoints(
+        2019, 2020, parabola.left[0], parabola.right[0],
+        *[c[0] for c in parabola.coefficients],
+    )
+    print(c3, c2, c1, c0)
+
+    long_term_curve = Splines(
+        cat([-721], start_year, [2019]),
+        cat([-720], end_year, [2020]),
+        cat([b3], a3, [c3]),
+        cat([b2], a2, [c2]),
+        cat([b1], a1, [c1]),
+        cat([b0], a0, [c0]),
+    )
+    #     s15['K_i'], s15['K_{i+1}'],
+    #     s15['a_3'], s15['a_2'], s15['a_1'], s15['a_0'],
+    # )
 
     daily_tt, daily_delta_t = extend(ts, daily_tt, daily_delta_t, long_term_curve, 180)
 
@@ -74,10 +100,17 @@ def try_out_new_class():
     #year = np.arange(-720, 2020)
     #year = np.arange(-800, 2020)
 
-    fig, axes = plt.subplots(3, 1)
+    fig, axes = plt.subplots(4, 1)
     axes = iter(axes)
 
-    do_plot(next(axes), ts.J(np.linspace(-800, 2020)), delta_t_function)
+    ax = next(axes)
+    #t = ts.J(np.linspace(-2000, 2500))
+    t = ts.J(np.linspace(-2000, 2150))
+    do_plot(ax, t, delta_t_function)
+    ax.plot(t.J, stephenson_morrison_hohenkerk_2016_parabola(t.J), linestyle='--')
+
+    #do_plot(next(axes), ts.J(np.linspace(-800, 2020)), delta_t_function)
+    do_plot(next(axes), ts.J(np.linspace(-730, -710)), delta_t_function)
 
     days = 360
 
@@ -91,6 +124,7 @@ def try_out_new_class():
     # ax.grid()
     # ax2.plot(t.J[1:], np.diff(delta_t))
     # ax2.grid()
+    fig.tight_layout()
     fig.savefig('tmp.png')
 
 def do_plot(ax, t, delta_t_function):
@@ -120,7 +154,7 @@ def compare_splines_to_finals2000_error_bars():
     #year = np.arange(1800, 2010)
     #year = np.arange(1980, 2010)
     year = np.arange(1980, 2010, 0.1)
-    interpolate = prep_interpolate(start_year, a3, a2, a1, a0)
+    interpolate = Splines(start_year, end_year, a3, a2, a1, a0)
     s15_curve = interpolate(year)
 
     finals_tt, finals_delta_t = delta_t_recent
@@ -128,8 +162,9 @@ def compare_splines_to_finals2000_error_bars():
     t = ts.utc(year)
     tt = t.tt
 
-    interpolate = prep_interpolate(
-        finals_tt,
+    interpolate = Splines(
+        finals_tt[:-1],
+        finals_tt[1:],
         finals_delta_t[1:] - finals_delta_t[:-1],
         finals_delta_t[:-1],
     )
@@ -182,34 +217,41 @@ class DeltaT(object):
 
     def __call__(self, t):
         delta_t = np.interp(t.tt, self.daily_tt, self.daily_delta_t, nan, nan)
-        nan_indexes = np.argwhere(np.isnan(delta_t))
-        print('nan_indexes:', nan_indexes)
+        [nan_indexes] = np.nonzero(np.isnan(delta_t))  # Or np.argwhere()?
+        #print('nan_indexes:', nan_indexes)
         if len(nan_indexes):
             delta_t[nan_indexes] = self.long_term_curve(t.J[nan_indexes])
         return delta_t
 
-def prep_interpolate(left, right, cn, *coefficients):
-    i_array = np.arange(len(left))
-    widths = right - left
-    def interpolate(t):
-        print('t:', t)
-        i = np.interp(t, left, i_array)
+def _a(a):
+    return a if hasattr(a, 'shape') else np.array((a,))
+
+class Splines(object):
+    def __init__(self, left, right, *coefficients):
+        self.left = left = _a(left)
+        self.right = right = _a(right)
+        self._width = right - left
+        self.n = np.arange(len(left))
+        self.coefficients = [_a(c) for c in coefficients]
+
+    def __call__(self, x):
+        i = np.interp(x, self.left, self.n)
         i = i.astype(int)
-        print(i, len(cn))
-        little_t = (t - left[i]) / widths[i]
-        value = cn[i]
+        t = (x - self.left[i]) / self._width[i]
+        coefficients = iter(self.coefficients)
+        value = next(coefficients)[i]
         for c in coefficients:
-            value *= little_t
+            value *= t
             value += c[i]
         return value
-    return interpolate
 
-def try_adjusting_spline():
-    k0, k1 = -720.0, -100.0
-    a0, a1, a2, a3 = 20371.848, -9999.586, 776.247, 409.160
-    j0, j1 = -800, -700
+stephenson_morrison_hohenkerk_2016_parabola = Splines(
+    1825.0, 1925.0, 0.0, 32.5, 0.0, -320.0)
 
-    # Problem: generate new b0..b3 for j0,j1.
+def move_spline_endpoints(new_left, new_right, old_left, old_right,
+                          a3, a2, a1, a0):
+    k0, k1 = old_left, old_right
+    j0, j1 = new_left, new_right
 
     u0 = a1/(-k0 + k1)
     u1 = j0*u0
@@ -245,21 +287,7 @@ def try_adjusting_spline():
     b1 = j1*u0 - j1*u11 + j1*u13 - u1 + u12 - u14 - 2*u16 + u17*u22 + u20 - u21 - u23 + u25
     b2 = u18 - u20 + u21 + u23 - 6*u24 + u26*u5 - u27*u7 + u28
     b3 = j1**3*u9 - u10 + u25 - u28
-
-    print(a0, a1, a2, a3)
-    print(b0, b1, b2, b3)
-
-    # Try out the new parameters:
-
-    years = np.array([-720, -710, -700])
-
-    t = (years - k0) / (k1 - k0)
-    d = (((a3 * t + a2) * t) + a1) * t + a0
-    print(d)
-
-    t = (years - j0) / (j1 - j0)
-    d = (((b3 * t + b2) * t) + b1) * t + b0
-    print(d)
+    return b3, b2, b1, b0
 
 def try_solving_spline():
     import sympy as sy
