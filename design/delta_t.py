@@ -30,8 +30,10 @@ import numpy as np
 from numpy import array, concatenate, maximum as clip_upper, nan
 from skyfield import functions, timelib
 from skyfield.api import load, Loader
+from skyfield.curvelib import Splines
 from skyfield.data import iers
 from skyfield.data.earth_orientation import parse_S15_table
+from skyfield.interpolation import build_spline_given_ends
 
 class A(object):
     __getitem__ = array
@@ -60,7 +62,6 @@ def cat1(*args):
 inf = float('inf')
 
 def main(argv):
-    run_tests()
     # try_out_new_class()
     # compare_splines_to_finals2000_error_bars()
     # try_adjusting_spline()
@@ -97,11 +98,11 @@ def try_out_new_class():
     print(aa)
 
     # bb = move_spline_endpoints(-721, -720, parabola.table[:,0])
-    # build_spline(y0, y1, slope0, slope1)
+    # build_spline_given_ends(y0, y1, slope0, slope1)
     # bb = adjust_spline_right(bb, s15_curve(-720))
     print('diff:', parabola.derivative(-721))
     print('diff:', parabola.derivative(-720))
-    bb = build_spline(
+    bb = build_spline_given_ends(
         -721,
         -720,
         parabola(-721),
@@ -251,40 +252,6 @@ class DeltaT(object):
 def _a(a):
     return a if hasattr(a, 'shape') else np.array(a)
 
-class Splines(object):
-    def __init__(self, table):
-        self.table = table = _a(table)
-        if len(table.shape) < 2:
-            table.shape = table.shape + (1,)
-        self.left = left = table[0]
-        self.right = right = table[1]
-        self._width = right - left
-        self.n = np.arange(len(left))
-        self.coefficients = table[2:]
-
-    def __call__(self, x):
-        i = np.interp(x, self.left, self.n)
-        i = i.astype(int)
-        t = (x - self.left[i]) / self._width[i]
-        coefficients = iter(self.coefficients)
-        value = next(coefficients)[i]
-        for c in coefficients:
-            value *= t
-            value += c[i]
-        return value
-
-    #@reify
-    @property
-    def derivative(self):
-        columns = [self.table[0], self.table[1]]
-        coefficients = self.table[2:-1]
-        for i, c in enumerate(coefficients):
-            n = len(coefficients) - i
-            columns.append(n * c / self._width)
-        return Splines(columns)
-
-    slope = derivative
-
 stephenson_morrison_hohenkerk_2016_parabola = Splines(
     [1825.0, 1925.0, 0.0, 32.5, 0.0, -320.0])
 
@@ -302,8 +269,8 @@ def big_solution_vs_slopes():
     print('Move endpoints:')
     print(row2)
 
-    row3 = build_spline(
-        x0, x1, p(x0), p(x1), p.slope(x0), p.slope(x1),
+    row3 = build_spline_given_ends(
+        x0, x1, p(x0), p(x1), p.derivative(x0), p.derivative(x1),
     )
     print('From y and slopes:')
     print(row3)
@@ -362,16 +329,6 @@ def adjust_spline_right(spline, y):
     a1 = y - a3 - a2 - a0
     return x_left, x_right, a3, a2, a1, a0
 
-def build_spline(left, right, y0, y1, slope0, slope1):
-    width = right - left
-    slope0 *= width
-    slope1 *= width
-    a0 = y0
-    a1 = slope0
-    a2 = -2*slope0 - slope1 - 3*y0 + 3*y1
-    a3 = slope0 + slope1 + 2*y0 - 2*y1
-    return left, right, a3, a2, a1, a0
-
 def try_solving_moving_endpoints_of_spline():
     import sympy as sy
     sy.init_printing()
@@ -412,25 +369,6 @@ def try_solving_moving_endpoints_of_spline():
         n += sy.count_ops(expr)
         print('b{} = {}'.format(i, expr))
     print('Total operations: {}'.format(n))
-
-def solve_spline_specified_by_endpoints_and_slopes():
-    import sympy as sy
-    sy.init_printing()
-
-    a0, a1, a2, a3, t, y0, y1, slope0, slope1 = sy.symbols(
-        'a0, a1, a2, a3, t, y0, y1, slope0, slope1')
-
-    x = a3 * t**3 + a2 * t**2 + a1 * t + a0
-    slope = sy.diff(x, t)
-
-    soln = sy.solve([
-        x.subs(t, 0) - y0,
-        x.subs(t, 1) - y1,
-        slope.subs(t, 0) - slope0,
-        slope.subs(t, 1) - slope1,
-    ], [a0, a1, a2, a3])
-    sy.pprint(soln)
-    #print(soln)
 
 def try_out_different_interpolation_techniques():
     url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15-v18.txt'
@@ -577,16 +515,7 @@ def try_out_different_interpolation_techniques():
     I1 %= 1.0
     t = I1
 
-    #print(a0123[i].shape)
-    # a0, a1, a2, a3 = a0123[i].T
-    # experimental_delta_t = ((a3 * t + a2) * t + a1) * t + a0
-
-    experimental_delta_t = ((a3[i] * t + a2[i]) * t + a1[i]) * t + a0[i]
-    #experimental_delta_t = a0[i]
-
     report.append((time() - T0, 's to compute ∆T with combined spline table'))
-
-    experimental_delta_t
 
     # Hybrid approach: splines for years outside IERS range, but simple
     # linear interpolation inside IERS table.
@@ -595,14 +524,6 @@ def try_out_different_interpolation_techniques():
     y_tt = to_tt(y)
     iers_mask = (iers_tt[0] <= y_tt) & (y_tt <= iers_tt[-1])
     print(iers_mask.shape, sum(iers_mask))
-
-    # generate index: subtract floor, build mask, turn matches into ints
-    # and 0.0-0.99 remainders, then do direct indexing into table.
-    # for ~mask, do splines, maybe having fake spline where table is?
-    # paste them together
-
-    # T0 = time()
-    # report.append((time() - T0, 's to compute ∆T with combined spline table'))
 
     # The plot.
 
@@ -644,67 +565,6 @@ def try_out_different_interpolation_techniques():
 
     for args in report:
         print(*args)
-
-def run_tests():
-    #def r(n): return round(n, 1)
-
-    # line = Splines([10, 11, 0.0, 0.0, 3.0, 7.0])
-    # x = [9.0, 10.0, 11.0]
-    # assert list(line(x)) == [4.0, 7.0, 10.0]
-    # assert list(line.derivative(x)) == [3.0, 3.0, 3.0]
-
-    # parabola = Splines([10, 11, 0.0, 2.0, 0.0, 5.0])
-    # x = [9.0, 10.0, 11.0]
-    # assert list(parabola(x)) == [7.0, 5.0, 7.0]
-    # print(parabola.derivative(x))
-    # assert list(parabola.derivative(x)) == [-4.0, 0.0, 4.0]
-
-    row = 10, 12, 2.0, 3.0, 5.0, 7.0
-    curve = Splines(row)
-    x = 8.0, 9.0, 10.0, 11.0, 12.0
-
-    # for delta in 0.1, 0.01, 0.001:
-    #     print(delta)
-    #     delta = np.array(delta)
-    #     print((curve(x + delta) - curve(x)) / delta)
-    # print(curve.derivative(x))
-
-    assert list(curve(x)) == [3.0, 5.0, 7.0, 10.5, 17.0]
-    assert list(curve.derivative(x)) == [2.5, 1.75, 2.5, 4.75, 8.5]
-
-    # Does the curve retain its shape after having its endpoints moved?
-
-    for left, right in [(8, 10), (1, 2)]:
-        row2 = move_spline_endpoints(left, right, row)
-        curve2 = Splines(row2)
-        assert curve2.table[0:2,0] == E[left, right]
-        assert list(curve2(x)) == [3.0, 5.0, 7.0, 10.5, 17.0]
-        assert list(curve2.derivative(x)) == [2.5, 1.75, 2.5, 4.75, 8.5]
-
-    # Can we rebuild it from its endpoints and slopes?
-
-    row3 = build_spline(10, 12, curve(10), curve(12),
-                        curve.derivative(10), curve.derivative(12))
-    assert row == row3  # Wow! It works now.
-
-    return
-
-    p = stephenson_morrison_hohenkerk_2016_parabola
-    d = p.derivative
-    assert p(1825) == -320.0
-    assert p(1725) == p(1925) == -287.5
-    assert d(1825) == 0.0
-    print(d(1725), 2 * 32.5 / 100.0)
-    # assert d(1725) == d(1925) == -287.5
-    print(p(1726) - p(1725), '<alt')
-
-    row = p.table[:,0]
-
-    row2 = move_spline_endpoints(1725, 1825, row)
-    print(row2)
-    p2 = Splines(row2)
-    assert r(p2(1825)) == -320.0
-    assert r(p2(1725)) == r(p2(1925)) == -287.5
 
 if __name__ == '__main__':
     main(sys.argv[1:])
