@@ -6,9 +6,10 @@ from .functions import _to_array
 
 class Splines(object):
     def __init__(self, table):
-        self.table = table = _to_array(table)
-        if len(table.shape) < 2:
-            table.shape = table.shape + (1,)
+        table = _to_array(table)
+        if len(table.shape) < 2:  # Let caller provide a single row.
+            table = table.reshape(table.shape + (1,))
+        self.table = table
         self.lower = lower = table[0]
         self.upper = upper = table[1]
         self._width = upper - lower

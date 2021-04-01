@@ -6,10 +6,11 @@ from collections import namedtuple
 from datetime import date, datetime
 from numpy import (
     array, concatenate, cos, float_, int64, interp, isnan, isinf,
-    nan, ndarray, pi, rollaxis, searchsorted, sin, where, zeros_like,
+    nan, ndarray, nonzero, pi, rollaxis, searchsorted, sin, where, zeros_like,
 )
 from time import strftime, struct_time
 from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
+from .curvelib import Splines
 from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
@@ -24,6 +25,7 @@ from .precessionlib import compute_precession
 GREGORIAN_START = 2299161
 GREGORIAN_START_ENGLAND = 2361222
 _OLD_PYTHON = sys.version_info < (2, 7)
+def _cat(*args): return concatenate(args, axis=1)
 
 CalendarTuple = namedtuple('CalendarTuple', 'year month day hour minute second')
 
@@ -87,8 +89,10 @@ class Timescale(object):
     polar_motion_table = None
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
-        (self.delta_t_table,
-         self._delta_t_function) = _build_legacy_delta_t(delta_t_recent)
+        self.delta_t_table = build_delta_t_table(delta_t_recent)
+        parabola = delta_t_parabola_morrison_stephenson_2004
+        f = _DeltaT(self.delta_t_table[0], self.delta_t_table[1], parabola)
+        self.delta_t_function = f
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
         self.J2000 = Time(self, float_(T0))
         self.B1950 = Time(self, float_(B1950))
@@ -346,12 +350,12 @@ class Timescale(object):
 
         # Estimate TT = UT1, to get a rough Delta T estimate.
         tt_approx = ut1
-        delta_t_approx = self._delta_t_function(tt_approx)
+        delta_t_approx = self.delta_t_function(tt_approx)
 
         # Use the rough Delta T to make a much better estimate of TT,
         # then generate an even better Delta T.
         tt_approx = ut1 + delta_t_approx / DAY_S
-        delta_t_approx = self._delta_t_function(tt_approx)
+        delta_t_approx = self.delta_t_function(tt_approx)
 
         # We can now estimate TT with an error of < 1e-9 seconds within
         # 10 centuries of either side of the present; for details, see:
@@ -783,7 +787,7 @@ class Time(object):
 
     @reify
     def delta_t(self):
-        return self.ts._delta_t_function(self.tt)
+        return self.ts.delta_t_function(self.tt)
 
     @reify
     def dut1(self):
@@ -975,80 +979,50 @@ def tdb_minus_tt(jd_tdb, fraction_tdb=0.0):
           + 0.000002 * sin (  21.3299 * t + 5.5431)
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
 
-def _build_legacy_delta_t(delta_t_recent):
-    delta_t_table = build_delta_t_table(delta_t_recent)
-    def _delta_t_function(tt_jd):
-        return interpolate_delta_t(delta_t_table, tt_jd)
-    return delta_t_table, _delta_t_function
+class _DeltaT(object):
+    def __init__(self, tt_index, tt_values, long_term_function):
+        self._tt_index = tt_index
+        self._tt_values = tt_values
+        self._long_term_function = long_term_function
 
-def interpolate_delta_t(delta_t_table, tt):
-    """Return interpolated Delta T values for the times in `tt`.
-
-    The 2xN table should provide TT values as element 0 and
-    corresponding Delta T values for element 1.  For times outside the
-    range of the table, a long-term formula is used instead.
-
-    """
-    tt_array, delta_t_array = delta_t_table
-    delta_t = _to_array(interp(tt, tt_array, delta_t_array, nan, nan))
-    missing = isnan(delta_t)
-
-    if missing.any():
-        # Test if we are dealing with an array and proceed appropriately
-        if missing.shape:
-            tt = tt[missing]
-            delta_t[missing] = delta_t_formula_morrison_and_stephenson_2004(tt)
+    def __call__(self, tt):
+        delta_t = interp(tt, self._tt_index, self._tt_values, nan, nan)
+        if delta_t.shape:
+            nan_indexes = nonzero(isnan(delta_t))
+            if nan_indexes:
+                J = (tt[nan_indexes] - 1721045.0) / 365.25
+                delta_t[nan_indexes] = self._long_term_function(J)
         else:
-            delta_t = delta_t_formula_morrison_and_stephenson_2004(tt)
-    return delta_t
+            if isnan(delta_t):
+                J = (tt - 1721045.0) / 365.25
+                delta_t = self._long_term_function(J)
+        return delta_t
 
-def delta_t_formula_stephenson_morrison_hohenkerk_2016(tt, fraction):
-    """∆T long-term parabola from Morrison, Stephenson, Hohenkerk 2016."""
-    t = (tt - 2387626.25 + fraction) / 36525.0  # centuries before/after 1825
-    return -320.0 + 32.5 * t * t
+delta_t_parabola_stephenson_morrison_hohenkerk_2016 = Splines(
+    [1825.0, 1925.0, 0.0, 32.5, 0.0, -320.0])
 
-def delta_t_formula_morrison_and_stephenson_2004(tt, fraction=0.0):
-    """∆T long-term parabola from Morrison and Stephenson, 2004."""
-    t = (tt - 2385800.5 + fraction) / 36525.0  # centuries before/after 1820
-    return 32.0 * t * t - 20.0
+delta_t_parabola_morrison_stephenson_2004 = Splines(
+    [1820.0, 1920.0, 0.0, 32.0, 0.0, -20.0])
 
 def build_delta_t_table(delta_t_recent):
-    """Build a table for interpolating Delta T.
-
-    Given a 2xN array of recent Delta T values, whose element 0 is a
-    sorted array of TT Julian dates and element 1 is Delta T values,
-    this routine returns a more complete table by prepending two
-    built-in data sources that ship with Skyfield as pre-built arrays:
-
-    * The historical values from Morrison and Stephenson (2004) which
-      the http://eclipse.gsfc.nasa.gov/SEcat5/deltat.html NASA web page
-      presents in an HTML table.
-
-    * The United States Naval Observatory ``historic_deltat.data``
-      values for Delta T over the years 1657 through 1984.
-
-    """
-    ancient = load_bundled_npy('morrison_stephenson_deltat.npy')
-    historic = load_bundled_npy('historic_deltat.npy')
-
-    # Prefer USNO over Morrison and Stephenson where they overlap.
-    historic_start_time = historic[0,0]
-    i = searchsorted(ancient[0], historic_start_time)
-    bundled = concatenate([ancient[:,:i], historic], axis=1)
-
-    # Let recent data replace everything else.
+    """Deprecated: the Delta T interpolation table used in Skyfield <= 1.37."""
+    bundled = _cat(
+        load_bundled_npy('morrison_stephenson_deltat.npy')[:,:22],
+        load_bundled_npy('historic_deltat.npy'),
+    )
     recent_start_time = delta_t_recent[0,0]
     i = searchsorted(bundled[0], recent_start_time)
-    row = ((0,),(0,))
-    table = concatenate([row, bundled[:,:i], delta_t_recent, row], axis=1)
-
-    # Create initial and final point to provide continuity with formula.
     century = 36524.0
-    start = table[0,1] - century
-    table[:,0] = start, delta_t_formula_morrison_and_stephenson_2004(start)
-    end = table[0,-2] + century
-    table[:,-1] = end, delta_t_formula_morrison_and_stephenson_2004(end)
-    return table
+    start_tt = bundled[0,0] - century
+    start_J = Time(None, start_tt).J
+    end_tt = delta_t_recent[0,-1] + century
+    end_J = Time(None, end_tt).J
+    return _cat(
+        [[start_tt], [delta_t_parabola_morrison_stephenson_2004(start_J)]],
+        bundled[:,:i],
+        delta_t_recent,
+        [[end_tt], [delta_t_parabola_morrison_stephenson_2004(end_J)]],
+    )
 
 _format_uses_milliseconds = re.compile(r'%[-_0^#EO]*f').search
 _format_uses_seconds = re.compile(r'%[-_0^#EO]*[STXc]').search

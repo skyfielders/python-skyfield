@@ -12,15 +12,6 @@ Choosing a source for ∆T
   1 second of time = 15 arcseconds.
   1 millisecond of time = 15 mas.
 
-TODO:
-
-[X] Build reader for long-term file.
-[X] Build polynomial interpolation function.
-[ ] Build translator between the two.
-[ ] Build translator between finals2000A and interpolator.
-[ ] Build combiner.
-[ ] Save combined table in Skyfield?  Or too big with all those 0's?
-
 """
 import sys
 from time import time
@@ -34,6 +25,7 @@ from skyfield.curvelib import Splines
 from skyfield.data import iers
 from skyfield.data.earth_orientation import parse_S15_table
 from skyfield.interpolation import build_spline_given_ends
+from skyfield.timelib import _DeltaT as DeltaT
 
 class A(object):
     __getitem__ = array
@@ -59,15 +51,10 @@ def cat(*args):
 def cat1(*args):
     return concatenate(args, axis=1)
 
-inf = float('inf')
-
 def main(argv):
     # try_out_new_class()
     # compare_splines_to_finals2000_error_bars()
-    # try_adjusting_spline()
-    # try_solving_spline()
     big_solution_vs_slopes()
-    # solve_spline_specified_by_endpoints_and_slopes()
     # try_out_different_interpolation_techniques()
 
 def try_out_new_class():
@@ -235,19 +222,6 @@ def extend(ts, daily_tt, daily_delta_t, long_term_curve, days):
     y_right = long_term_curve(t_right.J)
     return (cat([t_left.tt], daily_tt, [t_right.tt]),
             cat([y_left], daily_delta_t, [y_right]))
-
-class DeltaT(object):
-    def __init__(self, daily_tt, daily_delta_t, long_term_curve):
-        self.daily_tt = daily_tt
-        self.daily_delta_t = daily_delta_t
-        self.long_term_curve = long_term_curve
-
-    def __call__(self, t):
-        delta_t = np.interp(t.tt, self.daily_tt, self.daily_delta_t, nan, nan)
-        [nan_indexes] = np.nonzero(np.isnan(delta_t))  # Or np.argwhere()?
-        if len(nan_indexes):
-            delta_t[nan_indexes] = self.long_term_curve(t.J[nan_indexes])
-        return delta_t
 
 def _a(a):
     return a if hasattr(a, 'shape') else np.array(a)
