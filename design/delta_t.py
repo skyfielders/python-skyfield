@@ -27,11 +27,29 @@ from time import time
 
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy import concatenate, maximum as clip_upper, nan
+from numpy import array, concatenate, maximum as clip_upper, nan
 from skyfield import functions, timelib
 from skyfield.api import load, Loader
 from skyfield.data import iers
 from skyfield.data.earth_orientation import parse_S15_table
+
+class A(object):
+    __getitem__ = array
+A = A()
+
+class E2(list):
+    def __init__(self, value):
+        self.value = value
+    def __eq__(self, other):
+        return np.array_equal(other, self.value)
+
+class E():
+    def __getitem__(self, i):
+        return E2(i)
+E = E()
+
+x = A[1, 2, 3]  # No parens!
+#print('=', x == E[1,2,3])
 
 def cat(*args):
     return concatenate(args)
@@ -42,12 +60,14 @@ def cat1(*args):
 inf = float('inf')
 
 def main(argv):
-    try_out_new_class()
-    #compare_splines_to_finals2000_error_bars()
-    #try_adjusting_spline()
-    #try_solving_spline()
+    run_tests()
+    # try_out_new_class()
+    # compare_splines_to_finals2000_error_bars()
+    # try_adjusting_spline()
+    # try_solving_spline()
+    big_solution_vs_slopes()
     # solve_spline_specified_by_endpoints_and_slopes()
-    #try_out_different_interpolation_techniques()
+    # try_out_different_interpolation_techniques()
 
 def try_out_new_class():
     f = load.open('finals2000A.all')
@@ -81,14 +101,15 @@ def try_out_new_class():
     # bb = adjust_spline_right(bb, s15_curve(-720))
     print('diff:', parabola.derivative(-721))
     print('diff:', parabola.derivative(-720))
-    b2 = build_spline(
+    bb = build_spline(
+        -721,
+        -720,
         parabola(-721),
         s15_curve(-720),
         parabola.derivative(-721),
         s15_curve.derivative(-720),
     )
-    print('b2:', b2)
-    bb = (-721, -720) + b2
+    print('bb:', bb)
 
     cc = move_spline_endpoints(2019, 2020, parabola.table[:,0])
     print(cc)
@@ -259,11 +280,40 @@ class Splines(object):
         coefficients = self.table[2:-1]
         for i, c in enumerate(coefficients):
             n = len(coefficients) - i
-            columns.append(n * c / self._width ** n)
+            columns.append(n * c / self._width)
         return Splines(columns)
+
+    slope = derivative
 
 stephenson_morrison_hohenkerk_2016_parabola = Splines(
     [1825.0, 1925.0, 0.0, 32.5, 0.0, -320.0])
+
+def big_solution_vs_slopes():
+    p = stephenson_morrison_hohenkerk_2016_parabola
+    row = p.table[:,0]
+    print('Original row:')
+    print(row)
+
+    x = np.arange(1700, 2000)
+    x0 = 1790
+    x1 = 1800
+
+    row2 = move_spline_endpoints(x0, x1, row)
+    print('Move endpoints:')
+    print(row2)
+
+    row3 = build_spline(
+        x0, x1, p(x0), p(x1), p.slope(x0), p.slope(x1),
+    )
+    print('From y and slopes:')
+    print(row3)
+
+    p2 = Splines(row3)
+
+    fig, ax = plt.subplots(1, 1)
+    ax.plot(x, p(x))
+    ax.plot(x, p2(x), linestyle='--')
+    fig.savefig('tmp.png')
 
 def move_spline_endpoints(new_left, new_right, table_row):
     old_left, old_right, a3, a2, a1, a0 = table_row
@@ -312,12 +362,15 @@ def adjust_spline_right(spline, y):
     a1 = y - a3 - a2 - a0
     return x_left, x_right, a3, a2, a1, a0
 
-def build_spline(y0, y1, slope0, slope1):
+def build_spline(left, right, y0, y1, slope0, slope1):
+    width = right - left
+    slope0 *= width
+    slope1 *= width
     a0 = y0
     a1 = slope0
     a2 = -2*slope0 - slope1 - 3*y0 + 3*y1
     a3 = slope0 + slope1 + 2*y0 - 2*y1
-    return a3, a2, a1, a0
+    return left, right, a3, a2, a1, a0
 
 def try_solving_moving_endpoints_of_spline():
     import sympy as sy
@@ -591,6 +644,67 @@ def try_out_different_interpolation_techniques():
 
     for args in report:
         print(*args)
+
+def run_tests():
+    #def r(n): return round(n, 1)
+
+    # line = Splines([10, 11, 0.0, 0.0, 3.0, 7.0])
+    # x = [9.0, 10.0, 11.0]
+    # assert list(line(x)) == [4.0, 7.0, 10.0]
+    # assert list(line.derivative(x)) == [3.0, 3.0, 3.0]
+
+    # parabola = Splines([10, 11, 0.0, 2.0, 0.0, 5.0])
+    # x = [9.0, 10.0, 11.0]
+    # assert list(parabola(x)) == [7.0, 5.0, 7.0]
+    # print(parabola.derivative(x))
+    # assert list(parabola.derivative(x)) == [-4.0, 0.0, 4.0]
+
+    row = 10, 12, 2.0, 3.0, 5.0, 7.0
+    curve = Splines(row)
+    x = 8.0, 9.0, 10.0, 11.0, 12.0
+
+    # for delta in 0.1, 0.01, 0.001:
+    #     print(delta)
+    #     delta = np.array(delta)
+    #     print((curve(x + delta) - curve(x)) / delta)
+    # print(curve.derivative(x))
+
+    assert list(curve(x)) == [3.0, 5.0, 7.0, 10.5, 17.0]
+    assert list(curve.derivative(x)) == [2.5, 1.75, 2.5, 4.75, 8.5]
+
+    # Does the curve retain its shape after having its endpoints moved?
+
+    for left, right in [(8, 10), (1, 2)]:
+        row2 = move_spline_endpoints(left, right, row)
+        curve2 = Splines(row2)
+        assert curve2.table[0:2,0] == E[left, right]
+        assert list(curve2(x)) == [3.0, 5.0, 7.0, 10.5, 17.0]
+        assert list(curve2.derivative(x)) == [2.5, 1.75, 2.5, 4.75, 8.5]
+
+    # Can we rebuild it from its endpoints and slopes?
+
+    row3 = build_spline(10, 12, curve(10), curve(12),
+                        curve.derivative(10), curve.derivative(12))
+    assert row == row3  # Wow! It works now.
+
+    return
+
+    p = stephenson_morrison_hohenkerk_2016_parabola
+    d = p.derivative
+    assert p(1825) == -320.0
+    assert p(1725) == p(1925) == -287.5
+    assert d(1825) == 0.0
+    print(d(1725), 2 * 32.5 / 100.0)
+    # assert d(1725) == d(1925) == -287.5
+    print(p(1726) - p(1725), '<alt')
+
+    row = p.table[:,0]
+
+    row2 = move_spline_endpoints(1725, 1825, row)
+    print(row2)
+    p2 = Splines(row2)
+    assert r(p2(1825)) == -320.0
+    assert r(p2(1725)) == r(p2(1925)) == -287.5
 
 if __name__ == '__main__':
     main(sys.argv[1:])
