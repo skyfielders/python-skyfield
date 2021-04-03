@@ -340,6 +340,7 @@ class Loader(object):
         if builtin:
             arrays = load_bundled_npy('iers.npz')
             delta_t_recent = arrays['delta_t_recent']
+            delta_t_recent[1] = delta_t_recent[1].round(7)  # repair float32's
             leap_dates = arrays['leap_dates']
             leap_offsets = arrays['leap_offsets']
         elif e('deltat.data') and e('deltat.preds') and e('Leap_Second.dat'):

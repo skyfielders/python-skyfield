@@ -496,7 +496,7 @@ def test_delta_t(ts):
     # The IERS "finals2000A.all" for 2000 Jan 1 gives DUT1 = 0.3554779,
     # and 0.3554779 - 0.184 - 1.0 = -0.8285221.
     t = ts.utc(2000, 1, 1, 0, 0, 0)
-    assert abs(t.delta_t - 63.8285221) < 1e-9
+    assert t.delta_t == 63.8285221
 
     # Check historic value. Compare to the table in Morrison and
     # Stephenson 2004, the tolerance is 2 sigma
