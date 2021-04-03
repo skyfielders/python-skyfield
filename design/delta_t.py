@@ -18,11 +18,10 @@ import numpy as np
 from numpy import array, concatenate
 from skyfield import timelib
 from skyfield.api import load
-from skyfield.curvelib import Splines
+from skyfield.curvelib import Splines, build_spline_given_ends
 from skyfield.data import iers
 from skyfield.data.earth_orientation import parse_S15_table
 from skyfield.functions import load_bundled_npy
-from skyfield.interpolation import build_spline_given_ends
 from skyfield.timelib import Time, build_delta_t as build_new_delta_t
 
 delta_t_parabola_stephenson_morrison_hohenkerk_2020_maybe = Splines(
@@ -57,7 +56,7 @@ def main(argv):
     # try_solving_relation_between_lod_and_delta_t()
 
 def work_on_delta_t_discontinuities():
-    with load.open('finals2000A.all') as f:
+    with load.open('ci/finals2000A.all') as f:
         mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
     delta_t_recent, leap_dates, leap_offsets = (
         iers._build_timescale_arrays(mjd_utc, dut1)
@@ -88,8 +87,8 @@ def compare_splines_to_finals2000_error_bars():
 
     i, start_year, end_year, a0, a1, a2, a3 = columns
 
-    f = load.open('finals2000A.all')
-    mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+    with load.open('ci/finals2000A.all') as f:
+        mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
     delta_t_recent, leap_dates, leap_offsets = (
         iers._build_timescale_arrays(mjd_utc, dut1)
     )
@@ -131,8 +130,8 @@ def compare_splines_to_finals2000_error_bars():
     print('Max difference (seconds, arcseconds):', diff, diff * 15)
 
 def compare_old_and_new_delta_t():
-    f = load.open('finals2000A.all')
-    mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+    with load.open('ci/finals2000A.all') as f:
+        mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
     delta_t_recent, leap_dates, leap_offsets = (
         iers._build_timescale_arrays(mjd_utc, dut1)
     )

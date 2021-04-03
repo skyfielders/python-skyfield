@@ -97,8 +97,8 @@ def test_polar_motion_when_computing_topos_position(ts):
     # print(ter2cel(t.whole, t.ut1_fraction, t.delta_t, xp_arcseconds,
     #               yp_arcseconds, top.itrs_xyz.km, method=1))
 
-    expected = (3146.2195129336233, -3525.9568301237996, 4269.301884306766)
-    assert max(abs(top.at(t).position.km - expected)) < 1.1e-10
+    expected = (3146.2195130212253, -3525.9568300458445, 4269.301884306591)
+    assert max(abs(top.at(t).position.km - expected)) < 2e-12
 
 def test_polar_motion_when_computing_altaz_coordinates(ts):
     latitude = 37.3414

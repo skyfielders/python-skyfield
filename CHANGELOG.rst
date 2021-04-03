@@ -9,10 +9,10 @@ v1.38 — 2021 April 3
 --------------------
 
 * Replaced the old historic ∆T table from the United States Naval Observatory
-  with the most up-to-date splines from the extensive research of
+  with up-to-date splines from the 2020 release of the extensive research by
   `Morrison, Stephenson, Hohenkerk, and Zawilski <Morrison, Stephenson, et al>`
   and also adjusted the slope of Skyfield’s near-future ∆T estimates
-  to make its slope much less abrupt over the next few centuries.
+  to make the slope of ∆T much less abrupt over the coming century.
 
 * Added a full reference frame object
   for the :class:`~skyfield.sgp4lib.TEME` reference frame
