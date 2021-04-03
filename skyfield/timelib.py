@@ -10,7 +10,7 @@ from numpy import (
 )
 from time import strftime, struct_time
 from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
-from .curvelib import Splines
+from .curvelib import Splines, build_spline_given_ends
 from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
@@ -94,10 +94,8 @@ class Timescale(object):
             # passing a function of their own.
             self.delta_t_function = delta_t_recent
         else:
-            self.delta_t_table = build_delta_t_table(delta_t_recent)
-            parabola = delta_t_parabola_morrison_stephenson_2004
-            f = DeltaT(self.delta_t_table[0], self.delta_t_table[1], parabola)
-            self.delta_t_function = f
+            self.delta_t_table = delta_t_recent  # so users can see it
+            self.delta_t_function = build_delta_t(delta_t_recent)
 
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
         self.J2000 = Time(self, float_(T0))
@@ -986,22 +984,22 @@ def tdb_minus_tt(jd_tdb, fraction_tdb=0.0):
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
 
 class DeltaT(object):
-    def __init__(self, tt_index, tt_values, long_term_function):
-        self._tt_index = tt_index
-        self._tt_values = tt_values
-        self._long_term_function = long_term_function
+    def __init__(self, table_tt, table_delta_t, long_term_function):
+        self.table_tt = table_tt
+        self.table_delta_t = table_delta_t
+        self.long_term_function = long_term_function
 
     def __call__(self, tt):
-        delta_t = interp(tt, self._tt_index, self._tt_values, nan, nan)
+        delta_t = interp(tt, self.table_tt, self.table_delta_t, nan, nan)
         if delta_t.shape:
             nan_indexes = nonzero(isnan(delta_t))
             if nan_indexes:
                 J = (tt[nan_indexes] - 1721045.0) / 365.25
-                delta_t[nan_indexes] = self._long_term_function(J)
+                delta_t[nan_indexes] = self.long_term_function(J)
         else:
             if isnan(delta_t):
                 J = (tt - 1721045.0) / 365.25
-                delta_t = self._long_term_function(J)
+                delta_t = self.long_term_function(J)
         return delta_t
 
 delta_t_parabola_stephenson_morrison_hohenkerk_2016 = Splines(
@@ -1009,6 +1007,64 @@ delta_t_parabola_stephenson_morrison_hohenkerk_2016 = Splines(
 
 delta_t_parabola_morrison_stephenson_2004 = Splines(
     [1820.0, 1920.0, 0.0, 32.0, 0.0, -20.0])
+
+def build_delta_t(delta_t_recent):
+    parabola = delta_t_parabola_stephenson_morrison_hohenkerk_2016
+    s15_table = load_bundled_npy('delta_t.npz')['Table-S15.2020.txt']
+    table_tt, table_delta_t = delta_t_recent
+
+    p = parabola
+    pd = parabola.derivative
+    s = Splines(s15_table)
+    sd = s.derivative
+
+    long_term_parabola_width = p.upper[0] - p.lower[0]
+
+    # How many years wide we make the splines that connect the tables to
+    # the long-term parabola; tuned by hand until the derivative graphed
+    # by `work_on_delta_t_discontinuities()` in `design/delta_t.py`
+    # doesn't look too terrible.
+    patch_width = 800.0
+
+    # To the left of the Table-S15 splines, design a spline connecting
+    # them to the long-term parabola.
+
+    x1 = s.lower[0]  # For the current table, this = -720.0.
+    x0 = x1 - patch_width
+    left = build_spline_given_ends(x0, p(x0), pd(x0), x1, s(x1), sd(x1))
+
+    # And to the left of that, put the pure long-term parabola.
+
+    x1 = x0
+    x0 = x1 - long_term_parabola_width
+    far_left = build_spline_given_ends(x0, p(x0), pd(x0), x1, p(x1), pd(x1))
+
+    # To the right of the recent ∆T table, design a spline connecting
+    # smoothly to the long-term parabola.
+
+    x0 = (table_tt[-1] - 1721045.0) / 365.25  # TT to J centuries
+    x1 = (x0 + patch_width) // 100.0 * 100.0  # Choose multiple of 100 years
+    y0 = table_delta_t[-1]
+
+    lookback = min(366, len(table_delta_t))       # Slope of last year of ∆T.
+    slope = (table_delta_t[-1] - table_delta_t[-lookback]) * lookback / 365.0
+    right = build_spline_given_ends(x0, y0, slope, x1, p(x1), pd(x1))
+
+    # At the far right, finish with the pure long-term parabola.
+
+    x0 = x1
+    x1 = x0 + long_term_parabola_width
+    far_right = build_spline_given_ends(x0, p(x0), pd(x0), x1, p(x1), pd(x1))
+
+    curve = Splines(_cat(
+        array([far_left]).T,
+        array([left]).T,
+        s15_table,
+        array([right]).T,
+        array([far_right]).T,
+    ))
+
+    return DeltaT(table_tt, table_delta_t, curve)
 
 def build_delta_t_table(delta_t_recent):
     """Deprecated: the Delta T interpolation table used in Skyfield <= 1.37."""

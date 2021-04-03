@@ -151,14 +151,14 @@ def test_strftime_on_prehistoric_dates(ts_either):
     ts = ts_either
     t = ts.tt(-746, 2, 26)
     assert t.utc_strftime('%Y %S') == '-746 18'
-    assert t.ut1_strftime('%Y %S') == '-746 14'
+    assert t.ut1_strftime('%Y %S') == '-746 28'
     assert t.tai_strftime('%Y %S') == '-746 28'
     assert t.tt_strftime('%Y %S') == '-746 00'
     assert t.tdb_strftime('%Y %S') == '-746 00'
 
     t = ts.tt(-746, 2, [26, 26])
     assert t.utc_strftime('%Y %S') == ['-746 18'] * 2
-    assert t.ut1_strftime('%Y %S') == ['-746 14'] * 2
+    assert t.ut1_strftime('%Y %S') == ['-746 28'] * 2
     assert t.tai_strftime('%Y %S') == ['-746 28'] * 2
     assert t.tt_strftime('%Y %S') == ['-746 00'] * 2
     assert t.tdb_strftime('%Y %S') == ['-746 00'] * 2
@@ -503,10 +503,10 @@ def test_delta_t(ts):
     t = ts.utc(year=1000)
     assert abs(t.delta_t - 1570.0) < 110.0
 
-    # Check future value. Should be calculated by Morrison and
-    # Stephenson formula. For 2320 (t=5 cy) should be: -20 + 32 * 5**2
-    t = ts.utc(year=2320)
-    assert abs(t.delta_t + 20.0 - (32.0 * 5.0**2)) < 1.0
+    # Check far-future value against the long-term parabola formula.
+    centuries = 20
+    t = ts.J(1825 + centuries * 100)
+    assert t.delta_t == -320 + 32.5 * centuries**2
 
 def test_dut1(ts):
     # Roughly agreeing with tables on NIST website

@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
-
 """
-Choosing a source for ∆T
-========================
+Various routines useful when designing and tuning Skyfield’s ∆T curve.
 
 1. `ftp://ftp.iers.org/products/eop/rapid/standard/`_
 2. `ftp://ftp.iers.org/products/eop/rapid/standard/csv/`_
 
-* The CSV files are slightly larger, both compressed and uncompressed.
 * For the position of an object at the celestial equator,
   1 second of time = 15 arcseconds.
   1 millisecond of time = 15 mas.
@@ -26,7 +23,7 @@ from skyfield.data import iers
 from skyfield.data.earth_orientation import parse_S15_table
 from skyfield.functions import load_bundled_npy
 from skyfield.interpolation import build_spline_given_ends
-from skyfield.timelib import Time
+from skyfield.timelib import Time, build_delta_t as build_new_delta_t
 
 delta_t_parabola_stephenson_morrison_hohenkerk_2020_maybe = Splines(
     [1825.0, 1925.0, 0.0, 31.4, 0.0, -320.0])
@@ -48,9 +45,6 @@ E = E()
 
 x = A[1, 2, 3]  # No parens!
 #print('=', x == E[1,2,3])
-
-def cat(*args):
-    return concatenate(args)
 
 def _cat(*args):
     return concatenate(args, axis=1)
@@ -166,66 +160,6 @@ def plot_delta_t_functions(*functions):
     fig.tight_layout()
     fig.savefig('tmp.png')
 
-def build_new_delta_t(delta_t_recent):
-    parabola = timelib.delta_t_parabola_stephenson_morrison_hohenkerk_2016
-    tt_index, tt_values = delta_t_recent
-
-    url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15.2020.txt'
-    with load.open(url) as f:
-        names, s15_table = parse_S15_table(f)
-    s15_table = s15_table[[1,2,6,5,4,3]]
-
-    p = parabola
-    pd = parabola.derivative
-    s = Splines(s15_table)
-    sd = s.derivative
-
-    long_term_parabola_width = p.upper[0] - p.lower[0]
-
-    # How many years wide to make the splines we craft to connect the
-    # ends of the tables to the long-term spline.  Tuned by hand until
-    # the derivative graphed by `work_on_delta_t_discontinuities()`
-    # doesn't look too terrible.
-    patch_width = 800.0
-
-    # To the left of the official splines, design a spline connecting
-    # them to the long-term parabola.
-
-    x1 = s.lower[0]  # For the current table, this is the year -720.0.
-    x0 = x1 - patch_width
-    left2 = build_spline_given_ends(x0, x1, p(x0), pd(x0), s(x1), sd(x1))
-
-    # To the left of the connector, put the pure long-term parabola.
-
-    x1 = x0
-    x0 = x1 - long_term_parabola_width
-    left1 = build_spline_given_ends(x0, x1, p(x0), pd(x0), p(x1), pd(x1))
-
-    # To the right of the recent ∆T table, design a spline connecting
-    # smoothly to the long-term parabola.
-
-    x0 = (tt_index[-1] - 1721045.0) / 365.25
-    x1 = (x0 + patch_width) // 100.0 * 100.0  # Choose multiple of 100 years
-    y0 = tt_values[-1]
-    slope0 = tt_values[-1] - tt_values[-366]  # Final year of recent ∆T
-    right1 = build_spline_given_ends(x0, x1, y0, slope0, p(x1), pd(x1))
-
-    # At the far right, finish with the pure long-term parabola.
-
-    x0 = x1
-    x1 = x0 + long_term_parabola_width
-    right2 = build_spline_given_ends(x0, x1, p(x0), pd(x0), p(x1), pd(x1))
-
-    curve = Splines(_cat(
-        np.array([left1]).T,
-        np.array([left2]).T,
-        s15_table,
-        np.array([right1]).T,
-        np.array([right2]).T,
-    ))
-
-    return timelib.DeltaT(tt_index, tt_values, curve)
-
 def build_legacy_delta_t(delta_t_recent):
     bundled = _cat(
         load_bundled_npy('morrison_stephenson_deltat.npy')[:,:22],
@@ -268,7 +202,7 @@ def big_solution_vs_slopes():
     print(row2)
 
     row3 = build_spline_given_ends(
-        x0, x1, p(x0), p(x1), p.derivative(x0), p.derivative(x1),
+        x0, p(x0), p.derivative(x0), x1, p(x1), p.derivative(x1),
     )
     print('From y and slopes:')
     print(row3)

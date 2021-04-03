@@ -1,5 +1,4 @@
-from skyfield.curvelib import Splines
-from skyfield.interpolation import build_spline_given_ends
+from skyfield.curvelib import Splines, build_spline_given_ends
 
 def test_spline_and_derivative():
     parameters = 10, 12, 2.0, 3.0, 5.0, 7.0
@@ -16,9 +15,8 @@ def test_spline_and_derivative():
     # Can we rebuild the parameters from its endpoints and slopes?
 
     parameters2 = build_spline_given_ends(
-        10, 12,
-        curve(10), curve.derivative(10),
-        curve(12), curve.derivative(12))
+        10, curve(10), curve.derivative(10),
+        12, curve(12), curve.derivative(12))
 
     assert parameters == parameters2
 
@@ -27,9 +25,8 @@ def test_spline_and_derivative():
 
     for lower, upper in (8,10), (8,9), (21,23):
         parameters3 = build_spline_given_ends(
-            lower, upper,
-            curve(lower), curve.derivative(lower),
-            curve(upper), curve.derivative(upper))
+            lower, curve(lower), curve.derivative(lower),
+            upper, curve(upper), curve.derivative(upper))
         curve3 = Splines(parameters3)
         assert tuple(curve3(x)) == expected_values
         assert tuple(curve3.derivative(x)) == expected_slope

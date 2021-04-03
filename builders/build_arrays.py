@@ -8,6 +8,7 @@ from numpy import array
 
 from skyfield.api import load
 from skyfield.data import iers
+from skyfield.data.earth_orientation import parse_S15_table
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Save arrays to a file')
@@ -26,6 +27,14 @@ def main(argv):
         'se0_t_0',
         'se0_t_1',
     ]})
+
+    url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15.2020.txt'
+    with load.open(url) as f:
+        names, s15_table = parse_S15_table(f)
+    s15_table = s15_table[[1,2,6,5,4,3]]  # Omit indexes; reorder coefficients.
+    np.savez_compressed('skyfield/data/delta_t', **{
+        'Table-S15.2020.txt': s15_table,
+    })
 
     url = load.build_url('finals2000A.all')
     f = load.open(url)
