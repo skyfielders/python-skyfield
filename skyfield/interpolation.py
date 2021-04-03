@@ -1,6 +1,6 @@
 """Generating curve parameters."""
 
-def build_spline_given_ends(lower, upper, y0, y1, slope0, slope1):
+def build_spline_given_ends(lower, upper, y0, slope0, y1, slope1):
     width = upper - lower
     slope0 = slope0 * width
     slope1 = slope1 * width

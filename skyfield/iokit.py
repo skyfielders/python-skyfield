@@ -3,7 +3,6 @@ from __future__ import print_function
 import itertools
 import os
 import errno
-import numpy as np
 import sys
 from fnmatch import fnmatch
 from pkgutil import get_data
@@ -12,6 +11,7 @@ from time import time
 import certifi
 
 from .data import iers
+from .curvelib import Splines
 from .functions import load_bundled_npy
 from .io_timescale import (
     _build_legacy_data,
@@ -360,11 +360,9 @@ class Loader(object):
                 iers._build_timescale_arrays(mjd_utc, dut1))
 
         if delta_t is not None:
-            delta_t_recent = np.array(((-1e99, 1e99), (delta_t, delta_t)))
+            delta_t_recent = Splines([0, 1, delta_t])
 
-        ts = Timescale(delta_t_recent, leap_dates, leap_offsets)
-
-        return ts
+        return Timescale(delta_t_recent, leap_dates, leap_offsets)
 
     @property
     def log(self):

@@ -89,10 +89,16 @@ class Timescale(object):
     polar_motion_table = None
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
-        self.delta_t_table = build_delta_t_table(delta_t_recent)
-        parabola = delta_t_parabola_morrison_stephenson_2004
-        f = _DeltaT(self.delta_t_table[0], self.delta_t_table[1], parabola)
-        self.delta_t_function = f
+        if callable(delta_t_recent):
+            # Let a caller completely override our approach to ∆T by
+            # passing a function of their own.
+            self.delta_t_function = delta_t_recent
+        else:
+            self.delta_t_table = build_delta_t_table(delta_t_recent)
+            parabola = delta_t_parabola_morrison_stephenson_2004
+            f = DeltaT(self.delta_t_table[0], self.delta_t_table[1], parabola)
+            self.delta_t_function = f
+
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
         self.J2000 = Time(self, float_(T0))
         self.B1950 = Time(self, float_(B1950))
@@ -979,7 +985,7 @@ def tdb_minus_tt(jd_tdb, fraction_tdb=0.0):
           + 0.000002 * sin (  21.3299 * t + 5.5431)
           + 0.000010 * t * sin ( 628.3076 * t + 4.2490))
 
-class _DeltaT(object):
+class DeltaT(object):
     def __init__(self, tt_index, tt_values, long_term_function):
         self._tt_index = tt_index
         self._tt_values = tt_values
