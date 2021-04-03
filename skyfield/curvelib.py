@@ -1,6 +1,7 @@
 """Various curves."""
 
-from numpy import arange, interp
+from numpy import arange
+from ._compatibility import interp
 from .descriptorlib import reify
 from .functions import _to_array
 

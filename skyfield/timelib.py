@@ -5,10 +5,11 @@ import sys
 from collections import namedtuple
 from datetime import date, datetime
 from numpy import (
-    array, concatenate, cos, float_, int64, interp, isnan, isinf,
+    array, concatenate, cos, float_, int64, isnan, isinf,
     nan, ndarray, nonzero, pi, rollaxis, searchsorted, sin, where, zeros_like,
 )
 from time import strftime, struct_time
+from ._compatibility import interp
 from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .curvelib import Splines, build_spline_given_ends
 from .descriptorlib import reify
@@ -991,7 +992,7 @@ class DeltaT(object):
 
     def __call__(self, tt):
         delta_t = interp(tt, self.table_tt, self.table_delta_t, nan, nan)
-        if delta_t.shape:
+        if getattr(delta_t, 'shape', None):
             nan_indexes = nonzero(isnan(delta_t))
             if nan_indexes:
                 J = (tt[nan_indexes] - 1721045.0) / 365.25
