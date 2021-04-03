@@ -5,8 +5,14 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
-v1.38 — ?
----------
+v1.38 — 2021 April 3
+--------------------
+
+* Replaced the old historic ∆T table from the United States Naval Observatory
+  with the most up-to-date splines from the extensive research of
+  `Morrison, Stephenson, Hohenkerk, and Zawilski <Morrison, Stephenson, et al>`
+  and also adjusted the slope of Skyfield’s near-future ∆T estimates
+  to make its slope much less abrupt over the next few centuries.
 
 * Added a full reference frame object
   for the :class:`~skyfield.sgp4lib.TEME` reference frame

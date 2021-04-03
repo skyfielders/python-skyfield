@@ -51,6 +51,24 @@ by George H. Kaplan, October 2005
     starting point, as it collects several of the PDFs together in one
     place.
 
+.. _Morrison, Stephenson, et al:
+
+*Earth Rotation — the Change in the Length of Day
+and ΔT Plot showing lod from -2000 to +2500*
+
+    http://astro.ukho.gov.uk/nao/lvm/
+
+    This page offers the most up-to-date ΔT tables
+    from Morrison, Stephenson, Hohenkerk, and Zawilski,
+    which Skyfield uses to predict the Earth’s orientation
+    for the years preceding and following the more detailed
+    numbers published for 1973 through the current day by the IERS (see below).
+    It also links to their academic papers,
+    which provide a wealth of information
+    about the historical events — primarily eclipses —
+    that provide us with evidence
+    for which direction the Earth was pointing in past centuries.
+
 *Historical values of the Earth's clock error ∆T and the calculation of
 eclipses* by Morrison & Stephenson, 2004
 
@@ -65,43 +83,13 @@ eclipses* by Morrison & Stephenson, 2004
     eclipses for which records survive are our one point-source of data
     about how far the error had accumulated each century.
 
-*Delta T: Past, Present and Future* at the United States Naval Observatory
+*IERS “Earth orientation data” page*
 
-    http://asa.usno.navy.mil/SecK/DeltaT.html
-
-    A few well-presented plots of ∆T and its behavior over the past few
-    centuries.  I tended to have this page always open in another tab
-    while reading about ∆T on other sites, so that I could correlate the
-    descriptions of each text against the visuals here.
-
-*IERS Rapid Service/Prediction Center*
-links at the United States Naval Observatory
-
-    http://maia.usno.navy.mil/
-
-    The many links on this page helped me sort out the various raw
-    sources of Earth orientation data that are available, and decide on
-    the ones that needed to be built into Skyfield.  I also made many
-    visits to the IERS web site itself:
+    There used to be a United States Naval Observatory web page
+    dedicated to Earth orientation,
+    but these days I look for data files here:
 
     http://www.iers.org/IERS/EN/DataProducts/EarthOrientationData/eop.html
 
-    but found the USNO site to always be the better starting point.
-
-*The ∆T pages at the NASA Eclipse Web Site*
-
-    | http://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html
-
-    While most of the pages about ∆T at the Eclipse Web Site are a basic
-    introduction to the concept, the “Polynomial Expressions” page
-    provides something new: the polynomials that Espenak and Meeus used
-    as their fit to ∆T when building their *Five Millennium Canon of
-    Solar Eclipses: −1999 to +3000.*
-
-    When the day comes that I implement eclipse logic in Skyfield, I
-    will be interested in comparing my results against the `Espenak and
-    Meeus paper itself`_!
-
 .. _NOVAS library: http://aa.usno.navy.mil/software/novas/novas_py/novaspy_intro.php
-.. _Espenak and Meeus paper itself: http://eclipse.gsfc.nasa.gov/5MCSE/5MCSE-Text11.pdf
 .. _jplephem: https://pypi.python.org/pypi/jplephem
