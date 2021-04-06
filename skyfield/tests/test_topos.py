@@ -93,9 +93,9 @@ def test_polar_motion_when_computing_topos_position(ts):
     t = ts.utc(2005, 11, 12, 22, 2)
 
     # "expected" comes from:
-    from novas.compat import ter2cel
-    print(ter2cel(t.whole, t.ut1_fraction, t.delta_t, xp_arcseconds,
-                  yp_arcseconds, top.itrs_xyz.km, method=1))
+    # from novas.compat import ter2cel
+    # print(ter2cel(t.whole, t.ut1_fraction, t.delta_t, xp_arcseconds,
+    #               yp_arcseconds, top.itrs_xyz.km, method=1))
 
     expected = (3129.530248036487, -3535.1665884086683, 4273.94957733827)
     assert max(abs(top.at(t).position.km - expected)) < 3e-11
