@@ -90,15 +90,15 @@ def test_polar_motion_when_computing_topos_position(ts):
     ts.polar_motion_table = [0.0], [xp_arcseconds], [yp_arcseconds]
 
     top = iers2010.latlon(wms(42, 21, 24.1), wms(-71, 3, 24.8), 43.0)
-    t = ts.utc(2020, 11, 12, 22, 2)
+    t = ts.utc(2005, 11, 12, 22, 2)
 
     # "expected" comes from:
-    # from novas.compat import ter2cel
-    # print(ter2cel(t.whole, t.ut1_fraction, t.delta_t, xp_arcseconds,
-    #               yp_arcseconds, top.itrs_xyz.km, method=1))
+    from novas.compat import ter2cel
+    print(ter2cel(t.whole, t.ut1_fraction, t.delta_t, xp_arcseconds,
+                  yp_arcseconds, top.itrs_xyz.km, method=1))
 
-    expected = (3146.2195130212253, -3525.9568300458445, 4269.301884306591)
-    assert max(abs(top.at(t).position.km - expected)) < 2e-12
+    expected = (3129.530248036487, -3535.1665884086683, 4273.94957733827)
+    assert max(abs(top.at(t).position.km - expected)) < 3e-11
 
 def test_polar_motion_when_computing_altaz_coordinates(ts):
     latitude = 37.3414
