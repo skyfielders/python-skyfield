@@ -57,9 +57,9 @@ def main(argv):
 
 def work_on_delta_t_discontinuities():
     with load.open('ci/finals2000A.all') as f:
-        mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+        utc_mjd, dut1 = iers.parse_dut1_from_finals_all(f)
     delta_t_recent, leap_dates, leap_offsets = (
-        iers._build_timescale_arrays(mjd_utc, dut1)
+        iers._build_timescale_arrays(utc_mjd, dut1)
     )
 
     ts = load.timescale()
@@ -88,9 +88,9 @@ def compare_splines_to_finals2000_error_bars():
     i, start_year, end_year, a0, a1, a2, a3 = columns
 
     with load.open('ci/finals2000A.all') as f:
-        mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+        utc_mjd, dut1 = iers.parse_dut1_from_finals_all(f)
     delta_t_recent, leap_dates, leap_offsets = (
-        iers._build_timescale_arrays(mjd_utc, dut1)
+        iers._build_timescale_arrays(utc_mjd, dut1)
     )
 
     print('Size of IERS table:', delta_t_recent.shape)
@@ -131,9 +131,9 @@ def compare_splines_to_finals2000_error_bars():
 
 def compare_old_and_new_delta_t():
     with load.open('ci/finals2000A.all') as f:
-        mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+        utc_mjd, dut1 = iers.parse_dut1_from_finals_all(f)
     delta_t_recent, leap_dates, leap_offsets = (
-        iers._build_timescale_arrays(mjd_utc, dut1)
+        iers._build_timescale_arrays(utc_mjd, dut1)
     )
     plot_delta_t_functions(
         build_legacy_delta_t(delta_t_recent),

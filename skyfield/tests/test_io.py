@@ -74,7 +74,7 @@ def test_missing_file_gets_downloaded(load):
 def test_builtin_timescale_uses_recent_IERS_data(load):
     ts = load.timescale()
     # DUT1 cut and pasted from "20 1 1" line of "finals2000A.all":
-    assert abs(ts.utc(2020, 1, 1).dut1 - (-0.1771554)) < 1e-8
+    assert abs(ts.utc(2020, 1, 1).dut1 - (-0.1771553)) < 1e-8
 
 def test_non_builtin_timescale_prefers_USNO_files(load):
     save_file(load, 'deltat.data',

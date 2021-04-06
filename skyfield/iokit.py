@@ -9,6 +9,7 @@ from pkgutil import get_data
 from time import time
 
 import certifi
+import numpy as np
 
 from .data import iers
 from .curvelib import Splines
@@ -338,9 +339,12 @@ class Loader(object):
         """
         e = self._exists
         if builtin:
+            # See "build_arrays.py" for a notes on how these are stored.
             arrays = load_bundled_npy('iers.npz')
-            delta_t_recent = arrays['delta_t_recent']
-            delta_t_recent[1] = delta_t_recent[1].round(7)  # repair float32's
+            daily_tt = arrays['tt_jd_minus_arange']
+            daily_tt += np.arange(len(daily_tt))
+            daily_delta_t = (arrays['delta_t_1e7'] / 1e7).round(7)
+            delta_t_recent = daily_tt, daily_delta_t
             leap_dates = arrays['leap_dates']
             leap_offsets = arrays['leap_offsets']
         elif e('deltat.data') and e('deltat.preds') and e('Leap_Second.dat'):
@@ -356,9 +360,10 @@ class Loader(object):
         else:
             url = self.build_url('finals2000A.all')
             with self.open(url) as f:
-                mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
-            delta_t_recent, leap_dates, leap_offsets = (
-                iers._build_timescale_arrays(mjd_utc, dut1))
+                utc_mjd, dut1 = iers.parse_dut1_from_finals_all(f)
+            daily_tt, daily_delta_t, leap_dates, leap_offsets = (
+                iers.build_timescale_arrays(utc_mjd, dut1))
+            delta_t_recent = daily_tt, daily_delta_t
 
         if delta_t is not None:
             delta_t_recent = Splines([0, 1, delta_t])

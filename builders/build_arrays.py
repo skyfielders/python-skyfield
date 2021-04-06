@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import sys
 
 import numpy as np
@@ -15,7 +16,7 @@ def main(argv):
     parser.parse_args(argv)
 
     g = globals()
-    np.savez_compressed('skyfield/data/nutation', **{key: g[key] for key in [
+    save('skyfield/data/nutation', {key: g[key] for key in [
         'ke0_t',
         'ke1',
         'lunisolar_longitude_coefficients',
@@ -32,27 +33,37 @@ def main(argv):
     with load.open(url) as f:
         names, s15_table = parse_S15_table(f)
     s15_table = s15_table[[1,2,6,5,4,3]]  # Omit indexes; reorder coefficients.
-    np.savez_compressed('skyfield/data/delta_t', **{
+    save('skyfield/data/delta_t', {
         'Table-S15.2020.txt': s15_table,
     })
 
     url = load.build_url('finals2000A.all')
-    f = load.open(url)
-    mjd_utc, dut1 = iers.parse_dut1_from_finals_all(f)
+    with load.open(url) as f:
+        utc_mjd, dut1 = iers.parse_dut1_from_finals_all(f)
 
-    # Reduce the size of the output file by about 30%, for values that
-    # finals2000A.all only specifies to 7 decimal places anyway.
-    dut1 = dut1.astype(np.float32)
+    daily_tt, daily_delta_t, leap_dates, leap_offsets = (
+        iers.build_timescale_arrays(utc_mjd, dut1)
+    )
 
-    delta_t_recent, leap_dates, leap_offsets = (
-        iers._build_timescale_arrays(mjd_utc, dut1)
-    )
-    np.savez_compressed(
-        'skyfield/data/iers',
-        delta_t_recent=delta_t_recent,
-        leap_dates=leap_dates,
-        leap_offsets=leap_offsets,
-    )
+    # Removing the 1.0 increment between terms offers vastly improved
+    # compression.
+    tt_jd_minus_arange = daily_tt - np.arange(len(daily_tt))
+
+    # Turning ∆T fractions into exact integers improves compression.
+    delta_t_1e7 = (daily_delta_t * 1e7).round()
+
+    save('skyfield/data/iers', {
+        'tt_jd_minus_arange': tt_jd_minus_arange,
+        'delta_t_1e7': delta_t_1e7,
+        'leap_dates': leap_dates,
+        'leap_offsets': leap_offsets,
+    })
+
+def save(path, kw):
+    np.savez_compressed(path, **kw)
+    path += '.npz'
+    size = os.stat(path).st_size
+    print(f'{path}: {size} bytes')
 
 # ----------------------------------------------------------------------
 # START of arrays that used to be inline in nutation.py
