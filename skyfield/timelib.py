@@ -1040,6 +1040,21 @@ def build_delta_t(delta_t_recent):
     x0 = x1 - long_term_parabola_width
     far_left = build_spline_given_ends(x0, p(x0), pd(x0), x1, p(x1), pd(x1))
 
+    # Truncate the splines table where the daily table starts, and
+    # adjust the final spline to remove any discontinuity.
+
+    x = (table_tt[0] - 1721045.0) / 365.25  # TT to J centuries
+
+    i = searchsorted(s15_table[0], x)
+    s15_table = s15_table[:,:i]
+
+    desired_y = table_delta_t[0]
+    current_y = s(x)
+    x0, x1, a3, a2, a1, a0 = s15_table[:,-1]
+    t = (x - x0) / (x1 - x0)
+    a1 = a1 + (desired_y - current_y) / t  # adjust linear term
+    s15_table[:,-1] = x0, x1, a3, a2, a1, a0
+
     # To the right of the recent ∆T table, design a spline connecting
     # smoothly to the long-term parabola.
 

@@ -49,9 +49,9 @@ def _cat(*args):
     return concatenate(args, axis=1)
 
 def main(argv):
-    # work_on_delta_t_discontinuities()
+    work_on_delta_t_discontinuities()
     # compare_splines_to_finals2000_error_bars()
-    compare_old_and_new_delta_t()
+    # compare_old_and_new_delta_t()
     # big_solution_vs_slopes()
     # try_solving_relation_between_lod_and_delta_t()
 
@@ -61,14 +61,14 @@ def work_on_delta_t_discontinuities():
     delta_t_recent, leap_dates, leap_offsets = (
         iers._build_timescale_arrays(mjd_utc, dut1)
     )
-    delta_t_function = build_new_delta_t(delta_t_recent)
 
     ts = load.timescale()
     t = ts.J(np.arange(-3000 * 12, 4000 * 12) / 12)
+    #t = ts.J(np.arange(1700 * 12, 2000 * 12) / 12)
 
     fig, ax = plt.subplots(1, 1)
     fig.set(size_inches=(5, 5))
-    ax.plot(t.J[:-1], np.diff(delta_t_function(t.tt)))
+    ax.plot(t.J[:-1], np.diff(ts.delta_t_function(t.tt)))
     ax.grid()
     ax.set(xlabel='Year', ylabel='∆T month-to-month change')
     fig.tight_layout()
