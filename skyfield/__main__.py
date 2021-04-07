@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pkg_resources
+import numpy as np
 import skyfield
 from skyfield.api import load
 from skyfield.functions import load_bundled_npy
@@ -18,9 +19,10 @@ def main():
           .format(ts.tai_jd(final_leap).utc_strftime()))
 
     arrays = load_bundled_npy('iers.npz')
-    tt, delta_t = arrays['delta_t_recent']
-    start = ts.tt_jd(tt[0])
-    end = ts.tt_jd(tt[-1])
+    daily_tt = arrays['tt_jd_minus_arange']
+    daily_tt += np.arange(len(daily_tt))
+    start = ts.tt_jd(daily_tt[0])
+    end = ts.tt_jd(daily_tt[-1])
     print('Built-in ∆T table from finals2000A.all covers: {0} to {1}'
           .format(start.utc_strftime(fmt), end.utc_strftime(fmt)))
 
