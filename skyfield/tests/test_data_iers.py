@@ -21,3 +21,12 @@ def test_build_timescale_arrays():
         [1972, 12, 31, 23, 59, 60],
         [1973, 1, 1, 0, 0, 0],
     ]
+
+def test_build_timescale_arrays_when_series_already_has_early_leap_seconds():
+    mjd = array([41497.0, 41498.0, 41499.0, 41500.0])
+    dut1 = array([-0.6324066, -0.6349935, 0.3621956, 0.3592006])
+    daily_tt, daily_delta_t, leap_dates, leap_offsets = (
+        iers.build_timescale_arrays(mjd, dut1))
+
+    assert list(leap_dates) == [2441499.5]
+    assert list(leap_offsets) == [11.0]

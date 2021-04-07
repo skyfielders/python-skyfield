@@ -41,12 +41,17 @@ def build_timescale_arrays(utc_mjd, dut1):
 
     daily_tt = utc_mjd + tt_minus_utc / DAY_S + 2400000.5
     daily_delta_t = (tt_minus_utc - dut1).round(7)
-
     leap_dates = utc_mjd[leap_second_mask]
-    leap_dates = np.concatenate([[41499.0, 41683.0], leap_dates])
+
+    # Since "finals2000A.all" starts on 1973-01-02 and leaves out the
+    # first two leap seconds, add them back.  (But check first, in case
+    # the user loads a more complete data file than "finals2000A.all".)
+    first_leap = leap_dates[0] if len(leap_dates) else 0
+    more_leaps = [mjd for mjd in (41499.0, 41683.0) if first_leap > mjd]
+    leap_dates = np.concatenate([more_leaps, leap_dates])
+
     leap_dates += 2400000.5
     leap_offsets = np.arange(11.0, len(leap_dates) + 11.0)
-
     return daily_tt, daily_delta_t, leap_dates, leap_offsets
 
 # Compatibility with older Skyfield versions:
