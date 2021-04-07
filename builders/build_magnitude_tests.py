@@ -51,7 +51,8 @@ from skyfield.tests.conventions import A""")
             print(f'    mag = m._{planet}_magnitude({joined})')
             print(f'    assert abs({answer} - mag) < 0.0005')
 
-        continue
+        if planet != 'venus':
+            continue
 
         print()
         print('    args = [')

@@ -22,7 +22,7 @@ Ap_Mag_Input_V3.txt
 * ``ph_ang`` illumination phase angle (degrees)
 
 """
-from numpy import log10
+from numpy import log10, where
 from .constants import RAD2DEG
 from .functions import angle_between, length_of
 from .naifcodes import _target_name
@@ -79,19 +79,16 @@ def _mercury_magnitude(r, delta, ph_ang):
 
 def _venus_magnitude(r, delta, ph_ang):
     distance_mag_factor = 5 * log10(r * delta)
-    if ph_ang < 163.7:
-        ph_ang_factor = (
-            -1.044E-03 * ph_ang
-            + 3.687E-04 * ph_ang**2
-            - 2.814E-06 * ph_ang**3
-            + 8.938E-09 * ph_ang**4
-        )
-    else:
-        ph_ang_factor = (
-            236.05828 + 4.384
-            - 2.81914E+00 * ph_ang
-            + 8.39034E-03 * ph_ang**2
-        )
+    condition = ph_ang < 163.7
+    a0 = where(condition, 0.0, 236.05828 + 4.384)
+    a1 = where(condition, - 1.044E-03, - 2.81914E+00)
+    a2 = where(condition, + 3.687E-04, + 8.39034E-03)
+    a3 = where(condition, - 2.814E-06, 0.0)
+    a4 = where(condition, + 8.938E-09, 0.0)
+    ph_ang_factor = a4
+    for a in a3, a2, a1, a0:
+        ph_ang_factor *= ph_ang
+        ph_ang_factor += a
     return -4.384 + distance_mag_factor + ph_ang_factor
 
 def _earth_magnitude(r, delta, ph_ang):

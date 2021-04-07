@@ -41,3 +41,12 @@ def test_venus_magnitude_function():
     assert abs(-4.916 - mag) < 0.0005
     mag = m._venus_magnitude(0.726166592736, 0.28889582420642, 179.1845)
     assert abs(-3.090 - mag) < 0.0005
+
+    args = [
+        A[0.722722540169, 0.721480714554, 0.726166592736],
+        A[1.71607489554051, 0.37762511206278, 0.28889582420642],
+        A[1.3232, 124.1348, 179.1845],
+    ]
+    magnitudes = m._venus_magnitude(*args)
+    expected = [-3.917, -4.916, -3.090]
+    assert all(magnitudes - expected < 0.0005)
