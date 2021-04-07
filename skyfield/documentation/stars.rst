@@ -79,6 +79,20 @@ the star:
 The position will properly reflect the star’s proper motion as measured
 by the HIPPARCOS mission.
 
+Looking up specific stars
+=========================
+
+We looked up Barnard’s Star in the above example using its Hipparcos
+catalog number, HIP 87937.  If your project targets several specific
+stars, you can learn their HIP catalog numbers through any number of
+online search engines.  Here is a popular choice:
+
+https://vizier.u-strasbg.fr/viz-bin/VizieR?-source=1239/hip_main
+
+General-purpose references like the Wikipedia also tend to supply HIP
+numbers when describing a star, so searching a star’s page for the
+acronym “HIP” is also likely to lead you to its Hipparcos number.
+
 Stars with “nan” positions
 ==========================
 
