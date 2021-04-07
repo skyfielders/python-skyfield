@@ -15,7 +15,7 @@ from .curvelib import Splines, build_spline_given_ends
 from .descriptorlib import reify
 from .earthlib import sidereal_time, earth_rotation_angle
 from .framelib import ICRS_to_J2000 as B
-from .functions import (mxm, mxmxm, load_bundled_npy, rot_x, rot_y, rot_z,
+from .functions import (A, mxm, mxmxm, load_bundled_npy, rot_x, rot_y, rot_z,
                         _to_array, _reconcile)
 from .nutationlib import (
     build_nutation_matrix, equation_of_the_equinoxes_complimentary_terms,
@@ -62,8 +62,8 @@ else:
 # Much of the following code is adapted from the USNO's "novas.c".
 
 _time_zero = dt_module.time(tzinfo=utc)
-_months = array(['Month zero', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+MONTH_NAMES = A['0', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 tt_minus_tai = array(32.184 / DAY_S)
 
@@ -567,7 +567,8 @@ class Time(object):
         year = abs(year - bc)
         era = where(bc, 'B.C.', 'A.D.')
         format = '%s %04d-%s-%02d %02d:%02d:%02d.%04d UTC'
-        args = (era, year, _months[month], day, hour, minute, second, fraction)
+        args = (era, year, MONTH_NAMES[month], day,
+                hour, minute, second, fraction)
 
         if self.shape:
             return [format % tup for tup in zip(*args)]

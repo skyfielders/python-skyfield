@@ -9,6 +9,11 @@ from skyfield.constants import tau
 
 _AVOID_DIVIDE_BY_ZERO = finfo(float64).tiny
 
+class A(object):
+    """Allow literal NumPy arrays to be spelled ``A[1, 2, 3]``."""
+    __getitem__ = array
+A = A()
+
 def dots(v, u):
     """Given one or more vectors in `v` and `u`, return their dot products.
 
