@@ -16,13 +16,16 @@ def main(argv):
         lines = f.read().splitlines()
 
     print("""
-from skyfield import magnitudelib as m""")
+from skyfield import magnitudelib as m
+from skyfield.tests.conventions import A""")
+
+    tests = {}  # 'planet': [(args, answer)]
 
     for line in lines:
         if line.isupper():
             planet = line.lower()
-            print('\ndef test_{}_magnitude_function():'.format(planet))
-            print('    pass')
+            if planet not in tests:
+                tests[planet] = []
         elif line[0] == ' ' and line[1].isdigit():
             fields = line.split()
             if planet in ('mercury', 'earth', 'jupiter'):
@@ -34,8 +37,32 @@ from skyfield import magnitudelib as m""")
             else:
                 continue
             answer = fields[-1]
-            print('    assert abs({} - m.{}_magnitude({})) < 0.0005'
-                  .format(answer, planet, ', '.join(str(arg) for arg in args)))
+            tests[planet].append((args, answer))
+
+    # from pprint import pprint
+    # pprint(tests)
+
+    for planet, test_list in sorted(tests.items()):
+        if not test_list:
+            continue
+        print('\ndef test_{}_magnitude_function():'.format(planet))
+        for args, answer in test_list:
+            joined = ', '.join(str(arg) for arg in args)
+            print(f'    mag = m._{planet}_magnitude({joined})')
+            print(f'    assert abs({answer} - mag) < 0.0005')
+
+        continue
+
+        print()
+        print('    args = [')
+        for arg_vector in zip(*[args for args, answer in test_list]):
+            joined = ', '.join(arg_vector)
+            print(f'        A[{joined}],')
+        print('    ]')
+        print(f'    magnitudes = m._{planet}_magnitude(*args)')
+        joined = ', '.join(answer for args, answer in test_list)
+        print(f'    expected = [{joined}]')
+        print('    assert all(magnitudes - expected < 0.0005)')
 
 if __name__ == '__main__':
     main(sys.argv[1:])
