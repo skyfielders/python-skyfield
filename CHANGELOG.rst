@@ -5,6 +5,13 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+v1.39 — ?
+---------
+
+* The prototype :func:`~skyfield.magnitudelib.planetary_magnitude()`
+  function now works not only when given a single position, but when
+  given a vector of several positions.
+
 v1.38 — 2021 April 3
 --------------------
 

@@ -99,23 +99,20 @@ def _earth_magnitude(r, delta, ph_ang):
 def _jupiter_magnitude(r, delta, ph_ang):
     distance_mag_factor = 5 * log10(r * delta)
     geocentric_phase_angle_limit = 12.0
-
-    if ph_ang <= geocentric_phase_angle_limit:  # TODO: time arrays
-        ph_ang_factor = -3.7E-04 * ph_ang + 6.16E-04 * ph_ang**2
-    else:
-        ph_ang_factor = -2.5 * log10(
-            1.0 - 1.507 * (ph_ang / 180.)
-            - 0.363 * (ph_ang / 180.)**2
-            - 0.062 * (ph_ang / 180.)**3
-            + 2.809 * (ph_ang / 180.)**4
-            - 1.876 * (ph_ang / 180.)**5
-        )
-
-    if ph_ang <= geocentric_phase_angle_limit:
-        ap_mag = -9.395 + distance_mag_factor + ph_ang_factor
-    else:
-        ap_mag = -9.428 + distance_mag_factor + ph_ang_factor
-
+    ph_ang_pi = ph_ang / 180.0
+    ph_ang_factor = where(
+        ph_ang <= geocentric_phase_angle_limit,
+        (6.16E-04 * ph_ang - 3.7E-04) * ph_ang,
+        -2.5 * log10(
+            ((((- 1.876 * ph_ang_pi + 2.809) * ph_ang_pi - 0.062) * ph_ang_pi
+              - 0.363) * ph_ang_pi - 1.507) * ph_ang_pi + 1.0
+        ),
+    )
+    ap_mag = where(
+        ph_ang <= geocentric_phase_angle_limit,
+        -9.395 + distance_mag_factor + ph_ang_factor,
+        -9.428 + distance_mag_factor + ph_ang_factor,
+    )
     return ap_mag
 
 def _uranus_magnitude(r, delta, ph_ang,
@@ -126,8 +123,11 @@ def _uranus_magnitude(r, delta, ph_ang,
     sub_lat_factor = -0.00084 * sub_lat_planetog
     geocentric_phase_angle_limit = 3.1
     ap_mag = -7.110 + distance_mag_factor + sub_lat_factor
-    if ph_ang > geocentric_phase_angle_limit:  # TODO: time arrays
-        ap_mag += 6.587e-3 * ph_ang + 1.045e-4 * ph_ang**2
+    ap_mag += where(
+        ph_ang > geocentric_phase_angle_limit,
+        (1.045e-4 * ph_ang + 6.587e-3) * ph_ang,
+        0.0,
+    )
     return ap_mag
 
 _FUNCTIONS = {

@@ -39,9 +39,6 @@ from skyfield.tests.conventions import A""")
             answer = fields[-1]
             tests[planet].append((args, answer))
 
-    # from pprint import pprint
-    # pprint(tests)
-
     for planet, test_list in sorted(tests.items()):
         if not test_list:
             continue
@@ -50,9 +47,6 @@ from skyfield.tests.conventions import A""")
             joined = ', '.join(str(arg) for arg in args)
             print(f'    mag = m._{planet}_magnitude({joined})')
             print(f'    assert abs({answer} - mag) < 0.0005')
-
-        if planet != 'venus':
-            continue
 
         print()
         print('    args = [')
