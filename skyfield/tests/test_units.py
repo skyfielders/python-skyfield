@@ -1,7 +1,7 @@
 """Tests of whether units behave."""
 
 from assay import assert_raises
-from numpy import array
+from numpy import array, nan
 from skyfield.units import (
     Angle, Distance, Velocity, UnpackingError, WrongUnitError,
 )
@@ -46,24 +46,24 @@ def test_angle_scalar_strs():
     assert str(Angle(hours=array(12))) == '''12h 00m 00.00s'''
 
 def test_angle_array_strs():
-    h = Angle(hours=array([11, 12, 13]))
+    h = Angle(hours=array([0.5, nan, 13]))
     d = Angle(degrees=h._degrees)
 
-    assert str(h) == '3 values from 11h 00m 00.00s to 13h 00m 00.00s'
-    assert str(d) == '''3 values from 165deg 00' 00.0" to 195deg 00' 00.0"'''
+    assert str(h) == '3 values from 00h 30m 00.00s to 13h 00m 00.00s'
+    assert str(d) == '''3 values from 07deg 30' 00.0" to 195deg 00' 00.0"'''
 
     with assert_raises(WrongUnitError):
         h.dstr()
         d.hstr()
 
     assert h.hstr() == d.hstr(warn=False) == [
-        '11h 00m 00.00s',
-        '12h 00m 00.00s',
+        '00h 30m 00.00s',
+        'nan',
         '13h 00m 00.00s',
     ]
     assert d.dstr() == h.dstr(warn=False) == [
-        '165deg 00\' 00.0"',
-        '180deg 00\' 00.0"',
+        '07deg 30\' 00.0"',
+        'nan',
         '195deg 00\' 00.0"',
     ]
 
