@@ -8,6 +8,10 @@ from .constants import AU_KM, AU_M, C, DAY_S, tau
 from .descriptorlib import reify
 from .functions import _to_array, length_of
 
+_dfmt = '{0}{1:02}deg {2:02}\' {3:02}.{4:0{5}}"'.format
+_dsgn = '{0:+>1}{1:02}deg {2:02}\' {3:02}.{4:0{5}}"'.format
+_hfmt = '{0}{1:02}h {2:02}m {3:02}.{4:0{5}}s'.format
+
 class UnpackingError(Exception):
     """You cannot iterate directly over a Skyfield measurement object."""
 
@@ -313,18 +317,18 @@ class Angle(Unit):
         size = self.radians.size
         if size == 0:
             return 'Angle []'
-        f = '{0} values from {1} to {2}'.format
         if self.preference == 'degrees':
-            signed = self.signed
             v = self._degrees
-            if size < 2:
-                return _dstr(v, 1, signed)
-            return f(len(v), _dstr(v[0], 1, signed), _dstr(v[-1], 1, signed))
+            fmt = _dsgn if self.signed else _dfmt
+            places = 1
         else:
             v = self._hours
-            if size < 2:
-                return _hstr(v)
-            return f(len(v), _hstr(v[0]), _hstr(v[-1]))
+            fmt = _hfmt
+            places = 2
+        if size >= 2:
+            return '{0} values from {1} to {2}'.format(
+                len(v), _sfmt(fmt, v[0], places), _sfmt(fmt, v[-1], places))
+        return _sfmt(fmt, v, places)
 
     def __repr__(self):
         if self.radians.size == 0:
@@ -361,8 +365,8 @@ class Angle(Unit):
         hours = self._hours
         shape = getattr(hours, 'shape', ())
         if shape:
-            return [_hstr(h, places) for h in hours]
-        return _hstr(hours, places)
+            return [_sfmt(_hfmt, h, places) for h in hours]
+        return _sfmt(_hfmt, hours, places)
 
     def dms(self, warn=True):
         """Convert to a tuple (degrees, minutes, seconds).
@@ -392,10 +396,11 @@ class Angle(Unit):
             raise WrongUnitError('dstr')
         degrees = self._degrees
         signed = self.signed
+        fmt = _dsgn if signed else _dfmt
         shape = getattr(degrees, 'shape', ())
         if shape:
-            return [_dstr(d, places, signed) for d in degrees]
-        return _dstr(degrees, places, signed)
+            return [_sfmt(fmt, d, places) for d in degrees]
+        return _sfmt(fmt, degrees, places)
 
     def to(self, unit):
         """Convert this angle to the given AstroPy unit."""
@@ -467,41 +472,13 @@ def _sexagesimalize_to_int(value, places=0):
     n, minutes = divmod(n, 60)
     return sign, n, minutes, seconds, fraction
 
-def _hstr(hours, places=2):
-    """Convert floating point `hours` into a sexagesimal string.
-
-    >>> _hstr(12.125)
-    '12h 07m 30.00s'
-    >>> _hstr(12.125, places=4)
-    '12h 07m 30.0000s'
-    >>> _hstr(float('nan'))
-    'nan'
-
-    """
-    if isnan(hours):
+def _sfmt(format, value, places):
+    """Decompose floating point `value` into sexagesimal, and format."""
+    if isnan(value):
         return 'nan'
-    sgn, h, m, s, etc = _sexagesimalize_to_int(hours, places)
+    sgn, h, m, s, fraction = _sexagesimalize_to_int(value, places)
     sign = '-' if sgn < 0.0 else ''
-    return '%s%02dh %02dm %02d.%0*ds' % (sign, h, m, s, places, etc)
-
-def _dstr(degrees, places=1, signed=False):
-    r"""Convert floating point `degrees` into a sexagesimal string.
-
-    >>> _dstr(181.875)
-    '181deg 52\' 30.0"'
-    >>> _dstr(181.875, places=3)
-    '181deg 52\' 30.000"'
-    >>> _dstr(181.875, signed=True)
-    '+181deg 52\' 30.0"'
-    >>> _dstr(float('nan'))
-    'nan'
-
-    """
-    if isnan(degrees):
-        return 'nan'
-    sgn, d, m, s, etc = _sexagesimalize_to_int(degrees, places)
-    sign = '-' if sgn < 0.0 else '+' if signed else ''
-    return '%s%02ddeg %02d\' %02d.%0*d"' % (sign, d, m, s, places, etc)
+    return format(sign, h, m, s, fraction, places)
 
 def wms(whole, minutes=0.0, seconds=0.0):
     """Return a quantity expressed with 1/60 minutes and 1/3600 seconds."""
