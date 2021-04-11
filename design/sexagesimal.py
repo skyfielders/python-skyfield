@@ -69,3 +69,31 @@ for value in 1, -1, math.pi, -0.000000001:
         duration, s = approach(value)
         print('{:10.8f}  {}'.format(duration, s))
     print()
+
+print('Comparison of early int() vs late int():')
+
+# Wow, even though the early int() requires an extra abs() operation on
+# the floating point `value`, it's still faster overall.
+
+value = math.pi
+power = 10000
+
+n = int(power * 7200 * abs(value) + 1.0) // 2
+t0 = time()
+n = int(power * 7200 * abs(value) + 1.0) // 2
+print(time() - t0, 'early')
+
+n = int((power * 7200 * value + 1.0) // 2.0)
+t0 = time()
+n = int((power * 7200 * value + 1.0) // 2.0)
+print(time() - t0, 'late')
+
+n = int((power * 3600 * value + 0.5) // 1.0)
+t0 = time()
+n = int((power * 3600 * value + 0.5) // 1.0)
+print(time() - t0, 'late 2')
+
+n = int((power * 7200 * value + 1.0) // 2.0)
+t0 = time()
+n = int((power * 7200 * value + 1.0) // 2.0)
+print(time() - t0, 'late 3')

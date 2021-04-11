@@ -26,7 +26,7 @@ def test_degree_rounding():
     assert str(Angle(degrees=tenth * -1.75)) == '-00deg 00\' 00.2"'
     assert str(Angle(degrees=tenth * -1.25)) == '-00deg 00\' 00.1"'
     assert str(Angle(degrees=tenth * -0.75)) == '-00deg 00\' 00.1"'
-    assert str(Angle(degrees=tenth * -0.25)) == '-00deg 00\' 00.0"'
+    assert str(Angle(degrees=tenth * -0.25)) == '00deg 00\' 00.0"'
 
     assert str(Angle(degrees=0.0)) == '00deg 00\' 00.0"'
 

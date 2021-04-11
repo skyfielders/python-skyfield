@@ -459,11 +459,10 @@ def _sexagesimalize_to_int(value, places=0):
     to either 33.443" or 33.445" in its value.
 
     """
-    sign = int(np.sign(value))
-    value = abs(value)
     power = 10 ** places
-    n = int(7200 * power * value + 1) // 2
-    n, fraction = divmod(n, power)
+    n = int((power * 3600 * value + 0.5) // 1.0)
+    sign = np.sign(n)
+    n, fraction = divmod(abs(n), power)
     n, seconds = divmod(n, 60)
     n, minutes = divmod(n, 60)
     return sign, n, minutes, seconds, fraction
