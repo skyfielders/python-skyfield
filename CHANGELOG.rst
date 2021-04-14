@@ -5,8 +5,17 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
-v1.39 — ?
----------
+v1.39 — 2021 April 14
+---------------------
+
+* The
+  :meth:`Angle.dstr() <skyfield.units.Angle.dstr>`
+  and
+  :meth:`Angle.hstr() <skyfield.units.Angle.hstr>`
+  methods now accept a ``format=`` argument
+  that lets callers override Skyfield’s default angle formatting
+  and supply their own; see `Formatting angles`.
+  `#513 <https://github.com/skyfielders/python-skyfield/issues/513>`_
 
 * The prototype :func:`~skyfield.magnitudelib.planetary_magnitude()`
   function now works not only when given a single position, but when

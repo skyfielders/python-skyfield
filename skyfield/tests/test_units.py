@@ -46,11 +46,11 @@ def test_angle_scalar_strs():
     assert str(Angle(hours=array(12))) == '''12h 00m 00.00s'''
 
 def test_angle_array_strs():
-    h = Angle(hours=array([0.5, nan, 13]))
+    h = Angle(hours=array([0.5, nan, -13]))
     d = Angle(degrees=h._degrees)
 
-    assert str(h) == '3 values from 00h 30m 00.00s to 13h 00m 00.00s'
-    assert str(d) == '''3 values from 07deg 30' 00.0" to 195deg 00' 00.0"'''
+    assert str(h) == '3 values from 00h 30m 00.00s to -13h 00m 00.00s'
+    assert str(d) == '''3 values from 07deg 30' 00.0" to -195deg 00' 00.0"'''
 
     with assert_raises(WrongUnitError):
         h.dstr()
@@ -59,18 +59,23 @@ def test_angle_array_strs():
     assert h.hstr() == d.hstr(warn=False) == [
         '00h 30m 00.00s',
         'nan',
-        '13h 00m 00.00s',
+        '-13h 00m 00.00s',
     ]
     assert d.dstr() == h.dstr(warn=False) == [
         '07deg 30\' 00.0"',
         'nan',
-        '195deg 00\' 00.0"',
+        '-195deg 00\' 00.0"',
     ]
 
     empty = Angle(radians=[])
     assert str(empty) == 'Angle []'
     assert empty.hstr(warn=False) == []
     assert empty.dstr() == []
+
+    assert h.hstr(format='{0} {1} {2} {3} {4} {5}', places=6) == [
+        ' 0 30 0 0 6', 'nan', '- 13 0 0 0 6']
+    assert d.dstr(format='{0} {1} {2} {3} {4} {5}', places=6) == [
+        ' 7 30 0 0 6', 'nan', '- 195 0 0 0 6']
 
 def test_angle_sexagesimal_args():
     assert str(Angle(degrees=(90,))) == '''90deg 00' 00.0"'''

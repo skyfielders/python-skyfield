@@ -8,9 +8,9 @@ from .constants import AU_KM, AU_M, C, DAY_S, tau
 from .descriptorlib import reify
 from .functions import _to_array, length_of
 
-_dfmt = '{0}{1:02}deg {2:02}\' {3:02}.{4:0{5}}"'.format
-_dsgn = '{0:+>1}{1:02}deg {2:02}\' {3:02}.{4:0{5}}"'.format
-_hfmt = '{0}{1:02}h {2:02}m {3:02}.{4:0{5}}s'.format
+_dfmt = '{0}{1:02}deg {2:02}\' {3:02}.{4:0{5}}"'
+_dsgn = '{0:+>1}{1:02}deg {2:02}\' {3:02}.{4:0{5}}"'
+_hfmt = '{0}{1:02}h {2:02}m {3:02}.{4:0{5}}s'
 
 class UnpackingError(Exception):
     """You cannot iterate directly over a Skyfield measurement object."""
@@ -319,11 +319,11 @@ class Angle(Unit):
             return 'Angle []'
         if self.preference == 'degrees':
             v = self._degrees
-            fmt = _dsgn if self.signed else _dfmt
+            fmt = _dsgn.format if self.signed else _dfmt.format
             places = 1
         else:
             v = self._hours
-            fmt = _hfmt
+            fmt = _hfmt.format
             places = 2
         if size >= 2:
             return '{0} values from {1} to {2}'.format(
@@ -358,15 +358,22 @@ class Angle(Unit):
             raise WrongUnitError('signed_hms')
         return _sexagesimalize_to_float(self._hours)
 
-    def hstr(self, places=2, warn=True):
-        """Convert to a string like ``12h 07m 30.00s``."""
+    def hstr(self, places=2, warn=True, format=_hfmt):
+        """Return a string like ``12h 07m 30.00s``; see `Formatting angles`.
+
+        .. versionadded:: 1.39
+
+           Added the ``format=`` parameter.
+
+        """
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
         hours = self._hours
         shape = getattr(hours, 'shape', ())
+        fmt = format.format  # `format()` method of `format` string
         if shape:
-            return [_sfmt(_hfmt, h, places) for h in hours]
-        return _sfmt(_hfmt, hours, places)
+            return [_sfmt(fmt, h, places) for h in hours]
+        return _sfmt(fmt, hours, places)
 
     def dms(self, warn=True):
         """Convert to a tuple (degrees, minutes, seconds).
@@ -390,13 +397,21 @@ class Angle(Unit):
             raise WrongUnitError('signed_dms')
         return _sexagesimalize_to_float(self._degrees)
 
-    def dstr(self, places=1, warn=True):
-        """Convert to a string like ``181deg 52\' 30.0"``."""
+    def dstr(self, places=1, warn=True, format=None):
+        """Return a string like ``181deg 52' 30.0"``; see `Formatting angles`.
+
+        .. versionadded:: 1.39
+
+           Added the ``format=`` parameter.
+
+        """
         if warn and self.preference != 'degrees':
             raise WrongUnitError('dstr')
         degrees = self._degrees
         signed = self.signed
-        fmt = _dsgn if signed else _dfmt
+        if format is None:
+            format = _dsgn if signed else _dfmt
+        fmt = format.format  # `format()` method of `format` string
         shape = getattr(degrees, 'shape', ())
         if shape:
             return [_sfmt(fmt, d, places) for d in degrees]
@@ -472,13 +487,13 @@ def _sexagesimalize_to_int(value, places=0):
     n, minutes = divmod(n, 60)
     return sign, n, minutes, seconds, fraction
 
-def _sfmt(format, value, places):
+def _sfmt(fmt, value, places):
     """Decompose floating point `value` into sexagesimal, and format."""
     if isnan(value):
         return 'nan'
     sgn, h, m, s, fraction = _sexagesimalize_to_int(value, places)
     sign = '-' if sgn < 0.0 else ''
-    return format(sign, h, m, s, fraction, places)
+    return fmt(sign, h, m, s, fraction, places)
 
 def wms(whole, minutes=0.0, seconds=0.0):
     """Return a quantity expressed with 1/60 minutes and 1/3600 seconds."""
