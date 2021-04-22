@@ -183,7 +183,7 @@ doctest:
 
 sync: html
 	rm -rf _build/html/_sources
-	rm \
+	rm -f \
 		_build/html/_static/basic.css \
 		_build/html/_static/classic.css \
 		_build/html/_static/default.css \
