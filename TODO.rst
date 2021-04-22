@@ -126,6 +126,12 @@ Sprint Possibilities
   transition, with zero chance of missing a, say, one-minute arctic day
   or night.
 
+* After computing a satellite position, should the position’s `.target`
+  be the satellite object itself instead of a big negative integer?
+  It’s an incompatible change, but more in agreement with how other
+  geocentric objects work.  Was the old behavior documented?  (Not that
+  I can find!)
+
 Adding more smarts to ephemeris handling
 ========================================
 
