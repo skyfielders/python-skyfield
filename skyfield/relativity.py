@@ -23,8 +23,8 @@ def add_deflection(position, observer, ephemeris, t,
                    include_earth_deflection, count=3):
     """Update `position` for how solar system masses will deflect its light.
 
-    Given the ICRS `position` [x,y,z] of an object (au) that is being
-    viewed from the `observer` also expressed as [x,y,z], and given an
+    Given the ICRS `position` |xyz| of an object (au) that is being
+    viewed from the `observer` also expressed as |xyz|, and given an
     ephemeris that can be used to determine solar system body positions,
     and given the time `t` and Boolean `apply_earth` indicating whether
     to worry about the effect of Earth's mass, and a `count` of how many
@@ -116,7 +116,7 @@ def light_time_difference(position, observer_position):
 def _add_deflection(position, observer, deflector, rmass):
     """Correct a position vector for how one particular mass deflects light.
 
-    Given the ICRS `position` [x,y,z] of an object (AU) together with
+    Given the ICRS `position` |xyz| of an object (AU) together with
     the positions of an `observer` and a `deflector` of reciprocal mass
     `rmass`, this function updates `position` in-place to show how much
     the presence of the deflector will deflect the image of the object.
@@ -163,7 +163,7 @@ def _add_deflection(position, observer, deflector, rmass):
 def add_aberration(position, velocity, light_time):
     """Correct a relative position vector for aberration of light.
 
-    Given the relative `position` [x,y,z] of an object (AU) from a
+    Given the relative `position` |xyz| of an object (AU) from a
     particular observer, the `velocity` [dx,dy,dz] at which the observer
     is traveling (AU/day), and the light propagation delay `light_time`
     to the object (days), this function updates `position` in-place to

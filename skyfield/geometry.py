@@ -6,8 +6,8 @@ from .functions import length_of
 def intersect_line_and_sphere(endpoint, center, radius):
     """Compute distance to intersections of a line and a sphere.
 
-    Given a line through the origin (0,0,0) and an (x,y,z) ``endpoint``,
-    and a sphere with the (x,y,z) ``center`` and scalar ``radius``,
+    Given a line through the origin (0,0,0) and an |xyz| ``endpoint``,
+    and a sphere with the |xyz| ``center`` and scalar ``radius``,
     return the distance from the origin to their two intersections.
 
     If the line is tangent to the sphere, the two intersections will be

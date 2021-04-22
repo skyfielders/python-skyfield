@@ -59,7 +59,7 @@ class true_equator_and_equinox_of_date(object):
     """The dynamical frame of the Earth’s true equator and equinox of date.
 
     This is supplied as an explicit reference frame in case you want
-    x,y,z coordinates; if you want angles, it’s better to use the
+    |xyz| coordinates; if you want angles, it’s better to use the
     standard position method ``radec(epoch='date')`` since that will
     return the conventional units of hours-of-right-ascension instead of
     the degrees-of-longitude that ``frame_latlon()`` would return.

@@ -43,7 +43,7 @@ def mxmxm(M1, M2, M3):
 _mxv, _mxm, _mxmxm = mxv, mxm, mxmxm  # In case anyone imported old name
 
 def length_of(xyz):
-    """Given a 3-element array ``[x y z]``, return its length.
+    """Given a 3-element array |xyz|, return its length.
 
     The three elements can be simple scalars, or the array can be two
     dimensions and offer three whole series of x, y, and z coordinates.
@@ -68,7 +68,7 @@ def angle_between(u, v):
     return 2.0 * arctan2(length_of(a - b), length_of(a + b))
 
 def to_spherical(xyz):
-    """Convert ``[x y z]`` to spherical coordinates ``(r, theta, phi)``.
+    """Convert |xyz| to spherical coordinates (r,theta,phi).
 
     ``r`` - vector length
     ``theta`` - angle above (+) or below (-) the xy-plane
@@ -105,7 +105,7 @@ def _to_spherical_and_rates(r, v):
     return length, lat, lon, range_rate, lat_rate, lon_rate
 
 def from_spherical(r, theta, phi):
-    """Convert ``(r, theta, phi)`` to Cartesian coordinates ``[x y z]``.
+    """Convert (r,theta,phi) to Cartesian coordinates |xyz|.
 
     ``r`` - vector length
     ``theta`` - angle in radians above (+) or below (-) the xy-plane

@@ -91,7 +91,7 @@ class Distance(Unit):
         return '<{0} {1}>'.format(type(self).__name__, self)
 
     def length(self):
-        """Compute the length when this is an x,y,z vector.
+        """Compute the length when this is an |xyz| vector.
 
         The Euclidean vector length of this vector is returned as a new
         :class:`~skyfield.units.Distance` object.

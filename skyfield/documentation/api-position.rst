@@ -32,7 +32,7 @@ Generic ICRF position
 
    .. attribute:: position
 
-      A `Distance` object offering the position’s (\ *x,y,z*\ ) coordinates.
+      A `Distance` object offering the position’s |xyz| coordinates.
 
    .. attribute:: velocity
 

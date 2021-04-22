@@ -21,7 +21,7 @@ _elev_options = {'precision': 1, 'floatmode': 'fixed',
                  'threshold': 5, 'edgeitems': 2}
 
 class ITRSPosition(VectorFunction):
-    """An x,y,z position in the Earth-centered Earth-fixed (ECEF) ITRS frame."""
+    """An |xyz| position in the Earth-centered Earth-fixed (ECEF) ITRS frame."""
 
     center = 399
 
@@ -51,7 +51,7 @@ class ITRSPosition(VectorFunction):
 class GeographicPosition(ITRSPosition):
     """The position of a latitude and longitude on Earth.
 
-    Each instance of this class holds an x,y,z vector for a geographic
+    Each instance of this class holds an |xyz| vector for a geographic
     position on (or above, or below) the Earth’s surface, in the ITRS
     reference frame: the international standard for an Earth-centered
     Earth-fixed (ECEF) reference frame.  Instead of instantiating this
@@ -118,7 +118,7 @@ class GeographicPosition(ITRSPosition):
         return angular_velocity_matrix(R)
 
 class Geoid(object):
-    """An Earth ellipsoid; maps latitudes and longitudes to x,y,z positions."""
+    """An Earth ellipsoid; maps latitudes and longitudes to |xyz| positions."""
 
     def __init__(self, name, radius_m, inverse_flattening):
         self.name = name

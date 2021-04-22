@@ -33,7 +33,7 @@
    .. attribute:: itrs_xyz
 
       A :class:`~skyfield.units.Distance` object
-      giving the spatial x,y,z coordinates of this location
+      giving the spatial |xyz| coordinates of this location
       in the ITRS Earth-centered Earth-fixed (“ECEF”) reference frame.
 
    .. attribute:: center

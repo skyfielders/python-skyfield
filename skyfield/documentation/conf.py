@@ -90,6 +90,9 @@ pygments_style = 'sphinx'
 
 # Options inserted by hand:
 autodoc_member_order = 'bysource'
+rst_prolog = """
+.. |xyz| replace:: (\ *x,y,z*\ )
+"""
 
 # -- Options for HTML output ---------------------------------------------------
 

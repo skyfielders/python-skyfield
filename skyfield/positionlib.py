@@ -76,7 +76,7 @@ def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
                              t, center, target)
 
 class ICRF(object):
-    """An (x,y,z) position and velocity oriented to the ICRF axes.
+    """An |xyz| position and velocity oriented to the ICRF axes.
 
     The International Coordinate Reference Frame (ICRF) is a permanent
     reference frame that is the replacement for J2000.  Their axes agree
@@ -84,7 +84,7 @@ class ICRF(object):
     systems like B1900 and B1950.
 
     Each instance of this class provides a ``.position`` vector and a
-    ``.velocity`` vector that specify (x,y,z) coordinates along the axes
+    ``.velocity`` vector that specify |xyz| coordinates along the axes
     of the ICRF.  A specific time ``.t`` might be specified or might be
     ``None``.
 
@@ -122,7 +122,7 @@ class ICRF(object):
 
         * ``t`` — The :class:`~skyfield.timelib.Time` of the position.
         * ``frame`` — A reference frame listed at `reference_frames`.
-        * ``distance`` — A `Distance` x,y,z vector in the given frame.
+        * ``distance`` — A `Distance` |xyz| vector in the given frame.
         * ``velocity`` — A `Velocity` ẋ,ẏ,ż vector in the given frame.
 
         """
@@ -341,7 +341,7 @@ class ICRF(object):
     # TODO: build a reference frame for the following two methods.
 
     def cirs_xyz(self, epoch):
-        """Compute cartesian CIRS coordinates at a given epoch (x,y,z).
+        """Compute cartesian CIRS coordinates at a given epoch |xyz|.
 
         Calculate coordinates in the Celestial Intermediate Reference System
         (CIRS), a dynamical coordinate system referenced to the Celestial
@@ -398,20 +398,20 @@ class ICRF(object):
     # New methods for converting to and from `framelib.py` reference frames.
 
     def frame_xyz(self, frame):
-        """Return this position as an (x,y,z) vector in a reference frame.
+        """Return this position as an |xyz| vector in a reference frame.
 
         Returns a :class:`~skyfield.units.Distance` object giving the
-        (x,y,z) of this position in the given ``frame``.  See
+        |xyz| of this position in the given ``frame``.  See
         `reference_frames`.
 
         """
         return Distance(mxv(frame.rotation_at(self.t), self.position.au))
 
     def frame_xyz_and_velocity(self, frame):
-        """Return (x,y,z) position and velocity vectors in a reference frame.
+        """Return |xyz| position and velocity vectors in a reference frame.
 
         Returns two vectors in the given coordinate ``frame``: a
-        :class:`~skyfield.units.Distance` providing an (x,y,z) position
+        :class:`~skyfield.units.Distance` providing an |xyz| position
         and a :class:`~skyfield.units.Velocity` giving (xdot,ydot,zdot)
         velocity.  See `reference_frames`.
 
@@ -567,14 +567,14 @@ ICRS = ICRF
 
 
 class Geometric(ICRF):
-    """An (x,y,z) vector between two instantaneous position.
+    """An |xyz| vector between two instantaneous position.
 
     A geometric position is the difference between the Solar System
     positions of two bodies at exactly the same instant.  It is *not*
     corrected for the fact that, in real physics, it will take time for
     light to travel from one position to the other.
 
-    Both the ``.position`` and ``.velocity`` are (x,y,z) vectors
+    Both the ``.position`` and ``.velocity`` are |xyz| vectors
     oriented along the axes of the International Celestial Reference
     System (ICRS), the modern replacement for J2000 coordinates.
 
@@ -605,7 +605,7 @@ class Geometric(ICRF):
 
 
 class Barycentric(ICRF):
-    """An (x,y,z) position measured from the Solar System barycenter.
+    """An |xyz| position measured from the Solar System barycenter.
 
     Skyfield generates a `Barycentric` position measured from the
     gravitational center of the Solar System whenever you ask a body for
@@ -615,7 +615,7 @@ class Barycentric(ICRF):
     >>> mars.at(t)
     <Barycentric BCRS position and velocity at date t center=0 target=499>
 
-    This class’s ``.position`` and ``.velocity`` are (x,y,z) vectors in
+    This class’s ``.position`` and ``.velocity`` are |xyz| vectors in
     the Barycentric Celestial Reference System (BCRS), the modern
     replacement for J2000 coordinates measured from the Solar System
     Barycenter.
@@ -649,7 +649,7 @@ class Barycentric(ICRF):
 # it possible for it to observe() a planet.
 
 class Astrometric(ICRF):
-    """An astrometric (x,y,z) position relative to a particular observer.
+    """An astrometric |xyz| position relative to a particular observer.
 
     The astrometric position of a body is its position relative to an
     observer, adjusted for light-time delay.  It is the position of the
@@ -658,7 +658,7 @@ class Astrometric(ICRF):
     usually generated in Skyfield by calling the `Barycentric` method
     `observe()`, which performs the light-time correction.
 
-    Both the ``.position`` and ``.velocity`` are ``[x y z]`` vectors
+    Both the ``.position`` and ``.velocity`` are |xyz| vectors
     oriented along the axes of the ICRF, the modern replacement for the
     J2000 reference frame.
 
@@ -727,7 +727,7 @@ class Astrometric(ICRF):
         return apparent
 
 class Apparent(ICRF):
-    """An apparent ``[x y z]`` position relative to a particular observer.
+    """An apparent |xyz| position relative to a particular observer.
 
     This class’s vectors provide the position and velocity of a body
     relative to an observer, adjusted to predict where the body’s image
@@ -747,7 +747,7 @@ class Apparent(ICRF):
     These positions are usually produced in Skyfield by calling the
     `apparent()` method of an `Astrometric` object.
 
-    Both the ``.position`` and ``.velocity`` are ``[x y z]`` vectors
+    Both the ``.position`` and ``.velocity`` are |xyz| vectors
     oriented along the axes of the ICRF, the modern replacement for the
     J2000 reference frame.  If the observer is at the geocenter, they
     are more specifically GCRS coordinates.  Two common coordinates that
@@ -788,14 +788,14 @@ class Apparent(ICRF):
 
 
 class Geocentric(ICRF):
-    """An (x,y,z) position measured from the center of the Earth.
+    """An |xyz| position measured from the center of the Earth.
 
     A geocentric position is the difference between the position of the
     Earth at a given instant and the position of a target body at the
     same instant, without accounting for light-travel time or the effect
     of relativity on the light itself.
 
-    Its ``.position`` and ``.velocity`` vectors have (x,y,z) axes that
+    Its ``.position`` and ``.velocity`` vectors have |xyz| axes that
     are those of the Geocentric Celestial Reference System (GCRS), an
     inertial system that is an update to J2000 and that does not rotate
     with the Earth itself.

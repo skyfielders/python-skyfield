@@ -234,28 +234,31 @@ Topocentric locations
 
 .. currentmodule:: skyfield.toposlib
 
-You can create a vector function
-that computes the location of any position on the Earth’s surface.
-Start with a reference model of the Earth’s exact shape:
+You can ask Skyfield to compute the position
+of any geographic location on the Earth’s surface.
+First, choose a reference model of the Earth’s exact shape
+(click either name to learn more about them):
 
 * `wgs84`
 * `iers2010`
 
-Then ask the model for the location of a given longitude and latitude:
+Then, call one of the model’s methods
+to build an object representing a specific longitude and latitude.
+Both of the above models are instances of the `Geoid` class
+and offer these methods:
 
 .. autosummary::
 
-   Geoid
    Geoid.latlon
    Geoid.subpoint
 
-Finally, the resulting geographic location
-can compute its position at any specified time
-by combining its coordinates with the orientation and rotation of the Earth:
+Finally, the resulting `GeographicPosition`
+can compute its position at any specified time,
+by combining its coordinates
+with the orientation of the Earth at that moment:
 
 .. autosummary::
 
-   GeographicPosition
    GeographicPosition.at
    GeographicPosition.lst_hours_at
    GeographicPosition.refract
@@ -300,7 +303,7 @@ Astronomical positions
 
 The `ICRF` three-dimensional position vector serves as the base class
 for all of the following position classes.  Each class represents an
-(x,y,z) ``.position`` and ``.velocity`` vector oriented to the axes of
+|xyz| ``.position`` and ``.velocity`` vector oriented to the axes of
 the International Celestial Reference Frame, an inertial system that is
 an update to J2000 and that does not rotate with respect to the
 universe.

@@ -64,7 +64,7 @@ def reverse_terra(xyz_au, gast, iterations=3):
 def compute_limb_angle(position_au, observer_au):
     """Determine the angle of an object above or below the Earth's limb.
 
-    Given an object's GCRS `position_au` [x,y,z] vector and the position
+    Given an object's GCRS `position_au` |xyz| vector and the position
     of an `observer_au` as a vector in the same coordinate system,
     return a tuple that provides `(limb_ang, nadir_ang)`:
 

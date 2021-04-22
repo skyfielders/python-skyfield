@@ -20,7 +20,7 @@ class SpiceKernel(object):
     """Ephemeris file in NASA .bsp format.
 
     A "Spacecraft and Planet Kernel" (SPK) file from NASA provides
-    (x,y,z) coordinates for bodies in the Solar System like the Sun,
+    |xyz| coordinates for bodies in the Solar System like the Sun,
     planets, moons, and spacecraft.
 
     You can download a .bsp file yourself and use this class to open it,
