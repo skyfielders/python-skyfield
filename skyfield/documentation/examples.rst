@@ -96,7 +96,7 @@ or how early I need to rise to see the morning sky:
     f = almanac.dark_twilight_day(eph, bluffton)
     times, events = almanac.find_discrete(t0, t1, f)
 
-    previous_e = f(t0)
+    previous_e = f(t0).item()
     for t, e in zip(times, events):
         tstr = str(t.astimezone(zone))[:16]
         if previous_e < e:
