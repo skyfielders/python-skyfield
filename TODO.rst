@@ -16,6 +16,13 @@ Sprint Possibilities
 * Switch to a cube-root falloff, rather than a discontinuity, for Earth
   deflection.
 
+* Explain more about the rotation matrices used in coordinate
+  transforms, as they are a source of questions on GitHub.  One user
+  needed (and, happily, worked out themselves!) the dynamic reference
+  frame of the ecliptic::
+
+   ecliptic = skyfield.framelib.ecliptic_frame.rotation_at(t)
+
 * The “finals2000A.all” file expresses DUT1 like ``0.8084178`` with 7
   digits after the decimal place.  How accurate is that?  It goes down
   to tenths of microseconds.  Roughly how much arc does the Earth rotate
