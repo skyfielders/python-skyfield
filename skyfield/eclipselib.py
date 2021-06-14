@@ -99,15 +99,21 @@ def lunar_eclipses(start_time, end_time, eph):
     umbra_radius = atmosphere_blur * (pi_1 + pi_s - s_s)
 
     penumbral = closest_approach < penumbra_radius + moon_radius
+
+    # We now know which conjunctions are eclipses!  Before proceeding,
+    # narrow all of our arrays to only those incidents.
+    t = t[penumbral]
+    closest_approach = closest_approach[penumbral]
+    moon_radius = moon_radius[penumbral]
+    penumbra_radius = penumbra_radius[penumbral]
+    umbra_radius = umbra_radius[penumbral]
+
     partial = closest_approach < umbra_radius + moon_radius
     total = closest_approach < umbra_radius - moon_radius
 
-    t = t[penumbral]
-    partial = partial[penumbral]
-    total = total[penumbral]
-
     code = partial.astype(byte)
     code += total
+
     details = {
         'closest_approach_radians': closest_approach,
         'moon_radius_radians': moon_radius,
