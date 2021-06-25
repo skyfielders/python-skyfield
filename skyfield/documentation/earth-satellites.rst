@@ -462,8 +462,6 @@ or else in dynamical coordinates of the date you specify.
 
 See :doc:`positions` to learn more about these possibilities.
 
-.. _satellite-is-sunlit:
-
 Find a satellite’s range rate
 -----------------------------
 
@@ -506,6 +504,8 @@ but in fact the choice of coordinate system doesn’t matter
 if we’re going to ignore everything but the range and range rate:
 those two quantities should be independent
 of the orientation of the spherical coordinate system we choose.
+
+.. _satellite-is-sunlit:
 
 Find when a satellite is in sunlight
 ------------------------------------
