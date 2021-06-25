@@ -464,6 +464,49 @@ See :doc:`positions` to learn more about these possibilities.
 
 .. _satellite-is-sunlit:
 
+Find a satellite’s range rate
+-----------------------------
+
+If you’re interested in the Doppler shift
+of the radio signal from a satellite,
+you’ll want to know the rate
+at which the satellite’s range to your antenna is changing.
+To determine the rate,
+use the position method
+:meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()`
+whose third return value will be the range
+and whose sixth return value will be the range’s rate of change.
+
+Our example satellite culminates
+at around 20° above the horizon
+just after 11:20pm UTC.
+As expected,
+is range reaches a minimum during that minute
+and its range rate swaps from negative (drawing closer)
+to positive (moving away).
+
+.. testcode::
+
+    t = ts.utc(2014, 1, 23, 11, range(17, 23))
+    pos = (satellite - bluffton).at(t)
+    _, _, the_range, _, _, range_rate = pos.frame_latlon_and_rates(bluffton)
+
+    from numpy import array2string
+    print(array2string(the_range.km, precision=1), 'km')
+    print(array2string(range_rate.km_per_s, precision=2), 'km/s')
+
+.. testoutput::
+
+    [1434.2 1190.5 1064.3 1097.3 1277.4 1553.6] km
+    [-4.74 -3.24 -0.84  1.9   3.95  5.14] km/s
+
+I’ve chosen here to ask for coordinates
+in the observer’s alt-az frame of reference,
+but in fact the choice of coordinate system doesn’t matter
+if we’re going to ignore everything but the range and range rate:
+those two quantities should be independent
+of the orientation of the spherical coordinate system we choose.
+
 Find when a satellite is in sunlight
 ------------------------------------
 
@@ -592,6 +635,7 @@ that predicts the Solar System position of the Earth:
     # barycenter ("ssb"), then call observe() to compensate
     # for light-travel time.
 
+    t = ts.utc(2014, 1, 23, 11, 18, 7)
     de421 = load('de421.bsp')
     earth = de421['earth']
     ssb_bluffton = earth + bluffton
