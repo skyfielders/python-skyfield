@@ -335,7 +335,7 @@ you will probably want to learn more about its position at those times.
 
 The simplest form in which you can generate a satellite position
 is to call its ``at()`` method,
-which will return an *x, y, z* position relative to the Earth’s center
+which will return an |xyz| position relative to the Earth’s center
 in the Geocentric Celestial Reference System.
 (GCRS coordinates are based on even more precise axes
 than those of the old J2000 system.)
@@ -352,51 +352,51 @@ than those of the old J2000 system.)
 
     [-3918.87650458 -1887.64838745  5209.08801512]
 
-Another approach is to ask which point on the Earth’s globe
-is directly beneath the satellite,
-using the :meth:`~skyfield.toposlib.Geoid.subpoint()` method
-of a standard geoid.
+Satellite longitude, latitude, and height
+-----------------------------------------
+
+Once you have the geocentric satellite position computed above,
+you can ask for the satellite’s longitude and latitude
+by passing the position
+to the :meth:`~skyfield.toposlib.Geoid.subpoint()` method of a standard geoid.
 
 .. testcode::
 
     subpoint = wgs84.subpoint(geocentric)
     print('Latitude:', subpoint.latitude)
     print('Longitude:', subpoint.longitude)
-    print('Elevation (m):', int(subpoint.elevation.m))
+    print('Height: {:.1f} km'.format(subpoint.elevation.km))
 
 .. testoutput::
 
     Latitude: 50deg 14' 37.4"
     Longitude: -86deg 23' 23.3"
-    Elevation (m): 420873
+    Height: 420.9 km
 
-Finally, you might be most interested
+Satellite altitude, azimuth, and height
+---------------------------------------
+
+You might be most interested
 in whether the satellite is above or below the horizon
-from your own position as an observer.
-If you build an object to represent your latitude and longitude,
+from your own position as an observer,
+and in which direction to look for it.
+If you build an object to represent your latitude and longitude
+(as we did when we created the ``bluffton`` object above),
 you can use vector subtraction
 to ask “where will the satellite be *relative to* my location?”
 
 .. testcode::
 
     difference = satellite - bluffton
-    print(difference)
-
-.. testoutput::
-
-    Sum of 2 vectors:
-     Reversed Geodetic WGS84 latitude +40.8939 N longitude -83.8917 E elevation 0.0 m -> 399 EARTH
-     EarthSatellite 399 EARTH -> ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
 
 Every time you call this vector sum’s ``at()`` method,
-it will first compute the satellite’s position,
+it will compute the satellite’s position,
 then your own position,
-and finish by subtracting them.
+then subtract them.
 The result will be the position of the satellite relative
 to you as an observer.
 If you are interested you can access this relative position
-as *x, y, z* coordinates,
-just as you did for the position measured from the Earth’s center:
+as plain |xyz| coordinates:
 
 .. testcode::
 
@@ -408,33 +408,44 @@ just as you did for the position measured from the Earth’s center:
     [ 331.61901192  392.18492744 1049.7597825 ]
 
 But the most popular approach is to ask the topocentric position
-for its altitude and azimuth coordinates,
-which tell you whether the satellite is above or below the horizon:
+for its altitude and azimuth.
+The altitude angle runs from 0° at the horizon
+to 90° directly overhead at the zenith.
+A negative altitude means the satellite is that many degrees below the horizon.
 
 .. testcode::
 
-    alt, az, distance = topocentric.altaz()
+    alt, az, height = topocentric.altaz()
 
     if alt.degrees > 0:
         print('The ISS is above the horizon')
 
-    print(alt)
-    print(az)
-    print(int(distance.km), 'km')
+    print('Altitude:', alt)
+    print('Azimuth:', az)
+    print('Height: {:.1f} km'.format(height.km))
 
 .. testoutput::
 
     The ISS is above the horizon
-    16deg 16' 32.6"
-    350deg 15' 20.4"
-    1168 km
+    Altitude: 16deg 16' 32.6"
+    Azimuth: 350deg 15' 20.4"
+    Height: 1168.7 km
+
+The azimuth is measured clockwise around the horizon,
+just like the degrees shown on a compass,
+from geographic north (0°)
+through east (90°), south (180°), and west (270°)
+before returning to the north and rolling over from 359° back to 0°.
+
+Satellite right ascension and declination
+-----------------------------------------
 
 If you are interested
 in where among the stars the satellite will be positioned,
 then — as with any other Skyfield position object —
-you can also ask for a right ascension and declination,
+you can ask for its right ascension and declination,
 either relative to the fixed axes of the ICRF
-or else in dynamical coordinates of the date you specify.
+or else in the dynamical coordinate system of the date you specify.
 
 .. testcode::
 
