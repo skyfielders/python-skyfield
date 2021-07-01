@@ -11,9 +11,8 @@ There are several kinds of celestial object
 for which Skyfield can produce a position.
 If there’s a particular kind of object you’re interested in,
 you might want to read its documentation first
-and then return here
-when you’re ready
-to learn more about the position objects that Skyfield will return:
+then return here when you’re ready
+to learn more about the position objects that Skyfield returns:
 
 * `planets`
 * `stars`
@@ -68,12 +67,12 @@ By contrast, the ICRS defines its axes
 using the positions of very distant quasars,
 so its precision can improve each decade
 as radio telescopes become more sensitive
-and measure quasar positions more accurately.
+and measure quasar positions ever more accurately.
 
-In case you ever want to interact directly with ICRS |xyz| coordinates,
-here is where the three axes point:
+If you want to interact directly with ICRS |xyz| coordinates,
+here is where its axes point:
 
-* *x-axis* — Aims at the Vernal Equinox’s location on 2000 January 1,
+* *x-axis* — Aims at the Vernal Equinox’s position on 2000 January 1,
   which is defined more technically
   as the ascending node of the ecliptic on the celestial equator.
   Ancient astronomers called this “the first point of Ares”
@@ -86,7 +85,8 @@ here is where the three axes point:
 * *z-axis* — Aims at the North Celestial Pole.
 
 The ICRS axes are within 0.02 arcseconds of the J2000 axes,
-so many scripts simply treat old J2000 coordinates as ICRS coordinates.
+so many scripts simply treat old J2000 coordinates
+as equivalent to modern ICRS coordinates.
 
 Quick reference
 ===============
@@ -145,6 +145,108 @@ which explains each option in even greater detail.
 
 What can you do with a position once it has been generated?
 The rest of this document is a complete tour of the possibilities.
+
+Barycentric → Astrometric → Apparent
+====================================
+
+The most common calculations in Skyfield
+produce a succession of three |xyz| positions,
+one for the observer and two for the body being observed.
+The three positions can be hard to find in Skyfield code
+because they are often created and used
+without ever being given a name.
+Let’s use a :doc:`planet <planets>` position as our example:
+
+.. testcode::
+
+    from skyfield.api import load
+
+    ts = load.timescale()
+    t = ts.now()
+    planets = load('de421.bsp')
+    earth, mars = planets['earth'], planets['mars']
+
+    # Three positions in a single line of code!
+    d = earth.at(t).observe(mars).apparent().distance()
+
+    print('Mars is {:.2f} au from Earth'.format(d.au))
+
+.. testoutput::
+
+    Mars is 2.33 au from Earth
+
+The line that computes the distance ``d = …``
+creates three different Skyfield positions
+in a single line of code!
+To learn about them,
+the beginner will probably need to slow up and re-write that line
+so each object is assigned a separate name:
+
+.. testcode::
+
+    barycentric = earth.at(t)
+    astrometric = barycentric.observe(mars)
+    apparent = astrometric.apparent()
+    d = apparent.distance()
+
+This is a common Python pattern.
+By assigning names to intermediate values,
+the programmer can pivot between
+succinct code that fits on a single line
+and more verbose code that names each intermediate value,
+without changing the code’s result.
+Now that we’ve given them names,
+we can discuss the three positions:
+
+* A :class:`Barycentric` position
+  measures its |xyz| from the Solar System’s center of mass,
+  a frame of reference stationary enough
+  that a barycentric position is eligible
+  to :meth:`~Barycentric.observe()` other objects
+  and correctly compute where they will appear in the sky.
+  You’ll usually start a Skyfield script
+  by generating a barycentric position
+  for the platform from which you’ll be observing,
+  whether that’s the Earth,
+  a specific location on the Earth’s surface,
+  a satellite,
+  or another body like a planet or Moon.
+
+  More formally, a barycentric position’s |xyz|
+  are coordinates in the Barycentric Celestial Reference System (BCRS).
+
+* An :class:`Astrometric` position
+  is returned by the :meth:`~Barycentric.observe()` method,
+  which takes a target object
+  and applies the effect of light travel time to the observer.
+  For example,
+  on Earth we see the Moon not where it is right now,
+  but where it was about 1.3 seconds ago
+  when the light now reaching our eyes left its surface.
+  We see the Sun where it was 8 minutes ago,
+  Jupiter where it was more than a half hour ago,
+  and Neptune where it was about four hours ago.
+  The word “astrometric” is Greek for “star measure”
+  because it’s the position
+  where you would draw the target body on a star chart.
+
+* An :class:`Apparent` position is computed
+  by calling the :meth:`~Astrometric.apparent()` method
+  of an astrometric position.
+  This applies two real-world effects of relativity
+  that slightly shift everything in the night sky:
+  the aberration of light
+  produced by the Earth’s own motion through space,
+  and gravitational deflection
+  from masses like the Sun and Jupiter and the Earth itself.
+  The result is an “apparent” position
+  telling you where the target will really “appear” in tonight’s sky —
+  the direction in which you should point your telescope.
+
+  When an apparent position is measured from the Earth’s center,
+  it can be described more formally
+  as an |xyz| position
+  in Geocentric Celestial Reference System (GCRS) coordinates.
 
 Barycentric position
 ====================
