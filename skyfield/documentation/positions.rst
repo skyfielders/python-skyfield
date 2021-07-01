@@ -5,23 +5,96 @@
 
 .. currentmodule:: skyfield.positionlib
 
-Skyfield is careful to distinguish the *position* of an object
-from the several choices of *coordinate*
-that you can use to designate that position with numbers.
-There are only three basic kinds of position that Skyfield recognizes,
-but several different ways in which each position
-can be turned into coordinates.
+Skyfield stores the locations of celestial bodies
+as |xyz| vectors that it calls *positions.*
+There are several kinds of celestial object
+for which Skyfield can produce a position.
+If there’s a particular kind of object you’re interested in,
+you might want to read its documentation first
+and then return here
+when you’re ready
+to learn more about the position objects that Skyfield will return:
+
+* `planets`
+* `stars`
+* `earth-satellites`
+* `kepler-orbits` (comets and asteroids)
+
+You can also build a position object yourself
+by passing |xyz| coordinates
+to any of the classes described in the sections below.
+For example:
+
+.. testsetup::
+
+   __import__('skyfield.tests.fixes').tests.fixes.setup()
+
+.. TODO add time to this example?
+
+.. testcode::
+
+    from skyfield.positionlib import ICRF
+
+    x = 3141.0
+    y = 2718.0
+    z = 5820.0
+    barycentric = Barycentric([x, y, z])
+
+This document focuses
+on what you can do with positions once they’ve been computed,
+and on how position objects are used in Skyfield code.
+
+The ICRS reference system and J2000
+===================================
+
+.. TODO Make ra/dec and alt/az links to subsequent sections
+
+Even though most Skyfield users
+ask for output in spherical coordinates
+like right ascension and declination
+or altitude and azimuth,
+Skyfield always stores positions internally
+as Cartesian |xyz| vectors
+oriented along the axes of the International Celestial Reference System (ICRS).
+
+The ICRS is a higher-accuracy replacement
+for the old J2000 reference system,
+which was defined by the orientation of the Earth’s mean equator
+on 2000 January 1 —
+raising the problem
+that we only know the Earth’s orientation
+to a certain precision.
+By contrast, the ICRS defines its axes
+using the positions of very distant quasars,
+so its precision can improve each decade
+as radio telescopes become more sensitive
+and measure quasar positions more accurately.
+
+In case you ever want to interact directly with ICRS |xyz| coordinates,
+here is where the three axes point:
+
+* *x-axis* — Aims at the Vernal Equinox’s location on 2000 January 1,
+  which is defined more technically
+  as the ascending node of the ecliptic on the celestial equator.
+  Ancient astronomers called this “the first point of Ares”
+  but precession has gradually moved it into the constellation Pisces.
+
+* *y-axis* — Aims at the point 90° east of the Vernal Equinox
+  along the celestial equator,
+  which lies south of Betelgeuse and a few degrees east of Orion’s belt.
+
+* *z-axis* — Aims at the North Celestial Pole.
+
+The ICRS axes are within 0.02 arcseconds of the J2000 axes,
+so many scripts simply treat old J2000 coordinates as ICRS coordinates.
+
+Quick reference
+===============
 
 Here is a quick reference to the three basic kinds of position,
 together with all of the attributes and methods that they support:
 
 .. parsed-literal::
-
-    Creating 3 kinds of position
-
-    obj1.at(time)        →  Barycentric position (BCRS)
-        .observe(obj2)   →  Astrometric position (∆BCRS)
-        .apparent()      →  Apparent position (GCRS)
 
     Position attributes and methods
      │
@@ -70,191 +143,11 @@ both in the text above and in the explanations below,
 lead to the low-level :doc:`api`
 which explains each option in even greater detail.
 
-Quick reference to generating positions
-=======================================
-
-Skyfield already supports several kinds of object
-that can compute their position.
-Each object offers an ``at()`` method
-whose argument can be a :doc:`Time <time>` object
-that either holds a single time
-or a whole array of different time values.
-Objects respond by returning either a single scalar position
-or else by generating a whole series of positions.
-
-.. testsetup::
-
-   __import__('skyfield.tests.fixes').tests.fixes.setup()
-
-**Instantiating positions from numeric coordinates**
-  If you already possess *x*, *y*, and *z* coordinates
-  oriented along the ICRF axes,
-  then you can directly instantiate any of the position classes
-  by providing those coordinates as a vector of length 3.
-
-  .. testcode::
-
-    from skyfield.positionlib import ICRF
-
-    x = 3141.0
-    y = 2718.0
-    z = 5820.0
-    vec = ICRF([x, y, z])
-
-  This also works with more specific position classes
-  like the `Barycentric` class.
-  The resulting position object will support
-  all of the main features described on this page.
-
-**The planets**
-  The eight planets and Pluto are all supported,
-  thanks to the excellent work of the Jet Propulsion Laboratory (JPL).
-  Skyfield supports their major solar system ephemerides.
-  :doc:`Read more <planets>`
-
-  .. testcode::
-
-    from skyfield.api import N, W, load, wgs84
-
-    ts = load.timescale()
-    t = ts.now()
-
-    planets = load('de421.bsp')
-    mars = planets['mars']
-
-    # From the center of the Solar System (Barycentric)
-
-    barycentric = mars.at(t)
-
-    # From the center of the Sun (Heliocentric)
-
-    sun = planets['sun']
-    heliocentric = sun.at(t).observe(mars)
-
-    # From the center of the Earth (Geocentric)
-
-    earth = planets['earth']
-    astrometric = earth.at(t).observe(mars)
-    apparent = earth.at(t).observe(mars).apparent()
-
-    # From a place on Earth (Topocentric)
-
-    boston = earth + wgs84.latlon(42.3583 * N, 71.0603 * W, elevation_m=43)
-    astrometric = boston.at(t).observe(mars)
-    apparent = boston.at(t).observe(mars).apparent()
-
-**Comets and Minor Planets Asteroids**
-  Comet, asteroid, and other minor planet positions
-  can be generated through Skyfield’s :doc:`kepler-orbits` support
-  of data files downloaded from the Minor Planet Center.
-
-  And any Type 1 or Type 21 ephemerides you generate
-  using NASA’s `HORIZONS <https://ssd.jpl.nasa.gov/horizons.cgi>`_ system
-  are supported through third-party libraries;
-  for details, see :ref:`third-party-ephemerides`.
-
-**The stars**
-  Stars and other fixed objects with catalog coordinates
-  are able to generate their current astrometric position
-  when observed from a planet. :doc:`Read more <stars>`
-
-  .. testcode::
-
-    from skyfield.api import N, Star, W, load, wgs84
-
-    ts = load.timescale()
-    t = ts.now()
-
-    boston = earth + wgs84.latlon(42.3583 * N, 71.0603 * W, elevation_m=43)
-    barnard = Star(ra_hours=(17, 57, 48.49803),
-                   dec_degrees=(4, 41, 36.2072))
-
-    # From the center of the Earth (Geocentric)
-
-    astrometric = earth.at(t).observe(barnard)
-    apparent = earth.at(t).observe(barnard).apparent()
-
-    # From a place on Earth (Topocentric)
-
-    astrometric = boston.at(t).observe(barnard)
-    apparent = boston.at(t).observe(barnard).apparent()
-
-**Earth satellites**
-  Earth satellite positions can be generated
-  from public TLE elements describing their current orbit,
-  which you can download from Celestrak. :doc:`Read more <earth-satellites>`
-
-  .. testcode::
-
-    from skyfield.api import EarthSatellite, N, W, wgs84, load
-
-    ts = load.timescale()
-    t = ts.now()
-
-    line1 = '1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082'
-    line2 = '2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473'
-
-    boston = wgs84.latlon(42.3583 * N, 71.0603 * W, elevation_m=43)
-    satellite = EarthSatellite(line1, line2, name='ISS (ZARYA)')
-
-    # Geocentric
-
-    geometry = satellite.at(t)
-
-    # Geographic point beneath satellite
-
-    subpoint = wgs84.subpoint(geometry)
-    latitude = subpoint.latitude
-    longitude = subpoint.longitude
-    elevation = subpoint.elevation
-
-    # Topocentric
-
-    difference = satellite - boston
-    geometry = difference.at(t)
-
-Read :doc:`time` for more information
-about how to build dates and pass them to planets and satellites
-when generating positions.
-
 What can you do with a position once it has been generated?
 The rest of this document is a complete tour of the possibilities.
 
 Barycentric position
 ====================
-
-When you ask Skyfield for the position of a planet or star,
-it produces a three-dimensional position
-that is measured from the Solar System *barycenter* —
-the center of mass around which all of the planets revolve.
-The position is stored as *x*, *y*, and *z* coordinates
-in the International Celestial Reference System (ICRS),
-a permanent frame of reference
-that is a high-precision replacement
-for the old J2000.0 system
-that was popular at the end of the 20th century.
-The orientation of the axes is roughly:
-
-* *x-axis* — points at the Vernal Equinox:
-  the position of the Sun in our sky
-  at the moment the Sun’s annual journey along the ecliptic
-  carries it from south to north across the celestial equator
-  and Spring begins in the Northern Hemisphere.
-  To express the same thing more technically,
-  this axis points towards
-  the “ascending node of the ecliptic on the celestial equator”
-  as of the beginning of the year 2000.
-  In ancient times this point in the sky was called “the first point of Ares.”
-
-* *y-axis* — is aimed at the point 90° east of the Vernal Equinox
-  on the celestial equator.
-  It can be hard to remember which way is east in the sky, so:
-  if you were standing at the center of the celestial sphere
-  with the north pole above your head
-  and the x-axis in front of you,
-  this axis would be 90° to your *left.*
-
-* *z-axis* — points towards the celestial North Pole.
 
 Instead of using an acronym,
 Skyfield uses the class name :class:`Barycentric`
