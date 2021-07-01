@@ -304,9 +304,9 @@ Astronomical positions
 The `ICRF` three-dimensional position vector serves as the base class
 for all of the following position classes.  Each class represents an
 |xyz| ``.position`` and ``.velocity`` vector oriented to the axes of
-the International Celestial Reference Frame, an inertial system that is
-an update to J2000 and that does not rotate with respect to the
-universe.
+the International Celestial Reference System (ICRS),
+an inertial system that’s an update to J2000
+and that does not rotate with respect to the universe.
 
 .. autosummary::
    :nosignatures:
@@ -327,9 +327,6 @@ declination coordinates with
 
    position_of_radec
 
-Position methods and attributes
-===============================
-
 All position objects have three attributes
 which provide access to their raw data:
 
@@ -340,9 +337,9 @@ which provide access to their raw data:
 ================= ==================================
 
 If a position lacks a velocity,
-then the attribute is simply the value ``None``.
+then its ``.velocity`` is ``None``.
 
-All positions support a basic set of methods:
+All positions support these methods:
 
 .. autosummary::
 
@@ -359,8 +356,9 @@ All positions support a basic set of methods:
    ICRF.is_sunlit
    ICRF.from_altaz
 
-Position methods specific to one class
-======================================
+In addition to the methods above,
+several subclasses of the base position class
+provide unique methods of their own:
 
 .. autosummary::
 
