@@ -33,7 +33,7 @@ For example:
 
 .. testcode::
 
-    from skyfield.positionlib import ICRF
+    from skyfield.positionlib import Barycentric
 
     x = 3141.0
     y = 2718.0
@@ -161,6 +161,7 @@ by asking Skyfield for their ``position`` attribute:
 
     from skyfield.api import load
 
+    ts = load.timescale()
     planets = load('de421.bsp')
     earth = planets['earth']
     mars = planets['mars']
@@ -425,6 +426,8 @@ in case you don’t want to remember which directions are positive.
 
 .. testcode::
 
+    from skyfield.api import N,S,E,W, wgs84
+
     # Altitude and azimuth in the sky of a
     # specific geographic location
 
@@ -517,15 +520,16 @@ you can measure how far an object has moved:
     t1 = ts.utc(2015, 10, 11, 10, 30)
     t2 = ts.utc(2015, 10, 11, 10, 31)
 
-    p1 = satellite.at(t1)
-    p2 = satellite.at(t2)
+    moon = planets['moon']
+    p1 = moon.at(t1)
+    p2 = moon.at(t2)
 
     km = (p2 - p1).distance().km
-    print('In one minute the ISS moved %d km' % km)
+    print('In one minute the Moon moved %d km' % km)
 
 .. testoutput::
 
-    In one minute the ISS moved 461 km
+    In one minute the Moon moved 1736 km
 
 .. _reference_frames:
 
