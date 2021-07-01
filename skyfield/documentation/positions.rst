@@ -248,6 +248,66 @@ we can discuss the three positions:
   as an |xyz| position
   in Geocentric Celestial Reference System (GCRS) coordinates.
 
+Position attributes
+===================
+
+Five basic attributes are available on each position:
+
+.. include:: api.rst
+   :start-after: PAT START
+   :end-before: PAT END
+
+The first three attributes listed above
+are simple instances of Skyfield’s distance, velocity, and time classes,
+which you can learn more about
+by clicking on the class names above.
+They support operations like:
+
+.. testcode::
+
+    print('Earth x,y,z:', barycentric.position.au, 'au')
+    print('Mars velocity:', astrometric.velocity.au_per_d, 'au/day')
+    print('Time of observation:', apparent.t.utc_strftime())
+
+.. testoutput::
+
+    Earth x,y,z: [0.95554508 0.27716038 0.11997472] au
+    Mars velocity: [-0.00329848 -0.02350805 -0.01016779] au/day
+    Time of observation: 2015-10-11 10:00:00 UTC
+
+.. TODO say Mars “relative” velocity above (might need more room)
+
+Note that the distance unit attributes
+like ``au``, ``km``, and ``m``
+and the velocity unit attributes
+like ``au_per_d`` and ``km_per_s``
+are each three-element NumPy arrays offering |xyz| coordinates.
+If the times you’re using are :ref:`date-arrays`,
+then the distance and velocity will each have an additional dimension
+offering as many |xyz| coordinates as there are dates in your array.
+
+The ``.center`` and ``.target`` attributes require a bit more explanation.
+They specify the origin and destination of the vector,
+and are displayed if you ask Python to print the vector:
+
+.. testcode::
+
+    print(apparent)
+
+.. testoutput::
+
+    <Apparent GCRS position and velocity at date t center=399 target=499>
+
+.. TODO document NAIF codes and have brief summary, on ephemeris page
+
+In this case our positions were generated from a JPL ephemeris file,
+so the center and target are the simple integers
+``399`` indicating the Earth and ``499`` indicating Mars.
+If instead the center or target were defined by a Skyfield object
+like an Earth satellite or latitude-longitude position,
+then the ``.center`` and ``.target``
+will be those Skyfield objects themselves.
+
 Barycentric position
 ====================
 

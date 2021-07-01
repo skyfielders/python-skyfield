@@ -327,17 +327,19 @@ declination coordinates with
 
    position_of_radec
 
-All position objects have three attributes
-which provide access to their raw data:
+All position objects offer five basic attributes:
 
-================= ==================================
-``ICRF.t``        The `Time` of the position.
-``ICRF.position`` A `Distance` array giving x, y, z.
-``ICRF.velocity`` A `Velocity` array giving ẋ, ẏ, ż.
-================= ==================================
+.. PAT START
 
-If a position lacks a velocity,
-then its ``.velocity`` is ``None``.
+============= ========================================
+``.position`` An |xyz| `Distance`.
+``.velocity`` An |xyz| `Velocity`, or ``None``.
+``.t``        The `Time` of the position, or ``None``.
+``.center``   Body the vector is measured from.
+``.target``   Body the vector is measured to.
+============= ========================================
+
+.. PAT END
 
 All positions support these methods:
 
