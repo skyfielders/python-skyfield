@@ -373,8 +373,8 @@ to the :meth:`~skyfield.toposlib.Geoid.subpoint()` method of a standard geoid.
     Longitude: -86deg 23' 23.3"
     Height: 420.9 km
 
-Satellite altitude, azimuth, and height
----------------------------------------
+Satellite altitude, azimuth, and distance
+-----------------------------------------
 
 You might be most interested
 in whether the satellite is above or below the horizon
@@ -415,21 +415,21 @@ A negative altitude means the satellite is that many degrees below the horizon.
 
 .. testcode::
 
-    alt, az, height = topocentric.altaz()
+    alt, az, distance = topocentric.altaz()
 
     if alt.degrees > 0:
         print('The ISS is above the horizon')
 
     print('Altitude:', alt)
     print('Azimuth:', az)
-    print('Height: {:.1f} km'.format(height.km))
+    print('Distance: {:.1f} km'.format(distance.km))
 
 .. testoutput::
 
     The ISS is above the horizon
     Altitude: 16deg 16' 32.6"
     Azimuth: 350deg 15' 20.4"
-    Height: 1168.7 km
+    Distance: 1168.7 km
 
 The azimuth is measured clockwise around the horizon,
 just like the degrees shown on a compass,
