@@ -373,7 +373,7 @@ they are entirely unsuitable for star charts,
 which are supposed to be independent of any particular day of the year.
 
 For this reason,
-always generate reference RA/dec coordinates
+always generate reference RA/Dec coordinates
 from astrometric Skyfield positions,
 never from apparent positions.
 
@@ -394,7 +394,7 @@ without an argument:
 
 .. testcode::
 
-    # Astrometric RA/dec.
+    # Astrometric RA/Dec.
     ra, dec, distance = astrometric.radec()
 
     print('RA:', ra)
@@ -411,21 +411,78 @@ If your project specifically requires coordinates
 expressed in the RA/Dec of an older equinox,
 you can build a time object and pass it to  :meth:`~ICRF.radec()`:
 
-.. TODO
+.. testcode::
 
-    equinox = ts.B(1900)     # B1900
-    equinox = ts.B(1950)     # B1950
+    # Astrometric RA/Dec relative to another equinox.
+
+    equinox = ts.J(1991.25)
+    ra, dec, distance = astrometric.radec(equinox)
+
+Right ascension and declination: apparent
+=========================================
+
+The other reason that you might generate RA/Dec is practical:
+you are planning to point a telescope,
+and after orienting its equatorial mount to the Earth’s poles
+you want a declination that stays fixed all night
+while your telescope tracks the specified right ascension across the sky.
+
+In this case you aren’t likely to be satisfied
+with RA/Dec coordinates of some other era.
+You’ll want them measured against where the Earth’s poles
+are really pointing tonight.
+
+Skyfield uses the high precision IAU 2000A standard
+for both the precession that carries the Earth’s poles
+in their 26,000-year circle around the sky
+and also the short term wobbles in the Earth’s orientation
+that are called nutation.
+Together they give Skyfield an accurate assessment
+of the direction of the poles and equator
+on a given date.
+
+When pointing a telescope,
+always use apparent coordinates,
+since you will want every possible effect accounted for
+that produces the position of your target in the sky.
+
+While you could pass each position’s time
+to its own :meth:`~ICRF.radec()` method,
+that would be a bit tedious,
+so Skyfield provides a shortcut:
+if you pass the string ``'date'``
+then the RA/Dec coordinates use the equinox and poles
+of the date of the position itself:
 
 .. testcode::
 
-    equinox = ts.J(1991.25)  # J1991.25
-    equinox = ts.J(2000)     # J2000
+    # Apparent RA/Dec.
+    ra, dec, distance = apparent.radec('date')
 
-    # Astrometric RA/dec in another equinox.
-    ra, dec, distance = astrometric.radec(equinox)
+    print('RA:', ra)
+    print('Dec:', dec)
+    print('Distance:', distance)
 
-The resulting coordinates will measure
-from the equinox and poles of the date you’ve specified.
+.. testoutput::
+
+    RA: 11h 05m 48.68s
+    Dec: +09deg 11' 35.7"
+    Distance: 0.96678 au
+
+.. “is compounded of?”
+
+Note that there are two sources of difference
+between the astrometric coordinates printed in the previous section
+and the apparent coordinates printed here.
+We switched to the RA/Dec system of a different year,
+so even the exact same position
+would have been assigned a different coordinate than before.
+But we have also asked for the RA/Dec of a whole different point in the sky:
+the point where Mars will actually appear,
+not the ideal point where it should sit on a star chart
+that ignores aberration and deflection.
+
+.. TODO hour angle. xp yp. polar motion.
 
 Astrometric position
 ====================
