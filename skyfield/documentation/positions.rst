@@ -164,7 +164,7 @@ to compute a geocentric position for Mars:
     from skyfield.api import load
 
     ts = load.timescale()
-    t = ts.now()
+    t = ts.utc(1980, 1, 1)
     planets = load('de421.bsp')
     earth, mars = planets['earth'], planets['mars']
 
@@ -175,7 +175,7 @@ to compute a geocentric position for Mars:
 
 .. testoutput::
 
-    Mars is 2.33 au from Earth
+    Mars is 0.97 au from Earth
 
 By chaining together four different methods,
 the line that computes the distance ``d = …``
@@ -280,9 +280,9 @@ They support operations like:
 
 .. testoutput::
 
-    Earth x,y,z: [0.95554508 0.27716038 0.11997472] au
-    Mars relative velocity: [ -5.71116775 -40.70318024 -17.60508242] km/s
-    Time of observation: 2015-10-11 10:00:00 UTC
+    Earth x,y,z: [-0.16287311  0.88787399  0.38473904] au
+    Mars relative velocity: [12.66638873 -8.12551301 -3.38356109] km/s
+    Time of observation: 1980-01-01 00:00:00 UTC
 
 Note that the distance unit attributes
 like ``au`` and ``km``
@@ -315,44 +315,117 @@ like an Earth satellite or latitude-longitude position,
 then the ``.center`` and ``.target``
 will be those Skyfield objects themselves.
 
-Barycentric position
-====================
+Right ascension and declination: astrometric
+============================================
 
-Instead of using an acronym,
-Skyfield uses the class name :class:`Barycentric`
-for coordinates expressed in the ICRS.
-You can view the raw *x*, *y*, and *z* coordinates
-by asking Skyfield for their ``position`` attribute:
+The most popular coordinate system for star catalogs
+treats the night sky as a slowly spinning globe
+that we view from the inside.
+Just as we specify position on the Earth’s globe
+by degrees longitude that you would travel along the equator
+and then degrees latitude that you would travel north or south,
+coordinates in the sky are measured by two angles.
+These are called “equatorial coordinates”
+since they are measured with respect to the equator.
+
+* *Right ascension* (“RA”)
+  is the sky’s equivalent of longitude,
+  and is measured east along the celestial equator.
+  Since the sky makes roughly one complete turn every day,
+  RA is usually expressed in units of 24 hours
+  rather than 360 degrees.
+  This supports casual inferences,
+  like the fact
+  that a star with an RA of 3\ |h| will climb to your meridian
+  one hour later than a star with an RA of 2\ |h|.
+
+  The design of right ascension presented astronomers
+  with the same challenge that longitude presented geographers:
+  the arbitrary choice of a starting point.
+  In the case of longitude,
+  we measure east and west
+  from the Airy Transit Circle at the Royal Observatory Greenwich.
+  For RA,
+  astronomers measure east from the Vernal Equinox,
+  the point where the Sun crosses the celestial equator in March
+  as it crosses from the southern to the northern half of the sky.
+
+* *Declination* (“Dec”)
+  is the sky’s equivalent of latitude,
+  measured north and south of the celestial equator
+  in degrees, with north being positive.
+
+There are two common uses for RA/Dec coordinates.
+
+The first common use is as a reference coordinate system
+for perennial knowledge like star charts,
+celestial catalogs, and record keeping.
+This use case presents two complications.
+
+The first complication
+is that real star positions appear to be in constant motion.
+The Earth’s revolution around the Sun
+moves the stars in little circles thanks to the aberration of light,
+and their light can be bent and their images shifted
+by the gravity of the Sun, Jupiter, and even the Earth.
+Because these effects are periodic or temporary,
+they are entirely unsuitable for star charts,
+which are supposed to be independent of any particular day of the year.
+
+For this reason,
+always generate reference RA/dec coordinates
+from astrometric Skyfield positions,
+never from apparent positions.
+
+The second complication is that the Earth’s poles
+don’t point in a fixed direction
+but gradually trace 26,000-year circles around the sky.
+This requires RA/Dec coordinates to specify which year’s “equinox”
+their right ascension is measured from,
+which will also be the year whose poles and equator they use.
+
+The modern standard for astrometric RA/Dec is the ICRS,
+described above,
+which having been fixed in the directions of the J2000 equinox and poles
+is now permanent and will never suffer precession.
+Skyfield returns ICRS coordinates
+if you simply call :meth:`~ICRF.radec()`
+without an argument:
 
 .. testcode::
 
-    # BCRS positions of Earth and Venus
+    # Astrometric RA/dec.
+    ra, dec, distance = astrometric.radec()
 
-    from skyfield.api import load
-
-    ts = load.timescale()
-    planets = load('de421.bsp')
-    earth = planets['earth']
-    mars = planets['mars']
-
-    t = ts.utc(1980, 1, 1)
-    print(earth.at(t).position.au)
-    print(mars.at(t).position.au)
+    print('RA:', ra)
+    print('Dec:', dec)
+    print('Distance:', distance)
 
 .. testoutput::
 
-    [-0.16287311  0.88787399  0.38473904]
-    [-1.09202418  1.10723168  0.53739021]
+    RA: 11h 06m 51.22s
+    Dec: +09deg 05' 09.2"
+    Distance: 0.96678 au
 
-The coordinates shown above are measured
-using the Astronomical Unit (“au”),
-which is the average distance from the Earth to the Sun.
-You can, if you want, ask for these coordinates
-in kilometers with the :attr:`~skyfield.units.Distance.km` attribute
-or in meters with the :attr:`~skyfield.units.Distance.m` attribute.
-And if you have the third-party AstroPy package installed,
-then you can convert these coordinates
-into any length unit with the :meth:`~skyfield.units.Distance.to()` method.
+If your project specifically requires coordinates
+expressed in the RA/Dec of an older equinox,
+you can build a time object and pass it to  :meth:`~ICRF.radec()`:
+
+.. TODO
+
+    equinox = ts.B(1900)     # B1900
+    equinox = ts.B(1950)     # B1950
+
+.. testcode::
+
+    equinox = ts.J(1991.25)  # J1991.25
+    equinox = ts.J(2000)     # J2000
+
+    # Astrometric RA/dec in another equinox.
+    ra, dec, distance = astrometric.radec(equinox)
+
+The resulting coordinates will measure
+from the equinox and poles of the date you’ve specified.
 
 Astrometric position
 ====================
