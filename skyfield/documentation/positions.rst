@@ -48,10 +48,10 @@ The ICRS reference system and J2000
 
 .. TODO Make ra/dec and alt/az links to subsequent sections
 
-Even though most Skyfield users
-ask for output in spherical coordinates
-like right ascension and declination
-or altitude and azimuth,
+Even though Skyfield scripts often produce output
+in spherical coordinates —
+like right ascension and declination,
+or altitude and azimuth —
 Skyfield always stores positions internally
 as Cartesian |xyz| vectors
 oriented along the axes of the International Celestial Reference System (ICRS).
@@ -155,7 +155,9 @@ one for the observer and two for the body being observed.
 The three positions can be hard to find in Skyfield code
 because they are often created and used
 without ever being given a name.
-Let’s use a :doc:`planet <planets>` position as our example:
+As an example,
+let’s use an :doc:`ephemeris <planets>`
+to compute a geocentric position for Mars:
 
 .. testcode::
 
@@ -175,8 +177,9 @@ Let’s use a :doc:`planet <planets>` position as our example:
 
     Mars is 2.33 au from Earth
 
-The line that computes the distance ``d = …``
-creates three different Skyfield positions
+By chaining together four different methods,
+the line that computes the distance ``d = …``
+creates and discards three different Skyfield positions
 in a single line of code!
 To learn about them,
 the beginner will probably need to slow up and re-write that line
@@ -184,13 +187,16 @@ so each object is assigned a separate name:
 
 .. testcode::
 
+    # The “d =” line from the previous example,
+    # rewritten to give each position a name.
+
     barycentric = earth.at(t)
     astrometric = barycentric.observe(mars)
     apparent = astrometric.apparent()
     d = apparent.distance()
 
-This is a common Python pattern.
-By assigning names to intermediate values,
+This is a common Python pattern —
+by assigning names to intermediate values,
 the programmer can pivot between
 succinct code that fits on a single line
 and more verbose code that names each intermediate value,
@@ -200,13 +206,14 @@ we can discuss the three positions:
 
 * A :class:`Barycentric` position
   measures its |xyz| from the Solar System’s center of mass,
-  a frame of reference stationary enough
-  that a barycentric position is eligible
-  to :meth:`~Barycentric.observe()` other objects
-  and correctly compute where they will appear in the sky.
+  a frame of reference that’s inertial enough
+  to support the :meth:`~Barycentric.observe()` method,
+  which needs to apply effects like light travel time and relativity
+  to determine where a *target* object will appear in the sky.
+
   You’ll usually start a Skyfield script
   by generating a barycentric position
-  for the platform from which you’ll be observing,
+  for the *center* from which you’ll be observing —
   whether that’s the Earth,
   a specific location on the Earth’s surface,
   a satellite,
@@ -216,9 +223,9 @@ we can discuss the three positions:
   are coordinates in the Barycentric Celestial Reference System (BCRS).
 
 * An :class:`Astrometric` position
-  is returned by the :meth:`~Barycentric.observe()` method,
-  which takes a target object
-  and applies the effect of light travel time to the observer.
+  is returned by the :meth:`~Barycentric.observe()` method which,
+  given a target you want to observe,
+  applies the effect of light travel time.
   For example,
   on Earth we see the Moon not where it is right now,
   but where it was about 1.3 seconds ago
@@ -226,18 +233,20 @@ we can discuss the three positions:
   We see the Sun where it was 8 minutes ago,
   Jupiter where it was more than a half hour ago,
   and Neptune where it was about four hours ago.
-  The word “astrometric” is Greek for “star measure”
-  because it’s the position
-  where you would draw the target body on a star chart.
+
+.. TODO put this below
+   The word “astrometric” is Greek for “star measure”
+   because it’s the position
+   where you would draw the target body on a star chart.
 
 * An :class:`Apparent` position is computed
-  by calling the :meth:`~Astrometric.apparent()` method
-  of an astrometric position.
+  by calling an astrometric position’s
+  :meth:`~Astrometric.apparent()` method.
   This applies two real-world effects of relativity
   that slightly shift everything in the night sky:
   the aberration of light
-  produced by the Earth’s own motion through space,
-  and gravitational deflection
+  produced by the observer’s own motion through space,
+  and the gravitational deflection of light
   from masses like the Sun and Jupiter and the Earth itself.
   The result is an “apparent” position
   telling you where the target will really “appear” in tonight’s sky —
@@ -266,19 +275,17 @@ They support operations like:
 .. testcode::
 
     print('Earth x,y,z:', barycentric.position.au, 'au')
-    print('Mars velocity:', astrometric.velocity.au_per_d, 'au/day')
+    print('Mars relative velocity:', astrometric.velocity.km_per_s, 'km/s')
     print('Time of observation:', apparent.t.utc_strftime())
 
 .. testoutput::
 
     Earth x,y,z: [0.95554508 0.27716038 0.11997472] au
-    Mars velocity: [-0.00329848 -0.02350805 -0.01016779] au/day
+    Mars relative velocity: [ -5.71116775 -40.70318024 -17.60508242] km/s
     Time of observation: 2015-10-11 10:00:00 UTC
 
-.. TODO say Mars “relative” velocity above (might need more room)
-
 Note that the distance unit attributes
-like ``au``, ``km``, and ``m``
+like ``au`` and ``km``
 and the velocity unit attributes
 like ``au_per_d`` and ``km_per_s``
 are each three-element NumPy arrays offering |xyz| coordinates.
