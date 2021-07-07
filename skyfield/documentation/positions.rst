@@ -43,6 +43,24 @@ This document focuses
 on what you can do with positions once they’ve been computed,
 and on how position objects are used in Skyfield code.
 
+Quick reference
+===============
+
+For a succinct catalog of the attributes and methods
+offered by Skyfield’s position classes,
+follow these links to the API documentation.
+
+* :ref:`api:Astronomical positions`
+
+  All the attributes and methods of the core Skyfield position classes.
+
+* :ref:`api:Units`
+
+  Skyfield’s distance, velocity, and angle classes,
+  which offer simple attributes like ``km``
+  but also fancy methods like ``dstr()``
+  that formats an angle as degrees, minutes, and seconds.
+
 The ICRS reference system and J2000
 ===================================
 
@@ -87,64 +105,6 @@ here is where its axes point:
 The ICRS axes are within 0.02 arcseconds of the J2000 axes,
 so many scripts simply treat old J2000 coordinates
 as equivalent to modern ICRS coordinates.
-
-Quick reference
-===============
-
-Here is a quick reference to the three basic kinds of position,
-together with all of the attributes and methods that they support:
-
-.. parsed-literal::
-
-    Position attributes and methods
-     │
-     ├── `position <api-position.html#skyfield.positionlib.ICRF.position>`_.au         →   x, y, z
-     ├── `position <api-position.html#skyfield.positionlib.ICRF.position>`_.km         →   x, y, z
-     ├── `position <api-position.html#skyfield.positionlib.ICRF.position>`_.m          →   x, y, z
-     ├── `position <api-position.html#skyfield.positionlib.ICRF.position>`_.to(unit)   →   AstroPy distance units
-     │
-     ├── velocity.au_per_d   →   xdot, ydot, zdot
-     ├── velocity.km_per_s   →   xdot, ydot, zdot
-     ├── velocity.to(unit)   →   AstroPy velocity units
-     │
-     ├── `radec() <api-position.html#skyfield.positionlib.ICRF.radec>`_             →   ra, dec, distance (ICRF = J2000)
-     ├── `radec(epoch=t) <api-position.html#skyfield.positionlib.ICRF.radec>`_      →   ra, dec, distance (Equinox of time t)
-     ├── `distance() <api-position.html#skyfield.positionlib.ICRF.distance>`_          →   distance
-     ├── `separation_from(p2) <api-position.html#skyfield.positionlib.ICRF.separation_from>`_ →   angle
-     │
-     ├── `frame_xyz(frame) <api-position.html#skyfield.positionlib.ICRF.frame_xyz>`_    →   `Distance <api-units.html#skyfield.units.Distance>`_
-     ├── `frame_xyz_and_velocity(frame) <api-position.html#skyfield.positionlib.ICRF.frame_xyz_and_velocity>`_ → `Distance <api-units.html#skyfield.units.Distance>`_, `Velocity <api-units.html#skyfield.units.Velocity>`_
-     └── `frame_latlon() <api-position.html#skyfield.positionlib.ICRF.frame_latlon>`_      →   lat, lon, distance
-
-    Apparent position only
-     │
-     └── `altaz(…) <api-position.html#skyfield.positionlib.Apparent.altaz>`_            →   alt, az, distance
-
-    Angle like ra, dec, alt, and az
-     │
-     ├── `radians <api-units.html#skyfield.units.Angle.radians>`_             →   6.266029488577352
-     │
-     ├── `hours <api-units.html#skyfield.units.Angle.hours>`_               →   23.934469599999996
-     ├── `hstr() <api-units.html#skyfield.units.Angle.hstr>`_              →   '23h 56m 04.09s'
-     ├── `hstr(places=4) <api-units.html#skyfield.units.Angle.hstr>`_      →   '23h 56m 04.0906s'
-     ├── `hms() <api-units.html#skyfield.units.Angle.hms>`_               →   (23.0, 56.0, 4.0)
-     ├── `signed_hms() <api-units.html#skyfield.units.Angle.hms>`_        →   (1.0, 23.0, 56.0, 4.0)
-     │
-     ├── `degrees <api-units.html#skyfield.units.Angle.degrees>`_             →   359.017044
-     ├── `dstr() <api-units.html#skyfield.units.Angle.dstr>`_              →   '359deg 01\' 01.4"'
-     ├── `dstr(places=3) <api-units.html#skyfield.units.Angle.dstr>`_      →   '359deg 01\' 01.358"'
-     ├── `dms() <api-units.html#skyfield.units.Angle.dms>`_               →   (359.0, 1.0, 1.3584)
-     └── `signed_dms() <api-units.html#skyfield.units.Angle.signed_dms>`_        →   (1.0, 359.0, 1.0, 1.3584)
-
-The rest of this page is designed to explain
-all of the features outlined in the quick reference above.
-All hyperlinked attributes and method names,
-both in the text above and in the explanations below,
-lead to the low-level :doc:`api`
-which explains each option in even greater detail.
-
-What can you do with a position once it has been generated?
-The rest of this document is a complete tour of the possibilities.
 
 Barycentric → Astrometric → Apparent
 ====================================
