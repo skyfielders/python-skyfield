@@ -10,9 +10,9 @@ as |xyz| vectors that it calls *positions.*
 There are several kinds of celestial object
 for which Skyfield can produce a position.
 If there’s a particular kind of object you’re interested in,
-you might want to read its documentation first
+you might want to read its documentation first,
 then return here when you’re ready
-to learn more about the position objects that Skyfield returns:
+to learn more about the position objects that they generate:
 
 * `planets`
 * `stars`
@@ -20,8 +20,7 @@ to learn more about the position objects that Skyfield returns:
 * `kepler-orbits` (comets and asteroids)
 
 You can also build a position object yourself
-by passing |xyz| coordinates
-to any of the classes described in the sections below.
+by providing |xyz| coordinates to a position class.
 For example:
 
 .. testsetup::
@@ -75,26 +74,19 @@ as Cartesian |xyz| vectors
 oriented along the axes of the International Celestial Reference System (ICRS).
 
 The ICRS is a higher-accuracy replacement
-for the old J2000 reference system,
-which was defined by the orientation of the Earth’s mean equator
-on 2000 January 1 —
-raising the problem
-that we only know the Earth’s orientation
-to a certain precision.
-By contrast, the ICRS defines its axes
-using the positions of very distant quasars,
+for the old J2000 reference system.
+It’s defined using the positions of very distant quasars,
 so its precision can improve each decade
-as radio telescopes become more sensitive
-and measure quasar positions ever more accurately.
+as radio telescopes measure quasar positions ever more accurately.
 
 If you want to interact directly with ICRS |xyz| coordinates,
 here is where its axes point:
 
-* *x-axis* — Aims at the Vernal Equinox’s position on 2000 January 1,
+* *x-axis* — Aims at 2000 January 1 position of the Vernal Equinox,
   which is defined more technically
-  as the ascending node of the ecliptic on the celestial equator.
+  as the ascending node of the ecliptic on the mean celestial equator.
   Ancient astronomers called this “the first point of Ares”
-  but precession has gradually moved it into the constellation Pisces.
+  but precession has gradually shifted it into the constellation Pisces.
 
 * *y-axis* — Aims at the point 90° east of the Vernal Equinox
   along the celestial equator,
@@ -102,9 +94,9 @@ here is where its axes point:
 
 * *z-axis* — Aims at the North Celestial Pole.
 
-The ICRS axes are within 0.02 arcseconds of the J2000 axes,
-so many scripts simply treat old J2000 coordinates
-as equivalent to modern ICRS coordinates.
+The ICRS axes are within 0.02 arcseconds of the old J2000 axes,
+so many scripts simply treat J2000 coordinates
+as modern ICRS coordinates.
 
 Barycentric → Astrometric → Apparent
 ====================================
@@ -165,11 +157,10 @@ Now that we’ve given them names,
 we can discuss the three positions:
 
 * A :class:`Barycentric` position
-  measures its |xyz| from the Solar System’s center of mass,
+  measures from the Solar System’s center of mass,
+  so its |xyz| is in the Barycentric Celestial Reference System (BCRS) —
   a frame of reference that’s inertial enough
-  to support the :meth:`~Barycentric.observe()` method,
-  which needs to apply effects like light travel time and relativity
-  to determine where a *target* object will appear in the sky.
+  to support the :meth:`~Barycentric.observe()` method.
 
   You’ll usually start a Skyfield script
   by generating a barycentric position
@@ -179,20 +170,15 @@ we can discuss the three positions:
   a satellite,
   or another body like a planet or Moon.
 
-  More formally, a barycentric position’s |xyz|
-  are coordinates in the Barycentric Celestial Reference System (BCRS).
-
 * An :class:`Astrometric` position
-  is returned by the :meth:`~Barycentric.observe()` method which,
+  is returned by the :meth:`Barycentric.observe()` method which,
   given a target you want to observe,
   applies the effect of light travel time.
   For example,
-  on Earth we see the Moon not where it is right now,
-  but where it was about 1.3 seconds ago
-  when the light now reaching our eyes left its surface.
-  We see the Sun where it was 8 minutes ago,
-  Jupiter where it was more than a half hour ago,
-  and Neptune where it was about four hours ago.
+  on Earth we see the Moon where it was about 1.3 seconds ago,
+  the Sun where it was 8 minutes ago,
+  Jupiter where it was more than half an hour ago,
+  and Neptune where it was about 4 hours ago.
 
 .. TODO put this below
    The word “astrometric” is Greek for “star measure”
@@ -200,8 +186,7 @@ we can discuss the three positions:
    where you would draw the target body on a star chart.
 
 * An :class:`Apparent` position is computed
-  by calling an astrometric position’s
-  :meth:`~Astrometric.apparent()` method.
+  by calling the :meth:`Astrometric.apparent()` method.
   This applies two real-world effects
   that slightly shift everything in the night sky:
   the aberration of light
@@ -209,10 +194,10 @@ we can discuss the three positions:
   and the gravitational deflection of light
   that passes close to masses like the Sun and Jupiter —
   and, for an observer on the Earth’s surface,
-  the way incoming light is bent by the Earth itself.
+  for deflection produced by the Earth’s own gravity.
   The result is an “apparent” position
-  telling you where the target will really “appear” in tonight’s sky —
-  the direction in which you should point your telescope.
+  telling you where the target will really “appear” in tonight’s sky;
+  it’s the direction you should point your telescope.
 
   When an apparent position is measured from the Earth’s center,
   it can be described more formally
@@ -231,7 +216,7 @@ Five basic attributes are available on each position:
 The first three attributes listed above
 are simple instances of Skyfield’s distance, velocity, and time classes,
 which you can learn more about
-by clicking on the class names above.
+by clicking on their class names.
 They support operations like:
 
 .. testcode::
@@ -301,7 +286,7 @@ since they are measured with respect to the equator.
   that a star with an RA of 3\ |h| will climb to your meridian
   one hour later than a star with an RA of 2\ |h|.
 
-  The design of right ascension presented astronomers
+  This coordinate presented astronomers
   with the same challenge that longitude presented geographers:
   the arbitrary choice of a starting point.
   In the case of longitude,
@@ -310,12 +295,14 @@ since they are measured with respect to the equator.
   For RA,
   astronomers measure east from the Vernal Equinox,
   the point where the Sun crosses the celestial equator in March
-  as it crosses from the southern to the northern half of the sky.
+  as it passes from the southern to the northern half of the sky.
 
 * *Declination* (“Dec”)
   is the sky’s equivalent of latitude,
   measured north and south of the celestial equator
   in degrees, with north being positive.
+  The North Celestial Pole is at +90°
+  and the South Celestial Pole is at −90°.
 
 There are two common uses for RA/Dec coordinates.
 
