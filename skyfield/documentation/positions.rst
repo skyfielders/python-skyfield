@@ -242,12 +242,14 @@ we can discuss the three positions:
 * An :class:`Apparent` position is computed
   by calling an astrometric position’s
   :meth:`~Astrometric.apparent()` method.
-  This applies two real-world effects of relativity
+  This applies two real-world effects
   that slightly shift everything in the night sky:
   the aberration of light
   produced by the observer’s own motion through space,
   and the gravitational deflection of light
-  from masses like the Sun and Jupiter and the Earth itself.
+  that passes close to masses like the Sun and Jupiter —
+  and, for an observer on the Earth’s surface,
+  the way incoming light is bent by the Earth itself.
   The result is an “apparent” position
   telling you where the target will really “appear” in tonight’s sky —
   the direction in which you should point your telescope.
@@ -407,6 +409,14 @@ without an argument:
     Dec: +09deg 05' 09.2"
     Distance: 0.96678 au
 
+.. TODO add docstring to Angle as gentle introduction for API docs
+
+Here we have printed RA and declination using their default units.
+See the :class:`~skyfield.units.Angle` class documentation
+for the attributes and methods
+by which you can retrieve and format an angle’s value
+in units of your own choice.
+
 If your project specifically requires coordinates
 expressed in the RA/Dec of an older equinox,
 you can build a time object and pass it to  :meth:`~ICRF.radec()`:
@@ -484,118 +494,10 @@ that ignores aberration and deflection.
 
 .. TODO hour angle. xp yp. polar motion.
 
-Astrometric position
-====================
+.. TODO can generate observer position only once and use for N .observe() calls
 
-You might think that you could determine
-the position of Mars in the night sky of Earth
-by simply subtracting these two positions
-to generate the vector difference between them.
-But that would ignore the fact that light takes several minutes
-to travel between Mars and the Earth.
-The image of Mars in our sky
-does not show us where it *is*, right now,
-but where it *was* — several minutes ago —
-when the light now reaching our eyes or instruments
-actually left its surface.
+.. TODO move this to an accuracy page entry on aberration
 
-Correcting for the light-travel time
-does not simply fix a minor inconvenience,
-but reflects a very deep physical reality.
-Not only the light from Mars,
-but *all* of its physical effects,
-arrive no faster than the speed of light.
-As Mars tugs at the Earth with its gravity,
-we do not get pulled in the direction of the “real” Mars —
-we get tugged in the direction of its time-delayed image
-hanging in the sky above us!
-
-So Skyfield offers
-an :meth:`~skyfield.positionlib.Barycentric.observe()` method
-that carefully backdates the position of another object
-to determine where it was when it generated the image
-that we see in our sky:
-
-.. testcode::
-
-    # Observing Mars from the Earth's position
-
-    astrometric = earth.at(ts.utc(1980, 1, 1)).observe(mars)
-    print(astrometric.position.au)
-
-.. testoutput::
-
-    [-0.92909581  0.21939949  0.15266885]
-
-This light-delayed position is called the *astrometric* position,
-and is traditionally mapped on a star chart
-by the angles *right ascension* and *declination*
-that you can compute using the :meth:`~ICRF.radec()` method
-and display using their :meth:`~skyfield.units.Angle.hstr()`
-and :meth:`~skyfield.units.Angle.dstr()` methods:
-
-.. testcode::
-
-    # Astrometric RA and declination
-
-    ra, dec, distance = astrometric.radec()
-    print(ra.hstr())
-    print(dec.dstr())
-    print(distance)
-
-.. testoutput::
-
-    11h 06m 51.22s
-    +09deg 05' 09.2"
-    0.96678 au
-
-As we will explore in the next section,
-objects never appear at exactly the position in the sky
-predicted by the simple and ideal astrometric position.
-But it is useful for mapping the planet
-against the background of stars in a
-`printed star atlas <http://www.amazon.com/s/?_encoding=UTF8&camp=1789&creative=390957&linkCode=ur2&pageMinusResults=1&suo=1389754954253&tag=letsdisthemat-20&url=search-alias%3Daps#/ref=nb_sb_noss_1?url=search-alias%3Daps&field-keywords=star%20atlas&sprefix=star+%2Caps&rh=i%3Aaps%2Ck%3Astar%20atlas&sepatfbtf=true&tc=1389754955568>`_,
-because star atlases use astrometric positions.
-
-If you have several bodies for which you want to generate positions,
-note that it’s more efficient to generate the observer’s position only once
-and then re-use that position for each object you want to observe.
-
-.. testcode::
-
-    # Observing Mars from the Earth's position
-
-    mercury, venus = planets['mercury'], planets['venus']
-
-    here = earth.at(ts.utc(2018, 5, 19))
-    print(here.observe(mercury).position.au)
-    print(here.observe(venus).position.au)
-
-.. testoutput::
-
-    [0.894231   0.67436002 0.24448674]
-    [0.02134722 1.22511631 0.57114432]
-
-.. _apparent:
-
-Apparent position
-=================
-
-To determine the position of an object in the night sky
-with even greater accuracy,
-two further effects must be taken into account:
-
-* **Deflection** —
-  The object’s light is bent,
-  and thus its image displaced,
-  if the light passes close to another large mass
-  on its way to the observer.
-  This will happen if the object lies very near to the Sun in the sky,
-  for example, or is nearly behind Jupiter.
-  The effect is small,
-  but must be taken into account for research-grade results.
-
-* **Aberration** —
   The velocity of the Earth itself through space
   adds a very slight slant to light arriving at our planet,
   in the same way that rain or snow
@@ -606,75 +508,6 @@ two further effects must be taken into account:
   that only in 1728 was it finally observed and explained,
   when James Bradley realized that it provided the long-awaited proof
   that the Earth is indeed in motion in an orbit around the Sun.
-
-Skyfield lets you apply both of these effects
-by invoking the :meth:`~skyfield.positionlib.Astrometric.apparent()` method
-on an astrometric position.
-Like an astrometric position, an apparent position
-is typically expressed as the angles
-*right ascension* and *declination*:
-
-.. testcode::
-
-    # Apparent GCRS ("J2000.0") coordinates
-
-    apparent = astrometric.apparent()
-    ra, dec, distance = apparent.radec()
-
-    print(ra.hstr())   # Unusual choice: usually apparent positions
-    print(dec.dstr())  # are not expressed as ICRF/J2000 coordinates
-    print(distance)
-
-.. testoutput::
-
-    11h 06m 51.75s
-    +09deg 05' 04.7"
-    0.96678 au
-
-But printing apparent coordinates in ICRF coordinates like this
-is an unusual choice.
-You are unlikely to find the two values above
-if you look up the position of Mars on 1980 January 1
-in an almanac or by using other astronomy software.
-
-Instead, apparent positions are usually expressed
-relative to the Earth’s real equator and poles
-as its rolls and tumbles through space —
-which, after all,
-is how right ascension and declination were defined
-through most of human history,
-before the invention of the ICRF axes.
-The Earth’s equator and poles move at least slightly every day,
-and move by larger amounts as years add up to centuries.
-
-To ask for right ascension and declination
-relative to the real equator and poles of Earth,
-and not the ideal permanent axes of the ICRF,
-simply add the keyword argument ``epoch='date'``
-when you ask the apparent position for coordinates:
-
-.. testcode::
-
-    # Coordinates relative to true equator and equinox
-
-    ra, dec, distance = apparent.radec(epoch='date')
-
-    print(ra.hstr())
-    print(dec.dstr())
-    print(distance)
-
-.. testoutput::
-
-    11h 05m 48.68s
-    +09deg 11' 35.7"
-    0.96678 au
-
-These are the coordinates
-that should match other astronomy software
-and the data in the
-`Astronomical Almanac <http://www.amazon.com/s/?_encoding=UTF8&camp=1789&creative=390957&field-keywords=astronomical%20almanac&linkCode=ur2&tag=letsdisthemat-20&url=search-alias%3Daps>`_,
-and are sometimes said to be expressed
-in the “dynamical reference system” defined by the Earth itself.
 
 Azimuth and altitude
 ====================
