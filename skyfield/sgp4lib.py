@@ -192,7 +192,7 @@ class EarthSatellite(VectorFunction):
         R = _T(TEME.rotation_at(t))
         r = mxv(R, r)
         v = mxv(R, v)
-        return r, v, r, error
+        return r, v, None, error
 
     def find_events(self, topos, t0, t1, altitude_degrees=0.0):
         """Return the times at which the satellite rises, culminates, and sets.

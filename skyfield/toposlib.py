@@ -46,7 +46,7 @@ class ITRSPosition(VectorFunction):
         RT = _T(itrs.rotation_at(t))
         r = mxv(RT, r)
         v = mxv(RT, v)
-        return r, v, r, None
+        return r, v, None, None
 
 class GeographicPosition(ITRSPosition):
     """The position of a latitude and longitude on Earth.

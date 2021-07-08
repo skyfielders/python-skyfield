@@ -183,8 +183,8 @@ class ReversedVector(VectorFunction):
         return self.vector_function
 
     def _at(self, t):
-        p, v, gcrs_position, message = self.vector_function._at(t)
-        return -p, -v, gcrs_position, message
+        p, v, _, message = self.vector_function._at(t)
+        return -p, -v, None, message
 
 class VectorSum(VectorFunction):
     def __init__(self, center, target, vector_functions):
@@ -211,12 +211,15 @@ class VectorSum(VectorFunction):
     def _at(self, t):
         p, v = 0.0, 0.0
         gcrs_position = None
-        for vf in self.vector_functions:
-            p2, v2, another_gcrs_position, message = vf._at(t)
-            if gcrs_position is None:  # TODO: so bootleg; rework whole idea
-                gcrs_position = another_gcrs_position
+        vfs = self.vector_functions
+        for vf in vfs:
+            p2, v2, _, message = vf._at(t)
+            if vf.center == 399:
+                gcrs_position = -p
             p += p2
             v += v2
+        if vfs[0].center == 0 and vf.center == 399:
+            gcrs_position = p2
         return p, v, gcrs_position, message
 
 def _correct_for_light_travel_time(observer, target):
