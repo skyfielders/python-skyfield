@@ -50,6 +50,17 @@ def test_oppositions_conjunctions():
     assert strings == ['2019-09-02 10:42', '2020-10-13 23:26']
     assert (y == (0, 1)).all()
 
+def test_oppositions_conjunctions_of_moon():
+    ts = api.load.timescale()
+    t0 = ts.utc(2019, 1, 1)
+    t1 = ts.utc(2019, 2, 1)
+    e = api.load('de421.bsp')
+    f = almanac.oppositions_conjunctions(e, e['moon'])
+    t, y = almanac.find_discrete(t0, t1, f)
+    strings = t.utc_strftime('%Y-%m-%d %H:%M')
+    assert strings == ['2019-01-06 01:28', '2019-01-21 05:16']
+    assert (y == (1, 0)).all()
+
 # Compare with USNO:
 # http://aa.usno.navy.mil/rstt/onedaytable?ID=AA&year=2018&month=9&day=12&state=OH&place=Bluffton
 

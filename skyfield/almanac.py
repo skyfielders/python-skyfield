@@ -182,7 +182,10 @@ def oppositions_conjunctions(ephemeris, target):
         _, tlon, _ = e.observe(target).apparent().ecliptic_latlon()
         return ((slon.radians - tlon.radians) / pi % 2.0).astype('int8')
 
-    leading_or_trailing.step_days = 40  # Mercury
+    if target.target == 301:
+        leading_or_trailing.step_days = 14  # Moon
+    else:
+        leading_or_trailing.step_days = 40  # Mercury (the fastest planet)
     return leading_or_trailing
 
 MERIDIAN_TRANSITS = ['Antimeridian transit', 'Meridian transit']
