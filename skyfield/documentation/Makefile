@@ -66,7 +66,8 @@ html:
 		underscore.js \
 		up-pressed.png \
 		up.png \
-		websupport.js
+		websupport.js \
+		../searchindex.js
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
