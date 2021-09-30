@@ -886,8 +886,8 @@ def ITRF_to_GCRS2(t, rITRF, vITRF, _high_accuracy=False):
     R = mxm(t.MT, spin)
 
     z = 0.0 * angvel
-    import numpy as np
-    V = np.array((
+
+    V = array((
         (z,-DAY_S * angvel,z),
         (DAY_S * angvel,z,z),
         (z,z,z),
