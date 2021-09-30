@@ -10,6 +10,31 @@ forget.
 Sprint Possibilities
 ====================
 
+* If a user builds a ``wgs84.latlon()``, and then calls its ``at()`` to
+  get a position, and then tries to use it to ``observe()``, then they
+  get::
+
+    AttributeError: 'Geocentric' object has no attribute 'observe'
+
+  This might be what I’ve been looking for: a refutation of the idea
+  that position classes should have different methods.  My idea had been
+  that if only the ``Barycentric`` class had ``observe()``, that users
+  couldn’t call it on the wrong sort of position.
+
+  That plan might have worked if users all used IDEs that prevented them
+  from typing ``.observe()`` on a class with no such method.  But even
+  then, it would offer no help in how to get hold of a class that did
+  have the method.
+
+  But when typing in an editor, nothing stops them from typing
+  ``.observe()``, and the error they get back gives zero information
+  about how to fix the problem — generating a support load for the
+  maintainer on GitHub.
+
+  We should look at what it would be like for ``.observe()`` to be on
+  all positions, and raise informative exceptions for positions to which
+  it doesn’t apply.
+
 * Incorporate historical polar x and y (link shared in #372):
   https://datacenter.iers.org/data/latestVersion/186_EOP_C01_2000.1846_NOW_V2013_01186.txt
 
