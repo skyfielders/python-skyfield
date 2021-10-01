@@ -54,3 +54,23 @@
    .. method:: at(t)
 
       Return the position of this Earth location at time ``t``.
+
+.. autoclass:: ITRSPosition
+   :members:
+
+   This |xyz| vector has no knowledge
+   of standard geoids, latitude, or longitude,
+   but is convenient if you already know
+   the rectangular coordinates of a target’s location:
+
+   .. testcode::
+
+    from skyfield.api import Distance
+    from skyfield.toposlib import ITRSPosition
+
+    d = Distance(km=[-3918, -1887, 5209])
+    p = ITRSPosition(d)
+
+   .. method:: at(t)
+
+      Return the GCRS position of this ITRS coordinate at time ``t``.
