@@ -1,7 +1,7 @@
 
-=======================================
- API Reference — Topocentric Locations
-=======================================
+======================================
+ API Reference — Geographic Locations
+======================================
 
 .. currentmodule:: skyfield.toposlib
 
@@ -14,21 +14,30 @@
 .. autoclass:: GeographicPosition
    :members:
 
+   .. attribute:: model
+
+      The :class:`Geoid`, like WGS84 or IERS2010,
+      that this position uses to map longitude, latitude, and elevation
+      to a three-dimensional Cartesian position.
+
    .. attribute:: latitude
 
       An :class:`~skyfield.units.Angle` object
       specifying the latitude of the topocentric position.
+      The north pole has latitude +90°.
 
    .. attribute:: longitude
 
       An :class:`~skyfield.units.Angle` object
       specifying the longitude of the topocentric position.
+      East is positive.
 
    .. attribute:: elevation
 
       A :class:`~skyfield.units.Distance` object
-      specifying the elevation of the topocentric position
-      above mean sea level on a WGS-84 globe.
+      specifying an elevation above (positive) or below (negative)
+      the mean sea level of the Earth ellipsoid
+      specified by this position’s :attr:`~GeographicPosition.model`.
 
    .. attribute:: itrs_xyz
 

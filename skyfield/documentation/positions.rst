@@ -60,6 +60,8 @@ follow these links to the API documentation.
   but also fancy methods like ``dstr()``
   that formats an angle as degrees, minutes, and seconds.
 
+.. _ICRS:
+
 The ICRS reference system and J2000
 ===================================
 
@@ -333,10 +335,11 @@ This requires RA/Dec coordinates to specify which year’s “equinox”
 their right ascension is measured from,
 which will also be the year whose poles and equator they use.
 
-The modern standard for astrometric RA/Dec is the ICRS,
-described above,
-which having been fixed in the directions of the J2000 equinox and poles
-is now permanent and will never suffer precession.
+The modern standard for astrometric RA/Dec is the ICRS
+(:ref:`described above <ICRS>`).
+With axes that are fixed in the directions of the J2000 equinox and poles,
+the ICRS is a permanent coordinate system
+that will never suffer precession.
 Skyfield returns ICRS coordinates
 if you simply call :meth:`~ICRF.radec()`
 without an argument:
@@ -370,7 +373,8 @@ you can build a time object and pass it to  :meth:`~ICRF.radec()`:
 
 .. testcode::
 
-    # Astrometric RA/Dec relative to another equinox.
+    # Astrometric RA/Dec relative to another equinox:
+    # the J1991.25 epoch used by the Hipparcos catalog.
 
     equinox = ts.J(1991.25)
     ra, dec, distance = astrometric.radec(equinox)
@@ -389,8 +393,8 @@ with RA/Dec coordinates of some other era.
 You’ll want them measured against where the Earth’s poles
 are really pointing tonight.
 
-Skyfield uses the high precision IAU 2000A standard
-for both the precession that carries the Earth’s poles
+Skyfield uses the high precision IAU 2000A model
+to compute both the precession that carries the Earth’s poles
 in their 26,000-year circle around the sky
 and also the short term wobbles in the Earth’s orientation
 that are called nutation.
@@ -400,8 +404,7 @@ on a given date.
 
 When pointing a telescope,
 always use apparent coordinates,
-since you will want every possible effect accounted for
-that produces the position of your target in the sky.
+since you will want every possible real-world effect accounted for.
 
 While you could pass each position’s time
 to its own :meth:`~ICRF.radec()` method,
@@ -456,20 +459,20 @@ that ignores aberration and deflection.
   when James Bradley realized that it provided the long-awaited proof
   that the Earth is indeed in motion in an orbit around the Sun.
 
-Azimuth and altitude
-====================
+Azimuth and altitude from a geographic position
+===============================================
 
 The final result that many users seek
 is the altitude and azimuth of an object
 above their own local horizon.
 
 * *Altitude* measures the angle above or below the horizon.
-  The great circle of the horizon itself has 0° altitude,
-  while a positive number gives the number of degrees above the horizon.
+  The zenith is at +90°,
+  an object on the horizon’s great circle is at 0°,
+  and the nadir beneath your feet is at −90°.
 
-* *Azimuth* measures the angle around the sky from the north pole.
-  Thus 0° means that the object is exactly north,
-  90° directly east, 180° directly south, and 270° directly west.
+* *Azimuth* measures the angle around the sky from the north pole:
+  0° means exactly north, 90° is east, 180° is south, and 270° is west.
 
 Altitude and azimuth are computed
 by calling the :meth:`~Apparent.altaz()` method on an apparent position.

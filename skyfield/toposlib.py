@@ -49,7 +49,7 @@ class ITRSPosition(VectorFunction):
         return r, v, None, None
 
 class GeographicPosition(ITRSPosition):
-    """The position of a latitude and longitude on Earth.
+    """A latitude-longitude position on Earth.
 
     Each instance of this class holds an |xyz| vector for a geographic
     position on (or above, or below) the Earth’s surface, in the ITRS
@@ -118,7 +118,7 @@ class GeographicPosition(ITRSPosition):
         return angular_velocity_matrix(R)
 
 class Geoid(object):
-    """An Earth ellipsoid; maps latitudes and longitudes to |xyz| positions."""
+    """An Earth ellipsoid: maps latitudes and longitudes to |xyz| positions."""
 
     def __init__(self, name, radius_m, inverse_flattening):
         self.name = name
@@ -171,7 +171,7 @@ class Geoid(object):
         return cls(self, latitude, longitude, elevation, Distance(au=r))
 
     def subpoint(self, position):
-        """Return Earth latitude and longitude beneath a celestial ``position``.
+        """Express a ``position`` in Earth latitude, longitude, and elevation.
 
         The input ``position`` should have a center of 399, the
         geocenter.  The return value is a `GeographicPosition` whose
