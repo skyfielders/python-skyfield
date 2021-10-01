@@ -785,6 +785,20 @@ and otherwise recording the propagator error:
 
 .. _from-satrec:
 
+Build a satellite with a specific gravity model
+-----------------------------------------------
+
+If your satellite elements
+are designed for another gravity model besides the default WGS72 model,
+then use the underlying ``sgp4`` module to build the satellite.
+It will let you customize the choice of gravity model:
+
+.. testcode::
+
+    from sgp4.api import Satrec, WGS84
+    satrec = Satrec.twoline2rv(line1, line2, WGS84)
+    sat = EarthSatellite.from_satrec(satrec, ts)
+
 Build a satellite from orbital elements
 ---------------------------------------
 
