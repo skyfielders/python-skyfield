@@ -36,6 +36,23 @@ def test_jupiter_magnitude_function():
     expected = [-1.667, -2.934, 0.790]
     assert all(magnitudes - expected < 0.0005)
 
+def test_mars_magnitude_function():
+    mag = m._mars_magnitude(1.381191244505, 0.37274381097911, 4.8948)
+    assert abs(-2.862 - mag) < 0.1
+    mag = m._mars_magnitude(1.664150453905, 2.58995164518460, 11.5877)
+    assert abs(1.788 - mag) < 0.1
+    mag = m._mars_magnitude(1.591952180003, 3.85882552272013, 167.9000)
+    assert abs(8.977 - mag) < 0.1
+
+    args = [
+        A[1.381191244505, 1.664150453905, 1.591952180003],
+        A[0.37274381097911, 2.58995164518460, 3.85882552272013],
+        A[4.8948, 11.5877, 167.9000],
+    ]
+    magnitudes = m._mars_magnitude(*args)
+    expected = [-2.862, 1.788, 8.977]
+    assert all(magnitudes - expected < 0.1)
+
 def test_mercury_magnitude_function():
     mag = m._mercury_magnitude(0.310295423552, 1.32182643625754, 1.1677)
     assert abs(-2.477 - mag) < 0.0005

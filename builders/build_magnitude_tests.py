@@ -32,6 +32,8 @@ from skyfield.tests.conventions import A""")
                 args = fields[4], fields[6], fields[8]
             elif planet == 'venus':
                 args = fields[4], fields[6], fields[10]
+            elif planet == 'mars':
+                args = fields[10], fields[12], fields[16]
             elif planet == 'uranus':
                 args = fields[8], fields[10], fields[12], fields[7], fields[5]
             else:
@@ -40,13 +42,20 @@ from skyfield.tests.conventions import A""")
             tests[planet].append((args, answer))
 
     for planet, test_list in sorted(tests.items()):
+        tolerance = (
+            # Mars rotation effects are not yet written up.
+            '0.1' if planet == 'mars'
+            # Other planets should match to high precision.
+            else '0.0005'
+        )
+
         if not test_list:
             continue
         print('\ndef test_{}_magnitude_function():'.format(planet))
         for args, answer in test_list:
             joined = ', '.join(str(arg) for arg in args)
             print(f'    mag = m._{planet}_magnitude({joined})')
-            print(f'    assert abs({answer} - mag) < 0.0005')
+            print(f'    assert abs({answer} - mag) < {tolerance}')
 
         print()
         print('    args = [')
@@ -57,7 +66,7 @@ from skyfield.tests.conventions import A""")
         print(f'    magnitudes = m._{planet}_magnitude(*args)')
         joined = ', '.join(answer for args, answer in test_list)
         print(f'    expected = [{joined}]')
-        print('    assert all(magnitudes - expected < 0.0005)')
+        print(f'    assert all(magnitudes - expected < {tolerance})')
 
 if __name__ == '__main__':
     main(sys.argv[1:])

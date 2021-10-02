@@ -92,9 +92,49 @@ def _venus_magnitude(r, delta, ph_ang):
     return -4.384 + distance_mag_factor + ph_ang_factor
 
 def _earth_magnitude(r, delta, ph_ang):
-    distance_mag_factor = 5 * log10 (r * delta)
+    distance_mag_factor = 5 * log10(r * delta)
     ph_ang_factor = -1.060e-03 * ph_ang + 2.054e-04 * ph_ang**2
     return -3.99 + distance_mag_factor + ph_ang_factor
+
+def _mars_magnitude(r, delta, ph_ang):
+    r_mag_factor = 2.5 * log10(r * r)
+    delta_mag_factor = 2.5 * log10(delta * delta)
+    distance_mag_factor = r_mag_factor + delta_mag_factor
+
+    geocentric_phase_angle_limit = 50.0
+
+    condition = ph_ang <= geocentric_phase_angle_limit
+    a = where(condition, 2.267E-02, - 0.02573)
+    b = where(condition, - 1.302E-04, 0.0003445)
+    ph_ang_factor = a * ph_ang + b * ph_ang**2
+
+    # Compute the effective central meridian longitude
+    # eff_CM = ( sub_earth_long + sub_sun_long ) / 2.
+    # if ( abs ( sub_earth_long - sub_sun_long ) > 180. ):
+    #     Eff_CM = Eff_CM + 180.
+    # if ( Eff_CM > 360. ):
+    #     Eff_CM = Eff_CM - 360.
+
+    # ! Use Stirling interpolation to determine the magnitude correction
+    # call Mars_Stirling ( 'R', eff_CM, mag_corr_rot )
+
+    # Convert the ecliptic longitude to Ls
+    # Ls = h_ecl_long + Ls_offset
+    # if ( Ls > 360. ) Ls = Ls - 360.
+    # if ( Ls <   0. ) Ls = Ls + 360.
+
+    # Use Stirling interpolation to determine the magnitude correction
+    # call Mars_Stirling ( 'O', Ls, mag_corr_orb )
+
+    # Until effects from Mars rotation are written up:
+    mag_corr_rot = 0.0
+    mag_corr_orb = 0.0
+
+    # Add factors to determine the apparent magnitude
+    ap_mag = where(ph_ang <= geocentric_phase_angle_limit, -1.601, -0.367)
+    ap_mag += distance_mag_factor + ph_ang_factor + mag_corr_rot + mag_corr_orb
+
+    return ap_mag
 
 def _jupiter_magnitude(r, delta, ph_ang):
     distance_mag_factor = 5 * log10(r * delta)
