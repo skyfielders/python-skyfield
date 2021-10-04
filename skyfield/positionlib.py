@@ -97,7 +97,7 @@ class ICRF(object):
     def __init__(self, position_au, velocity_au_per_d=None, t=None,
                  center=None, target=None):
         self.t = t
-        self.position = Distance(position_au)
+        self.position = self.xyz = Distance(position_au)
         if velocity_au_per_d is None:
             velocity_au_per_d = full(self.position.au.shape, nan)
         self.velocity = Velocity(velocity_au_per_d)
