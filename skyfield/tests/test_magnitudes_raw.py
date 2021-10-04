@@ -1,4 +1,6 @@
 
+import numpy as np
+from numpy import nan
 from skyfield import magnitudelib as m
 from skyfield.tests.conventions import A
 
@@ -17,7 +19,7 @@ def test_earth_magnitude_function():
     ]
     magnitudes = m._earth_magnitude(*args)
     expected = [-3.269, -6.909, 1.122]
-    assert all(magnitudes - expected < 0.0005)
+    np.allclose(magnitudes, expected, 0, 0.0005, equal_nan=True)
 
 def test_jupiter_magnitude_function():
     mag = m._jupiter_magnitude(5.446231815414, 6.44985867459088, 0.2446)
@@ -34,7 +36,7 @@ def test_jupiter_magnitude_function():
     ]
     magnitudes = m._jupiter_magnitude(*args)
     expected = [-1.667, -2.934, 0.790]
-    assert all(magnitudes - expected < 0.0005)
+    np.allclose(magnitudes, expected, 0, 0.0005, equal_nan=True)
 
 def test_mars_magnitude_function():
     mag = m._mars_magnitude(1.381191244505, 0.37274381097911, 4.8948)
@@ -51,7 +53,7 @@ def test_mars_magnitude_function():
     ]
     magnitudes = m._mars_magnitude(*args)
     expected = [-2.862, 1.788, 8.977]
-    assert all(magnitudes - expected < 0.1)
+    np.allclose(magnitudes, expected, 0, 0.1, equal_nan=True)
 
 def test_mercury_magnitude_function():
     mag = m._mercury_magnitude(0.310295423552, 1.32182643625754, 1.1677)
@@ -68,7 +70,29 @@ def test_mercury_magnitude_function():
     ]
     magnitudes = m._mercury_magnitude(*args)
     expected = [-2.477, 0.181, 7.167]
-    assert all(magnitudes - expected < 0.0005)
+    np.allclose(magnitudes, expected, 0, 0.0005, equal_nan=True)
+
+def test_saturn_magnitude_function():
+    mag = m._saturn_magnitude(9.014989659493, 8.03160470546889, 0.1055, -31.19, -31.31, True)
+    assert abs(-0.552 - mag) < 0.0005
+    mag = m._saturn_magnitude(9.438629261423, 8.47601935508925, 1.8569, -9.82, -9.14, False)
+    assert abs(0.567 - mag) < 0.0005
+    mag = m._saturn_magnitude(9.026035315474, 10.1321497654765, 169.8958, 34.37, -31.69, False)
+    assert abs(5.206 - mag) < 0.0005
+    mag = m._saturn_magnitude(9.026035315474, 10.1321497654765, 169.8958, 34.37, -31.69, True)
+    assert np.isnan(mag)
+
+    args = [
+        A[9.014989659493, 9.438629261423, 9.026035315474, 9.026035315474],
+        A[8.03160470546889, 8.47601935508925, 10.1321497654765, 10.1321497654765],
+        A[0.1055, 1.8569, 169.8958, 169.8958],
+        A[-31.19, -9.82, 34.37, 34.37],
+        A[-31.31, -9.14, -31.69, -31.69],
+        A[True, False, False, True],
+    ]
+    magnitudes = m._saturn_magnitude(*args)
+    expected = [-0.552, 0.567, 5.206, nan]
+    np.allclose(magnitudes, expected, 0, 0.0005, equal_nan=True)
 
 def test_uranus_magnitude_function():
     mag = m._uranus_magnitude(18.321003215845, 17.3229728525108, 0.0410, -20.29, -20.28)
@@ -87,7 +111,7 @@ def test_uranus_magnitude_function():
     ]
     magnitudes = m._uranus_magnitude(*args)
     expected = [5.381, 6.025, 8.318]
-    assert all(magnitudes - expected < 0.0005)
+    np.allclose(magnitudes, expected, 0, 0.0005, equal_nan=True)
 
 def test_venus_magnitude_function():
     mag = m._venus_magnitude(0.722722540169, 1.71607489554051, 1.3232)
@@ -104,4 +128,4 @@ def test_venus_magnitude_function():
     ]
     magnitudes = m._venus_magnitude(*args)
     expected = [-3.917, -4.916, -3.090]
-    assert all(magnitudes - expected < 0.0005)
+    np.allclose(magnitudes, expected, 0, 0.0005, equal_nan=True)

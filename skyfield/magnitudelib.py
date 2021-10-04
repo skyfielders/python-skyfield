@@ -22,7 +22,7 @@ Ap_Mag_Input_V3.txt
 * ``ph_ang`` illumination phase angle (degrees)
 
 """
-from numpy import log10, where
+from numpy import arctan, exp, log10, nan, sin, sqrt, tan, where
 from .constants import RAD2DEG
 from .functions import angle_between, length_of
 from .naifcodes import _target_name
@@ -153,6 +153,63 @@ def _jupiter_magnitude(r, delta, ph_ang):
         -9.395 + distance_mag_factor + ph_ang_factor,
         -9.428 + distance_mag_factor + ph_ang_factor,
     )
+    return ap_mag
+
+def _saturn_magnitude(r, delta, ph_ang, sun_sub_lat_geoc, earth_sub_lat_geoc,
+                      rings=True):
+    r_mag_factor = 2.5 * log10(r * r)
+    delta_mag_factor = 2.5 * log10(delta * delta)
+    distance_mag_factor = r_mag_factor + delta_mag_factor
+
+    e2 = 0.8137e0  # eccentricity squared of Saturn ellipse
+
+    # Compute the effective sub-latitude
+    # First convert geodetic to geocentric
+    sun_sub_lat_geoc = arctan(e2 * tan(sun_sub_lat_geoc / RAD2DEG)) * RAD2DEG
+    earth_sub_lat_geoc = arctan(e2 * tan(earth_sub_lat_geoc / RAD2DEG)) \
+        * RAD2DEG
+
+    # Then take the square root of the product of the saturnicentric
+    # latitude of the Sun and that of Earth but set to zero when the
+    # signs are opposite
+    product = sun_sub_lat_geoc * earth_sub_lat_geoc
+    sub_lat_geoc = product ** where(product >= 0.0, 0.5, 0.0)
+
+    # Compute the effect of phase angle and inclination
+
+    geocentric_phase_angle_limit = 6.5
+    geocentric_inclination_limit = 27.0
+
+    is_within_geocentric_bounds = (
+        (ph_ang <= geocentric_phase_angle_limit)
+        & (sub_lat_geoc <= geocentric_inclination_limit)
+    )
+
+    ap_mag = where(
+        is_within_geocentric_bounds,
+        where(
+            rings,
+
+            # Use equation #10 for globe+rings and geocentric circumstances.
+            -8.914 - 1.825 * sin(sub_lat_geoc / RAD2DEG) + 0.026 * ph_ang
+            - 0.378 * sin(sub_lat_geoc / RAD2DEG) * exp(-2.25 * ph_ang),
+
+            # Use equation #11 for globe-alone and geocentric circumstances
+            -8.95 - 3.7e-4 * ph_ang + 6.16e-4 * ph_ang**2,
+        ),
+        where(
+            (ph_ang > geocentric_phase_angle_limit) & (~rings),
+
+            # Use equation #12 for globe-alone beyond geocentric phase
+            # angle limit
+            -8.94 + 2.446e-4 * ph_ang + 2.672e-4 * ph_ang**2
+            - 1.506e-6 * ph_ang**3 +4.767e-9 * ph_ang**4,
+
+            nan,
+        ),
+    )
+
+    ap_mag = ap_mag + distance_mag_factor
     return ap_mag
 
 def _uranus_magnitude(r, delta, ph_ang,

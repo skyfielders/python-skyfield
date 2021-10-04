@@ -16,6 +16,8 @@ def main(argv):
         lines = f.read().splitlines()
 
     print("""
+import numpy as np
+from numpy import nan
 from skyfield import magnitudelib as m
 from skyfield.tests.conventions import A""")
 
@@ -40,6 +42,14 @@ from skyfield.tests.conventions import A""")
                 continue
             answer = fields[-1]
             tests[planet].append((args, answer))
+        elif line[0] == ' ' and line[1] in 'TF' and planet == 'saturn':
+            fields = line.split()
+            args = (
+                fields[9], fields[11], fields[15],
+                fields[6], fields[8], str(fields[0] == 'T'),
+            )
+            answer = fields[16] if len(fields) > 16 else 'nan'
+            tests[planet].append((args, answer))
 
     for planet, test_list in sorted(tests.items()):
         tolerance = (
@@ -55,7 +65,10 @@ from skyfield.tests.conventions import A""")
         for args, answer in test_list:
             joined = ', '.join(str(arg) for arg in args)
             print(f'    mag = m._{planet}_magnitude({joined})')
-            print(f'    assert abs({answer} - mag) < {tolerance}')
+            if answer == 'nan':
+                print(f'    assert np.isnan(mag)')
+            else:
+                print(f'    assert abs({answer} - mag) < {tolerance}')
 
         print()
         print('    args = [')
@@ -66,7 +79,8 @@ from skyfield.tests.conventions import A""")
         print(f'    magnitudes = m._{planet}_magnitude(*args)')
         joined = ', '.join(answer for args, answer in test_list)
         print(f'    expected = [{joined}]')
-        print(f'    assert all(magnitudes - expected < {tolerance})')
+        print(f'    np.allclose(magnitudes, expected, 0, {tolerance},'
+              ' equal_nan=True)')
 
 if __name__ == '__main__':
     main(sys.argv[1:])
