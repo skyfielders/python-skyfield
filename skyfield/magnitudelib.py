@@ -30,9 +30,9 @@ from .naifcodes import _target_name
 def planetary_magnitude(position):
     """Given the position of a planet, return its visual magnitude.
 
-    This prototype function — which so far only supports Mercury, Venus,
-    Earth, Jupiter, and Uranus — computes the visual magnitude of a
-    planet, given its position relative to an observer.
+    This prototype function, which supports all the major planets except
+    Saturn, computes the visual magnitude of a planet given its position
+    relative to an observer.
 
     >>> from skyfield.api import load
     >>> from skyfield.magnitudelib import planetary_magnitude
@@ -62,6 +62,10 @@ def planetary_magnitude(position):
     r = length_of(sun_to_planet)
     delta = length_of(observer_to_planet)
     ph_ang = angle_between(-sun_to_planet, -observer_to_planet) * RAD2DEG
+
+    if function is _neptune_magnitude:
+        year = position.t.J
+        return function(r, delta, ph_ang, year)
 
     return function(r, delta, ph_ang)
 
@@ -259,12 +263,18 @@ _FUNCTIONS = {
     199: _mercury_magnitude,
     299: _venus_magnitude,
     399: _earth_magnitude,
+    499: _mars_magnitude,
     599: _jupiter_magnitude,
+    #699: _saturn_magnitude,
     799: _uranus_magnitude,
+    899: _neptune_magnitude,
 
     # Some planets can be reasonably identified with their barycenter.
     1: _mercury_magnitude,
     2: _venus_magnitude,
+    4: _mars_magnitude,
     5: _jupiter_magnitude,
+    #6: _saturn_magnitude,
     7: _uranus_magnitude,
+    8: _neptune_magnitude,
 }
