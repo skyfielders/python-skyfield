@@ -22,7 +22,7 @@ Ap_Mag_Input_V3.txt
 * ``ph_ang`` illumination phase angle (degrees)
 
 """
-from numpy import arctan, exp, log10, nan, sin, sqrt, tan, where
+from numpy import arctan, clip, exp, log10, nan, sin, sqrt, tan, where
 from .constants import RAD2DEG
 from .functions import angle_between, length_of
 from .naifcodes import _target_name
@@ -225,6 +225,34 @@ def _uranus_magnitude(r, delta, ph_ang,
         (1.045e-4 * ph_ang + 6.587e-3) * ph_ang,
         0.0,
     )
+    return ap_mag
+
+def _neptune_magnitude(r, delta, ph_ang, year):
+    r_mag_factor = 2.5 * log10(r * r)
+    delta_mag_factor = 2.5 * log10(delta * delta)
+    distance_mag_factor = r_mag_factor + delta_mag_factor
+
+    # Equation 16 compute the magnitude at unit distance as a function of time
+    ap_mag = clip(-6.89 - 0.0054 * (year - 1980.0), -7.00, -6.89)
+    ap_mag += distance_mag_factor
+
+    geocentric_phase_angle_limit = 1.9
+
+    ap_mag = where(
+        ph_ang > geocentric_phase_angle_limit,
+
+        # Add phase angle factor from equation 17
+        # Check the year because equation 17 only pertains to t > 2000.0
+        where(
+            year >= 2000.0,
+            ap_mag + 7.944e-3 * ph_ang + 9.617e-5 * ph_ang**2,
+            nan,
+        ),
+
+        # Otherwise leave the value unchanged.
+        ap_mag,
+    )
+
     return ap_mag
 
 _FUNCTIONS = {

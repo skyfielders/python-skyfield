@@ -129,3 +129,25 @@ def test_uranus_magnitude_function():
     magnitudes = m._uranus_magnitude(*args)
     expected = [5.381, 6.025, 8.318]
     np.allclose(magnitudes, expected, 0, 0.0005, equal_nan=True)
+
+def test_neptune_magnitude_function():
+    mag = m._neptune_magnitude(30.322109867761, 31.3091610098214, 0.0549, 1970.8963)
+    assert abs(7.997 - mag) < 0.0005
+    mag = m._neptune_magnitude(30.207767693725, 29.8172370857530, 1.7741, 1990.3240)
+    assert abs(7.827 - mag) < 0.0005
+    mag = m._neptune_magnitude(30.028181709541, 29.0158521665744, 0.0381, 2009.6299)
+    assert abs(7.701 - mag) < 0.0005
+    mag = m._neptune_magnitude(29.94386311956, 0.00940968942251, 88.4363, 2018.1409)
+    assert abs(-8.296 - mag) < 0.0005
+    mag = m._neptune_magnitude(29.94363797622, 0.01582757185680, 176.9965, 2018.1831)
+    assert abs(-4.203 - mag) < 0.0005
+
+    args = [
+        A[30.322109867761, 30.207767693725, 30.028181709541, 29.94386311956, 29.94363797622],
+        A[31.3091610098214, 29.8172370857530, 29.0158521665744, 0.00940968942251, 0.01582757185680],
+        A[0.0549, 1.7741, 0.0381, 88.4363, 176.9965],
+        A[1970.8963, 1990.3240, 2009.6299, 2018.1409, 2018.1831],
+    ]
+    magnitudes = m._neptune_magnitude(*args)
+    expected = [7.997, 7.827, 7.701, -8.296, -4.203]
+    np.allclose(magnitudes, expected, 0, 0.0005, equal_nan=True)

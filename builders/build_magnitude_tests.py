@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import argparse
+import datetime as dt
 import sys
 
 def main(argv):
@@ -38,6 +39,12 @@ from skyfield.tests.conventions import A""")
                 args = fields[10], fields[12], fields[16]
             elif planet == 'uranus':
                 args = fields[8], fields[10], fields[12], fields[7], fields[5]
+            elif planet == 'neptune':
+                datestr = fields[0]
+                d = dt.datetime.strptime(datestr, '%Y-%b-%d')
+                # Formula from Ap_Mag_V3.f90
+                year = '%.4f' % (d.year + (d.month - 1) / 12.0 + d.day / 365.0)
+                args = fields[8], fields[10], fields[12], year
             else:
                 continue
             answer = fields[-1]
