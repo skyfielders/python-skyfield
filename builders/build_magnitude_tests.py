@@ -51,7 +51,7 @@ from skyfield.tests.conventions import A""")
             answer = fields[16] if len(fields) > 16 else 'nan'
             tests[planet].append((args, answer))
 
-    for planet, test_list in sorted(tests.items()):
+    for planet, test_list in tests.items():
         tolerance = (
             # Mars rotation effects are not yet written up.
             '0.1' if planet == 'mars'
