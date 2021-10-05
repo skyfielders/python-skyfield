@@ -22,10 +22,13 @@ Ap_Mag_Input_V3.txt
 * ``ph_ang`` illumination phase angle (degrees)
 
 """
-from numpy import arctan, clip, exp, log10, nan, sin, sqrt, tan, where
-from .constants import RAD2DEG
+from numpy import arctan, array, clip, exp, log10, nan, sin, sqrt, tan, where
+from .constants import RAD2DEG, tau
 from .functions import angle_between, length_of
 from .naifcodes import _target_name
+
+# See "design/saturn_tilt.py" in the Skyfield repository.
+_SATURN_POLE = array([0.08547883, 0.07323576, 0.99364475])
 
 def planetary_magnitude(position):
     """Given the position of a planet, return its visual magnitude.
@@ -62,6 +65,17 @@ def planetary_magnitude(position):
     r = length_of(sun_to_planet)
     delta = length_of(observer_to_planet)
     ph_ang = angle_between(-sun_to_planet, -observer_to_planet) * RAD2DEG
+
+    if function is _saturn_magnitude:
+        p = position.xyz.au  # Observer -> Saturn vector
+        a = angle_between(_SATURN_POLE, p)
+        observer_sub_lat = a * RAD2DEG - 90.0
+
+        p = p + position.center_barycentric.xyz.au  # add SSB -> Observer
+        a = angle_between(_SATURN_POLE, p)
+        sun_sub_lat = a * RAD2DEG - 90.0
+
+        return function(r, delta, ph_ang, sun_sub_lat, observer_sub_lat)
 
     if function is _neptune_magnitude:
         year = position.t.J
@@ -159,24 +173,18 @@ def _jupiter_magnitude(r, delta, ph_ang):
     )
     return ap_mag
 
-def _saturn_magnitude(r, delta, ph_ang, sun_sub_lat_geoc, earth_sub_lat_geoc,
-                      rings=True):
+def _saturn_magnitude(r, delta, ph_ang, sun_sub_lat, earth_sub_lat, rings=True):
+    # Note that sun_sub_lat and earth_sub_lat should be geocentric
+    # latitude, not geodetic.  (Where geo = Saturn.)
+
     r_mag_factor = 2.5 * log10(r * r)
     delta_mag_factor = 2.5 * log10(delta * delta)
     distance_mag_factor = r_mag_factor + delta_mag_factor
 
-    e2 = 0.8137e0  # eccentricity squared of Saturn ellipse
-
-    # Compute the effective sub-latitude
-    # First convert geodetic to geocentric
-    sun_sub_lat_geoc = arctan(e2 * tan(sun_sub_lat_geoc / RAD2DEG)) * RAD2DEG
-    earth_sub_lat_geoc = arctan(e2 * tan(earth_sub_lat_geoc / RAD2DEG)) \
-        * RAD2DEG
-
     # Then take the square root of the product of the saturnicentric
     # latitude of the Sun and that of Earth but set to zero when the
     # signs are opposite
-    product = sun_sub_lat_geoc * earth_sub_lat_geoc
+    product = sun_sub_lat * earth_sub_lat
     sub_lat_geoc = product ** where(product >= 0.0, 0.5, 0.0)
 
     # Compute the effect of phase angle and inclination
@@ -265,7 +273,7 @@ _FUNCTIONS = {
     399: _earth_magnitude,
     499: _mars_magnitude,
     599: _jupiter_magnitude,
-    #699: _saturn_magnitude,
+    699: _saturn_magnitude,
     799: _uranus_magnitude,
     899: _neptune_magnitude,
 
@@ -274,7 +282,7 @@ _FUNCTIONS = {
     2: _venus_magnitude,
     4: _mars_magnitude,
     5: _jupiter_magnitude,
-    #6: _saturn_magnitude,
+    6: _saturn_magnitude,
     7: _uranus_magnitude,
     8: _neptune_magnitude,
 }

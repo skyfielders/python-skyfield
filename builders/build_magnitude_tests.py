@@ -5,6 +5,7 @@ from __future__ import print_function
 import argparse
 import datetime as dt
 import sys
+from math import atan, degrees, radians, tan
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Build magnitude tests.')
@@ -51,9 +52,19 @@ from skyfield.tests.conventions import A""")
             tests[planet].append((args, answer))
         elif line[0] == ' ' and line[1] in 'TF' and planet == 'saturn':
             fields = line.split()
+
+            # The HORIZONS input supplies geodetic latitudes, but the
+            # routine needs geocentric latitudes (except that "geo" here
+            # is Saturn).
+            s = float(fields[6])
+            e = float(fields[8])
+            e2 = 0.8137e0  # eccentricity squared of Saturn ellipse
+            sun_sub_lat = degrees(atan(e2 * tan(radians(s))))
+            earth_sub_lat = degrees(atan(e2 * tan(radians(e))))
+
             args = (
                 fields[9], fields[11], fields[15],
-                fields[6], fields[8], str(fields[0] == 'T'),
+                str(sun_sub_lat), str(earth_sub_lat), str(fields[0] == 'T'),
             )
             answer = fields[16] if len(fields) > 16 else 'nan'
             tests[planet].append((args, answer))
