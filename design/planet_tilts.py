@@ -11,5 +11,11 @@ from skyfield.api import position_of_radec
 BODY699_POLE_RA = 40.589
 BODY699_POLE_DEC = 83.537
 
-p = position_of_radec(40.589 / 15.0, 83.537, 1.0).xyz.au
-print(p)
+p = position_of_radec(BODY699_POLE_RA / 15.0, BODY699_POLE_DEC, 1.0).xyz.au
+print('Saturn:', p)
+
+BODY799_POLE_RA = 257.311
+BODY799_POLE_DEC = -15.175
+
+p = position_of_radec(BODY799_POLE_RA / 15.0, BODY799_POLE_DEC, 1.0).xyz.au
+print('Uranus:', p)

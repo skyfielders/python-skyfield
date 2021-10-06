@@ -27,8 +27,9 @@ from .constants import RAD2DEG, tau
 from .functions import angle_between, length_of
 from .naifcodes import _target_name
 
-# See "design/saturn_tilt.py" in the Skyfield repository.
+# See "design/planet_tilts.py" in the Skyfield repository.
 _SATURN_POLE = array([0.08547883, 0.07323576, 0.99364475])
+_URANUS_POLE = array([-0.21199958 -0.94155916 -0.26176809])
 
 def planetary_magnitude(position):
     """Given the position of a planet, return its visual magnitude.
@@ -56,15 +57,11 @@ def planetary_magnitude(position):
       illumination phase angle exceeds 1.9° and the position's date is
       before the year 2000.
 
-    And two formulae are not completely implemented in Skyfield (though
+    And one formula is not fully implemented in Skyfield (though
     contributions are welcome!):
 
     * The magnitude of Mars is not adjusted for which face of Mars is
       pointed towards the observer.
-
-    * The routine does not yet take into account whether the observer is
-      facing the equator or the poles of Uranus, so will only be
-      accurate to within about 0.1 magnitudes.
 
     """
     target = position.target
@@ -83,11 +80,20 @@ def planetary_magnitude(position):
     ph_ang = angle_between(sun_to_planet, observer_to_planet) * RAD2DEG
 
     if function is _saturn_magnitude:
+        a = angle_between(_SATURN_POLE, sun_to_planet)
+        sun_sub_lat = a * RAD2DEG - 90.0
+
         a = angle_between(_SATURN_POLE, observer_to_planet)
         observer_sub_lat = a * RAD2DEG - 90.0
 
-        a = angle_between(_SATURN_POLE, sun_to_planet)
+        return function(r, delta, ph_ang, sun_sub_lat, observer_sub_lat)
+
+    if function is _uranus_magnitude:
+        a = angle_between(_URANUS_POLE, sun_to_planet)
         sun_sub_lat = a * RAD2DEG - 90.0
+
+        a = angle_between(_URANUS_POLE, observer_to_planet)
+        observer_sub_lat = a * RAD2DEG - 90.0
 
         return function(r, delta, ph_ang, sun_sub_lat, observer_sub_lat)
 
@@ -241,7 +247,7 @@ def _saturn_magnitude(r, delta, ph_ang, sun_sub_lat, earth_sub_lat, rings=True):
     return ap_mag
 
 def _uranus_magnitude(r, delta, ph_ang,
-                      sun_sub_lat_planetog=0.0, earth_sub_lat_planetog=0.0):
+                      sun_sub_lat_planetog, earth_sub_lat_planetog):
     distance_mag_factor = 5.0 * log10 (r * delta)
     sub_lat_planetog = (abs(sun_sub_lat_planetog)
                         + abs(earth_sub_lat_planetog)) / 2.0
