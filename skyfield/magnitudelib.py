@@ -33,10 +33,6 @@ _SATURN_POLE = array([0.08547883, 0.07323576, 0.99364475])
 def planetary_magnitude(position):
     """Given the position of a planet, return its visual magnitude.
 
-    This prototype function, which supports all the major planets except
-    Saturn, computes the visual magnitude of a planet given its position
-    relative to an observer.
-
     >>> from skyfield.api import load
     >>> from skyfield.magnitudelib import planetary_magnitude
     >>> ts = load.timescale()
@@ -46,9 +42,29 @@ def planetary_magnitude(position):
     >>> print('%.2f' % planetary_magnitude(astrometric))
     -2.73
 
-    The routine does not yet take into account whether the observer is
-    facing the equator or poles of Uranus, so will only be accurate to
-    within about 0.1 magnitudes.
+    The formulae are from `Mallama and Hilton “Computing Apparent
+    Planetary Magnitude for the Astronomical Almanac” (2018)
+    <https://arxiv.org/pdf/1808.01973.pdf>`_.  Two of the formulae have
+    inherent limits:
+
+    * Saturn’s magnitude is unknown and the function will return ``nan``
+      (the floating-point value “Not a Number”) if the “illumination
+      phase angle” — the angle of the vertex observer-Saturn-Sun —
+      exceeds 6.5°.
+
+    * Neptune’s magnitude is unknown and will return ``nan`` if the
+      illumination phase angle exceeds 1.9° and the position's date is
+      before the year 2000.
+
+    And two formulae are not completely implemented in Skyfield (though
+    contributions are welcome!):
+
+    * The magnitude of Mars is not adjusted for which face of Mars is
+      pointed towards the observer.
+
+    * The routine does not yet take into account whether the observer is
+      facing the equator or the poles of Uranus, so will only be
+      accurate to within about 0.1 magnitudes.
 
     """
     target = position.target
@@ -58,21 +74,19 @@ def planetary_magnitude(position):
         raise ValueError('cannot compute the magnitude of target %s' % name)
 
     # Shamelessly treat the Sun as sitting at the Solar System Barycenter.
-    sun_to_observer = position.center_barycentric.position.au
-    observer_to_planet = position.position.au
+    sun_to_observer = position.center_barycentric.xyz.au
+    observer_to_planet = position.xyz.au
     sun_to_planet = sun_to_observer + observer_to_planet
 
     r = length_of(sun_to_planet)
     delta = length_of(observer_to_planet)
-    ph_ang = angle_between(-sun_to_planet, -observer_to_planet) * RAD2DEG
+    ph_ang = angle_between(sun_to_planet, observer_to_planet) * RAD2DEG
 
     if function is _saturn_magnitude:
-        p = position.xyz.au  # Observer -> Saturn vector
-        a = angle_between(_SATURN_POLE, p)
+        a = angle_between(_SATURN_POLE, observer_to_planet)
         observer_sub_lat = a * RAD2DEG - 90.0
 
-        p = p + position.center_barycentric.xyz.au  # add SSB -> Observer
-        a = angle_between(_SATURN_POLE, p)
+        a = angle_between(_SATURN_POLE, sun_to_planet)
         sun_sub_lat = a * RAD2DEG - 90.0
 
         return function(r, delta, ph_ang, sun_sub_lat, observer_sub_lat)
@@ -174,8 +188,8 @@ def _jupiter_magnitude(r, delta, ph_ang):
     return ap_mag
 
 def _saturn_magnitude(r, delta, ph_ang, sun_sub_lat, earth_sub_lat, rings=True):
-    # Note that sun_sub_lat and earth_sub_lat should be geocentric
-    # latitude, not geodetic.  (Where geo = Saturn.)
+    # Note that sun_sub_lat and earth_sub_lat should be saturnicentric
+    # latitude, not saturnidetic.
 
     r_mag_factor = 2.5 * log10(r * r)
     delta_mag_factor = 2.5 * log10(delta * delta)
@@ -185,7 +199,9 @@ def _saturn_magnitude(r, delta, ph_ang, sun_sub_lat, earth_sub_lat, rings=True):
     # latitude of the Sun and that of Earth but set to zero when the
     # signs are opposite
     product = sun_sub_lat * earth_sub_lat
-    sub_lat_geoc = product ** where(product >= 0.0, 0.5, 0.0)
+    signs_same = product >= 0.0
+    square_root = product ** where(signs_same, 0.5, 0.0)  # avoid sqrt(neg)
+    sub_lat_geoc = where(signs_same, square_root, 0.0)
 
     # Compute the effect of phase angle and inclination
 
