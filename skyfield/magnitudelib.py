@@ -57,11 +57,11 @@ def planetary_magnitude(position):
       illumination phase angle exceeds 1.9° and the position's date is
       before the year 2000.
 
-    And one formula is not fully implemented in Skyfield (though
-    contributions are welcome!):
+    And one formula is not fully implemented (though contributions are
+    welcome!):
 
-    * The magnitude of Mars is not adjusted for which face of Mars is
-      pointed towards the observer.
+    * Skyfield does not compute which features on Mars are facing the
+      observer, which can introduce an error of ±0.06 magnitude.
 
     """
     target = position.target
