@@ -281,6 +281,15 @@ class Loader(object):
         Set ``backup`` to ``True`` if you want an already-existing file
         moved out of the way instead of overwritten.
 
+        Your operating system may raise any of several errors during a
+        download: hostname lookup failure (this is the usual symptom if
+        you are disconnected from the Internet); the server refusing the
+        connection; and the connection closing mid-download.  Skyfield
+        makes no attempt to intercept or interpret these errors — which
+        vary by operating system — so your application itself should
+        catch network errors if it needs to avoid printing raw Python
+        exceptions, or if you want to retry failed downloads.
+
         """
         if '://' not in url:
             url = self.build_url(url)
