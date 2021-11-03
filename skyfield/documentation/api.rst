@@ -89,6 +89,7 @@ Its methods are:
    Timescale.ut1
    Timescale.ut1_jd
    Timescale.from_astropy
+   Timescale.linspace
 
 .. _api-Time:
 

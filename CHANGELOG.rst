@@ -15,6 +15,9 @@ v1.40 — Unreleased
   :meth:`~skyfield.toposlib.Geoid.subpoint_of()`.
   `#644 <https://github.com/skyfielders/python-skyfield/issues/644>`_
 
+* Added a timescale method :meth:`~skyfield.timelib.Timescale.linspace()`.
+  `#617 <https://github.com/skyfielders/python-skyfield/issues/617>`_
+
 v1.39 — 2021 April 14
 ---------------------
 

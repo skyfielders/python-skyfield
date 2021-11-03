@@ -5,7 +5,7 @@ import sys
 from collections import namedtuple
 from datetime import date, datetime
 from numpy import (
-    array, concatenate, cos, float_, int64, isnan, isinf,
+    array, concatenate, cos, float_, int64, isnan, isinf, linspace,
     nan, ndarray, nonzero, pi, rollaxis, searchsorted, sin, where, zeros_like,
 )
 from time import strftime, struct_time
@@ -374,6 +374,25 @@ class Timescale(object):
     def from_astropy(self, t):
         """Build a Skyfield `Time` from an AstroPy time object."""
         return self.tt(jd=t.tt.jd)
+
+    def linspace(self, t0, t1, num=50):
+        """Return ``num`` times spaced uniformly between ``t0`` to ``t1``.
+
+        This routine is named after, and powered by, the NumPy routine
+        `linspace()`_.
+
+        .. _linspace(): https://numpy.org/doc/stable/reference/generated/numpy.linspace.html
+
+        """
+        whole0 = t0.whole
+        frac0 = t0.tt_fraction
+        whole1 = t1.whole
+        frac1 = t1.tt_fraction
+        return Time(
+            self,
+            linspace(whole0, whole1, num),
+            linspace(frac0, frac1, num),
+        )
 
 class Time(object):
     """A single moment in history, or an array of several moments.

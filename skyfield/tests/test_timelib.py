@@ -266,6 +266,19 @@ def test_building_time_from_python_date(ts):
     t = ts.utc(d)
     assert t.utc == (2020, 7, 22, 0, 0, 0.0)
 
+def test_timescale_linspace(ts):
+    t0 = ts.tt(2021, 11, 3, 6)
+    t1 = ts.tt(2021, 11, 5, 18)
+    t = ts.linspace(t0, t1, 3)
+    assert [n for a in t.tt_calendar() for n in a] == [
+	2021, 2021, 2021,
+        11, 11, 11,
+        3, 4, 5,
+        6, 12, 18,
+        0, 0, 0,
+        0, 0, 0,
+    ]
+
 def test_converting_ut1_to_tt(ts):
     ten_thousand_years = 365 * 10000
 
