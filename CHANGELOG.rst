@@ -5,6 +5,16 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+v1.40 — Unreleased
+------------------
+
+* The :meth:`~skyfield.toposlib.Geoid.subpoint()` method has been
+  deprecated, because users found its name was a poor match for its
+  behavior.  Two new methods have replaced it:
+  :meth:`~skyfield.toposlib.Geoid.latlon_and_elevation_of()` and
+  :meth:`~skyfield.toposlib.Geoid.subpoint_of()`.
+  `#644 <https://github.com/skyfielders/python-skyfield/issues/644>`_
+
 v1.39 — 2021 April 14
 ---------------------
 

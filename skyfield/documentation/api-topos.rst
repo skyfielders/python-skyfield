@@ -10,6 +10,13 @@
 
 .. autoclass:: Geoid
    :members:
+   :exclude-members: subpoint
+
+   .. method:: subpoint(…)
+
+      .. deprecated:: 1.40
+
+         Renamed to `latlon_and_elevation_of()`.
 
 .. autoclass:: GeographicPosition
    :members:

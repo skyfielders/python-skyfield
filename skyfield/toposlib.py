@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from numpy import arctan2, array, array2string, cos, exp, sin, sqrt
-from .constants import ANGVEL, AU_M, DAY_S, T0, pi, tau
+from .constants import ANGVEL, AU_M, DAY_S, RAD2DEG, T0, pi, tau
 from .earthlib import refract
 from .framelib import itrs
 from .functions import (
@@ -49,10 +49,10 @@ class ITRSPosition(VectorFunction):
         return r, v, None, None
 
 class GeographicPosition(ITRSPosition):
-    """A latitude-longitude position on Earth.
+    """A latitude-longitude-elevation position on Earth.
 
     Each instance of this class holds an |xyz| vector for a geographic
-    position on (or above, or below) the Earth’s surface, in the ITRS
+    position on, above, or below the Earth’s surface, in the ITRS
     reference frame: the international standard for an Earth-centered
     Earth-fixed (ECEF) reference frame.  Instead of instantiating this
     class directly, Skyfield users usually give a reference geoid the
@@ -118,8 +118,16 @@ class GeographicPosition(ITRSPosition):
         return angular_velocity_matrix(R)
 
 class Geoid(object):
-    """An Earth ellipsoid: maps latitudes and longitudes to |xyz| positions."""
+    """An Earth ellipsoid: maps latitudes and longitudes to |xyz| positions.
 
+    Instead of creating their own geoid object, most Skyfield users
+    simply use the `wgs84` object that comes built-in.
+
+    The math for turning a position into latitude and longitude is based
+    on Dr. T.S. Kelso's quite helpful article `Orbital Coordinate
+    Systems, Part III <https://www.celestrak.com/columns/v02n03/>`_.
+
+    """
     def __init__(self, name, radius_m, inverse_flattening):
         self.name = name
         self.radius = Distance(m=radius_m)
@@ -129,13 +137,15 @@ class Geoid(object):
 
     def latlon(self, latitude_degrees, longitude_degrees, elevation_m=0.0,
                cls=GeographicPosition):
-        """Return the geographic position of a given latitude and longitude.
+        """Return a `GeographicPosition` for a given latitude and longitude.
 
-        Longitude is positive towards the east, so supply a negative
-        number for west::
+        The longitude and latitude should both be specified in degrees.
+        If no elevation in meters is supplied, the returned position
+        will be at sea level.  Longitude is positive towards the east,
+        so supply a negative number for west::
 
             from skyfield.api import wgs84
-            observatory = wgs84.latlon(37.3414, -121.6429)
+            observatory = wgs84.latlon(37.3414, -121.6429)  # 121.6° West
 
         You can avoid remembering which directions are negative by using
         Skyfield’s compass direction constants, which have the values +1
@@ -170,19 +180,15 @@ class Geoid(object):
 
         return cls(self, latitude, longitude, elevation, Distance(au=r))
 
-    def subpoint(self, position):
-        """Express a ``position`` in Earth latitude, longitude, and elevation.
+    def latlon_and_elevation_of(self, position):
+        """Return the latitude, longitude, and elevation of a ``position``.
 
-        The input ``position`` should have a center of 399, the
-        geocenter.  The return value is a `GeographicPosition` whose
-        ``latitude`` and ``longitude`` are the spot on the Earth’s
-        surface directly beneath the given ``position``, and whose
-        ``elevation`` is the position’s distance above (or depth below)
-        mean sea level.
-
-        The underlying computation is based on Dr. T.S. Kelso's quite
-        helpful article `Orbital Coordinate Systems, Part III
-        <https://www.celestrak.com/columns/v02n03/>`_.
+        The input ``position`` must be geocentric: it must have a
+        ``.center`` of 399, the Earth’s center.  The return value is a
+        `GeographicPosition` whose ``latitude`` and ``longitude``
+        specify the point on the Earth’s surface directly beneath the
+        given position, and whose ``elevation`` is the position’s
+        distance above (or depth below) sea level.
 
         """
         if position.center != 399:
@@ -214,6 +220,42 @@ class Geoid(object):
             itrs_xyz=Distance(au=xyz_au),
             model=self,
         )
+
+    subpoint = latlon_and_elevation_of  # deprecated method name
+
+    def subpoint_of(self, position):
+        """Return the Earth latitude and longitude beneath a ``position``.
+
+        The input ``position`` must be geocentric: it must have a
+        ``.center`` of 399, the Earth’s center.  The return value is a
+        `GeographicPosition` whose ``latitude`` and ``longitude``
+        specify the point on the Earth’s surface directly beneath the
+        given ``position`` and whose ``elevation`` is zero, placing it
+        at sea level for this geoid.
+
+        """
+        if position.center != 399:
+            raise ValueError(
+                'a geographic subpoint can only be calculated for positions'
+                ' measured from 399, the center of the Earth, but this'
+                ' position has center {0}'.format(position.center)
+            )
+        xyz_au = position.frame_xyz(itrs).au
+        x, y, z = xyz_au
+
+        R = sqrt(x*x + y*y)
+        lon = (arctan2(y, x) - pi) % tau - pi
+        lat = arctan2(z, R)
+
+        a = self.radius.au
+        f = 1.0 / self.inverse_flattening
+        e2 = 2.0*f - f*f
+        C = 1.0
+        for iteration in 0,1,2:
+            C = 1.0 / sqrt(1.0 - e2 * (sin(lat) ** 2.0))
+            lat = arctan2(z + a * C * e2 * sin(lat), R)
+
+        return self.latlon(lat * RAD2DEG, lon * RAD2DEG)
 
 wgs84 = Geoid('WGS84', 6378137.0, 298.257223563)
 iers2010 = Geoid('IERS2010', 6378136.6, 298.25642)

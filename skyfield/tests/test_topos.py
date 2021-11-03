@@ -192,6 +192,19 @@ def test_wgs84_round_trip_with_polar_motion(ts, angle):
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
     assert error_mas < 0.1
 
+def test_latlon_and_subpoint_methods(ts, angle):
+    t = ts.utc(2020, 11, 3, 17, 5)
+    g = wgs84.latlon(angle, angle, elevation_m=1234.0)
+
+    def check(expected_elevation, g2):
+        assert g.latitude.mas() - g2.latitude.mas() < 0.1
+        assert g.longitude.mas() - g2.longitude.mas() < 0.1
+        assert expected_elevation - g2.elevation.m < 1e-7
+
+    check(1234.0, wgs84.subpoint(g.at(t)))
+    check(1234.0, wgs84.latlon_and_elevation_of(g.at(t)))
+    check(0.0, wgs84.subpoint_of(g.at(t)))
+
 def test_deprecated_position_subpoint_method(ts, angle):
     t = ts.utc(2018, 1, 19, 14, 37, 55)
     top = iers2010.latlon(angle, angle, elevation_m=0.0)
