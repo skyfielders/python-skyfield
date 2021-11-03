@@ -22,8 +22,8 @@ Ap_Mag_Input_V3.txt
 * ``ph_ang`` illumination phase angle (degrees)
 
 """
-from numpy import arctan, array, clip, exp, log10, nan, sin, sqrt, tan, where
-from .constants import RAD2DEG, tau
+from numpy import array, clip, exp, log10, nan, sin, where
+from .constants import RAD2DEG
 from .functions import angle_between, length_of
 from .naifcodes import _target_name
 
