@@ -8,15 +8,23 @@ Changelog
 v1.40 — Unreleased
 ------------------
 
+* Extended the :func:`~skyfield.magnitudelib.planetary_magnitude()`
+  routine to work with all the major planets, which upgrades it from a
+  prototype feature to a production feature of Skyfield.
+
 * The :meth:`~skyfield.toposlib.Geoid.subpoint()` method has been
-  deprecated, because users found its name was a poor match for its
-  behavior.  Two new methods have replaced it:
+  deprecated, because users reported that its name was a poor match for
+  its behavior.  Two new methods have replaced it:
   :meth:`~skyfield.toposlib.Geoid.latlon_and_elevation_of()` and
   :meth:`~skyfield.toposlib.Geoid.subpoint_of()`.
   `#644 <https://github.com/skyfielders/python-skyfield/issues/644>`_
 
 * Added a timescale method :meth:`~skyfield.timelib.Timescale.linspace()`.
   `#617 <https://github.com/skyfielders/python-skyfield/issues/617>`_
+
+* The :func:`~skyfield.almanac.oppositions_conjunctions()` routine,
+  which was originally designed only for planets, can now also handle
+  the Moon (which moves from opposition to conjunction much faster).
 
 v1.39 — 2021 April 14
 ---------------------
