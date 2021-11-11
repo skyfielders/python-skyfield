@@ -2,6 +2,7 @@
 *.bsp
 *.egg-info
 *.ipynb_checkpoints
+*.pck
 *.pyc
 *.tpc
 *.tf
