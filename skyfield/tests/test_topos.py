@@ -194,16 +194,29 @@ def test_wgs84_round_trip_with_polar_motion(ts, angle):
 
 def test_latlon_and_subpoint_methods(ts, angle):
     t = ts.utc(2020, 11, 3, 17, 5)
-    g = wgs84.latlon(angle, angle, elevation_m=1234.0)
+    g = wgs84.latlon(angle, 2 * angle, elevation_m=1234.0)
+    pos = g.at(t)
 
-    def check(expected_elevation, g2):
-        assert g.latitude.mas() - g2.latitude.mas() < 0.1
-        assert g.longitude.mas() - g2.longitude.mas() < 0.1
-        assert expected_elevation - g2.elevation.m < 1e-7
+    def check_lat(lat): assert abs(g.latitude.mas() - lat.mas()) < 0.1
+    def check_lon(lon): assert abs(g.longitude.mas() - lon.mas()) < 0.1
+    def check_height(h): assert abs(g.elevation.m - h.m) < 1e-7
 
-    check(1234.0, wgs84.subpoint(g.at(t)))
-    check(1234.0, wgs84.latlon_and_elevation_of(g.at(t)))
-    check(0.0, wgs84.subpoint_of(g.at(t)))
+    lat, lon = wgs84.latlon_of(pos)
+    check_lat(lat)
+    check_lon(lon)
+
+    height = wgs84.height_of(pos)
+    check_height(height)
+
+    g = wgs84.geographic_position_of(pos)
+    check_lat(g.latitude)
+    check_lon(g.longitude)
+    check_height(g.elevation)
+
+    g = wgs84.subpoint(pos)  # old deprecated method name
+    check_lat(g.latitude)
+    check_lon(g.longitude)
+    check_height(g.elevation)
 
 def test_deprecated_position_subpoint_method(ts, angle):
     t = ts.utc(2018, 1, 19, 14, 37, 55)

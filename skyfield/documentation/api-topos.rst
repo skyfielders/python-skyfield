@@ -16,7 +16,7 @@
 
       .. deprecated:: 1.40
 
-         Renamed to `latlon_and_elevation_of()`.
+         Renamed to `geographic_position_of()`.
 
 .. autoclass:: GeographicPosition
    :members:

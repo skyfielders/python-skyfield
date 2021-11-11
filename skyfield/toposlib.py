@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from numpy import arctan2, array, array2string, cos, exp, sin, sqrt
-from .constants import ANGVEL, AU_M, DAY_S, RAD2DEG, T0, pi, tau
+from .constants import ANGVEL, DAY_S, T0, pi, tau
 from .earthlib import refract
 from .framelib import itrs
 from .functions import (
@@ -134,6 +134,8 @@ class Geoid(object):
         self.inverse_flattening = inverse_flattening
         omf = (inverse_flattening - 1.0) / inverse_flattening
         self._one_minus_flattening_squared = omf * omf
+        f = 1.0 / inverse_flattening
+        self._e2 = 2.0*f - f*f
 
     def latlon(self, latitude_degrees, longitude_degrees, elevation_m=0.0,
                cls=GeographicPosition):
@@ -180,15 +182,58 @@ class Geoid(object):
 
         return cls(self, latitude, longitude, elevation, Distance(au=r))
 
-    def latlon_and_elevation_of(self, position):
+    def latlon_of(self, position):
+        """Return the latitude and longitude of a ``position``.
+
+        The input ``position`` must be geocentric: it must have a
+        ``.center`` of 399.  Returns the two angles latitude and
+        longitude.
+
+        """
+        if position.center != 399:
+            raise ValueError(
+                'a geographic subpoint can only be calculated for positions'
+                ' measured from 399, the center of the Earth, but this'
+                ' position has center {0}'.format(position.center)
+            )
+
+        x, y, z = position.frame_xyz(itrs).au
+        a = self.radius.au
+        R, C, lat = _compute_latitude(a, self._e2, x, y, z)
+        lon = (arctan2(y, x) - pi) % tau - pi
+        return Angle(radians=lat), Angle(radians=lon)
+
+    def height_of(self, position):
+        """Return the height above sea level of a ``position``.
+
+        The input ``position`` must be geocentric: it must have a
+        ``.center`` of 399.  The return value is a distance that when
+        positive gives the position’s height above sea level, and that
+        when negative gives its depth below it.
+
+        """
+        if position.center != 399:
+            raise ValueError(
+                'a geographic subpoint can only be calculated for positions'
+                ' measured from 399, the center of the Earth, but this'
+                ' position has center {0}'.format(position.center)
+            )
+
+        x, y, z = position.frame_xyz(itrs).au
+        a = self.radius.au
+        R, C, lat = _compute_latitude(a, self._e2, x, y, z)
+        height_au = ((R / cos(lat)) - a * C)
+        return Distance(height_au)
+
+    def geographic_position_of(self, position):
         """Return the latitude, longitude, and elevation of a ``position``.
 
         The input ``position`` must be geocentric: it must have a
         ``.center`` of 399, the Earth’s center.  The return value is a
         `GeographicPosition` whose ``latitude`` and ``longitude``
         specify the point on the Earth’s surface directly beneath the
-        given position, and whose ``elevation`` is the position’s
-        distance above (or depth below) sea level.
+        given position, and whose ``elevation`` is the position’s height
+        above (or depth below) sea level.
 
         """
         if position.center != 399:
@@ -197,65 +242,23 @@ class Geoid(object):
                 ' measured from 399, the center of the Earth, but this'
                 ' position has center {0}'.format(position.center)
             )
+
         xyz_au = position.frame_xyz(itrs).au
         x, y, z = xyz_au
-
-        R = sqrt(x*x + y*y)
-        lon = (arctan2(y, x) - pi) % tau - pi
-        lat = arctan2(z, R)
-
         a = self.radius.au
-        f = 1.0 / self.inverse_flattening
-        e2 = 2.0*f - f*f
-        C = 1.0
-        for iteration in 0,1,2:
-            C = 1.0 / sqrt(1.0 - e2 * (sin(lat) ** 2.0))
-            lat = arctan2(z + a * C * e2 * sin(lat), R)
-        elevation_m = ((R / cos(lat)) - a * C) * AU_M
+        R, C, lat = _compute_latitude(a, self._e2, x, y, z)
+        lon = (arctan2(y, x) - pi) % tau - pi
+        height_au = ((R / cos(lat)) - a * C)
 
         return GeographicPosition(
             latitude=Angle(radians=lat),
             longitude=Angle(radians=lon),
-            elevation=Distance(m=elevation_m),
+            elevation=Distance(height_au),
             itrs_xyz=Distance(au=xyz_au),
             model=self,
         )
 
-    subpoint = latlon_and_elevation_of  # deprecated method name
-
-    def subpoint_of(self, position):
-        """Return the Earth latitude and longitude beneath a ``position``.
-
-        The input ``position`` must be geocentric: it must have a
-        ``.center`` of 399, the Earth’s center.  The return value is a
-        `GeographicPosition` whose ``latitude`` and ``longitude``
-        specify the point on the Earth’s surface directly beneath the
-        given ``position`` and whose ``elevation`` is zero, placing it
-        at sea level for this geoid.
-
-        """
-        if position.center != 399:
-            raise ValueError(
-                'a geographic subpoint can only be calculated for positions'
-                ' measured from 399, the center of the Earth, but this'
-                ' position has center {0}'.format(position.center)
-            )
-        xyz_au = position.frame_xyz(itrs).au
-        x, y, z = xyz_au
-
-        R = sqrt(x*x + y*y)
-        lon = (arctan2(y, x) - pi) % tau - pi
-        lat = arctan2(z, R)
-
-        a = self.radius.au
-        f = 1.0 / self.inverse_flattening
-        e2 = 2.0*f - f*f
-        C = 1.0
-        for iteration in 0,1,2:
-            C = 1.0 / sqrt(1.0 - e2 * (sin(lat) ** 2.0))
-            lat = arctan2(z + a * C * e2 * sin(lat), R)
-
-        return self.latlon(lat * RAD2DEG, lon * RAD2DEG)
+    subpoint = geographic_position_of  # deprecated method name
 
 wgs84 = Geoid('WGS84', 6378137.0, 298.257223563)
 iers2010 = Geoid('IERS2010', 6378136.6, 298.25642)
@@ -269,6 +272,18 @@ that don’t specify an alternative geoid.
 
 """
 iers2010.__doc__ = 'International Earth Rotation Service 2010 `Geoid`.'
+
+# Helpers.
+
+def _compute_latitude(a, e2, x, y, z):
+    R = sqrt(x*x + y*y)
+    lat = arctan2(z, R)
+    for iteration in 0,1,2:
+        sin_lat = sin(lat)
+        e2_sin_lat = e2 * sin_lat
+        C = 1.0 / sqrt(1.0 - e2_sin_lat * sin_lat)
+        lat = arctan2(z + a * C * e2_sin_lat, R)
+    return R, C, lat
 
 # Compatibility with old versions of Skyfield:
 

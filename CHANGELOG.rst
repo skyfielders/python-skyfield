@@ -14,9 +14,10 @@ v1.40 — Unreleased
 
 * The :meth:`~skyfield.toposlib.Geoid.subpoint()` method has been
   deprecated, because users reported that its name was a poor match for
-  its behavior.  Two new methods have replaced it:
-  :meth:`~skyfield.toposlib.Geoid.latlon_and_elevation_of()` and
-  :meth:`~skyfield.toposlib.Geoid.subpoint_of()`.
+  its behavior.  Three new methods have replaced it:
+  :meth:`~skyfield.toposlib.Geoid.latlon_of()`,
+  :meth:`~skyfield.toposlib.Geoid.height_of()` and
+  :meth:`~skyfield.toposlib.Geoid.geographic_position_of()`.
   `#644 <https://github.com/skyfielders/python-skyfield/issues/644>`_
 
 * Added a timescale method :meth:`~skyfield.timelib.Timescale.linspace()`.
