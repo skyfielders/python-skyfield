@@ -30,7 +30,8 @@ def parse(lines):
 
     This merely reads raw assignment statements; it doesn’t combine
     multiple ``+=`` assignments to create single values.  The byte
-    string ``equals`` will be either ``b'='`` or ``b'+='``.
+    string ``equals`` will be either ``b'='`` or ``b'+='``.  Scalars are
+    returned as a ``values`` list one item long.
 
     """
     tokens = iter(_parse_tokens(lines))

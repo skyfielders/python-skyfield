@@ -25,9 +25,12 @@ class PlanetaryConstants(object):
     """
     def __init__(self):
         self.variables = {}
-        self.assignments = self.variables  # alias to old deprecated name
         self._binary_files = []
         self._segment_map = {}
+
+    @property
+    def assignments(self):  # deprecated original name for the variables dict
+        return self.variables
 
     def read_text(self, file):
         """Read frame variables from a KPL/FK file.
