@@ -13,6 +13,6 @@ def test_magnitudes():
     e = eph['earth'].at(t)
     positions = [e.observe(eph[name]) for name in names]
     magnitudes = [planetary_magnitude(position) for position in positions]
-    assert [f'{m:.3f}' for m in magnitudes] == [
+    assert ['%.3f' % m for m in magnitudes] == [
         '2.393', '-4.278', '1.592', '-2.693', '0.508', '5.701', '7.690',
     ]
