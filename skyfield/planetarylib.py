@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
-import re
 from numpy import array, cos, nan, sin
 from jplephem.pck import DAF, PCK
 from .constants import ASEC2RAD, AU_KM, DAY_S, tau
+from .data import text_pck
 from .functions import _T, mxv, mxm, mxmxm, rot_x, rot_y, rot_z
 from .units import Angle, Distance
 from .vectorlib import VectorFunction
@@ -24,21 +24,22 @@ class PlanetaryConstants(object):
 
     """
     def __init__(self):
-        self.assignments = {}
+        self.variables = {}
+        self.assignments = self.variables  # alias to old deprecated name
         self._binary_files = []
         self._segment_map = {}
 
     def read_text(self, file):
-        """Read frame assignments from a KPL/FK file.
+        """Read frame variables from a KPL/FK file.
 
         Appropriate files will typically have the extension ``.tf`` or
         ``.tpc`` and will define a series of names and values that will
-        be loaded into this object's ``.assignments`` dictionary.
+        be loaded into this object's ``.variables`` dictionary.
 
         >>> from skyfield.api import load
         >>> pc = PlanetaryConstants()
         >>> pc.read_text(load('moon_080317.tf'))
-        >>> pc.assignments['FRAME_31006_NAME']
+        >>> pc.variables['FRAME_31006_NAME']
         'MOON_PA_DE421'
 
         """
@@ -47,16 +48,7 @@ class PlanetaryConstants(object):
             if not file.read(7).startswith(_TEXT_MAGIC_NUMBERS):
                 raise ValueError('file must start with one of the patterns:'
                                  ' {0}'.format(_TEXT_MAGIC_NUMBERS))
-            file.seek(0)
-            assignments = self.assignments
-            for name, equals, value in parse_text_pck(file):
-                if equals == b'=':
-                    assignments[name] = value
-                elif equals == b'+=':
-                    previous = assignments.get(name)
-                    if previous is None:
-                        previous = assignments[name] = []
-                    previous.extend(value)
+            text_pck.load(file, self.variables)
         finally:
             file.close()
 
@@ -76,9 +68,9 @@ class PlanetaryConstants(object):
             self._segment_map[segment.body] = segment
 
     def _get_assignment(self, key):
-        """Do .assignments[key] but with a pretty exception on failure."""
+        """Do .variables[key] but with a pretty exception on failure."""
         try:
-            return self.assignments[key]
+            return self.variables[key]
         except KeyError:
             e = ValueError(_missing_name_message.format(key))
             e.__cause__ = None
@@ -92,14 +84,14 @@ class PlanetaryConstants(object):
     def build_frame(self, integer, _segment=None):
         """Given a frame integer code, return a :class:`Frame` object."""
         center = self._get_assignment('FRAME_{0}_CENTER'.format(integer))
-        spec = self.assignments.get('TKFRAME_{0}_SPEC'.format(integer))
+        spec = self.variables.get('TKFRAME_{0}_SPEC'.format(integer))
         if spec is None:
             matrix = None
         else:
             if spec == 'ANGLES':
-                angles = self.assignments['TKFRAME_{0}_ANGLES'.format(integer)]
-                axes = self.assignments['TKFRAME_{0}_AXES'.format(integer)]
-                units = self.assignments['TKFRAME_{0}_UNITS'.format(integer)]
+                angles = self.variables['TKFRAME_{0}_ANGLES'.format(integer)]
+                axes = self.variables['TKFRAME_{0}_AXES'.format(integer)]
+                units = self.variables['TKFRAME_{0}_UNITS'.format(integer)]
                 scale = _unit_scales[units]
                 matrix = 1,0,0, 0,1,0, 0,0,1
                 matrix = array(matrix)
@@ -108,13 +100,13 @@ class PlanetaryConstants(object):
                     rot = _rotations[axis]
                     matrix = mxm(rot(angle * scale), matrix)
             elif spec == 'MATRIX':
-                matrix = self.assignments['TKFRAME_{0}_MATRIX'.format(integer)]
+                matrix = self.variables['TKFRAME_{0}_MATRIX'.format(integer)]
                 matrix = array(matrix)
                 matrix.shape = 3, 3
             else:
                 raise NotImplementedError('spec %r not yet implemented' % spec)
-            relative = self.assignments['TKFRAME_{0}_RELATIVE'.format(integer)]
-            integer = self.assignments['FRAME_{0}'.format(relative)]
+            relative = self.variables['TKFRAME_{0}_RELATIVE'.format(integer)]
+            integer = self.variables['FRAME_{0}'.format(relative)]
 
         if _segment is None:
             segment = self._segment_map.get(integer)
@@ -147,7 +139,7 @@ _missing_name_message = """unknown planetary constant {0!r}
 You should either use this object's `.read_text()` method to load an
 additional "*.tf" PCK text file that defines the missing name, or
 manually provide a value by adding the name and value to the this
-object's `.assignments` dictionary."""
+object's `.variables` dictionary."""
 
 class Frame(object):
     """Planetary constants frame, for building rotation matrices."""
@@ -256,57 +248,3 @@ class PlanetTopos(VectorFunction):
         # azimuth reads north-east rather than the other direction.
         R[1] *= -1
         return R
-
-def parse_text_pck(lines):
-    """Yield ``(name, equals, value)`` tuples parsed from a PCK text kernel.
-
-    The byte string ``equals`` will be ``b'='`` for a normal assignment,
-    or ``b'+='`` for an append.
-
-    """
-    tokens = iter(_parse_text_pck_tokens(lines))
-    for token in tokens:
-        name = token.decode('ascii')
-        equals = next(tokens)
-        if equals not in (b'=', b'+='):
-            raise ValueError('was expecting an equals sign after %r' % name)
-        value = next(tokens)
-        if value == b'(':
-            value = []
-            for token2 in tokens:
-                if token2 == b')':
-                    break
-                value.append(_evaluate(token2))
-        else:
-            value = _evaluate(value)
-        yield name, equals, value
-
-def _evaluate(token):
-    """Return a string, integer, or float parsed from a PCK text kernel."""
-    if token[0:1].startswith(b"'"):
-        return token[1:-1].decode('ascii')
-    if token.isdigit():
-        return int(token)
-    if token.startswith(b'@'):
-        raise NotImplementedError('TODO: need parser for dates,'
-                                  ' like @01-MAY-1991/16:25')
-    token = token.replace(b'D', b'E')  # for numbers like -1.4D-12
-    return float(token)
-
-_token_re = re.compile(b"'[^']*'|[^', ]+")
-
-def _parse_text_pck_tokens(lines):
-    """Yield all the tokens inside the data segments of a PCK text file."""
-    lines = iter(lines)
-    for line in lines:
-        if b'\\begindata' not in line:
-            continue  # save cost of strip() on most lines
-        line = line.strip()
-        if line != b'\\begindata':
-            continue
-        for line in lines:
-            line = line.strip()
-            if line == b'\\begintext':
-                break
-            for token in _token_re.findall(line):
-                yield token
