@@ -690,6 +690,12 @@ of the API documentation
 for the whole slate of methods
 that can convert between inertial and Earth-fixed positions.
 
+.. Once fully supported, illustrate round-trips like
+
+    xyz = m.frame_xyz(itrs)
+    from skyfield.positionlib import ICRS
+    position = ICRS.from_time_and_frame_vectors(t, itrs, xyz, None)
+
 Coordinates in other reference frames
 =====================================
 

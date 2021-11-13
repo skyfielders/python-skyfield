@@ -355,23 +355,46 @@ than those of the old J2000 system.)
 Satellite longitude, latitude, and height
 -----------------------------------------
 
-Once you have the geocentric satellite position computed above,
-you can ask for the satellite’s longitude and latitude
-by passing the position
-to the :meth:`~skyfield.toposlib.Geoid.subpoint()` method of a standard geoid.
+Once you have computed a geocentric satellite position,
+you can use either of several :data:`~skyfield.toposlib.wgs84` object methods
+to learn the satellite’s latitude, longitude, and height:
+
+* :meth:`~skyfield.toposlib.Geoid.latlon_of()`
+* :meth:`~skyfield.toposlib.Geoid.height_of()`
+* :meth:`~skyfield.toposlib.Geoid.geographic_position_of()`
+
+For example:
 
 .. testcode::
 
-    subpoint = wgs84.subpoint(geocentric)
-    print('Latitude:', subpoint.latitude)
-    print('Longitude:', subpoint.longitude)
-    print('Height: {:.1f} km'.format(subpoint.elevation.km))
+    lat, lon = wgs84.latlon_of(geocentric)
+    print('Latitude:', lat)
+    print('Longitude:', lon)
 
 .. testoutput::
 
     Latitude: 50deg 14' 37.4"
     Longitude: -86deg 23' 23.3"
-    Height: 420.9 km
+
+Another :data:`~skyfield.toposlib.wgs84` method
+computes the subpoint directly below the satellite —
+the point on the Earth
+with the same latitude and longitude as the satellite,
+but with a height above the WGS84 ellipsoid of zero:
+
+* :meth:`~skyfield.toposlib.Geoid.subpoint_of()`
+
+If you want the actual position of the ground beneath the satellite,
+you of course can’t assume that the position will be exactly at sea level.
+You’ll need to find a geographic library
+that lets you load a digital elevation model (DEM),
+then build a subpoint manually using the elevation returned
+for the satellite’s latitude and longitude.
+
+.. testcode::
+
+    elevation_m = 123.0
+    subpoint = wgs84.latlon(lat.degrees, lon.degrees, elevation_m)
 
 Satellite altitude, azimuth, and distance
 -----------------------------------------
