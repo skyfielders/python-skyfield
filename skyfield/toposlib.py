@@ -180,7 +180,7 @@ class Geoid(object):
         accst = ac * cos(lon)
         r = array((accst, acsst, ash * sinphi))
 
-        return cls(self, latitude, longitude, elevation, Distance(au=r))
+        return cls(self, latitude, longitude, elevation, Distance(r))
 
     def latlon_of(self, position):
         """Return the latitude and longitude of a ``position``.
@@ -222,7 +222,7 @@ class Geoid(object):
         x, y, z = position.frame_xyz(itrs).au
         a = self.radius.au
         R, C, lat = _compute_latitude(a, self._e2, x, y, z)
-        height_au = ((R / cos(lat)) - a * C)
+        height_au = R / cos(lat) - a * C
         return Distance(height_au)
 
     def geographic_position_of(self, position):
@@ -248,13 +248,45 @@ class Geoid(object):
         a = self.radius.au
         R, C, lat = _compute_latitude(a, self._e2, x, y, z)
         lon = (arctan2(y, x) - pi) % tau - pi
-        height_au = ((R / cos(lat)) - a * C)
+        height_au = R / cos(lat) - a * C
 
         return GeographicPosition(
             latitude=Angle(radians=lat),
             longitude=Angle(radians=lon),
             elevation=Distance(height_au),
-            itrs_xyz=Distance(au=xyz_au),
+            itrs_xyz=Distance(xyz_au),
+            model=self,
+        )
+
+    def subpoint_of(self, position):
+        """Return the point on the geoid directly below a ``position``.
+
+        The input ``position`` must be geocentric: it must have a
+        ``.center`` of 399, the Earth’s center.  The return value is a
+        `GeographicPosition` whose ``latitude`` and ``longitude``
+        specify the point on the Earth’s surface directly beneath the
+        given position, and whose ``elevation`` is zero — a position at
+        mean sea level on this particular geoid.
+
+        """
+        if position.center != 399:
+            raise ValueError(
+                'a geographic subpoint can only be calculated for positions'
+                ' measured from 399, the center of the Earth, but this'
+                ' position has center {0}'.format(position.center)
+            )
+
+        xyz_au = position.frame_xyz(itrs).au
+        x, y, z = xyz_au
+        a = self.radius.au
+        R, C, lat = _compute_latitude(a, self._e2, x, y, z)
+        lon = (arctan2(y, x) - pi) % tau - pi
+
+        return GeographicPosition(
+            latitude=Angle(radians=lat),
+            longitude=Angle(radians=lon),
+            elevation=Distance(lat * 0.0),
+            itrs_xyz=Distance(xyz_au),
             model=self,
         )
 

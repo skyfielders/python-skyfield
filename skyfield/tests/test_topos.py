@@ -218,6 +218,11 @@ def test_latlon_and_subpoint_methods(ts, angle):
     check_lon(g.longitude)
     check_height(g.elevation)
 
+    g = wgs84.subpoint_of(pos)
+    check_lat(g.latitude)
+    check_lon(g.longitude)
+    assert g.elevation.m == 0.0
+
 def test_deprecated_position_subpoint_method(ts, angle):
     t = ts.utc(2018, 1, 19, 14, 37, 55)
     top = iers2010.latlon(angle, angle, elevation_m=0.0)
