@@ -289,7 +289,7 @@ class Angle(Unit):
 
     @reify
     def hours(self):
-        """Hours (24 in a circle)."""
+        """Hours (24\ |h| in a circle)."""
         if self.preference != 'hours':
             raise WrongUnitError('hours')
         return self._hours

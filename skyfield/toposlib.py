@@ -195,10 +195,11 @@ class Geoid(object):
         return Distance(height_au)
 
     def geographic_position_of(self, position):
-        """Return the latitude, longitude, and elevation of a ``position``.
+        """Return the `GeographicPosition` of a geocentric ``position``.
 
         Given a geocentric ``position``, returns a `GeographicPosition`
-        providing its ``latitude``, ``longitude``, and ``elevation``.
+        providing its ``latitude``, ``longitude``, and ``elevation``
+        above or below the surface of the ellipsoid.
 
         """
         xyz_au, x, y, aC, R, lat = self._compute_latitude(position)

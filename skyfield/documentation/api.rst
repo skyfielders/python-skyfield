@@ -230,33 +230,42 @@ Routines to search for events like sunrise, sunset, and Moon phase.
 
    lunar_eclipses
 
-Topocentric locations
-=====================
+Geographic locations
+====================
 
 .. currentmodule:: skyfield.toposlib
 
-You can ask Skyfield to compute the position
-of any geographic location on the Earth’s surface.
-First, choose a reference model of the Earth’s exact shape
-(click either name to learn more about them):
+.. _topocentric-locations:
+
+Skyfield supports two Earth datums
+for translating between latitude/longitude and Cartesian coordinates.
+They each use a slightly different estimate of the Earth’s oblateness.
+The most popular is WGS84, which is used by the world’s GPS devices:
 
 * `wgs84`
 * `iers2010`
 
-Then, call one of the model’s methods
-to build an object representing a specific longitude and latitude.
-Both of the above models are instances of the `Geoid` class
-and offer these methods:
+Each datum offers a method for taking a latitude and longitude
+and returning a `GeographicPosition` that knows its position in space:
 
 .. autosummary::
 
    Geoid.latlon
-   Geoid.subpoint
 
-Finally, the resulting `GeographicPosition`
-can compute its position at any specified time,
-by combining its coordinates
-with the orientation of the Earth at that moment:
+Going in the other direction,
+there are several methods for converting an existing Skyfield position
+into latitude, longitude, and height:
+
+.. autosummary::
+
+   Geoid.latlon_of
+   Geoid.height_of
+   Geoid.geographic_position_of
+   Geoid.subpoint_of
+
+Once you have used either of the above approaches
+to build a `GeographicPosition`,
+it offers several methods:
 
 .. autosummary::
 

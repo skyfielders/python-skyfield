@@ -20,8 +20,7 @@ to learn more about the position objects that they generate:
 * `kepler-orbits` (comets and asteroids)
 
 You can also build a position object yourself
-by providing |xyz| coordinates to a position class.
-For example:
+by providing |xyz| coordinates to a position class:
 
 .. testsetup::
 
@@ -149,18 +148,21 @@ so each object is assigned a separate name:
     apparent = astrometric.apparent()
     d = apparent.distance()
 
-This is a common Python pattern —
-by assigning names to intermediate values,
-the programmer can pivot between
+This is a common Python pattern.
+By assigning names to intermediate values,
+the programmer
+— without changing the code’s result —
+can pivot between
 succinct code that fits on a single line
-and more verbose code that names each intermediate value,
-without changing the code’s result.
+and more verbose code that names each intermediate value.
+
 Now that we’ve given them names,
 we can discuss the three positions:
 
 * A :class:`Barycentric` position
-  measures from the Solar System’s center of mass,
-  so its |xyz| is in the Barycentric Celestial Reference System (BCRS) —
+  measures from the Solar System’s center of mass.
+  This places its |xyz| vector
+  in the Barycentric Celestial Reference System (BCRS) —
   a frame of reference that’s inertial enough
   to support the :meth:`~Barycentric.observe()` method.
 
@@ -168,9 +170,8 @@ we can discuss the three positions:
   by generating a barycentric position
   for the *center* from which you’ll be observing —
   whether that’s the Earth,
-  a specific location on the Earth’s surface,
-  a satellite,
-  or another body like a planet or Moon.
+  or a specific location on the Earth’s surface,
+  or another body like a satellite, planet, or moon.
 
 * An :class:`Astrometric` position
   is returned by the :meth:`Barycentric.observe()` method which,
@@ -190,7 +191,7 @@ we can discuss the three positions:
 * An :class:`Apparent` position is computed
   by calling the :meth:`Astrometric.apparent()` method.
   This applies two real-world effects
-  that slightly shift everything in the night sky:
+  that slightly shift everything in the sky:
   the aberration of light
   produced by the observer’s own motion through space,
   and the gravitational deflection of light
@@ -614,6 +615,80 @@ you can measure how far an object has moved:
     In one minute the Moon moved 1736 km
 
 .. _reference_frames:
+
+ECI and ECEF coordinates
+========================
+
+Programmers are sometimes asked to produce “ECI” or “ECEF” coordinates,
+or to convert between the two.
+
+ECI means *Earth-Centered Inertial* —
+a position centered on the Earth
+that’s expressed in a non-rotating reference frame.
+Remember the very first coordinates we produced above,
+in the :ref:`positions:Barycentric → Astrometric → Apparent` section?
+They qualify as ECI coordinates!
+Why?
+Because they’re measured from the Earth’s center,
+and because Skyfield’s default ICRS reference frame is inertial.
+So when generating positions centered on the Earth,
+Skyfield produces ECI coordinates by default.
+
+ECEF means *Earth-Centered Earth-Fixed* —
+a position measured from the Earth’s center
+that rotates with the Earth’s surface instead of staying fixed in space.
+Skyfield uses the standard ITRS reference frame for Earth-fixed positions.
+If all you need are |xyz| coordinates,
+you can ask Skyfield for them directly.
+The ITRS *x*-axis points at 0° longitude on the Earth’s equator,
+the *y*-axis at 90° east longitude on the equator,
+and the *z*-axis at the North Pole:
+
+.. testcode::
+
+    from skyfield.framelib import itrs
+
+    m = earth.at(t).observe(moon)
+
+    # Cartesian ECEF coordinates.
+
+    x, y, z = m.frame_xyz(itrs).km
+    print('Cartesian (km): x={:.0f} y={:.0f} z={:.0f}'
+          .format(x, y, z))
+
+.. testoutput::
+
+    Cartesian (km): x=349034 y=-106810 z=122509
+
+But ECEF coordinates
+are more often expressed using latitude, longitude, and height.
+Earlier on this page,
+we learned the :meth:`~skyfield.toposlib.Geoid.latlon()` method
+that takes a latitude and longitude
+and returns an ECEF position.
+There’s a matching method that goes the other direction,
+and computes the latitude and longitude of an existing position.
+We can ask which point on the Earth’s surface the Moon is standing above:
+
+.. testcode::
+
+    from skyfield.api import wgs84
+
+    # Geographic ECEF coordinates.
+
+    lat, lon = wgs84.latlon_of(m)
+    print('Latitude: {:.4f}'.format(lat.degrees))
+    print('Longitude: {:.4f}'.format(lon.degrees))
+
+.. testoutput::
+
+    Latitude: 18.5553
+    Longitude: -17.0149
+
+See the :ref:`api:Geographic locations` section
+of the API documentation
+for the whole slate of methods
+that can convert between inertial and Earth-fixed positions.
 
 Coordinates in other reference frames
 =====================================

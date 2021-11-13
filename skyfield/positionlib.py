@@ -226,7 +226,7 @@ class ICRF(object):
         return self.distance().m / C * DAY_S
 
     def radec(self, epoch=None):
-        r"""Compute equatorial (RA, declination, distance)
+        r"""Compute equatorial RA, declination, and distance.
 
         When called without a parameter, this returns standard ICRF
         right ascension and declination:
