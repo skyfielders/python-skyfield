@@ -139,9 +139,9 @@ def test_polar_motion_when_computing_altaz_coordinates(ts):
 def test_subpoint_with_wrong_center(ts, angle):
     t = ts.utc(2020, 12, 31)
     p = Barycentric([0,0,0], t=t)
-    with assert_raises(ValueError, 'a geographic subpoint can only be'
-                       ' calculated for positions measured from 399, the center'
-                       ' of the Earth, but this position has center 0'):
+    with assert_raises(ValueError, 'you can only calculate a geographic'
+                       ' position from a position which is geocentric'
+                       ' .center=399., but this position has a center of 0'):
         wgs84.subpoint(p)
 
 def test_iers2010_subpoint(ts, angle):

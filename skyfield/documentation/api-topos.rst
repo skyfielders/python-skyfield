@@ -29,21 +29,19 @@
 
    .. attribute:: latitude
 
-      An :class:`~skyfield.units.Angle` object
-      specifying the latitude of the topocentric position.
-      The north pole has latitude +90°.
+      An :class:`~skyfield.units.Angle` specifying latitude;
+      the north pole has latitude +90°.
 
    .. attribute:: longitude
 
-      An :class:`~skyfield.units.Angle` object
-      specifying the longitude of the topocentric position.
-      East is positive.
+      An :class:`~skyfield.units.Angle` specifying longitude;
+      east is positive, west is negative.
 
    .. attribute:: elevation
 
-      A :class:`~skyfield.units.Distance` object
-      specifying an elevation above (positive) or below (negative)
-      the mean sea level of the Earth ellipsoid
+      A :class:`~skyfield.units.Distance` specifying elevation
+      above (positive) or below (negative)
+      the surface of the Earth ellipsoid
       specified by this position’s :attr:`~GeographicPosition.model`.
 
    .. attribute:: itrs_xyz
@@ -55,8 +53,8 @@
    .. attribute:: center
 
       The integer 399,
-      which identifies this topocentric position’s vector
-      as having its origin at the center of the Earth.
+      which identifies this position as geocentric:
+      its |xyz| coordinates are measured from the Earth’s center.
 
    .. method:: at(t)
 

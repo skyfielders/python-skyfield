@@ -143,8 +143,8 @@ class Geoid(object):
 
         The longitude and latitude should both be specified in degrees.
         If no elevation in meters is supplied, the returned position
-        will be at sea level.  Longitude is positive towards the east,
-        so supply a negative number for west::
+        will lie on the surface of the ellipsoid.  Longitude is positive
+        towards the east, so supply a negative number for west::
 
             from skyfield.api import wgs84
             observatory = wgs84.latlon(37.3414, -121.6429)  # 121.6° West
@@ -183,73 +183,27 @@ class Geoid(object):
         return cls(self, latitude, longitude, elevation, Distance(r))
 
     def latlon_of(self, position):
-        """Return the latitude and longitude of a ``position``.
-
-        The input ``position`` must be geocentric: it must have a
-        ``.center`` of 399.  Returns the two angles latitude and
-        longitude.
-
-        """
-        if position.center != 399:
-            raise ValueError(
-                'a geographic subpoint can only be calculated for positions'
-                ' measured from 399, the center of the Earth, but this'
-                ' position has center {0}'.format(position.center)
-            )
-
-        x, y, z = position.frame_xyz(itrs).au
-        a = self.radius.au
-        R, C, lat = _compute_latitude(a, self._e2, x, y, z)
+        """Return the latitude and longitude of a geocentric ``position``."""
+        xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
         lon = (arctan2(y, x) - pi) % tau - pi
         return Angle(radians=lat), Angle(radians=lon)
 
     def height_of(self, position):
-        """Return the height above sea level of a ``position``.
-
-        The input ``position`` must be geocentric: it must have a
-        ``.center`` of 399.  The return value is a distance that when
-        positive gives the position’s height above sea level, and that
-        when negative gives its depth below it.
-
-        """
-        if position.center != 399:
-            raise ValueError(
-                'a geographic subpoint can only be calculated for positions'
-                ' measured from 399, the center of the Earth, but this'
-                ' position has center {0}'.format(position.center)
-            )
-
-        x, y, z = position.frame_xyz(itrs).au
-        a = self.radius.au
-        R, C, lat = _compute_latitude(a, self._e2, x, y, z)
-        height_au = R / cos(lat) - a * C
+        """Return height above the ellipsoid for a geocentric ``position``."""
+        xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
+        height_au = R / cos(lat) - aC
         return Distance(height_au)
 
     def geographic_position_of(self, position):
         """Return the latitude, longitude, and elevation of a ``position``.
 
-        The input ``position`` must be geocentric: it must have a
-        ``.center`` of 399, the Earth’s center.  The return value is a
-        `GeographicPosition` whose ``latitude`` and ``longitude``
-        specify the point on the Earth’s surface directly beneath the
-        given position, and whose ``elevation`` is the position’s height
-        above (or depth below) sea level.
+        Given a geocentric ``position``, returns a `GeographicPosition`
+        providing its ``latitude``, ``longitude``, and ``elevation``.
 
         """
-        if position.center != 399:
-            raise ValueError(
-                'a geographic subpoint can only be calculated for positions'
-                ' measured from 399, the center of the Earth, but this'
-                ' position has center {0}'.format(position.center)
-            )
-
-        xyz_au = position.frame_xyz(itrs).au
-        x, y, z = xyz_au
-        a = self.radius.au
-        R, C, lat = _compute_latitude(a, self._e2, x, y, z)
+        xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
         lon = (arctan2(y, x) - pi) % tau - pi
-        height_au = R / cos(lat) - a * C
-
+        height_au = R / cos(lat) - aC
         return GeographicPosition(
             latitude=Angle(radians=lat),
             longitude=Angle(radians=lon),
@@ -259,29 +213,15 @@ class Geoid(object):
         )
 
     def subpoint_of(self, position):
-        """Return the point on the geoid directly below a ``position``.
+        """Return the point on the ellipsoid directly below a ``position``.
 
-        The input ``position`` must be geocentric: it must have a
-        ``.center`` of 399, the Earth’s center.  The return value is a
-        `GeographicPosition` whose ``latitude`` and ``longitude``
-        specify the point on the Earth’s surface directly beneath the
-        given position, and whose ``elevation`` is zero — a position at
-        mean sea level on this particular geoid.
+        Given a geocentric ``position``, returns a `GeographicPosition`
+        whose ``latitude`` and ``longitude`` lie directly underneath the
+        input position and whose ``elevation`` is zero.
 
         """
-        if position.center != 399:
-            raise ValueError(
-                'a geographic subpoint can only be calculated for positions'
-                ' measured from 399, the center of the Earth, but this'
-                ' position has center {0}'.format(position.center)
-            )
-
-        xyz_au = position.frame_xyz(itrs).au
-        x, y, z = xyz_au
-        a = self.radius.au
-        R, C, lat = _compute_latitude(a, self._e2, x, y, z)
+        xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
         lon = (arctan2(y, x) - pi) % tau - pi
-
         return GeographicPosition(
             latitude=Angle(radians=lat),
             longitude=Angle(radians=lon),
@@ -289,6 +229,26 @@ class Geoid(object):
             itrs_xyz=Distance(xyz_au),
             model=self,
         )
+
+    def _compute_latitude(self, position):
+        if position.center != 399:
+            raise ValueError(
+                'you can only calculate a geographic position from a'
+                ' position which is geocentric (center=399), but this'
+                ' position has a center of {0}'.format(position.center)
+            )
+        xyz_au = position.frame_xyz(itrs).au
+        x, y, z = xyz_au
+        a = self.radius.au
+        e2 = self._e2
+        R = sqrt(x*x + y*y)
+        lat = arctan2(z, R)
+        for iteration in 0,1,2:
+            sin_lat = sin(lat)
+            e2_sin_lat = e2 * sin_lat
+            aC = a / sqrt(1.0 - e2_sin_lat * sin_lat)
+            lat = arctan2(z + aC * e2_sin_lat, R)
+        return xyz_au, x, y, aC, R, lat
 
     subpoint = geographic_position_of  # deprecated method name
 
@@ -304,18 +264,6 @@ that don’t specify an alternative geoid.
 
 """
 iers2010.__doc__ = 'International Earth Rotation Service 2010 `Geoid`.'
-
-# Helpers.
-
-def _compute_latitude(a, e2, x, y, z):
-    R = sqrt(x*x + y*y)
-    lat = arctan2(z, R)
-    for iteration in 0,1,2:
-        sin_lat = sin(lat)
-        e2_sin_lat = e2 * sin_lat
-        C = 1.0 / sqrt(1.0 - e2_sin_lat * sin_lat)
-        lat = arctan2(z + a * C * e2_sin_lat, R)
-    return R, C, lat
 
 # Compatibility with old versions of Skyfield:
 
