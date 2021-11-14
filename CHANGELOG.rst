@@ -5,8 +5,8 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
-v1.40 — Unreleased
-------------------
+v1.40 — 2021 November 14
+------------------------
 
 * Extended the :func:`~skyfield.magnitudelib.planetary_magnitude()`
   routine to work with all the major planets, which upgrades it from a

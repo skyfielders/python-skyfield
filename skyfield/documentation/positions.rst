@@ -668,7 +668,9 @@ that takes a latitude and longitude
 and returns an ECEF position.
 There’s a matching method that goes the other direction,
 and computes the latitude and longitude of an existing position.
-We can ask which point on the Earth’s surface the Moon is standing above:
+For example,
+we can ask for the Earth longitude and latitude
+of the point directly beneath the Moon:
 
 .. testcode::
 
