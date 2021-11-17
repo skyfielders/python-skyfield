@@ -208,7 +208,7 @@ def _ecliptic_lon_diff(observer, body1, body2, t):
 
 def _local_sidereal(observer, t):
     """Returns observer's local apparent sidereal time at t in degrees"""
-    return ts.tt(jd=t).gast*15 + observer.positives[-1].longitude.degrees
+    return ts.tt(jd=t).gast*15 + observer.vector_functions[-1].longitude.degrees
 
 
 def _lha(observer, body, t):
@@ -299,7 +299,7 @@ def meridian_transits(observer, body, t0, t1):
     if isinstance(observer, Topos):
         raise ValueError('`observer` should be a VectorSum of earth + Topos.')
     
-    if isinstance(body, EarthSatellite) or (isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite)):
+    if isinstance(body, EarthSatellite) or (isinstance(body, VectorSum) and isinstance(body.vector_functions[-1], EarthSatellite)):
         raise ValueError("meridian_transits doesn't support EarthSatellites.")
     
     f = partial(_lha, observer, body)    
@@ -353,13 +353,13 @@ def culminations(observer, body, t0, t1):
         culminations
     """    
     if isinstance(body, EarthSatellite) and isinstance(observer, VectorSum):
-        observer = observer.positives[-1]
+        observer = observer.vector_functions[-1]
         
     if not isinstance(body, EarthSatellite) and not isinstance(observer, VectorSum):
         raise ValueError('Unless ``body`` is an EarthSatellite, ``observer``'
                          'must be a VectorSum of Earth + Topos')
         
-    if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
+    if isinstance(body, VectorSum) and isinstance(body.vector_functions[-1], EarthSatellite):
         raise ValueError('`body` should be a plain EarthSatellite, not a VectorSum')
     
     if isinstance(body, EarthSatellite):
@@ -428,13 +428,13 @@ def risings_settings(observer, body, t0, t1):
         array containing 'rise' for risings, or 'set' for settings
     """
     if isinstance(body, EarthSatellite) and isinstance(observer, VectorSum):
-        observer = observer.positives[-1]
+        observer = observer.vector_functions[-1]
     
     if not isinstance(body, EarthSatellite) and not isinstance(observer, VectorSum):
         raise ValueError('Unless ``body`` is an EarthSatellite, ``observer``'
                          'must be a VectorSum of Earth + Topos')
         
-    if isinstance(body, VectorSum) and isinstance(body.positives[-1], EarthSatellite):
+    if isinstance(body, VectorSum) and isinstance(body.vector_functions[-1], EarthSatellite):
         raise ValueError('`body` should be a plain EarthSatellite, not a VectorSum')
     
     if isinstance(body, EarthSatellite):
@@ -508,7 +508,7 @@ def twilights(observer, sun, t0, t1, kind='civil'):
     am_pm : ndarray, dtype=str
         array containing 'am' for morning twilight, or 'pm' for evening twilight
         """
-    if not isinstance(observer.positives[-1], Topos):
+    if not isinstance(observer.vector_functions[-1], Topos):
         raise ValueError('`observer` should be a VectorSum of earth + Topos.')
         
     sun_culminations = culminations(observer, sun, t0, t1)[0].tt

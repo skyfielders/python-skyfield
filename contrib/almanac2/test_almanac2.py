@@ -10,7 +10,7 @@ from numpy import ndarray
 from functools import partial
 
 # Put your data directory here before running this file:
-load = Loader(r'')
+load = Loader(r'.')
 
 ts = load.timescale()
 ephem = load('de430t.bsp')
