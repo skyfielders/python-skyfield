@@ -223,7 +223,12 @@ class ICRF(object):
     @reify
     def light_time(self):
         """Length of this vector in days of light travel time."""
-        return self.distance().m / C * DAY_S
+        # Note that this property is almost never called, since
+        # .light_time is set manually on the one kind of position
+        # (astrometric) that is ever likely to need it.  Alas: back in
+        # 2015, I didn't think to either hide this attribute, or have it
+        # include its units in its name!
+        return self.distance().m / C / DAY_S
 
     def radec(self, epoch=None):
         r"""Compute equatorial RA, declination, and distance.

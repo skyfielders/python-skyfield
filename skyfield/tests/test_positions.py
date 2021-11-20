@@ -185,6 +185,10 @@ def test_velocity_in_ITRF_to_GCRS2():
     acceptable_error = 4e-12
     assert relative_error < acceptable_error
 
+def test_light_time_method():
+    p = ICRF([0.0, 1.0, 0.0])
+    assert abs(p.light_time - 0.0057755183) < 1e-10
+
 def test_hadec():
     # If the DE430 ephemeris excerpt is avaiable, this test can run
     # locally against the HA number from first line of
