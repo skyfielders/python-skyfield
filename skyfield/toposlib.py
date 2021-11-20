@@ -85,7 +85,14 @@ class GeographicPosition(ITRSPosition):
             array2string(self.elevation.m, **_elev_options))
 
     def lst_hours_at(self, t):
-        """Return this position’s Local Sidereal Time in hours at time ``t``."""
+        """Return the Local Apparent Sidereal Time, in hours, at time ``t``.
+
+        This location’s Local Apparent Sidereal Time (LAST) is the right
+        ascension of the zenith at the time ``t``, as measured against
+        the “true” Earth equator and equinox (rather than the fictional
+        “mean” equator and equinox, which ignore the Earth’s nutation).
+
+        """
         sprime = -47.0e-6 * (t.whole - T0 + t.tdb_fraction) / 36525.0
         return (t.gast + self.longitude._hours + sprime / 54000.0) % 24.0
 
