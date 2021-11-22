@@ -1,5 +1,6 @@
 from skyfield.api import load, Time, load_file
 from skyfield.data.spice import inertial_frames
+from skyfield.data.gravitational_parameters import GM_dict
 from skyfield.units import Distance, Angle, Velocity
 from skyfield.constants import DAY_S
 from skyfield.elementslib import (
@@ -594,3 +595,15 @@ def test_all_types_at_once(ts):
                 w=array([ 0, 0,    0,  4,  4,    2, 4, 4,    2,   4,   4,    2]),
                 v=array([ 1, 5,    3,  5,  5,    3, 5, 5,    3,  .5,  .5,   .5]),
                 ts=ts)
+
+def test_gm_calculation(ts):
+    geocentric_pos = (moon - earth).at(ts.tdb(2015, 3, 2, 2))
+    geocentric_elements = osculating_elements_of(geocentric_pos, ECLIPTIC)
+    assert geocentric_elements._mu == GM_dict[3]
+
+    barycentric_pos = earth.at(ts.tdb(2015, 3, 2, 2))
+    barycentric_elements = osculating_elements_of(barycentric_pos, ECLIPTIC)
+    assert barycentric_elements._mu == GM_dict[0]
+
+    assert osculating_elements_of(barycentric_pos, ECLIPTIC, GM_dict[0])._mu == barycentric_elements._mu
+
