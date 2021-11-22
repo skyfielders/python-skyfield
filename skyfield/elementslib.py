@@ -12,8 +12,7 @@ from numpy import (array, arctan2, sin, arctan, tan, inf, repeat, float64,
 def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
     """Produce the osculating orbital elements for a position.
 
-    Parameters
-    ----------
+    Parameters:
     position : :class:`~skyfield.positionlib.ICRF` object
          commonly returned by the ``at()`` method of any Solar System body
     reference_frame: 3x3 numpy array, optional
@@ -22,8 +21,7 @@ def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
         Gravitational parameter (G*M) in units of km^3/s^2
         If not specified, this is calculated for you.
 
-    Returns
-    -------
+    Returns:
     :class:`~skyfield.elementslib.OsculatingElements`
     """
     if not gm_km3_s2:
