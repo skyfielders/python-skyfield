@@ -12,12 +12,19 @@ from numpy import (array, arctan2, sin, arctan, tan, inf, repeat, float64,
 def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
     """Produce the osculating orbital elements for a position.
 
-    The ``position`` should be an :class:`~skyfield.positionlib.ICRF`
-    instance like that returned by the ``at()`` method of any Solar
-    System body, specifying a position, a velocity, and a time.  An
-    instance of :class:`~skyfield.elementslib.OsculatingElements` is
-    returned.
+    Parameters
+    ----------
+    position : :class:`~skyfield.positionlib.ICRF` object
+         commonly returned by the ``at()`` method of any Solar System body
+    reference_frame: 3x3 numpy array, optional
+        commonly used values are found in skyfield.data.spice.inertial_frames
+    gm_km3_s2: float, optional
+        Gravitational parameter (G*M) in units of km^3/s^2
+        If not specified, this is calculated for you.
 
+    Returns
+    -------
+    :class:`~skyfield.elementslib.OsculatingElements`
     """
     if not gm_km3_s2:
         gm_km3_s2 = GM_dict.get(position.center, 0)
