@@ -31,9 +31,9 @@ def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
         if position.center not in range(0, 10): # true if position.center is not a barycenter
             gm_km3_s2 += GM_dict.get(position.target, 0)
 
-    if gm_km3_s2 == 0:
-        raise ValueError("Skyfield is unable to calculate a value for GM. You"
-                " should specify one using the 'gm_km3_s2' keyword argument")
+        if gm_km3_s2 == 0:
+            raise ValueError("Skyfield is unable to calculate a value for GM. You"
+                    " should specify one using the 'gm_km3_s2' keyword argument")
 
     if reference_frame is not None:
         position_vec = Distance(reference_frame.dot(position.position.au))
