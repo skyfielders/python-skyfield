@@ -18,8 +18,7 @@ def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
     reference_frame: 3x3 numpy array, optional
         commonly used values are found in skyfield.data.spice.inertial_frames
     gm_km3_s2: float, optional
-        Gravitational parameter (G*M) in units of km^3/s^2
-        If not specified, this is calculated for you.
+        Gravitational parameter (G*M) in units of km^3/s^2 If not specified, this is calculated for you.
 
     Returns:
     :class:`~skyfield.elementslib.OsculatingElements`
