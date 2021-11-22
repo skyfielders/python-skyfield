@@ -9,7 +9,7 @@ from numpy import (array, arctan2, sin, arctan, tan, inf, repeat, float64,
                    sinh, sqrt, arccos, arctanh, zeros_like, ones_like, divide,
                    where, pi, cross)
 
-def osculating_elements_of(position, reference_frame=None):
+def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
     """Produce the osculating orbital elements for a position.
 
     The ``position`` should be an :class:`~skyfield.positionlib.ICRF`
@@ -19,7 +19,14 @@ def osculating_elements_of(position, reference_frame=None):
     returned.
 
     """
-    mu = GM_dict.get(position.center, 0) + GM_dict.get(position.target, 0)
+    if not gm_km3_s2:
+        gm_km3_s2 = GM_dict.get(position.center, 0)
+        if position.center not in range(0, 10): # true if position.center is not a barycenter
+            gm_km3_s2 += GM_dict.get(position.target, 0)
+
+    if gm_km3_s2 == 0:
+        raise ValueError("Skyfield is unable to calculate a value for GM. You"
+                " should specify one using the 'gm_km3_s2' keyword argument")
 
     if reference_frame is not None:
         position_vec = Distance(reference_frame.dot(position.position.au))
@@ -31,7 +38,7 @@ def osculating_elements_of(position, reference_frame=None):
     return OsculatingElements(position_vec,
                               velocity_vec,
                               position.t,
-                              mu)
+                              gm_km3_s2)
 
 
 class OsculatingElements(object):
