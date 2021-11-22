@@ -82,3 +82,6 @@ GM_dict = {
     2000511: 2.3312860000000000E+00,
     2000704: 2.3573170000000001E+00,
     }
+
+non_barycenters = [id for id in GM_dict.keys() if id not in range(1, 10)]
+GM_dict[0] = sum([GM_dict[id] for id in non_barycenters])
