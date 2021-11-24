@@ -22,6 +22,7 @@ def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
 
     Returns:
     :class:`~skyfield.elementslib.OsculatingElements`
+
     """
     if not gm_km3_s2:
         gm_km3_s2 = GM_dict.get(position.center, 0.0)
