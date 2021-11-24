@@ -1,6 +1,8 @@
 # All values are in km**3/s**2
 # Source: ftp://ssd.jpl.nasa.gov/pub/xfr/gm_Horizons.pck
 GM_dict = {
+    0: 132890518792.23172, # script for calculating this value in design/ssb_gm.py
+
     1: 2.2031780000000021E+04,
     2: 3.2485859200000006E+05,
     3: 4.0350323550225981E+05,
@@ -83,5 +85,3 @@ GM_dict = {
     2000704: 2.3573170000000001E+00,
     }
 
-non_barycenters = [id for id in GM_dict.keys() if id not in range(1, 10)]
-GM_dict[0] = sum([GM_dict[id] for id in non_barycenters])
