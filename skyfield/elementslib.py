@@ -25,8 +25,12 @@ def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
 
     """
     if gm_km3_s2 is None:
+        if not isinstance(position.center, int):
+            raise ValueError('Skyfield is unable to calculate a value for GM. You'
+                    ' should specify one using the `gm_km3_s2` keyword argument')
         gm_km3_s2 = GM_dict.get(position.center, 0.0)
-        if not 0 <= position.center <= 9: # true if position.center is not a barycenter
+        orbits_barycenter = 0 <= position.center <= 9
+        if not orbits_barycenter:
             gm_km3_s2 += GM_dict.get(position.target, 0.0)
 
         if gm_km3_s2 == 0:
