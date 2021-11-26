@@ -61,7 +61,7 @@ def _filename_of(url):
 
 _IERS = 'https://hpiers.obspm.fr/iers/bul/bulc/'
 _IERS2 = 'ftp://ftp.iers.org/products/eop/rapid/standard/'
-_JPL = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/'
+_JPL = 'https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/'
 _NAIF_KERNELS = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/'
 _NAIF = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'
 

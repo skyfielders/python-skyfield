@@ -5,6 +5,18 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+v1.41 — Unreleased
+------------------
+
+* Skyfield now uses HTTPS instead of FTP to download JPL ephemeris files
+  like ``de421.bsp``.  This does risk raising an error for users whose
+  machines have out-of-date root certificates.  But it protects the
+  connection from outside tampering, and will keep working if the
+  ``ssd.jpl.nasa.gov`` FTP service is ever shut down — as happened
+  earlier this year to FTP on NASA’s ``cddis.nasa.gov`` server.
+  `#666 <https://github.com/skyfielders/python-skyfield/issues/666>`_
+
+
 v1.40 — 2021 November 14
 ------------------------
 

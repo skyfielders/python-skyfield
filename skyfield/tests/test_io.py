@@ -47,7 +47,7 @@ def fake_download(load, filename, content):
 # Simple tests.
 
 def test_build_url(load):
-    url = 'ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/de421.bsp'
+    url = 'https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de421.bsp'
     assert load.build_url('de421.bsp') == url
     with assert_raises(ValueError, 'know the URL'):
         load.build_url('unknown.kind.of.file')
