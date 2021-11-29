@@ -9,17 +9,35 @@ from numpy import (array, arctan2, sin, arctan, tan, inf, repeat, float64,
                    sinh, sqrt, arccos, arctanh, zeros_like, ones_like, divide,
                    where, pi, cross)
 
-def osculating_elements_of(position, reference_frame=None):
+def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
     """Produce the osculating orbital elements for a position.
 
-    The ``position`` should be an :class:`~skyfield.positionlib.ICRF`
-    instance like that returned by the ``at()`` method of any Solar
-    System body, specifying a position, a velocity, and a time.  An
-    instance of :class:`~skyfield.elementslib.OsculatingElements` is
-    returned.
+    `position` is an instance of :class:`~skyfield.positionlib.ICRF`.
+    These are commonly returned by the ``at()`` method of any
+    Solar System body. `reference_frame` is an optional argument
+    and is a 3x3 numpy array. The reference frame by default
+    is the ICRF. Commonly used reference frames are found in
+    skyfield.data.spice.inertial_frames. `gm_km3_s2` is an optional
+    float argument representing the gravitational parameter (G*M) in
+    units of km^3/s^2, which is the sum of the masses of the orbiting
+    object and the object being orbited. If not specified, this is
+    calculated for you.
+
+    This function returns an instance of :class:`~skyfield.elementslib.OsculatingElements`
 
     """
-    mu = GM_dict.get(position.center, 0) + GM_dict.get(position.target, 0)
+    if gm_km3_s2 is None:
+        if not isinstance(position.center, int):
+            raise ValueError('Skyfield is unable to calculate a value for GM. You'
+                    ' should specify one using the `gm_km3_s2` keyword argument')
+        gm_km3_s2 = GM_dict.get(position.center, 0.0)
+        orbits_barycenter = 0 <= position.center <= 9
+        if not orbits_barycenter:
+            gm_km3_s2 += GM_dict.get(position.target, 0.0)
+
+        if gm_km3_s2 == 0:
+            raise ValueError('Skyfield is unable to calculate a value for GM. You'
+                    ' should specify one using the `gm_km3_s2` keyword argument')
 
     if reference_frame is not None:
         position_vec = Distance(reference_frame.dot(position.position.au))
@@ -31,7 +49,7 @@ def osculating_elements_of(position, reference_frame=None):
     return OsculatingElements(position_vec,
                               velocity_vec,
                               position.t,
-                              mu)
+                              gm_km3_s2)
 
 
 class OsculatingElements(object):
