@@ -1,7 +1,7 @@
 
-===========================
- Positions and Coordinates
-===========================
+===========
+ Positions
+===========
 
 .. currentmodule:: skyfield.positionlib
 
