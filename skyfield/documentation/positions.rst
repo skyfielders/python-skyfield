@@ -1,7 +1,7 @@
 
-===========================
- Positions and Coordinates
-===========================
+===========
+ Positions
+===========
 
 .. currentmodule:: skyfield.positionlib
 
@@ -443,8 +443,6 @@ the point where Mars will actually appear,
 not the ideal point where it should sit on a star chart
 that ignores aberration and deflection.
 
-.. TODO hour angle. xp yp. polar motion.
-
 .. TODO can generate observer position only once and use for N .observe() calls
 
 .. TODO move this to an accuracy page entry on aberration
@@ -616,135 +614,19 @@ you can measure how far an object has moved:
 
 .. _reference_frames:
 
-ECI and ECEF coordinates
-========================
-
-Programmers are sometimes asked to produce “ECI” or “ECEF” coordinates,
-or to convert between the two.
-
-ECI means *Earth-Centered Inertial* —
-a position centered on the Earth
-that’s expressed in a non-rotating reference frame.
-Remember the very first coordinates we produced above,
-in the :ref:`positions:Barycentric → Astrometric → Apparent` section?
-They qualify as ECI coordinates!
-Why?
-Because they’re measured from the Earth’s center,
-and because Skyfield’s default ICRS reference frame is inertial.
-So when generating positions centered on the Earth,
-Skyfield produces ECI coordinates by default.
-
-ECEF means *Earth-Centered Earth-Fixed* —
-a position measured from the Earth’s center
-that rotates with the Earth’s surface instead of staying fixed in space.
-Skyfield uses the standard ITRS reference frame for Earth-fixed positions.
-If all you need are |xyz| coordinates,
-you can ask Skyfield for them directly.
-The ITRS *x*-axis points at 0° longitude on the Earth’s equator,
-the *y*-axis at 90° east longitude on the equator,
-and the *z*-axis at the North Pole:
-
-.. testcode::
-
-    from skyfield.framelib import itrs
-
-    m = earth.at(t).observe(moon)
-
-    # Cartesian ECEF coordinates.
-
-    x, y, z = m.frame_xyz(itrs).km
-    print('Cartesian (km): x={:.0f} y={:.0f} z={:.0f}'
-          .format(x, y, z))
-
-.. testoutput::
-
-    Cartesian (km): x=349034 y=-106810 z=122509
-
-But ECEF coordinates
-are more often expressed using latitude, longitude, and height.
-Earlier on this page,
-we learned the :meth:`~skyfield.toposlib.Geoid.latlon()` method
-that takes a latitude and longitude
-and returns an ECEF position.
-There’s a matching method that goes the other direction,
-and computes the latitude and longitude of an existing position.
-For example,
-we can ask for the Earth longitude and latitude
-of the point directly beneath the Moon:
-
-.. testcode::
-
-    from skyfield.api import wgs84
-
-    # Geographic ECEF coordinates.
-
-    lat, lon = wgs84.latlon_of(m)
-    print('Latitude: {:.4f}'.format(lat.degrees))
-    print('Longitude: {:.4f}'.format(lon.degrees))
-
-.. testoutput::
-
-    Latitude: 18.5553
-    Longitude: -17.0149
-
-See the :ref:`api:Geographic locations` section
-of the API documentation
-for the whole slate of methods
-that can convert between inertial and Earth-fixed positions.
-
-.. Once fully supported, illustrate round-trips like
-
-    xyz = m.frame_xyz(itrs)
-    from skyfield.positionlib import ICRS
-    position = ICRS.from_time_and_frame_vectors(t, itrs, xyz, None)
-
 Coordinates in other reference frames
 =====================================
 
 You can ask Skyfield to express a position
 in a number of other reference frames
-besides the standard ICRF reference frame
-(the modern equivalent to J2000 coordinates)
-that Skyfield uses internally.
-For example,
-to express the position of the Moon relative to the rotating Earth:
+besides the ones illustrated above.
+For details, see the accompanying chapter
+that’s specifically dedicated to explaining :doc:`coordinates`.
 
-.. testcode::
-
-    from skyfield.framelib import itrs
-
-    a = earth.at(t).observe(planets['moon']).apparent()
-    x = a.frame_xyz(itrs)
-    print(x.km.astype(int))
-
-.. testoutput::
-
-    [ 349045 -106774  122510]
-
-The three position methods that accept a reference frame argument are:
-
-* `frame_xyz()`
-* `frame_xyz_and_velocity()`
-* `frame_latlon()`
-
-Position classes also support a constructor
-that accepts a position vector and a velocity vector
-in a particular reference frame:
-
-* `from_time_and_frame_vectors()`
-
-Here are the reference frames defined in the ``framelib`` module
-(click on their names for more detailed descriptions):
-
-* `true_equator_and_equinox_of_date`
-* `itrs`
-* :data:`~skyfield.framelib.ecliptic_J2000_frame`
-* :data:`~skyfield.framelib.ecliptic_frame`
-* :data:`~skyfield.framelib.galactic_frame`
-
-See also :doc:`planetary` for reference frames
-that are not included with Skyfield
-but that you can load from NASA reference files.
+You can also read the chapter :doc:`planetary`,
+which explains how to use reference frames
+that are not included with Skyfield,
+by loading them from NASA reference files.
 
 .. testcleanup::
 

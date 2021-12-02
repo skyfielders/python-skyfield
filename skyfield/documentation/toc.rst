@@ -17,6 +17,7 @@ that is accelerated using NumPy vector math!
    files
    almanac
    positions
+   coordinates
    time
    planets
    stars
