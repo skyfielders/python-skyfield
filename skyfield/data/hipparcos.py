@@ -39,10 +39,9 @@ _COLUMN_NAMES = (
 )
 
 def load_dataframe(fobj):
-    """Given an open file for `hip_main.dat.gz`, return a parsed dataframe.
+    """Given an open file for ``hip_main.dat``, return a parsed dataframe.
 
-    If your copy of ``hip_main.dat`` has already been unzipped, pass the
-    optional argument ``compression=None``.
+    If the file is gzipped, it will be automatically uncompressed.
 
     """
     try:
