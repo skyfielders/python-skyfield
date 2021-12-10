@@ -619,48 +619,14 @@ Coordinates in other reference frames
 
 You can ask Skyfield to express a position
 in a number of other reference frames
-besides the standard ICRF reference frame
-(the modern equivalent to J2000 coordinates)
-that Skyfield uses internally.
-For example,
-to express the position of the Moon relative to the rotating Earth:
+besides the ones illustrated above.
+For details, see the accompanying chapter
+that’s specifically dedicated to explaining :doc:`coordinates`.
 
-.. testcode::
-
-    from skyfield.framelib import itrs
-
-    a = earth.at(t).observe(planets['moon']).apparent()
-    x = a.frame_xyz(itrs)
-    print(x.km.astype(int))
-
-.. testoutput::
-
-    [ 349045 -106774  122510]
-
-The three position methods that accept a reference frame argument are:
-
-* `frame_xyz()`
-* `frame_xyz_and_velocity()`
-* `frame_latlon()`
-
-Position classes also support a constructor
-that accepts a position vector and a velocity vector
-in a particular reference frame:
-
-* `from_time_and_frame_vectors()`
-
-Here are the reference frames defined in the ``framelib`` module
-(click on their names for more detailed descriptions):
-
-* `true_equator_and_equinox_of_date`
-* `itrs`
-* :data:`~skyfield.framelib.ecliptic_J2000_frame`
-* :data:`~skyfield.framelib.ecliptic_frame`
-* :data:`~skyfield.framelib.galactic_frame`
-
-See also :doc:`planetary` for reference frames
-that are not included with Skyfield
-but that you can load from NASA reference files.
+You can also read the chapter :doc:`planetary`,
+which explains how to use reference frames
+that are not included with Skyfield,
+by loading them from NASA reference files.
 
 .. testcleanup::
 

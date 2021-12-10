@@ -16,11 +16,11 @@ As explained in the :doc:`positions` chapter,
 there is a real physical difference between,
 say, an astrometric position and an apparent position:
 they are two distinct points in the sky.
-But for a single position —
+But given a single position —
 a single point in the sky —
-all the various coordinates that Skyfield can produce
-will identify the exact same spot,
-and will point a telescope in its direction.
+all the various coordinates you can produce
+mean exactly the same thing:
+the direction you would point a telescope to put that point at its center.
 
 Cartesian coordinates versus Spherical coordinates
 ==================================================
@@ -36,11 +36,11 @@ along axes that stand at right angles to each other.
 
 *Spherical* coordinates instead specify a location
 using two angles plus a distance.
-Just as geographic latitude and longitude
+Just as a geographic latitude and longitude
 designate a position on the Earth,
-the two angles of spherical coordinates
-pick out a particular point on the celestial sphere —
-a particular direction into the heavens —
+the two angles of a spherical coordinate
+pick out a particular point in the sky —
+a particular point on the celestial sphere —
 and the distance says how far you would need to travel in that direction
 to reach the target.
 
@@ -67,27 +67,28 @@ Here’s how the axes and angles are defined:
  | ↔ Right ascension 0\ |h|–24\ |h| east around the equator
  | ↕ Declination ±90° from equator toward poles
 
-There’s a problem
-with the definition of this coordinate system:
-thanks to `precession <https://en.wikipedia.org/wiki/Axial_precession>`_,
+There’s a problem with this coordinate system:
+it slowly changes.
+Thanks to `precession <https://en.wikipedia.org/wiki/Axial_precession>`_,
 the Earth’s poles are in constant — if gradual — motion.
 So equatorial coordinates
 always have to specify
-whether they are using the Earth’s equator and equinox
+whether they are measuring against the Earth’s equator and equinox
 as of 1950, or 2000, or some other specific year.
 In the late twentieth century
 “J2000” coordinates became popular,
-measured against where the Earth’s mean equator would be pointing
-at noon Terrestrial Time on 2000 January 1.
+measured against the Earth’s mean equator
+as of noon Terrestrial Time on 2000 January 1.
 
 But in 1998,
 astronomers decided it was time to get off of the equatorial treadmill.
 They defined a new coordinate system:
 the ICRS (International Celestial Reference System).
 Its axes point almost exactly along the old J2000 axes,
-but are permanent and immobile and can achieve unbounded precision:
-instead of moving with the Earth,
-its axes are measured against the locations of very distance quasars.
+but are permanent and immobile,
+and can achieve unbounded precision
+because instead of using the Earth
+its axes are tied to the locations of very distant quasars.
 
 In the :doc:`positions` chapter
 you’ve already seen
@@ -95,8 +96,7 @@ how to retrieve ICRS coordinates in both Cartesian and spherical form:
 
 .. testcode::
 
-    # Let’s build an example position using
-    # what we learned in the Positions chapter.
+    # Building an example position.
 
     from skyfield.api import load
 
@@ -105,6 +105,8 @@ how to retrieve ICRS coordinates in both Cartesian and spherical form:
     eph = load('de421.bsp')
     earth, mars = eph['earth'], eph['mars']
     position = earth.at(t).observe(mars)
+
+    # Producing coordinates.
 
     print('Cartesian ICRS:')
 
@@ -135,14 +137,13 @@ how to retrieve ICRS coordinates in both Cartesian and spherical form:
       -18deg 08' 37.0" declination
       2.47983 au distance
 
-These are the most popular coordinates
-to use with astrometric positions.
+Note that ``.xyz`` is a :class:`~skyfield.units.Distance` object
+and supports not only ``.au``
+but also several other units of measure.
 
-But what if instead of using the ICRS
-you want to pay attention to precession,
-and get coordinates measured against the Earth’s true equator and equinox?
-In that case,
-retrieving spherical coordinates is easy:
+If instead of using the permanent ICRS
+you want to measure coordinates against the Earth’s axes as they precess,
+then retrieving spherical coordinates is easy:
 simply provide a date to :meth:`~skyfield.positionlib.ICRF.radec()`
 and it will return a right ascension and declination
 relative to the Earth’s equator and equinox as of that date.
@@ -150,8 +151,7 @@ relative to the Earth’s equator and equinox as of that date.
 It’s less usual for someone to want |xyz| coordinates
 measured against the real equator and equinox,
 so there’s no built-in method to retrieve them.
-Instead, we can import the Skyfield object
-representing the reference frame
+Instead, you’ll need to import the reference frame itself
 and pass it to the position’s
 :meth:`~skyfield.positionlib.ICRF.frame_xyz()` method:
 
@@ -216,10 +216,10 @@ in the sense of “pertaining to the horizon.”
 As with the equatorial system,
 the angles associated with horizontal coordinates are so popular
 that Skyfield provides a built-in
-method :meth:`~skyfield.positionlib.Apparent.altaz()` to retrieve them.
-And you can generate |xyz| coordinates
-by calling :meth:`~skyfield.positionlib.ICRF.frame_xyz()`
-and passing it the geographic location itself as the reference frame:
+method :meth:`~skyfield.positionlib.Apparent.altaz()` to retrieve them,
+while |xyz| coordinates require a call to
+:meth:`~skyfield.positionlib.ICRF.frame_xyz()`
+with the geographic location itself passed as the reference frame:
 
 .. testcode::
 
@@ -266,7 +266,7 @@ for what Skyfield calls “altitude”:
 the angle at which a target stands above the horizon.
 Obviously both words are ambiguous,
 since “elevation” can also mean a site’s vertical distance above sea level,
-and since “altitude” can also mean an airplane’s height
+and “altitude” can mean an airplane’s height
 above either sea level or the ground.
 
 Hour Angle and Declination
@@ -323,15 +323,19 @@ ECEF stands for *Earth-Centered Earth-Fixed*
 and specifies coordinates that are
 (a) measured from the Earth’s center
 but (b) which rotate with the Earth instead of staying fixed in space.
-A fixed latitude and longitude on the Earth’s surface is a good example.
+An example would be the latitude and longitude of the Lowell Observatory,
+which stays in place on the Earth’s surface
+but from the point of view of the rest of the Solar System
+is rotating with the Earth.
+A fixed  on the Earth’s surface is a good example.
 We will learn about generating ECEF coordinates in the next section.
 
 Geographic ITRS latitude and longitude
 ======================================
 
 Skyfield uses the standard ITRS reference frame
-for specifying Earth-fixed positions
-that are measured from the rotating Earth’s surface.
+to specify positions
+that are fixed relative to the Earth’s surface.
 
  | **ITRS Coordinates**
  | *xy*-plane: Earth’s equator
@@ -341,8 +345,8 @@ that are measured from the rotating Earth’s surface.
  | ↕ Latitude ±90° from equator toward poles
  | ↔ Longitude ±180° from prime meridian with east positive
 
-The definition of latitude
-depends on whether you model the Earth as a simple sphere
+A location’s latitude will vary slightly
+depending on whether you model the Earth as a simple sphere
 or more realistically as a slightly flattened ellipsoid.
 The most popular choice today is to use the WGS84 ellipsoid,
 which is the one used by the GPS system.
@@ -387,7 +391,7 @@ which is the one used by the GPS system.
      370974969 km above sea level
 
 Note that height is measured from sea level,
-not distance from the center of the Earth.
+not from the center of the Earth.
 
 The code above is slightly inefficient,
 because :meth:`~skyfield.toposlib.Geoid.height_of()`
@@ -413,10 +417,11 @@ Ecliptic coordinates
 They are useful
 when making maps and diagrams of the Solar System
 and when exploring the properties of orbits around the Sun,
-because it places the orbits of the major planets
+because they place the orbits of the major planets
 nearly flat against the *xy*-plane —
 unlike right ascension and declination,
-which twists the Solar System up at the 23° tilt of the Earth’s own axis.
+which twist the Solar System up at a 23° angle
+because of the tilt of the Earth’s axis.
 
 You might be tempted to ask
 why we measure against the plane of the Earth’s orbit,
@@ -430,12 +435,12 @@ along with it as it revolves around the Sun.
 Our estimate of the invariable plane, by contrast,
 is a mere average
 that changes — at least slightly —
-every time we discover a new trans-Neptunian object, asteroid, or comet.
-So the Earth’s own orbit remains the best basis
+every time we discover a new asteroid, comet, or trans-Neptunian object.
+So the Earth’s own orbit winds up being the most pragmatic choice
 for a coordinate system oriented to the Solar System.
 
  | **Ecliptic Coordinates**
- | *xy*-plane: Ecliptic plane
+ | *xy*-plane: Ecliptic plane (plane of Earth’s orbit)
  | *x*-axis: March equinox
  | *z*-axis: North ecliptic pole
  | ↕ Latitude ±90° above or below the ecliptic
@@ -476,17 +481,16 @@ for a coordinate system oriented to the Solar System.
 
 Note the very small values returned
 for the ecliptic *z* coordinate
-and for the ecliptic latitude —
-because we are measuring against the plane
-in which both the Earth and Mars revolve around the Sun.
+and for the ecliptic latitude,
+because Mars revolves around the Sun
+in very nearly the same plane as the Earth.
 
 Galactic coordinates
 ====================
 
 *Galactic coordinates* are measured
-against the plane and center of our Milky Way galaxy —
-or at least as best as we can approximate the galaxy’s sprawling structure
-from our vantage point here deep inside the Orion Arm:
+against the disc of our own Milky Way galaxy,
+as measured from our vantage point here inside the Orion Arm:
 
  | **Galactic Coordinates**
  | *xy*-plane: Galactic plane
@@ -534,7 +538,16 @@ Skyfield uses the `IAU 1958 Galactic System II
 <https://adsabs.harvard.edu/full/1960MNRAS.121..123B>`_,
 which is believed to be accurate to within ±0.1°.
 
-.. TODO section on Velocity
+Velocity
+========
+
+If you need not only a position vector but a velocity vector
+relative to a particular reference frame,
+then switch from
+the :meth:`~skyfield.positionlib.ICRF.frame_xyz()` method
+to the :meth:`~skyfield.positionlib.ICRF.frame_xyz_and_velocity()` method.
+As explained in its documentation,
+its return values include the velocity vector.
 
 Turning coordinates into a position
 ===================================
