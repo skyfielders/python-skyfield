@@ -3,15 +3,6 @@
  Coordinates
 =============
 
-Add text to Positions:
-
-at end of radec
-If instead you are starting with ra/dec coordinates
-and want to convert them to a Skyfield position,
-see _.
-
-And do that with other ra/dec? and altaz?
-
 “Coordinates” are the numbers we use to name astronomical positions.
 For any given position,
 Skyfield can return
@@ -548,39 +539,89 @@ which is believed to be accurate to within ±0.1°.
 Turning coordinates into a position
 ===================================
 
-.. TODO
-
 All of the above examples take a Skyfield position and return coordinates,
-but sometimes you start with coordinates in a reference frame
+but sometimes you start with coordinates
 and want to produce a position.
-If you happen to start with |xyz| coordinates,
-then you can create a position with a method call:
 
-    #ICRS
-    from skyfield.framelib import ecliptic
+If you happen to start with ICRS |xyz| coordinates,
+then you can create a position with a function call:
+
+.. testcode::
+
+    from skyfield.positionlib import build_position
+
+    icrs_xyz_au = [-1.521, -1.800, -0.772]
+    position = build_position(icrs_xyz_au, t=t)
+
+But it’s probably more common for you
+to have been given a target’s right ascension and declination.
+One common approach is to create a
+:class:`~skyfield.starlib.Star`
+as described in the :doc:`stars` chapter,
+which will give you an object
+that you can pass to ``.observe()``
+like any other Skyfield body.
+But you can also create a position directly
+by using the ``from_radec()`` method carried by each position class.
+To create an apparent position, for example:
+
+.. testcode::
+
     from skyfield.positionlib import Apparent
 
-    t = ?
-    xyz = [...]
-    a = Apparent.from_time_and_frame_vectors(t, ecliptic, xyz, None)
+    position = Apparent.from_radec(ra_hours=5.59, dec_degrees=5.45)
 
-If instead of a Cartesian |xyz| vector
-you start with a right ascension and declination,
-then 
+A final common situation
+is that you measured an altitude and azimuth relative to your horizon
+and want to learn the right ascension and declination of that position.
+The solution is to use the :meth:`~skyfield.positionlib.ICRF.from_altaz()`
+method,
+but there’s a catch:
+because the true coordinates behind any particular altitude and azimuth
+are changing every moment as the Earth spins,
+you first need to compute the position of your observatory
+``.at()`` the moment you measured the altitude and azimuth,
+and only then call the method.
 
-If your coordinates are expressed as some other pair of angles,
-then you will have to dig a bit deeper into Skyfield
-/and do the conversion yourself/
-for the routine to convert between the two.
+.. testcode::
+
+    # What are the coordinates of the zenith?
+
+    b = bluffton.at(t)
+    apparent = b.from_altaz(alt_degrees=90.0, az_degrees=0.0)
+
+    ra, dec, distance = apparent.radec()
+    print('Right ascension:', ra)
+    print('Declination:', dec)
+
+.. testoutput::
+
+    Right ascension: 13h 17m 00.20s
+    Declination: +41deg 00' 27.7"
+
+If you find yourself in an even less common situation,
+like needing to build a position from ecliptic or galactic coordinates,
+then —
+while there aren’t yet any documented examples for you to follow —
+you might be able to assemble a solution together from these pieces:
+
+* The position constructor method
+  :meth:`~skyfield.positionlib.ICRF.from_time_and_frame_vectors()`.
+* The ``from_spherical(r, theta, phi)`` method in ``skyfield/functions.py``.
+
+.. TODO
+
+ If your coordinates are expressed as some other pair of angles,
+ then you will have to dig a bit deeper into Skyfield
+ /and do the conversion yourself/
+ for the routine to convert between the two.
 
     from skyfield.functions import from_spherical
 
     lat, lon, distance =
     xyz = from_spherical(distance.au, lat.radians, lon.radians)
 
-Then, use the same maneuver shown above
-to turn the |xyz| vector into a Skyfield position.
+ Then, use the same maneuver shown above
+ to turn the |xyz| vector into a Skyfield position.
 
-
-position_of_radec
-from_time_and_frame_vectors
+ from_time_and_frame_vectors
