@@ -67,3 +67,30 @@ To have Skyfield apply polar motion when computing positions and coordinates,
 simply install the IERS tables on your timescale object
 as shown in the example code above.
 Polar motion will be used everywhere that it applies.
+
+------------------------
+Using too many CPU cores
+------------------------
+
+On some systems,
+users `have reported
+<https://github.com/skyfielders/python-skyfield/issues/595>`_
+that Skyfield consumes 100% of all of their CPUs
+and makes it difficult to do other work.
+
+This isn’t something that Skyfield has direct control over.
+It’s the underlying NumPy library
+that decides how to perform each of the math operations
+that Skyfield requests.
+And in this case,
+the user’s installed version of NumPy
+was deciding to run a vector operation in parallel across all the CPUs.
+(Ironically, this made the operation slower!)
+
+In case you find NumPy misbehaving in the same way on your system,
+the user reported that they were able to force single-threaded behavior
+by setting this environment variable::
+
+    export OPENBLAS_NUM_THREADS=1
+
+The same solution might work on your system.
