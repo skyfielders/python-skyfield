@@ -200,6 +200,9 @@ def test_latlon_and_subpoint_methods(ts, angle):
     def check_lat(lat): assert abs(g.latitude.mas() - lat.mas()) < 0.1
     def check_lon(lon): assert abs(g.longitude.mas() - lon.mas()) < 0.1
     def check_height(h): assert abs(g.elevation.m - h.m) < 1e-7
+    def check_itrs(xyz, expected_distance):
+        actual_distance = length_of(g.itrs_xyz.m - xyz)
+        assert abs(actual_distance - expected_distance) < 1e-7
 
     lat, lon = wgs84.latlon_of(pos)
     check_lat(lat)
@@ -208,20 +211,23 @@ def test_latlon_and_subpoint_methods(ts, angle):
     height = wgs84.height_of(pos)
     check_height(height)
 
-    g = wgs84.geographic_position_of(pos)
-    check_lat(g.latitude)
-    check_lon(g.longitude)
-    check_height(g.elevation)
+    g2 = wgs84.geographic_position_of(pos)
+    check_lat(g2.latitude)
+    check_lon(g2.longitude)
+    check_height(g2.elevation)
+    check_itrs(g2.itrs_xyz.m, 0.0)
 
-    g = wgs84.subpoint(pos)  # old deprecated method name
-    check_lat(g.latitude)
-    check_lon(g.longitude)
-    check_height(g.elevation)
+    g2 = wgs84.subpoint(pos)  # old deprecated method name
+    check_lat(g2.latitude)
+    check_lon(g2.longitude)
+    check_height(g2.elevation)
+    check_itrs(g2.itrs_xyz.m, 0.0)
 
-    g = wgs84.subpoint_of(pos)
-    check_lat(g.latitude)
-    check_lon(g.longitude)
-    assert g.elevation.m == 0.0
+    g2 = wgs84.subpoint_of(pos)
+    check_lat(g2.latitude)
+    check_lon(g2.longitude)
+    assert g2.elevation.m == 0.0
+    check_itrs(g2.itrs_xyz.m, 1234.0)
 
 def test_deprecated_position_subpoint_method(ts, angle):
     t = ts.utc(2018, 1, 19, 14, 37, 55)

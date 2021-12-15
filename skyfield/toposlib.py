@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from numpy import arctan2, array, array2string, cos, exp, sin, sqrt
-from .constants import ANGVEL, DAY_S, T0, pi, tau
+from .constants import ANGVEL, DAY_S, RAD2DEG, T0, pi, tau
 from .earthlib import refract
 from .framelib import itrs
 from .functions import (
@@ -230,13 +230,7 @@ class Geoid(object):
         """
         xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
         lon = (arctan2(y, x) - pi) % tau - pi
-        return GeographicPosition(
-            latitude=Angle(radians=lat),
-            longitude=Angle(radians=lon),
-            elevation=Distance(lat * 0.0),
-            itrs_xyz=Distance(xyz_au),
-            model=self,
-        )
+        return self.latlon(lat * RAD2DEG, lon * RAD2DEG)
 
     def _compute_latitude(self, position):
         if position.center != 399:
