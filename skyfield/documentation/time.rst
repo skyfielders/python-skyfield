@@ -441,8 +441,6 @@ then you will have to decide
 whether to simply ignore the ``leap_second`` value
 or to somehow output the leap second information.
 
-.. _date-arrays:
-
 Date arithmetic
 ===============
 
@@ -468,6 +466,8 @@ across a :ref:`leap second <leap-seconds>`,
 you will notice
 that the clock time returned by Skyfield’s UTC functions
 is one second earlier or later than you expect.
+
+.. _date-arrays:
 
 Date arrays
 ===========
