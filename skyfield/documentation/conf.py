@@ -266,3 +266,8 @@ def maybe_skip_member(app, what, name, obj, skip, options):
 
 def setup(app):
     app.connect('autodoc-skip-member', maybe_skip_member)
+
+# Regulate NumPy's visual noise when printing arrays.
+
+import numpy as np
+np.set_printoptions(suppress=True)

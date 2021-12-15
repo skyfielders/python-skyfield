@@ -17,9 +17,6 @@ by the various standard time scales:
 
    __import__('skyfield.tests.fixes').tests.fixes.setup()
 
-   import numpy as np
-   np.set_printoptions(suppress=True)
-
 .. testcode::
 
     from skyfield.api import load
