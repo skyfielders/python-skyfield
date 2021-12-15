@@ -8,6 +8,11 @@ Changelog
 v1.41 — Unreleased
 ------------------
 
+* Times now support arithmetic: addition and subtraction with either a
+  number representing TT days, or a Python ``timedelta`` which is
+  interpreted as TT days and seconds.
+  `#568 <https://github.com/skyfielders/python-skyfield/issues/568>`_
+
 * Skyfield now uses HTTPS instead of FTP to download JPL ephemeris files
   like ``de421.bsp``.  This does risk raising an error for users whose
   machines have out-of-date root certificates.  But it protects the
@@ -15,7 +20,6 @@ v1.41 — Unreleased
   ``ssd.jpl.nasa.gov`` FTP service is ever shut down — as happened
   earlier this year to FTP on NASA’s ``cddis.nasa.gov`` server.
   `#666 <https://github.com/skyfielders/python-skyfield/issues/666>`_
-
 
 v1.40 — 2021 November 14
 ------------------------

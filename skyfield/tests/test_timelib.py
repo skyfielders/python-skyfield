@@ -736,3 +736,20 @@ def test_time_equality(ts):
     assert t2 != t0
     assert t2 - t0 > 0
     assert hash(t0) != hash(t2)
+
+def test_time_math(ts):
+    t = ts.tt_jd(2459008.5, 0.125)
+
+    assert (t - 1).tt_strftime() == '2020-06-07 03:00:00 TT'
+    assert (t + 1).tt_strftime() == '2020-06-09 03:00:00 TT'
+
+    assert (t - 1.25).tt_strftime() == '2020-06-06 21:00:00 TT'
+    assert (t + 1.25).tt_strftime() == '2020-06-09 09:00:00 TT'
+
+    bump = dt_module.timedelta(days=1, seconds=1)
+    assert (t - bump).tt_strftime() == '2020-06-07 02:59:59 TT'
+    assert (t + bump).tt_strftime() == '2020-06-09 03:00:01 TT'
+
+    bump = dt_module.timedelta(microseconds=300)
+    assert (t - bump).utc_jpl() == 'A.D. 2020-Jun-08 02:58:50.8157 UTC'
+    assert (t + bump).utc_jpl() == 'A.D. 2020-Jun-08 02:58:50.8163 UTC'

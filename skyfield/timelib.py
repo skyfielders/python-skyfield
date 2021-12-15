@@ -3,7 +3,7 @@ import datetime as dt_module
 import re
 import sys
 from collections import namedtuple
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from numpy import (
     array, concatenate, cos, float_, int64, isnan, isinf, linspace,
     nan, ndarray, nonzero, pi, rollaxis, searchsorted, sin, where, zeros_like,
@@ -23,6 +23,7 @@ from .nutationlib import (
 )
 from .precessionlib import compute_precession
 
+DAY_US = 86400000000.0
 GREGORIAN_START = 2299161
 GREGORIAN_START_ENGLAND = 2361222
 _OLD_PYTHON = sys.version_info < (2, 7)
@@ -49,7 +50,7 @@ if hasattr(dt_module, 'timezone'):
 else:
     class UTC(dt_module.tzinfo):
         'UTC'
-        zero = dt_module.timedelta(0)
+        zero = timedelta(0)
         def utcoffset(self, dt):
             return self.zero
         def tzname(self, dt):
@@ -885,11 +886,31 @@ class Time(object):
     def __eq__(self, other_time):
         return self.__sub__(other_time) == 0.0
 
-    def __sub__(self, other_time):
-        if not isinstance(other_time, Time):
+    def __add__(self, other_time):
+        if isinstance(other_time, timedelta):
+            w = other_time.days
+            f = other_time.seconds / DAY_S + other_time.microseconds / DAY_US
+        elif isinstance(other_time, (int, float)):
+            w, f = divmod(other_time, 1.0)
+        else:
             return NotImplemented
-        return ((self.whole - other_time.whole)
-                + (self.tt_fraction - other_time.tt_fraction))
+
+        return self.ts.tt_jd(self.whole + w, self.tt_fraction + f)
+
+    def __sub__(self, other_time):
+        if isinstance(other_time, Time):
+            return self.whole - other_time.whole + (
+                self.tt_fraction - other_time.tt_fraction
+            )
+        elif isinstance(other_time, timedelta):
+            w = other_time.days
+            f = other_time.seconds / DAY_S + other_time.microseconds / DAY_US
+        elif isinstance(other_time, (int, float)):
+            w, f = divmod(other_time, 1.0)
+        else:
+            return NotImplemented
+
+        return self.ts.tt_jd(self.whole - w, self.tt_fraction - f)
 
     def __hash__(self):
         # Someone wanted to use Time objects with functools.lru_cache so

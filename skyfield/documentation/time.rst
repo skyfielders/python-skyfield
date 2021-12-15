@@ -443,6 +443,32 @@ or to somehow output the leap second information.
 
 .. _date-arrays:
 
+Date arithmetic
+===============
+
+Dates support a few simple math operations:
+
+.. testcode::
+
+    from datetime import timedelta
+
+    t - 10                   # 10 days earlier
+    t + 0.25                 # 6 hours later
+    t + timedelta(hours=12)  # 12 hours later
+
+    t2 - t1  # difference between times, in days
+
+Raw numbers,
+like ``10`` and ``0.25`` above,
+specify days of Terrestrial Time —
+units of exactly 24 hours of 60 minutes of 60 SI seconds,
+measured in the Earth’s relativistic frame of reference.
+If you increment or decrement a date
+across a :ref:`leap second <leap-seconds>`,
+you will notice
+that the clock time returned by Skyfield’s UTC functions
+is one second earlier or later than you expect.
+
 Date arrays
 ===========
 
