@@ -24,7 +24,7 @@ def dots(v, u):
     """
     return (v * u).sum(axis=0)
 
-def _T(M):
+def T(M):
     """Swap the first two dimensions of an array."""
     return rollaxis(M, 1)
 
@@ -40,7 +40,7 @@ def mxmxm(M1, M2, M3):
     """Matrix times matrix times matrix: multiply 3 NxN matrices together."""
     return einsum('ij...,jk...,kl...->il...', M1, M2, M3)
 
-_mxv, _mxm, _mxmxm = mxv, mxm, mxmxm  # In case anyone imported old name
+_T, _mxv, _mxm, _mxmxm = T, mxv, mxm, mxmxm  # In case anyone imported old name
 
 def length_of(xyz):
     """Given a 3-element array |xyz|, return its length.

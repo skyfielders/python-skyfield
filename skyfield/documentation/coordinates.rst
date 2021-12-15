@@ -638,3 +638,49 @@ you might be able to assemble a solution together from these pieces:
  to turn the |xyz| vector into a Skyfield position.
 
  from_time_and_frame_vectors
+
+Rotation Matrices
+=================
+
+If you are doing some of your own mathematics,
+you might want access to the low-level 3×3 rotation matrices
+that define the relationship between each coordinate reference frame
+and the ICRS.
+To compute a rotation matrix,
+simply pass a time to the frame’s ``rotation_at()`` method:
+
+.. testcode::
+
+    # 3×3 rotation matrix: ICRS → frame
+
+    R = ecliptic_frame.rotation_at(t)
+    print(R)
+
+.. testoutput::
+
+    [[ 0.99998613 -0.00482998 -0.00209857]
+     [ 0.00526619  0.9174892   0.39772583]
+     [ 0.00000441 -0.39773137  0.91750191]]
+
+You should find the matrix easy to work with if ``t`` is a single time,
+but if ``t`` is a whole :ref:`array of times <date-arrays>`
+then the resulting matrix will have a third dimension
+with the same number of elements as the time vector.
+NumPy provides no direct support
+for rotation matrices with an extra dimension,
+so avoid using NumPy’s multiplication operators.
+Instead, use Skyfield utility functions:
+
+.. testsetup::
+
+    from numpy import array, identity
+    R2 = identity(3)
+    v = array([1,2,3])
+
+.. testcode::
+
+    from skyfield.functions import T, mxm, mxv
+
+    T(R)        # reverse rotation matrix: frame → ICRS
+    mxm(R, R2)  # matrix × matrix: combines rotations
+    mxv(R, v)   # matrix × vector: rotates a vector
