@@ -157,16 +157,6 @@ Sprint Possibilities
   geocentric objects work.  Was the old behavior documented?  (Not that
   I can find!)
 
-* One contributor says they needed to work out a routine which “Adds
-  days in units of TT days, which are exactly 86400 SI seconds: (I'm
-  assuming you need to pass along ts explicitly, in case you have more
-  than one of them)” and would appreciate more official support::
-
-    def offset_TT_date(ts, ti, add_days):
-         return(ts.tt_jd(ti.tt + add_days))
-
-  They also needed to “add days in units of Earth rotation.”
-
 Adding more smarts to ephemeris handling
 ========================================
 
