@@ -8,10 +8,14 @@ Changelog
 v1.41 — Unreleased
 ------------------
 
-* Times now support arithmetic: addition and subtraction with either a
-  number representing TT days, or a Python ``timedelta`` which is
-  interpreted as TT days and seconds.
+* Times now support arithmetic: you can add or subtract from a time
+  either a number representing days of Terrestrial Time (TT) or a Python
+  ``timedelta`` which Skyfield interprets as TT days and seconds.
   `#568 <https://github.com/skyfielders/python-skyfield/issues/568>`_
+
+* Fixed the ``.itrs_xyz`` vector of the geographic position returned
+  by the :meth:`~skyfield.toposlib.Geoid.subpoint_of()` method.
+  `#673 <https://github.com/skyfielders/python-skyfield/issues/673>`_
 
 * Skyfield now uses HTTPS instead of FTP to download JPL ephemeris files
   like ``de421.bsp``.  This does risk raising an error for users whose
