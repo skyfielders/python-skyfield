@@ -884,7 +884,9 @@ class Time(object):
     # Various dunders.
 
     def __eq__(self, other_time):
-        return self.__sub__(other_time) == 0.0
+        if isinstance(other_time, Time):
+            return self.__sub__(other_time) == 0.0
+        return False
 
     def __add__(self, other_time):
         if isinstance(other_time, timedelta):
