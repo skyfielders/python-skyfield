@@ -5,8 +5,8 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
-v1.41 — Unreleased
-------------------
+v1.41 — 2021 December 16
+------------------------
 
 * Times now support arithmetic: you can add or subtract from a time
   either a number representing days of Terrestrial Time (TT) or a Python
