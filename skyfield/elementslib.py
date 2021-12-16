@@ -14,10 +14,10 @@ def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
 
     `position` is an instance of :class:`~skyfield.positionlib.ICRF`.
     These are commonly returned by the ``at()`` method of any
-    Solar System body. `reference_frame` is an optional argument
+    Solar System body. ``reference_frame`` is an optional argument
     and is a 3x3 numpy array. The reference frame by default
     is the ICRF. Commonly used reference frames are found in
-    skyfield.data.spice.inertial_frames. `gm_km3_s2` is an optional
+    skyfield.data.spice.inertial_frames. ``gm_km3_s2`` is an optional
     float argument representing the gravitational parameter (G*M) in
     units of km^3/s^2, which is the sum of the masses of the orbiting
     object and the object being orbited. If not specified, this is
