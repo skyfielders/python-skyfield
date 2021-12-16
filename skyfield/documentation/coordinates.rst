@@ -257,8 +257,8 @@ with the geographic location itself passed as the reference frame:
       z = 1.025 au up
 
     Spherical:
-      Altitude: 24deg 24' 20.2"
-      Azimuth: 147deg 54' 27.9"
+      Altitude: 24deg 24' 20.6"
+      Azimuth: 147deg 54' 28.8"
       Distance: 2.47981 au
 
 Note that some astronomers use the term “elevation”
@@ -287,7 +287,7 @@ which measures ±180° from your own local meridian.
 
 .. testoutput::
 
-    Hour Angle: -02h 02m 28.94s
+    Hour Angle: -02h 02m 28.88s
     Declination: -18deg 13' 16.4"
     Distance: 2.47981 au
 
@@ -387,7 +387,7 @@ which is the one used by the GPS system.
 
     Geographic:
      -18.2218° latitude
-     -53.2660° longitude
+     -53.2662° longitude
      370974969 km above sea level
 
 Note that height is measured from sea level,
@@ -609,7 +609,7 @@ and only then call the method.
 
 .. testoutput::
 
-    Right ascension: 13h 17m 00.20s
+    Right ascension: 13h 17m 00.26s
     Declination: +41deg 00' 27.7"
 
 If you find yourself in an even less common situation,
