@@ -265,8 +265,8 @@ like an Earth satellite or latitude-longitude position,
 then the ``.center`` and ``.target``
 will be those Skyfield objects themselves.
 
-Right ascension and declination: astrometric
-============================================
+Astrometric right ascension and declination
+===========================================
 
 The most popular coordinate system for star catalogs
 treats the night sky as a slowly spinning globe
@@ -380,8 +380,8 @@ you can build a time object and pass it to  :meth:`~ICRF.radec()`:
     equinox = ts.J(1991.25)
     ra, dec, distance = astrometric.radec(equinox)
 
-Right ascension and declination: apparent
-=========================================
+Apparent right ascension and declination
+========================================
 
 The other reason that you might generate RA/Dec is practical:
 you are planning to point a telescope,
