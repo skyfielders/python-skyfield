@@ -212,8 +212,6 @@ Routines to search for events like sunrise, sunset, and Moon phase.
 
 .. autosummary::
 
-   phase_angle
-   fraction_illuminated
    seasons
    moon_phase
    moon_phases
@@ -365,6 +363,8 @@ All positions support these methods:
    ICRF.frame_latlon
    ICRF.frame_latlon_and_rates
    ICRF.from_time_and_frame_vectors
+   ICRF.phase_angle
+   ICRF.fraction_illuminated
    ICRF.is_sunlit
    ICRF.from_altaz
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, einsum, full, reshape, nan, nan_to_num
+from numpy import array, cos, einsum, full, reshape, nan, nan_to_num
 from . import framelib
 from .constants import ANGVEL, AU_M, C, ERAD, DAY_S, RAD2DEG, pi, tau
 from .descriptorlib import reify
@@ -484,6 +484,33 @@ class ICRF(object):
         from astropy.units import au
         x, y, z = self.position.au
         return SkyCoord(representation_type='cartesian', x=x, y=y, z=z, unit=au)
+
+    def phase_angle(self, sun):
+        """Return this position’s phase angle: the angle Sun-target-observer.
+
+        Given a Sun object (which you can build by loading an ephemeris
+        and looking up ``eph['Sun']``), return the `Angle` between the
+        light arriving at this position’s target from the Sun and the
+        light traveling from this position’s target to the observer.
+
+        .. versionadded:: 1.42
+
+        """
+        return self.separation_from(self.center_barycentric - sun.at(self.t))
+
+    def fraction_illuminated(self, sun):
+        """Return the fraction of the target’s disc that is illuminated.
+
+        Given a Sun object (which you can build by loading an ephemeris
+        and looking up ``eph['Sun']``), compute what fraction from 0.0
+        to 1.0 of this target’s disc is illuminated, under the
+        assumption that the target is a sphere.
+
+        .. versionadded:: 1.42
+
+        """
+        a = self.phase_angle(sun).radians
+        return 0.5 * (1.0 + cos(a))
 
     def is_sunlit(self, ephemeris):
         """Return whether a position in Earth orbit is in sunlight.

@@ -323,3 +323,23 @@ def test_cirs_sofa():
 
         assert np.allclose(ra_cirs._degrees, ra_sofa, rtol=0.0, atol=tol)
         assert np.allclose(dec_cirs._degrees, dec_sofa, rtol=0.0, atol=tol)
+
+def test_phase_angle_and_fraction_illuminated():
+    ts = api.load.timescale()
+    t = ts.utc(2018, 9, range(9, 19), 5)
+    t1 = t[-1]
+    e = api.load('de421.bsp')
+    earth, moon, sun = e['earth'], e['moon'], e['sun']
+
+    p = earth.at(t1).observe(moon)
+    a = p.phase_angle(sun).degrees.round(1)
+    assert a == 76.4
+    i = p.fraction_illuminated(sun).round(2)
+    assert i == 0.62
+
+    p = earth.at(t).observe(moon)
+    a = p.phase_angle(sun).degrees.round(1)
+    assert list(a) == [172.0, 172.6, 159.7, 146.7, 134.0,
+                       121.8, 110.0, 98.5, 87.3, 76.4]
+    i = p.fraction_illuminated(sun).round(2)
+    assert list(i) == [0, 0, 0.03, 0.08, 0.15, 0.24, 0.33, 0.43, 0.52, 0.62]

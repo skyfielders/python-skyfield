@@ -16,32 +16,12 @@ find_discrete
 # Simple facts.
 
 def phase_angle(ephemeris, body, t):
-    """Compute the phase angle of a body viewed from Earth.
-
-    The ``body`` should be an integer or string that can be looked up in
-    the given ``ephemeris``, which will also be asked to provide
-    positions for the Earth and Sun.  The return value will be an
-    :class:`~skyfield.units.Angle` object.
-
-    """
-    earth = ephemeris['earth']
-    sun = ephemeris['sun']
-    body = ephemeris[body]
-    center = earth.at(t)
-    pe = center.observe(body)
-    ps = center - sun.at(t)
-    return pe.separation_from(ps)
+    """DEPRECATED: use the position method .phase_angle() instead."""
+    p = ephemeris['earth'].at(t).observe(ephemeris[body])
+    return p.phase_angle(ephemeris['sun'])
 
 def fraction_illuminated(ephemeris, body, t):
-    """Compute the illuminated fraction of a body viewed from Earth.
-
-    The ``body`` should be an integer or string that can be looked up in
-    the given ``ephemeris``, which will also be asked to provide
-    positions for the Earth and Sun.  The return value will be a
-    floating point number between zero and one.  This simple routine
-    assumes that the body is a perfectly uniform sphere.
-
-    """
+    """DEPRECATED: use the position method .fraction_illuminated() instead."""
     a = phase_angle(ephemeris, body, t).radians
     return 0.5 * (1.0 + cos(a))
 
