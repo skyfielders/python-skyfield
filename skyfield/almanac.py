@@ -27,10 +27,9 @@ def phase_angle(ephemeris, body, t):
     earth = ephemeris['earth']
     sun = ephemeris['sun']
     body = ephemeris[body]
-    pe = earth.at(t).observe(body)
-    pe.position.au *= -1     # rotate 180 degrees to point back at Earth
-    t2 = t.ts.tt_jd(t.tt - pe.light_time)
-    ps = body.at(t2).observe(sun)
+    center = earth.at(t)
+    pe = center.observe(body)
+    ps = center - sun.at(t)
     return pe.separation_from(ps)
 
 def fraction_illuminated(ephemeris, body, t):

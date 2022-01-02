@@ -10,7 +10,7 @@ def test_fraction_illuminated():
     i = almanac.fraction_illuminated(e, 'moon', t0[-1]).round(2)
     assert i == 0.62
     i = almanac.fraction_illuminated(e, 'moon', t0).round(2)
-    assert (i == (0, 0, 0.03, 0.08, 0.15, 0.24, 0.33, 0.43, 0.52, 0.62)).all()
+    assert list(i) == [0, 0, 0.03, 0.08, 0.15, 0.24, 0.33, 0.43, 0.52, 0.62]
 
 # Compare with USNO:
 # http://aa.usno.navy.mil/seasons?year=2018&tz=+0
