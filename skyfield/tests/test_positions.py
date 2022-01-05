@@ -9,6 +9,7 @@ from skyfield.starlib import Star
 from .fixes import low_precision_ERA
 
 from assay import assert_raises
+from unittest import SkipTest
 
 def test_subtraction():
     p0 = ICRF((10,20,30), (40,50,60), center=0, target=499)
@@ -347,6 +348,13 @@ def test_phase_angle_and_fraction_illuminated():
     assert list(i) == [0, 0, 0.03, 0.08, 0.15, 0.24, 0.33, 0.43, 0.52, 0.62]
 
 def test_astropy_conversion():
+    try:
+        import astropy
+    except ImportError:
+        raise SkipTest('AstroPy not installed')
+    else:
+        astropy  # avoid linter complaint
+
     ts = api.load.timescale()
     r = np.array([1, 2, 3])
     t = ts.tt(2022, 1, 3)
