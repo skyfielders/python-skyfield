@@ -141,6 +141,7 @@ Other time scales and conversions are available through its methods.
    Time.gast
    Time.nutation_matrix
    Time.precession_matrix
+   Time.to_astropy
 
 Time utilities
 ==============
@@ -363,6 +364,7 @@ All positions support these methods:
    ICRF.frame_latlon
    ICRF.frame_latlon_and_rates
    ICRF.from_time_and_frame_vectors
+   ICRF.to_skycoord
    ICRF.phase_angle
    ICRF.fraction_illuminated
    ICRF.is_sunlit

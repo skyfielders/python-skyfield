@@ -479,11 +479,30 @@ class ICRF(object):
                 Velocity(d_rate))
 
     def to_skycoord(self, unit=None):
-        """Convert this distance to an AstroPy ``SkyCoord`` object."""
+        """Convert this distance to an AstroPy ``SkyCoord`` object.
+
+        Currently, this will only work with Skyfield positions whose
+        center is the Solar System barycenter or else the geocenter.
+
+        """
         from astropy.coordinates import SkyCoord
         from astropy.units import au
+        if self.center == 0:
+            frame = 'icrs'
+        elif self.center == 399:
+            from astropy.coordinates import GCRS
+            frame = GCRS(obstime=self.t.to_astropy())
+        else:
+            raise NotImplementedError(
+                'Skyfield can only return AstroPy positions for barycentric'
+                ' and geocentric coordinates; if you are interested in adding'
+                ' support for positions whose center={}, please open an issue'
+                .format(self.center)
+            )
+
         x, y, z = self.position.au
-        return SkyCoord(representation_type='cartesian', x=x, y=y, z=z, unit=au)
+        return SkyCoord(frame=frame, representation_type='cartesian',
+                        unit=au, x=x, y=y, z=z)
 
     def phase_angle(self, sun):
         """Return this position’s phase angle: the angle Sun-target-observer.

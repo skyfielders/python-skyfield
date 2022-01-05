@@ -5,6 +5,17 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+v1.42 — Unreleased
+------------------
+
+* Time objects now feature a :meth:`~skyfield.timelib.Time.to_astropy`
+  method.
+
+* The position method :meth:`~skyfield.positionlib.ICRF.to_skycoord` now
+  sets the `frame` attribute of the sky coordinate it returns, and for
+  now only supports barycentric and geocentric positions.
+  `#577 <https://github.com/skyfielders/python-skyfield/issues/577>`_
+
 v1.41 — 2021 December 16
 ------------------------
 

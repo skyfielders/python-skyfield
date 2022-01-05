@@ -8,6 +8,8 @@ from skyfield.positionlib import Geocentric, ICRF, ITRF_to_GCRS2, _GIGAPARSEC_AU
 from skyfield.starlib import Star
 from .fixes import low_precision_ERA
 
+from assay import assert_raises
+
 def test_subtraction():
     p0 = ICRF((10,20,30), (40,50,60), center=0, target=499)
     p1 = ICRF((1,2,3), (4,5,6), center=0, target=399)
@@ -343,3 +345,25 @@ def test_phase_angle_and_fraction_illuminated():
                        121.8, 110.0, 98.5, 87.3, 76.4]
     i = p.fraction_illuminated(sun).round(2)
     assert list(i) == [0, 0, 0.03, 0.08, 0.15, 0.24, 0.33, 0.43, 0.52, 0.62]
+
+def test_astropy_conversion():
+    ts = api.load.timescale()
+    r = np.array([1, 2, 3])
+    t = ts.tt(2022, 1, 3)
+
+    p = ICRF(r, t=t, center=0)
+    a = p.to_skycoord()
+    assert str(a) == '<SkyCoord (ICRS): (x, y, z) in AU\n    (1., 2., 3.)>'
+    assert a.obstime is None
+
+    p = ICRF(r, t=t, center=399)
+    a = p.to_skycoord()
+    assert str(a) == (
+        '<SkyCoord (GCRS: obstime=2459582.5, obsgeoloc=(0., 0., 0.) m,'
+        ' obsgeovel=(0., 0., 0.) m / s): (x, y, z) in AU\n    (1., 2., 3.)>'
+    )
+    assert a.obstime.fits == '2022-01-03T00:00:00.000'
+
+    p = ICRF(r, t=t, center=3)
+    with assert_raises(NotImplementedError):
+        a = p.to_skycoord()

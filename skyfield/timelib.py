@@ -7,6 +7,7 @@ from datetime import date, datetime, timedelta
 from numpy import (
     array, concatenate, cos, float_, int64, isnan, isinf, linspace,
     nan, ndarray, nonzero, pi, rollaxis, searchsorted, sin, where, zeros_like,
+
 )
 from time import strftime, struct_time
 from ._compatibility import interp
@@ -920,6 +921,13 @@ class Time(object):
         # will return the same hash for very closely spaced times that
         # all round to the same floating point TT.
         return hash(self.tt)
+
+    # Interoperability.
+
+    def to_astropy(self):
+        """Return an AstroPy object representing this time."""
+        from astropy.time import Time
+        return Time(self.whole, self.tt_fraction, format='jd', scale='tt')
 
     # Deprecated attributes that were once used internally, consuming
     # memory with matrices that are never used again by Skyfield once
