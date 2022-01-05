@@ -351,9 +351,11 @@ def test_astropy_conversion():
     try:
         import astropy
     except ImportError:
-        raise SkipTest('AstroPy not installed')
+        # Drat: assay doesn't know about skipping a test.
+        #raise SkipTest('AstroPy not installed')
+        return
     else:
-        astropy  # avoid linter complaint
+        astropy  # Use the library's name, to avoid a linter complaint.
 
     ts = api.load.timescale()
     r = np.array([1, 2, 3])
