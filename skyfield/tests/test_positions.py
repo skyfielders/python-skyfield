@@ -9,7 +9,6 @@ from skyfield.starlib import Star
 from .fixes import low_precision_ERA
 
 from assay import assert_raises
-from unittest import SkipTest
 
 def test_subtraction():
     p0 = ICRF((10,20,30), (40,50,60), center=0, target=499)
