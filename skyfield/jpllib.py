@@ -96,6 +96,11 @@ class SpiceKernel(object):
         """Close this ephemeris file."""
         self.spk.close()
 
+        # In practice, users are not confident the file is really closed
+        # unless the metadata also disappears.
+        self.segments.clear()
+        self.codes.clear()
+
     def comments(self):
         """Return the comments string of this kernel.
 

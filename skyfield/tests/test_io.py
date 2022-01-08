@@ -101,6 +101,14 @@ def test_non_builtin_timescale_tries_to_load_finals2000A_all(load):
     with assert_raises(IndexError):
         load.timescale(builtin=False)
 
+def test_close_of_ephemeris(load):
+    eph = api.load('de421.bsp')
+    assert eph.segments
+    assert eph.codes
+    eph.close()
+    assert eph.segments == []
+    assert eph.codes == set()
+
 # Impressive tests: synchronize threads to reproduce concurrency bugs.
 
 class FakeConnection():
