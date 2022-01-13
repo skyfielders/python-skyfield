@@ -63,7 +63,7 @@ def _evaluate(token):
     token = token.replace(b'D', b'E')  # for numbers like -1.4D-12
     return float(token)
 
-_token_re = re.compile(b"[A-Za-z]\w+|=|\\+=|\\(|\\)|'[^']*'|[^), ]+")
+_token_re = re.compile(b"[A-Za-z]\\w+|=|\\+=|\\(|\\)|'[^']*'|[^), ]+")
 
 def _parse_tokens(lines):
     """Yield all the tokens inside the data segments of a PCK text file."""

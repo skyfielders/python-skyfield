@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PYTHONWARNINGS=d
+
 cd "$(readlink -f $(dirname "${BASH_SOURCE[0]}"))"/ci
 echo 'Changing to CI directory: cd' $(pwd)
 

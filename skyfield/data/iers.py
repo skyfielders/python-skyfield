@@ -14,9 +14,9 @@ inf = float('inf')
 # compile it triggers a bug in older NumPy versions like 1.14.3:
 # https://github.com/skyfielders/python-skyfield/issues/372
 _R = (b'(?m)^......(.........) . '
-      b'(.\d.......)......... '
-      b'(.\d.......).........  '
-      b'.(.\d........)')
+      b'(.\\d.......)......... '
+      b'(.\\d.......).........  '
+      b'.(.\\d........)')
 
 def parse_x_y_dut1_from_finals_all(f):
     return np.fromregex(f, _R, [
