@@ -136,7 +136,7 @@ def moon_nodes(ephemeris):
         lat, _, _ = e.observe(moon).apparent().ecliptic_latlon('date')
         return lat.radians > 0.0
 
-    moon_node_at.step_days = 14.0  # one node each half lunar month
+    moon_node_at.step_days = 12.0  # 2000-2050: closest nodes 12.38 days apart
     return moon_node_at
 
 CONJUNCTIONS = [

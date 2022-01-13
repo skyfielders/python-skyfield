@@ -8,6 +8,11 @@ Changelog
 v1.42 — Unreleased
 ------------------
 
+* The almanac routine :func:`~skyfield.almanac.moon_nodes()` would
+  sometimes skip nodes that were closer together than 14.0 days, so it
+  has been tightened down and should now detect all lunar nodes.
+  `#662 <https://github.com/skyfielders/python-skyfield/issues/662>`_
+
 * Time objects now feature a :meth:`~skyfield.timelib.Time.to_astropy`
   method.
 

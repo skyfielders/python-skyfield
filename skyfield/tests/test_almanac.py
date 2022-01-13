@@ -39,6 +39,16 @@ def test_moon_phases():
     assert strings == ['2018-09-16 23:15', '2018-09-25 02:52']
     assert (y == (1, 2)).all()
 
+def test_moon_nodes():
+    ts = api.load.timescale()
+    e = api.load('de421.bsp')
+    t0 = ts.utc(2022, 1, 13)
+    t1 = ts.utc(2022, 1, 31)
+    t, y = almanac.find_discrete(t0, t1, almanac.moon_nodes(e))
+    strings = t.utc_strftime('%Y-%m-%d %H:%M')
+    assert strings == ['2022-01-13 04:19', '2022-01-27 06:15']
+    assert list(y) == [1, 0]
+
 def test_oppositions_conjunctions():
     ts = api.load.timescale()
     t0 = ts.utc(2019, 1, 1)
