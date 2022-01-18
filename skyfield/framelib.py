@@ -116,6 +116,8 @@ class itrs(object):
     loaded) the polar wobble of the crust with respect to the Earth’s
     pole of rotation.
 
+    .. versionadded:: 1.34
+
     """
     @staticmethod
     def rotation_at(t):

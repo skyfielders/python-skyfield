@@ -204,6 +204,8 @@ v1.34 — 2020 December 10
   See :ref:`reference_frames`.
   `#476 <https://github.com/skyfielders/python-skyfield/issues/476>`_
 
+* Added an official :class:`~skyfield.framelib.itrs` reference frame.
+
 * Added support for IERS :ref:`polar motion` 𝑥 and 𝑦.
 
 * Added a method :meth:`~skyfield.toposlib.GeographicPosition.lst_hours_at()`
