@@ -9,6 +9,8 @@ from numpy import (array, arctan2, sin, arctan, tan, inf, repeat, float64,
                    sinh, sqrt, arccos, arctanh, zeros_like, ones_like, divide,
                    where, pi, cross)
 
+_DAY_S_SQUARED = DAY_S * DAY_S
+
 def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
     """Produce the osculating orbital elements for a position.
 
@@ -77,6 +79,7 @@ class OsculatingElements(object):
         self._vel_vec = velocity.km_per_s
         self.time = time
         self._mu = mu_km_s
+        self._mu_km_d = mu_km_s * _DAY_S_SQUARED
 
         self._h_vec = cross(self._pos_vec, self._vel_vec, 0, 0).T
         self._e_vec = eccentricity_vector(self._pos_vec, self._vel_vec, self._mu)
@@ -152,14 +155,20 @@ class OsculatingElements(object):
 
     @reify
     def periapsis_time(self):
-        M = mean_anomaly(self.eccentric_anomaly.radians, self.eccentricity, shift=False)
-        tp = time_since_periapsis(M,
-                                  self.mean_motion_per_day.radians/DAY_S,
-                                  self.true_anomaly.radians,
-                                  self.semi_latus_rectum.km,
-                                  self._mu)
+        M = mean_anomaly(
+            self.eccentric_anomaly.radians,
+            self.eccentricity,
+            shift=False,
+        )
+        tp = time_since_periapsis(
+            M,
+            self.mean_motion_per_day.radians,
+            self.true_anomaly.radians,
+            self.semi_latus_rectum.km,
+            self._mu_km_d,
+        )
         ts = self.time.ts
-        times = self.time.tdb - tp/DAY_S
+        times = self.time.tdb - tp
         return ts.tdb(jd=times)
 
     @reify
@@ -401,14 +410,18 @@ def semi_minor_axis(p, e):
 
 
 def time_since_periapsis(M, n, v, p, mu):
+    # Problem: this `too_small` tuning parameter is sensitive to the
+    # units used for time, even though this routine should be unit-
+    # agnostic.  It was originally 1e-19 but now is 1e-19 * DAY_S.
+    too_small = 8.64e-15
     if p.ndim == 0:
-        if n>1e-19: # non-parabolic
+        if n >= too_small: # non-parabolic
             return M/n
         else: # parabolic
             D = tan(v/2)
             return sqrt(2*(p/2)**3/mu)*(D + D**3/3)
     else:
-        parabolic = n<1e-19
+        parabolic = (n < too_small)
         t = divide(M, n, out=zeros_like(p), where=~parabolic)
 
         D = tan(v[parabolic]/2)
