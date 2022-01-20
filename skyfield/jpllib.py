@@ -98,7 +98,7 @@ class SpiceKernel(object):
 
         # In practice, users are not confident the file is really closed
         # unless the metadata also disappears.
-        self.segments.clear()
+        del self.segments[:]
         self.codes.clear()
 
     def comments(self):
