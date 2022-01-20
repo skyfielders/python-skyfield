@@ -12,6 +12,11 @@ angle = (-15, 15, 35, 45)
 def ts():
     yield load.timescale()
 
+def t():
+    ts = load.timescale()
+    yield ts.utc(2020, 11, 3, 17, 5)
+    yield ts.utc(2020, 11, 3, 17, [5, 5])
+
 def test_latitude_longitude_elevation_str_and_repr():
     w = wgs84.latlon(36.7138, -112.2169, 2400.0)
     assert str(w) == ('WGS84 latitude +36.7138 N'
@@ -192,17 +197,21 @@ def test_wgs84_round_trip_with_polar_motion(ts, angle):
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
     assert error_mas < 0.1
 
-def test_latlon_and_subpoint_methods(ts, angle):
-    t = ts.utc(2020, 11, 3, 17, 5)
+def test_latlon_and_subpoint_methods(t, angle):
     g = wgs84.latlon(angle, 2 * angle, elevation_m=1234.0)
     pos = g.at(t)
+    x = all if t.shape else lambda x: x
 
-    def check_lat(lat): assert abs(g.latitude.mas() - lat.mas()) < 0.1
-    def check_lon(lon): assert abs(g.longitude.mas() - lon.mas()) < 0.1
-    def check_height(h): assert abs(g.elevation.m - h.m) < 1e-7
+    def check_lat(lat): assert x(abs(g.latitude.mas() - lat.mas()) < 0.1)
+    def check_lon(lon): assert x(abs(g.longitude.mas() - lon.mas()) < 0.1)
+    def check_height(h): assert x(abs(g.elevation.m - h.m) < 1e-7)
     def check_itrs(xyz, expected_distance):
-        actual_distance = length_of(g.itrs_xyz.m - xyz)
-        assert abs(actual_distance - expected_distance) < 1e-7
+        r1 = g.itrs_xyz.m
+        r2 = xyz
+        if len(r2.shape) > len(r1.shape):
+            r1.shape += (1,)
+        actual_distance = length_of(r1 - r2)
+        assert x(abs(actual_distance - expected_distance) < 1e-7)
 
     lat, lon = wgs84.latlon_of(pos)
     check_lat(lat)
