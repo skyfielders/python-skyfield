@@ -124,15 +124,18 @@ class Velocity(Unit):
 
     # TODO: consider reworking this class to return a Rate object.
 
-    def __init__(self, au_per_d=None, km_per_s=None):
+    def __init__(self, au_per_d=None, km_per_s=None, m_per_s=None):
         if km_per_s is not None:
             self.km_per_s = km_per_s = _to_array(km_per_s)
             self.au_per_d = km_per_s * DAY_S / AU_KM
+        elif m_per_s is not None:
+            self.m_per_s = m_per_s = _to_array(m_per_s)
+            self.au_per_d = m_per_s * DAY_S / AU_M
         elif au_per_d is not None:
             self.au_per_d = _to_array(au_per_d)
         else:
             raise ValueError('to construct a Velocity provide'
-                             ' au_per_d or km_per_s')
+                             ' au_per_d, km_per_s or m_per_s')
 
     @reify
     def au_per_d(self):  # Empty property to provide Sphinx docstring.
