@@ -96,7 +96,9 @@ def test_arcminutes_and_arcseconds_and_mas():
 def test_velocity_input_units():
     v1 = Velocity(au_per_d=2.0)
     v2 = Velocity(km_per_s=3462.9137)
+    v3 = Velocity(m_per_s=34629137)
     assert abs(v1.au_per_d - v2.au_per_d) < 1e-7
+    assert abs(v1.au_per_d - v3.au_per_d) < 1e-7
 
 def test_stringifying_vector_distance():
     a = array([1.23, 4.56])
