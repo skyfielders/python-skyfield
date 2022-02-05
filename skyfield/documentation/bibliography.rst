@@ -22,7 +22,7 @@ by George H. Kaplan, October 2005
 
 *User’s Guide to NOVAS Version F3.1,* March 2011
 
-    http://aa.usno.navy.mil/software/novas/novas_f/NOVAS_F3.1_Guide.pdf
+    https://aa.usno.navy.mil/downloads/novas/NOVAS_C3.1_Guide.pdf
 
     There were also several useful tidbits of information in the United
     States Naval Observatory’s guide to using NOVAS.  It tends towards
@@ -91,5 +91,5 @@ eclipses* by Morrison & Stephenson, 2004
 
     http://www.iers.org/IERS/EN/DataProducts/EarthOrientationData/eop.html
 
-.. _NOVAS library: http://aa.usno.navy.mil/software/novas/novas_py/novaspy_intro.php
+.. _NOVAS library: https://aa.usno.navy.mil/software/novaspy_intro
 .. _jplephem: https://pypi.python.org/pypi/jplephem

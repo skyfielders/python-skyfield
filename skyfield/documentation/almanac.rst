@@ -32,7 +32,7 @@ Rounding time to the nearest minute
 ===================================
 
 If you compare almanac results to official sources like the `United
-States Naval Observatory <http://aa.usno.navy.mil/data/index.php>`_, the
+States Naval Observatory <https://aa.usno.navy.mil/data/index>`_, the
 printed time will often differ because the Naval Observatory results are
 rounded to the nearest minute — any time with ``:30`` or more seconds at
 the end gets named as the next minute.
@@ -277,7 +277,7 @@ Then you can create a start time and an end time and ask for all of the
 sunrises and sunsets in between.
 Skyfield uses the
 `official definition of sunrise and sunset
-<http://aa.usno.navy.mil/faq/docs/RST_defs.php>`_
+<https://aa.usno.navy.mil/faq/RST_defs>`_
 from the United States Naval Observatory,
 which defines them as the moment when the center — not the limb —
 of the sun is 0.8333 degrees below the horizon,
