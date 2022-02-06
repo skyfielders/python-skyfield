@@ -55,8 +55,8 @@ ICRS and equatorial right ascension and declination
 which measure angles from the Earth’s equator and poles,
 have already been described in the :doc:`positions` chapter:
 
-* :ref:`positions:Right Ascension and Declination: Astrometric`
-* :ref:`positions:Right Ascension and Declination: Apparent`
+* :ref:`positions:Astrometric right ascension and declination`
+* :ref:`positions:Apparent right ascension and declination`
 
 Here’s how the axes and angles are defined:
 
