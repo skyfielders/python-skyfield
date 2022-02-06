@@ -31,3 +31,9 @@ times of sunrise, sunset, and the phases of the moon.
 .. currentmodule:: skyfield.eclipselib
 
 .. autofunction:: lunar_eclipses
+
+.. currentmodule:: skyfield.almanac
+
+.. autofunction:: phase_angle
+
+.. autofunction:: fraction_illuminated

@@ -16,12 +16,20 @@ find_discrete
 # Simple facts.
 
 def phase_angle(ephemeris, body, t):
-    """DEPRECATED: use the position method .phase_angle() instead."""
+    """
+    .. deprecated:: 1.42
+       Use the :meth:`~skyfield.positionlib.ICRF.phase_angle()` position
+       method instead.
+    """
     p = ephemeris['earth'].at(t).observe(ephemeris[body])
     return p.phase_angle(ephemeris['sun'])
 
 def fraction_illuminated(ephemeris, body, t):
-    """DEPRECATED: use the position method .fraction_illuminated() instead."""
+    """
+    .. deprecated:: 1.42
+       Use the :meth:`~skyfield.positionlib.ICRF.fraction_illuminated()`
+       position method instead.
+    """
     a = phase_angle(ephemeris, body, t).radians
     return 0.5 * (1.0 + cos(a))
 

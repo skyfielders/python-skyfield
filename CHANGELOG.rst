@@ -8,16 +8,22 @@ Changelog
 v1.42 — Unreleased
 ------------------
 
+* Added two new position methods
+  :meth:`~skyfield.positionlib.ICRF.phase_angle()`
+  and
+  :meth:`~skyfield.positionlib.ICRF.fraction_illuminated()`
+  that replace a pair of old functions in the almanac module.
+
 * The almanac routine :func:`~skyfield.almanac.moon_nodes()` would
-  sometimes skip nodes that were closer together than 14.0 days, so it
-  has been tightened down and should now detect all lunar nodes.
+  sometimes skip nodes that were closer together than 14.0 days.  It has
+  been tightened down and should now detect all lunar nodes.
   `#662 <https://github.com/skyfielders/python-skyfield/issues/662>`_
 
 * Time objects now feature a :meth:`~skyfield.timelib.Time.to_astropy`
   method.
 
 * The position method :meth:`~skyfield.positionlib.ICRF.to_skycoord` now
-  sets the `frame` attribute of the sky coordinate it returns, and for
+  sets the ``frame`` attribute of the sky coordinate it returns, and for
   now only supports barycentric and geocentric positions.
   `#577 <https://github.com/skyfielders/python-skyfield/issues/577>`_
 
