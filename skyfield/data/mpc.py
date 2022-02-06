@@ -70,8 +70,11 @@ def load_mpcorb_dataframe(fobj):
     #     keepers = _MPCORB_NECESSARY_COLUMNS
     #     columns = [tup for tup in columns if tup[0] in keepers]
     names, colspecs = zip(*columns)
-    df = pd.read_fwf(fobj, colspecs, names=names, dtypes=_MPCORB_DTYPES,
-                     converters=_MPCORB_CONVERTERS)
+    df = pd.read_fwf(
+        fobj, colspecs=colspecs, names=names,
+        dtypes=_MPCORB_DTYPES,
+        converters=_MPCORB_CONVERTERS,
+    )
     return df
 
 def mpcorb_orbit(row, ts, gm_km3_s2):
@@ -199,7 +202,7 @@ def load_comets_dataframe_slow(fobj):
     """
     fobj = io.StringIO(fobj.read().decode('ascii'))
     names, colspecs = zip(*_COMET_COLUMNS)
-    df = pd.read_fwf(fobj, colspecs, names=names)
+    df = pd.read_fwf(fobj, colspecs=colspecs, names=names)
     return df
 
 def comet_orbit(row, ts, gm_km3_s2):
