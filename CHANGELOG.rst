@@ -5,8 +5,8 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
-v1.42 — Unreleased
-------------------
+v1.42 — 2022 February 6
+-----------------------
 
 * Added two new position methods
   :meth:`~skyfield.positionlib.ICRF.phase_angle()`
