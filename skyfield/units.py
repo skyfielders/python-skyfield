@@ -5,7 +5,7 @@
 import numpy as np
 from numpy import abs, copysign, isnan
 from .constants import AU_KM, AU_M, C, DAY_S, tau
-from .descriptorlib import reify
+from .descriptorlib import reify #, update_wrapper
 from .functions import _to_array, length_of
 
 _dfmt = '{0}{1:02}deg {2:02}\' {3:02}.{4:0{5}}"'
@@ -28,6 +28,132 @@ class Unit(object):
         raise UnpackingError(s.format(name, '\n'.join(examples)))
 
     __iter__ = __getitem__   # give advice about both foo[i] and "x,y,z = foo"
+
+# class GetSet(object):
+#     """Adapted from Pyramid's `reify()` memoizing decorator."""
+#     def __init__(self, method, conversion_factor):
+#         self.name = method.__name__
+#         self.method = method
+#         update_wrapper(self, method)
+
+#     # def __call__(cls, measure):
+#     #     print('got', measure, self.conversion_factor)
+
+#     def __get__(self, instance, objtype=None):
+#         if instance is None:
+#             return self
+#         value = self.method(instance)
+#         instance.__dict__[self.__name__] = value
+#         return value
+
+# def getset(conversion_factor):
+#     def wrap(method):
+#         gs = GetSet(method, conversion_factor)
+#         gs.__call__ = int
+#         return gs
+#     return wrap
+
+# def getset(conversion_factor):
+#     def wrap(method):
+#         unit = method
+#         print('unit:', unit)
+#         print(unit.__class__)
+#         print(dir(unit))
+#         name = method.__name__
+
+#         class GetSet(object):
+#             """Adapted from Pyramid's `reify()` memoizing decorator."""
+#             def __init__(self, method):
+#                 self.method = method
+#                 update_wrapper(self, method)
+
+#             def __call__(cls, measure):
+#                 print('got', measure, conversion_factor)
+#                 obj = cls.__new__(cls)
+
+#             def __get__(self, instance, objtype=None):
+#                 if instance is None:
+#                     return self
+#                 value = self.method(instance)
+#                 instance.__dict__[self.__name__] = value
+#                 return value
+
+#         gs = GetSet(method)
+#         return gs
+#     return wrap
+
+# from functools import partial
+
+# def getset(conversion_factor=None, core_unit=None):
+#     def wrap(method):
+#         name = method.__name__
+
+#         class GetSet(object):
+#             def __init__(self, method):
+#                 self.method = method
+#                 update_wrapper(self, method)
+
+#             def __get__(self, instance, objtype=None):
+#                 if instance is None:  # class method
+#                     return partial(constructor, objtype)
+#                 value = self.method(instance)
+#                 instance.__dict__[self.__name__] = value
+#                 return value
+
+#         def constructor(cls, value):
+#             obj = cls.__new__(cls)
+#             setattr(obj, name, value)
+#             if conversion_factor is not None:
+#                 setattr(obj, core_unit, value / conversion_factor)
+#             return obj
+
+#         return GetSet(method)
+#     return wrap
+
+# class getset(object):
+#     def __init__(self, name, docstring, conversion_factor=None, core_unit=None):
+#         self.name = name
+#         self.__doc__ = docstring
+#         self.conversion_factor = conversion_factor
+#         self.core_unit = core_unit
+
+#     def __get__(self, instance, objtype=None):
+#         if instance is None:  # class method
+#             return partial(constructor, objtype, self.name,
+#                            self.conversion_factor, self.core_unit)
+#         value = getattr(instance, self.core_unit) * self.conversion_factor
+#         instance.__dict__[self.name] = value
+#         return value
+
+# def constructor(cls, name, conversion_factor, core_unit, value):
+#     obj = cls.__new__(cls)
+#     setattr(obj, name, value)
+#     if conversion_factor is not None:
+#         setattr(obj, core_unit, value / conversion_factor)
+#     return obj
+
+class getset(object):
+    def __init__(self, name, docstring, conversion_factor=None, core_unit=None):
+        self.name = name
+        self.__doc__ = docstring
+        self.conversion_factor = conversion_factor
+        self.core_unit = core_unit
+
+    def __get__(self, instance, objtype=None):
+        if instance is None:  # class method
+            def constructor(value):
+                value = _to_array(value)
+                obj = objtype.__new__(objtype)
+                setattr(obj, self.name, value)
+                conversion_factor = self.conversion_factor
+                if conversion_factor is not None:
+                    setattr(obj, self.core_unit, value / conversion_factor)
+                return obj
+            constructor.__doc__ = self.__doc__
+            return constructor
+        value = getattr(instance, self.core_unit) * self.conversion_factor
+        instance.__dict__[self.name] = value
+        return value
 
 class Distance(Unit):
     """A distance, stored internally as au and available in other units.
@@ -78,10 +204,11 @@ class Distance(Unit):
         """Kilometers (1,000 meters)."""
         return self.au * AU_KM
 
-    @reify
-    def m(self):
-        """Meters."""
-        return self.au * AU_M
+    m = getset('m', 'Meters.', AU_M, 'au')
+
+    # def m(self):
+    #     """Meters."""
+    #     return self.au * AU_M
 
     def __str__(self):
         n = self.au
