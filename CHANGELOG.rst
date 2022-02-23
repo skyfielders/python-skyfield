@@ -14,6 +14,14 @@ v1.42 — 2022 February 6
   :meth:`~skyfield.positionlib.ICRF.fraction_illuminated()`
   that replace a pair of old functions in the almanac module.
 
+* Added position methods
+  :meth:`~skyfield.positionlib.ICRF.phase_angle()`
+  and
+  :meth:`~skyfield.positionlib.ICRF.fraction_illuminated()`
+  that, given an illuminator (usually the Sun) as their argument,
+  compute whether the observer is looking at the bright side or the dark
+  side of the target body.
+
 * The almanac routine :func:`~skyfield.almanac.moon_nodes()` would
   sometimes skip nodes that were closer together than 14.0 days.  It has
   been tightened down and should now detect all lunar nodes.

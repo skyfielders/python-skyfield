@@ -508,13 +508,18 @@ class ICRF(object):
         """Return this position’s phase angle: the angle Sun-target-observer.
 
         Given a Sun object (which you can build by loading an ephemeris
-        and looking up ``eph['Sun']``), return the `Angle` between the
-        light arriving at this position’s target from the Sun and the
-        light traveling from this position’s target to the observer.
+        and looking up ``eph['Sun']``), return the `Angle` from the
+        body's point of view between light arriving from the Sun and the
+        light departing toward the observer.  This angle is 0° if the
+        observer is in the same direction as the Sun and sees the body
+        as fully illuminated, and 180° if the observer is behind the
+        body and sees only its dark side.
 
         .. versionadded:: 1.42
 
         """
+        # TODO: should we have the body .observe() the Sun, to account
+        # for light travel time?
         return self.separation_from(self.center_barycentric - sun.at(self.t))
 
     def fraction_illuminated(self, sun):
