@@ -1,4 +1,4 @@
-"""Basic tests of the Skyfield API module and its contents."""
+"""Tests of the Skyfield `api` module and user-facing exceptions."""
 
 import numpy as np
 from assay import assert_raises
@@ -99,17 +99,25 @@ def test_star_vector_from_topos(ts):
     assert (a1.position.au == a.position.au[:,0]).all()
     assert (a2.position.au == a.position.au[:,1]).all()
 
+def test_hadec_needs_a_longitude(ts):
+    e = api.load('de421.bsp')
+    earth = e['earth']
+    moon = e['moon']
+    apparent = earth.at(ts.utc(2016)).observe(moon)
+    with assert_raises(ValueError, 'from a specific latitude and longitude'):
+        apparent.hadec()
+
 def test_altaz_needs_topos(ts):
     e = api.load('de421.bsp')
     earth = e['earth']
     moon = e['moon']
     apparent = earth.at(ts.utc(2016)).observe(moon).apparent()
-    with assert_raises(ValueError, 'from a specific Earth location'):
+    with assert_raises(ValueError, 'from a specific latitude and longitude'):
         apparent.altaz()
 
 def test_from_altaz_needs_topos():
     p = positionlib.ICRF([0.0, 0.0, 0.0])
-    with assert_raises(ValueError, 'to compute an altazimuth position'):
+    with assert_raises(ValueError, 'to compute altitude and azimuth'):
         p.from_altaz(alt_degrees=0, az_degrees=0)
 
 def test_from_altaz_parameters(ts):

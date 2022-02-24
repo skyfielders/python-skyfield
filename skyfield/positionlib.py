@@ -299,7 +299,10 @@ class ICRF(object):
         R = framelib.itrs.rotation_at(self.t)
         r = mxv(R, self.position.au)
         au, dec, sublongtiude = to_spherical(r)
-        ha = self.center.longitude.radians - sublongtiude
+        lon = getattr(self.center, 'longitude', None)
+        if lon is None:
+            raise ValueError(_hadec_message)
+        ha = lon.radians - sublongtiude
         ha += pi
         ha %= tau
         ha -= pi
@@ -897,10 +900,14 @@ def _to_altaz(position, temperature_C, pressure_mbar):
 
     return alt, Angle(radians=az), Distance(r_au)
 
+_hadec_message = (
+    'to compute a body’s hour angle, you must observe it'
+    ' from a specific latitude and longitude on Earth'
+)
 _altaz_message = (
-    'to compute an altazimuth position, you must observe from a'
-    ' specific Earth location or from a position on another body'
-    ' loaded from a set of planetary constants'
+    'to compute altitude and azimuth, you must observe it from a specific'
+    ' latitude and longitude on Earth, or else from a location on another'
+    ' Solar System body that you have loaded from a set of planetary constants'
 )
 
 class _Fake(ICRF):  # support for deprecated frame rotation methods above
