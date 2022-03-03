@@ -27,7 +27,11 @@ def find_discrete(start_time, end_time, f, epsilon=EPSILON, num=12):
     step_days = getattr(f, 'step_days', None)
     if step_days is None:
         # Legacy "rough_period" attribute.
-        periods = (jd1 - jd0) / f.rough_period
+        rough_period = getattr(f, 'rough_period', None)
+        if rough_period is None:
+            raise AttributeError('the function you have passed'
+                                 ' is missing a "step_days" attribute')
+        periods = (jd1 - jd0) / rough_period
         if periods < 1.0:
             periods = 1.0
         sample_count = int(periods * num)

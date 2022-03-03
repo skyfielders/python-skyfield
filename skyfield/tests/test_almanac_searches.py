@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from assay import assert_raises
 from skyfield.api import load
 from skyfield.searchlib import find_discrete, find_maxima
 
@@ -24,6 +25,13 @@ def make_stairstep_f(steps):
 
 def is_close(value, expected):
     return (abs(value - expected) < epsilon).all()
+
+def test_exception_if_step_days_is_missing():
+    def f(t):
+        return t.J > 0.0
+    t0, t1 = make_t()
+    with assert_raises(AttributeError, 'missing a "step_days" attribute'):
+        find_discrete(t0, t1, f, epsilon)
 
 def test_find_discrete_that_finds_nothing():
     t0, t1 = make_t()
@@ -66,6 +74,15 @@ def test_find_discrete_with_a_sub_epsilon_jag_right_at_zero():
     # flurry of changes is complete.
     assert is_close(t.tt, (0.5 + 0.99 * epsilon,))
     assert list(y) == [2]
+
+def test_old_rough_period_attribute():
+    t0, t1 = make_t()
+    f = make_stairstep_f([bump, 0.5])
+    del f.step_days
+    f.rough_period = 1.0
+    t, y = find_discrete(t0, t1, f, epsilon)
+    assert is_close(t.tt, (bump, 0.5))
+    assert list(y) == [1, 2]
 
 def make_mountain_range_f(peaks):
     """Return a function with local maxima at each of a series of `peaks`."""
