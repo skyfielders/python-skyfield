@@ -170,7 +170,7 @@ and others during which it is slow?
 
 I always recommend plotting any value
 on which you are planning to perform a search.
-It can help us develop an intuition
+It can help develop an intuition
 around how the value changes through time.
 
 .. testsetup::
@@ -241,6 +241,8 @@ that jumps instantly between zero and one.
         m = e.observe(mars).apparent()
         return s.separation_from(m).degrees >= 90
 
+    mars_quadrature.step_days = 90  # Explained below
+
 Since the Python values ``False`` and ``True``
 are really the integers 0 and 1,
 a plot of this function shows a square wave
@@ -307,7 +309,8 @@ you will recognize that this is the same problem
 as undersampling an audio signal.)
 
 Mars quadrature events appear to be separated by at least a half-year.
-For safety let’s ask for data points twice as often as that:
+For safety let’s ask for data points twice as often as that,
+which gives us the ``step_days`` setting that we saw above:
 
 .. testcode::
 
