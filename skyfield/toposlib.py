@@ -190,22 +190,35 @@ class Geoid(object):
         return cls(self, latitude, longitude, elevation, Distance(r))
 
     def latlon_of(self, position):
-        """Return the latitude and longitude of a geocentric ``position``."""
+        """Return the latitude and longitude of a ``position``.
+
+        The position’s ``.center`` must be 399, the center of the Earth.
+        Geodetic latitude and longitude are returned as a pair of
+        :class:`~skyfield.units.Angle` objects.
+
+        """
         xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
         lon = (arctan2(y, x) - pi) % tau - pi
         return Angle(radians=lat), Angle(radians=lon)
 
     def height_of(self, position):
-        """Return height above the ellipsoid for a geocentric ``position``."""
+        """Return the height above the Earth’s ellipsoid of a ``position``.
+
+        The position’s ``.center`` must be 399, the center of the Earth.
+        A :class:`~skyfield.units.Distance` is returned giving the
+        position’s geodetic height above the Earth’s surface.
+
+        """
         xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
         height_au = R / cos(lat) - aC
         return Distance(height_au)
 
     def geographic_position_of(self, position):
-        """Return the `GeographicPosition` of a geocentric ``position``.
+        """Return the `GeographicPosition` of a ``position``.
 
-        Given a geocentric ``position``, returns a `GeographicPosition`
-        providing its ``latitude``, ``longitude``, and ``elevation``
+        The position’s ``.center`` must be 399, the center of the Earth.
+        A `GeographicPosition` is returned giving the position’s
+        geodetic ``latitude`` and ``longitude``, and an ``elevation``
         above or below the surface of the ellipsoid.
 
         """
@@ -223,9 +236,10 @@ class Geoid(object):
     def subpoint_of(self, position):
         """Return the point on the ellipsoid directly below a ``position``.
 
-        Given a geocentric ``position``, returns a `GeographicPosition`
-        whose ``latitude`` and ``longitude`` lie directly underneath the
-        input position and whose ``elevation`` is zero.
+        The position’s ``.center`` must be 399, the center of the Earth.
+        Returns a `GeographicPosition` giving the geodetic ``latitude``
+        and ``longitude`` that lie directly below the input position,
+        and an ``elevation`` above the ellipsoid of zero.
 
         """
         xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
