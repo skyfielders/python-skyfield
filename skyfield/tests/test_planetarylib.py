@@ -45,6 +45,7 @@ def test_frame_rotation_matrices():
     desired_rate = np.array(desired_rate) * DAY_S
 
     R = frame.rotation_at(ts.tdb_jd(tdb))
+    print(R - desired_rotation)
     assert (R == desired_rotation).all()  # Boom.
 
     R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
