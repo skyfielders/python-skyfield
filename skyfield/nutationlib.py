@@ -71,7 +71,14 @@ def build_nutation_matrix(mean_obliquity_radians,
 def mean_obliquity(jd_tdb):
     """Return the mean obliquity of the ecliptic in arcseconds.
 
-    `jd_tt` - TDB time as a Julian date float, or NumPy array of floats
+    The caller need only supply a single argument:
+
+    `jd_tdb` - TDB time as a Julian date float, or NumPy array of floats
+
+    The formulae used to compute the mean obliquity are based on
+    equations 37 and 39 from:
+
+    Capitaine et al. (2003), _Astronomy and Astrophysics_ 412, 567-586.
 
     """
     # Compute time in Julian centuries from epoch J2000.0.
@@ -93,7 +100,20 @@ def mean_obliquity(jd_tdb):
 def equation_of_the_equinoxes_complimentary_terms(jd_tt):
     """Compute the complementary terms of the equation of the equinoxes.
 
+    This routine takes a single argument:
+
     `jd_tt` - Terrestrial Time: Julian date float, or NumPy array of floats
+
+    The formulae used are from:
+
+    Capitaine, N., Wallace, P.T., and McCarthy, D.D. (2003). _Astron. &
+    Astrophys._ 406, p. 1135-1149. Table 3.
+
+    _IERS Conventions (2010)_, Chapter 5, p. 60, Table 5.2e.  (Table
+    5.2e presented in the printed publication is a truncated series. The
+    full series, which is used here, is available on the IERS
+    Conventions Center website in file tab5.2e.txt.)
+    ftp://tai.bipm.org/iers/conv2010/chapter5/
 
     """
     # Interval between fundamental epoch J2000.0 and current date.
