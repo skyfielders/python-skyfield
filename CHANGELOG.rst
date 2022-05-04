@@ -5,6 +5,14 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+v1.43 — 2022 ?
+--------------
+
+* Fixed :func:`~skyfield.magnitudelib.planetary_magnitude()` so it works
+  for Saturn even when the time is an array rather than a single time;
+  also, improved its calculation slightly with respect to Uranus.
+  `#739 <https://github.com/skyfielders/python-skyfield/issues/739>`_
+
 v1.42 — 2022 February 6
 -----------------------
 

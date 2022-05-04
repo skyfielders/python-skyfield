@@ -29,7 +29,9 @@ from .naifcodes import _target_name
 
 # See "design/planet_tilts.py" in the Skyfield repository.
 _SATURN_POLE = array([0.08547883, 0.07323576, 0.99364475])
-_URANUS_POLE = array([-0.21199958 -0.94155916 -0.26176809])
+_SATURN_POLE_2D = _SATURN_POLE[:, None]
+_URANUS_POLE = array([-0.21199958, -0.94155916, -0.26176809])
+_URANUS_POLE_2D = _URANUS_POLE[:, None]
 
 def planetary_magnitude(position):
     """Given the position of a planet, return its visual magnitude.
@@ -80,19 +82,29 @@ def planetary_magnitude(position):
     ph_ang = angle_between(sun_to_planet, observer_to_planet) * RAD2DEG
 
     if function is _saturn_magnitude:
-        a = angle_between(_SATURN_POLE, sun_to_planet)
+        if len(sun_to_planet.shape) > 1:
+            pole = _SATURN_POLE_2D
+        else:
+            pole = _SATURN_POLE
+
+        a = angle_between(pole, sun_to_planet)
         sun_sub_lat = a * RAD2DEG - 90.0
 
-        a = angle_between(_SATURN_POLE, observer_to_planet)
+        a = angle_between(pole, observer_to_planet)
         observer_sub_lat = a * RAD2DEG - 90.0
 
         return function(r, delta, ph_ang, sun_sub_lat, observer_sub_lat)
 
     if function is _uranus_magnitude:
-        a = angle_between(_URANUS_POLE, sun_to_planet)
+        if len(sun_to_planet.shape) > 1:
+            pole = _URANUS_POLE_2D
+        else:
+            pole = _URANUS_POLE
+
+        a = angle_between(pole, sun_to_planet)
         sun_sub_lat = a * RAD2DEG - 90.0
 
-        a = angle_between(_URANUS_POLE, observer_to_planet)
+        a = angle_between(pole, observer_to_planet)
         observer_sub_lat = a * RAD2DEG - 90.0
 
         return function(r, delta, ph_ang, sun_sub_lat, observer_sub_lat)
