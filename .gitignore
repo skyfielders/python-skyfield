@@ -12,6 +12,7 @@
 .pydevproject
 .settings
 .tox/
+/build/
 /dist/
 /finals2000A.all
 /skyfield/documentation/_build/
@@ -22,7 +23,6 @@ MANIFEST
 MPCORB.DAT*
 Soft0*.txt
 Untitled*.ipynb
-build
 htmlcov/
 active.txt
 stations.txt

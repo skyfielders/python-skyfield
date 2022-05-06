@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+
+import os
+import setuptools
+import sys
+
+build_dir = os.path.dirname(__file__)
+skyfield_dir = os.path.dirname(build_dir)
+
+# Note that we merely supplement argv, we don't rewrite it, so the user
+# can put "upload" at the end to send the results to PyPI.
+
+sys.argv[1:1] = ['sdist', 'bdist_wheel']
+sys.path[0:0] = [skyfield_dir]
+
+import setup
