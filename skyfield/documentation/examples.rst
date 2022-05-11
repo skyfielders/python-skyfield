@@ -137,6 +137,8 @@ The result is an angle that is 0° for the New Moon,
 90° at the First Quarter,
 180° at the Full Moon,
 and 270° at the Last Quarter.
+Skyfield also has a method for computing
+what fraction of a spherical body is illuminated by the sun.
 
 .. testcode::
 
@@ -150,15 +152,22 @@ and 270° at the Last Quarter.
     sun, moon, earth = eph['sun'], eph['moon'], eph['earth']
 
     e = earth.at(t)
-    _, slon, _ = e.observe(sun).apparent().frame_latlon(ecliptic_frame)
-    _, mlon, _ = e.observe(moon).apparent().frame_latlon(ecliptic_frame)
+    s = e.observe(sun).apparent()
+    m = e.observe(moon).apparent()
+
+    _, slon, _ = s.frame_latlon(ecliptic_frame)
+    _, mlon, _ = m.frame_latlon(ecliptic_frame)
     phase = (mlon.degrees - slon.degrees) % 360.0
 
-    print('{0:.1f}'.format(phase))
+    percent = 100.0 * m.fraction_illuminated(sun)
+
+    print('Phase (0°–360°): {0:.1f}'.format(phase))
+    print('Percent illuminated: {0:.1f}%'.format(percent))
 
 .. testoutput::
 
-    149.4
+    Phase (0°–360°): 149.4
+    Percent illuminated: 92.9%
 
 What is the angular diameter of a planet, given its radius?
 ===========================================================
