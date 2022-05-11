@@ -18,13 +18,13 @@ an :class:`~skyfield.elementslib.OsculatingElements` object.  For
 example, here is how to find the osculating elements of the moon
 orbiting earth:
 
- .. testcode::
+.. testcode::
 
     from skyfield.api import load
     from skyfield.elementslib import osculating_elements_of
 
     ts = load.timescale()
-    t = ts.utc(2018, 4, 22, range(0, 25))
+    t = ts.utc(2018, 4, 22)
 
     planets = load('de421.bsp')
     earth = planets['earth']
@@ -35,11 +35,51 @@ orbiting earth:
 
 The elements are then attributes of the Elements object:
 
- .. testcode::
+.. testcode::
 
     i = elements.inclination.degrees
     e = elements.eccentricity
     a = elements.semi_major_axis.km
+
+    print('Inclination: {0:.2f} degrees'.format(i))
+    print('Eccentricity: {0:.5f}'.format(e))
+    print('Semimajor axis: {0:.0f} km'.format(a))
+
+.. testoutput::
+
+    Inclination: 20.46 degrees
+    Eccentricity: 0.03104
+    Semimajor axis: 380577 km
+
+Note that one element,
+the periapsis time,
+is not necessarily a unique value:
+if an orbit is periodic,
+then the body will reach periapsis repeatedly
+at a series of dates which are separated by ``period_in_days``.
+
+.. testcode::
+
+    print('Periapsis:', elements.periapsis_time.utc_strftime())
+    print('Period: {0:.2f} days'.format(elements.period_in_days))
+
+.. testoutput::
+
+    Periapsis: 2018-04-20 16:09:42 UTC
+    Period: 26.88 days
+
+You can add or subtract the period
+in order to produce a series of equally valid periapsis dates
+for that set of orbital elements.
+
+.. testcode::
+
+    next = elements.periapsis_time + elements.period_in_days
+    print('Next periapsis:', next.utc_strftime())
+
+.. testoutput::
+
+    Next periapsis: 2018-05-17 13:14:56 UTC
 
 Attributes of OsculatingElements objects
 ========================================
