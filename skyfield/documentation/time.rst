@@ -864,6 +864,21 @@ will instead download ``finals2000A.all`` from the IERS:
 As usual with data files,
 Skyfield will only download the file the first time you need it,
 then will keep using that same copy of the file that it finds on disk.
+
+Note that the international agencies responsible for the file’s distribution
+sometimes have trouble keeping their servers up.
+For example, as I write this in May of 2022,
+the file cannot be fetched from ``ftp.iers.org``
+because of an
+`Outage of iers.org data servers <https://www.iers.org/IERS/EN/NewsMeetings/News/news_001.html>`_
+reported on their website.
+At
+`Skyfield issue #730 <https://github.com/skyfielders/python-skyfield/issues/730>`_
+and
+`Skyfield issue #732 <https://github.com/skyfielders/python-skyfield/issues/732>`_
+you can find links to alternative data sources
+which various Skyfield users have been able to access in the meantime.
+
 If your script will always have Internet access
 and you worry about the file falling out of date
 (and if you can trust the “modify time” file attribute on your filesystem),
