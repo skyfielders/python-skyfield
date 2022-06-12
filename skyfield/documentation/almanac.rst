@@ -105,10 +105,12 @@ so the ``March Equinox``, for example, is followed by the ``June Solstice``.
 Phases of the Moon
 ==================
 
-The phases of the Moon are the same for everyone on Earth, so you don’t
-need to specify the longitude and latitude of your location.  Simply ask
-for the current phase of the Moon as an angle, where 0° is New Moon and
-180° is Full:
+The phases of the Moon are the same for everyone on Earth,
+so you don’t need to specify the longitude and latitude of your location.
+Simply ask for the current phase of the Moon.
+The return value is an angle
+where 0° is New Moon, 90° is First Quarter,
+180° is Full Moon, and 270° is Last Quarter:
 
 .. testcode::
 
@@ -121,7 +123,7 @@ for the current phase of the Moon as an angle, where 0° is New Moon and
     Moon phase: 51.3 degrees
 
 Or you can have Skyfield search over a range of dates for the moments
-when the Moon reaches First Quarter, Full, Last Quarter, and New:
+when the Moon reaches First Quarter, Full Moon, Last Quarter, and New Moon:
 
 .. testcode::
 
