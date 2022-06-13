@@ -139,6 +139,11 @@ _COMET_FAST_COLUMNS = (
     'designation', 'reference',
 )
 
+# Some CometEls.txt fields now have commas in them, like the final
+# Halley's Comet field "98, 1083".  Since Pandas 1.4 complains about
+# extra fields, let's use Record Separator instead of comma internally.
+_COMET_SEP = '\x1E'
+
 _fast_comet_re = None
 _fast_comet_sub = None
 
@@ -167,11 +172,11 @@ def load_comets_dataframe(fobj):
         for name, (start, end) in _COMET_COLUMNS:
             if previous_end is not None:
                 pat.append(' ' * (start - previous_end))
-            keep = name in keepers
             if name == 'designation':
                 pat.append('(.*?)  +(.*)')
                 break
             else:
+                keep = name in keepers
                 if keep:
                     pat.append('(')
                 pat.append('.' * (end - start))
@@ -180,13 +185,15 @@ def load_comets_dataframe(fobj):
             previous_end = end
 
         pat = ''.join(pat)
-        sub = ','.join('\\{}'.format(i + 1) for i in range(len(keepers)))
+        keeper_indexes = range(len(keepers))
+        sub = _COMET_SEP.join('\\{}'.format(i + 1) for i in keeper_indexes)
 
         _fast_comet_re = re.compile(pat.encode('ascii'), re.M)
         _fast_comet_sub = sub.encode('ascii')
 
     text = _fast_comet_re.sub(_fast_comet_sub, text)
-    df = pd.read_csv(io.BytesIO(text), header=None, names=_COMET_FAST_COLUMNS)
+    df = pd.read_csv(io.BytesIO(text), sep=_COMET_SEP, header=None,
+                     names=_COMET_FAST_COLUMNS)
     return df
 
 def load_comets_dataframe_slow(fobj):
