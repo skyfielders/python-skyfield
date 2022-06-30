@@ -13,6 +13,13 @@ v1.43 — 2022 ?
   also, improved its calculation slightly with respect to Uranus.
   `#739 <https://github.com/skyfielders/python-skyfield/issues/739>`_
 
+* Improved :func:`~skyfield.data.mpc.load_comets_dataframe()` so that
+  parsing ``CometEls.txt`` with the most recent version of Pandas
+  doesn’t stumble over the commas in the final field of (for example)
+  Halley’s Comet and give the error ``ParserError: Error tokenizing
+  data. C error: Expected 12 fields…saw 13``.
+  `#707 <https://github.com/skyfielders/python-skyfield/issues/707>`_
+
 v1.42 — 2022 February 6
 -----------------------
 
