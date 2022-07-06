@@ -1,4 +1,9 @@
 import os
+
+if 'SKYFIELD_USE_SETUPTOOLS' in os.environ:
+    import setuptools
+    print('Using setuptools version', setuptools.__version__)
+
 from distutils.core import setup
 from distutils.command.sdist import sdist
 
@@ -8,7 +13,8 @@ class my_sdist(sdist):
     def make_distribution(self):
         # See https://github.com/skyfielders/python-skyfield/issues/378
         for path in self.filelist.files:
-            os.chmod(path, 0o644)
+            if os.path.isfile(path):  # so we don't "chmod a-x" any directories
+                os.chmod(path, 0o644)
         sdist.make_distribution(self)
 
 setup(

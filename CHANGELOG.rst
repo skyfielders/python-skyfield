@@ -5,6 +5,15 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+v1.43.1 — 2022 July 6
+---------------------
+
+* An attempt at overly clever scripting resulted in a Skyfield 1.43
+  release without a ``setup.py`` in its ``.tar.gz``; within an hour, a
+  Python 2.7 user had reported that Skyfield could no longer install.
+  This release is identical to 1.43 but (hopefully) installs correctly
+  for everyone!
+
 v1.43 — 2022 July 6
 -------------------
 

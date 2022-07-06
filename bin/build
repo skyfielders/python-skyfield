@@ -1,16 +1,9 @@
-#!/usr/bin/env python3
+#!/bin/bash
 
-import os
-import setuptools
-import sys
+set -ex
 
-build_dir = os.path.dirname(__file__)
-skyfield_dir = os.path.dirname(build_dir)
+cd "$(readlink -f $(dirname "${BASH_SOURCE[0]}"))"
+cd ..
 
-# Note that we merely supplement argv, we don't rewrite it, so the user
-# can put "upload" at the end to send the results to PyPI.
-
-sys.argv[1:1] = ['sdist', 'bdist_wheel']
-sys.path[0:0] = [skyfield_dir]
-
-import setup
+python setup.py sdist $@
+SKYFIELD_USE_SETUPTOOLS=yes python setup.py bdist_wheel $@
