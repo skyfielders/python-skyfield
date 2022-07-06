@@ -279,6 +279,17 @@ Kepler orbits
 See :doc:`kepler-orbits`
 for computing the positions of comets, asteroids, and other minor planets.
 
+Kepler orbit data
+=================
+
+.. currentmodule:: skyfield.data.mpc
+
+.. autosummary::
+
+   load_mpcorb_dataframe
+   load_comets_dataframe
+   load_comets_dataframe_slow
+
 Earth satellites
 ================
 

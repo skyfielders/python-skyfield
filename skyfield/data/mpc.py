@@ -59,8 +59,8 @@ _MPCORB_CONVERTERS = {
 def load_mpcorb_dataframe(fobj):
     """Parse a Minor Planet Center orbits file into a Pandas dataframe.
 
-    See :doc:`kepler-orbits.rst`.  The MPCORB file format is documented
-    at: https://minorplanetcenter.net/iau/info/MPOrbitFormat.html
+    See :doc:`kepler-orbits`.  The MPCORB file format is documented at:
+    https://minorplanetcenter.net/iau/info/MPOrbitFormat.html
 
     """
     # See https://github.com/pandas-dev/pandas/issues/18035
@@ -154,8 +154,8 @@ def load_comets_dataframe(fobj):
     See :func:`~skyfield.data.mpc.load_comets_dataframe_slow()` for a
     slower routine that includes every comet data field.
 
-    See :doc:`kepler-orbits.rst`.  The comet file format is documented
-    at: https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
+    See :doc:`kepler-orbits`.  The comet file format is documented at:
+    https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
 
     """
     global _fast_comet_re, _fast_comet_sub
@@ -203,8 +203,8 @@ def load_comets_dataframe_slow(fobj):
     See :func:`~skyfield.data.mpc.load_comets_dataframe()` for a faster
     routine that omits some of the more expensive comet fields.
 
-    See :doc:`kepler-orbits.rst`.  The comet file format is documented
-    at: https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
+    See :doc:`kepler-orbits`.  The comet file format is documented at:
+    https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
 
     """
     fobj = io.StringIO(fobj.read().decode('ascii'))

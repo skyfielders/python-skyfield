@@ -40,6 +40,7 @@ that is accelerated using NumPy vector math!
    api-position
    api-framelib
    api-planetary
+   api-kepler
    api-elements
    api-units
    api-trigonometry
