@@ -1,11 +1,17 @@
 # This URL worked until September 2020:
-
-#URL = 'http://cdsarc.u-strasbg.fr/ftp/cats/I/239/hip_main.dat.gz'
-
+#
+# URL = 'http://cdsarc.u-strasbg.fr/ftp/cats/I/239/hip_main.dat.gz'
+#
 # Then someone at VizieR apparently ran `gunzip` on the file, breaking
 # the existing URL.  The fastest fix is for us to switch to:
+#
+# URL = 'https://cdsarc.u-strasbg.fr/ftp/cats/I/239/hip_main.dat'
+#
+# Then in September 2022 the site's certificate broke, and an engineer
+# at unistra.fr confirmed that 'the domain "astro.unistra.fr" as well as
+# the domain "u-strasbg.fr" are obsoleted by "cds.unistra.fr".'  Thus:
 
-URL = 'https://cdsarc.u-strasbg.fr/ftp/cats/I/239/hip_main.dat'
+URL = 'https://cdsarc.cds.unistra.fr/ftp/cats/I/239/hip_main.dat'
 
 # But what if someone runs `gzip` on the file again?  Then the new URL
 # will break like the old one did.  It appears that VizieR makes no

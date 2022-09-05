@@ -5,6 +5,13 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+v1.44 — 2022 September ?
+------------------------
+
+* Updated the URL from which the Hipparcos database ``hip_main.dat`` is
+  downloaded, following a change in the domain for the University of
+  Strasbourg from ``u-strasbg.fr`` to ``unistra.fr``.
+
 v1.43.1 — 2022 July 6
 ---------------------
 
