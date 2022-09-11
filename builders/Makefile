@@ -1,6 +1,9 @@
 
 all:
-	echo "Targets: fonts, magnitudes, novas, spice"
+	echo "Targets: arrays, fonts, magnitudes, novas, spice"
+
+arrays:
+	cd .. && rm -f finals2000A.all && python builders/build_arrays.py
 
 # Download and unzip:
 # http://scripts.sil.org/cms/scripts/render_download.php?format=file&media_id=GentiumPlus-5.000-web.zip&filename=GentiumPlus-5.000-web.zip
