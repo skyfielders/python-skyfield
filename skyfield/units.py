@@ -19,6 +19,7 @@ class Unit(object):
     """A measurement that can be expressed in several choices of unit."""
 
     def __getitem__(self, *args):
+        """Tell users to ask for a specific unit before indexing or slicing."""
         cls = self.__class__
         name = cls.__name__
         s = 'to use this {0}, ask for its value in a particular unit:\n\n{1}'
