@@ -21,5 +21,4 @@ Untitled*.ipynb
 build
 htmlcov/
 stations.txt
-env/
 design/active.txt
