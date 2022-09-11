@@ -24,11 +24,49 @@ class Unit(object):
         name = cls.__name__
         s = 'to use this {0}, ask for its value in a particular unit:\n\n{1}'
         attrs = sorted(k for k, v in cls.__dict__.items()
-                       if k[0].islower() and isinstance(v, reify))
+                       if k[0].islower() and isinstance(v, (getset, reify)))
         examples = ['    {0}.{1}'.format(name.lower(), attr) for attr in attrs]
         raise UnpackingError(s.format(name, '\n'.join(examples)))
 
     __iter__ = __getitem__   # give advice about both foo[i] and "x,y,z = foo"
+
+class getset(object):
+    """Unit name that serves as both a class constructor and instance attribute.
+
+    This supports two use cases:
+
+    * When called as a class method like ``Distance.km(5.0)``, we build
+      and return an instance of ``Distance`` whose ``km`` has been set
+      to 5.0 and whose base unit ``m``, using the appropriate conversion
+      factor, has been set to 5000.0.
+
+    * When invoked like ``d.km`` on a particular ``Distance`` that
+      doesn't yet have a ``km`` attribute (which otherwise Python itself
+      would have returned), we apply the conversion factor to ``d.m``
+      and return the result.
+
+    """
+    def __init__(self, name, docstring, conversion_factor=None, core_unit=None):
+        self.name = name
+        self.__doc__ = docstring
+        self.conversion_factor = conversion_factor
+        self.core_unit = core_unit
+
+    def __get__(self, instance, objtype=None):
+        if instance is None:  # the class itself has been asked for this name
+            def constructor(value):
+                value = _to_array(value)
+                obj = objtype.__new__(objtype)
+                setattr(obj, self.name, value)
+                conversion_factor = self.conversion_factor
+                if conversion_factor is not None:
+                    setattr(obj, self.core_unit, value / conversion_factor)
+                return obj
+            constructor.__doc__ = self.__doc__
+            return constructor
+        value = getattr(instance, self.core_unit) * self.conversion_factor
+        instance.__dict__[self.name] = value
+        return value
 
 class Distance(Unit):
     """A distance, stored internally as au and available in other units.
@@ -65,24 +103,13 @@ class Distance(Unit):
             raise ValueError('to construct a Distance provide au, km, or m')
 
     @classmethod
-    def from_au(cls, au):
-        self = cls.__new__(cls)
-        self.au = _to_array(au)
-        return self
+    def from_au(cls, au):  # deprecated and no longer used internally
+        return cls.au(au)
 
-    @reify
-    def au(self):  # Empty property to provide Sphinx docstring.
-        """Astronomical units (the Earth-Sun distance of 149,597,870,700 m)."""
-
-    @reify
-    def km(self):
-        """Kilometers (1,000 meters)."""
-        return self.au * AU_KM
-
-    @reify
-    def m(self):
-        """Meters."""
-        return self.au * AU_M
+    au = getset('au', 'Astronomical units'
+                ' (the Earth-Sun distance of 149,597,870,700 m).')
+    km = getset('km', 'Kilometers (1,000 meters).', AU_KM, 'au')
+    m = getset('m', 'Meters.', AU_M, 'au')
 
     def __str__(self):
         n = self.au
@@ -135,19 +162,11 @@ class Velocity(Unit):
             raise ValueError('to construct a Velocity provide'
                              ' au_per_d or km_per_s')
 
-    @reify
-    def au_per_d(self):  # Empty property to provide Sphinx docstring.
-        """Astronomical units per day."""
-
-    @reify
-    def km_per_s(self):
-        """Kilometers per second."""
-        return self.au_per_d * AU_KM / DAY_S
-
-    @reify
-    def m_per_s(self):
-        """Meters per second."""
-        return self.au_per_d * AU_M / DAY_S
+    au_per_d = getset('au_per_d', 'Astronomical units per day.')
+    km_per_s = getset('km_per_s', 'Kilometers per second.',
+                      AU_KM / DAY_S, 'au_per_d')
+    m_per_s = getset('m_per_s', 'Meters per second.',
+                     AU_M / DAY_S, 'au_per_d')
 
     def __str__(self):
         n = self.au_per_d
@@ -276,9 +295,7 @@ class Angle(Unit):
         self.signed = signed
         return self
 
-    @reify
-    def radians(self):  # Empty property to provide Sphinx docstring.
-        """Radians (𝜏 = 2𝜋 in a circle)."""
+    radians = getset('radians', 'Radians (𝜏 = 2𝜋 in a circle).')
 
     @reify
     def _hours(self):

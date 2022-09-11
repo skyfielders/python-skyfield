@@ -93,9 +93,25 @@ def test_arcminutes_and_arcseconds_and_mas():
     assert angle.arcseconds() == 60 * 60
     assert angle.mas() == 60 * 60 * 1000
 
+def test_distance_input_units():
+    for d in (
+        Distance(1.0),
+        Distance(au=1.0),       # deprecated
+        Distance(m=149597870700),
+        Distance(km=149597870.700),
+        Distance.au(1.0),       # modern
+        Distance.m(149597870700),
+        Distance.km(149597870.700),
+    ):
+        assert abs(d.au - 1.0) <= 0
+
 def test_velocity_input_units():
     v1 = Velocity(au_per_d=2.0)
     v2 = Velocity(km_per_s=3462.9137)
+    assert abs(v1.au_per_d - v2.au_per_d) < 1e-7
+
+    v1 = Velocity.au_per_d(2.0)
+    v2 = Velocity.km_per_s(3462.9137)
     assert abs(v1.au_per_d - v2.au_per_d) < 1e-7
 
 def test_stringifying_vector_distance():
@@ -171,6 +187,10 @@ def test_converting_from_km_to_m():
 def test_converting_from_m_to_km():
     distance = Distance(m=1234.0)
     assert abs(distance.km - 1.234) < 1e-15
+
+def test_deprecated_method_from_au():
+    distance = Distance.from_au(1.25)
+    assert distance.au == 1.25
 
 @needs_astropy
 def test_converting_distance_with_astropy():

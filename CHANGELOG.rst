@@ -5,8 +5,12 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
-v1.44 — 2022 September ?
-------------------------
+v1.44 — 2022 September 11
+-------------------------
+
+* Distance and velocity objects can now be created by calling their unit
+  names as constructors, like ``d = Distance.km(5.0)`` and
+  ``v = Velocity.km_per_s(0.343)``.
 
 * Updated the URL from which the Hipparcos database ``hip_main.dat`` is
   downloaded, following a change in the domain for the University of

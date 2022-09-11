@@ -153,9 +153,10 @@ def angular_velocity_matrix(angular_velocity_vector):
 def _to_array(value):
     """Convert plain Python sequences into NumPy arrays.
 
-    This helps Skyfield endpoints convert caller-provided tuples and
-    lists into NumPy arrays.  If the ``value`` is not a sequence, then
-    it is coerced to a Numpy float object, but not an actual array.
+    This lets users pass plain old Python lists and tuples to Skyfield,
+    instead of always having to remember to build NumPy arrays.  We pass
+    any kind of generic sequence to the NumPy ``array()`` constructor
+    and wrap any other kind of value in a NumPy ``float64`` object.
 
     """
     if hasattr(value, 'shape'):
