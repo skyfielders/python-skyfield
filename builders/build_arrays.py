@@ -38,8 +38,14 @@ def main(argv):
     })
 
     url = load.build_url('finals2000A.all')
-    with load.open(url) as f:
+    try:
+        f = load.open(url)
+    except OSError:
+        url = 'https://maia.usno.navy.mil/ser7/finals2000A.all'
+        f = load.open(url)
+    with f:
         utc_mjd, dut1 = iers.parse_dut1_from_finals_all(f)
+
 
     daily_tt, daily_delta_t, leap_dates, leap_offsets = (
         iers.build_timescale_arrays(utc_mjd, dut1)
