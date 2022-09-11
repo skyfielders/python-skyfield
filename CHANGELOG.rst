@@ -8,6 +8,10 @@ Changelog
 v1.44 — 2022 September 11
 -------------------------
 
+* Skyfield’s internal table for the ∆T Earth orientation parameter has
+  been updated, so that instead of including measurements only through
+  December 2021 it now knows Earth orientation through September 2022.
+
 * Distance and velocity objects can now be created by calling their unit
   names as constructors, like ``d = Distance.km(5.0)`` and
   ``v = Velocity.km_per_s(0.343)``.
