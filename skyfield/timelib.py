@@ -1061,6 +1061,15 @@ delta_t_parabola_morrison_stephenson_2004 = Splines(
     [1820.0, 1920.0, 0.0, 32.0, 0.0, -20.0])
 
 def build_delta_t(delta_t_recent):
+    """Return a function t→∆T, given recent real-world observations of ∆T.
+
+    When asked for ∆T outside the range of the `delta_t_recent` table,
+    Skyfield uses the splines for 720 BC – AD 2015 computed by Morrison,
+    Stephenson, Hohenkerk, and Zawilski.  For dates that fall outside of
+    the spines, we use the long-term parabola of Stephenson, Morrison,
+    and Hohenkerk.
+
+    """
     parabola = delta_t_parabola_stephenson_morrison_hohenkerk_2016
     s15_table = load_bundled_npy('delta_t.npz')['Table-S15.2020.txt']
     table_tt, table_delta_t = delta_t_recent
