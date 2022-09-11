@@ -2,11 +2,12 @@ from __future__ import division
 
 import sys
 import math
-from numpy import(abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
-                  clip, copy, copyto, cos, cosh, exp, full_like, log, ndarray,
-                  newaxis, pi, power, repeat, sin, sinh, squeeze, sqrt, sum,
-                  tan, tanh, zeros_like)
-
+from numpy import (
+    abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
+    clip, copy, copyto, cos, cosh, exp, full_like, log, ndarray, newaxis,
+    pi, power, repeat, sign, sin, sinh, squeeze, sqrt, sum,
+    tan, tanh, zeros_like,
+)
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
 from skyfield.descriptorlib import reify
@@ -267,27 +268,28 @@ class _KeplerOrbit(VectorFunction):
     def __repr__(self):
         return '<{0}>'.format(str(self))
 
+_ten_iterations = tuple([None] * 10)
 
 def eccentric_anomaly(e, M):
-    """ Iterates to solve Kepler's equation to find eccentric anomaly
+    """Iterate to solve Kepler's equation to find the eccentric anomaly.
 
-    Based on the algorithm in section 8.10.2 of the Explanatory Supplement
-    to the Astronomical Almanac, 3rd ed.
+    See arXiv:2108.03215.
+
     """
     M = normpi(M)
-    E = M + e*sin(M)
+    ebar = 0.25 * pi/e - 1.0
+    E = 0.5 * pi * ebar * (sign(ebar) * sqrt(1 + M/(e*ebar*ebar)) - 1.0)
 
-    max_iters = 100
-    iters = 0
-    while iters < max_iters:
-        dM = M - (E - e*sin(E))
-        dE = dM/(1 - e*cos(E))
-        E = E + dE
-        if abs(dE) < 1e-14: return E
-        iters += 1
-    else:
-        raise ValueError('Failed to converge')
+    for _ in _ten_iterations:
+        f1 = 1.0 - e*cos(E)
+        f2 = e*sin(E)
+        f = E - f2 - M
+        dE = f*f1 / (f1*f1 - 0.5*f*f2)
+        E -= dE
+        if abs(dE) < 1e-14:
+            return E
 
+    raise ValueError('eccentric anomaly failed to converge')
 
 def true_anomaly_hyperbolic(e, E):
     """Calculates true anomaly from eccentricity and eccentric anomaly.
