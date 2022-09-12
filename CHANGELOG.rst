@@ -5,7 +5,7 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
-v1.44 — 2022 September 11
+v1.44 — 2022 September 12
 -------------------------
 
 * Skyfield’s internal table for the ∆T Earth orientation parameter has
