@@ -377,6 +377,139 @@ like the Sun, Moon, or one of the planets.
     Sun 20 05:47 MST rises
     Sun 20 14:23 MST sets
 
+At what rate is a target moving across the sky?
+===============================================
+
+Automatically-driven telescopes and antennas
+often need to know the rate at which an object is moving across the sky.
+Specifically,
+an instrument with a simple altazimuth mount
+will need to know the rates at which altitude and azimuth are changing,
+whereas a fancier equatorial mount
+will need the rates for right ascension and declination.
+
+The solution is the same in both cases:
+to call Skyfield’s
+:meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` position method
+and pass it the frame of reference
+in which you want the rates computed.
+In either case,
+you will want to start by asking Skyfield to compute an apparent position:
+
+.. testcode::
+
+    from skyfield.api import load, wgs84, N, E
+
+    ts = load.timescale()
+    t = ts.utc(2021, 2, 3, 0, 0)
+    planets = load('de421.bsp')
+    earth, mars = planets['earth'], planets['mars']
+    top = wgs84.latlon(35.1844866 * N, 248.347300 * E, elevation_m=2106.9128)
+
+    a = (earth + top).at(t).observe(mars).apparent()
+
+Since every topocentric location in Skyfield
+is itself a reference frame representing the location’s horizon,
+we can simply pass ``top`` to the
+:meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` method
+to learn the rates at which the altitude and azimuth are changing:
+
+.. testcode::
+
+    alt, az, distance, alt_rate, az_rate, range_rate = (
+        a.frame_latlon_and_rates(top)
+    )
+
+    print('Alt: {:+.2f} asec/min'.format(alt_rate.arcseconds.per_minute))
+    print('Az:  {:+.2f} asec/min'.format(az_rate.arcseconds.per_minute))
+
+.. testoutput::
+
+    Alt: +548.66 asec/min
+    Az:  +1586.48 asec/min
+
+But if our instrument is on an equatorial mount,
+it will need to know how fast
+the right ascension and declination are changing.
+In that case we import Skyfield’s reference frame
+that represents the Earth’s true orientation in space,
+and pass that object to the
+:meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` method:
+
+.. testcode::
+
+    from skyfield import framelib
+
+    eeod = framelib.true_equator_and_equinox_of_date
+    dec, ra, distance, dec_rate, ra_rate, range_rate = (
+        a.frame_latlon_and_rates(eeod)
+    )
+
+    print(f'RA:  {ra_rate.arcseconds.per_hour:+.2f} asec/hr')
+    print(f'Dec: {dec_rate.arcseconds.per_hour:+.2f} asec/hr')
+
+.. testoutput::
+
+    RA:  +78.66 asec/hr
+    Dec: +25.61 asec/hr
+
+Note that, contrary to Skyfield’s usual custom,
+declination is returned first.
+That’s why the
+:meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` method
+has ``latlon`` in its name:
+it always returns the latitude-like coordinate
+(angle above or below the plane) first,
+then the longitude-like coordinate
+(angle around the plane) second.
+
+Finally, in case you need it,
+you will notice that both of the calls above return a ``range_rate``
+that is positive if the body is moving away from you
+and its range is increasing,
+or is negative if the target is moving closer and the range is falling.
+At the specific date and time we asked about above,
+Mars is moving away:
+
+.. testcode::
+
+    print('Range rate: {:+.2f} km/s'.format(range_rate.km_per_s))
+
+.. testoutput::
+
+    Range rate: +16.79 km/s
+
+Finally,
+there’s the slight complication
+that some data sources and instruments
+want the rate of motion around-the-sky
+to be multiplied by the cosine of the body’s angle
+above or below the reference plane.
+By simply performing the math—and
+remembering that ``sin()`` and ``cos()`` in Python take radian arguments—you
+can produce these alternative measurements yourself:
+
+.. testcode::
+
+    from numpy import cos
+
+    rcos = az_rate.arcseconds.per_minute * cos(alt.radians)
+    print(
+        'Azimuth rate × cos(altitude): {:.2f} arcseconds / minute'
+        .format(rcos)
+    )
+
+    rcos = ra_rate.arcseconds.per_hour * cos(dec.radians)
+    print(
+        'RA rate × cos(declination): {:.2f} arcseconds / hour'
+        .format(rcos)
+    )
+
+.. testoutput::
+
+    Azimuth rate × cos(altitude): 663.55 arcseconds / minute
+    RA rate × cos(declination): 75.16 arcseconds / hour
+
 What is the right ascension and declination of a point in the sky?
 ==================================================================
 
