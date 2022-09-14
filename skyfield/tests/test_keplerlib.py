@@ -52,7 +52,7 @@ def test_against_horizons():
     epsilon = Distance(m=0.001).au
     assert abs(r + sun_au - horizons_au).max() < epsilon
 
-def test_minor_planet():
+def test_minor_planet_with_positive_M():
     text = (b'00001    3.4   0.15 K205V 162.68631   73.73161   80.28698'
             b'   10.58862  0.0775571  0.21406009   2.7676569  0 MPO492748'
             b'  6751 115 1801-2019 0.60 M-v 30h Williams   0000      '
@@ -73,6 +73,30 @@ def test_minor_planet():
     assert ceres.target == '(1) Ceres'
     assert abs(ra.hours - 23.1437) < 0.00005
     assert abs(dec.degrees - -17.323) < 0.0005
+
+def test_minor_planet_with_negative_M():
+    text = (b'00002    4.11  0.15 K221L 272.47992  310.69724  172.91658'
+            b'   34.92531  0.2299930  0.21366046   2.7711069  0 MPO681823'
+            b'  8875 119 1804-2022 0.58 M-c 28k Pan        0000      '
+            b'(2) Pallas             20220105')
+
+    ts = load.timescale()
+    t = ts.utc(2022, 9, 14)
+    eph = load('de421.bsp')
+    df = mpc.load_mpcorb_dataframe(BytesIO(text))
+    row = df.iloc[0]
+
+    assert row.designation_packed == '00002'
+    assert row.designation == '(2) Pallas'
+
+    ceres = mpc.mpcorb_orbit(row, ts, GM_SUN)
+    ra, dec, distance = eph['earth'].at(t).observe(eph['sun'] + ceres).radec()
+
+    # We can't expect close agreement, since the HORIZONS orbital
+    # elements are different than MPC's.
+    assert ceres.target == '(2) Pallas'
+    assert abs(ra._degrees - 92.750) < 0.006
+    assert abs(dec.degrees - -10.561) < 0.002
 
 def test_comet():
     text = (b'    CJ95O010  1997 03 29.6333  0.916241  0.994928  130.6448'

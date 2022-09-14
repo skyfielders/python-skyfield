@@ -1,0 +1,106 @@
+
+
+*******************************************************************************
+Ephemeris / WWW_USER Wed Sep 14 09:16:35 2022 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: 2 Pallas (A802 FA)              {source: JPL#53}
+Center body name: Earth (399)                     {source: DE441}
+Center-site name: GEOCENTRIC
+*******************************************************************************
+Start time      : A.D. 2022-Sep-14 00:00:00.0000 UT
+Stop  time      : A.D. 2022-Sep-15 00:00:00.0000 UT
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : IAU                             {West-longitude positive}
+Target radii    : 275.0 x 258.0 x 238.0 km        {Equator, meridian, pole}
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : ITRF93                          {East-longitude positive}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: DE441}
+Rel. light bend : Sun, EARTH                      {source: DE441}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
+Small-body perts: Yes                             {source: SB441-N16}
+Atmos refraction: NO (AIRLESS)
+RA format       : DEG
+Time format     : CAL
+EOP file        : eop.220913.p221206
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2022-SEP-13. PREDICTS-> 2022-DEC-05
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2449980.5 ! 1995-Sep-20.00 (TDB)         Residual RMS= .37167
+   EC= .2338097526855965   QR= 2.123204839606035   TP= 2449888.233816247
+   OM= 173.2983228558771   W=  309.697859274967    IN= 34.80773731863506
+  Equivalent ICRF heliocentric cartesian coordinates (au, au/d):
+   X=-1.995828858949859E+00  Y= 8.913560385695452E-01  Z=-4.041546169155649E-02
+  VX=-6.330649225887670E-03 VY=-1.082745395951178E-02 VZ= 2.571698303544990E-03
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= 13.63               RAD= 256.5              ROTPER= 7.813221
+   H= 4.12                 G= .110                 B-V= .635
+                           ALBEDO= .155            STYP= B
+*******************************************************************************
+ Date__(UT)__HR:MN     R.A._______(ICRF)_______DEC
+**************************************************
+$$SOE
+ 2022-Sep-14 00:00      92.750094321 -10.561059030
+ 2022-Sep-15 00:00      93.126259300 -10.775319868
+$$EOE
+*******************************************************************************
+Column meaning:
+
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion from TDB on Earth
+regardless of observer location within the solar system, although clock
+rates may differ due to the local gravity field and no analog to "UT"
+may be defined for that location.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+
+ 'R.A._______(ICRF)_______DEC' =
+  Astrometric right ascension and declination of the target center with
+respect to the observing site (coordinate origin) in the reference frame of
+the planetary ephemeris (ICRF). Compensated for down-leg light-time delay
+aberration.
+
+  Units: RA  in decimal degrees,  ddd.fffff{ffff}
+         DEC in decimal degrees,  sdd.fffff{ffff}
+
+Computations by ...
+
+    Solar System Dynamics Group, Horizons On-Line Ephemeris System
+    4800 Oak Grove Drive, Jet Propulsion Laboratory
+    Pasadena, CA  91109   USA
+
+    General site: https://ssd.jpl.nasa.gov/
+    Mailing list: https://ssd.jpl.nasa.gov/email_list.html
+    System news : https://ssd.jpl.nasa.gov/horizons/news.html
+    User Guide  : https://ssd.jpl.nasa.gov/horizons/manual.html
+    Connect     : browser        https://ssd.jpl.nasa.gov/horizons/app.html#/x
+                  API            https://ssd-api.jpl.nasa.gov/doc/horizons.html
+                  command-line   telnet ssd.jpl.nasa.gov 6775
+                  e-mail/batch   https://ssd.jpl.nasa.gov/ftp/ssd/hrzn_batch.txt
+                  scripts        https://ssd.jpl.nasa.gov/ftp/ssd/SCRIPTS
+    Author      : Jon.D.Giorgini@jpl.nasa.gov
+
+*******************************************************************************

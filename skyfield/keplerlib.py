@@ -277,6 +277,8 @@ def eccentric_anomaly(e, M):
 
     """
     M = normpi(M)
+    sign_M = sign(M)
+    M *= sign_M
     ebar = 0.25 * pi/e - 1.0
     E = 0.5 * pi * ebar * (sign(ebar) * sqrt(1 + M/(e*ebar*ebar)) - 1.0)
 
@@ -287,7 +289,7 @@ def eccentric_anomaly(e, M):
         dE = f*f1 / (f1*f1 - 0.5*f*f2)
         E -= dE
         if abs(dE) < 1e-14:
-            return E
+            return E * sign_M
 
     raise ValueError('eccentric anomaly failed to converge')
 
