@@ -5,6 +5,13 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+v1.45 — 2022 September 15
+-------------------------
+
+* Bugfix: minor planets and comets in Skyfield 1.44 would raise an
+  exception if asked for a position in the half of their orbit where
+  they are inbound towards their perihelion.
+
 v1.44 — 2022 September 12
 -------------------------
 
