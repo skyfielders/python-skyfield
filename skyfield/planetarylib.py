@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
-from numpy import array, cos, nan, sin
+from numpy import array, cos, nan, sin, deg2rad
 from jplephem.pck import DAF, PCK
-from .constants import ASEC2RAD, AU_KM, DAY_S, tau
+from .constants import ASEC2RAD, AU_KM, DAY_S, tau, T0, D_JC
 from .data import text_pck
 from .functions import _T, mxv, mxm, mxmxm, rot_x, rot_y, rot_z
 from .units import Angle, Distance
@@ -251,3 +251,100 @@ class PlanetTopos(VectorFunction):
         # azimuth reads north-east rather than the other direction.
         R[1] *= -1
         return R
+
+class PlanetaryOrientation():
+  """Planet/moon orientation using models from .tpc file
+
+  >>> from skyfield.api import load, PlanetaryConstants, PlanetaryOrientation
+  >>> pc = PlanetaryConstants()
+  >>> pc.read_text(load('pck00010.tpc'))
+  >>> jup_orientation = PlanetaryOrientation(pc, '599')
+  >>> t = load.timescale().utc(2020,1,1)
+  >>> jup_orientation.at(t).orientation # [RA, DEC, prime_meridian]
+  [268.05773343067165, 64.49711711016498, 6359115.859072568]
+
+  """
+  def __init__(self, pc, naifid):
+    self.a0 = None
+    self.d0 = None
+    self.W = None
+    self.orientation = [self.a0, self.d0, self.W]
+
+    pck = pc.variables
+
+    self.naifid = naifid
+
+    self.pole_ra = pck['BODY'+naifid+'_POLE_RA']
+    self.pole_dec = pck['BODY'+naifid+'_POLE_DEC']
+    self.pm = pck['BODY'+naifid+'_PM']
+    self.long_axis = self._getPCKvar(pck, 'BODY'+naifid+'_LONG_AXIS')
+    self.nut_prec_ra = self._getPCKvar(pck, 'BODY'+naifid+'_NUT_PREC_RA')
+    self.nut_prec_dec = self._getPCKvar(pck, 'BODY'+naifid+'_NUT_PREC_DEC')
+    self.nut_prec_pm = self._getPCKvar(pck, 'BODY'+naifid+'_NUT_PREC_PM')
+    # NUT_PREC_ANGLES are listed under main planet barycenter number
+    self.nut_prec_angles = self._getPCKvar(pck, 'BODY'+naifid[0]+'_NUT_PREC_ANGLES')
+    self.radii = pck['BODY'+naifid+'_RADII']
+
+    # check if _NUT_PREC_* values are available
+    if (self.nut_prec_ra is not None and
+        self.nut_prec_dec is not None and
+        self.nut_prec_pm is not None and
+        self.nut_prec_angles is not None):
+      self.nutation = True
+    else:
+      self.nutation = False
+
+    
+    # parse nut_prec_angles into list of tuples
+    if self.nutation:
+      self.nut_prec_angles_pairs = list(zip( self.nut_prec_angles[::2],
+                                             self.nut_prec_angles[1::2] ))
+
+  def _getPCKvar(self, pck, var_name):
+    try:
+      v = pck[var_name]
+    except:
+      v = None
+    return v
+
+  def at(self, t):
+    self.t = t
+    self._calcOrientation()
+    return self
+
+  def _calcOrientation(self, t=None):
+    if t is None:
+      t = self.t
+    else:
+      self.t = t
+    
+    d = t.tdb - T0 # Interval in days from the standard epoch
+    T = d/D_JC # Interval in Julian centuries from the standard epoch
+
+    nut_prec_ra_sum = 0
+    nut_prec_dec_sum = 0
+    nut_prec_pm_sum = 0
+
+    if self.nutation:
+      for i in range(len(self.nut_prec_ra)):
+        a1, a2 = self.nut_prec_angles_pairs[i]
+        npa = a1 + a2*T
+        npa_rad = deg2rad(npa)
+
+        nut_prec_ra_sum += self.nut_prec_ra[i]*sin(npa_rad)
+        nut_prec_dec_sum += self.nut_prec_dec[i]*cos(npa_rad)
+        nut_prec_dec_sum += self.nut_prec_pm[i]*sin(npa_rad)
+
+
+    a0 = self.pole_ra[0] + self.pole_ra[1]*T + nut_prec_ra_sum
+    d0 = self.pole_dec[0] + self.pole_dec[1]*T + nut_prec_dec_sum
+    W = self.pm[0] + self.pm[1]*d + nut_prec_pm_sum
+
+    self.orientation = [a0, d0, W]
+    self.a0, self.d0, self.W = self.orientation
+
+    return self.orientation
+
+
+
+
