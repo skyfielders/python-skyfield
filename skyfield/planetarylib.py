@@ -253,7 +253,14 @@ class PlanetTopos(VectorFunction):
         return R
 
 class PlanetaryOrientation():
-  """Planet/moon orientation using models from .tpc file
+  """Planet/moon orientation and shape using models from .tpc file
+  
+  Based on the models presented in pck00010.tpc, which is based on
+     
+  Archinal, B.A., A’Hearn, M.F., Bowell, E. et al. Report of the IAU
+  Working Group on Cartographic Coordinates and Rotational Elements: 2009.
+  Celest Mech Dyn Astr 109, 101–135 (2011).
+  https://doi.org/10.1007/s10569-010-9320-4
 
   >>> from skyfield.api import load, PlanetaryConstants, PlanetaryOrientation
   >>> pc = PlanetaryConstants()
@@ -272,38 +279,70 @@ class PlanetaryOrientation():
 
     pck = pc.variables
 
+    # make sure that naifid is a string number
+    naifid = str(naifid)
+    if naifid.upper().startswith('BODY'):
+      naifid = naifid[4:]
+
     self.naifid = naifid
 
-    self.pole_ra = pck['BODY'+naifid+'_POLE_RA']
-    self.pole_dec = pck['BODY'+naifid+'_POLE_DEC']
-    self.pm = pck['BODY'+naifid+'_PM']
-    self.long_axis = self._getPCKvar(pck, 'BODY'+naifid+'_LONG_AXIS')
-    self.nut_prec_ra = self._getPCKvar(pck, 'BODY'+naifid+'_NUT_PREC_RA')
-    self.nut_prec_dec = self._getPCKvar(pck, 'BODY'+naifid+'_NUT_PREC_DEC')
-    self.nut_prec_pm = self._getPCKvar(pck, 'BODY'+naifid+'_NUT_PREC_PM')
+    # not all variables are available for every body
+    # set to None if they aren't
+    self.pole_ra = self._getPCKvar(pck, naifid, 'POLE_RA')
+    self.pole_dec = self._getPCKvar(pck, naifid, 'POLE_DEC')
+    self.pm = self._getPCKvar(pck, naifid, 'PM')
+    self.long_axis = self._getPCKvar(pck, naifid, 'LONG_AXIS')
+    self.nut_prec_ra = self._getPCKvar(pck, naifid, 'NUT_PREC_RA')
+    self.nut_prec_dec = self._getPCKvar(pck, naifid, 'NUT_PREC_DEC')
+    self.nut_prec_pm = self._getPCKvar(pck, naifid, 'NUT_PREC_PM')
     # NUT_PREC_ANGLES are listed under main planet barycenter number
-    self.nut_prec_angles = self._getPCKvar(pck, 'BODY'+naifid[0]+'_NUT_PREC_ANGLES')
-    self.radii = pck['BODY'+naifid+'_RADII']
+    self.nut_prec_angles = self._getPCKvar(pck, naifid[0], 'NUT_PREC_ANGLES')
+    self.radii = self._getPCKvar(pck, naifid, 'RADII')
 
-    # check if _NUT_PREC_* values are available
+    # check if POLE and PM values (orientation) are available
+    # many moons don't have them
+    if (self.pole_ra is not None and
+        self.pole_dec is not None and
+        self.pm is not None):
+      self.orientation_model = True
+    else:
+      self.orientation_model = False
+
+    # check if _NUT_PREC_* values (nutation) are available
+    # not all bodies have it, most notably Earth
     if (self.nut_prec_ra is not None and
         self.nut_prec_dec is not None and
         self.nut_prec_pm is not None and
         self.nut_prec_angles is not None):
-      self.nutation = True
+      self.nutation_model = True
     else:
-      self.nutation = False
+      self.nutation_model = False
 
-    
-    # parse nut_prec_angles into list of tuples
-    if self.nutation:
+    # check if RADII values (shape) are available
+    if (self.radii is not None):
+      self.shape_model = True
+    else:
+      self.shape_model = False
+
+    # check that at least one model is available
+    if (not self.orientation_model and
+        not self.nutation_model and
+        not self.shape_model):
+      e = 'No models found for BODY' + self.naifid + \
+          '. Verify that NAIF ID is correct'
+      raise KeyError(e)
+
+    # parse NUT_PREC_ANGLES into list of tuples for easier use later
+    if self.nutation_model:
       self.nut_prec_angles_pairs = list(zip( self.nut_prec_angles[::2],
                                              self.nut_prec_angles[1::2] ))
 
-  def _getPCKvar(self, pck, var_name):
+  def _getPCKvar(self, pckvars, naifid, var):
+    """Do .variables[key] but return None instead of throwing an exception."""
     try:
-      v = pck[var_name]
-    except:
+      key = 'BODY'+naifid+'_'+var # e.g. BODY399_POLE_RA
+      v = pckvars[key]
+    except KeyError:
       v = None
     return v
 
@@ -313,6 +352,10 @@ class PlanetaryOrientation():
     return self
 
   def _calcOrientation(self, t=None):
+    if not self.orientation_model:
+      e = 'BODY' + self.naifid + ' does not have an orientation model'
+      raise AttributeError(e)
+
     if t is None:
       t = self.t
     else:
@@ -325,7 +368,12 @@ class PlanetaryOrientation():
     nut_prec_dec_sum = 0
     nut_prec_pm_sum = 0
 
-    if self.nutation:
+    # only do the nutation calculations if the necessary values are available
+    if self.nutation_model:
+      # Is keying to NUT_PREC_RA really the correct thing to do?
+      # This keeps everything in a single loop and there doesn't seem to be
+      # any cases NUT_PREC variables for the same body having different numbers
+      # of values.
       for i in range(len(self.nut_prec_ra)):
         a1, a2 = self.nut_prec_angles_pairs[i]
         npa = a1 + a2*T
@@ -335,7 +383,6 @@ class PlanetaryOrientation():
         nut_prec_dec_sum += self.nut_prec_dec[i]*cos(npa_rad)
         nut_prec_dec_sum += self.nut_prec_pm[i]*sin(npa_rad)
 
-
     a0 = self.pole_ra[0] + self.pole_ra[1]*T + nut_prec_ra_sum
     d0 = self.pole_dec[0] + self.pole_dec[1]*T + nut_prec_dec_sum
     W = self.pm[0] + self.pm[1]*d + nut_prec_pm_sum
@@ -344,7 +391,3 @@ class PlanetaryOrientation():
     self.a0, self.d0, self.W = self.orientation
 
     return self.orientation
-
-
-
-
