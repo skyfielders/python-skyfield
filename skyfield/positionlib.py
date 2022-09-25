@@ -523,7 +523,10 @@ class ICRF(object):
         """
         # TODO: should we have the body .observe() the Sun, to account
         # for light travel time?
-        return self.separation_from(self.center_barycentric - sun.at(self.t))
+        s = sun.at(self.t)
+        u = self.position.au
+        v = u - s.position.au + self.center_barycentric.position.au
+        return Angle(radians=angle_between(u, v))
 
     def fraction_illuminated(self, sun):
         """Return the fraction of the target’s disc that is illuminated.

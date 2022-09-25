@@ -335,16 +335,17 @@ def test_phase_angle_and_fraction_illuminated():
 
     p = earth.at(t1).observe(moon)
     a = p.phase_angle(sun).degrees.round(1)
-    assert a == 76.4
+    assert a == 76.2
     i = p.fraction_illuminated(sun).round(2)
     assert i == 0.62
 
     p = earth.at(t).observe(moon)
     a = p.phase_angle(sun).degrees.round(1)
-    assert list(a) == [172.0, 172.6, 159.7, 146.7, 134.0,
-                       121.8, 110.0, 98.5, 87.3, 76.4]
-    i = p.fraction_illuminated(sun).round(2)
-    assert list(i) == [0, 0, 0.03, 0.08, 0.15, 0.24, 0.33, 0.43, 0.52, 0.62]
+    assert list(a) == [172.0, 172.6, 159.6, 146.6, 133.9,
+                       121.7, 109.9, 98.4, 87.2, 76.2]
+    i = (p.fraction_illuminated(sun) * 100).round(2)
+    assert list(i) == [0.49, 0.41, 3.12, 8.25, 15.30, 23.73, 33.01,  # not 33.02?
+                       42.71, 52.45, 61.92]
 
 def test_astropy_conversion():
     try:
