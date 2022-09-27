@@ -381,7 +381,7 @@ class PlanetaryOrientation():
 
         nut_prec_ra_sum += self.nut_prec_ra[i]*sin(npa_rad)
         nut_prec_dec_sum += self.nut_prec_dec[i]*cos(npa_rad)
-        nut_prec_dec_sum += self.nut_prec_pm[i]*sin(npa_rad)
+        nut_prec_pm_sum += self.nut_prec_pm[i]*sin(npa_rad)
 
     a0 = self.pole_ra[0] + self.pole_ra[1]*T + nut_prec_ra_sum
     d0 = self.pole_dec[0] + self.pole_dec[1]*T + nut_prec_dec_sum
