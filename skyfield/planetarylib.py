@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
-from numpy import array, cos, nan, sin, deg2rad
+from numpy import array, cos, nan, sin, deg2rad, ndarray
 from jplephem.pck import DAF, PCK
 from .constants import ASEC2RAD, AU_KM, DAY_S, tau, T0, D_JC
 from .data import text_pck
@@ -332,10 +332,10 @@ class PlanetaryOrientation():
           '. Verify that NAIF ID is correct'
       raise KeyError(e)
 
-    # parse NUT_PREC_ANGLES into list of tuples for easier use later
+    # parse NUT_PREC_ANGLES into Nx2 array for easier use later
     if self.nutation_model:
-      self.nut_prec_angles_pairs = list(zip( self.nut_prec_angles[::2],
-                                             self.nut_prec_angles[1::2] ))
+      self.nut_prec_angles_array = array([ self.nut_prec_angles[::2],
+                                           self.nut_prec_angles[1::2] ])
 
   def _getPCKvar(self, pckvars, naifid, var):
     """Do .variables[key] but return None instead of throwing an exception."""
@@ -370,24 +370,24 @@ class PlanetaryOrientation():
 
     # only do the nutation calculations if the necessary values are available
     if self.nutation_model:
-      # Is keying to NUT_PREC_RA really the correct thing to do?
-      # This keeps everything in a single loop and there doesn't seem to be
-      # any cases NUT_PREC variables for the same body having different numbers
-      # of values.
-      for i in range(len(self.nut_prec_ra)):
-        a1, a2 = self.nut_prec_angles_pairs[i]
-        npa = a1 + a2*T
-        npa_rad = deg2rad(npa)
-
-        nut_prec_ra_sum += self.nut_prec_ra[i]*sin(npa_rad)
-        nut_prec_dec_sum += self.nut_prec_dec[i]*cos(npa_rad)
-        nut_prec_pm_sum += self.nut_prec_pm[i]*sin(npa_rad)
+      a1, a2 = self.nut_prec_angles_array
+      
+      # if time is an array, need to flip row into column
+      if isinstance(T, ndarray):
+        npa = deg2rad(a1 + a2*T.reshape(-1,1))
+      else:
+        npa = deg2rad(a1 + a2*T)
+    
+      sum_axis = npa.ndim-1 # 0 for single time, 1 for time array
+      nut_prec_ra_sum = (self.nut_prec_ra*sin(npa)).sum(axis=sum_axis)
+      nut_prec_dec_sum = (self.nut_prec_dec*cos(npa)).sum(axis=sum_axis)
+      nut_prec_pm_sum = (self.nut_prec_pm*sin(npa)).sum(axis=sum_axis)
 
     a0 = self.pole_ra[0] + self.pole_ra[1]*T + nut_prec_ra_sum
     d0 = self.pole_dec[0] + self.pole_dec[1]*T + nut_prec_dec_sum
     W = self.pm[0] + self.pm[1]*d + nut_prec_pm_sum
 
-    self.orientation = [a0, d0, W]
+    self.orientation = array([a0, d0, W])
     self.a0, self.d0, self.W = self.orientation
 
     return self.orientation
