@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
-from numpy import array, cos, nan, sin, deg2rad, ndarray
+from numpy import array, cos, nan, sin, deg2rad, ndarray, pad
 from jplephem.pck import DAF, PCK
 from .constants import ASEC2RAD, AU_KM, DAY_S, tau, T0, D_JC
 from .data import text_pck
@@ -299,6 +299,11 @@ class PlanetaryOrientation():
     self.nut_prec_angles = self._getPCKvar(pck, naifid[0], 'NUT_PREC_ANGLES')
     self.radii = self._getPCKvar(pck, naifid, 'RADII')
 
+    # parse NUT_PREC_ANGLES into Nx2 array for easier use later
+    if self.nut_prec_angles is not None:
+      self.nut_prec_angles_array = array([ self.nut_prec_angles[::2],
+                                           self.nut_prec_angles[1::2] ])
+
     # check if POLE and PM values (orientation) are available
     # many moons don't have them
     if (self.pole_ra is not None and
@@ -315,6 +320,13 @@ class PlanetaryOrientation():
         self.nut_prec_pm is not None and
         self.nut_prec_angles is not None):
       self.nutation_model = True
+
+      # some bodies need to pad _NUT_PREC_ arrays with zeroes so they are the
+      # same length as self.nut_prec_angles_array
+      num_npa = self.nut_prec_angles_array.shape[1]
+      self.nut_prec_ra = pad(self.nut_prec_ra, (0,num_npa-len(self.nut_prec_ra)))
+      self.nut_prec_dec = pad(self.nut_prec_dec, (0,num_npa-len(self.nut_prec_dec)))
+      self.nut_prec_pm = pad(self.nut_prec_pm, (0,num_npa-len(self.nut_prec_pm)))
     else:
       self.nutation_model = False
 
@@ -331,11 +343,6 @@ class PlanetaryOrientation():
       e = 'No models found for BODY' + self.naifid + \
           '. Verify that NAIF ID is correct'
       raise KeyError(e)
-
-    # parse NUT_PREC_ANGLES into Nx2 array for easier use later
-    if self.nutation_model:
-      self.nut_prec_angles_array = array([ self.nut_prec_angles[::2],
-                                           self.nut_prec_angles[1::2] ])
 
   def _getPCKvar(self, pckvars, naifid, var):
     """Do .variables[key] but return None instead of throwing an exception."""
@@ -377,7 +384,7 @@ class PlanetaryOrientation():
         npa = deg2rad(a1 + a2*T.reshape(-1,1))
       else:
         npa = deg2rad(a1 + a2*T)
-    
+
       sum_axis = npa.ndim-1 # 0 for single time, 1 for time array
       nut_prec_ra_sum = (self.nut_prec_ra*sin(npa)).sum(axis=sum_axis)
       nut_prec_dec_sum = (self.nut_prec_dec*cos(npa)).sum(axis=sum_axis)
