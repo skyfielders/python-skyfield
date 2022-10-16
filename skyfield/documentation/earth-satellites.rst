@@ -35,7 +35,8 @@ for artificial satellites in Earth orbit:
       at epoch and it quickly degrades.”
 
 3. Satellite elements go rapidly out of date.
-   You will want to pay attention to the “epoch” —
+   As explained below in `Checking a TLE’s epoch`_,
+   you will want to pay attention to the “epoch” —
    the date on which an element set is most accurate —
    of every TLE element set you use.
    Elements are only useful for a week or two
@@ -66,6 +67,15 @@ for artificial satellites in Earth orbit:
 
 .. _Revisiting Spacetrack Report #3:
     https://celestrak.com/publications/AIAA/2006-6753/
+
+Note that even though TLE elements have names
+like *inclination* and *eccentricity*
+that might remind you of the simple Kepler elements
+used for the orbits of comets and asteroids,
+the SGP4 propagation routine
+knows that a satellite orbit is not a simple ellipse
+and includes effects like the Moon’s gravity and atmospheric drag
+in its calculations.
 
 Loading a TLE file
 ------------------
