@@ -523,7 +523,7 @@ Our example satellite culminates
 at around 20° above the horizon
 just after 11:20pm UTC.
 As expected,
-is range reaches a minimum during that minute
+its range reaches a minimum during that minute
 and its range rate swaps from negative (drawing closer)
 to positive (moving away).
 
@@ -558,7 +558,7 @@ A satellite is generally only visible to a ground observer
 when there is still sunlight up at its altitude.
 The satellite will visually disappear
 when it enters the Earth’s shadow
-and reappear when it comes out of eclipse.
+and reappear when it emerges back into the sunlight.
 If you are planning to observe a satellite visually,
 rather than with radar or radio,
 you will want to know which satellite passes are in sunlight.
