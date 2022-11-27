@@ -30,7 +30,7 @@ def test_astrometric_position_does_not_allow_altaz(ts):
     e = api.load('de421.bsp')
     o = e['earth'] + api.wgs84.latlon(36.7138, -112.2169)
     a = o.at(ts.utc(2014, 2, 9, 14, 50)).observe(e['mars'])
-    with assert_raises(AttributeError):
+    with assert_raises(ValueError, 'it is not useful to call .altaz'):
         a.altaz()
 
 def test_ephemeris_contains_method(ts):

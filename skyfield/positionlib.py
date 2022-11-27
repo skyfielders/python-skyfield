@@ -23,8 +23,6 @@ def build_position(position_au, velocity_au_per_d=None, t=None,
         cls = Barycentric
     elif center == 399:
         cls = Geocentric
-    elif hasattr(center, 'rotation_at'):  # and thus deserves an altaz() method
-        cls = Geometric
     else:
         cls = ICRF
     return cls(position_au, velocity_au_per_d, t, center, target)
@@ -309,6 +307,30 @@ class ICRF(object):
         return (Angle(radians=ha, preference='hours', signed=True),
                 Angle(radians=dec, signed=True),
                 Distance(au))
+
+    def altaz(self, temperature_C=None, pressure_mbar='standard'):
+        """Compute (alt, az, distance) relative to the observer's horizon
+
+        The altitude returned is an :class:`~skyfield.units.Angle`
+        measured in degrees above the horizon, while the azimuth
+        :class:`~skyfield.units.Angle` measures east along the horizon
+        from geographic north (so 0 degrees means north, 90 is east, 180
+        is south, and 270 is west).
+
+        By default, Skyfield does not adjust the altitude for
+        atmospheric refraction.  If you want Skyfield to estimate how
+        high the atmosphere might lift the body's image, give the
+        argument ``temperature_C`` either the temperature in degrees
+        centigrade, or the string ``'standard'`` (in which case 10°C is
+        used).
+
+        When calculating refraction, Skyfield uses the observer’s
+        elevation above sea level to estimate the atmospheric pressure.
+        If you want to override that value, simply provide a number
+        through the ``pressure_mbar`` parameter.
+
+        """
+        return _to_altaz(self, temperature_C, pressure_mbar)
 
     def separation_from(self, another_icrf):
         """Return the angle between this position and another.
@@ -627,7 +649,6 @@ class ICRF(object):
 # important enough change to warrant a deprecation error for users, so:
 ICRS = ICRF
 
-
 class Geometric(ICRF):
     """An |xyz| vector between two instantaneous position.
 
@@ -641,30 +662,6 @@ class Geometric(ICRF):
     System (ICRS), the modern replacement for J2000 coordinates.
 
     """
-    def altaz(self, temperature_C=None, pressure_mbar='standard'):
-        """Compute (alt, az, distance) relative to the observer's horizon
-
-        The altitude returned is an :class:`~skyfield.units.Angle`
-        measured in degrees above the horizon, while the azimuth
-        :class:`~skyfield.units.Angle` measures east along the horizon
-        from geographic north (so 0 degrees means north, 90 is east, 180
-        is south, and 270 is west).
-
-        By default, Skyfield does not adjust the altitude for
-        atmospheric refraction.  If you want Skyfield to estimate how
-        high the atmosphere might lift the body's image, give the
-        argument ``temperature_C`` either the temperature in degrees
-        centigrade, or the string ``'standard'`` (in which case 10°C is
-        used).
-
-        When calculating refraction, Skyfield uses the observer’s
-        elevation above sea level to estimate the atmospheric pressure.
-        If you want to override that value, simply provide a number
-        through the ``pressure_mbar`` parameter.
-
-        """
-        return _to_altaz(self, temperature_C, pressure_mbar)
-
 
 class Barycentric(ICRF):
     """An |xyz| position measured from the Solar System barycenter.
@@ -730,6 +727,12 @@ class Astrometric(ICRF):
     call ``.apparent()`` to generate an :class:`Apparent` position.
 
     """
+    def altaz(self):
+        raise ValueError(
+            'it is not useful to call .altaz() on an astrometric position;'
+            ' try calling .apparent() first to get an apparent position'
+        )
+
     def apparent(self):
         """Compute an :class:`Apparent` position for this body.
 
@@ -824,30 +827,6 @@ class Apparent(ICRF):
       equator and equinox of date.
 
     """
-    def altaz(self, temperature_C=None, pressure_mbar='standard'):
-        """Compute (alt, az, distance) relative to the observer's horizon
-
-        The altitude returned is an :class:`~skyfield.units.Angle`
-        measured in degrees above the horizon, while the azimuth
-        :class:`~skyfield.units.Angle` measures east along the horizon
-        from geographic north (so 0 degrees means north, 90 is east, 180
-        is south, and 270 is west).
-
-        By default, Skyfield does not adjust the altitude for
-        atmospheric refraction.  If you want Skyfield to estimate how
-        high the atmosphere might lift the body's image, give the
-        argument ``temperature_C`` either the temperature in degrees
-        centigrade, or the string ``'standard'`` (in which case 10°C is
-        used).
-
-        When calculating refraction, Skyfield uses the observer’s
-        elevation above sea level to estimate the atmospheric pressure.
-        If you want to override that value, simply provide a number
-        through the ``pressure_mbar`` parameter.
-
-        """
-        return _to_altaz(self, temperature_C, pressure_mbar)
-
 
 class Geocentric(ICRF):
     """An |xyz| position measured from the center of the Earth.
