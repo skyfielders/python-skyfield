@@ -160,6 +160,9 @@ Sprint Possibilities
   geocentric objects work.  Was the old behavior documented?  (Not that
   I can find!)
 
+* Should the `.target` string of `_KeplerOrbit` become `.target_name`
+  instead?
+
 Adding more smarts to ephemeris handling
 ========================================
 
