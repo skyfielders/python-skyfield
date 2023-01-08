@@ -43,7 +43,7 @@ with load.open(hipparcos.URL) as f:
 # ends.
 
 url = ('https://raw.githubusercontent.com/Stellarium/stellarium/master'
-       '/skycultures/western_SnT/constellationship.fab')
+       '/skycultures/modern_st/constellationship.fab')
 
 with load.open(url) as f:
     constellations = stellarium.parse_constellations(f)
