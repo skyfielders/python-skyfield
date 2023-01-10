@@ -144,7 +144,7 @@ def test_two_sats():
 def test_many_sats():
     print("test many sats")
     ts = load.timescale(builtin=True)
-    active_sats = load.tle_file("https://celestrak.com/NORAD/elements/active.txt", reload=False)
+    active_sats = load.tle_file("https://celestrak.org/NORAD/elements/active.txt", reload=False)
     print(" active satellites:", len(active_sats), " x 300 time values")
     trange = range(0, 300, 1)
     times = ts.utc(2020, 8, 25, 12, 0, trange)

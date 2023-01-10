@@ -12,7 +12,7 @@ But there several limitations to be aware of
 when using Skyfield to generate positions
 for artificial satellites in Earth orbit:
 
-.. _Celestrak: https://celestrak.com/
+.. _Celestrak: https://celestrak.org/
 
 1. Do not expect perfect agreement between
    any two pieces of software that are trying to predict
@@ -66,7 +66,7 @@ for artificial satellites in Earth orbit:
    several times in a row.
 
 .. _Revisiting Spacetrack Report #3:
-    https://celestrak.com/publications/AIAA/2006-6753/
+    https://celestrak.org/publications/AIAA/2006-6753/
 
 Note that even though TLE elements have names
 like *inclination* and *eccentricity*
@@ -81,7 +81,7 @@ Loading a TLE file
 ------------------
 
 You can find satellite element sets at the
-`NORAD Two-Line Element Sets <http://celestrak.com/NORAD/elements/>`_
+`NORAD Two-Line Element Sets <http://celestrak.org/NORAD/elements/>`_
 page of the Celestrak web site.
 
 Beware that the two-line element (TLE) format is very rigid.
@@ -109,7 +109,7 @@ which is listed in Celestrak’s ``stations.txt`` file:
 
     from skyfield.api import load, wgs84
 
-    stations_url = 'http://celestrak.com/NORAD/elements/stations.txt'
+    stations_url = 'http://celestrak.org/NORAD/elements/stations.txt'
     satellites = load.tle_file(stations_url)
     print('Loaded', len(satellites), 'satellites')
 
@@ -179,7 +179,7 @@ saving the result to a file specific to the query:
 .. testcode::
 
     n = 25544
-    url = 'https://celestrak.com/satcat/tle.php?CATNR={}'.format(n)
+    url = 'https://celestrak.org/satcat/tle.php?CATNR={}'.format(n)
     filename = 'tle-CATNR-{}.txt'.format(n)
     satellites = load.tle_file(url, filename=filename)
     print(satellites)

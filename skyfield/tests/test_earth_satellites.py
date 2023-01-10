@@ -50,7 +50,7 @@ def test_iss_against_horizons():
     assert abs(p.velocity.au_per_d - hv).max() < three_km_per_hour
 
 # The following tests are based on the text of
-# http://www.celestrak.com/publications/AIAA/2006-6753/AIAA-2006-6753-Rev2.pdf
+# http://www.celestrak.org/publications/AIAA/2006-6753/AIAA-2006-6753-Rev2.pdf
 
 appendix_c_example = """\
 TEME EXAMPLE
@@ -68,7 +68,7 @@ seconds_per_day = 86400.0
 # "Revisiting Spacetrack Report #3" AIAA 2006-6753 (earlier versions of
 # the PDF use different numbers):
 #
-# http://ww.celestrak.com/publications/AIAA/2006-6753/AIAA-2006-6753-Rev2.pdf
+# http://www.celestrak.org/publications/AIAA/2006-6753/AIAA-2006-6753-Rev2.pdf
 
 def test_appendix_c_conversion_from_TEME_to_ITRF():
     rTEME = array([5094.18016210, 6127.64465950, 6380.34453270])
@@ -126,7 +126,7 @@ def test_appendix_c_satellite():
     assert abs(-3.157345433 - vTEME[2]) < epsilon
 
 def test_epoch_date():
-    # Example from https://celestrak.com/columns/v04n03/
+    # Example from https://celestrak.org/columns/v04n03/
     s = appendix_c_example.replace('00179.78495062', '98001.00000000')
     lines = s.splitlines()
     sat = EarthSatellite(lines[1], lines[2], lines[0])

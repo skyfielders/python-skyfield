@@ -11,7 +11,7 @@ Sprint Possibilities
 ====================
 
 * Somewhere the Skyfield docs should mention this URL:
-  https://celestrak.com/NORAD/elements/active.txt
+  https://celestrak.org/NORAD/elements/active.txt
 
 * If a user builds a ``wgs84.latlon()``, and then calls its ``at()`` to
   get a position, and then tries to use it to ``observe()``, then they

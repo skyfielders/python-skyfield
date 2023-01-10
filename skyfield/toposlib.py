@@ -132,7 +132,7 @@ class Geoid(object):
 
     The math for turning a position into latitude and longitude is based
     on Dr. T.S. Kelso's quite helpful article `Orbital Coordinate
-    Systems, Part III <https://www.celestrak.com/columns/v02n03/>`_.
+    Systems, Part III <https://www.celestrak.org/columns/v02n03/>`_.
 
     """
     def __init__(self, name, radius_m, inverse_flattening):
