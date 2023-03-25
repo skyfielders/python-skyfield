@@ -4,7 +4,7 @@ from numpy import abs, arange, sqrt
 from skyfield import constants
 from skyfield.api import Distance, load, wgs84, wms
 from skyfield.functions import length_of
-from skyfield.positionlib import Apparent, Barycentric
+from skyfield.positionlib import Apparent, Barycentric, ICRF
 from skyfield.toposlib import ITRSPosition, iers2010
 
 angle = (-15, 15, 35, 45)
@@ -262,3 +262,74 @@ def test_deprecated_position_subpoint_method(ts, angle):
     error_degrees = abs(b.longitude.degrees - angle)
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
     assert error_mas < 0.1
+
+def test_intersection_from_pole(ts):
+    t = ts.utc(2018, 1, 19, 14, 37, 55)
+    p = wgs84.latlon(90.0, 0.0, 1234.0).at(t)
+    attitude = -p.xyz.au / length_of(p.xyz.au)
+    earth_point = wgs84.intersection_of(p, attitude)
+
+    error_degrees = abs(earth_point.latitude.degrees - 90.0)
+    error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
+    assert error_mas < 0.1
+
+def test_intersection_from_equator(ts):
+    t = ts.utc(2018, 1, 19, 14, 37, 55)
+    p = wgs84.latlon(0.0, 0.0, 1234.0).at(t)
+    attitude = -p.xyz.au / length_of(p.xyz.au)
+    earth_point = wgs84.intersection_of(p, attitude)
+
+    error_degrees = abs(earth_point.latitude.degrees - 0.0)
+    error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
+    assert error_mas < 0.1
+
+    error_degrees = abs(earth_point.longitude.degrees - 0.0)
+    error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
+    assert error_mas < 0.1
+
+def test_limb_intersection_points(ts):
+    t = ts.utc(2018, 1, 19, 14, 37, 55)
+    d = 100.0
+    a = wgs84.radius.au
+    c = a * (1.0 - 1.0 / wgs84.inverse_flattening)
+
+    # Attitude vectors pointing to the polar and equatorial limbs of the Earth
+    attitude_bottom_tangent = [-d, 0.0, -c] / sqrt(d**2 + c**2)
+    attitude_top_tangent = [-d, 0.0, c] / sqrt(d**2 + c**2)
+    attitude_left_tangent = [-d, -a, 0.0] / sqrt(d**2 + c**2)
+    attitude_right_tangent = [-d, a, 0.0] / np.sqrt(d**2 + c**2)
+    # Attitude vector pointing straight down
+    attitude_zenith = [-1.0, 0.0, 0.0]
+
+    pos = ICRF(position_au=[d, 0.0, 0.0], t=t, center=399)
+
+    intersection_bottom = wgs84.intersection_of(pos, attitude_bottom_tangent)
+    intersection_top = wgs84.intersection_of(pos, attitude_top_tangent)
+    intersection_left = wgs84.intersection_of(pos, attitude_left_tangent)
+    intersection_right = wgs84.intersection_of(pos, attitude_right_tangent)
+    intersection_zenith = wgs84.intersection_of(pos, attitude_zenith)
+
+    # Viewed from sufficient distance, points of intersection should be nearly
+    # tangent to the north and south poles, and the zenith longitude +/- 90.0
+    zenith_lon = intersection_zenith.longitude.degrees
+    left_limb_lon = zenith_lon - 90.0
+    right_limb_lon = zenith_lon + 90.0
+
+    error_degrees = abs(intersection_bottom.latitude.degrees + 90.0)
+    assert error_degrees < 0.1
+
+    error_degrees = abs(intersection_top.latitude.degrees - 90.0)
+    assert error_degrees < 0.1
+
+    error_degrees = abs(intersection_left.latitude.degrees - 0.0)
+    assert error_degrees < 0.1
+
+    error_degrees = abs(intersection_left.longitude.degrees - left_limb_lon)
+    assert error_degrees < 0.1
+
+    error_degrees = abs(intersection_right.latitude.degrees - 0.0)
+    assert error_degrees < 0.1
+
+    error_degrees = abs(intersection_right.longitude.degrees - right_limb_lon)
+    assert error_degrees < 0.1
+

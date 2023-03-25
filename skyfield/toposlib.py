@@ -5,8 +5,9 @@ from .constants import ANGVEL, DAY_S, RAD2DEG, T0, pi, tau
 from .earthlib import refract
 from .framelib import itrs
 from .functions import (
-    _T, angular_velocity_matrix, mxm, mxv, rot_y, rot_z,
+    _T, angular_velocity_matrix, dots, length_of, mxm, mxv, rot_y, rot_z,
 )
+from .positionlib import ICRF, Geocentric
 from .descriptorlib import reify
 from .units import Angle, Distance, _ltude
 from .vectorlib import VectorFunction
@@ -275,6 +276,76 @@ class Geoid(object):
         return xyz_au, x, y, R, aC, hyp, lat
 
     subpoint = geographic_position_of  # deprecated method name
+
+    def intersection_of(self, position, direction):
+        """Return the surface point intersected by a vector.
+
+        The position must be provided in ICRF coordinates with a ``.center`` of
+        399, the center of the Earth. Returns a `GeographicPosition` giving the
+        geodetic ``latitude`` and ``longitude`` at the point that the ray
+        intersects the surface of the Earth.
+
+        The main calculation implemented here is based on JPL's NAIF toolkit;
+        https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/ellipses.html
+        """
+        if not isinstance(position, ICRF):
+            raise ValueError(
+                'you can only calculate an intersection for a vector that is'
+                ' defined by coordinates along the ICRF axes'
+            )
+        if position.center != 399:
+            raise ValueError(
+                'you can only calculate an intersection for a vector that is'
+                ' defined relative to a position that is geocentric'
+                ' (center=399), but this position has a center of {0}'
+                .format(position.center)
+            )
+        if position.t is None:
+            raise ValueError(
+                'you can only calculate an intersection for a vector that is'
+                ' defined at a fixed point in time (must have a non-null `.t`)'
+            )
+
+        # Define a distortion matrix to map the ellipsoid into a unit sphere
+        a = self.radius.au
+        c = a * (1.0 - 1.0 / self.inverse_flattening)
+        d_matrix = array(
+            [[1.0 / a, 0.0, 0.0], [0.0, 1.0 / a, 0.0], [0.0, 0.0, 1.0 / c]]
+            )
+        inv_d_matrix = array([[a, 0.0, 0.0], [0.0, a, 0.0], [0.0, 0.0, c]])
+
+        # Apply distortion matrix to the vector
+        position_xyz = position.xyz.au
+        d_position_xyz = mxv(d_matrix, position_xyz)
+        d_direction = mxv(d_matrix, direction)
+        # Rescale the vector to unit length
+        d_direction = d_direction / length_of(d_direction)
+
+        # The disciminant indicates the number of solutions (intersections)
+        discriminant = dots(d_direction, d_position_xyz) ** 2 - (
+            length_of(d_position_xyz) ** 2 - 1.0
+        )
+        if discriminant < 0:
+            raise ValueError(
+                "The viewing angle does not intersect with the ellipsoid."
+                )
+        # There will be another solution with `+ np.sqrt(discrimant)` (the
+        # intersection as the ray exits the opposite side of the ellipsoid),
+        # but we only need the solution on the near side.
+        distance = -dots(d_direction, d_position_xyz) - sqrt(discriminant)
+
+        # Solve for the location of intersection
+        d_intersection = d_position_xyz + distance * d_direction
+
+        # Apply inverse distortion and convert back to geocentric coords
+        intersection = Geocentric(
+            mxv(inv_d_matrix, d_intersection), t=position.t
+            )
+
+        # Retrieve latitude and longitude
+        intersection_latlon = self.geographic_position_of(intersection)
+
+        return intersection_latlon
 
 wgs84 = Geoid('WGS84', 6378137.0, 298.257223563)
 iers2010 = Geoid('IERS2010', 6378136.6, 298.25642)
