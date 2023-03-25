@@ -280,11 +280,13 @@ class Geoid(object):
     def intersection_of(self, position, direction):
         """Return the surface point intersected by a vector.
 
-        The position must be provided in ICRF coordinates with a ``.center`` of
-        399, the center of the Earth. Returns a `GeographicPosition` giving the
-        geodetic ``latitude`` and ``longitude`` at the point that the ray
-        intersects the surface of the Earth.
-
+        The ``position`` and ``direction`` describe the tail and orientation
+        of the vector to intersect the ellipsoid, respectively. The vector must
+        be provided in ICRF coordinates with a ``.center``` of 399, the center
+        of the Earth. The direction should be an |xyz| unit vector. Returns a
+        `GeographicPosition` giving the geodetic ``latitude`` and ``longitude``
+        at the point that the ray intersects the surface of the Earth.
+    
         The main calculation implemented here is based on JPL's NAIF toolkit;
         https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/ellipses.html
         """
