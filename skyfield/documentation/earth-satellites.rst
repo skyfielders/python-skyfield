@@ -576,11 +576,11 @@ anti-aligned with the position vector:
 .. testcode::
 
     neg_position = -geocentric.position.au / length_of(geocentric.position.au)
-    print(negative_position)
+    print(neg_position)
 
 .. testoutput::
 
-    [-0.57745914 -0.2781511   0.76757599]
+    [0.57745914  0.2781511  -0.76757599]
 
 Now, to find the intersection of this vector with the Earth’s surface we can
 use the :meth:`~skyfield.toposlib.Geoid.intersection_of()` method:
@@ -593,8 +593,8 @@ use the :meth:`~skyfield.toposlib.Geoid.intersection_of()` method:
 
 .. testoutput::
 
-    Longitude: -86deg 23' 23.3"
     Latitude: 50deg 15' 19.6"
+    Longitude: -86deg 23' 23.3"
 
 
 Find a satellite’s range rate
