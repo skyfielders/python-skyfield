@@ -540,6 +540,63 @@ or else in the dynamical coordinate system of the date you specify.
 
 See :doc:`positions` to learn more about these possibilities.
 
+Where on Earth is a satellite looking?
+-----------------------------------------
+
+Rather than knowing where to look to observe a satellite in the sky, you might
+be interested in doing the reverse; finding the geographic location on Earth
+that a satellite would be observing for a given viewing geometry. To do this,
+you can define an attitude vector for the satellite position, and then use
+a :data:`~skyfield.toposlib.wgs84` intersection method to find the surface
+position in the line-of-sight:
+
+* :meth:`~skyfield.toposlib.Geoid.intersection_of()`
+
+For example, first contruct an inertial :data:`~skyfield.framelib.LVLH` frame
+for the satellite position, then use the frame to define an attitude vector:
+
+.. testcode::
+
+    from skyfield.framelib import LVLH
+
+    satellite_lvlh = LVLH(geocentric)
+    attitude = satellite_lvlh.icrf_looking_vector(pitch=0.0, roll=0.0)
+    print('Frame:', satellite_lvlh)
+    print('Attitude:', attitude)
+
+.. testoutput::
+
+    Frame: <skyfield.framelib.LVLH object at 0x7fd11ab18790>
+    Attitude: [ 0.57745914  0.2781511  -0.76757599]
+
+In this case we have set the pitch and roll to zero, so the attitude vector
+is pointing toward the center of mass of the Earth, i.e., a unit vector
+anti-aligned with the position vector:
+
+.. testcode::
+
+    neg_position = -geocentric.position.au / length_of(geocentric.position.au)
+    print(negative_position)
+
+.. testoutput::
+
+    [-0.57745914 -0.2781511   0.76757599]
+
+Now, to find the intersection of this vector with the Earth’s surface we can
+use the :meth:`~skyfield.toposlib.Geoid.intersection_of()` method:
+
+.. testcode::
+
+    intersection = wgs84.intersection_of(geocentric, attitude)
+    print('Latitude:', intersection.latitude)
+    print('Longitude:', intersection.longitude)
+
+.. testoutput::
+
+    Longitude: -86deg 23' 23.3"
+    Latitude: 50deg 15' 19.6"
+
+
 Find a satellite’s range rate
 -----------------------------
 
