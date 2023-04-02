@@ -272,6 +272,7 @@ def test_intersection_from_pole(ts):
     error_degrees = abs(earth_point.latitude.degrees - 90.0)
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
     assert error_mas < 0.1
+    assert earth_point.elevation.m < 0.1
 
 def test_intersection_from_equator(ts):
     t = ts.utc(2018, 1, 19, 14, 37, 55)
@@ -286,6 +287,7 @@ def test_intersection_from_equator(ts):
     error_degrees = abs(earth_point.longitude.degrees - 0.0)
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
     assert error_mas < 0.1
+    assert earth_point.elevation.m < 0.1
 
 def test_limb_intersection_points(ts):
     t = ts.utc(2018, 1, 19, 14, 37, 55)
@@ -297,7 +299,7 @@ def test_limb_intersection_points(ts):
     attitude_bottom_tangent = [-d, 0.0, -c] / sqrt(d**2 + c**2)
     attitude_top_tangent = [-d, 0.0, c] / sqrt(d**2 + c**2)
     attitude_left_tangent = [-d, -a, 0.0] / sqrt(d**2 + c**2)
-    attitude_right_tangent = [-d, a, 0.0] / np.sqrt(d**2 + c**2)
+    attitude_right_tangent = [-d, a, 0.0] / sqrt(d**2 + c**2)
     # Attitude vector pointing straight down
     attitude_zenith = [-1.0, 0.0, 0.0]
 
@@ -317,19 +319,23 @@ def test_limb_intersection_points(ts):
 
     error_degrees = abs(intersection_bottom.latitude.degrees + 90.0)
     assert error_degrees < 0.1
+    assert intersection_bottom.elevation.m < 0.1
 
     error_degrees = abs(intersection_top.latitude.degrees - 90.0)
     assert error_degrees < 0.1
+    assert intersection_top.elevation.m < 0.1
 
     error_degrees = abs(intersection_left.latitude.degrees - 0.0)
     assert error_degrees < 0.1
 
     error_degrees = abs(intersection_left.longitude.degrees - left_limb_lon)
     assert error_degrees < 0.1
+    assert intersection_left.elevation.m < 0.1
 
     error_degrees = abs(intersection_right.latitude.degrees - 0.0)
     assert error_degrees < 0.1
 
     error_degrees = abs(intersection_right.longitude.degrees - right_limb_lon)
     assert error_degrees < 0.1
+    assert intersection_right.elevation.m < 0.1
 
