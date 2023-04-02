@@ -24,6 +24,7 @@ from .nutationlib import (
 )
 from .precessionlib import compute_precession
 
+_EMPTY_TUPLE = ()  # since we use the value as a sentinel
 DAY_US = 86400000000.0
 GREGORIAN_START = 2299161
 GREGORIAN_START_ENGLAND = 2361222
@@ -414,10 +415,13 @@ class Time(object):
         self.ts = ts
         self.whole = tt
         self.tt_fraction = tt_fraction
-        self.shape = getattr(tt, 'shape', ())
+        self.shape = getattr(tt, 'shape', _EMPTY_TUPLE)
 
     def __len__(self):
-        return self.shape[0]
+        shape = self.shape
+        if shape is _EMPTY_TUPLE:
+            raise TypeError('this is a single Time, not an array')
+        return shape[0]
 
     def __repr__(self):
         size = getattr(self.tt, 'size', -1)
@@ -429,9 +433,9 @@ class Time(object):
                     .replace('[ ', '[').replace('  ', ' '))
 
     def __getitem__(self, index):
+        if self.shape is _EMPTY_TUPLE:
+            raise TypeError('this is a single Time, not an array')
         # TODO: also copy cached matrices?
-        # TODO: raise non-IndexError exception if this Time is not an array;
-        # otherwise, a `for` loop over it will not raise an error.
         t = Time(self.ts, self.whole[index], self.tt_fraction[index])
         d = self.__dict__
         for name in 'tai_fraction', 'tdb_fraction', 'ut1_fraction':

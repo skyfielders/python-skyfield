@@ -135,6 +135,16 @@ def test_days_overflow_correctly(ts):
         '2020-10-02', '2020-11-01', '2020-12-02', '2021-01-01',
     ]
 
+def test_sequence_behaviors_of_time_that_is_not_array(ts):
+    t = ts.utc(2023, 4, 2)
+    with assert_raises(TypeError):
+        for item in t:
+            pass
+    # The specific exception TypeError in the following case makes
+    # Pandas inference.is_sequence() happy.
+    with assert_raises(TypeError):
+        len(t)
+
 def test_time_can_be_indexed(ts):
     for t in all_kinds_of_time_array(ts):
         t[0]
