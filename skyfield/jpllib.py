@@ -218,8 +218,7 @@ class ChebyshevPosition(SPICESegment):
             position, velocity = segment.compute_and_differentiate(
                 t.whole, t.tdb_fraction)
         except OutOfRangeError as e:
-            start_time = t.ts.tdb(jd=segment.start_jd)
-            end_time = t.ts.tdb(jd=segment.end_jd)
+            start_time, end_time = self.time_range(t.ts)
             s = '%04d-%02d-%02d' % start_time.tdb_calendar()[:3]
             t = '%04d-%02d-%02d' % end_time.tdb_calendar()[:3]
             text = 'ephemeris segment only covers dates %s through %s' % (s, t)
