@@ -220,9 +220,9 @@ class ChebyshevPosition(SPICESegment):
         except OutOfRangeError as e:
             start_time = t.ts.tdb(jd=segment.start_jd)
             end_time = t.ts.tdb(jd=segment.end_jd)
-            # TODO: switch to calendar dates in TDB to produce round numbers?
-            text = ('ephemeris segment only covers dates %s through %s UT'
-                    % (start_time.utc_iso(' '), end_time.utc_iso(' ')))
+            text = ('ephemeris segment only covers dates %s through %s'
+                    % (start_time.tdb_strftime('%Y-%m-%d'),
+                       end_time.tdb_strftime('%Y-%m-%d')))
             mask = e.out_of_range_times
             segment = self.spk_segment
             e = EphemerisRangeError(text, start_time, end_time, mask, segment)

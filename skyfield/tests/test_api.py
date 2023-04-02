@@ -45,8 +45,7 @@ def test_ephemeris_contains_method(ts):
 def test_exception_raised_for_dates_outside_ephemeris(ts):
     eph = api.load('de421.bsp')
     message = (
-        'ephemeris segment only covers dates 1899-07-28 23:59:18Z'
-        ' through 2053-10-08 23:58:51Z UT'
+        'ephemeris segment only covers dates 1899-07-29 through 2053-10-09'
     )
     with assert_raises(EphemerisRangeError, message) as a:
         eph['earth'].at(ts.tt(4096))
