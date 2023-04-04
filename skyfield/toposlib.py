@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from numpy import arctan2, array, array2string, cos, exp, sin, sqrt
+from numpy import (
+    arctan2, array, array2string, asarray, cos, exp, float64, sin, sqrt
+)
+
 from .constants import ANGVEL, DAY_S, RAD2DEG, T0, pi, tau
 from .earthlib import refract
 from .framelib import itrs
@@ -143,6 +146,7 @@ class Geoid(object):
         self._one_minus_flattening_squared = omf * omf
         f = 1.0 / inverse_flattening
         self._e2 = 2.0*f - f*f
+        self.semi_minor_axis = Distance(m=radius_m * (1.0 - f))
 
     def latlon(self, latitude_degrees, longitude_degrees, elevation_m=0.0,
                cls=GeographicPosition):
@@ -210,8 +214,17 @@ class Geoid(object):
 
         """
         xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
-        height_au = R / cos(lat) - aC
+        height_au = self._compute_height(R, lat, aC, xyz_au)
         return Distance(height_au)
+
+    def _compute_height(self, R, lat, aC, xyz_au):
+        height_au = asarray(R)
+        near_pole = height_au <= 1.e-12
+        if near_pole.any():
+            height_au[near_pole] = abs(xyz_au[2]) - self.semi_minor_axis.au
+        else:
+            height_au[~near_pole] = R / cos(lat) - aC
+        return float64(height_au)
 
     def geographic_position_of(self, position):
         """Return the `GeographicPosition` of a ``position``.
@@ -224,7 +237,7 @@ class Geoid(object):
         """
         xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
         lon = (arctan2(y, x) - pi) % tau - pi
-        height_au = R / cos(lat) - aC
+        height_au = self._compute_height(R, lat, aC, xyz_au)
         return GeographicPosition(
             latitude=Angle(radians=lat),
             longitude=Angle(radians=lon),
