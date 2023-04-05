@@ -183,8 +183,8 @@ class Geoid(object):
         # At the pole: 6399 km, the Earth's radius of curvature at the pole.
         radius_xy = radius_au * c + elevation_au
         xy = radius_xy * cosphi
-        x = xy * sin(lon)
-        y = xy * cos(lon)
+        x = xy * cos(lon)
+        y = xy * sin(lon)
 
         # At equator: 6335 km, the Earth's radius of curvature at the equator.
         # At the pole: 6357 km, the Earth's actual radius at the pole.
