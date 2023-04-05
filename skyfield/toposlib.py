@@ -179,14 +179,19 @@ class Geoid(object):
         c = 1.0 / sqrt(cosphi * cosphi + sinphi * sinphi * omf2)
         s = omf2 * c
 
-        ach = radius_au * c + elevation_au
-        ash = radius_au * s + elevation_au
+        # At equator: 6378 km, the Earth's actual radius at the equator.
+        # At the pole: 6399 km, the Earth's radius of curvature at the pole.
+        radius_xy = radius_au * c + elevation_au
+        xy = radius_xy * cosphi
+        x = xy * sin(lon)
+        y = xy * cos(lon)
 
-        ac = ach * cosphi
-        acsst = ac * sin(lon)
-        accst = ac * cos(lon)
-        r = array((accst, acsst, ash * sinphi))
+        # At equator: 6335 km, the Earth's radius of curvature at the equator.
+        # At the pole: 6357 km, the Earth's actual radius at the pole.
+        radius_z = radius_au * s + elevation_au
+        z = radius_z * sinphi
 
+        r = array((x, y, z))
         return cls(self, latitude, longitude, elevation, Distance(r))
 
     def latlon_of(self, position):
