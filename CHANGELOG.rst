@@ -5,6 +5,13 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+v1.46 — 2022 April ?
+--------------------
+
+* Bugfix: Skyfield was giving values several kilometers off when
+  computing the elevation above ground level of a target directly above
+  the Earth’s north or south pole.
+
 v1.45 — 2022 September 15
 -------------------------
 

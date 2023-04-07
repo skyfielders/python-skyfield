@@ -181,6 +181,18 @@ def test_wgs84_subpoint(ts, angle):
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
     assert error_mas < 0.1
 
+def test_wgs84_subpoint_at_pole(ts):
+    # The `height` previously suffered from very low precision at the pole.
+    t = ts.utc(2023, 4, 7, 12, 44)
+    p = wgs84.latlon(90, 0, elevation_m=10.0).at(t)
+    micrometer = 1e-6
+
+    h = wgs84.height_of(p)
+    assert abs(h.m - 10.0) < micrometer
+
+    g = wgs84.geographic_position_of(p)
+    assert abs(g.elevation.m - 10.0) < micrometer
+
 def test_wgs84_round_trip_with_polar_motion(ts, angle):
     t = ts.utc(2018, 1, 19, 14, 37, 55)
     ts.polar_motion_table = [0.0], [0.003483], [0.358609]

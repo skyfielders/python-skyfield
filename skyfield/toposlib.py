@@ -181,15 +181,15 @@ class Geoid(object):
 
         # At equator: 6378 km, the Earth's actual radius at the equator.
         # At the pole: 6399 km, the Earth's radius of curvature at the pole.
-        radius_xy = radius_au * c + elevation_au
-        xy = radius_xy * cosphi
+        radius_xy = radius_au * c
+        xy = (radius_xy + elevation_au) * cosphi
         x = xy * cos(lon)
         y = xy * sin(lon)
 
         # At equator: 6335 km, the Earth's radius of curvature at the equator.
         # At the pole: 6357 km, the Earth's actual radius at the pole.
-        radius_z = radius_au * s + elevation_au
-        z = radius_z * sinphi
+        radius_z = radius_au * s
+        z = (radius_z + elevation_au) * sinphi
 
         r = array((x, y, z))
         return cls(self, latitude, longitude, elevation, Distance(r))
@@ -202,7 +202,7 @@ class Geoid(object):
         :class:`~skyfield.units.Angle` objects.
 
         """
-        xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
+        xyz_au, x, y, R, aC, hyp, lat = self._compute_latitude(position)
         lon = (arctan2(y, x) - pi) % tau - pi
         return Angle(radians=lat), Angle(radians=lon)
 
@@ -214,8 +214,8 @@ class Geoid(object):
         position’s geodetic height above the Earth’s surface.
 
         """
-        xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
-        height_au = R / cos(lat) - aC
+        xyz_au, x, y, R, aC, hyp, lat = self._compute_latitude(position)
+        height_au = sqrt(hyp * hyp + R * R) - aC
         return Distance(height_au)
 
     def geographic_position_of(self, position):
@@ -227,9 +227,9 @@ class Geoid(object):
         above or below the surface of the ellipsoid.
 
         """
-        xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
+        xyz_au, x, y, R, aC, hyp, lat = self._compute_latitude(position)
         lon = (arctan2(y, x) - pi) % tau - pi
-        height_au = R / cos(lat) - aC
+        height_au = sqrt(hyp * hyp + R * R) - aC
         return GeographicPosition(
             latitude=Angle(radians=lat),
             longitude=Angle(radians=lon),
@@ -247,7 +247,7 @@ class Geoid(object):
         and an ``elevation`` above the ellipsoid of zero.
 
         """
-        xyz_au, x, y, aC, R, lat = self._compute_latitude(position)
+        xyz_au, x, y, R, aC, hyp, lat = self._compute_latitude(position)
         lon = (arctan2(y, x) - pi) % tau - pi
         return self.latlon(lat * RAD2DEG, lon * RAD2DEG)
 
@@ -267,9 +267,12 @@ class Geoid(object):
         for iteration in 0,1,2:
             sin_lat = sin(lat)
             e2_sin_lat = e2 * sin_lat
+            # At 0°, aC = 6378 km, Earth's actual radius at the equator.
+            # At 90°, aC = 6399 km, Earth's radius of curvature at the pole.
             aC = a / sqrt(1.0 - e2_sin_lat * sin_lat)
-            lat = arctan2(z + aC * e2_sin_lat, R)
-        return xyz_au, x, y, aC, R, lat
+            hyp = z + aC * e2_sin_lat
+            lat = arctan2(hyp, R)
+        return xyz_au, x, y, R, aC, hyp, lat
 
     subpoint = geographic_position_of  # deprecated method name
 
