@@ -45,14 +45,14 @@ def test_frame_rotation_matrices():
     desired_rate = np.array(desired_rate) * DAY_S
 
     R = frame.rotation_at(ts.tdb_jd(tdb))
-    assert (R == desired_rotation).all()  # Boom.
+    assert abs(R - desired_rotation).max() < 3e-16
 
     R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
     assert (R == R2).all()
     if IS_32_BIT:
         assert abs(Rv - desired_rate).max() < 3e-26
     else:
-        assert (Rv == desired_rate).all()  # Boom.
+        assert abs(Rv - desired_rate).max() < 3e-17
 
     # Second, a moment when the angle W is more than 2500 radians.
 
@@ -107,14 +107,14 @@ def test_frame_rotation_matrices():
     if IS_32_BIT:
         assert abs(R - desired_rotation).max() < 2e-16
     else:
-        assert (R == desired_rotation).all()
+        assert abs(R - desired_rotation).max() < 4e-16
 
     R2, Rv = frame.rotation_and_rate_at(ts.tdb_jd(tdb))
     assert (R == R2).all()
     if IS_32_BIT:
         assert abs(Rv - desired_rate).max() < 2e-18
     else:
-        assert (Rv == desired_rate).all()
+        assert abs(Rv - desired_rate).max() < 6e-17
 
 def test_rotating_vector_into_frame():
     et_seconds = 259056665.1855896

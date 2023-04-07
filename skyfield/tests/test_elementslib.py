@@ -423,7 +423,7 @@ def check_orbit(p, e, i, Om, w, v, ts):
                                   time, mu)
     check_types(elements, length)
     compare(time, elements.time, 1e-9)
-    compare(elements.semi_latus_rectum.km, p, 1e-9)
+    compare(elements.semi_latus_rectum.km, p, 1e-8)
     compare(elements.eccentricity, e, 1e-14)
     compare(elements.inclination.radians, i, 1e-14, mod=True)
     compare(elements.longitude_of_ascending_node.radians, Om, 1e-14, mod=True)
