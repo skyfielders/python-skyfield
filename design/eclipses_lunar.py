@@ -43,26 +43,27 @@ problems = Counter()
 i = 0
 
 for ti, yi in zip(t, y):
+    letter2 = 'NPT'[yi]
     t5, letter = table[i]
     diff = (ti.utc_datetime() - t5.utc_datetime()).total_seconds()
     if diff < -100.0:
         problems['Extra'] += 1
-        print('SKIPPING eclipse we found but is not in their list')
+        print(ti.tt_strftime(), yi, 'EXTRA:not in catalog', letter2)
         continue
-    i += 1
     while diff > 100.0:
         problems['Missing'] += 1
-        print('MISSING eclipse!')
-        t5, letter = table[i]
+        print(' ' * len(t5.tt_strftime()), '-', t5.tt_strftime(), letter,
+              'MISSING eclipse!')
         i += 1
+        t5, letter = table[i]
         diff = (ti.utc_datetime() - t5.utc_datetime()).total_seconds()
     max_diff = max(max_diff, abs(diff))
     total_diff += abs(diff)
-    letter2 = 'NPT'[yi]
     judge = '' if letter == letter2 else f'their {letter} != our {letter2}'
     if judge:
         problems['Mismatch'] += 1
     print(ti.tt_strftime(), yi, t5.tt_strftime(), letter, diff, judge)
+    i += 1
 
 print('Largest difference in time of an eclipse (seconds):', max_diff)
 print('Total difference in seconds between eclipse times:', total_diff)
