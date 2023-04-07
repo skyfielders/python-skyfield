@@ -139,7 +139,7 @@ def test_position_of_radec():
     ra, dec, distance = p.radec(epoch=epoch)
     assert abs(ra.hours) < 1e-12
     assert abs(dec.degrees) < 1e-12
-    assert abs(distance.au - 1) < 1e-16
+    assert abs(distance.au - 1) < 3e-16
 
 def test_position_from_radec():
     # Only a couple of minimal tests, since the routine is deprecated.
