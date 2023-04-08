@@ -410,6 +410,8 @@ of the sea-level point beneath a given celestial object.
     from skyfield.positionlib import ICRS
     position = ICRS.from_time_and_frame_vectors(t, itrs, xyz, None)
 
+.. _ecliptic-coordinates:
+
 Ecliptic coordinates
 ====================
 

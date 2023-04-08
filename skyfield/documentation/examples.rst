@@ -274,6 +274,116 @@ This example can serve as a template for many other kinds of custom search:
     2020-08-13 00:14:12 UTC  45.8° west elongation
     2021-10-29 20:51:56 UTC  47.0° east elongation
 
+Are planets separated by 0° at conjunction and 180° at opposition?
+==================================================================
+
+It surprises many newcomers to astronomy
+that the angular separation between two planets
+never drops all the way to 0° at conjunction
+nor increases all the way to a full 180° at opposition.
+The reason is that the planets will still have at least a slight
+lingering difference in latitude,
+even when their longitudes have brought them together
+or have placed them opposite each other in the sky.
+
+We can take as an example
+the date and time of the conjunction between Mars and the Sun
+computed in the :ref:`oppositions-conjunctions` section of the Almanac page.
+How close are they in the sky at that moment?
+The :func:`~skyfield.positionlib.ICRF.separation_from()` method
+measures raw angular distance
+between any two points in the sky:
+
+.. testcode::
+
+    from skyfield.api import load
+    from skyfield.framelib import ecliptic_frame
+
+    ts = load.timescale()
+    eph = load('de421.bsp')
+    sun, mars = eph['sun'], eph['mars']
+
+    t = ts.utc(2019, 9, 2, 10, 42, 26)
+    e = earth.at(t)
+    s = e.observe(sun).apparent()
+    m = e.observe(mars).apparent()
+    print('{:.5f}°'.format(m.separation_from(s).degrees))
+
+.. testoutput::
+
+    1.08256°
+
+They are more than one degree apart!
+How can that be,
+if their ecliptic longitudes are at that moment the same?
+Let’s use Skyfield’s :data:`~skyfield.framelib.ecliptic_frame`
+to express their positions in :ref:`ecliptic-coordinates`:
+
+.. testcode::
+
+    print('     Latitude Longitude')
+
+    lat, lon, distance = s.frame_latlon(ecliptic_frame)
+    print('Sun  {:.5f}° {:.5f}°'.format(lat.degrees, lon.degrees))
+
+    lat, lon, distance = m.frame_latlon(ecliptic_frame)
+    print('Mars {:.5f}° {:.5f}°'.format(lat.degrees, lon.degrees))
+
+.. testoutput::
+
+         Latitude Longitude
+    Sun  0.00005° 159.68641°
+    Mars 1.08260° 159.68641°
+
+While the Sun sits very close to the ecliptic —
+as we would expect, since the ecliptic is defined
+as the course the Sun takes around the sky each year —
+the inclination of the orbit of Mars has carried it
+more than one degree above the ecliptic.
+That’s why the :func:`~skyfield.positionlib.ICRF.separation_from()` method
+still measured an angle of more than one degree between them.
+
+A similar situation pertains at opposition:
+
+.. testcode::
+
+    t = ts.utc(2020, 10, 13, 23, 25, 55)
+
+    e = earth.at(t)
+    s = e.observe(sun).apparent()
+    m = e.observe(mars).apparent()
+
+    print('Separation: {:.5f}°'.format(m.separation_from(s).degrees))
+
+    print('')
+    print('     Latitude Longitude')
+
+    lat, lon, distance = s.frame_latlon(ecliptic_frame)
+    print('Sun  {:.5f}° {:.5f}°'.format(lat.degrees, lon.degrees))
+
+    lat, lon, distance = m.frame_latlon(ecliptic_frame)
+    print('Mars {:.5f}° {:.5f}°'.format(lat.degrees, lon.degrees))
+
+.. testoutput::
+
+    Separation: 177.00424°
+
+         Latitude Longitude
+    Sun  0.00007° 201.07794°
+    Mars -2.99582° 21.07794°
+
+Even though their ecliptic longitudes are 180° apart,
+the fact that neither the Sun nor Mars is lying exactly on the ecliptic
+means that the :func:`~skyfield.positionlib.ICRF.separation_from()` method
+finds that they are not quite 180° apart.
+
+In case you run across the term ‘elongation’
+in discussions of conjunctions and oppositions,
+it’s shorthand for ‘the angle between a planet and the Sun’ —
+and so each of the angular separations printed above can,
+more specifically,
+be labeled as the ‘elongation of Mars’ on those dates.
+
 At what angle in the sky is the crescent Moon?
 ==============================================
 
