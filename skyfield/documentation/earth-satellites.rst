@@ -312,8 +312,9 @@ over the span of a single day:
     t0 = ts.utc(2014, 1, 23)
     t1 = ts.utc(2014, 1, 24)
     t, events = satellite.find_events(bluffton, t0, t1, altitude_degrees=30.0)
+    event_names = 'rise above 30°', 'culminate', 'set below 30°'
     for ti, event in zip(t, events):
-        name = ('rise above 30°', 'culminate', 'set below 30°')[event]
+        name = event_names[event]
         print(ti.utc_strftime('%Y %b %d %H:%M:%S'), name)
 
 .. testoutput::
@@ -335,6 +336,39 @@ and the moment at which it dipped below it.
 
 Beware that events might not always be in the order rise-culminate-set.
 Some satellites culminate several times between rising and setting.
+
+By combining these results
+with the result of the :meth:`~skyfield.positionlib.ICRF.is_sunlit()` method
+(as described below in :ref:`satellite-is-sunlit`),
+you can determine whether the satellite is in sunlight
+during these passes,
+or is eclipsed within the Earth’s shadow.
+
+.. testcode::
+
+    eph = load('de421.bsp')
+    sunlit = satellite.at(t).is_sunlit(eph)
+
+    for ti, event, sunlit_flag in zip(t, events, sunlit):
+        name = event_names[event]
+        state = ('in shadow', 'in sunlight')[sunlit_flag]
+        print('{:22} {:15} {}'.format(
+            ti.utc_strftime('%Y %b %d %H:%M:%S'), name, state,
+        ))
+
+.. testoutput::
+
+    2014 Jan 23 06:25:37   rise above 30°  in shadow
+    2014 Jan 23 06:26:58   culminate       in shadow
+    2014 Jan 23 06:28:19   set below 30°   in shadow
+    2014 Jan 23 12:54:56   rise above 30°  in sunlight
+    2014 Jan 23 12:56:27   culminate       in sunlight
+    2014 Jan 23 12:57:58   set below 30°   in sunlight
+
+Finally, you will probably want to check the altitude of the Sun,
+so that you can ignore passes that happen during the daytime —
+unless you have some means of observing the satellite
+(by radio, for example) before it gets dark outside.
 
 Generating a satellite position
 -------------------------------
