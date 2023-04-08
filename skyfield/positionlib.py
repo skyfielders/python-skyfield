@@ -603,7 +603,8 @@ class ICRF(object):
         earth_m = - observer_gcrs_au * AU_M
         vector_m = self.position.m
         near, far = intersect_line_and_sphere(vector_m, earth_m, ERAD)
-        return nan_to_num(far) > 0
+        length_m = length_of(vector_m)
+        return (nan_to_num(far) > 0) & (nan_to_num(near) < length_m)
 
     @reify
     def _altaz_rotation(self):

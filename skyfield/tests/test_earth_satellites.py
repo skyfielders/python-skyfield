@@ -4,7 +4,7 @@ from numpy import array
 from skyfield import api
 from skyfield.api import EarthSatellite, load
 from skyfield.constants import AU_KM, AU_M
-from skyfield.sgp4lib import TEME_to_ITRF
+from skyfield.sgp4lib import TEME_to_ITRF, VectorFunction
 from skyfield.timelib import julian_date
 
 line1 = '1 25544U 98067A   18184.80969102  .00001614  00000-0  31745-4 0  9993'
@@ -171,3 +171,39 @@ def test_is_another_satellite_behind_earth():
     expected = [True, True, True, True, True, True]
     p = (s - s2).at(t)
     assert list(p.is_behind_earth()) == expected
+
+def test_behind_earth_thoroughly():
+    class FakeSat(VectorFunction):
+        center = 399
+        target = None
+        zero = array([0,0,0])
+        def __init__(self, r):
+            self.r = array(r)
+        def _at(self, t):
+            return self.r, self.zero, None, None
+
+    ts = api.load.timescale()
+    t = ts.utc(2023, 4, 8, 1, 25)
+
+    # Earth's equatorial radius is around 6378 km.
+
+    sats = [
+        FakeSat([-9e5 / AU_KM, 0, 0]),  # far left of Earth
+        FakeSat([-8e5 / AU_KM, 0, 0]),  # left of Earth
+        FakeSat([0, 0, 0]),             # center of Earth
+        FakeSat([8e5 / AU_KM, 0, 0]),   # right of Earth
+        FakeSat([9e5 / AU_KM, 0, 0]),   # farther right of Earth
+    ]
+    verdicts = [
+        (s2 - s1).at(t).is_behind_earth()
+        for s1 in sats
+        for s2 in sats
+        if s2 is not s1
+    ]
+    assert verdicts == [
+        False, True, True, True,  # First two fake sats can see each other.
+        False, True, True, True,
+        True, True, True, True,
+        True, True, True, False,
+        True, True, True, False,  # Last two fake sats can see each other.
+    ]
