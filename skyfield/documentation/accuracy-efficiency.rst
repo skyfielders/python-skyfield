@@ -15,7 +15,7 @@ Precession and Nutation
 
 As explained in the section on
 :ref:`Positions:Apparent right ascension and declination`,
-Skyfield uses the IAU2000A precession-nutation model
+Skyfield uses the IAU 2000A precession-nutation model
 to determine the orientation of the Earth’s axes on any given date.
 This is used in:
 
@@ -54,7 +54,7 @@ In Skyfield you can see the size of the effect
 by loading an official data file
 from the International Earth Rotation Service (IERS)
 and measuring the maximum excursions
-of the polar motion parameters 𝑥 and 𝑦:
+of the polar motion parameters *x* and *y*:
 
 .. testcode::
 
@@ -80,17 +80,25 @@ of the polar motion parameters 𝑥 and 𝑦:
 In what kinds of Skyfield calculations
 does the exact position of the Earth’s crust come into play?
 
-* Polar motion affects the position of an observer on the Earth’s surface.
+At the most basic level,
+the two polar motion rotations
+are applied directly to the ITRS reference frame
+in :data:`skyfield.framelib.itrs`,
+supplementing the changes in the Earth’s orientation
+that Skyfield was already expecting
+thanks to its IAU 2000A precession and nutation models.
+This, in turn, slightly affects:
 
-* Polar motion therefore also affects the relative position
-  of a target with respect to an observer on the Earth’s surface.
+* The position of an observer on the Earth’s surface.
 
-* Polar motion directly affects altazimuth coordinates,
-  since the polar angles 𝑥 and 𝑦 tilt the zenith and local horizon
+* The relative position of a target with
+  respect to an observer on the Earth’s surface.
+
+* All alt-azimuth coordinates,
+  since the polar angles *x* and *y* tilt the zenith and local horizon
   against which altitude and azimuth are measured for a particular observer.
 
-* Finally,
-  polar motion affects the position of any observation target
+* The position of any observation target
   that’s located on the Earth’s surface —
   for example, if you are calculating the position of a ground station
   from the perspective of a space probe.
