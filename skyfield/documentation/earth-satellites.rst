@@ -566,7 +566,7 @@ for the satellite position, then use the frame to define an attitude vector:
 
 .. testoutput::
 
-    Frame: <skyfield.framelib.LVLH object at 0x7fd11ab18790>
+    Frame: <LVLH> Center (399) Pointing Local Vertical Local Horizontal reference frame.
     Attitude: [ 0.57745914  0.2781511  -0.76757599]
 
 In this case we have set the pitch and roll to zero, so the attitude vector
@@ -575,12 +575,14 @@ anti-aligned with the position vector:
 
 .. testcode::
 
+    from skyfield.functions import length_of
+
     neg_position = -geocentric.position.au / length_of(geocentric.position.au)
     print(neg_position)
 
 .. testoutput::
 
-    [0.57745914  0.2781511  -0.76757599]
+    [ 0.57745914  0.2781511  -0.76757599]
 
 Now, to find the intersection of this vector with the Earth’s surface we can
 use the :meth:`~skyfield.toposlib.Geoid.intersection_of()` method:

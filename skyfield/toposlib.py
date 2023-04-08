@@ -286,7 +286,7 @@ class Geoid(object):
         of the Earth. The direction should be an |xyz| unit vector. Returns a
         `GeographicPosition` giving the geodetic ``latitude`` and ``longitude``
         at the point that the ray intersects the surface of the Earth.
-    
+
         The main calculation implemented here is based on JPL's NAIF toolkit;
         https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/ellipses.html
         """

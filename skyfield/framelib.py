@@ -149,6 +149,9 @@ class InertialFrame(object):
         self.__doc__ = doc
         self._matrix = matrix
 
+    def __repr__(self):
+        return '<{0}> {1}'.format(self.__class__.__name__, self.__doc__)
+
     def rotation_at(self, t):
         return self._matrix
 
@@ -170,7 +173,7 @@ class LVLH(InertialFrame):
         matrix = mxmxm(matrix, rot_z(pi - i), rot_y(-u))
 
         doc = (
-            "Center {0} Pointing Local Vertical Local Horizontal"
+            "Center ({0}) Pointing Local Vertical Local Horizontal"
             " reference frame."
             ).format(position.center)
         super(LVLH, self).__init__(doc, matrix)
