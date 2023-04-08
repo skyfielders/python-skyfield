@@ -5,6 +5,7 @@ from __future__ import print_function, division
 
 from numpy import cos, zeros_like
 from .constants import pi, tau
+from .framelib import ecliptic_frame
 from .searchlib import find_discrete
 from .nutationlib import iau2000b_radians
 from .units import Angle
@@ -71,7 +72,7 @@ def seasons(ephemeris):
         """Return season 0 (Spring) through 3 (Winter) at time `t`."""
         t._nutation_angles_radians = iau2000b_radians(t)
         e = earth.at(t)
-        _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
+        _, slon, _ = e.observe(sun).apparent().frame_latlon(ecliptic_frame)
         return (slon.radians // (tau / 4) % 4).astype(int)
 
     season_at.step_days = 90.0
@@ -94,8 +95,9 @@ def moon_phase(ephemeris, t):
 
     """
     e = ephemeris['earth'].at(t)
-    _, mlon, _ = e.observe(ephemeris['moon']).apparent().ecliptic_latlon('date')
-    _, slon, _ = e.observe(ephemeris['sun']).apparent().ecliptic_latlon('date')
+    moon, sun = ephemeris['moon'], ephemeris['sun']
+    _, mlon, _ = e.observe(moon).apparent().frame_latlon(ecliptic_frame)
+    _, slon, _ = e.observe(sun).apparent().frame_latlon(ecliptic_frame)
     return Angle(radians=(mlon.radians - slon.radians) % tau)
 
 def moon_phases(ephemeris):
@@ -115,8 +117,8 @@ def moon_phases(ephemeris):
         """Return the phase of the moon 0 through 3 at time `t`."""
         t._nutation_angles_radians = iau2000b_radians(t)
         e = earth.at(t)
-        _, mlon, _ = e.observe(moon).apparent().ecliptic_latlon('date')
-        _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
+        _, mlon, _ = e.observe(moon).apparent().frame_latlon(ecliptic_frame)
+        _, slon, _ = e.observe(sun).apparent().frame_latlon(ecliptic_frame)
         return ((mlon.radians - slon.radians) // (tau / 4) % 4).astype(int)
 
     moon_phase_at.step_days = 7.0  # one lunar phase per week
@@ -141,7 +143,7 @@ def moon_nodes(ephemeris):
     def moon_node_at(t):
         """Return the phase of the moon 0 through 3 at time `t`."""
         e = earth.at(t)
-        lat, _, _ = e.observe(moon).apparent().ecliptic_latlon('date')
+        lat, _, _ = e.observe(moon).apparent().frame_latlon(ecliptic_frame)
         return lat.radians > 0.0
 
     moon_node_at.step_days = 12.0  # 2000-2050: closest nodes 12.38 days apart
@@ -165,8 +167,8 @@ def oppositions_conjunctions(ephemeris, target):
     def leading_or_trailing(t):
         """Return whether the target is east or west of the Sun."""
         e = earth_at(t)
-        _, slon, _ = e.observe(sun).apparent().ecliptic_latlon()
-        _, tlon, _ = e.observe(target).apparent().ecliptic_latlon()
+        _, slon, _ = e.observe(sun).apparent().frame_latlon(ecliptic_frame)
+        _, tlon, _ = e.observe(target).apparent().frame_latlon(ecliptic_frame)
         return ((slon.radians - tlon.radians) / pi % 2.0).astype('int8')
 
     if target.target == 301:

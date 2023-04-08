@@ -8,6 +8,11 @@ Changelog
 v1.46 — 2022 April ?
 --------------------
 
+* The :func:`~skyfield.almanac.oppositions_conjunctions()` routine now
+  measures ecliptic longitude using the ecliptic of each specific date,
+  rather than always using the J2000 ecliptic, which should improve its
+  accuracy.
+
 * Bugfix: Skyfield was giving values several kilometers off when
   computing the elevation above ground level of a target directly above
   the Earth’s north or south pole.

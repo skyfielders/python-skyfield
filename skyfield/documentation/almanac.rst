@@ -192,7 +192,7 @@ conjunction with the Sun is when their ecliptic longitudes are at 0° or
 
 .. testoutput::
 
-    ['2019-09-02T10:42:14Z', '2020-10-13T23:25:47Z']
+    ['2019-09-02T10:42:26Z', '2020-10-13T23:25:55Z']
     [0 1]
 
 The result ``t`` will be an array of times, and ``y`` will be an array
