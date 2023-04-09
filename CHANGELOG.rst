@@ -13,6 +13,9 @@ v1.46 — 2022 April ?
   rather than always using the J2000 ecliptic, which should improve its
   accuracy.
 
+* Skyfield’s internal table for the ∆T Earth orientation parameter has
+  been updated, so that its predictions now extend to 2024-04-13.
+
 * Bugfix: Skyfield was giving values several kilometers off when
   computing the elevation above ground level of a target directly above
   the Earth’s north or south pole.
