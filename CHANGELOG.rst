@@ -25,6 +25,13 @@ v1.46 — 2022 April ?
   that joins the two satellites, but over on the far side of the other
   satellite where it wasn’t really in the way.
 
+* Internals: the :meth:`~skyfield.positionlib.ICRF.altaz()` method now
+  lives on the main position class instead of in two specific
+  subclasses.  If the user mistakenly tries to call ``.altaz()`` on an
+  instance of the :class:`~skyfield.positionlib.Astrometric` position
+  subclass — which previously lacked the method — then a friendly
+  exception is raised explaining their error.
+
 v1.45 — 2022 September 15
 -------------------------
 
