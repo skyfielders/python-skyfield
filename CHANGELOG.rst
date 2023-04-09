@@ -5,20 +5,20 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
-v1.46 — 2022 April ?
+v1.46 — 2022 April 9
 --------------------
 
 * The :func:`~skyfield.almanac.oppositions_conjunctions()` routine now
   measures ecliptic longitude using the ecliptic of each specific date,
   rather than always using the J2000 ecliptic, which should improve its
-  accuracy.
+  accuracy by several seconds.
 
 * Skyfield’s internal table for the ∆T Earth orientation parameter has
   been updated, so that its predictions now extend to 2024-04-13.
 
 * Bugfix: Skyfield was giving values several kilometers off when
-  computing the elevation above ground level of a target directly above
-  the Earth’s north or south pole.
+  computing the elevation above ground level of a target that was
+  positioned directly above the Earth’s north or south pole.
 
 * Bugfix: the :func:`~skyfield.positionlib.ICRF.is_behind_earth()`
   method was incorrectly returning ``True`` if the Earth was on the line
