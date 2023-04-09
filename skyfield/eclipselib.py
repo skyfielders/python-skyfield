@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Search for eclipses."""
 
 from __future__ import division
