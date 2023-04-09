@@ -5,7 +5,7 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
-v1.46 — 2022 April 9
+v1.46 — 2023 April 9
 --------------------
 
 * The :func:`~skyfield.almanac.oppositions_conjunctions()` routine now
