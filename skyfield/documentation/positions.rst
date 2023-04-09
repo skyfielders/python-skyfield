@@ -474,7 +474,7 @@ above their own local horizon.
   0° means exactly north, 90° is east, 180° is south, and 270° is west.
 
 Altitude and azimuth are computed
-by calling the :meth:`~Apparent.altaz()` method on an apparent position.
+by calling the :meth:`~ICRF.altaz()` method on an apparent position.
 But because the method needs to know which local horizon to use,
 it does not work
 on the plain geocentric (“Earth centered”) positions
@@ -530,7 +530,7 @@ in case you don’t want to remember which directions are positive.
 So Mars was more than 24° above the horizon for Bostonians
 on 1980 March 1 at midnight UTC.
 
-The altitude returned from a plain :meth:`~Apparent.altaz()` call
+The altitude returned from a plain :meth:`~ICRF.altaz()` call
 is the ideal position
 that you would observe if the Earth had no atmosphere.
 You can also ask Skyfield to estimate

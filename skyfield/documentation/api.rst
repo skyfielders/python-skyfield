@@ -369,6 +369,8 @@ All positions support these methods:
    ICRF.speed
    ICRF.radec
    ICRF.hadec
+   ICRF.altaz
+   ICRF.from_altaz
    ICRF.separation_from
    ICRF.frame_xyz
    ICRF.frame_xyz_and_velocity
@@ -379,7 +381,6 @@ All positions support these methods:
    ICRF.phase_angle
    ICRF.fraction_illuminated
    ICRF.is_sunlit
-   ICRF.from_altaz
 
 In addition to the methods above,
 several subclasses of the base position class
@@ -389,7 +390,6 @@ provide unique methods of their own:
 
    Barycentric.observe
    Astrometric.apparent
-   Apparent.altaz
 
 Reference frames
 ================

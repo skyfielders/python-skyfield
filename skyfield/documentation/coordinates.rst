@@ -216,7 +216,7 @@ in the sense of “pertaining to the horizon.”
 As with the equatorial system,
 the angles associated with horizontal coordinates are so popular
 that Skyfield provides a built-in
-method :meth:`~skyfield.positionlib.Apparent.altaz()` to retrieve them,
+method :meth:`~skyfield.positionlib.ICRF.altaz()` to retrieve them,
 while |xyz| coordinates require a call to
 :meth:`~skyfield.positionlib.ICRF.frame_xyz()`
 with the geographic location itself passed as the reference frame:

@@ -11,7 +11,7 @@ def position_angle_of(anglepair1, anglepair2):
     :class:`~skyfield.units.Angle` objects, like the tuples returned by
     :meth:`~skyfield.positionlib.ICRF.radec()`,
     :meth:`~skyfield.positionlib.ICRF.frame_latlon()`, and
-    :meth:`~skyfield.positionlib.Apparent.altaz()`.
+    :meth:`~skyfield.positionlib.ICRF.altaz()`.
 
     If one of the two angle items is signed (if its ``.signed``
     attribute is true), then that angle is used as the latitude and the

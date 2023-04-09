@@ -18,7 +18,7 @@ v1.46 — 2022 April ?
   the Earth’s north or south pole.
 
 * Bugfix: the :func:`~skyfield.positionlib.ICRF.is_behind_earth()`
-  method was incorrectly returning `True` if the Earth was on the line
+  method was incorrectly returning ``True`` if the Earth was on the line
   that joins the two satellites, but over on the far side of the other
   satellite where it wasn’t really in the way.
 

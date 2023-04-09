@@ -426,7 +426,7 @@ and 270° if the Sun is to the right of the Moon.
 
 The :func:`~skyfield.trigonometry.position_angle_of()` routine
 will not only accept
-the output of :meth:`~skyfield.positionlib.Apparent.altaz()`,
+the output of :meth:`~skyfield.positionlib.ICRF.altaz()`,
 but also of :meth:`~skyfield.positionlib.ICRF.frame_latlon()`
 if you want a position angle relative to the ecliptic’s north pole.
 
