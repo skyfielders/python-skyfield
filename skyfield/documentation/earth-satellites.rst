@@ -889,8 +889,8 @@ that builds a satellite model directly from numeric orbital parameters:
         5,               # satnum: Satellite number
         18441.785,       # epoch: days since 1949 December 31 00:00 UT
         2.8098e-05,      # bstar: drag coefficient (/earth radii)
-        6.969196665e-13, # ndot: ballistic coefficient (revs/day)
-        0.0,             # nddot: second derivative of mean motion (revs/day^3)
+        6.969196665e-13, # ndot: ballistic coefficient (radians/minute^2)
+        0.0,             # nddot: second derivative of mean motion (radians/minute^3)
         0.1859667,       # ecco: eccentricity
         5.7904160274885, # argpo: argument of perigee (radians)
         0.5980929187319, # inclo: inclination (radians)
