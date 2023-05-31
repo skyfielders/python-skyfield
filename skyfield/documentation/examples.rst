@@ -12,10 +12,17 @@ to solve a general problem,
 that should provide readers with a basis
 for solving other similar problems of their own.
 
+Here’s the list of examples that you can find in the sections below:
+
+.. contents::
+   :local:
+
 .. testsetup::
 
    __import__('skyfield.tests.fixes').tests.fixes.setup(
        (2020, 4, 19, 17, 58))
+
+And the following sections are the examples themselves.
 
 What time is solar noon, when the Sun transits the meridian?
 ============================================================
