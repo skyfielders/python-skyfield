@@ -174,7 +174,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
               (      0.007702 +
               (     -0.00005939)
               * t) * t) * t) * t) * ASEC2RAD
-              + (-5.0*t % 1.0) * tau)
+              + fmod(-5.0*t, 1.0) * tau)
 
     fa[ 5] = (4.402608842 + 2608.7903141574 * t)
     fa[ 6] = (3.176146697 + 1021.3285546211 * t)
@@ -186,7 +186,7 @@ def equation_of_the_equinoxes_complimentary_terms(jd_tt):
     fa[12] = (5.311886287 +    3.8133035638 * t)
     fa[13] = (0.024381750 +    0.00000538691 * t) * t
 
-    fa %= tau
+    fa = fmod(fa, tau)
 
     # Evaluate the complementary terms.
 
