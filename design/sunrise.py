@@ -1,26 +1,6 @@
 from skyfield import almanac, api
 from skyfield.api import load, tau
 
-# sunrise_t, sunset_t = t
-
-# app = (earth + bluffton).at(sunrise_t).observe(sun).apparent()
-# ha, dec, distance = app.hadec()
-# alt, az, distance = app.altaz()
-
-# print('Dec in degrees at sunrise:', dec.degrees)
-# print('Alt in degrees at sunrise:', alt.degrees)
-# print('HA in hours at sunrise:', ha.hours)
-
-# def f(t, msg):
-#     app = (earth + bluffton).at(t).observe(sun).apparent()
-#     ha, dec, distance = app.hadec()
-#     alt, az, distance = app.altaz()
-#     print(f'HA in hours {msg}:', ha.hours)
-
-# f(sunset_t, 'at sunset')
-# f(ts.tt_jd(sunrise_t.tt - 1/24.0/3600.0), 'at sunrise - 1 second')
-# f(ts.tt_jd(sunrise_t.tt + 1/24.0/3600.0), 'at sunrise + 1 second')
-
 # http://slittlefair.staff.shef.ac.uk/teaching/phy115/session3/page4/page6/page6.html
 
 # sin ALT = sin LAT * sin DEC + cos LAT * cos DEC * cos HA
@@ -33,25 +13,12 @@ from skyfield.api import load, tau
 
 from numpy import arccos, sin, cos
 
-# alt, az, _ = app.altaz()
-
-# ALT =
-# print('ALT', alt.radians)
-# DEC = dec.radians
-# print('DEC', dec.radians)
-# LAT = bluffton.latitude.radians
-# print('LAT', bluffton.latitude.radians)
-
 def _sunrise_hour_angle_radians(latitude, declination, altitude_radians):
     lat = latitude.radians
     dec = declination.radians
     ha = arccos((sin(altitude_radians) - sin(lat) * sin(dec))
                 / (cos(lat) * cos(dec)))
     return ha
-
-# ha = _sunrise_hour_angle_radians(bluffton.latitude, dec, stdalt)
-
-# print('HA, computed:', ha / tau * 24.0)
 
 import numpy as np
 
@@ -66,9 +33,7 @@ def find_sunrise(observer, target, horizon_degrees, start_time, end_time):
 
     # Build an array of times 0.8 days apart from start_time to end_time.
     ts = start_time.ts
-    tt0 = start_time.tt
-    tt1 = end_time.tt
-    t = ts.tt_jd(np.arange(tt0, tt1, 0.8))
+    t = ts.tt_jd(np.arange(start_time.tt, end_time.tt, 0.8))
 
     # Determine the target's hour angle and declination at those times.
     fastify(t)
@@ -84,13 +49,11 @@ def find_sunrise(observer, target, horizon_degrees, start_time, end_time):
     # from the target's next 'ideal' rising?
     difference = ha.radians - rising_radians
     difference %= tau
-    print('HA jump (deg):', difference / tau * 360.0)
 
     # We want to return each rising exactly once, so where there are
     # runs of several times `t` that all precede the same rising, let's
     # throw the first few out and keep only the last one.
     i, = np.nonzero(np.diff(difference) < 0.0)
-    print(i)
 
     # When might have rising actually have taken place?  Let's guess by
     # drawing a line between the two (time, hour angles) coordinates and
@@ -99,62 +62,28 @@ def find_sunrise(observer, target, horizon_degrees, start_time, end_time):
     b = difference[i + 1]
     tt = t.tt
     new_tt = (b * tt[i] + a * tt[i+1]) / (a + b)
+    t = ts.tt_jd(new_tt)
 
-    # Time to check how good those guesses were!  Let's plug those TT
-    # times in and see where exactly the target really was.
-    t2 = ts.tt_jd(new_tt)
-    fastify(t2)
-    ha2, dec2, _ = observer.at(t2).observe(target).apparent().hadec()
+    ha_per_day = tau
 
-    # (What is the diff between expected dec and actual dec?  Is that
-    # what makes all the difference?)
-    print('Dec diff (deg):', dec2.degrees - dec.degrees[i])
-
-    # The target won't have been exactly at the right place because its
-    # declination won't really have stayed constant, so let's repeat the
-    # above computation to bring us one step closer.
-    setting_ha2 = _sunrise_hour_angle_radians(latitude, dec2, h)
-    rising_ha2 = - setting_ha2
-
-    adjustment = rising_ha2 - ha2.radians  # radians
-    rise = ha2.radians - ha.radians[i]     # radians
-    run = t2.tt - t[i].tt                  # TT
-    slope = rise / run                     # radians actually turned per TT
-    timebump = adjustment / slope          # rad * (rad / TT) -> TT
-
-    print('Timebump(s):', timebump * 24.0 * 3600.0)
-
-    t3 = ts.tt_jd(t2.tt + timebump)
-
-    fastify(t3)
-    ha3, dec3, _ = observer.at(t3).observe(target).apparent().hadec()
-    setting_ha3 = _sunrise_hour_angle_radians(latitude, dec3, h)
-    rising_ha3 = - setting_ha3
-
-    adjustment = rising_ha3 - ha3.radians  # radians
-    rise = ha3.radians - ha2.radians       # radians
-    run = t3.tt - t2.tt                    # TT
-    slope = rise / run                     # radians actually turned per TT
-    timebump = adjustment / slope          # rad * (rad / TT) -> TT
-
-    t4 = ts.tt_jd(t3.tt + timebump)
+    for i in 0, 1: #2, 3:
+        fastify(t)
+        ha, dec, _ = observer.at(t).observe(target).apparent().hadec()
+        desired_ha = - _sunrise_hour_angle_radians(latitude, dec, h)
+        ha_adjustment = desired_ha - ha.radians
+        print('ha_adjustment:', ha_adjustment)
+        timebump = ha_adjustment / ha_per_day
+        print('Timebump(s):', timebump * 24.0 * 3600.0)
+        t = ts.tt_jd(t.whole, t.tt_fraction + timebump)
 
     # Test of how we did.
-    t_final = t4
-    alt, az, _ = observer.at(t4).observe(target).apparent().altaz()
+    t_final = t
+    alt, az, _ = observer.at(t_final).observe(target).apparent().altaz()
     diff = horizon_degrees - alt.degrees
     print('New alts:', diff.min(), 'to', diff.max(), 'degrees')
     print('Detailed differences (degrees):', diff)
 
-    return t_final
-
-    # adjustment = stdalt - alt.radians
-    # print(max(abs(adjustment)) / tau * 24.0 * 3600.0,
-    #       'radians adj, in seconds of day (approx)')
-    # print(max(adjustment / tau * 24.0 * 3600.0),
-    #       'max')
-
-    #ha, dec, _ = observer.at(t).observe(target).apparent().hadec()
+    return t
 
 #find_sunrise(earth + bluffton, sun, stdalt, t0, t1)
 
@@ -222,7 +151,7 @@ def main():
     alt, az, _ = (earth + bluffton).at(t_new).observe(sun).apparent().altaz()
     diff_degrees = alt.degrees - stdalt
 
-    if 1:
+    if 0:
         import matplotlib.pyplot as plt
         fig, (ax, ax2) = plt.subplots(2)
         ax.plot(t_new.J, diff_seconds, label='diff (sec)', linestyle='--')
