@@ -55,7 +55,15 @@ def _sunrise_hour_angle_radians(latitude, declination, altitude_radians):
 
 import numpy as np
 
-def find_sunrise(observer, target, horizon, start_time, end_time):
+from skyfield.nutationlib import iau2000b_radians
+def fastify(t):
+    t._nutation_angles_radians = iau2000b_radians(t)
+
+def find_sunrise(observer, target, horizon_degrees, start_time, end_time):
+    geo = observer.vector_functions[-1]
+    latitude = geo.latitude
+    h = horizon_degrees / 360.0 * tau
+
     # Build an array of times 0.8 days apart from start_time to end_time.
     ts = start_time.ts
     tt0 = start_time.tt
@@ -63,24 +71,26 @@ def find_sunrise(observer, target, horizon, start_time, end_time):
     t = ts.tt_jd(np.arange(tt0, tt1, 0.8))
 
     # Determine the target's hour angle and declination at those times.
+    fastify(t)
     ha, dec, _ = observer.at(t).observe(target).apparent().hadec()
 
-    # Invoke our geometry formula: if the target's declination were to
-    # stop changing, then what would its hour angle be when it next
-    # reached the horizon, for each time `t`?
-    geo = observer.vector_functions[-1]
-    latitude = geo.latitude
-    setting_ha = _sunrise_hour_angle_radians(latitude, dec, horizon)
+    # Invoke our geometry formula: for each time `t`, predict the hour
+    # angle at which the target will next reach the horizon, if its
+    # declination were to remain constant.
+    setting_ha = _sunrise_hour_angle_radians(latitude, dec, h)
     rising_radians = - setting_ha
 
-    # So at each time `t`, how many radians was it from its next rising?
+    # So at each time `t`, how many radians is the target's hour angle
+    # from the target's next 'ideal' rising?
     difference = ha.radians - rising_radians
     difference %= tau
+    print('HA jump (deg):', difference / tau * 360.0)
 
     # We want to return each rising exactly once, so where there are
     # runs of several times `t` that all precede the same rising, let's
     # throw the first few out and keep only the last one.
     i, = np.nonzero(np.diff(difference) < 0.0)
+    print(i)
 
     # When might have rising actually have taken place?  Let's guess by
     # drawing a line between the two (time, hour angles) coordinates and
@@ -93,29 +103,50 @@ def find_sunrise(observer, target, horizon, start_time, end_time):
     # Time to check how good those guesses were!  Let's plug those TT
     # times in and see where exactly the target really was.
     t2 = ts.tt_jd(new_tt)
+    fastify(t2)
     ha2, dec2, _ = observer.at(t2).observe(target).apparent().hadec()
+
+    # (What is the diff between expected dec and actual dec?  Is that
+    # what makes all the difference?)
+    print('Dec diff (deg):', dec2.degrees - dec.degrees[i])
 
     # The target won't have been exactly at the right place because its
     # declination won't really have stayed constant, so let's repeat the
     # above computation to bring us one step closer.
-    setting_ha2 = _sunrise_hour_angle_radians(latitude, dec2, horizon)
+    setting_ha2 = _sunrise_hour_angle_radians(latitude, dec2, h)
     rising_ha2 = - setting_ha2
 
-    adjustment = rising_ha2 - ha2.radians
-    rise = ha2.radians - ha.radians[i]
-    run = t2.tt - t[i].tt
-    slope = rise / run
-    timebump = adjustment / slope
+    adjustment = rising_ha2 - ha2.radians  # radians
+    rise = ha2.radians - ha.radians[i]     # radians
+    run = t2.tt - t[i].tt                  # TT
+    slope = rise / run                     # radians actually turned per TT
+    timebump = adjustment / slope          # rad * (rad / TT) -> TT
+
+    print('Timebump(s):', timebump * 24.0 * 3600.0)
 
     t3 = ts.tt_jd(t2.tt + timebump)
-    # ha3, dec3, _ = observer.at(t3).observe(target).apparent().hadec()
-    # setting_ha3 = _sunrise_hour_angle_radians(latitude, dec3, horizon)
-    # rising_ha3 = - setting_ha3
 
-    alt, az, _ = observer.at(t3).observe(target).apparent().altaz()
-    print('Alts:', alt.degrees.min(), 'to', alt.degrees.max())
+    fastify(t3)
+    ha3, dec3, _ = observer.at(t3).observe(target).apparent().hadec()
+    setting_ha3 = _sunrise_hour_angle_radians(latitude, dec3, h)
+    rising_ha3 = - setting_ha3
 
-    return t3
+    adjustment = rising_ha3 - ha3.radians  # radians
+    rise = ha3.radians - ha2.radians       # radians
+    run = t3.tt - t2.tt                    # TT
+    slope = rise / run                     # radians actually turned per TT
+    timebump = adjustment / slope          # rad * (rad / TT) -> TT
+
+    t4 = ts.tt_jd(t3.tt + timebump)
+
+    # Test of how we did.
+    t_final = t4
+    alt, az, _ = observer.at(t4).observe(target).apparent().altaz()
+    diff = horizon_degrees - alt.degrees
+    print('New alts:', diff.min(), 'to', diff.max(), 'degrees')
+    print('Detailed differences (degrees):', diff)
+
+    return t_final
 
     # adjustment = stdalt - alt.radians
     # print(max(abs(adjustment)) / tau * 24.0 * 3600.0,
@@ -135,7 +166,8 @@ def main():
     bluffton = api.wgs84.latlon(40.8939, -83.8917)
 
     t0 = ts.utc(2020, 1, 1)
-    t1 = ts.utc(2021, 1, 1)
+    t1 = ts.utc(2020, 1, 10)
+    #t1 = ts.utc(2021, 1, 1)
     # t0 = ts.utc(2018, 9, 12, 4)
     # t1 = ts.utc(2018, 9, 13, 4)
 
@@ -143,7 +175,7 @@ def main():
 
     if 1:
         sun = eph['sun']
-        stdalt = -0.833 / 360.0 * tau
+        stdalt = -0.8333 #/ 360.0 * tau
 
         T0 = time()
         f = almanac.sunrise_sunset(eph, bluffton)
@@ -152,17 +184,23 @@ def main():
 
     else:
         sun = eph['mercury']
-        stdalt = -0.833 / 360.0 * tau
+        stdalt = -0.8333 #/ 360.0 * tau
 
         T0 = time()
         f = almanac.risings_and_settings(
             eph, sun, bluffton,
-            horizon_degrees=-0.833,
+            horizon_degrees=-stdalt,
             radius_degrees=0.0,
         )
         #f = almanac.sunrise_sunset(eph, bluffton)
         t_old, y = almanac.find_discrete(t0, t1, f)
         DUR_OLD = time() - T0
+
+    print('How good are old find_discrete results?')
+    alt, az, _ = (earth + bluffton).at(t_old).observe(sun).apparent().altaz()
+    diff_degrees = alt.degrees - stdalt
+    print(diff_degrees)
+    print()
 
     # print(t.utc_iso())
     # print(y)
@@ -176,9 +214,28 @@ def main():
     print(len(t_old), 'old')
     print(len(t_new), 'new')
 
+    diff_seconds = (t_old.tt - t_new.tt) * 24.0 * 3600.0
     print('Max difference (seconds):', max(
-        abs(t_old.tt - t_new.tt) * 24.0 * 3600.0
+        abs(diff_seconds)
     ))
+
+    alt, az, _ = (earth + bluffton).at(t_new).observe(sun).apparent().altaz()
+    diff_degrees = alt.degrees - stdalt
+
+    if 1:
+        import matplotlib.pyplot as plt
+        fig, (ax, ax2) = plt.subplots(2)
+        ax.plot(t_new.J, diff_seconds, label='diff (sec)', linestyle='--')
+        ax.grid()
+        ax2.plot(t_new.J, diff_degrees, label='altitude °', linestyle='--')
+        ax2.grid()
+        #ax.set(xlabel='time (s)', ylabel='voltage (mV)', title='Title')
+        #ax.set_aspect(aspect=1.0)
+        #ax.axhline(1.0)
+        #ax.axvline(1.0)
+        #plt.legend()
+        fig.savefig('tmp.png')
+
     print(DUR_OLD, DUR_NEW, DUR_OLD / DUR_NEW)
 
     #print('HA:', HA / tau * 24.0 - 12)
