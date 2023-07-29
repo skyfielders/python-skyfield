@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Routines to solve for circumstances like sunrise, sunset, and moon phase."""
 
-from __future__ import print_function, division
+from __future__ import division
 
-from numpy import cos, zeros_like
+import numpy as np
+from numpy import cos, sin, zeros_like
 from .constants import pi, tau
 from .framelib import ecliptic_frame
 from .searchlib import find_discrete
@@ -301,3 +302,101 @@ def risings_and_settings(ephemeris, target, topos,
 
     is_body_up_at.step_days = 0.25
     return is_body_up_at
+
+# Direct-search routines using geometry, that don't need find_discrete().
+
+def _fastify(t):
+    t._nutation_angles_radians = iau2000b_radians(t)
+
+def _setting_hour_angle(latitude, declination, altitude_radians):
+    """Return the hour angle, in radians, when a body reaches the horizon.
+
+    Given the latitude of an observer, and the declination of a target,
+    return the positive hour angle at which the body will set below the
+    horizon, where the horizon is specified as `altitude_radians` above
+    (positive) or below (negative) the great circle of zero altitude.
+
+    """
+    lat = latitude.radians
+    dec = declination.radians
+    numerator = sin(altitude_radians) - sin(lat) * sin(dec)
+    denominator = cos(lat) * cos(dec)
+    ha = np.arccos(np.clip(numerator / denominator, -1.0, 1.0))
+    return ha
+
+def _rising_hour_angle(latitude, declination, altitude_radians):
+    return - _setting_hour_angle(latitude, declination, altitude_radians)
+
+def _transit_hour_angle(latitude, declination, altitude_radians):
+    return 0.0
+
+def _find(observer, target, start_time, end_time, horizon_degrees, f):
+    if horizon_degrees is None:
+        if getattr(target, 'target', None) == 10:
+            horizon_degrees = -0.8333  # USNO horizon+radius for sunrise/sunset
+        else:
+            raise NotImplementedError
+
+    h = horizon_degrees / 360.0 * tau
+    geo = observer.vector_functions[-1]
+    latitude = geo.latitude
+
+    # Build an array of times 0.8 days apart from start_time to end_time.
+    ts = start_time.ts
+    tt0 = start_time.tt
+    tt1 = end_time.tt
+    sample_count = np.ceil((tt1 - tt0) / 0.8) + 1
+    t = ts.tt_jd(np.linspace(tt0, tt1, sample_count))
+
+    # Determine the target's hour angle and declination at those times.
+    _fastify(t)
+    ha, dec, _ = observer.at(t).observe(target).apparent().hadec()
+
+    # Invoke our geometry formula: for each time `t`, predict the hour
+    # angle at which the target will next reach the horizon, if its
+    # declination were to remain constant.
+    setting_ha = f(latitude, dec, h)
+    rising_radians = - setting_ha
+
+    # So at each time `t`, how many radians is the target's hour angle
+    # from the target's next 'ideal' rising?
+    difference = ha.radians - rising_radians
+    difference %= tau
+
+    # We want to return each rising exactly once, so where there are
+    # runs of several times `t` that all precede the same rising, let's
+    # throw the first few out and keep only the last one.
+    i, = np.nonzero(np.diff(difference) < 0.0)
+
+    # When might each rising have actually taken place?  Let's
+    # interpolate between the two times that bracket each rising.
+    a = tau - difference[i]
+    b = difference[i + 1]
+    tt = t.tt
+    interpolated_tt = (b * tt[i] + a * tt[i+1]) / (a + b)
+    t = ts.tt_jd(interpolated_tt)
+
+    ha_per_day = tau            # angle the celestrial sphere rotates in 1 day
+
+    for i in 0, 1:
+        _fastify(t)
+        ha, dec, _ = observer.at(t).observe(target).apparent().hadec()
+        desired_ha = f(latitude, dec, h)
+        ha_adjustment = desired_ha - ha.radians
+        timebump = ha_adjustment / ha_per_day
+        t = ts.tt_jd(t.whole, t.tt_fraction + timebump)
+
+    is_above_horizon = (desired_ha != 0.0)
+    return t, is_above_horizon
+
+def find_risings(observer, target, start_time, end_time, horizon_degrees=None):
+    return _find(observer, target, start_time, end_time, horizon_degrees,
+                 _rising_hour_angle)
+
+def find_settings(observer, target, start_time, end_time, horizon_degrees=None):
+    return _find(observer, target, start_time, end_time, horizon_degrees,
+                 _setting_hour_angle)
+
+def _find_transits(observer, target, start_time, end_time, horizon_degrees=None):
+    return _find(observer, target, start_time, end_time, horizon_degrees,
+                 _transit_hour_angle)

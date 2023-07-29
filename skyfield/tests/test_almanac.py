@@ -1,3 +1,4 @@
+from numpy import array, concatenate as concat
 from skyfield import api, almanac
 
 # Compare with USNO:
@@ -22,7 +23,6 @@ def test_seasons():
     e = api.load('de421.bsp')
     t, y = almanac.find_discrete(t0, t1, almanac.seasons(e))
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
-    print(strings)
     assert strings == ['2018-09-23 01:54', '2018-12-21 22:23']
     assert (y == (2, 3)).all()
 
@@ -74,16 +74,33 @@ def test_oppositions_conjunctions_of_moon():
 # Compare with USNO:
 # http://aa.usno.navy.mil/rstt/onedaytable?ID=AA&year=2018&month=9&day=12&state=OH&place=Bluffton
 
-def test_sunrise_sunset():
+def _sunrise_sunset(f):
     ts = api.load.timescale()
     t0 = ts.utc(2018, 9, 12, 4)
     t1 = ts.utc(2018, 9, 13, 4)
     e = api.load('de421.bsp')
     bluffton = api.Topos('40.8939 N', '83.8917 W')
-    t, y = almanac.find_discrete(t0, t1, almanac.sunrise_sunset(e, bluffton))
+    t, y = f(t0, t1, e, bluffton)
     strings = t.utc_strftime('%Y-%m-%d %H:%M')
     assert strings == ['2018-09-12 11:13', '2018-09-12 23:50']
     assert (y == (1, 0)).all()
+
+def _concat(t0, t1):
+    return t0.ts.tt_jd(concat((t0.whole, t1.whole)),
+                       concat((t0.tt_fraction, t1.tt_fraction)))
+
+def test_sunrise_sunset_old():
+    def f(t0, t1, e, topos):
+        return almanac.find_discrete(t0, t1, almanac.sunrise_sunset(e, topos))
+    _sunrise_sunset(f)
+
+def test_sunrise_sunset_new():
+    def f(t0, t1, e, topos):
+        r, _ = almanac.find_risings(e['earth'] + topos, e['sun'], t0, t1)
+        s, _ = almanac.find_settings(e['earth'] + topos, e['sun'], t0, t1)
+        t = _concat(r, s)
+        return t, array([1, 0])
+    _sunrise_sunset(f)
 
 def test_dark_twilight_day():
     ts = api.load.timescale()
