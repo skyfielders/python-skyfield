@@ -272,19 +272,97 @@ down below your horizon.
 Sunrise and Sunset
 ==================
 
-Because sunrise and sunset differ depending on your location on the
-Earth’s surface, you will need to specify a latitude and longitude.
-
-Then you can create a start time and an end time and ask for all of the
-sunrises and sunsets in between.
+Because sunrise and sunset depend on your latitude and longitude,
+you need to build an observer with a specific latitude and longitude
+before asking the time of sunrise and sunset.
 Skyfield uses the
 `official definition of sunrise and sunset
 <https://aa.usno.navy.mil/faq/RST_defs>`_
 from the United States Naval Observatory,
-which defines them as the moment when the center — not the limb —
+which defines them as the moment when the center
 of the sun is 0.8333 degrees below the horizon,
-to account for both the average radius of the Sun itself
+to account for both the average radius of the Sun
 and for the average refraction of the atmosphere at the horizon.
+Here’s how to ask for the sunrises between a given start and end time:
+
+.. testcode::
+
+    observer = eph['Earth'] + bluffton
+    sun = eph['Sun']
+    t0 = ts.utc(2018, 9, 12, 4)
+    t1 = ts.utc(2018, 9, 14, 4)
+
+    t, y = almanac.find_risings(observer, sun, t0, t1)
+    print(t.utc_iso(' '))
+    print(y)
+
+.. testoutput::
+
+    ['2018-09-12 11:13:13Z', '2018-09-13 11:14:12Z']
+    [ True  True]
+
+And here’s how to ask for the sunsets:
+
+.. testcode::
+
+    t, y = almanac.find_settings(observer, sun, t0, t1)
+    print(t.utc_iso(' '))
+    print(y)
+
+.. testoutput::
+
+    ['2018-09-12 23:49:37Z', '2018-09-13 23:47:56Z']
+    [ True  True]
+
+Normally every value in the second array will be ``True``,
+indicating that a rising or setting was successfully detected.
+But locations north of the Arctic Circle or south of the Antarctic Circle
+can experience 24-hour summer days during which the sun never sets,
+and suffer winter days during which the sun never rises.
+On days when the Sun never reaches the horizon,
+the second array will have the value ``False``,
+and Skyfield will return the moment of transit instead.
+For example:
+
+.. testcode::
+
+    harra_sweden = api.wgs84.latlon(+67.4066, +20.0997)
+    observer = eph['Earth'] + harra_sweden
+    sun = eph['Sun']
+
+    t0 = ts.utc(2022, 12, 18)
+    t1 = ts.utc(2022, 12, 26)
+    t, y = almanac.find_risings(observer, sun, t0, t1)
+
+    alt, az, dist = observer.at(t).observe(sun).apparent().altaz()
+
+    for ti, yi, alti in zip(t.utc_iso(' '), y, alt.degrees):
+        print('{} {:5} {:.4f}'.format(ti, str(yi), alti))
+
+.. testoutput::
+
+    2022-12-18 10:22:54Z True  -0.8333
+    2022-12-19 10:29:21Z True  -0.8333
+    2022-12-20 10:37:06Z False -0.8387
+    2022-12-21 10:37:36Z False -0.8464
+    2022-12-22 10:38:06Z False -0.8461
+    2022-12-23 10:38:36Z False -0.8380
+    2022-12-24 10:31:29Z True  -0.8333
+    2022-12-25 10:26:08Z True  -0.8333
+
+This output shows that right around the winter solstice,
+there are four days on which the Sun never quite reaches the horizon,
+but is at least a few fractions of a degree below the altitude of -0.8333°
+that would qualify for the USNO definition of sunrise.
+So Skyfield instead returns the moment when the Sun is closest to the horizon,
+with the accompanying value ``False``.
+
+In case you are maintaining older code:
+versions before Skyfield 1.47 could only compute sunrises and sunsets
+with an almanac routine
+that was both slower than the modern routine described above,
+and that also tended to miss sunrises and sunsets in the Arctic and Antarctic.
+Here’s how the older routine is called:
 
 .. testcode::
 
@@ -307,28 +385,6 @@ If you need to provide your own custom value for refraction, adjust the
 estimate of the Sun’s radius, or account for a vantage point above the
 Earth’s surface, see :ref:`risings-and-settings` to learn about the more
 versatile :func:`~skyfield.almanac.risings_and_settings()` routine.
-
-Note that a location near one of the poles during polar summer or polar
-winter will not experience sunrise and sunset.  To learn whether the sun
-is up or down, call the sunrise-sunset function at the time that
-interests you, and the return value will indicate whether the sun is up.
-
-.. testcode::
-
-    far_north = api.wgs84.latlon(89, -80)
-    f = almanac.sunrise_sunset(eph, far_north)
-    t, y = almanac.find_discrete(t0, t1, f)
-
-    print(t.utc_iso())  # Empty list: no sunrise or sunset
-    print(f(t0))        # But we can ask if the sun is up
-
-    print('polar day' if f(t0) else 'polar night')
-
-.. testoutput::
-
-    []
-    True
-    polar day
 
 Twilight
 ========
