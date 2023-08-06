@@ -4,6 +4,7 @@ name: ci
 on:
   push:
     branches:
+      - fix-ci
       - master
 
   pull_request:
@@ -42,22 +43,18 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: [2.7, 3.6]
+        python: [python2, python3]
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
 
     - name: Install
       run: |
-        python -m pip install --upgrade pip
-        python setup.py sdist
-        pip install dist/*
-        pip install mock pandas
-        pip install https://github.com/brandon-rhodes/assay/archive/master.zip
+        ${{python}} -m pip install --upgrade pip
+        ${{python}} setup.py sdist
+        ${{python}} -m pip install dist/*
+        ${{python}} -m pip install mock pandas
+        ${{python}} -m pip install https://github.com/brandon-rhodes/assay/archive/master.zip
 
     - name: Test
       run: |
