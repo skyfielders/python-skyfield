@@ -52,7 +52,8 @@ jobs:
       run: |
         sudo apt install python3-virtualenv virtualenv
         virtualenv -p ${{matrix.python}} V
-        source ./V/activate
+        ls -lR V
+        source ./V/bin/activate
         python -m pip install --upgrade pip
         python setup.py sdist
         python -m pip install dist/*
