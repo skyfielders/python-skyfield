@@ -29,16 +29,15 @@ A given coordinate system can be used to produce
 two kinds of coordinate:
 Cartesian and spherical.
 
-*Cartesian* coordinates,
-named after their inventor René Descartes,
-measure a position as three distances |xyz|
-along axes that stand at right angles to each other.
+*Cartesian* coordinates
+specify a position by providing three distances |xyz|
+that are measured along axes that stand at right angles to each other.
 
 *Spherical* coordinates instead specify a location
 using two angles plus a distance.
 Just as a geographic latitude and longitude
 designate a position on the Earth,
-the two angles of a spherical coordinate
+so the two angles of a spherical coordinate
 pick out a particular point in the sky —
 a particular point on the celestial sphere —
 and the distance says how far you would need to travel in that direction
