@@ -62,5 +62,5 @@ jobs:
 
     - name: Test
       run: |
-        source ./V/activate
+        source ./V/bin/activate
         cd ci && ../test-code.sh
