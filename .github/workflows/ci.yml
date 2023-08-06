@@ -52,8 +52,7 @@ jobs:
       run: |
         sudo apt install python3-virtualenv virtualenv
         virtualenv -p ${{matrix.python}} V
-        ./V/bin/python --version
-        source ./V/bin/activate
+        bash -c "source .v/skyfield/bin/activate && set | egrep '^(PATH|VIRTUAL_ENV)='" >> "$GITHUB_ENV"
         which python
         python --version
         python -m pip install --upgrade pip
