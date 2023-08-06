@@ -345,7 +345,7 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     ts = start_time.ts
     tt0 = start_time.tt
     tt1 = end_time.tt
-    sample_count = np.ceil((tt1 - tt0) / 0.8) + 1
+    sample_count = int(np.ceil((tt1 - tt0) / 0.8)) + 1
     t = ts.tt_jd(np.linspace(tt0, tt1, sample_count))
 
     # Determine the target's hour angle and declination at those times.
