@@ -23,10 +23,12 @@ jobs:
 
     - name: Install
       run: |
-        sudo apt -q -q install python3-virtualenv virtualenv
+        sudo apt install -q -q python3-virtualenv virtualenv
         virtualenv -p ${{matrix.python}} V
         bash -c "source ./V/bin/activate && set | egrep '^(PATH|VIRTUAL_ENV)='" >> "$GITHUB_ENV"
         echo '###' && cat "$GITHUB_ENV" && echo '###'
+        echo PATH is $PATH
+        source ./V/bin/activate
         echo PATH is $PATH
         which python
         python --version
