@@ -41,24 +41,40 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [2.7, 3.6]
+        python: [python2, python3]
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
 
     - name: Install
       run: |
+        sudo apt install -q -q python3-virtualenv virtualenv
+        virtualenv -p ${{matrix.python}} V
+
+    - name: Build scripts
+      run: |
+        cat <<'EOF' > GITHUB_INSTALL.sh
+        source ./V/bin/activate
+        echo PATH is $PATH
+        which python
+        python --version
         python -m pip install --upgrade pip
         python setup.py sdist
-        pip install dist/*
-        pip install mock pandas
-        pip install https://github.com/brandon-rhodes/assay/archive/master.zip
+        python -m pip install dist/*
+        python -m pip install mock pandas
+        python -m pip install https://github.com/brandon-rhodes/assay/archive/master.zip
+        EOF
+        cat <<'EOF' > GITHUB_TEST.sh
+        source ./V/bin/activate
+        cd ci && ../test-code.sh
+        EOF
+
+    - name: Install
+      run: |
+        bash -e -x GITHUB_INSTALL.sh
 
     - name: Test
       run: |
-        cd ci && ../test-code.sh
+        bash -e -x GITHUB_TEST.sh
