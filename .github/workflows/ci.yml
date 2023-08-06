@@ -46,8 +46,8 @@ jobs:
 
     - name: Install
       run: |
-        bash -e -x install.sh
+        bash -e -x GITHUB_INSTALL.sh
 
     - name: Test
       run: |
-        bash -e -x test.sh
+        bash -e -x GITHUB_TEST.sh
