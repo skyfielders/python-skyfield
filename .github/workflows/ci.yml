@@ -25,9 +25,10 @@ jobs:
       run: |
         sudo apt install -q -q python3-virtualenv virtualenv
         virtualenv -p ${{matrix.python}} V
-        bash -c "source ./V/bin/activate && set | egrep '^(PATH|VIRTUAL_ENV)='" >> "$GITHUB_ENV"
-        echo '###' && cat "$GITHUB_ENV" && echo '###'
-        echo PATH is $PATH
+
+    - name: Build scripts
+      run: |
+        cat <<'EOF' > GITHUB_INSTALL.sh
         source ./V/bin/activate
         echo PATH is $PATH
         which python
@@ -37,8 +38,16 @@ jobs:
         python -m pip install dist/*
         python -m pip install mock pandas
         python -m pip install https://github.com/brandon-rhodes/assay/archive/master.zip
+        EOF
+        cat <<'EOF' > GITHUB_TEST.sh
+        source ./V/bin/activate
+        cd ci && ../test-code.sh
+        EOF
+
+    - name: Install
+      run: |
+        bash -e -x install.sh
 
     - name: Test
       run: |
-        bash -c "source ./V/bin/activate && set | egrep '^(PATH|VIRTUAL_ENV)='" >> "$GITHUB_ENV"
-        cd ci && ../test-code.sh
+        bash -e -x test.sh
