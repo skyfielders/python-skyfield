@@ -43,13 +43,14 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python: [python2, python3]
+        python: [python, python3]
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Install
       run: |
+        sudo apt install ${{matrix.python}}-virtualenv
         virtualenv -p ${{matrix.python}} V
         source V/activate
         python -m pip install --upgrade pip
