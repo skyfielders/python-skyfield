@@ -327,12 +327,13 @@ def _setting_hour_angle(latitude, declination, altitude_radians):
 def _rising_hour_angle(latitude, declination, altitude_radians):
     return - _setting_hour_angle(latitude, declination, altitude_radians)
 
-def _transit_hour_angle(latitude, declination, altitude_radians):
+def _transit_ha(latitude, declination, altitude_radians):
     return 0.0
 
 def _find(observer, target, start_time, end_time, horizon_degrees, f):
     if horizon_degrees is None:
-        if getattr(target, 'target', None) == 10:
+        tt = getattr(target, 'target', None)
+        if tt == 10:
             horizon_degrees = -0.8333  # USNO horizon+radius for sunrise/sunset
         else:
             raise NotImplementedError
@@ -398,6 +399,6 @@ def find_settings(observer, target, start_time, end_time, horizon_degrees=None):
     return _find(observer, target, start_time, end_time, horizon_degrees,
                  _setting_hour_angle)
 
-def _find_transits(observer, target, start_time, end_time, horizon_degrees=None):
-    return _find(observer, target, start_time, end_time, horizon_degrees,
-                 _transit_hour_angle)
+def find_transits(observer, target, start_time, end_time):
+    t, _ = _find(observer, target, start_time, end_time, 0.0, _transit_ha)
+    return t

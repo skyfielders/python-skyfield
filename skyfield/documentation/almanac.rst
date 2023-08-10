@@ -241,16 +241,32 @@ swings the sky through nearly 360°,
 leaving the celestial poles stationary
 while bringing each star and planet in turn
 across your *meridian* —
-the “line of longitude” in the sky above you
-that runs from the South Pole to the North Pole
-through the zenith point directly above your location on Earth.
+the line of right ascension in the sky above you
+that runs from the South Pole to the North Pole through your local zenith.
+
 You can ask Skyfield for the times at which a body
-crosses your meridian,
-and then the antimeridian on the opposite side of the celestial globe:
+crosses your meridian:
 
 .. testcode::
 
     bluffton = api.wgs84.latlon(+40.8939, -83.8917)
+    observer = eph['Earth'] + bluffton
+
+    t0 = ts.utc(2020, 11, 6)
+    t1 = ts.utc(2020, 11, 8)
+    t = almanac.find_transits(observer, eph['Mars'], t0, t1)
+
+    print(t.utc_strftime('%Y-%m-%d %H:%M'))
+
+.. testoutput::
+
+    ['2020-11-06 03:32', '2020-11-07 03:28']
+
+Skyfield also has an older mechanism for detecting transits
+that isn’t as fast but that also returns the moments of anti-transit,
+when a body crosses the line of right ascension that crosses your local nadir:
+
+.. testcode::
 
     t0 = ts.utc(2020, 11, 6)
     t1 = ts.utc(2020, 11, 7)
@@ -272,8 +288,8 @@ Some astronomers call these moments
 
 Observers often think of transit as the moment
 when an object is highest in the sky,
-which is roughly true.
-But at very high precision,
+but that’s only roughly true.
+At very high precision,
 if the body has any north or south velocity
 then its moment of highest altitude will be slightly earlier or later.
 
@@ -281,8 +297,8 @@ Bodies near the poles are exceptions to the general rule
 that a body is visible at transit but below the horizon at antitransit.
 For a body that’s circumpolar from your location,
 transit and antitransit are both moments of visibility,
-when it stands above and below the pole;
-and objects close to the opposite pole will always be below the horizon,
+when it stands above and below the pole.
+And objects close to the opposite pole will always be below the horizon,
 even as they invisibly transit your line of longitude
 down below your horizon.
 
