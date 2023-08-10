@@ -35,25 +35,42 @@ If you compare almanac results to official sources like the `United
 States Naval Observatory <https://aa.usno.navy.mil/data/index>`_, the
 printed time will often differ because the Naval Observatory results are
 rounded to the nearest minute — any time with ``:30`` or more seconds at
-the end gets named as the next minute.
+the end gets rounded up to the next minute.
 
-If you try to display a date that needs to be rounded to the nearest
-minute by simply stopping at ``%M`` and leaving off the ``%S`` seconds,
-the output will be one minute too early.  For example, the Naval
-Observatory would round ``14:59`` up to ``:15`` in the following date.
+The Skyfield method :meth:`~skyfield.timelib.Time.utc_strftime()`
+performs this rounding automatically if you don’t ask for the seconds to
+be displayed:
 
 .. testcode::
 
-    t = ts.utc(2018, 9, 10, 5, 14, 59)
+    t = ts.utc(2023, 8, 10, 6, 21, 45.9)
+
+    print('Microseconds:', t.utc_strftime('%Y-%m-%d %H:%M:%S.%f'))
+    print('Nearest second:', t.utc_strftime('%Y-%m-%d %H:%M:%S'))
+    print('Nearest minute:', t.utc_strftime('%Y-%m-%d %H:%M'))
+
+.. testoutput::
+
+    Microseconds: 2023-08-10 06:21:45.900000
+    Nearest second: 2023-08-10 06:21:46
+    Nearest minute: 2023-08-10 06:22
+
+But beware that the rounding won’t happen automatically if you are doing
+your own formatting using Python’s built-in ``datetime`` objects.  For
+example, if you stop with ``%M``, then the seconds are simply ignored,
+instead of being used for rounding:
+
+.. testcode::
+
     dt = t.utc_datetime()
     print(dt.strftime('%Y-%m-%d %H:%M'))
 
 .. testoutput::
 
-    2018-09-10 05:14
+    2023-08-10 06:21
 
-To do the same rounding yourself, simply add 30 seconds to the time
-before truncating the seconds.
+To fix the problem and round a Python ``datetime`` to the nearest
+minute, try manually adding 30 seconds to the time before displaying it:
 
 .. testcode::
 
@@ -67,7 +84,7 @@ before truncating the seconds.
 
 .. testoutput::
 
-    2018-09-10 05:15
+    2023-08-10 06:22
 
 The results should then agree with the tables produced by the USNO.
 

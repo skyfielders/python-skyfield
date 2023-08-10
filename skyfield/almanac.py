@@ -341,7 +341,8 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     geo = observer.vector_functions[-1]
     latitude = geo.latitude
 
-    # Build an array of times 0.8 days apart from start_time to end_time.
+    # Build an array of times 0.8 days apart, in the hopes that nothing
+    # ever rises (or sets or transits) twice within a 0.8-day period.
     ts = start_time.ts
     tt0 = start_time.tt
     tt1 = end_time.tt
