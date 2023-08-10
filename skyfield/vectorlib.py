@@ -81,7 +81,6 @@ class VectorFunction(object):
 
         * Solar System Barycenter: :class:`~skyfield.positionlib.Barycentric`
         * Center of the Earth: :class:`~skyfield.positionlib.Geocentric`
-        * Difference: :class:`~skyfield.positionlib.Geometric`
         * Anything else: :class:`~skyfield.positionlib.ICRF`
 
         """

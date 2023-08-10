@@ -650,19 +650,7 @@ class ICRF(object):
 # important enough change to warrant a deprecation error for users, so:
 ICRS = ICRF
 
-class Geometric(ICRF):
-    """An |xyz| vector between two instantaneous position.
-
-    A geometric position is the difference between the Solar System
-    positions of two bodies at exactly the same instant.  It is *not*
-    corrected for the fact that, in real physics, it will take time for
-    light to travel from one position to the other.
-
-    Both the ``.position`` and ``.velocity`` are |xyz| vectors
-    oriented along the axes of the International Celestial Reference
-    System (ICRS), the modern replacement for J2000 coordinates.
-
-    """
+class Geometric(ICRF): pass  # deprecated; kept for backwards compatibility
 
 class Barycentric(ICRF):
     """An |xyz| position measured from the Solar System barycenter.

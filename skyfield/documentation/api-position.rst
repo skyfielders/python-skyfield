@@ -78,15 +78,6 @@ Geocentric position relative to the Earth
    This class inherits the methods of is parent class :class:`ICRF` as
    well as the orientation of its axes in space.
 
-Geometric instantaneous position between two objects
-====================================================
-
-.. autoclass:: Geometric
-   :members:
-
-   This class inherits the methods of is parent class :class:`ICRF` as
-   well as the orientation of its axes in space.
-
 Building a position from right ascension and declination
 ========================================================
 

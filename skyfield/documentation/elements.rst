@@ -5,10 +5,10 @@
 
 .. currentmodule:: skyfield.api
 
-Skyfield is able to calculate osculating orbital elements for any
-Geometric, Barycentric, or Geocentric position with respect to either
-the ecliptic or equatorial plane. The data produced by Skyfield matches
-the data produced by JPL’s HORIZONS system.
+Skyfield is able to calculate osculating orbital elements
+with respect to either the ecliptic or equatorial plane.
+The data produced by Skyfield
+matches the data produced by JPL’s HORIZONS system.
 
 Generating Elements
 ===================
