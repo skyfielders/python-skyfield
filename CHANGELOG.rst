@@ -189,7 +189,7 @@ v1.37 — 2021 February 15
 
 * The :class:`~skyfield.timelib.Time`
   tuple :data:`~skyfield.timelib.Time.utc`
-  and method :data:`~skyfield.timelib.Time.utc_strftime()`
+  and method :meth:`~skyfield.timelib.Time.utc_strftime()`
   are now backed by the same math,
   so they always advance to the next calendar day at the same moment.
   This makes it safe to mix values returned by one of them
