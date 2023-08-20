@@ -277,32 +277,18 @@ class Geoid(object):
 
     subpoint = geographic_position_of  # deprecated method name
 
-    def intersection_of(self, position, direction):
+    def intersection_of(self, vector):
         """Return the surface point intersected by a vector.
 
-        The ``position`` and ``direction`` describe the tail and orientation
-        of the vector to intersect the ellipsoid, respectively. The vector must
-        be provided in ICRF coordinates with a ``.center``` of 399, the center
-        of the Earth. The direction should be an |xyz| unit vector. Returns a
-        `GeographicPosition` giving the geodetic ``latitude`` and ``longitude``
-        at the point that the ray intersects the surface of the Earth.
+        TODO ...
+        Returns a `GeographicPosition` giving the geodetic ``latitude`` and
+        ``longitude`` at the point that the ray intersects the surface of the
+        Earth.
 
         The main calculation implemented here is based on JPL's NAIF toolkit;
         https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/ellipses.html
         """
-        if not isinstance(position, ICRF):
-            raise ValueError(
-                'you can only calculate an intersection for a vector that is'
-                ' defined by coordinates along the ICRF axes'
-            )
-        if position.center != 399:
-            raise ValueError(
-                'you can only calculate an intersection for a vector that is'
-                ' defined relative to a position that is geocentric'
-                ' (center=399), but this position has a center of {0}'
-                .format(position.center)
-            )
-        if position.t is None:
+        if vector.t is None:
             raise ValueError(
                 'you can only calculate an intersection for a vector that is'
                 ' defined at a fixed point in time (must have a non-null `.t`)'
@@ -317,9 +303,9 @@ class Geoid(object):
         inv_d_matrix = array([[a, 0.0, 0.0], [0.0, a, 0.0], [0.0, 0.0, c]])
 
         # Apply distortion matrix to the vector
-        position_xyz = position.xyz.au
+        position_xyz = vector.center.xyz.au
         d_position_xyz = mxv(d_matrix, position_xyz)
-        d_direction = mxv(d_matrix, direction)
+        d_direction = mxv(d_matrix, vector.target)
         # Rescale the vector to unit length
         d_direction = d_direction / length_of(d_direction)
 
@@ -341,7 +327,7 @@ class Geoid(object):
 
         # Apply inverse distortion and convert back to geocentric coords
         intersection = Geocentric(
-            mxv(inv_d_matrix, d_intersection), t=position.t
+            mxv(inv_d_matrix, d_intersection), t=vector.t
             )
 
         # Retrieve latitude and longitude

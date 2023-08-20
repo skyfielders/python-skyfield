@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """Raw transforms between coordinate frames, as NumPy matrices."""
 
-from numpy import array, cos, sin
+from numpy import array
 
 from .constants import ANGVEL, ASEC2RAD, DAY_S, pi, tau
 from .data.spice import inertial_frames as _inertial_frames
 from .elementslib import osculating_elements_of
-from .functions import mxm, mxmxm, mxv, rot_x, rot_y, rot_z
+from .functions import mxm, mxmxm, rot_x, rot_y, rot_z
 
 
 def build_matrix():
@@ -155,15 +155,23 @@ class InertialFrame(object):
     def rotation_at(self, t):
         return self._matrix
 
-class LVLH(InertialFrame):
+class LVLH(object):
     """The Local Vertical Local Horizontal (LVLH) reference frame.
 
-    An inertial frame for a body in orbit, according to CCSDS conventions.
+    A reference frame for a body in orbit, according to CCSDS conventions.
     The frame origin is centered on the body `position`, with z-axis in the
     direction of the `position.center` (i.e., the negative position vector),
     and y-axis opposite the orbital momentum vector.
     """
-    def __init__(self, position):
+    def __init__(self, satellite):
+        self.satellite = satellite
+        self.__doc__ = (
+            "Center ({0}) Pointing Local Vertical Local Horizontal"
+            " reference frame."
+            ).format(satellite.center)
+
+    def rotation_at(self, t):
+        position = self.satellite.at(t)
         elements = osculating_elements_of(position)
         i = elements.inclination.radians
         u = elements.argument_of_latitude.radians
@@ -172,34 +180,7 @@ class LVLH(InertialFrame):
         matrix = mxmxm(rot_x(pi / 2.0), rot_y(pi / 2.0), rot_y(om - pi))
         matrix = mxmxm(matrix, rot_z(pi - i), rot_y(-u))
 
-        doc = (
-            "Center ({0}) Pointing Local Vertical Local Horizontal"
-            " reference frame."
-            ).format(position.center)
-        super(LVLH, self).__init__(doc, matrix)
-
-    def local_looking_vector(self, pitch, roll):
-        """Return a unit vector in the attitude direction in local coordinates.
-
-        Rotations should be provided as radians; `roll` is rotation about the
-        x-axis and `pitch` is rotation about the y-axis.
-        """
-        local_looking_vector = array(
-            [sin(pitch), -sin(roll), cos(pitch) * cos(roll)]
-            )
-
-        return local_looking_vector
-
-    def icrf_looking_vector(self, pitch, roll):
-        """Return a unit vector in the attitude direction, in ICRF coordinates.
-
-        Rotations should be provided in radians; `roll` is rotation about the
-        x-axis and `pitch` is rotation about the y-axis.
-        """
-        local_looking_vector = self.local_looking_vector(pitch, roll)
-        icrf_looking_vector = mxv(self._matrix, local_looking_vector)
-
-        return icrf_looking_vector
+        return matrix
 
 equatorial_B1950_frame = InertialFrame(
     'Reference frame of the Earth’s mean equator and equinox at B1950.',

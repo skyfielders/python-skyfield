@@ -1,4 +1,5 @@
 from assay import assert_raises
+from collections import namedtuple
 from numpy import abs, arange, sqrt
 
 from skyfield import constants
@@ -266,8 +267,10 @@ def test_deprecated_position_subpoint_method(ts, angle):
 def test_intersection_from_pole(ts):
     t = ts.utc(2018, 1, 19, 14, 37, 55)
     p = wgs84.latlon(90.0, 0.0, 1234.0).at(t)
-    attitude = -p.xyz.au / length_of(p.xyz.au)
-    earth_point = wgs84.intersection_of(p, attitude)
+    direction = -p.xyz.au / length_of(p.xyz.au)
+    Vector = namedtuple("Vector", "center, target, t")
+    vector = Vector(p, direction, t)
+    earth_point = wgs84.intersection_of(vector)
 
     error_degrees = abs(earth_point.latitude.degrees - 90.0)
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
@@ -277,8 +280,10 @@ def test_intersection_from_pole(ts):
 def test_intersection_from_equator(ts):
     t = ts.utc(2018, 1, 19, 14, 37, 55)
     p = wgs84.latlon(0.0, 0.0, 1234.0).at(t)
-    attitude = -p.xyz.au / length_of(p.xyz.au)
-    earth_point = wgs84.intersection_of(p, attitude)
+    direction = -p.xyz.au / length_of(p.xyz.au)
+    Vector = namedtuple("Vector", "center, target, t")
+    vector = Vector(p, direction, t)
+    earth_point = wgs84.intersection_of(vector)
 
     error_degrees = abs(earth_point.latitude.degrees - 0.0)
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
@@ -294,22 +299,26 @@ def test_limb_intersection_points(ts):
     d = 100.0
     a = wgs84.radius.au
     c = a * (1.0 - 1.0 / wgs84.inverse_flattening)
-
-    # Attitude vectors pointing to the polar and equatorial limbs of the Earth
-    attitude_bottom_tangent = [-d, 0.0, -c] / sqrt(d**2 + c**2)
-    attitude_top_tangent = [-d, 0.0, c] / sqrt(d**2 + c**2)
-    attitude_left_tangent = [-d, -a, 0.0] / sqrt(d**2 + c**2)
-    attitude_right_tangent = [-d, a, 0.0] / sqrt(d**2 + c**2)
-    # Attitude vector pointing straight down
-    attitude_zenith = [-1.0, 0.0, 0.0]
-
     pos = ICRF(position_au=[d, 0.0, 0.0], t=t, center=399)
 
-    intersection_bottom = wgs84.intersection_of(pos, attitude_bottom_tangent)
-    intersection_top = wgs84.intersection_of(pos, attitude_top_tangent)
-    intersection_left = wgs84.intersection_of(pos, attitude_left_tangent)
-    intersection_right = wgs84.intersection_of(pos, attitude_right_tangent)
-    intersection_zenith = wgs84.intersection_of(pos, attitude_zenith)
+    # Vectors pointing to the polar and equatorial limbs of the Earth
+    direction_bottom_tangent = [-d, 0.0, -c] / sqrt(d**2 + c**2)
+    direction_top_tangent = [-d, 0.0, c] / sqrt(d**2 + c**2)
+    direction_left_tangent = [-d, -a, 0.0] / sqrt(d**2 + c**2)
+    direction_right_tangent = [-d, a, 0.0] / sqrt(d**2 + c**2)
+    Vector = namedtuple("Vector", "center, target, t")
+    bottom_tangent = Vector(pos, direction_bottom_tangent, t)
+    top_tangent = Vector(pos, direction_top_tangent, t)
+    left_tangent = Vector(pos, direction_left_tangent, t)
+    right_tangent = Vector(pos, direction_right_tangent, t)
+    # Attitude vector pointing straight down
+    zenith = Vector(pos, [-1.0, 0.0, 0.0], t)
+
+    intersection_bottom = wgs84.intersection_of(bottom_tangent)
+    intersection_top = wgs84.intersection_of(top_tangent)
+    intersection_left = wgs84.intersection_of(left_tangent)
+    intersection_right = wgs84.intersection_of(right_tangent)
+    intersection_zenith = wgs84.intersection_of(zenith)
 
     # Viewed from sufficient distance, points of intersection should be nearly
     # tangent to the north and south poles, and the zenith longitude +/- 90.0

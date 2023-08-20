@@ -4,9 +4,11 @@
 from numpy import (
     array, concatenate, identity, multiply, ones_like, repeat,
 )
+from collections import namedtuple
 from sgp4.api import SGP4_ERRORS, Satrec
 
 from .constants import AU_KM, DAY_S, T0, tau
+from .framelib import LVLH
 from .functions import _T, mxm, mxv, rot_x, rot_y, rot_z
 from .searchlib import _find_discrete, find_maxima
 from .timelib import compute_calendar_date
@@ -280,6 +282,30 @@ class EarthSatellite(VectorFunction):
 
         i = jd.argsort()
         return ts.tt_jd(jd[i]), v[i]
+
+    def _attitude(self, t, roll=0.0, pitch=0.0, yaw=0.0, rotation_order="xyz"):
+        """Return a unit vector in the attitude direction in local coordinates.
+
+        Rotations are applied to an initial vector pointing along the z-axis.
+        Rotations should be provided as radians; `roll` is rotation about the
+        x-axis, `pitch` is about the y-axis, and `yaw` is about the z-axis.
+        """
+        rotations = {
+            "x": rot_x(roll) if roll != 0 else _identity,
+            "y": rot_y(pitch) if pitch != 0 else _identity,
+            "z": rot_z(yaw) if yaw != 0 else _identity,
+        }
+
+        lvlh_attitude = array([0, 0, 1])
+        for axis in rotation_order:
+            lvlh_attitude = mxv(rotations[axis], lvlh_attitude)
+
+        lvlh_frame = LVLH(self)
+        direction = mxv(lvlh_frame.rotation_at(t), lvlh_attitude)
+        Attitude = namedtuple("Attitude", "center, target, t")
+        attitude = Attitude(self.at(t).position, direction, t)
+
+        return attitude
 
 class TEME(object):
     """The SGP4-specific True Equator Mean Equinox frame of reference.

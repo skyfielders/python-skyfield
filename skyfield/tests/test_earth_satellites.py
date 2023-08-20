@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from numpy import array
+from numpy import allclose, array, arange, isclose
 from skyfield import api
 from skyfield.api import EarthSatellite, load
-from skyfield.constants import AU_KM, AU_M
+from skyfield.constants import AU_KM, AU_M, pi
+from skyfield.functions import angle_between, length_of
 from skyfield.sgp4lib import TEME_to_ITRF, VectorFunction
 from skyfield.timelib import julian_date
 
@@ -207,3 +208,41 @@ def test_behind_earth_thoroughly():
         True, True, True, False,
         True, True, True, False,  # Last two fake sats can see each other.
     ]
+
+def test_neutral_attitude():
+    ts = api.load.timescale()
+    times = [ts.utc(2023, 4, 8, 1 + i, 25) for i in range(10)]
+    sat = EarthSatellite(line1, line2)
+
+    for t in times:
+        a = EarthSatellite(line1, line2)._attitude(t)
+        p = sat.at(t).position.au
+        a = sat._attitude(t)
+        # Attitude should be the negative of position vector.
+        neg_p = -array(p) / length_of(array(p))
+        assert allclose(a.center.au, p)
+        assert allclose(a.target, neg_p)
+
+def test_attitude():
+    ts = api.load.timescale()
+    t = ts.utc(2023, 4, 8, 1, 25)
+    sat = EarthSatellite(line1, line2)
+    pos = sat.at(t).position.au
+    angles = array(arange(-pi, pi, pi / 8))
+
+    for angle in angles:
+        abs_angle = abs(angle)
+        a = sat._attitude(t, roll=angle)
+        assert isclose(angle_between(a.target, -pos), abs_angle)
+
+        a = sat._attitude(t, pitch=angle)
+        assert isclose(angle_between(a.target, -pos), abs_angle)
+
+        a = sat._attitude(t, yaw=angle)
+        assert isclose(angle_between(a.target, -pos), 0.0)
+
+        a = sat._attitude(t, pitch=angle, yaw=angle)
+        assert allclose(angle_between(a.target, -pos), abs_angle)
+
+        a = sat._attitude(t, roll=angle, yaw=angle)
+        assert allclose(angle_between(a.target, -pos), abs_angle)
