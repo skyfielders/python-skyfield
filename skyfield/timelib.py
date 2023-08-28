@@ -5,9 +5,8 @@ import sys
 from collections import namedtuple
 from datetime import date, datetime, timedelta
 from numpy import (
-    array, concatenate, cos, float_, int64, isnan, isinf, linspace,
+    array, concatenate, cos, float64, int64, isnan, isinf, linspace,
     nan, ndarray, nonzero, pi, rollaxis, searchsorted, sin, where, zeros_like,
-
 )
 from time import strftime, struct_time
 from ._compatibility import interp
