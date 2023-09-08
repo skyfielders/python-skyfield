@@ -357,34 +357,35 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # Invoke our geometry formula: for each time `t`, predict the hour
     # angle at which the target will next reach the horizon, if its
     # declination were to remain constant.
-    setting_ha = f(latitude, dec, h)
-    rising_radians = - setting_ha
+    desired_ha_radians = f(latitude, dec, h)
 
     # So at each time `t`, how many radians is the target's hour angle
-    # from the target's next 'ideal' rising?
-    difference = ha.radians - rising_radians
+    # from the target's next 'ideal' rising or setting?
+    difference = desired_ha_radians - ha.radians
     difference %= tau
 
     # We want to return each rising exactly once, so where there are
     # runs of several times `t` that all precede the same rising, let's
     # throw the first few out and keep only the last one.
-    i, = np.nonzero(np.diff(difference) < 0.0)
+    i, = np.nonzero(np.diff(difference) > 0.0)
 
     # When might each rising have actually taken place?  Let's
     # interpolate between the two times that bracket each rising.
-    a = tau - difference[i]
-    b = difference[i + 1]
+    a = difference[i]
+    b = tau - difference[i + 1]
     tt = t.tt
     interpolated_tt = (b * tt[i] + a * tt[i+1]) / (a + b)
     t = ts.tt_jd(interpolated_tt)
 
     ha_per_day = tau            # angle the celestrial sphere rotates in 1 day
 
-    for i in 0, 1:
+    #for i in 0, 1:
+    for i in 0, 1, 2:
         _fastify(t)
         ha, dec, _ = observer.at(t).observe(target).apparent().hadec()
         desired_ha = f(latitude, dec, h)
         ha_adjustment = desired_ha - ha.radians
+        ha_adjustment = (ha_adjustment + pi) % tau - pi
         timebump = ha_adjustment / ha_per_day
         t = ts.tt_jd(t.whole, t.tt_fraction + timebump)
 
