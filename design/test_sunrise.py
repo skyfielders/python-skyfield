@@ -14,12 +14,12 @@ from skyfield.api import load, wgs84
 
 TABLE = """\
              o  ,    o  ,                                    FREDONIA, AZ                              Astronomical Applications Dept.
-Location: W112 31, N36 57                          Rise and Set for the Sun for 2023                   U. S. Naval Observatory        
-                                                                                                       Washington, DC  20392-5420     
-                                                      Zone:  7h West of Greenwich                                                     
-                                                                                                                                      
-                                                                                                                                      
-       Jan.       Feb.       Mar.       Apr.       May        June       July       Aug.       Sept.      Oct.       Nov.       Dec.  
+Location: W112 31, N36 57                          Rise and Set for the Sun for 2023                   U. S. Naval Observatory
+                                                                                                       Washington, DC  20392-5420
+                                                      Zone:  7h West of Greenwich
+
+
+       Jan.       Feb.       Mar.       Apr.       May        June       July       Aug.       Sept.      Oct.       Nov.       Dec.
 Day Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set
      h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m
 01  0743 1724  0733 1755  0701 1824  0616 1852  0536 1919  0512 1944  0514 1954  0535 1937  0601 1859  0625 1814  0654 1733  0724 1714
@@ -120,4 +120,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

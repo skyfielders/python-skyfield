@@ -344,7 +344,7 @@ And here’s how to ask for the sunsets:
 
 .. testoutput::
 
-    ['2018-09-12 23:49:37Z', '2018-09-13 23:47:56Z']
+    ['2018-09-12 23:49:38Z', '2018-09-13 23:47:56Z']
     [ True  True]
 
 Normally every value in the second array will be ``True``,
