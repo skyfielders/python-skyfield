@@ -330,6 +330,8 @@ def _rising_hour_angle(latitude, declination, altitude_radians):
 def _transit_ha(latitude, declination, altitude_radians):
     return 0.0
 
+
+
 def _find(observer, target, start_time, end_time, horizon_degrees, f):
     if horizon_degrees is None:
         tt = getattr(target, 'target', None)
@@ -359,8 +361,8 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # declination were to remain constant.
     desired_ha_radians = f(latitude, dec, h)
 
-    # So at each time `t`, how many radians is the target's hour angle
-    # from the target's next 'ideal' rising or setting?
+    # So at each time `t`, how many radians must the sky turn to bring
+    # the target to the horizon?
     difference = desired_ha_radians - ha.radians
     difference %= tau
 
@@ -379,8 +381,10 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
 
     ha_per_day = tau            # angle the celestrial sphere rotates in 1 day
 
-    #for i in 0, 1:
-    for i in 0, 1, 2:
+    #for i in 0,:
+    for i in 0, 1:  # Good enough for Sun and planets?
+    #for i in 0, 1, 2:
+    #for i in 0, 1, 2, 3:  # Gets Moon to within a few hundredths?
         _fastify(t)
         ha, dec, _ = observer.at(t).observe(target).apparent().hadec()
         desired_ha = f(latitude, dec, h)

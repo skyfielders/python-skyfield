@@ -6,13 +6,14 @@
 # Moon.  Is it able to match USNO predictions for one year?
 
 import datetime as dt
+from collections import defaultdict
 from skyfield import almanac
 from skyfield.api import load, wgs84
 
 # From:
 # https://aa.usno.navy.mil/calculated/rstt/year?ID=AA&year=2023&task=0&lat=36.95&lon=-112.52&label=Fredonia%2C+AZ&tz=7&tz_sign=-1&submit=Get+Data
 
-TABLE = """\
+SUN_TABLE = """\
              o  ,    o  ,                                    FREDONIA, AZ                              Astronomical Applications Dept.
 Location: W112 31, N36 57                          Rise and Set for the Sun for 2023                   U. S. Naval Observatory
                                                                                                        Washington, DC  20392-5420
@@ -57,10 +58,56 @@ Day Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set 
 Add one hour for daylight time, if and when in use.
 """
 
-def main():
+MOON_TABLE = """\
+             o  ,    o  ,                                    FREDONIA, AZ                              Astronomical Applications Dept.
+Location: W112 31, N36 57                         Rise and Set for the Moon for 2023                   U. S. Naval Observatory
+                                                                                                       Washington, DC  20392-5420
+                                                      Zone:  7h West of Greenwich
+
+
+       Jan.       Feb.       Mar.       Apr.       May        June       July       Aug.       Sept.      Oct.       Nov.       Dec.
+Day Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set
+     h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m
+01  1342 0257  1414 0456  1259 0345  1442 0425  1529 0345  1726 0323  1839 0306  2011 0508  2015 0749  1940 0901  2025 1113  2111 1128
+02  1413 0400  1506 0549  1354 0434  1542 0453  1630 0408  1837 0354  1948 0359  2049 0627  2043 0902  2015 1013  2122 1208  2212 1203
+03  1449 0502  1602 0636  1453 0516  1642 0518  1732 0431  1950 0431  2048 0503  2121 0746  2112 1013  2056 1123  2223 1255  2312 1232
+04  1530 0603  1701 0716  1553 0552  1742 0542  1837 0456  2101 0518  2138 0617  2149 0900  2144 1123  2144 1228  2324 1333       1257
+05  1618 0700  1801 0751  1653 0623  1843 0605  1946 0524  2205 0616  2219 0736  2216 1012  2221 1232  2237 1327       1404  0010 1320
+06  1711 0752  1901 0820  1753 0650  1946 0629  2057 0558  2300 0724  2253 0853  2244 1121  2303 1338  2335 1417  0025 1431  0108 1341
+07  1809 0837  2000 0846  1852 0715  2052 0655  2208 0638  2345 0839  2322 1007  2313 1230  2352 1439       1459  0124 1455  0206 1403
+08  1908 0916  2059 0910  1952 0738  2200 0724  2316 0729       0954  2349 1118  2346 1337       1534  0036 1534  0222 1517  0305 1427
+09  2008 0949  2158 0933  2053 0801  2310 0759       0829  0021 1108       1226       1443  0046 1620  0136 1603  0320 1539  0407 1453
+10  2107 1017  2259 0956  2155 0825       0842  0015 0938  0052 1219  0015 1333  0023 1547  0145 1659  0236 1629  0419 1602  0512 1524
+11  2206 1042       1021  2301 0852  0019 0935  0104 1051  0119 1327  0042 1439  0107 1645  0245 1732  0335 1652  0520 1626  0621 1603
+12  2305 1106  0002 1049       0922  0123 1037  0145 1205  0145 1433  0111 1545  0157 1736  0345 1800  0433 1714  0623 1655  0730 1651
+13       1129  0108 1122  0009 0959  0218 1147  0219 1317  0211 1539  0145 1650  0253 1820  0445 1825  0531 1736  0730 1728  0838 1749
+14  0005 1153  0218 1202  0118 1045  0305 1301  0248 1426  0239 1646  0224 1752  0352 1857  0543 1847  0631 1759  0839 1810  0938 1857
+15  0107 1219  0329 1252  0226 1141  0343 1415  0315 1534  0309 1752  0310 1848  0452 1929  0641 1909  0732 1824  0947 1901  1029 2011
+16  0213 1249  0437 1354  0328 1246  0416 1527  0341 1642  0345 1857  0402 1938  0552 1956  0739 1931  0836 1854  1050 2001  1111 2126
+17  0323 1326  0539 1506  0422 1400  0445 1638  0408 1749  0426 1958  0459 2020  0651 2020  0838 1955  0942 1929  1146 2110  1146 2239
+18  0436 1412  0631 1624  0507 1516  0512 1748  0437 1857  0515 2054  0559 2056  0749 2042  0940 2021  1050 2013  1233 2223  1216 2350
+19  0549 1509  0714 1743  0544 1632  0539 1857  0509 2004  0609 2141  0659 2126  0847 2104  1044 2052  1156 2106  1311 2336  1243
+20  0657 1619  0749 1859  0617 1747  0607 2005  0547 2109  0707 2221  0759 2152  0945 2126  1150 2129  1256 2209  1344       1309 0059
+21  0756 1736  0820 2013  0645 1858  0638 2114  0632 2209  0807 2255  0857 2215  1044 2150  1257 2215  1349 2318  1412 0048  1336 0207
+22  0844 1856  0848 2123  0713 2009  0713 2221  0722 2301  0907 2323  0955 2237  1146 2218  1402 2312  1433       1439 0158  1405 0316
+23  0923 2013  0915 2232  0740 2118  0753 2323  0818 2346  1007 2348  1053 2259  1251 2251  1501       1510 0032  1506 0307  1438 0425
+24  0955 2126  0943 2339  0810 2226  0840       0918       1105       1151 2322  1359 2332  1552 0019  1542 0146  1533 0417  1517 0534
+25  1024 2236  1013       0842 2333  0933 0020  1018 0023  1203 0012  1252 2348  1508       1635 0133  1610 0300  1604 0528  1603 0641
+26  1050 2343  1047 0045  0919       1030 0109  1118 0055  1302 0034  1357       1613 0023  1711 0249  1638 0412  1640 0639  1656 0743
+27  1117       1125 0149  1002 0037  1130 0150  1217 0122  1403 0057  1505 0018  1711 0126  1743 0406  1705 0524  1722 0749  1755 0838
+28  1144 0048  1209 0249  1050 0137  1230 0225  1316 0146  1506 0121  1616 0055  1801 0239  1812 0522  1735 0636  1812 0856  1857 0923
+29  1214 0152             1144 0229  1330 0254  1415 0209  1614 0149  1726 0142  1842 0357  1839 0635  1808 0748  1908 0956  1959 1001
+30  1249 0256             1242 0314  1430 0321  1516 0232  1726 0223  1830 0240  1916 0517  1908 0748  1847 0900  2009 1046  2100 1032
+31  1328 0357             1342 0352             1619 0256             1926 0350  1946 0634             1933 1010             2159 1058
+               Note: Blank spaces in the table indicate that a rising or a setting did not occur during that 24 hr interval.
+
+Add one hour for daylight time, if and when in use.
+"""
+
+def test(table, e, body):
     usno_rises = []  # (month, minutes_into_day)
 
-    for line in TABLE.splitlines():
+    for line in table.splitlines():
         if not line[0:1].isdigit():
             continue
         day_of_month = int(line[:2])
@@ -79,14 +126,12 @@ def main():
     #t0 = ts.utc(2023, 1, 1, 10)
     t1 = ts.utc(2024, 1, 1, 7)
     #t1 = ts.utc(2023, 4, 1, 7)
-    e = load('de421.bsp')
     #e = load('de430.bsp')
     fredonia = wgs84.latlon(36 + 57/60.0, - (112 + 31/60.0))
     observer = e['Earth'] + fredonia
     horizon = -0.8333
     #horizon = -0.8333333333333
-    t, y = almanac.find_risings(observer, e['Sun'], t0, t1, horizon)
-    # t = ts.linspace(t0, t1, 5)
+    t, y = almanac.find_risings(observer, body, t0, t1, horizon)
     t -= dt.timedelta(hours=7)
     #strings = t.utc_strftime('%m-%d %H%M:%S.%f')
     #strings = t.utc_strftime('%m-%d %H%M')
@@ -99,24 +144,27 @@ def main():
         tup = u.month, u.day, u.hour * 60 + u.minute + (u.second >= 30)
         skyfield_rises.append(tup)
 
+    errors = defaultdict(int)
+
     for u, s in zip(usno_rises, skyfield_rises):
-        #print(u[0:2], s[0:2])
         if u[0:2] != s[0:2]:
             print()
             print('Error: usno', u[0:2], 'skyfield', s[0:2])
             exit(1)
-        print(u[2] - s[2], end=' ')
+        error = u[2] - s[2]
+        errors[error] += 1
+        print(error, end=' ')
     print()
+    print(sorted(errors.items()))
 
-    ti = t[2]
-    ti += dt.timedelta(hours=7)
-    #print(ti.utc_strftime())
-    alt, az, _ = observer.at(ti).observe(e['Sun']).apparent().altaz()
-    print('Altitude:', alt.degrees)
-    #01  1347 0249
-    #02  1420 0350
-    #03  1457 0451
-    #04  1540
+    toff = t + dt.timedelta(hours=7)
+    alt, az, _ = observer.at(toff).observe(body).apparent().altaz()
+    print('Altitude min:', min(alt.degrees), ' max:', max(alt.degrees))
+
+def main():
+    e = load('de421.bsp')
+    test(SUN_TABLE, e, e['Sun'])
+    test(MOON_TABLE, e, e['Moon'])
 
 if __name__ == '__main__':
     main()
