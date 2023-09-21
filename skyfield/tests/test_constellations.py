@@ -16,6 +16,10 @@ def test_constellations():
     assert lookup(position_of_radec(18.1747, 39., epoch=B1875)) == 'Her'
     assert lookup(position_of_radec(18.1753, 39., epoch=B1875)) == 'Lyr'
 
+    # Verify we are not using the paper's original table, which had an error.
+    star = position_of_radec(16.323165, -18.848203, epoch=B1875)
+    assert lookup(star) == 'Sco'
+
     # Test vectorization.
     assert list(
         lookup(position_of_radec([4.65, 4.75], [0, 0.3]))
