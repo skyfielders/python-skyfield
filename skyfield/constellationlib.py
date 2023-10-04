@@ -84,5 +84,5 @@ def load_constellation_names():
 
     """
     data = get_data('skyfield', 'data/constellations.gz')
-    data = zlib.decompress(data, wbits=zlib.MAX_WBITS+32).decode('ascii')
+    data = zlib.decompress(data, zlib.MAX_WBITS+32).decode('ascii')
     return [line.split(' ', 1) for line in data.splitlines()]
