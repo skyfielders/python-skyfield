@@ -1,4 +1,7 @@
-from skyfield.api import load_constellation_map, position_of_radec
+from skyfield.api import (
+    load_constellation_map, load_constellation_names, position_of_radec,
+)
+from skyfield.functions import load_bundled_npy
 from skyfield.timelib import Time, julian_date_of_besselian_epoch
 
 def test_constellations():
@@ -24,3 +27,13 @@ def test_constellations():
     assert list(
         lookup(position_of_radec([4.65, 4.75], [0, 0.3]))
     ) == ['Eri', 'Ori']
+
+def test_that_constellation_abbreviations_match():
+    # This test should ideally not have to load the underlying data
+    # source that is behind load_constellation_map(), but for the moment
+    # I do not see a quick alternative.
+    arrays = load_bundled_npy('constellations.npz')
+    abbrevs1 = set(arrays['indexed_abbreviations'])
+
+    abbrevs2 = {abbrev for abbrev, name in load_constellation_names()}
+    assert abbrevs1 == abbrevs2
