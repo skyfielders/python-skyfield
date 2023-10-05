@@ -5,6 +5,15 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+v1.47 — Unreleased
+------------------
+
+* Constellation abbreviations are now consistent between the
+  :func:`~skyfield.api.load_constellation_map()` table and the
+  :func:`~skyfield.api.load_constellation_names()` list.  Previously,
+  ``CVn`` and ``TrA`` had been mis-capitalized in the list as ``Cvn``
+  and ``Tra``.
+
 v1.46 — 2023 April 9
 --------------------
 
