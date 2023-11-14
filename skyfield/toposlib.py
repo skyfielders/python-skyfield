@@ -7,7 +7,7 @@ from .framelib import itrs
 from .functions import (
     _T, angular_velocity_matrix, dots, length_of, mxm, mxv, rot_y, rot_z,
 )
-from .positionlib import ICRF, Geocentric
+from .positionlib import Geocentric
 from .descriptorlib import reify
 from .units import Angle, Distance, _ltude
 from .vectorlib import VectorFunction
@@ -277,18 +277,20 @@ class Geoid(object):
 
     subpoint = geographic_position_of  # deprecated method name
 
-    def intersection_of(self, vector):
+    def intersection_of(self, icrf_vector):
         """Return the surface point intersected by a vector.
 
-        TODO ...
-        Returns a `GeographicPosition` giving the geodetic ``latitude`` and
-        ``longitude`` at the point that the ray intersects the surface of the
-        Earth.
-
+        This method calculates the point at which the input `icrf_vector`
+        intersects the surface of the Geoid. The input `icrf_vector` should be
+        an :class:`~skyfield.positionlib.ICRF` object (or subclass thereof)
+        and is implicitly assumed to extend to infinity.
         The main calculation implemented here is based on JPL's NAIF toolkit;
         https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/ellipses.html
+
+        Returns a `GeographicPosition` with the geodetic ``latitude`` and
+        ``longitude`` at the point of intersection.
         """
-        if vector.t is None:
+        if icrf_vector.t is None:
             raise ValueError(
                 'you can only calculate an intersection for a vector that is'
                 ' defined at a fixed point in time (must have a non-null `.t`)'
@@ -303,9 +305,9 @@ class Geoid(object):
         inv_d_matrix = array([[a, 0.0, 0.0], [0.0, a, 0.0], [0.0, 0.0, c]])
 
         # Apply distortion matrix to the vector
-        position_xyz = vector.center.xyz.au
+        position_xyz = icrf_vector.center.xyz.au
         d_position_xyz = mxv(d_matrix, position_xyz)
-        d_direction = mxv(d_matrix, vector.target)
+        d_direction = mxv(d_matrix, icrf_vector.target)
         # Rescale the vector to unit length
         d_direction = d_direction / length_of(d_direction)
 
@@ -327,7 +329,7 @@ class Geoid(object):
 
         # Apply inverse distortion and convert back to geocentric coords
         intersection = Geocentric(
-            mxv(inv_d_matrix, d_intersection), t=vector.t
+            mxv(inv_d_matrix, d_intersection), t=icrf_vector.t
             )
 
         # Retrieve latitude and longitude
