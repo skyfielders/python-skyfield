@@ -220,7 +220,7 @@ def test_neutral_attitude():
         a = sat._attitude(t)
         # Attitude should be the negative of position vector.
         neg_p = -array(p) / length_of(array(p))
-        assert allclose(a.center.au, p)
+        assert allclose(a.center.xyz.au, p)
         assert allclose(a.target, neg_p)
 
 def test_attitude():
@@ -232,17 +232,37 @@ def test_attitude():
 
     for angle in angles:
         abs_angle = abs(angle)
+        # Angle between attitude and position vector after pitch or roll should
+        # be equal to the provided angle.
         a = sat._attitude(t, roll=angle)
         assert isclose(angle_between(a.target, -pos), abs_angle)
 
         a = sat._attitude(t, pitch=angle)
         assert isclose(angle_between(a.target, -pos), abs_angle)
 
+        # Yaw without other rotations should not change attitude.
         a = sat._attitude(t, yaw=angle)
         assert isclose(angle_between(a.target, -pos), 0.0)
 
-        a = sat._attitude(t, pitch=angle, yaw=angle)
-        assert allclose(angle_between(a.target, -pos), abs_angle)
+        # Angle between attitude and position vector after yaw with pitch or
+        # or roll should be equal to the provided angle, regardless of order.
+        a = sat._attitude(t, pitch=angle, yaw=angle, rotation_order="yz")
+        assert isclose(angle_between(a.target, -pos), abs_angle)
 
-        a = sat._attitude(t, roll=angle, yaw=angle)
-        assert allclose(angle_between(a.target, -pos), abs_angle)
+        a = sat._attitude(t, pitch=angle, yaw=angle, rotation_order="zy")
+        assert isclose(angle_between(a.target, -pos), abs_angle)
+
+        a = sat._attitude(t, roll=angle, yaw=angle, rotation_order="xz")
+        assert isclose(angle_between(a.target, -pos), abs_angle)
+
+        a = sat._attitude(t, roll=angle, yaw=angle, rotation_order="zx")
+        assert isclose(angle_between(a.target, -pos), abs_angle)
+
+        # Rotations applied in reverse will result in different attitudes,
+        # but the angle between attitude and position vector should be equal.
+        axyz = sat._attitude(t, roll=angle, pitch=angle, yaw=angle)
+        azyx = sat._attitude(t, roll=angle, pitch=angle, yaw=angle,
+                             rotation_order="zyx")
+        assert isclose(
+            angle_between(axyz.target, -pos), angle_between(azyx.target, -pos)
+            )

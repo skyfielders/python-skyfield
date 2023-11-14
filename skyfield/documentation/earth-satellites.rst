@@ -552,22 +552,22 @@ position in the line-of-sight:
 
 * :meth:`~skyfield.toposlib.Geoid.intersection_of()`
 
-For example, first contruct an inertial :data:`~skyfield.framelib.LVLH` frame
-for the satellite position, then use the frame to define an attitude vector:
+For example, `roll`, `pitch`, and `yaw` angles can be provided to the
+:meth:`~skyfield.sgp4lib.EarthSatellite._attitude()` method, which will return
+a :class:`~skyfield.positionlib.ICRF` position vector representing
+the satellite's line-of-sight. The `target` and `center` attributes store the
+attitude vector and the satellite position, respectively;
 
 .. testcode::
 
-    from skyfield.framelib import LVLH
-
-    satellite_lvlh = LVLH(geocentric)
-    attitude = satellite_lvlh.icrf_looking_vector(pitch=0.0, roll=0.0)
-    print('Frame:', satellite_lvlh)
-    print('Attitude:', attitude)
+    attitude = satellite._attitude(t=t, roll=0.0, pitch=0.0, yaw=0.0)
+    print('Attitude.target:', attitude.target)
+    print('Attitude.center:', attitude.center)
 
 .. testoutput::
 
-    Frame: <LVLH> Center (399) Pointing Local Vertical Local Horizontal reference frame.
-    Attitude: [ 0.57745914  0.2781511  -0.76757599]
+    Attitude.target: [ 0.57745914  0.2781511  -0.76757599]
+    Attitude.center: <Geocentric ICRS position and velocity at date t center=399 target=-125544>
 
 In this case we have set the pitch and roll to zero, so the attitude vector
 is pointing toward the center of mass of the Earth, i.e., a unit vector
@@ -589,7 +589,7 @@ use the :meth:`~skyfield.toposlib.Geoid.intersection_of()` method:
 
 .. testcode::
 
-    intersection = wgs84.intersection_of(geocentric, attitude)
+    intersection = wgs84.intersection_of(attitude)
     print('Latitude:', intersection.latitude)
     print('Longitude:', intersection.longitude)
 
