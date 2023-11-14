@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 """Raw transforms between coordinate frames, as NumPy matrices."""
 
-from numpy import array
-
-from .constants import ANGVEL, ASEC2RAD, DAY_S, pi, tau
+from numpy import array, cross
+from .constants import ANGVEL, ASEC2RAD, DAY_S, tau
 from .data.spice import inertial_frames as _inertial_frames
-from .elementslib import osculating_elements_of
-from .functions import mxm, mxmxm, rot_x, rot_y, rot_z
+from .functions import length_of, mxm, rot_x, rot_z
 
 
 def build_matrix():
@@ -172,13 +170,14 @@ class LVLH(object):
 
     def rotation_at(self, t):
         position = self.satellite.at(t)
-        elements = osculating_elements_of(position)
-        i = elements.inclination.radians
-        u = elements.argument_of_latitude.radians
-        om = elements.longitude_of_ascending_node.radians
+        position_vec = position.position.km
+        velocity_vec = position.velocity.km_per_s
+        z_lvlh = -position_vec / length_of(position_vec)
+        L_vec = cross(velocity_vec, z_lvlh)
+        y_lvlh = -L_vec / length_of(L_vec)
+        x_lvlh = cross(y_lvlh, z_lvlh)
 
-        matrix = mxmxm(rot_x(pi / 2.0), rot_y(pi / 2.0), rot_y(om - pi))
-        matrix = mxmxm(matrix, rot_z(pi - i), rot_y(-u))
+        matrix = array([x_lvlh, y_lvlh, z_lvlh]).T
 
         return matrix
 
