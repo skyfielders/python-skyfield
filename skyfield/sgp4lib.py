@@ -4,12 +4,12 @@
 from numpy import (
     array, concatenate, identity, multiply, ones_like, repeat,
 )
-from collections import namedtuple
 from sgp4.api import SGP4_ERRORS, Satrec
 
 from .constants import AU_KM, DAY_S, T0, tau
 from .framelib import LVLH
 from .functions import _T, mxm, mxv, rot_x, rot_y, rot_z
+from .positionlib import Geometric
 from .searchlib import _find_discrete, find_maxima
 from .timelib import compute_calendar_date
 from .vectorlib import VectorFunction
@@ -284,26 +284,32 @@ class EarthSatellite(VectorFunction):
         return ts.tt_jd(jd[i]), v[i]
 
     def _attitude(self, t, roll=0.0, pitch=0.0, yaw=0.0, rotation_order="xyz"):
-        """Return a unit vector in the attitude direction in local coordinates.
+        """Return a unit vector in the attitude direction in ICRF coordinates.
 
-        Rotations are applied to an initial vector pointing along the z-axis.
-        Rotations should be provided as radians; `roll` is rotation about the
-        x-axis, `pitch` is about the y-axis, and `yaw` is about the z-axis.
+        Rotations are applied relative to the LVLH frame axes, where the
+        neutral attitude vector is pointing along the z-axis. Rotation angles
+        should be provided as radians; `roll` is rotation about the x-axis,
+        `pitch` is about the y-axis, and `yaw` is about the z-axis.
         """
         rotations = {
-            "x": rot_x(roll) if roll != 0 else _identity,
-            "y": rot_y(pitch) if pitch != 0 else _identity,
-            "z": rot_z(yaw) if yaw != 0 else _identity,
+            "x": (roll, rot_x),
+            "y": (pitch, rot_y),
+            "z": (yaw, rot_z),
         }
 
         lvlh_attitude = array([0, 0, 1])
         for axis in rotation_order:
-            lvlh_attitude = mxv(rotations[axis], lvlh_attitude)
+            angle, rotation = rotations[axis]
+            if angle != 0:
+                lvlh_attitude = mxv(rotation(angle), lvlh_attitude)
 
-        lvlh_frame = LVLH(self)
-        direction = mxv(lvlh_frame.rotation_at(t), lvlh_attitude)
-        Attitude = namedtuple("Attitude", "center, target, t")
-        attitude = Attitude(self.at(t).position, direction, t)
+        R = LVLH(self).rotation_at(t)
+        direction = mxv(R, lvlh_attitude)
+        attitude = Geometric(
+            position_au=self.at(t).xyz.au,
+            velocity_au_per_d=self.at(t).velocity.au_per_d,
+            t=t, center=self.at(t), target=direction
+        )
 
         return attitude
 
