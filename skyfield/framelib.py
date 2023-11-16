@@ -6,7 +6,6 @@ from .constants import ANGVEL, ASEC2RAD, DAY_S, tau
 from .data.spice import inertial_frames as _inertial_frames
 from .functions import length_of, mxm, rot_x, rot_z
 
-
 def build_matrix():
     # 'xi0', 'eta0', and 'da0' are ICRS frame biases in arcseconds taken
     # from IERS (2003) Conventions, Chapter 5.
@@ -146,9 +145,6 @@ class InertialFrame(object):
     def __init__(self, doc, matrix):
         self.__doc__ = doc
         self._matrix = matrix
-
-    def __repr__(self):
-        return '<{0}> {1}'.format(self.__class__.__name__, self.__doc__)
 
     def rotation_at(self, t):
         return self._matrix
