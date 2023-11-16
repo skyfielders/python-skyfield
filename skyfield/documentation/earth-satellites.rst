@@ -550,7 +550,7 @@ you can define an attitude vector for the satellite position, and then use
 a :data:`~skyfield.toposlib.wgs84` intersection method to find the surface
 position in the line-of-sight:
 
-* :meth:`~skyfield.toposlib.Geoid.intersection_of()`
+* :meth:`~skyfield.toposlib.Geoid._intersection_of()`
 
 For example, `roll`, `pitch`, and `yaw` angles can be provided to the
 :meth:`~skyfield.sgp4lib.EarthSatellite._attitude()` method, which will return
@@ -585,11 +585,11 @@ anti-aligned with the position vector:
     [ 0.57745914  0.2781511  -0.76757599]
 
 Now, to find the intersection of this vector with the Earth’s surface we can
-use the :meth:`~skyfield.toposlib.Geoid.intersection_of()` method:
+use the :meth:`~skyfield.toposlib.Geoid._intersection_of()` method:
 
 .. testcode::
 
-    intersection = wgs84.intersection_of(attitude)
+    intersection = wgs84._intersection_of(attitude)
     print('Latitude:', intersection.latitude)
     print('Longitude:', intersection.longitude)
 

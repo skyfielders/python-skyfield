@@ -277,7 +277,7 @@ class Geoid(object):
 
     subpoint = geographic_position_of  # deprecated method name
 
-    def intersection_of(self, icrf_vector):
+    def _intersection_of(self, icrf_vector):
         """Return the surface point intersected by a vector.
 
         This method calculates the point at which the input `icrf_vector`

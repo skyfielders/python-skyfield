@@ -270,7 +270,7 @@ def test_intersection_from_pole(ts):
     direction = -p.xyz.au / length_of(p.xyz.au)
     Vector = namedtuple("Vector", "center, target, t")
     vector = Vector(p, direction, t)
-    earth_point = wgs84.intersection_of(vector)
+    earth_point = wgs84._intersection_of(vector)
 
     error_degrees = abs(earth_point.latitude.degrees - 90.0)
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
@@ -283,7 +283,7 @@ def test_intersection_from_equator(ts):
     direction = -p.xyz.au / length_of(p.xyz.au)
     Vector = namedtuple("Vector", "center, target, t")
     vector = Vector(p, direction, t)
-    earth_point = wgs84.intersection_of(vector)
+    earth_point = wgs84._intersection_of(vector)
 
     error_degrees = abs(earth_point.latitude.degrees - 0.0)
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
@@ -314,11 +314,11 @@ def test_limb_intersection_points(ts):
     # Attitude vector pointing straight down
     zenith = Vector(pos, [-1.0, 0.0, 0.0], t)
 
-    intersection_bottom = wgs84.intersection_of(bottom_tangent)
-    intersection_top = wgs84.intersection_of(top_tangent)
-    intersection_left = wgs84.intersection_of(left_tangent)
-    intersection_right = wgs84.intersection_of(right_tangent)
-    intersection_zenith = wgs84.intersection_of(zenith)
+    intersection_bottom = wgs84._intersection_of(bottom_tangent)
+    intersection_top = wgs84._intersection_of(top_tangent)
+    intersection_left = wgs84._intersection_of(left_tangent)
+    intersection_right = wgs84._intersection_of(right_tangent)
+    intersection_zenith = wgs84._intersection_of(zenith)
 
     # Viewed from sufficient distance, points of intersection should be nearly
     # tangent to the north and south poles, and the zenith longitude +/- 90.0
