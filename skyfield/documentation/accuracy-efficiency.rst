@@ -132,5 +132,20 @@ the user reported that they were able to force single-threaded behavior
 by setting this environment variable::
 
     export OPENBLAS_NUM_THREADS=1
+    export MKL_NUM_THREADS=1
+
+If you want to apply these settings right in your Python code,
+then you must modify these environment settings
+*before* importing NumPy::
+
+    # First set up the environment.
+
+    import os
+    os.environ['OPENBLAS_NUM_THREADS'] = '1'
+    os.environ['MKL_NUM_THREADS'] = '1'
+
+    # And only then import NumPy.
+
+    import numpy
 
 The same solution might work on your system.
