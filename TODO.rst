@@ -7,8 +7,14 @@ are appropriate for sprints and collaboration, and longer-term goals
 that the code base is not quite ready for yet but that we do not want to
 forget.
 
-Sprint Possibilities
-====================
+* While ``is_sunlit()`` is easy to use with a bare Earth satellite
+  because it expects to compute the positions of both Earth and Sun, the
+  ``phase_angle()`` method instead needs the position to already know
+  its barycentric center because it’s only willing to compute the
+  position of the Sun.  Should they share logic, that would use a
+  barycentric coordinate if it already exists, but that otherwise would
+  compute and cache it?  Or, should users have to do the work
+  themselves, but maybe we could make it easier?
 
 * Somewhere the Skyfield docs should mention this URL:
   https://celestrak.org/NORAD/elements/active.txt
