@@ -382,8 +382,8 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     ha_per_day = tau            # angle the celestrial sphere rotates in 1 day
 
     #for i in 0,:
-    for i in 0, 1:  # Good enough for Sun and planets?
-    #for i in 0, 1, 2:
+    #for i in 0, 1:  # Good enough for Sun and planets?
+    for i in 0, 1, 2:
     #for i in 0, 1, 2, 3:  # Gets Moon to within a few hundredths?
         _fastify(t)
         ha, dec, _ = observer.at(t).observe(target).apparent().hadec()

@@ -6,7 +6,9 @@
 # Moon.  Is it able to match USNO predictions for one year?
 
 import datetime as dt
+import sys
 from collections import defaultdict
+from time import time
 from skyfield import almanac
 from skyfield.api import load, wgs84
 
@@ -131,11 +133,23 @@ def test(table, e, body):
     observer = e['Earth'] + fredonia
     horizon = -0.8333
     #horizon = -0.8333333333333
-    t, y = almanac.find_risings(observer, body, t0, t1, horizon)
+    if len(sys.argv) > 1:
+        # old
+        if body.target == 10:
+            f = almanac.sunrise_sunset(e, fredonia)
+        else:
+            f = almanac.risings_and_settings(e, body, fredonia, horizon)
+        tt = time()
+        t, y = almanac.find_discrete(t0, t1, f)
+        duration = time() - tt
+        t = t[y == 1]
+    else:
+        # new
+        tt = time()
+        t, y = almanac.find_risings(observer, body, t0, t1, horizon)
+        duration = time() - tt
+    print('Duration:', duration, 'seconds')
     t -= dt.timedelta(hours=7)
-    #strings = t.utc_strftime('%m-%d %H%M:%S.%f')
-    #strings = t.utc_strftime('%m-%d %H%M')
-    #print(strings)
 
     skyfield_rises = []
 
@@ -146,14 +160,16 @@ def test(table, e, body):
 
     errors = defaultdict(int)
 
+    #print(usno_rises)
+    #print(skyfield_rises)
     for u, s in zip(usno_rises, skyfield_rises):
         if u[0:2] != s[0:2]:
             print()
-            print('Error: usno', u[0:2], 'skyfield', s[0:2])
+            print('Error: usno', u, 'skyfield', s)
             exit(1)
         error = u[2] - s[2]
         errors[error] += 1
-        print(error, end=' ')
+        print(error or '.', end=' ')
     print()
     print(sorted(errors.items()))
 
