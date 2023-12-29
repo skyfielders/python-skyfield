@@ -38,7 +38,7 @@ def load_dataframe(fobj):
     df = read_csv(
         fobj, sep='|', names=_COLUMN_NAMES, compression=compression,
         usecols=['TYC', 'Vmag', 'RAdeg', 'DEdeg', 'Plx', 'pmRA', 'pmDE'],
-        na_values=['     ', '       ', '        ', '            '],
+        na_values=['     ', '       ', '        '],
     )
     df.columns = (
         'tyc', 'magnitude', 'ra_degrees', 'dec_degrees',
