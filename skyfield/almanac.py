@@ -330,18 +330,26 @@ def _rising_hour_angle(latitude, declination, altitude_radians):
 def _transit_ha(latitude, declination, altitude_radians):
     return 0.0
 
-
-
 def _find(observer, target, start_time, end_time, horizon_degrees, f):
+    # Build a function h() that returns the angle above or below the
+    # horizon we are aiming for, in radians.
     if horizon_degrees is None:
         tt = getattr(target, 'target', None)
         if tt == 10:
-            horizon_degrees = -0.8333  # USNO horizon+radius for sunrise/sunset
+            # Sun https://aa.usno.navy.mil/faq/RST_defs
+            horizon_radians = -0.8333 / 360.0 * tau
+            h = lambda distance: horizon_radians
+        elif tt == 301:
+            # Moon https://aa.usno.navy.mil/faq/RST_defs
+            horizon_radians = -0.5666 / 360.0 * tau
+            h = lambda distance: horizon_radians - 1737.4 / distance.km
         else:
             raise NotImplementedError
+    else:
+        horizon_radians = horizon_degrees / 360.0 * tau
+        h = lambda distance: horizon_radians
 
-    h = horizon_degrees / 360.0 * tau
-    geo = observer.vector_functions[-1]
+    geo = observer.vector_functions[-1]  # should we check observer.center?
     latitude = geo.latitude
 
     # Build an array of times 0.8 days apart, in the hopes that nothing
@@ -354,12 +362,12 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
 
     # Determine the target's hour angle and declination at those times.
     _fastify(t)
-    ha, dec, _ = observer.at(t).observe(target).apparent().hadec()
+    ha, dec, distance = observer.at(t).observe(target).apparent().hadec()
 
     # Invoke our geometry formula: for each time `t`, predict the hour
     # angle at which the target will next reach the horizon, if its
     # declination were to remain constant.
-    desired_ha_radians = f(latitude, dec, h)
+    desired_ha_radians = f(latitude, dec, h(distance))
 
     # So at each time `t`, how many radians must the sky turn to bring
     # the target to the horizon?
@@ -381,13 +389,16 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
 
     ha_per_day = tau            # angle the celestrial sphere rotates in 1 day
 
-    #for i in 0,:
-    #for i in 0, 1:  # Good enough for Sun and planets?
+    # TODO: How many iterations do we need?  And can we cut down on that
+    # number if we use velocity intelligently?  For now, we experiment
+    # using the ./design/test_sunrise_moonrise.py script in the
+    # repository, that checks both the old Skyfiled routines and this
+    # new one against the USNO.  It suggests that 3 iterations is enough
+    # for the Moon, the fastest-moving Solar System object, to match.
     for i in 0, 1, 2:
-    #for i in 0, 1, 2, 3:  # Gets Moon to within a few hundredths?
         _fastify(t)
-        ha, dec, _ = observer.at(t).observe(target).apparent().hadec()
-        desired_ha = f(latitude, dec, h)
+        ha, dec, distance = observer.at(t).observe(target).apparent().hadec()
+        desired_ha = f(latitude, dec, h(distance))
         ha_adjustment = desired_ha - ha.radians
         ha_adjustment = (ha_adjustment + pi) % tau - pi
         timebump = ha_adjustment / ha_per_day

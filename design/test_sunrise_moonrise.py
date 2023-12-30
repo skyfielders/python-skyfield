@@ -146,7 +146,7 @@ def test(table, e, body):
     else:
         # new
         tt = time()
-        t, y = almanac.find_risings(observer, body, t0, t1, horizon)
+        t, y = almanac.find_risings(observer, body, t0, t1) #, horizon)
         duration = time() - tt
     print('Duration:', duration, 'seconds')
     t -= dt.timedelta(hours=7)
