@@ -125,14 +125,10 @@ def test(table, e, body):
 
     ts = load.timescale()
     t0 = ts.utc(2023, 1, 1, 7)
-    #t0 = ts.utc(2023, 1, 1, 10)
     t1 = ts.utc(2024, 1, 1, 7)
-    #t1 = ts.utc(2023, 4, 1, 7)
-    #e = load('de430.bsp')
     fredonia = wgs84.latlon(36 + 57/60.0, - (112 + 31/60.0))
     observer = e['Earth'] + fredonia
     horizon = -0.8333
-    #horizon = -0.8333333333333
     if len(sys.argv) > 1:
         # old
         if body.target == 10:
@@ -153,17 +149,17 @@ def test(table, e, body):
 
     skyfield_rises = []
 
-    for ti in t:
+    thirty_seconds = 1.0 / 24.0 / 60.0 / 2.0  # to round to next minute
+    for ti in t + thirty_seconds:
         u = ti.utc
-        tup = u.month, u.day, u.hour * 60 + u.minute + (u.second >= 30)
+        tup = u.month, u.day, u.hour * 60 + u.minute
         skyfield_rises.append(tup)
 
     errors = defaultdict(int)
 
-    #print(usno_rises)
-    #print(skyfield_rises)
     for u, s in zip(usno_rises, skyfield_rises):
-        if u[0:2] != s[0:2]:
+        month_and_day_matches = (u[0:2] == s[0:2])
+        if not month_and_day_matches:
             print()
             print('Error: usno', u, 'skyfield', s)
             exit(1)
@@ -179,6 +175,7 @@ def test(table, e, body):
 
 def main():
     e = load('de421.bsp')
+    #e = load('de440.bsp')
     test(SUN_TABLE, e, e['Sun'])
     test(MOON_TABLE, e, e['Moon'])
 
