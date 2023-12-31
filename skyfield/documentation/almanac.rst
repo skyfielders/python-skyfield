@@ -313,7 +313,7 @@ Skyfield uses the
 <https://aa.usno.navy.mil/faq/RST_defs>`_
 from the United States Naval Observatory,
 which defines them as the moment when the center
-of the sun is 0.8333 degrees below the horizon,
+of the sun is 0.8333° below the horizon,
 to account for both the average radius of the Sun
 and for the average refraction of the atmosphere at the horizon.
 Here’s how to ask for the sunrises between a given start and end time:
@@ -360,14 +360,14 @@ For example:
 .. testcode::
 
     harra_sweden = api.wgs84.latlon(+67.4066, +20.0997)
-    observer = eph['Earth'] + harra_sweden
+    harra_observer = eph['Earth'] + harra_sweden
     sun = eph['Sun']
 
     t0 = ts.utc(2022, 12, 18)
     t1 = ts.utc(2022, 12, 26)
-    t, y = almanac.find_risings(observer, sun, t0, t1)
+    t, y = almanac.find_risings(harra_observer, sun, t0, t1)
 
-    alt, az, dist = observer.at(t).observe(sun).apparent().altaz()
+    alt, az, dist = harra_observer.at(t).observe(sun).apparent().altaz()
 
     for ti, yi, alti in zip(t.utc_iso(' '), y, alt.degrees):
         print('{} {:5} {:.4f}'.format(ti, str(yi), alti))
@@ -390,10 +390,10 @@ that would qualify for the USNO definition of sunrise.
 So Skyfield instead returns the moment when the Sun is closest to the horizon,
 with the accompanying value ``False``.
 
-In case you are maintaining older code:
-versions before Skyfield 1.47 could only compute sunrises and sunsets
+In case you are maintaining older code,
+versions of Skyfield before 1.47 could only compute sunrises and sunsets
 with an almanac routine
-that was both slower than the modern routine described above,
+that was both slower than the routine described above,
 and that also tended to miss sunrises and sunsets in the Arctic and Antarctic.
 Here’s how the older routine is called:
 
@@ -419,11 +419,48 @@ estimate of the Sun’s radius, or account for a vantage point above the
 Earth’s surface, see :ref:`risings-and-settings` to learn about the more
 versatile :func:`~skyfield.almanac.risings_and_settings()` routine.
 
+Moonrise and moonset
+====================
+
+Passing the Moon to the
+:func:`~skyfield.almanac.find_risings()`
+and
+:func:`~skyfield.almanac.find_settings()`
+routines that were discussed in the previous section
+will let you find the times of moonrise and moonset.
+Skyfield uses the
+`official definition of moonrise and moonset
+<https://aa.usno.navy.mil/faq/RST_defs>`_
+from the United States Naval Observatory:
+the moment when the top edge of the Moon
+is exactly 34 arcminutes below the horizon,
+as an approximate correction for atmospheric refraction.
+
+.. testcode::
+
+    moon = eph['Moon']
+    t0 = ts.utc(2023, 12, 27)
+    t1 = ts.utc(2023, 12, 29)
+
+    t, y = almanac.find_risings(observer, moon, t0, t1)
+    print('Moonrises (UTC):', t.utc_iso(' '))
+
+    t, y = almanac.find_settings(observer, moon, t0, t1)
+    print('Moonsets (UTC):', t.utc_iso(' '))
+
+.. testoutput::
+
+    Moonrises (UTC): ['2023-12-27 22:40:11Z', '2023-12-28 23:43:48Z']
+    Moonsets (UTC): ['2023-12-27 13:54:47Z', '2023-12-28 14:39:33Z']
+
+Read the previous section to learn about the Boolean array ``y``,
+which is ``False`` for Arctic and Antarctic locations
+when the Moon reaches the meridian without crossing the horizon.
+
 Twilight
 ========
 
-An expanded version of the sunrise-sunset routine
-named :func:`~skyfield.almanac.dark_twilight_day()`
+The routine :func:`~skyfield.almanac.dark_twilight_day()`
 returns a separate code for each of the phases of twilight:
 
 0. Dark of night.
