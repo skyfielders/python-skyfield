@@ -343,7 +343,7 @@ Here’s how to ask for the sunrises between a given start and end time:
 
 .. testoutput::
 
-    ['2018-09-12 11:13:13Z', '2018-09-13 11:14:12Z']
+    ['2018-09-12 11:13:12Z', '2018-09-13 11:14:12Z']
     [ True  True]
 
 And here’s how to ask for the sunsets:
@@ -392,7 +392,7 @@ For example:
     2022-12-21 10:37:36Z False -0.8464
     2022-12-22 10:38:06Z False -0.8461
     2022-12-23 10:38:36Z False -0.8380
-    2022-12-24 10:31:29Z True  -0.8333
+    2022-12-24 10:31:28Z True  -0.8333
     2022-12-25 10:26:08Z True  -0.8333
 
 This output shows that right around the winter solstice,

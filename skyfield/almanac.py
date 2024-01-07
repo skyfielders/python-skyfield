@@ -330,21 +330,25 @@ def _rising_hour_angle(latitude, declination, altitude_radians):
 def _transit_ha(latitude, declination, altitude_radians):
     return 0.0
 
+# Per https://aa.usno.navy.mil/faq/RST_defs we estimate 34 arcminutes of
+# atmospheric refraction and 16 arcminutes for the radius of the Sun.
+_sun_horizon_radians = -50.0 / 21600.0 * tau
+_refraction_radians = -34.0 / 21600.0 * tau
+
 def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # Build a function h() that returns the angle above or below the
     # horizon we are aiming for, in radians.
     if horizon_degrees is None:
         tt = getattr(target, 'target', None)
         if tt == 10:
-            # Sun https://aa.usno.navy.mil/faq/RST_defs
-            horizon_radians = -0.8333 / 360.0 * tau
+            horizon_radians = _sun_horizon_radians
             h = lambda distance: horizon_radians
         elif tt == 301:
-            # Moon https://aa.usno.navy.mil/faq/RST_defs
-            horizon_radians = -0.5666 / 360.0 * tau
+            horizon_radians = _refraction_radians
             h = lambda distance: horizon_radians - 1737.4 / distance.km
         else:
-            raise NotImplementedError
+            horizon_radians = _refraction_radians
+            h = lambda distance: horizon_radians
     else:
         horizon_radians = horizon_degrees / 360.0 * tau
         h = lambda distance: horizon_radians
