@@ -81,6 +81,9 @@ h1, h2, h3 {
     font-family: "Dosis";
     color: #002664;
 }
+h3:before {
+    content: "▸  ";
+}
 #skyfield h1 {
     margin-bottom: 0;
     height: 1px;
