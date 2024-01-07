@@ -103,6 +103,295 @@ minute, try manually adding 30 seconds to the time before displaying it:
 
 The results should then agree with the tables produced by the USNO.
 
+.. _risings-and-settings:
+
+Risings and settings
+====================
+
+Skyfield can compute when a given body rises and sets
+for an observer at the Earth’s surface.
+The routine is designed for bodies at the Moon’s distance or farther,
+that rise and set about once a day,
+so it will be caught off-guard
+if you pass it something fast like an Earth satellite;
+for that case, see :ref:`satellite-rising-and-setting`.
+
+Sunrise and Sunset
+------------------
+
+Skyfield uses the
+`official definition of sunrise and sunset
+<https://aa.usno.navy.mil/faq/RST_defs>`_
+from the United States Naval Observatory,
+which defines them as the moment when the center
+of the sun is 0.8333° below the horizon,
+to account for both the average radius of the Sun
+and for the average refraction of the atmosphere at the horizon.
+Here’s how to ask for the sunrises between a given start and end time:
+
+.. testcode::
+
+    observer = eph['Earth'] + bluffton
+    sun = eph['Sun']
+    t0 = ts.utc(2018, 9, 12, 4)
+    t1 = ts.utc(2018, 9, 14, 4)
+
+    t, y = almanac.find_risings(observer, sun, t0, t1)
+    print(t.utc_iso(' '))
+    print(y)
+
+.. testoutput::
+
+    ['2018-09-12 11:13:12Z', '2018-09-13 11:14:12Z']
+    [ True  True]
+
+And here’s how to ask for the sunsets:
+
+.. testcode::
+
+    t, y = almanac.find_settings(observer, sun, t0, t1)
+    print(t.utc_iso(' '))
+    print(y)
+
+.. testoutput::
+
+    ['2018-09-12 23:49:38Z', '2018-09-13 23:47:56Z']
+    [ True  True]
+
+Normally every value in the second array will be ``True``,
+indicating that a rising or setting was successfully detected.
+But locations north of the Arctic Circle or south of the Antarctic Circle
+can experience 24-hour summer days during which the sun never sets,
+and suffer winter days during which the sun never rises.
+On days when the Sun never reaches the horizon,
+the second array will have the value ``False``,
+and Skyfield will return the moment of transit instead.
+For example:
+
+.. testcode::
+
+    harra_sweden = wgs84.latlon(+67.4066, +20.0997)
+    harra_observer = eph['Earth'] + harra_sweden
+    sun = eph['Sun']
+
+    t0 = ts.utc(2022, 12, 18)
+    t1 = ts.utc(2022, 12, 26)
+    t, y = almanac.find_risings(harra_observer, sun, t0, t1)
+
+    alt, az, dist = harra_observer.at(t).observe(sun).apparent().altaz()
+
+    for ti, yi, alti in zip(t.utc_iso(' '), y, alt.degrees):
+        print('{} {:5} {:.4f}'.format(ti, str(yi), alti))
+
+.. testoutput::
+
+    2022-12-18 10:22:54Z True  -0.8333
+    2022-12-19 10:29:21Z True  -0.8333
+    2022-12-20 10:37:06Z False -0.8387
+    2022-12-21 10:37:36Z False -0.8464
+    2022-12-22 10:38:06Z False -0.8461
+    2022-12-23 10:38:36Z False -0.8380
+    2022-12-24 10:31:28Z True  -0.8333
+    2022-12-25 10:26:08Z True  -0.8333
+
+This output shows that right around the winter solstice,
+there are four days on which the Sun never quite reaches the horizon,
+but is at least a few fractions of a degree below the altitude of -0.8333°
+that would qualify for the USNO definition of sunrise.
+So Skyfield instead returns the moment when the Sun is closest to the horizon,
+with the accompanying value ``False``.
+
+
+
+Rising and setting predictions can be generated
+using the :func:`~skyfield.almanac.risings_and_settings()` routine:
+
+.. testcode::
+
+    t0 = ts.utc(2020, 2, 1)
+    t1 = ts.utc(2020, 2, 2)
+    f = almanac.risings_and_settings(eph, eph['Mars'], bluffton)
+    t, y = almanac.find_discrete(t0, t1, f)
+
+    for ti, yi in zip(t, y):
+        print(ti.utc_iso(), 'Rise' if yi else 'Set')
+
+.. testoutput::
+
+    2020-02-01T09:29:16Z Rise
+    2020-02-01T18:42:57Z Set
+
+As with sunrise and sunset above,
+``1`` means the moment of rising and ``0`` means the moment of setting.
+
+The routine also offers some optional parameters,
+whose several uses are covered in the following sections.
+
+Computing your own refraction angle
+-----------------------------------
+
+Instead of accepting the standard estimate of 34 arcminutes
+for the angle by which refraction will raise the image
+of a body at the horizon,
+you can compute atmospheric refraction yourself
+and supply the resulting angle to ``horizon_degrees``.
+Note that the value passed should be a small negative angle.
+In this example it makes a 3 second difference
+in both the rising and setting time:
+
+.. testcode::
+
+    from skyfield.earthlib import refraction
+
+    r = refraction(0.0, temperature_C=15.0, pressure_mbar=1030.0)
+    print('Arcminutes refraction for body seen at horizon: %.2f\n' % (r * 60.0))
+
+    f = almanac.risings_and_settings(eph, eph['Mars'], bluffton, horizon_degrees=-r)
+    t, y = almanac.find_discrete(t0, t1, f)
+
+    for ti, yi in zip(t, y):
+        print(ti.utc_iso(), 'Rise' if yi else 'Set')
+
+.. testoutput::
+
+    Arcminutes refraction for body seen at horizon: 34.53
+
+    2020-02-01T09:29:13Z Rise
+    2020-02-01T18:43:00Z Set
+
+Adjusting for apparent radius
+-----------------------------
+
+Planets and especially the Sun and Moon have an appreciable radius,
+and we usually consider the moment of sunrise
+to be the moment when its bright limb crests the horizon —
+not the later moment when its center finally rises into view.
+Set the parameter ``radius_degrees`` to the body’s apparent radius
+to generate an earlier rising and later setting;
+the value ``0.25``, for example,
+would be a rough estimate for the Sun or Moon.
+
+The difference in rising time can be a minute or more:
+
+.. testcode::
+
+    f = almanac.risings_and_settings(eph, eph['Sun'], bluffton, radius_degrees=0.25)
+    t, y = almanac.find_discrete(t0, t1, f)
+    print(t[0].utc_iso(' '), 'Limb of the Sun crests the horizon')
+
+    f = almanac.risings_and_settings(eph, eph['Sun'], bluffton)
+    t, y = almanac.find_discrete(t0, t1, f)
+    print(t[0].utc_iso(' '), 'Center of the Sun reaches the horizon')
+
+.. testoutput::
+
+    2020-02-01 12:46:27Z Limb of the Sun crests the horizon
+    2020-02-01 12:47:53Z Center of the Sun reaches the horizon
+
+Elevated vantage points
+-----------------------
+
+Rising and setting predictions usually assume a flat local horizon
+that does not vary with elevation.
+Yes, Denver is the Mile High City,
+but it sees the sun rise against a local horizon that’s also a mile high.
+Since the city’s high altitude
+is matched by the high altitude of the terrain around it,
+the horizon winds up in the same place it would be for a city at sea level.
+
+But sometimes you need to account not only for local elevation,
+but for *altitude* above the surrounding terrain.
+Some observatories, for example, are located on mountaintops
+that are much higher than the elevation of the terrain
+that forms their horizon.
+And Earth satellites can be hundreds of kilometers
+above the surface of the Earth that produces their sunrises and sunsets.
+
+You can account for high altitude above the horizon’s terrain
+by setting an artificially negative value for ``horizon_degrees``.
+If we consider the Earth to be approximately a sphere,
+then we can use a bit of trigonometry
+to estimate the position of the horizon for an observer at altitude:
+
+.. testcode::
+
+    from numpy import arccos
+    from skyfield.units import Angle
+
+    # When does the Sun rise in the ionosphere’s F-layer, 300km up?
+    altitude_m = 300e3
+
+    earth_radius_m = 6378136.6
+    side_over_hypotenuse = earth_radius_m / (earth_radius_m + altitude_m)
+    h = Angle(radians = -arccos(side_over_hypotenuse))
+    print('The horizon from 300km up is at %.2f degrees' % h.degrees)
+
+    f = almanac.risings_and_settings(
+        eph, eph['Sun'], bluffton, horizon_degrees=h.degrees,
+        radius_degrees=0.25,
+    )
+    t, y = almanac.find_discrete(t0, t1, f)
+    print(t[0].utc_iso(' '), 'Limb of the Sun crests the horizon')
+
+.. testoutput::
+
+    The horizon from 300km up is at -17.24 degrees
+    2020-02-01 00:22:42Z Limb of the Sun crests the horizon
+
+When writing code for this situation,
+we need to be very careful to keep straight
+the two different meanings of *altitude*.
+
+1. The *altitude above sea level* is a linear distance measured in meters
+   between the ground and the location at which
+   we want to compute rises and settings.
+
+2. The *altitude of the horizon* names a quite different measure.
+   It’s an angle measured in degrees
+   that is one of the two angles
+   of the altitude-azimuth (“altazimuth”) system
+   oriented around an observer on a planet’s surface.
+   While azimuth measures horizontally around the horizon
+   from north through east, south, and west,
+   the altitude angle measures up towards the zenith (positive)
+   and down towards the nadir (negative).
+   The altitude is zero all along the great circle between zenith and nadir.
+
+The problem of an elevated observer
+unfortunately involves both kinds of altitude at the same time:
+for each extra meter of “altitude” above the ground,
+there is a slight additional depression in the angular “altitude”
+of the horizon on the altazimuth globe.
+
+When a right ascension and declination rises and sets
+-----------------------------------------------------
+
+If you are interested in finding the times
+when a fixed point in the sky rises and sets,
+simply create a star object with the coordinates
+of the position you are interested in
+(see :doc:`stars`).
+Here, for example, are rising and setting times for the Galactic Center:
+
+.. testcode::
+
+    from skyfield.api import Star
+
+    galactic_center = Star(ra_hours=(17, 45, 40.04),
+                           dec_degrees=(-29, 0, 28.1))
+
+    f = almanac.risings_and_settings(eph, galactic_center, bluffton)
+    t, y = almanac.find_discrete(t0, t1, f)
+
+    for ti, yi in zip(t, y):
+        verb = 'rises above' if yi else 'sets below'
+        print(ti.utc_iso(' '), '- Galactic Center', verb, 'the horizon')
+
+.. testoutput::
+
+    2020-02-01 10:29:00Z - Galactic Center rises above the horizon
+    2020-02-01 18:45:46Z - Galactic Center sets below the horizon
+
 The Seasons
 ===========
 
@@ -314,93 +603,8 @@ And objects close to the opposite pole will always be below the horizon,
 even as they invisibly transit your line of longitude
 down below your horizon.
 
-Sunrise and Sunset
-==================
-
-Because sunrise and sunset depend on your latitude and longitude,
-you need to build an observer with a specific latitude and longitude
-before asking the time of sunrise and sunset.
-Skyfield uses the
-`official definition of sunrise and sunset
-<https://aa.usno.navy.mil/faq/RST_defs>`_
-from the United States Naval Observatory,
-which defines them as the moment when the center
-of the sun is 0.8333° below the horizon,
-to account for both the average radius of the Sun
-and for the average refraction of the atmosphere at the horizon.
-Here’s how to ask for the sunrises between a given start and end time:
-
-.. testcode::
-
-    observer = eph['Earth'] + bluffton
-    sun = eph['Sun']
-    t0 = ts.utc(2018, 9, 12, 4)
-    t1 = ts.utc(2018, 9, 14, 4)
-
-    t, y = almanac.find_risings(observer, sun, t0, t1)
-    print(t.utc_iso(' '))
-    print(y)
-
-.. testoutput::
-
-    ['2018-09-12 11:13:12Z', '2018-09-13 11:14:12Z']
-    [ True  True]
-
-And here’s how to ask for the sunsets:
-
-.. testcode::
-
-    t, y = almanac.find_settings(observer, sun, t0, t1)
-    print(t.utc_iso(' '))
-    print(y)
-
-.. testoutput::
-
-    ['2018-09-12 23:49:38Z', '2018-09-13 23:47:56Z']
-    [ True  True]
-
-Normally every value in the second array will be ``True``,
-indicating that a rising or setting was successfully detected.
-But locations north of the Arctic Circle or south of the Antarctic Circle
-can experience 24-hour summer days during which the sun never sets,
-and suffer winter days during which the sun never rises.
-On days when the Sun never reaches the horizon,
-the second array will have the value ``False``,
-and Skyfield will return the moment of transit instead.
-For example:
-
-.. testcode::
-
-    harra_sweden = wgs84.latlon(+67.4066, +20.0997)
-    harra_observer = eph['Earth'] + harra_sweden
-    sun = eph['Sun']
-
-    t0 = ts.utc(2022, 12, 18)
-    t1 = ts.utc(2022, 12, 26)
-    t, y = almanac.find_risings(harra_observer, sun, t0, t1)
-
-    alt, az, dist = harra_observer.at(t).observe(sun).apparent().altaz()
-
-    for ti, yi, alti in zip(t.utc_iso(' '), y, alt.degrees):
-        print('{} {:5} {:.4f}'.format(ti, str(yi), alti))
-
-.. testoutput::
-
-    2022-12-18 10:22:54Z True  -0.8333
-    2022-12-19 10:29:21Z True  -0.8333
-    2022-12-20 10:37:06Z False -0.8387
-    2022-12-21 10:37:36Z False -0.8464
-    2022-12-22 10:38:06Z False -0.8461
-    2022-12-23 10:38:36Z False -0.8380
-    2022-12-24 10:31:28Z True  -0.8333
-    2022-12-25 10:26:08Z True  -0.8333
-
-This output shows that right around the winter solstice,
-there are four days on which the Sun never quite reaches the horizon,
-but is at least a few fractions of a degree below the altitude of -0.8333°
-that would qualify for the USNO definition of sunrise.
-So Skyfield instead returns the moment when the Sun is closest to the horizon,
-with the accompanying value ``False``.
+TODO
+====
 
 In case you are maintaining older code,
 versions of Skyfield before 1.47 could only compute sunrises and sunsets
@@ -483,208 +687,6 @@ returns a separate code for each of the phases of twilight:
 
 You can find a full example of its use
 at the :ref:`dark_twilight_day() example`.
-
-.. _risings-and-settings:
-
-Risings and Settings
-====================
-
-Skyfield can compute when a given body rises and sets.
-The routine is designed for bodies at the Moon’s distance or farther,
-that tend to rise and set about once a day.
-But it might be caught off guard
-if you pass it an Earth satellite
-that rises several times a day;
-for that case, see :ref:`satellite-rising-and-setting`.
-
-Rising and setting predictions can be generated
-using the :func:`~skyfield.almanac.risings_and_settings()` routine:
-
-.. testcode::
-
-    t0 = ts.utc(2020, 2, 1)
-    t1 = ts.utc(2020, 2, 2)
-    f = almanac.risings_and_settings(eph, eph['Mars'], bluffton)
-    t, y = almanac.find_discrete(t0, t1, f)
-
-    for ti, yi in zip(t, y):
-        print(ti.utc_iso(), 'Rise' if yi else 'Set')
-
-.. testoutput::
-
-    2020-02-01T09:29:16Z Rise
-    2020-02-01T18:42:57Z Set
-
-As with sunrise and sunset above,
-``1`` means the moment of rising and ``0`` means the moment of setting.
-
-The routine also offers some optional parameters,
-whose several uses are covered in the following sections.
-
-Computing your own refraction angle
------------------------------------
-
-Instead of accepting the standard estimate of 34 arcminutes
-for the angle by which refraction will raise the image
-of a body at the horizon,
-you can compute atmospheric refraction yourself
-and supply the resulting angle to ``horizon_degrees``.
-Note that the value passed should be a small negative angle.
-In this example it makes a 3 second difference
-in both the rising and setting time:
-
-.. testcode::
-
-    from skyfield.earthlib import refraction
-
-    r = refraction(0.0, temperature_C=15.0, pressure_mbar=1030.0)
-    print('Arcminutes refraction for body seen at horizon: %.2f\n' % (r * 60.0))
-
-    f = almanac.risings_and_settings(eph, eph['Mars'], bluffton, horizon_degrees=-r)
-    t, y = almanac.find_discrete(t0, t1, f)
-
-    for ti, yi in zip(t, y):
-        print(ti.utc_iso(), 'Rise' if yi else 'Set')
-
-.. testoutput::
-
-    Arcminutes refraction for body seen at horizon: 34.53
-
-    2020-02-01T09:29:13Z Rise
-    2020-02-01T18:43:00Z Set
-
-Adjusting for apparent radius
------------------------------
-
-Planets and especially the Sun and Moon have an appreciable radius,
-and we usually consider the moment of sunrise
-to be the moment when its bright limb crests the horizon —
-not the later moment when its center finally rises into view.
-Set the parameter ``radius_degrees`` to the body’s apparent radius
-to generate an earlier rising and later setting;
-the value ``0.25``, for example,
-would be a rough estimate for the Sun or Moon.
-
-The difference in rising time can be a minute or more:
-
-.. testcode::
-
-    f = almanac.risings_and_settings(eph, eph['Sun'], bluffton, radius_degrees=0.25)
-    t, y = almanac.find_discrete(t0, t1, f)
-    print(t[0].utc_iso(' '), 'Limb of the Sun crests the horizon')
-
-    f = almanac.risings_and_settings(eph, eph['Sun'], bluffton)
-    t, y = almanac.find_discrete(t0, t1, f)
-    print(t[0].utc_iso(' '), 'Center of the Sun reaches the horizon')
-
-.. testoutput::
-
-    2020-02-01 12:46:27Z Limb of the Sun crests the horizon
-    2020-02-01 12:47:53Z Center of the Sun reaches the horizon
-
-Elevated vantage points
------------------------
-
-Rising and setting predictions usually assume a flat local horizon
-that does not vary with elevation.
-Yes, Denver is the Mile High City,
-but it sees the sun rise against a local horizon that’s also a mile high.
-Since the city’s high altitude
-is matched by the high altitude of the terrain around it,
-the horizon winds up in the same place it would be for a city at sea level.
-
-But sometimes you need to account not only for local elevation,
-but for *altitude* above the surrounding terrain.
-Some observatories, for example, are located on mountaintops
-that are much higher than the elevation of the terrain
-that forms their horizon.
-And Earth satellites can be hundreds of kilometers
-above the surface of the Earth that produces their sunrises and sunsets.
-
-You can account for high altitude above the horizon’s terrain
-by setting an artificially negative value for ``horizon_degrees``.
-If we consider the Earth to be approximately a sphere,
-then we can use a bit of trigonometry
-to estimate the position of the horizon for an observer at altitude:
-
-.. testcode::
-
-    from numpy import arccos
-    from skyfield.units import Angle
-
-    # When does the Sun rise in the ionosphere’s F-layer, 300km up?
-    altitude_m = 300e3
-
-    earth_radius_m = 6378136.6
-    side_over_hypotenuse = earth_radius_m / (earth_radius_m + altitude_m)
-    h = Angle(radians = -arccos(side_over_hypotenuse))
-    print('The horizon from 300km up is at %.2f degrees' % h.degrees)
-
-    f = almanac.risings_and_settings(
-        eph, eph['Sun'], bluffton, horizon_degrees=h.degrees,
-        radius_degrees=0.25,
-    )
-    t, y = almanac.find_discrete(t0, t1, f)
-    print(t[0].utc_iso(' '), 'Limb of the Sun crests the horizon')
-
-.. testoutput::
-
-    The horizon from 300km up is at -17.24 degrees
-    2020-02-01 00:22:42Z Limb of the Sun crests the horizon
-
-When writing code for this situation,
-we need to be very careful to keep straight
-the two different meanings of *altitude*.
-
-1. The *altitude above sea level* is a linear distance measured in meters
-   between the ground and the location at which
-   we want to compute rises and settings.
-
-2. The *altitude of the horizon* names a quite different measure.
-   It’s an angle measured in degrees
-   that is one of the two angles
-   of the altitude-azimuth (“altazimuth”) system
-   oriented around an observer on a planet’s surface.
-   While azimuth measures horizontally around the horizon
-   from north through east, south, and west,
-   the altitude angle measures up towards the zenith (positive)
-   and down towards the nadir (negative).
-   The altitude is zero all along the great circle between zenith and nadir.
-
-The problem of an elevated observer
-unfortunately involves both kinds of altitude at the same time:
-for each extra meter of “altitude” above the ground,
-there is a slight additional depression in the angular “altitude”
-of the horizon on the altazimuth globe.
-
-When a right ascension and declination rises and sets
------------------------------------------------------
-
-If you are interested in finding the times
-when a fixed point in the sky rises and sets,
-simply create a star object with the coordinates
-of the position you are interested in
-(see :doc:`stars`).
-Here, for example, are rising and setting times for the Galactic Center:
-
-.. testcode::
-
-    from skyfield.api import Star
-
-    galactic_center = Star(ra_hours=(17, 45, 40.04),
-                           dec_degrees=(-29, 0, 28.1))
-
-    f = almanac.risings_and_settings(eph, galactic_center, bluffton)
-    t, y = almanac.find_discrete(t0, t1, f)
-
-    for ti, yi in zip(t, y):
-        verb = 'rises above' if yi else 'sets below'
-        print(ti.utc_iso(' '), '- Galactic Center', verb, 'the horizon')
-
-.. testoutput::
-
-    2020-02-01 10:29:00Z - Galactic Center rises above the horizon
-    2020-02-01 18:45:46Z - Galactic Center sets below the horizon
 
 Solar terms
 ===========
