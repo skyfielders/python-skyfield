@@ -3,30 +3,45 @@
  Almanac Computation
 =====================
 
-The highest-level routines in Skyfield let you search back and forward
-through time for the exact moments when the Earth, Sun, and Moon are in
-special configurations.
+To help you navigate, here are the topics covered on this page:
 
-They all require you to start by loading up a timescale object and also
-an ephemeris file that provides positions from the planets:
+.. contents::
+   :local:
 
-.. testcode::
-
-    from skyfield import api
-
-    ts = api.load.timescale()
-    eph = api.load('de421.bsp')
-
-Then, load the “almanac” module.
+Here are the imports and objects that will drive the examples below:
 
 .. testcode::
 
     from skyfield import almanac
+    from skyfield.api import N, W, load, wgs84
 
-Note that almanac computation can be slow and expensive.  To determine
-the moment of sunrise, for example, Skyfield has to search back and
-forth through time asking for the altitude of the Sun over and over
-until it finally works out the moment at which it crests the horizon.
+    ts = load.timescale()
+    eph = load('de421.bsp')
+    bluffton = wgs84.latlon(40.8939 * N, 83.8917 * W)
+    observer = eph['Earth'] + bluffton
+
+Note a distinction:
+
+* ``bluffton`` — this :class:`~skyfield.toposlib.GeographicPosition`
+  computes the vector from the Earth’s center
+  to a specific geographic location.
+  Unless an elevation is specified,
+  the vector’s length will be the Earth’s radius,
+  which varies from 6,357 km at the pole to 6,378 km at the equator.
+
+* ``observer`` — this computes the much larger vector
+  from the center of the Solar System to the geographic position.
+
+  Almanac routines typically need to be passed this full vector,
+  not merely a geographic position.
+  Depending on the season (Earth is closest to the Sun in early January),
+  it will be somewhere close to 1 au in length.
+
+Beware that almanac computation can be expensive.
+As they search backwards and forwards through time
+for particular circumstances,
+almanac routines have to repeatedly recompute
+the positions of the Earth and other bodies.
 
 Rounding time to the nearest minute
 ===================================
@@ -249,9 +264,6 @@ crosses your meridian:
 
 .. testcode::
 
-    bluffton = api.wgs84.latlon(+40.8939, -83.8917)
-    observer = eph['Earth'] + bluffton
-
     t0 = ts.utc(2020, 11, 6)
     t1 = ts.utc(2020, 11, 8)
     t = almanac.find_transits(observer, eph['Mars'], t0, t1)
@@ -359,7 +371,7 @@ For example:
 
 .. testcode::
 
-    harra_sweden = api.wgs84.latlon(+67.4066, +20.0997)
+    harra_sweden = wgs84.latlon(+67.4066, +20.0997)
     harra_observer = eph['Earth'] + harra_sweden
     sun = eph['Sun']
 
@@ -657,8 +669,10 @@ Here, for example, are rising and setting times for the Galactic Center:
 
 .. testcode::
 
-    galactic_center = api.Star(ra_hours=(17, 45, 40.04),
-                               dec_degrees=(-29, 0, 28.1))
+    from skyfield.api import Star
+
+    galactic_center = Star(ra_hours=(17, 45, 40.04),
+                           dec_degrees=(-29, 0, 28.1))
 
     f = almanac.risings_and_settings(eph, galactic_center, bluffton)
     t, y = almanac.find_discrete(t0, t1, f)
