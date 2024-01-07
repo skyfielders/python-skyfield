@@ -262,8 +262,6 @@ to follow along with the drama
 as various satellite element sets go out-of-date each month
 and await updates from their respective organizations.
 
-.. _satellite-rising-and-setting:
-
 Historical satellite element sets
 ---------------------------------
 
@@ -294,6 +292,8 @@ are in their archive.
 If so, then you should be able to download them to your machine
 and use them when you need historic satellite positions
 close to the old TLE’s epoch date.
+
+.. _satellite-rising-and-setting:
 
 Finding when a satellite rises and sets
 ---------------------------------------
