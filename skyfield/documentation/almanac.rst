@@ -13,7 +13,7 @@ Here are the imports and objects that will drive the examples below:
 .. testcode::
 
     from skyfield import almanac
-    from skyfield.api import N, W, load, wgs84
+    from skyfield.api import N, S, E, W, load, wgs84
 
     ts = load.timescale()
     eph = load('de421.bsp')
@@ -38,9 +38,9 @@ Note a distinction:
   it will be somewhere close to 1 au in length.
 
 Beware that almanac computation can be expensive.
-As they search backwards and forwards through time
+As almanac routines search backwards and forwards through time
 for particular circumstances,
-almanac routines have to repeatedly recompute
+they have to repeatedly recompute
 the positions of the Earth and other bodies.
 
 Rounding time to the nearest minute
@@ -124,17 +124,16 @@ Skyfield uses the
 <https://aa.usno.navy.mil/faq/RST_defs>`_
 from the United States Naval Observatory,
 which defines them as the moment when the center
-of the sun is 0.8333° below the horizon,
+of the sun is 50 arcminutes below the horizon,
 to account for both the average radius of the Sun
 and for the average refraction of the atmosphere at the horizon.
 Here’s how to ask for the sunrises between a given start and end time:
 
 .. testcode::
 
-    observer = eph['Earth'] + bluffton
-    sun = eph['Sun']
     t0 = ts.utc(2018, 9, 12, 4)
     t1 = ts.utc(2018, 9, 14, 4)
+    sun = eph['Sun']
 
     t, y = almanac.find_risings(observer, sun, t0, t1)
     print(t.utc_iso(' '))
@@ -160,19 +159,26 @@ And here’s how to ask for the sunsets:
 
 Normally every value in the second array will be ``True``,
 indicating that a rising or setting was successfully detected.
-But locations north of the Arctic Circle or south of the Antarctic Circle
-can experience 24-hour summer days during which the sun never sets,
-and suffer winter days during which the sun never rises.
-On days when the Sun never reaches the horizon,
-the second array will have the value ``False``,
-and Skyfield will return the moment of transit instead.
+See the next section for an example where the value is ``False``.
+
+.. _polar-day-and-night:
+
+Detecting polar day and polar night
+-----------------------------------
+
+In the Arctic and Antarctic,
+there will be summer days when the sun never sets,
+and winter days when the sun never rises.
+On such days the second array returned by the rising and setting routines
+will have the value ``False`` instead of ``True``.
+The time returned will instead be that of transit,
+whether that takes place above or below the horizon.
 For example:
 
 .. testcode::
 
-    harra_sweden = wgs84.latlon(+67.4066, +20.0997)
+    harra_sweden = wgs84.latlon(67.4066 * N, 20.0997 * E)
     harra_observer = eph['Earth'] + harra_sweden
-    sun = eph['Sun']
 
     t0 = ts.utc(2022, 12, 18)
     t1 = ts.utc(2022, 12, 26)
@@ -201,31 +207,59 @@ that would qualify for the USNO definition of sunrise.
 So Skyfield instead returns the moment when the Sun is closest to the horizon,
 with the accompanying value ``False``.
 
+Moonrise and moonset
+--------------------
 
+Skyfield uses the
+`official definition of moonrise and moonset
+<https://aa.usno.navy.mil/faq/RST_defs>`_
+from the United States Naval Observatory:
+the moment when the top edge of the Moon
+is exactly 34 arcminutes below the horizon,
+to correct for atmospheric refraction.
 
-Rising and setting predictions can be generated
-using the :func:`~skyfield.almanac.risings_and_settings()` routine:
+.. testcode::
+
+    moon = eph['Moon']
+    t0 = ts.utc(2023, 12, 27)
+    t1 = ts.utc(2023, 12, 29)
+
+    t, y = almanac.find_risings(observer, moon, t0, t1)
+    print('Moonrises (UTC):', t.utc_iso(' '))
+
+    t, y = almanac.find_settings(observer, moon, t0, t1)
+    print('Moonsets (UTC):', t.utc_iso(' '))
+
+.. testoutput::
+
+    Moonrises (UTC): ['2023-12-27 22:40:11Z', '2023-12-28 23:43:48Z']
+    Moonsets (UTC): ['2023-12-27 13:54:47Z', '2023-12-28 14:39:33Z']
+
+Read the previous section to learn about the Boolean array ``y``.
+
+Planet rising and setting
+-------------------------
+
+The rising and setting routines also work for planets.
 
 .. testcode::
 
     t0 = ts.utc(2020, 2, 1)
-    t1 = ts.utc(2020, 2, 2)
-    f = almanac.risings_and_settings(eph, eph['Mars'], bluffton)
-    t, y = almanac.find_discrete(t0, t1, f)
+    t1 = ts.utc(2020, 2, 3)
 
-    for ti, yi in zip(t, y):
-        print(ti.utc_iso(), 'Rise' if yi else 'Set')
+    t, y = almanac.find_risings(observer, eph['Mars'], t0, t1)
+    print('Mars rises:', t.utc_iso(' '))
+
+    t, y = almanac.find_settings(observer, eph['Mars'], t0, t1)
+    print('Mars sets: ', t.utc_iso(' '))
 
 .. testoutput::
 
-    2020-02-01T09:29:16Z Rise
-    2020-02-01T18:42:57Z Set
+    Mars rises: ['2020-02-01 09:29:16Z', '2020-02-02 09:28:34Z']
+    Mars sets:  ['2020-02-01 18:42:57Z', '2020-02-02 18:41:41Z']
 
-As with sunrise and sunset above,
-``1`` means the moment of rising and ``0`` means the moment of setting.
-
-The routine also offers some optional parameters,
-whose several uses are covered in the following sections.
+Read the previous section :ref:`polar-day-and-night`
+to learn about the Boolean array ``y``.
 
 Computing your own refraction angle
 -----------------------------------
@@ -242,6 +276,9 @@ in both the rising and setting time:
 .. testcode::
 
     from skyfield.earthlib import refraction
+
+    t0 = ts.utc(2020, 2, 1)
+    t1 = ts.utc(2020, 2, 2)
 
     r = refraction(0.0, temperature_C=15.0, pressure_mbar=1030.0)
     print('Arcminutes refraction for body seen at horizon: %.2f\n' % (r * 60.0))
@@ -634,44 +671,6 @@ If you need to provide your own custom value for refraction, adjust the
 estimate of the Sun’s radius, or account for a vantage point above the
 Earth’s surface, see :ref:`risings-and-settings` to learn about the more
 versatile :func:`~skyfield.almanac.risings_and_settings()` routine.
-
-Moonrise and moonset
-====================
-
-Passing the Moon to the
-:func:`~skyfield.almanac.find_risings()`
-and
-:func:`~skyfield.almanac.find_settings()`
-routines that were discussed in the previous section
-will let you find the times of moonrise and moonset.
-Skyfield uses the
-`official definition of moonrise and moonset
-<https://aa.usno.navy.mil/faq/RST_defs>`_
-from the United States Naval Observatory:
-the moment when the top edge of the Moon
-is exactly 34 arcminutes below the horizon,
-as an approximate correction for atmospheric refraction.
-
-.. testcode::
-
-    moon = eph['Moon']
-    t0 = ts.utc(2023, 12, 27)
-    t1 = ts.utc(2023, 12, 29)
-
-    t, y = almanac.find_risings(observer, moon, t0, t1)
-    print('Moonrises (UTC):', t.utc_iso(' '))
-
-    t, y = almanac.find_settings(observer, moon, t0, t1)
-    print('Moonsets (UTC):', t.utc_iso(' '))
-
-.. testoutput::
-
-    Moonrises (UTC): ['2023-12-27 22:40:11Z', '2023-12-28 23:43:48Z']
-    Moonsets (UTC): ['2023-12-27 13:54:47Z', '2023-12-28 14:39:33Z']
-
-Read the previous section to learn about the Boolean array ``y``,
-which is ``False`` for Arctic and Antarctic locations
-when the Moon reaches the meridian without crossing the horizon.
 
 Twilight
 ========
