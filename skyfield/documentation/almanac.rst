@@ -642,7 +642,7 @@ Here’s how it was called:
 
 .. testoutput::
 
-    ['2018-09-12T11:13:13Z', '2018-09-12T23:49:38Z']
+    ['2020-11-06T12:12:46Z', '2020-11-06T22:25:10Z']
     [1 0]
 
 The result ``t`` will be an array of times, and ``y`` will be ``1`` if
@@ -661,8 +661,8 @@ worked the same way, but for general targets like planets.
 
 .. testoutput::
 
-    ['2020-02-01T09:29:16Z', '2020-02-01T18:42:57Z']
-    [1 0]
+    ['2020-11-06T09:50:55Z', '2020-11-06T21:08:55Z']
+    [0 1]
 
 Twilight
 ========
