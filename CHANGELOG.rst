@@ -12,6 +12,7 @@ v1.47 — 2023 January 13
   :func:`~skyfield.almanac.find_risings()` and
   :func:`~skyfield.almanac.find_settings()` and
   :func:`~skyfield.almanac.find_transits()`.
+  `#662 <https://github.com/skyfielders/python-skyfield/issues/662>`_
 
 * Skyfield’s internal table for the ∆T Earth orientation parameter has
   been updated, so that its predictions now extend to 2025-01-18.
@@ -21,6 +22,7 @@ v1.47 — 2023 January 13
   :func:`~skyfield.api.load_constellation_names()` list.  Previously,
   ``CVn`` and ``TrA`` had been mis-capitalized in the list as ``Cvn``
   and ``Tra``.
+  `#906 <https://github.com/skyfielders/python-skyfield/issues/906>`_
 
 v1.46 — 2023 April 9
 --------------------
