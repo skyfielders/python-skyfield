@@ -108,9 +108,9 @@ simply install the IERS tables on your timescale object
 as shown in the example code above.
 Polar motion will be used everywhere that it applies.
 
-------------------------
-Using too many CPU cores
-------------------------
+----------------------------------
+Bad performance and using 100% CPU
+----------------------------------
 
 On some systems,
 users `have reported
