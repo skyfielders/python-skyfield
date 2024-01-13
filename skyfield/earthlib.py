@@ -138,7 +138,7 @@ def earth_rotation_angle(jd_ut1, fraction_ut1=0.0):
 
 
 def refraction(alt_degrees, temperature_C, pressure_mbar):
-    """Given an observed altitude, return how much the image is refracted.
+    """Given an observed altitude, estimate atmospheric refraction, in degrees.
 
     Zero refraction is returned both for objects very near the zenith,
     as well as for objects more than one degree below the horizon.

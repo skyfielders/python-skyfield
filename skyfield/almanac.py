@@ -334,6 +334,7 @@ def _transit_ha(latitude, declination, altitude_radians):
 # atmospheric refraction and 16 arcminutes for the radius of the Sun.
 _sun_horizon_radians = -50.0 / 21600.0 * tau
 _refraction_radians = -34.0 / 21600.0 * tau
+_moon_radius_m = 1.7374e6
 
 def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # Build a function h() that returns the angle above or below the
@@ -345,7 +346,7 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
             h = lambda distance: horizon_radians
         elif tt == 301:
             horizon_radians = _refraction_radians
-            h = lambda distance: horizon_radians - 1737.4 / distance.km
+            h = lambda distance: horizon_radians - _moon_radius_m / distance.m
         else:
             horizon_radians = _refraction_radians
             h = lambda distance: horizon_radians

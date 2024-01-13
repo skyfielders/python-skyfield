@@ -8,6 +8,10 @@ Changelog
 v1.47 — Unreleased
 ------------------
 
+* Added faster and more accurate
+  :func:`~skyfield.almanac.find_risings()` and
+  :func:`~skyfield.almanac.find_settings()` almanac routines.
+
 * Constellation abbreviations are now consistent between the
   :func:`~skyfield.api.load_constellation_map()` table and the
   :func:`~skyfield.api.load_constellation_names()` list.  Previously,

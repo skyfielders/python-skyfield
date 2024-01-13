@@ -17,6 +17,7 @@ Here are the imports and objects that will drive the examples below:
 
     ts = load.timescale()
     eph = load('de421.bsp')
+    sun = eph['Sun']
     bluffton = wgs84.latlon(40.8939 * N, 83.8917 * W)
     observer = eph['Earth'] + bluffton
 
@@ -110,11 +111,12 @@ Risings and settings
 
 Skyfield can compute when a given body rises and sets
 for an observer at the Earth’s surface.
-The routine is designed for bodies at the Moon’s distance or farther,
+The routines are designed for bodies
+at least as far away as Moon,
 that rise and set about once a day,
 so it will be caught off-guard
-if you pass it something fast like an Earth satellite;
-for that case, see :ref:`satellite-rising-and-setting`.
+if you pass it something fast like an Earth satellite.
+For that case, see :ref:`satellite-rising-and-setting`.
 
 Sunrise and Sunset
 ------------------
@@ -125,15 +127,14 @@ Skyfield uses the
 from the United States Naval Observatory,
 which defines them as the moment when the center
 of the sun is 50 arcminutes below the horizon,
-to account for both the average radius of the Sun
-and for the average refraction of the atmosphere at the horizon.
+to account for both the average solar radius of 16 arcminutes
+and for roughly 34 arcminutes of atmospheric refraction at the horizon.
 Here’s how to ask for the sunrises between a given start and end time:
 
 .. testcode::
 
     t0 = ts.utc(2018, 9, 12, 4)
     t1 = ts.utc(2018, 9, 14, 4)
-    sun = eph['Sun']
 
     t, y = almanac.find_risings(observer, sun, t0, t1)
     print(t.utc_iso(' '))
@@ -241,6 +242,10 @@ Planet rising and setting
 -------------------------
 
 The rising and setting routines also work for planets.
+To account for atmospheric refraction under typical conditions,
+Skyfield will look for the moment
+when the center of the planet’s disc
+is exactly 34 arcminutes below the horizon.
 
 .. testcode::
 
@@ -264,66 +269,57 @@ to learn about the Boolean array ``y``.
 Computing your own refraction angle
 -----------------------------------
 
-Instead of accepting the standard estimate of 34 arcminutes
-for the angle by which refraction will raise the image
-of a body at the horizon,
-you can compute atmospheric refraction yourself
-and supply the resulting angle to ``horizon_degrees``.
-Note that the value passed should be a small negative angle.
-In this example it makes a 3 second difference
-in both the rising and setting time:
+Atmospheric refraction makes bodies at the horizon
+appear slightly higher than they would be otherwise.
+That’s why Skyfield doesn’t wait until a body’s altazimuth coordinates
+have reached 0.0° altitude
+to proclaim that it has risen.
+Instead, as explained in the previous sections,
+Skyfield goes ahead and counts a body as risen
+as soon as it has reached −0°34′ altitude.
+
+But refraction varies with atmospheric conditions.
+To supply your own estimate
+of the altitude of the visible horizon,
+pass the optional ``horizon_degrees`` argument
+to :func:`~skyfield.almanac.find_risings()`
+and :func:`~skyfield.almanac.find_settings()`
+with the target altitude angle you want to use instead.
+
+To help you build an estimate,
+Skyfield provides a small function
+that takes an altitude angle, the temperature, and the pressure,
+and returns a standard United States Naval Observatory estimate
+for the angle of atmospheric refraction.
+Here’s an example of how to use it:
 
 .. testcode::
 
     from skyfield.earthlib import refraction
 
-    t0 = ts.utc(2020, 2, 1)
-    t1 = ts.utc(2020, 2, 2)
-
     r = refraction(0.0, temperature_C=15.0, pressure_mbar=1030.0)
-    print('Arcminutes refraction for body seen at horizon: %.2f\n' % (r * 60.0))
+    print('Refraction at the horizon: %.2f arcminutes\n' % (r * 60.0))
 
-    f = almanac.risings_and_settings(eph, eph['Mars'], bluffton, horizon_degrees=-r)
-    t, y = almanac.find_discrete(t0, t1, f)
+    t, y = almanac.find_risings(observer, eph['Mars'], t0, t1,
+                                horizon_degrees=-r)
+    print('Mars rises:', t.utc_iso(' '))
 
-    for ti, yi in zip(t, y):
-        print(ti.utc_iso(), 'Rise' if yi else 'Set')
-
-.. testoutput::
-
-    Arcminutes refraction for body seen at horizon: 34.53
-
-    2020-02-01T09:29:13Z Rise
-    2020-02-01T18:43:00Z Set
-
-Adjusting for apparent radius
------------------------------
-
-Planets and especially the Sun and Moon have an appreciable radius,
-and we usually consider the moment of sunrise
-to be the moment when its bright limb crests the horizon —
-not the later moment when its center finally rises into view.
-Set the parameter ``radius_degrees`` to the body’s apparent radius
-to generate an earlier rising and later setting;
-the value ``0.25``, for example,
-would be a rough estimate for the Sun or Moon.
-
-The difference in rising time can be a minute or more:
-
-.. testcode::
-
-    f = almanac.risings_and_settings(eph, eph['Sun'], bluffton, radius_degrees=0.25)
-    t, y = almanac.find_discrete(t0, t1, f)
-    print(t[0].utc_iso(' '), 'Limb of the Sun crests the horizon')
-
-    f = almanac.risings_and_settings(eph, eph['Sun'], bluffton)
-    t, y = almanac.find_discrete(t0, t1, f)
-    print(t[0].utc_iso(' '), 'Center of the Sun reaches the horizon')
+    t, y = almanac.find_settings(observer, eph['Mars'], t0, t1,
+                                 horizon_degrees=-r)
+    print('Mars sets: ', t.utc_iso(' '))
 
 .. testoutput::
 
-    2020-02-01 12:46:27Z Limb of the Sun crests the horizon
-    2020-02-01 12:47:53Z Center of the Sun reaches the horizon
+    Refraction at the horizon: 34.53 arcminutes
+
+    Mars rises: ['2020-02-01 09:29:13Z', '2020-02-02 09:28:30Z']
+    Mars sets:  ['2020-02-01 18:43:00Z', '2020-02-02 18:41:45Z']
+
+If you want to account for both atmospheric refraction
+and also the radius of the target body,
+then simply supply an even more negative value for ``horizon_degrees``
+that combines the correction for refraction
+with the radius of the body’s visible disc in the sky.
 
 Elevated vantage points
 -----------------------
@@ -332,19 +328,18 @@ Rising and setting predictions usually assume a flat local horizon
 that does not vary with elevation.
 Yes, Denver is the Mile High City,
 but it sees the sun rise against a local horizon that’s also a mile high.
-Since the city’s high altitude
-is matched by the high altitude of the terrain around it,
+Since the city’s high elevation
+is matched by the high elevation of the terrain around it,
 the horizon winds up in the same place it would be for a city at sea level.
 
-But sometimes you need to account not only for local elevation,
-but for *altitude* above the surrounding terrain.
+But sometimes you need to account for a viewpoint’s
+local prominence above the surrounding terrain.
 Some observatories, for example, are located on mountaintops
-that are much higher than the elevation of the terrain
-that forms their horizon.
+that are much higher than the terrain that forms their horizon.
 And Earth satellites can be hundreds of kilometers
 above the surface of the Earth that produces their sunrises and sunsets.
 
-You can account for high altitude above the horizon’s terrain
+You can account for an observer’s prominence above their horizon’s terrain
 by setting an artificially negative value for ``horizon_degrees``.
 If we consider the Earth to be approximately a sphere,
 then we can use a bit of trigonometry
@@ -356,49 +351,34 @@ to estimate the position of the horizon for an observer at altitude:
     from skyfield.units import Angle
 
     # When does the Sun rise in the ionosphere’s F-layer, 300km up?
-    altitude_m = 300e3
 
+    altitude_m = 300e3
     earth_radius_m = 6378136.6
     side_over_hypotenuse = earth_radius_m / (earth_radius_m + altitude_m)
     h = Angle(radians = -arccos(side_over_hypotenuse))
     print('The horizon from 300km up is at %.2f degrees' % h.degrees)
 
-    f = almanac.risings_and_settings(
-        eph, eph['Sun'], bluffton, horizon_degrees=h.degrees,
-        radius_degrees=0.25,
+    solar_radius_degrees = 0.25
+    t, y = almanac.find_risings(
+        observer, sun, t0, t1,
+        horizon_degrees=h.degrees - solar_radius_degrees,
     )
-    t, y = almanac.find_discrete(t0, t1, f)
-    print(t[0].utc_iso(' '), 'Limb of the Sun crests the horizon')
+    print('At', t[0].utc_iso(' '), 'the limb of the Sun crests the horizon')
 
 .. testoutput::
 
     The horizon from 300km up is at -17.24 degrees
-    2020-02-01 00:22:42Z Limb of the Sun crests the horizon
+    At 2020-02-01 11:14:57Z the limb of the Sun crests the horizon
 
-When writing code for this situation,
-we need to be very careful to keep straight
-the two different meanings of *altitude*.
-
-1. The *altitude above sea level* is a linear distance measured in meters
-   between the ground and the location at which
-   we want to compute rises and settings.
-
-2. The *altitude of the horizon* names a quite different measure.
-   It’s an angle measured in degrees
-   that is one of the two angles
-   of the altitude-azimuth (“altazimuth”) system
-   oriented around an observer on a planet’s surface.
-   While azimuth measures horizontally around the horizon
-   from north through east, south, and west,
-   the altitude angle measures up towards the zenith (positive)
-   and down towards the nadir (negative).
-   The altitude is zero all along the great circle between zenith and nadir.
-
-The problem of an elevated observer
-unfortunately involves both kinds of altitude at the same time:
-for each extra meter of “altitude” above the ground,
-there is a slight additional depression in the angular “altitude”
-of the horizon on the altazimuth globe.
+Beware a possible source of confusion:
+some people use the word *altitude*
+for a geographic site’s elevation in meters above sea level.
+And other people — primarily Earth satellite folks —
+use the term *elevation*
+for degrees above or below the horizon,
+which Skyfield instead calls *altitude*
+(because that’s what the syllable *alt-* stands for
+in the name *altazimuth coordinate system*).
 
 When a right ascension and declination rises and sets
 -----------------------------------------------------
@@ -408,7 +388,7 @@ when a fixed point in the sky rises and sets,
 simply create a star object with the coordinates
 of the position you are interested in
 (see :doc:`stars`).
-Here, for example, are rising and setting times for the Galactic Center:
+Here, for example, is the rising time for the Galactic Center:
 
 .. testcode::
 
@@ -420,14 +400,11 @@ Here, for example, are rising and setting times for the Galactic Center:
     f = almanac.risings_and_settings(eph, galactic_center, bluffton)
     t, y = almanac.find_discrete(t0, t1, f)
 
-    for ti, yi in zip(t, y):
-        verb = 'rises above' if yi else 'sets below'
-        print(ti.utc_iso(' '), '- Galactic Center', verb, 'the horizon')
+    print('The Galactic Center rises at', t[0].utc_iso(' '))
 
 .. testoutput::
 
-    2020-02-01 10:29:00Z - Galactic Center rises above the horizon
-    2020-02-01 18:45:46Z - Galactic Center sets below the horizon
+    The Galactic Center rises at 2020-02-01 10:29:00Z
 
 The Seasons
 ===========
