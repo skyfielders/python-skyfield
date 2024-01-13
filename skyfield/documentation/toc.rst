@@ -9,7 +9,7 @@ the pure Python astronomy library
 that is accelerated using NumPy vector math!
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    installation
    examples

@@ -5,6 +5,10 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+-----------------
+Released versions
+-----------------
+
 v1.47 — 2023 January 13
 -----------------------
 
