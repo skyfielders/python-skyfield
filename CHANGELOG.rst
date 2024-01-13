@@ -13,6 +13,9 @@ v1.47 — 2023 January 13
   :func:`~skyfield.almanac.find_settings()` and
   :func:`~skyfield.almanac.find_transits()`.
 
+* Skyfield’s internal table for the ∆T Earth orientation parameter has
+  been updated, so that its predictions now extend to 2025-01-18.
+
 * Constellation abbreviations are now consistent between the
   :func:`~skyfield.api.load_constellation_map()` table and the
   :func:`~skyfield.api.load_constellation_names()` list.  Previously,
