@@ -5,12 +5,13 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
-v1.47 — Unreleased
-------------------
+v1.47 — 2023 January 13
+-----------------------
 
-* Added faster and more accurate
+* Added faster and more accurate  almanac routines
   :func:`~skyfield.almanac.find_risings()` and
-  :func:`~skyfield.almanac.find_settings()` almanac routines.
+  :func:`~skyfield.almanac.find_settings()` and
+  :func:`~skyfield.almanac.find_transits()`.
 
 * Constellation abbreviations are now consistent between the
   :func:`~skyfield.api.load_constellation_map()` table and the

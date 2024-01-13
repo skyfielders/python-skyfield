@@ -266,6 +266,8 @@ is exactly 34 arcminutes below the horizon.
 Read the previous section :ref:`polar-day-and-night`
 to learn about the Boolean array ``y``.
 
+.. _horizon_degrees:
+
 Computing your own refraction angle
 -----------------------------------
 
@@ -387,7 +389,8 @@ If you are interested in finding the times
 when a fixed point in the sky rises and sets,
 simply create a star object with the coordinates
 of the position you are interested in
-(see :doc:`stars`).
+(see :doc:`stars`)
+and then call the routines described above.
 Here, for example, is the rising time for the Galactic Center:
 
 .. testcode::
@@ -397,9 +400,7 @@ Here, for example, is the rising time for the Galactic Center:
     galactic_center = Star(ra_hours=(17, 45, 40.04),
                            dec_degrees=(-29, 0, 28.1))
 
-    f = almanac.risings_and_settings(eph, galactic_center, bluffton)
-    t, y = almanac.find_discrete(t0, t1, f)
-
+    t, y = almanac.find_risings(observer, galactic_center, t0, t1)
     print('The Galactic Center rises at', t[0].utc_iso(' '))
 
 .. testoutput::
@@ -577,8 +578,28 @@ crosses your meridian:
 
     ['2020-11-06 03:32', '2020-11-07 03:28']
 
-Skyfield also has an older mechanism for detecting transits
-that isn’t as fast but that also returns the moments of anti-transit,
+Observers often think of transit as the moment
+when an object is highest in the sky,
+but that’s only roughly true.
+At very high precision,
+if the body has any north or south velocity
+then its moment of highest altitude will be slightly earlier or later.
+
+Bodies near the poles are exceptions to the general rule
+that a body is visible at transit but below the horizon at antitransit.
+For a body that’s circumpolar from your location,
+transit and antitransit are both moments of visibility,
+when it stands above and below the pole.
+And objects close to the opposite pole will always be below the horizon,
+even as they invisibly transit your line of longitude
+down below your horizon.
+
+Legacy transit routine
+======================
+
+Skyfield has an older mechanism for detecting transits
+that isn’t as fast as the function described in the previous section,
+but it also returns the moments of anti-transit,
 when a body crosses the line of right ascension that crosses your local nadir:
 
 .. testcode::
@@ -601,37 +622,20 @@ when a body crosses the line of right ascension that crosses your local nadir:
 Some astronomers call these moments
 “upper culmination” and “lower culmination” instead.
 
-Observers often think of transit as the moment
-when an object is highest in the sky,
-but that’s only roughly true.
-At very high precision,
-if the body has any north or south velocity
-then its moment of highest altitude will be slightly earlier or later.
-
-Bodies near the poles are exceptions to the general rule
-that a body is visible at transit but below the horizon at antitransit.
-For a body that’s circumpolar from your location,
-transit and antitransit are both moments of visibility,
-when it stands above and below the pole.
-And objects close to the opposite pole will always be below the horizon,
-even as they invisibly transit your line of longitude
-down below your horizon.
-
-TODO
-====
+Legacy rising and setting routines
+==================================
 
 In case you are maintaining older code,
-versions of Skyfield before 1.47 could only compute sunrises and sunsets
-with an almanac routine
-that was both slower than the routine described above,
-and that also tended to miss sunrises and sunsets in the Arctic and Antarctic.
-Here’s how the older routine is called:
+versions of Skyfield before 1.47
+could only compute sunrises and sunsets
+with a routine that was much slower than the functions described above.
+It also tended to miss sunrises and sunsets in the Arctic and Antarctic.
+Here’s how it was called:
 
 .. testcode::
 
-    t0 = ts.utc(2018, 9, 12, 4)
-    t1 = ts.utc(2018, 9, 13, 4)
-    t, y = almanac.find_discrete(t0, t1, almanac.sunrise_sunset(eph, bluffton))
+    f = almanac.sunrise_sunset(eph, bluffton)
+    t, y = almanac.find_discrete(t0, t1, f)
 
     print(t.utc_iso())
     print(y)
@@ -644,10 +648,21 @@ Here’s how the older routine is called:
 The result ``t`` will be an array of times, and ``y`` will be ``1`` if
 the sun rises at the corresponding time and ``0`` if it sets.
 
-If you need to provide your own custom value for refraction, adjust the
-estimate of the Sun’s radius, or account for a vantage point above the
-Earth’s surface, see :ref:`risings-and-settings` to learn about the more
-versatile :func:`~skyfield.almanac.risings_and_settings()` routine.
+Another old routine :func:`~skyfield.almanac.risings_and_settings()`
+worked the same way, but for general targets like planets.
+
+.. testcode::
+
+    f = almanac.risings_and_settings(eph, eph['Mars'], bluffton)
+    t, y = almanac.find_discrete(t0, t1, f)
+
+    print(t.utc_iso())
+    print(y)
+
+.. testoutput::
+
+    ['2020-02-01T09:29:16Z', '2020-02-01T18:42:57Z']
+    [1 0]
 
 Twilight
 ========

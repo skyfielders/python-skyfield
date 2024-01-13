@@ -8,6 +8,12 @@
 See :doc:`almanac` for a guide to using these routines to search for the
 times of sunrise, sunset, and the phases of the moon.
 
+.. autofunction:: find_risings
+
+.. autofunction:: find_settings
+
+.. autofunction:: find_transits
+
 .. autofunction:: find_discrete
 
 .. autofunction:: seasons

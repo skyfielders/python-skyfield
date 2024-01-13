@@ -213,6 +213,9 @@ Routines to search for events like sunrise, sunset, and Moon phase.
 
 .. autosummary::
 
+   find_risings
+   find_settings
+   find_transits
    seasons
    moon_phase
    moon_phases

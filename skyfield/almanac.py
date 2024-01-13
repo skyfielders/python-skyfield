@@ -413,13 +413,56 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     return t, is_above_horizon
 
 def find_risings(observer, target, start_time, end_time, horizon_degrees=None):
+    """Return the times at which a target rises above the eastern horizon.
+
+    Given an observer on the Earth’s surface, a target like the Sun or
+    Moon or a planet, and start and stop :class:`~skyfield.timelib.Time`
+    objects, this returns two arrays that have the same length.  The
+    first is a :class:`~skyfield.timelib.Time` listing the moments at
+    which the target rises.  The second array has ``True`` for each time
+    the target really crosses the horizon, and ``False`` when the target
+    merely transits without actually touching the horizon.
+
+    See :ref:`horizon_degrees` for how to use the ``horizon_degrees``
+    argument.
+
+    .. versionadded:: 1.47
+
+    """
     return _find(observer, target, start_time, end_time, horizon_degrees,
                  _rising_hour_angle)
 
 def find_settings(observer, target, start_time, end_time, horizon_degrees=None):
+    """Return the times at which a target sets below the western horizon.
+
+    Given an observer on the Earth’s surface, a target like the Sun or
+    Moon or a planet, and start and stop :class:`~skyfield.timelib.Time`
+    objects, this returns two arrays that have the same length.  The
+    first is a :class:`~skyfield.timelib.Time` listing the moments at
+    which the target sets.  The second array has ``True`` for each time
+    the target really crosses the horizon, and ``False`` when the target
+    merely transits without actually touching the horizon.
+
+    See :ref:`horizon_degrees` for how to use the ``horizon_degrees``
+    argument.
+
+    .. versionadded:: 1.47
+
+    """
     return _find(observer, target, start_time, end_time, horizon_degrees,
                  _setting_hour_angle)
 
 def find_transits(observer, target, start_time, end_time):
+    """Return the times at which a target transits across the meridian.
+
+    Given an observer on the Earth’s surface, a target like the Sun or
+    Moon or a planet, and start and stop :class:`~skyfield.timelib.Time`
+    objects, this returns a :class:`~skyfield.timelib.Time` array
+    listing the moments at which the target transits across the
+    meridian.
+
+    .. versionadded:: 1.47
+
+    """
     t, _ = _find(observer, target, start_time, end_time, 0.0, _transit_ha)
     return t
