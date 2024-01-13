@@ -423,8 +423,8 @@ def find_risings(observer, target, start_time, end_time, horizon_degrees=None):
     the target really crosses the horizon, and ``False`` when the target
     merely transits without actually touching the horizon.
 
-    See :ref:`horizon_degrees` for how to use the ``horizon_degrees``
-    argument.
+    See `risings-and-settings` for examples, and `horizon_degrees` for
+    how to use the ``horizon_degrees`` argument.
 
     .. versionadded:: 1.47
 
@@ -443,8 +443,8 @@ def find_settings(observer, target, start_time, end_time, horizon_degrees=None):
     the target really crosses the horizon, and ``False`` when the target
     merely transits without actually touching the horizon.
 
-    See :ref:`horizon_degrees` for how to use the ``horizon_degrees``
-    argument.
+    See `risings-and-settings` for examples, and `horizon_degrees` for
+    how to use the ``horizon_degrees`` argument.
 
     .. versionadded:: 1.47
 
@@ -460,6 +460,8 @@ def find_transits(observer, target, start_time, end_time):
     objects, this returns a :class:`~skyfield.timelib.Time` array
     listing the moments at which the target transits across the
     meridian.
+
+    See `transits` for example code.
 
     .. versionadded:: 1.47
 

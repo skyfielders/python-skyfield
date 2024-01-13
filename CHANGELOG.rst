@@ -12,10 +12,11 @@ Released versions
 v1.47 — 2023 January 13
 -----------------------
 
-* Added faster and more accurate  almanac routines
+* Added faster and more accurate rising and setting routines!
+  See `risings-and-settings` for documentation and examples of the new
   :func:`~skyfield.almanac.find_risings()` and
   :func:`~skyfield.almanac.find_settings()` and
-  :func:`~skyfield.almanac.find_transits()`.
+  :func:`~skyfield.almanac.find_transits()` functions.
   `#662 <https://github.com/skyfielders/python-skyfield/issues/662>`_
 
 * Skyfield’s internal table for the ∆T Earth orientation parameter has
