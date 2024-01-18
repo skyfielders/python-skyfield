@@ -530,6 +530,9 @@ in case you don’t want to remember which directions are positive.
 So Mars was more than 24° above the horizon for Bostonians
 on 1980 March 1 at midnight UTC.
 
+Adjusting altitude for atmospheric refraction
+---------------------------------------------
+
 The altitude returned from a plain :meth:`~ICRF.altaz()` call
 is the ideal position
 that you would observe if the Earth had no atmosphere.
