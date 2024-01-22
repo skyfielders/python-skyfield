@@ -9,7 +9,7 @@ Changelog
 Released versions
 -----------------
 
-v1.47 — 2023 January 13
+v1.47 — 2024 January 13
 -----------------------
 
 * Added faster and more accurate rising and setting routines!
