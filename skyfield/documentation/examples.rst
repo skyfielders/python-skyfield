@@ -497,135 +497,159 @@ like the Sun, Moon, or one of the planets.
 At what rate is a target moving across the sky?
 ===============================================
 
-Automatically-driven telescopes and antennas
-often need to know the rate at which an object is moving across the sky.
-Specifically,
-an instrument with a simple altazimuth mount
-will need to know the rates at which altitude and azimuth are changing,
-whereas a fancier equatorial mount
-will need the rates for right ascension and declination.
-
-The solution is the same in both cases:
-to call Skyfield’s
-:meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` position method
-and pass it the frame of reference
-in which you want the rates computed.
-In either case,
-you will want to start by asking Skyfield to compute an apparent position:
+If you are interested in the rate at which a target is moving across the sky,
+you can call Skyfield’s
+:meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` method
+and pass it the frame of reference in which you want the angles measured.
+First, compute the target’s position relative to your geographic location:
 
 .. testcode::
 
-    from skyfield.api import load, wgs84, N, E
+    from skyfield.api import load, wgs84, N,S,E,W
 
     ts = load.timescale()
     t = ts.utc(2021, 2, 3, 0, 0)
     planets = load('de421.bsp')
     earth, mars = planets['earth'], planets['mars']
-    top = wgs84.latlon(35.1844866 * N, 248.347300 * E, elevation_m=2106.9128)
+    topos = wgs84.latlon(35.1844 * N, 111.6535 * W, elevation_m=2099.5)
 
-    a = (earth + top).at(t).observe(mars).apparent()
+    a = (earth + topos).at(t).observe(mars).apparent()
 
-Since every topocentric location in Skyfield
-is itself a reference frame representing the location’s horizon,
-we can simply pass ``top`` to the
-:meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` method
-to learn the rates at which the altitude and azimuth are changing:
-
-.. testcode::
-
-    alt, az, distance, alt_rate, az_rate, range_rate = (
-        a.frame_latlon_and_rates(top)
-    )
-
-    print('Alt: {:+.2f} asec/min'.format(alt_rate.arcseconds.per_minute))
-    print('Az:  {:+.2f} asec/min'.format(az_rate.arcseconds.per_minute))
-
-.. testoutput::
-
-    Alt: +548.66 asec/min
-    Az:  +1586.48 asec/min
-
-But if our instrument is on an equatorial mount,
-it will need to know how fast
-the right ascension and declination are changing.
-In that case we import Skyfield’s reference frame
-that represents the Earth’s true orientation in space,
-and pass that object to the
-:meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` method:
+In Skyfield, a topocentric location object like ``topos``
+is also a reference frame oriented to the
+:ref:`location’s horizon and zenith <horizontal-coordinates>`.
+So if you pass it to the
+:meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` method,
+Skyfield will compute the rates at which the altitude and azimuth are changing
+as the target moves across the sky:
 
 .. testcode::
 
-    from skyfield import framelib
+    (alt, az, distance,
+     alt_rate, az_rate, range_rate) = a.frame_latlon_and_rates(topos)
 
-    eeod = framelib.true_equator_and_equinox_of_date
-    dec, ra, distance, dec_rate, ra_rate, range_rate = (
-        a.frame_latlon_and_rates(eeod)
-    )
-
-    print(f'RA:  {ra_rate.arcseconds.per_hour:+.2f} asec/hr')
-    print(f'Dec: {dec_rate.arcseconds.per_hour:+.2f} asec/hr')
+    print('Alt: {:+.1f} asec/min'.format(alt_rate.arcseconds.per_minute))
+    print('Az:  {:+.1f} asec/min'.format(az_rate.arcseconds.per_minute))
 
 .. testoutput::
 
-    RA:  +78.66 asec/hr
-    Dec: +25.61 asec/hr
+    Alt: +548.7 asec/min
+    Az:  +1586.4 asec/min
 
-Note that, contrary to Skyfield’s usual custom,
-declination is returned first.
-That’s why the
-:meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` method
-has ``latlon`` in its name:
-it always returns the latitude-like coordinate
-(angle above or below the plane) first,
-then the longitude-like coordinate
-(angle around the plane) second.
+.. Why is this a comment? Because it is false. Using equinox-of-date
+   combines two motions, that of the body across the heavens, and that
+   of the Earth’s pole. Should I re-do this using Hour Angle?
 
-Finally, in case you need it,
-you will notice that both of the calls above return a ``range_rate``
-that is positive if the body is moving away from you
-and its range is increasing,
-or is negative if the target is moving closer and the range is falling.
-At the specific date and time we asked about above,
-Mars is moving away:
+   Or maybe I should do this using a frame that is ICRS / J2000.
+   Except that, does Skyfield have such a frame?
+
+   Anyway:
+
+   Or, if you instead want to know how fast the target is moving
+   against the background of stars,
+   you can pass Skyfield’s built-in
+   :data:`~skyfield.framelib.true_equator_and_equinox_of_date` reference frame
+   to compute rates of moment in right ascension and declination:
+
+   .. testcode::
+
+       from skyfield import framelib
+
+       teqeq = framelib.true_equator_and_equinox_of_date
+       (dec, ra, distance,
+        dec_rate, ra_rate, range_rate) = a.frame_latlon_and_rates(teqeq)
+
+       print(f'RA:  {ra_rate.arcseconds.per_hour:+.1f} asec/hr')
+       print(f'Dec: {dec_rate.arcseconds.per_hour:+.1f} asec/hr')
+
+   .. testoutput::
+
+       RA:  +78.7 asec/hr
+       Dec: +25.6 asec/hr
+
+   Note that, contrary to Skyfield’s usual custom,
+   this technique returns declination as the first return value
+   instead of returning right ascension first.
+   That’s because the
+   :meth:`~skyfield.positionlib.ICRF.frame_latlon_and_rates()` method
+   always returns the latitude-like coordinate first,
+   which measures the target’s angle ±90° above or below the plane,
+   and then the longitude-like coordinate second,
+   which measures the target’s position 0°–360° around.
+   The ``latlon`` in its name can help you remember this.
+
+You can choose other units besides ``arcseconds`` and ``per_minute``.
+For the possible numerators see
+:class:`~skyfield.units.AngleRate`,
+and for the possible denominators see
+:class:`~skyfield.units.Rate`.
+
+Computing the range rate-of-change
+----------------------------------
+
+Both of the calls above return a ``range_rate``
+that is positive if the body is moving away
+and negative if the target is moving closer:
 
 .. testcode::
 
-    print('Range rate: {:+.2f} km/s'.format(range_rate.km_per_s))
+    print('Range rate: {:+.1f} km/s'.format(range_rate.km_per_s))
 
 .. testoutput::
 
-    Range rate: +16.79 km/s
+    Range rate: +16.8 km/s
 
-Finally,
-there’s the slight complication
-that some data sources and instruments
-want the rate of motion around-the-sky
-to be multiplied by the cosine of the body’s angle
-above or below the reference plane.
-By simply performing the math—and
-remembering that ``sin()`` and ``cos()`` in Python take radian arguments—you
-can produce these alternative measurements yourself:
+Computing angular speed
+-----------------------
+
+You might think that you could compute
+a target’s total angular speed across the sky
+by simply subjecting the two angular rates of change
+to the Pythagorean theorem.
+
+But that won’t work, because of a subtlety:
+it turns out that all of the different kinds of longitude —
+including right ascension, azimuth, and ecliptic longitude —
+have lines that are far apart at the equator
+but that draw closer and closer together near the poles.
+I hope that there is an elegant antique globe sitting near you
+as you read this in your armchair.
+Look at the lines on its surface.
+Down at the equator,
+the lines of longitude stand far apart,
+and to move 15° in longitude
+you would have to travel across very nearly 15° of the Earth’s surface.
+But now look at the poles.
+The lines of longitude draw so close together that,
+if you’re close enough to the pole,
+you could cross 15° of longitude
+by traveling only a very short distance!
+
+Happily, spherical trigonometry gives us a simple correction to apply.
+Multiplying the longitude rate by the cosine of the latitude
+gives a bare angular rate of motion across the sky,
+that can safely be tossed into the Pythagorean theorem:
 
 .. testcode::
 
-    from numpy import cos
+    from numpy import cos, sqrt
 
-    rcos = az_rate.arcseconds.per_minute * cos(alt.radians)
-    print(
-        'Azimuth rate × cos(altitude): {:.2f} arcseconds / minute'
-        .format(rcos)
-    )
+    ralt = alt_rate.degrees.per_minute
+    raz = az_rate.degrees.per_minute * cos(alt.radians)
 
-    rcos = ra_rate.arcseconds.per_hour * cos(dec.radians)
-    print(
-        'RA rate × cos(declination): {:.2f} arcseconds / hour'
-        .format(rcos)
-    )
+    degrees_per_minute = sqrt(ralt*ralt + raz*raz)
+    print('{:.4f}° per minute'.format(degrees_per_minute))
 
 .. testoutput::
 
-    Azimuth rate × cos(altitude): 663.55 arcseconds / minute
-    RA rate × cos(declination): 75.16 arcseconds / hour
+    0.2392° per minute
+
+In exactly the same way,
+if instead you wanted to compute a target’s speed
+against the background of stars,
+you would multiply the rate at which the right ascension is changing
+by the cosine of the declination
+before combining them with the Pythagorean theorem.
 
 What is the right ascension and declination of a point in the sky?
 ==================================================================

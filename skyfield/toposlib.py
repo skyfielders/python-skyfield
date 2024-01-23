@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Classes that represent a ‘topocentric’ position on the Earth’s surface."""
 
 from numpy import arctan2, array, array2string, cos, exp, sin, sqrt
 from .constants import ANGVEL, DAY_S, RAD2DEG, T0, pi, tau
