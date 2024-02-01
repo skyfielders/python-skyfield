@@ -798,7 +798,7 @@ class Time(object):
 
     @reify
     def utc(self):
-        """A tuple ``(year, month, day, hour, minute, seconds)`` in UTC."""
+        """A tuple ``(year, month, day, hour, minute, second)`` in UTC."""
         utc = self._utc_tuple(0.0)
         return (array(utc).view(CalendarArray) if self.shape
                 else CalendarTuple(*utc))
