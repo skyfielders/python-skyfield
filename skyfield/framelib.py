@@ -56,7 +56,13 @@ def build_ecliptic_matrix(t):
     return mxm(rot_x(- true_obliquity), t.M)
 
 class true_equator_and_equinox_of_date(object):
-    """The dynamical frame of the Earth’s true equator and equinox of date.
+    """The dynamical frame of Earth’s true equator and true equinox of date.
+
+    This frame is used for measuring right ascension and declination.
+    Unlike the fixed reference frames J2000 and the ICRS, this ‘TETE’
+    frame rotates slowly as the Earth’s precession and nutation shift
+    the equinox point.  Unlike the :class:`~skyfield.sgp4lib.TEME`
+    frame, this frame doesn’t ignore nutation.
 
     This is supplied as an explicit reference frame in case you want
     |xyz| coordinates; if you want angles, it’s better to use the

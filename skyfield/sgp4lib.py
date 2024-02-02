@@ -282,9 +282,17 @@ class EarthSatellite(VectorFunction):
         return ts.tt_jd(jd[i]), v[i]
 
 class TEME(object):
-    """The SGP4-specific True Equator Mean Equinox frame of reference.
+    """The satellite-specific True Equator Mean Equinox frame of reference.
 
-    Described in AIAA 2006-6753 Appendix C.  See :ref:`reference_frames`
+    This TEME frame is used to measure right ascension and declination,
+    and is the reference frame of the SGP4 Earth satellite orbit model.
+    It is a bit quirky.  Instead measuring right ascension from the true
+    vernal equinox point, it uses the ‘mean’ equniox that considers only
+    precession but not nutation (the same equinox used for Greenwich
+    Mean Sidereal Time).  This made the reference frame more tractable
+    for the 1970s computers that first implemented SGP4.
+
+    Defined in AIAA 2006-6753 Appendix C.  See :ref:`reference_frames`
     for a guide to using Skyfield reference frames like this one.
 
     """

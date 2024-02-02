@@ -406,6 +406,7 @@ Reference frames
    skyfield.framelib.ecliptic_frame
    skyfield.framelib.ecliptic_J2000_frame
    skyfield.framelib.galactic_frame
+   skyfield.sgp4lib.TEME
 
 Constellations
 ==============
