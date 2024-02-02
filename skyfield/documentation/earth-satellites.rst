@@ -21,13 +21,12 @@ for artificial satellites in Earth orbit:
    in their crucial paper `Revisiting Spacetrack Report #3`_,
    there are many slightly different versions
    of the basic satellite prediction algorithm circulating in the wild.
-   (Happily, Skyfield does use
-   the corrected and updated version of the algorithm
-   that they created as part of writing that report!)
+   Happily,
+   Skyfield uses the corrected and updated version of the algorithm
+   that they created as part of writing that report.
 
-2. The accuracy of the satellite positions is not perfect.
-   To quote directly from `Revisiting Spacetrack Report #3`_
-   Appendix B:
+2. Satellite positions have limited precision.
+   Here’s what `Revisiting Spacetrack Report #3`_ says in Appendix B:
 
       “The maximum accuracy for a TLE is
       limited by the number of decimal places in each field.
@@ -46,9 +45,9 @@ for artificial satellites in Earth orbit:
    For earlier dates,
    you will want to pull an old TLE from the archives.
 
-4. Expect a satellite’s orbit to constantly change
-   as the SGP4 propagation routine models effects
-   like atmospheric drag and the Moon’s gravity.
+4. A satellite’s orbital elements are in constant flux
+   from effects like atmospheric drag, the Moon’s gravity,
+   and its own propulsion.
    In particular, the true anomaly parameter can swing wildly
    for satellites with nearly circular orbits,
    because the reference point from which true anomaly is measured —
@@ -68,17 +67,19 @@ for artificial satellites in Earth orbit:
 .. _Revisiting Spacetrack Report #3:
     https://celestrak.org/publications/AIAA/2006-6753/
 
-Note that even though TLE elements have names
-like *inclination* and *eccentricity*
-that might remind you of the simple Kepler elements
-used for the orbits of comets and asteroids,
-the SGP4 propagation routine
-knows that a satellite orbit is not a simple ellipse
-and includes effects like the Moon’s gravity and atmospheric drag
-in its calculations.
+Note that even though several TLE elements
+have names that might remind you of Kepler orbital elements,
+like *inclination* and *eccentricity*,
+the SGP4 routine does not treat a satellite’s orbit as a simple ellipse,
+and will produce a different position than a Kepler orbit would.
 
-Loading a TLE file
-------------------
+Loading TLE element sets
+========================
+
+Skyfield supports several approaches to loading TLE data.
+
+Downloading a TLE file
+----------------------
 
 You can find satellite element sets at the
 `NORAD Two-Line Element Sets <http://celestrak.org/NORAD/elements/>`_
@@ -99,11 +100,12 @@ which is listed in Celestrak’s ``stations.txt`` file:
 
 .. testsetup::
 
-    open('stations.txt', 'wb').write(b"""\
+    stations_txt_bytes = b"""\
     ISS (ZARYA)             \n\
     1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082
     2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
-    """ * 60)
+    """ * 60
+    open('stations.txt', 'wb').write(stations_txt_bytes)
 
 .. testcode::
 
@@ -117,10 +119,13 @@ which is listed in Celestrak’s ``stations.txt`` file:
 
     Loaded 60 satellites
 
-If you want to operate on every satellite in the list,
-simply loop over the list with a ``for`` loop.
-If you instead want to be able
-to select individual satellites by name or number,
+Indexing satellites by name or number
+-------------------------------------
+
+If you want to operate on every satellite
+in the list that you have loaded from a file,
+you can use Python’s ``for`` loop.
+But if you instead want to select individual satellites by name or number,
 try building a lookup dictionary
 using Python’s dictionary comprehension syntax:
 
@@ -194,8 +199,31 @@ But note that when asked again for the same satellite,
 it will simply reload the existing file from disk
 unless ``reload=True`` is specified.
 
-Loading a TLE set from strings
-------------------------------
+Loading a TLE file from a string
+--------------------------------
+
+If your program has already loaded the text of a TLE file,
+and you don’t need Skyfield to handle the download for you,
+then you can turn it into a list of Skyfield satellites
+with the :func:`~skyfield.iokit.parse_tle_file()` function.
+The function is a Python generator,
+so we use Python’s ``list()`` constructor
+to load all the satellites:
+
+.. testcode::
+
+    from io import BytesIO
+    from skyfield.iokit import parse_tle_file
+
+    f = BytesIO(stations_txt_bytes)
+    satellites = list(parse_tle_file(f))
+
+If it’s simpler in your case,
+you can instead pass :func:`~skyfield.iokit.parse_tle_file()`
+a simple list of lines.
+
+Loading a single TLE set from strings
+-------------------------------------
 
 If your program already has the two lines of TLE data for a satellite
 and doesn’t need Skyfield to download and parse a Celestrak file,
@@ -216,7 +244,7 @@ you can instantiate an :class:`~skyfield.sgp4lib.EarthSatellite` directly.
     ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
 
 Checking a TLE’s epoch
-----------------------
+======================
 
 The “epoch” date of a satellite element set
 is the all-important date and time
@@ -263,7 +291,7 @@ as various satellite element sets go out-of-date each month
 and await updates from their respective organizations.
 
 Historical satellite element sets
----------------------------------
+=================================
 
 To repeat the warning in the previous section:
 any particular satellite TLE set
@@ -296,7 +324,7 @@ close to the old TLE’s epoch date.
 .. _satellite-rising-and-setting:
 
 Finding when a satellite rises and sets
----------------------------------------
+=======================================
 
 Skyfield can search between a start time and an end time
 for each occasion on which a satellite’s altitude
@@ -371,7 +399,7 @@ unless you have some means of observing the satellite
 (by radio, for example) before it gets dark outside.
 
 Generating a satellite position
--------------------------------
+===============================
 
 Once Skyfield has identified the times
 at which a particular satellite is overhead,
@@ -397,7 +425,7 @@ than those of the old J2000 system.)
     [-3918.87650458 -1887.64838745  5209.08801512]
 
 Satellite longitude, latitude, and height
------------------------------------------
+=========================================
 
 Once you have computed a geocentric satellite position,
 you can use either of several :data:`~skyfield.toposlib.wgs84` object methods
@@ -441,7 +469,7 @@ for the satellite’s latitude and longitude.
     subpoint = wgs84.latlon(lat.degrees, lon.degrees, elevation_m)
 
 Satellite altitude, azimuth, and distance
------------------------------------------
+=========================================
 
 You might be most interested
 in whether the satellite is above or below the horizon
@@ -505,7 +533,7 @@ through east (90°), south (180°), and west (270°)
 before returning to the north and rolling over from 359° back to 0°.
 
 Satellite right ascension and declination
------------------------------------------
+=========================================
 
 If you are interested
 in where among the stars the satellite will be positioned,
@@ -541,7 +569,7 @@ or else in the dynamical coordinate system of the date you specify.
 See :doc:`positions` to learn more about these possibilities.
 
 Find a satellite’s range rate
------------------------------
+=============================
 
 If you’re interested in the Doppler shift
 of the radio signal from a satellite,
@@ -586,7 +614,7 @@ of the orientation of the spherical coordinate system we choose.
 .. _satellite-is-sunlit:
 
 Find when a satellite is in sunlight
-------------------------------------
+====================================
 
 A satellite is generally only visible to a ground observer
 when there is still sunlight up at its altitude.
@@ -643,7 +671,7 @@ if you want to loop across the times and corresponding values.
 .. _is-behind-earth:
 
 Find whether the Earth blocks a satellite’s view
-------------------------------------------------
+================================================
 
 The Earth looms large in the sky of an Earth-orbiting satellite.
 To plan an observation you may want to know
@@ -672,7 +700,7 @@ each of these ``True`` and ``False`` values
 with their corresponding time.
 
 Avoid calling the observe method
---------------------------------
+================================
 
 When computing positions for the Sun, Moon, planets, and stars,
 Skyfield encourages a far more fussy approach
@@ -755,7 +783,7 @@ so you should neglect it and simply subtract
 GCRS-centered vectors instead as detailed above.
 
 Detecting Propagation Errors
-----------------------------
+============================
 
 After building a satellite object,
 you can examine the *epoch* date and time
@@ -853,7 +881,7 @@ and otherwise recording the propagator error:
 .. _from-satrec:
 
 Build a satellite with a specific gravity model
------------------------------------------------
+===============================================
 
 If your satellite elements
 are designed for another gravity model besides the default WGS72 model,
@@ -867,7 +895,7 @@ It will let you customize the choice of gravity model:
     sat = EarthSatellite.from_satrec(satrec, ts)
 
 Build a satellite from orbital elements
----------------------------------------
+=======================================
 
 If you are starting with raw satellite orbital parameters
 instead of TLE text,
