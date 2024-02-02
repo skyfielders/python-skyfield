@@ -5,7 +5,9 @@
 
 Quick links to the sections below:
 
-.. contents:: :local:
+.. contents::
+   :local:
+   :backlinks: none
 
 Version
 =======

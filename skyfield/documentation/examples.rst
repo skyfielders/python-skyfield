@@ -16,6 +16,7 @@ Here’s the list of examples that you can find in the sections below:
 
 .. contents::
    :local:
+   :backlinks: none
 
 .. testsetup::
 

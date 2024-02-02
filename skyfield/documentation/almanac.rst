@@ -7,6 +7,7 @@ To help you navigate, here are the topics covered on this page:
 
 .. contents::
    :local:
+   :backlinks: none
 
 Here are the imports and objects that will drive the examples below:
 
