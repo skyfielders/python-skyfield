@@ -37,7 +37,7 @@ del build_matrix
 _identity = array([(1,0,0), (0,1,0), (0,0,1)])
 
 class ICRS(object):
-    """The International Coordinate Reference System (ICRS).
+    """The International Celestial Reference System (ICRS).
 
     The ICRS is a permanent reference frame which has replaced J2000,
     with which its axes agree to within 0.02 arcseconds (closer than the
@@ -136,7 +136,8 @@ itrs = itrs()
 
 class ecliptic_frame(object):
     """Reference frame of the true ecliptic and equinox of date."""
-    def rotation_at(self, t):
+    @staticmethod
+    def rotation_at(t):
         return build_ecliptic_matrix(t)
 
 ecliptic_frame = ecliptic_frame()

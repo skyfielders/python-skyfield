@@ -76,7 +76,7 @@ def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
 class ICRF(object):
     """An |xyz| position and velocity oriented to the ICRF axes.
 
-    The International Coordinate Reference Frame (ICRF) is a permanent
+    The International Celestial Reference Frame (ICRF) is a permanent
     reference frame that is the replacement for J2000.  Their axes agree
     to within 0.02 arcseconds.  It also supersedes older equinox-based
     systems like B1900 and B1950.
