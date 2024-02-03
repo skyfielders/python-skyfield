@@ -17,6 +17,9 @@ def t():
     yield ts.utc(2020, 11, 3, 17, 5)
     yield ts.utc(2020, 11, 3, 17, [5, 5])
 
+def test_polar_radius():
+    assert round(wgs84.polar_radius.km) == 6357
+
 def test_latitude_longitude_elevation_str_and_repr():
     w = wgs84.latlon(36.7138, -112.2169, 2400.0)
     assert str(w) == ('WGS84 latitude +36.7138 N'

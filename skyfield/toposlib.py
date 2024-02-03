@@ -145,6 +145,11 @@ class Geoid(object):
         f = 1.0 / inverse_flattening
         self._e2 = 2.0*f - f*f
 
+    @reify
+    def polar_radius(self):
+        """The Earth’s polar radius, as a :class:`~skyfield.units.Distance`."""
+        return Distance(self.radius.au * (1.0 - 1.0 / self.inverse_flattening))
+
     def latlon(self, latitude_degrees, longitude_degrees, elevation_m=0.0,
                cls=GeographicPosition):
         """Return a `GeographicPosition` for a given latitude and longitude.

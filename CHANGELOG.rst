@@ -9,6 +9,12 @@ Changelog
 Released versions
 -----------------
 
+Next version
+------------
+
+* For convenience, geoids like :data:`~skyfield.toposlib.wgs84` have a
+  new attribute :data:`~skyfield.toposlib.Geoid.polar_radius`.
+
 v1.47 — 2024 January 13
 -----------------------
 
