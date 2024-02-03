@@ -2,7 +2,7 @@
 
 from numpy import (
     arcsin, arctan2, array, cos, einsum, finfo, float64,
-    full_like, load, rollaxis, sin, sqrt,
+    full_like, load, nan, rollaxis, sin, sqrt, where,
 )
 from pkgutil import get_data
 from skyfield.constants import tau
@@ -13,6 +13,11 @@ class A(object):
     """Allow literal NumPy arrays to be spelled ``A[1, 2, 3]``."""
     __getitem__ = array
 A = A()
+
+def sqrt_nan(n):
+    """Return the square root of ``n``, or ``nan`` if ``n < 0``."""
+    # (See design/sqrt_nan.py for a speed comparison of approaches.)
+    return where(n < 0.0, nan, sqrt(abs(n)))
 
 def dots(v, u):
     """Given one or more vectors in `v` and `u`, return their dot products.

@@ -1,14 +1,8 @@
 from skyfield.api import load, wgs84
-from numpy import array, sqrt
+from numpy import array, nan
 
-# Now let's try the SPICE 'surfpt.f' approach, and actually find the
-# point of interception, while treating the Earth as an ellipsoid.
-# Here are two helper routines:
-
-# def VPERP(a, b):
-#     return a - VPROJ(a, b)
-
-from skyfield.functions import dots, length_of
+from skyfield.functions import dots
+from skyfield.geometry import line_and_ellipsoid_intersection
 
 def vector_projection(a, b):
     return dots(a,b) / dots(b,b) * b
@@ -65,78 +59,7 @@ class A(object):
     __getitem__ = array
 A = A()
 
-import numpy as np
-from numpy import nan #, sign
-
 nan3 = A[nan,nan,nan]
-
-def line_and_ellipsoid_intersection(line_start, line_direction, radii):
-    # Based on `surfpt.f` from the SPICE Toolkit.
-    # TODO: vectorize
-
-    # Scale coordinates so the ellipsoid becomes the unit sphere.
-    start = line_start / radii
-    direction = line_direction / radii
-
-    # What point on the line is closest to the sphere's center?
-    closest_point = start - vector_projection(start, direction)
-
-    startmag = length_of(start)
-    pmag = length_of(closest_point)
-    startPROJ = start - closest_point
-
-    j = 2 + np.sign(startmag - 1.0).astype(int) * 2
-    k = dots(startPROJ, direction) > 0.0
-    i = j + k
-
-    sign_table = A[
-        +1,  # startmag < 1: looking out from inside sphere
-        +1,  # startmag < 1: (same)
-        -1,  # startmag = 1: on surface, so choose - to return `start`
-        +1,  # startmag = 1: on surface, so choose + to return `start`
-        -1,  # startmag > 1: outside sphere, looking towards it
-        nan, # startmag > 1: outside sphere, but looking away from it
-    ]
-    # sign_table = A[
-    #     +1,  # startmag < 1, same direction: looking out from inside sphere
-    #     -1,  # startmag = 1, ...: on surface of sphere ...
-    #     -1,  # startmag > 1, ...: outside sphere ...
-    #     +1,  # startmag < 1, ...: inside sphere
-    #     +1,  # startmag = 1, ...: on surface of sphere ...
-    #     nan, # startmag > 1, ...: outside sphere looking away from it
-    # ]
-    sign = sign_table[i]
-
-    # if startmag > 1.0:          # start is outside sphere
-    #     startPROJ = start - closest_point
-    #     if dots(startPROJ, direction) > 0.0:
-    #         #return nan3
-    #         sign = nan
-    #     # if pmag > 1.0:
-    #     #     return nan3
-    #     # if pmag == 1.0:
-    #     #     return closest_point * radii
-    #     else:
-    #         sign = -1.0
-    # elif startmag == 1.0:       # start is on surface of sphere
-    #     print('HERE')
-    #     print('*******', startmag, pmag)
-    #     # return line_start
-    #     # sign = 1.0
-    #     startPROJ = start - closest_point
-    #     sign = np.sign(dots(startPROJ, direction))
-    #     # if  > 0.0:
-    #     #     sign = 1.0
-    #     # else:
-    #     #     sign = -1.0
-    # else:                       # start is inside sphere
-    #     sign = 1.0
-
-    half_chord_length = sqrt(1.0 - pmag*pmag)  # TODO: issues warning?!
-    unit_direction = direction / length_of(direction)
-    print('*****',closest_point, sign, half_chord_length, unit_direction)
-    intersection = closest_point + sign * half_chord_length * unit_direction
-    return intersection * radii
 
 def test():
     f = line_and_ellipsoid_intersection
