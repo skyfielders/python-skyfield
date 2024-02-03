@@ -27,10 +27,6 @@ from skyfield.timelib import Time, build_delta_t as build_new_delta_t
 delta_t_parabola_stephenson_morrison_hohenkerk_2020_maybe = Splines(
     [1825.0, 1925.0, 0.0, 31.4, 0.0, -320.0])
 
-class A(object):
-    __getitem__ = array
-A = A()
-
 class E2(list):
     def __init__(self, value):
         self.value = value
@@ -41,9 +37,6 @@ class E():
     def __getitem__(self, i):
         return E2(i)
 E = E()
-
-x = A[1, 2, 3]  # No parens!
-#print('=', x == E[1,2,3])
 
 def _cat(*args):
     return concatenate(args, axis=1)
