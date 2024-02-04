@@ -15,6 +15,11 @@ Next version
 * For convenience, geoids like :data:`~skyfield.toposlib.wgs84` have a
   new attribute :data:`~skyfield.toposlib.Geoid.polar_radius`.
 
+* You can no longer subtract two positions unless they have the same
+  ``.center``.  Otherwise, a ``ValueError`` is raised.  This check has
+  always been performed when you subtract vector functions, but it was
+  missing from the position subtraction routine.
+
 v1.47 — 2024 January 13
 -----------------------
 

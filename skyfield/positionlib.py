@@ -168,6 +168,11 @@ class ICRF(object):
 
     def __sub__(self, body):
         """Subtract two ICRF vectors to produce a third."""
+        if self.center != body.center:
+            raise ValueError(
+                "you can only subtract two vectors"
+                " if they both start at the same center"
+            )
         p = self.position.au - body.position.au
         if self.velocity is None or body.velocity is None:
             v = None

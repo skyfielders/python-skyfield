@@ -20,6 +20,10 @@ def test_subtraction():
     assert tuple(p.position.au) == (9, 18, 27)
     assert tuple(p.velocity.au_per_d) == (36, 45, 54)
 
+    p1.center = 1
+    with assert_raises(ValueError):
+        p0 - p1
+
 def test_separation_from_on_scalar():
     p0 = ICRF((1, 0, 0))
     p1 = ICRF((0, 1, 0))
