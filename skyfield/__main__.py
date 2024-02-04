@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import pkg_resources
 import numpy as np
+
+import jplephem
+import sgp4
 import skyfield
 from skyfield.api import load
 from skyfield.functions import load_bundled_npy
 
 def main():
     print('Skyfield version: {0}'.format(skyfield.__version__))
-    print('jplephem version: {0}'.format(version_of('jplephem')))
-    print('sgp4 version: {0}'.format(version_of('sgp4')))
+    print('jplephem version: {0}'.format(jplephem.__version__))
+    print('sgp4 version: {0}'.format(sgp4.__version__))
 
     ts = load.timescale()
     fmt = '%Y-%m-%d'
@@ -25,13 +27,5 @@ def main():
     end = ts.tt_jd(daily_tt[-1])
     print('Built-in ∆T table from finals2000A.all covers: {0} to {1}'
           .format(start.utc_strftime(fmt), end.utc_strftime(fmt)))
-
-def version_of(distribution):
-    try:
-        d = pkg_resources.get_distribution(distribution)
-    except pkg_resources.DistributionNotFound:
-        return 'Unknown'
-    else:
-        return d.version
 
 main()
