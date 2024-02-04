@@ -16,6 +16,10 @@ def test_sending_jd_that_is_not_a_julian_date():
                        " instead of the value 'blah'"):
         earth.at('blah')
 
+def test_observe_and_apparent_survive_an_empty_time_array(ts):
+    e = api.load('de421.bsp')
+    e['earth'].at(ts.utc(2024, 2, 4, 7, [])).observe(e['mars']).apparent()
+
 def test_apparent_position_class(ts):
     e = api.load('de421.bsp')
     p = e['earth'].at(ts.utc(2014, 2, 9, 14, 50)).observe(e['mars']).apparent()
