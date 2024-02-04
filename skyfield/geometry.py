@@ -37,6 +37,8 @@ def line_and_ellipsoid_intersection(line_start, line_direction, radii):
 
     """
     # Based on `surfpt.f` from the SPICE Toolkit.
+    if len(getattr(line_start, 'shape', ())) > 1:
+        radii = radii.reshape((3, 1))
 
     # Scale coordinates so the ellipsoid becomes the unit sphere.
     start = line_start / radii
