@@ -893,6 +893,10 @@ class Time(object):
             return self.__sub__(other_time) == 0.0
         return False
 
+    def __lt__(self, other):
+        return ((self.tt_fraction - other.tt_fraction)
+                + (self.whole - other.whole)) < 0
+
     def __add__(self, other_time):
         if isinstance(other_time, timedelta):
             w = other_time.days

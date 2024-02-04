@@ -763,3 +763,5 @@ def test_time_math(ts):
     bump = dt_module.timedelta(microseconds=300)
     assert (t - bump).utc_jpl() == 'A.D. 2020-Jun-08 02:58:50.8157 UTC'
     assert (t + bump).utc_jpl() == 'A.D. 2020-Jun-08 02:58:50.8163 UTC'
+
+    assert t < t + 1

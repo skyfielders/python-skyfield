@@ -12,6 +12,9 @@ Released versions
 Next version
 ------------
 
+* Times now support the ``<`` operator, which also means that Python can
+  sort them.
+
 * For convenience, geoids like :data:`~skyfield.toposlib.wgs84` have a
   new attribute :data:`~skyfield.toposlib.Geoid.polar_radius`.
 
