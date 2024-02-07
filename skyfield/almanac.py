@@ -409,7 +409,7 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
         timebump = ha_adjustment / ha_per_day
         t = ts.tt_jd(t.whole, t.tt_fraction + timebump)
 
-    is_above_horizon = (desired_ha != 0.0)
+    is_above_horizon = (desired_ha % pi != 0.0)
     return t, is_above_horizon
 
 def find_risings(observer, target, start_time, end_time, horizon_degrees=None):

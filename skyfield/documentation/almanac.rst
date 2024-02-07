@@ -189,18 +189,18 @@ For example:
     alt, az, dist = harra_observer.at(t).observe(sun).apparent().altaz()
 
     for ti, yi, alti in zip(t.utc_iso(' '), y, alt.degrees):
-        print('{} {:5} {:.4f}'.format(ti, str(yi), alti))
+        print('{} {:5} {:.4f}°'.format(ti, str(yi), alti))
 
 .. testoutput::
 
-    2022-12-18 10:22:54Z True  -0.8333
-    2022-12-19 10:29:21Z True  -0.8333
-    2022-12-20 10:37:06Z False -0.8387
-    2022-12-21 10:37:36Z False -0.8464
-    2022-12-22 10:38:06Z False -0.8461
-    2022-12-23 10:38:36Z False -0.8380
-    2022-12-24 10:31:28Z True  -0.8333
-    2022-12-25 10:26:08Z True  -0.8333
+    2022-12-18 10:22:54Z True  -0.8333°
+    2022-12-19 10:29:21Z True  -0.8333°
+    2022-12-20 10:37:06Z False -0.8387°
+    2022-12-21 10:37:36Z False -0.8464°
+    2022-12-22 10:38:06Z False -0.8461°
+    2022-12-23 10:38:36Z False -0.8380°
+    2022-12-24 10:31:28Z True  -0.8333°
+    2022-12-25 10:26:08Z True  -0.8333°
 
 This output shows that right around the winter solstice,
 there are four days on which the Sun never quite reaches the horizon,
@@ -208,6 +208,35 @@ but is at least a few fractions of a degree below the altitude of -0.8333°
 that would qualify for the USNO definition of sunrise.
 So Skyfield instead returns the moment when the Sun is closest to the horizon,
 with the accompanying value ``False``.
+
+The value ``False`` also accompanies a lower transit
+when the sun is up for an entire 24-hour day
+and never touches the horizon and sets.
+
+.. testcode::
+
+    utqiagvik_alaska = wgs84.latlon(71.2906 * N, 156.7886 * W)
+    utqiagvik_observer = eph['Earth'] + utqiagvik_alaska
+
+    t0 = ts.utc(2023, 6, 21)
+    t1 = ts.utc(2023, 6, 22)
+    t, y = almanac.find_settings(utqiagvik_observer, sun, t0, t1)
+
+    alt, az, dist = utqiagvik_observer.at(t).observe(sun).apparent().altaz()
+
+    for ti, yi, alti in zip(t.utc_iso(' '), y, alt.degrees):
+        print('{} {:5} {:.4f}°'.format(ti, str(yi), alti))
+
+.. testoutput::
+
+    2023-06-21 10:28:55Z False 4.7265°
+
+The Sun at this Alaska location doesn’t reach the horizon on June 21,
+and so instead of triumphantly returning
+the time at which the sun reached -0.8333°,
+Skyfield returns the moment of anti-transit
+when the Sun was at its lowest and furthest north —
+standing a full 4.7° above the horizon.
 
 Moonrise and moonset
 --------------------
