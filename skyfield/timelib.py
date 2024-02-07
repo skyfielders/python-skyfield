@@ -5,7 +5,7 @@ import sys
 from collections import namedtuple
 from datetime import date, datetime, timedelta
 from numpy import (
-    array, concatenate, cos, float_, int64, isnan, isinf, linspace,
+    array, concatenate, cos, float64, int64, isnan, isinf, linspace,
     nan, ndarray, nonzero, pi, rollaxis, searchsorted, sin, where, zeros_like,
 
 )
@@ -102,8 +102,8 @@ class Timescale(object):
             self.delta_t_function = build_delta_t(delta_t_recent)
 
         self.leap_dates, self.leap_offsets = leap_dates, leap_offsets
-        self.J2000 = Time(self, float_(T0))
-        self.B1950 = Time(self, float_(B1950))
+        self.J2000 = Time(self, float64(T0))
+        self.B1950 = Time(self, float64(B1950))
         self.julian_calendar_cutoff = None
 
         # Our internal leap-second table has three columns:
