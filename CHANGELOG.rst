@@ -9,11 +9,10 @@ Changelog
 Released versions
 -----------------
 
-Next version
-------------
+v1.48 — 2024 February 7
+-----------------------
 
-* Times now support the ``<`` operator, which also means that Python can
-  sort them.
+* Times now support the ``<`` operator, so Python can sort them.
 
 * For convenience, geoids like :data:`~skyfield.toposlib.wgs84` have a
   new attribute :data:`~skyfield.toposlib.Geoid.polar_radius`.
@@ -22,6 +21,10 @@ Next version
   ``.center``.  Otherwise, a ``ValueError`` is raised.  This check has
   always been performed when you subtract vector functions, but it was
   missing from the position subtraction routine.
+
+* On days that the Sun fails to rise and set in the Arctic and
+  Antarctic, the new rising and setting routines now correctly set the
+  value ``False`` not only for sunrise but also for sunset.
 
 v1.47 — 2024 January 13
 -----------------------
