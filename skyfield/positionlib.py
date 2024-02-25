@@ -293,7 +293,7 @@ class ICRF(object):
         Because this declination is measured from the plane of the
         Earth’s physical geographic equator, it will be slightly
         different than the declination returned by ``radec()`` if you
-        have loaded a :ref:`polar motion` file.
+        have loaded a :ref:`polar-motion` file.
 
         The coordinates are not adjusted for atmospheric refraction near
         the horizon.

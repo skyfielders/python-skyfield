@@ -301,7 +301,7 @@ v1.35 — 2020 December 31
   (The old method will remain in place to support legacy code,
   but is discouraged in new applications.)
 
-* The effects of :ref:`Polar motion` — if configured — are now included
+* The effects of :ref:`polar-motion` — if configured — are now included
   both when computing the position in space of an Earth latitude and longitude,
   and when determining the latitude and longitude beneath a celestial position.
 
@@ -329,7 +329,7 @@ v1.34 — 2020 December 10
 
 * Added an official :class:`~skyfield.framelib.itrs` reference frame.
 
-* Added support for IERS :ref:`polar motion` 𝑥 and 𝑦.
+* Added support for IERS :ref:`polar-motion` 𝑥 and 𝑦.
 
 * Added a method :meth:`~skyfield.toposlib.GeographicPosition.lst_hours_at()`
   that computes Local Sidereal Time.

@@ -335,6 +335,9 @@ while keeping UTC synchronized with the Earth
 is to occasionally add an extra leap second
 to one of the year’s minutes.
 
+See :ref:`the-leap-second-table` if you are interested
+in printing Skyfield’s full list of leap seconds.
+
 The `International Earth Rotation Service <http://hpiers.obspm.fr/>`_
 currently restricts itself to appending a leap second
 to the last minute of June or the last minute of December.

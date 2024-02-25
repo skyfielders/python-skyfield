@@ -7,8 +7,6 @@ This document is a work in progress,
 that will be expanded into a full guide.
 Right now it covers only one topic.
 
-.. _polar motion:
-
 -----------------------
 Precession and Nutation
 -----------------------
@@ -40,6 +38,8 @@ that rotates coordinates from the ICRS
 into the Earth equatorial coordinate system of that date and time.
 See the section on :ref:`Coordinates:Rotation Matrices`
 for a guide to using a rotation matrix.
+
+.. _polar-motion:
 
 ------------
 Polar Motion
@@ -107,6 +107,46 @@ To have Skyfield apply polar motion when computing positions and coordinates,
 simply install the IERS tables on your timescale object
 as shown in the example code above.
 Polar motion will be used everywhere that it applies.
+
+.. _the-leap-second-table:
+
+---------------------
+The leap second table
+---------------------
+
+If you want to double-check that Skyfield’s leap second table
+agrees with other tools or software,
+you can easily print it out.
+Each timescale object offers an array of Julian dates ``leap_dates``
+and another array of the same length named ``leap_offsets``
+that offers the difference between UTC and TAI in seconds:
+
+.. testcode::
+
+    ts = load.timescale()
+    for jd, offset in zip(ts.leap_dates, ts.leap_offsets):
+        ymd = ts.tt_jd(jd).tt_strftime('%Y-%m-%d')
+        print(jd, ymd, '{:+}'.format(int(offset)))
+
+.. testoutput::
+
+    2441499.5 1972-07-01 +11
+    2441683.5 1973-01-01 +12
+    2442048.5 1974-01-01 +13
+    ...
+    2456109.5 2012-07-01 +35
+    2457204.5 2015-07-01 +36
+    2457754.5 2017-01-01 +37
+
+Note that each leap second occurs just before
+the Julian date given in the table.
+Taking the second row as an example,
+the offset between TAI and UTC increased to +12
+at the first moment of the day 1973-01-01.
+It did so because that day was immediately preceded by a leap second
+that was attached to the *previous* day as its final second.
+So the leap second followed the normal, non-leap second 1972-12-31 12:59:59
+and had the special designation 1972-12-31 12:59:60.
 
 ----------------------------------
 Bad performance and using 100% CPU
