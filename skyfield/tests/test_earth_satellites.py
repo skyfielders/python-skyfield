@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from numpy import array
+from numpy import allclose, array, arange, isclose
 from skyfield import api
 from skyfield.api import EarthSatellite, load
-from skyfield.constants import AU_KM, AU_M
+from skyfield.constants import AU_KM, AU_M, pi
+from skyfield.functions import angle_between, length_of
 from skyfield.sgp4lib import TEME_to_ITRF, VectorFunction
 from skyfield.timelib import julian_date
 
@@ -207,3 +208,61 @@ def test_behind_earth_thoroughly():
         True, True, True, False,
         True, True, True, False,  # Last two fake sats can see each other.
     ]
+
+def test_neutral_attitude():
+    ts = api.load.timescale()
+    times = [ts.utc(2023, 4, 8, 1 + i, 25) for i in range(10)]
+    sat = EarthSatellite(line1, line2)
+
+    for t in times:
+        a = EarthSatellite(line1, line2)._attitude(t)
+        p = sat.at(t).position.au
+        a = sat._attitude(t)
+        # Attitude should be the negative of position vector.
+        neg_p = -array(p) / length_of(array(p))
+        assert allclose(a.center.xyz.au, p)
+        assert allclose(a.target, neg_p)
+
+def test_attitude():
+    ts = api.load.timescale()
+    t = ts.utc(2023, 4, 8, 1, 25)
+    sat = EarthSatellite(line1, line2)
+    pos = sat.at(t).position.au
+    angles = array(arange(-pi, pi, pi / 8))
+
+    for angle in angles:
+        abs_angle = abs(angle)
+        # Angle between attitude and position vector after pitch or roll should
+        # be equal to the provided angle.
+        a = sat._attitude(t, roll=angle)
+        assert isclose(angle_between(a.target, -pos), abs_angle)
+
+        a = sat._attitude(t, pitch=angle)
+        assert isclose(angle_between(a.target, -pos), abs_angle)
+
+        # Yaw without other rotations should not change attitude.
+        a = sat._attitude(t, yaw=angle)
+        assert isclose(angle_between(a.target, -pos), 0.0)
+
+        # Angle between attitude and position vector after yaw with pitch or
+        # or roll should be equal to the provided angle, regardless of order.
+        a = sat._attitude(t, pitch=angle, yaw=angle, rotation_order="yz")
+        assert isclose(angle_between(a.target, -pos), abs_angle)
+
+        a = sat._attitude(t, pitch=angle, yaw=angle, rotation_order="zy")
+        assert isclose(angle_between(a.target, -pos), abs_angle)
+
+        a = sat._attitude(t, roll=angle, yaw=angle, rotation_order="xz")
+        assert isclose(angle_between(a.target, -pos), abs_angle)
+
+        a = sat._attitude(t, roll=angle, yaw=angle, rotation_order="zx")
+        assert isclose(angle_between(a.target, -pos), abs_angle)
+
+        # Rotations applied in reverse will result in different attitudes,
+        # but the angle between attitude and position vector should be equal.
+        axyz = sat._attitude(t, roll=angle, pitch=angle, yaw=angle)
+        azyx = sat._attitude(t, roll=angle, pitch=angle, yaw=angle,
+                             rotation_order="zyx")
+        assert isclose(
+            angle_between(axyz.target, -pos), angle_between(azyx.target, -pos)
+            )

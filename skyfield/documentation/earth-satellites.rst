@@ -568,6 +568,65 @@ or else in the dynamical coordinate system of the date you specify.
 
 See :doc:`positions` to learn more about these possibilities.
 
+Where on Earth is a satellite looking?
+-----------------------------------------
+
+Rather than knowing where to look to observe a satellite in the sky, you might
+be interested in doing the reverse; finding the geographic location on Earth
+that a satellite would be observing for a given viewing geometry. To do this,
+you can define an attitude vector for the satellite position, and then use
+a :data:`~skyfield.toposlib.wgs84` intersection method to find the surface
+position in the line-of-sight:
+
+* :meth:`~skyfield.toposlib.Geoid._intersection_of()`
+
+For example, `roll`, `pitch`, and `yaw` angles can be provided to the
+:meth:`~skyfield.sgp4lib.EarthSatellite._attitude()` method, which will return
+a :class:`~skyfield.positionlib.ICRF` position vector representing
+the satellite's line-of-sight. The `target` and `center` attributes store the
+attitude vector and the satellite position, respectively;
+
+.. testcode::
+
+    attitude = satellite._attitude(t=t, roll=0.0, pitch=0.0, yaw=0.0)
+    print('Attitude.target:', attitude.target)
+    print('Attitude.center:', attitude.center)
+
+.. testoutput::
+
+    Attitude.target: [ 0.57745914  0.2781511  -0.76757599]
+    Attitude.center: <Geocentric ICRS position and velocity at date t center=399 target=-125544>
+
+In this case we have set the pitch and roll to zero, so the attitude vector
+is pointing toward the center of mass of the Earth, i.e., a unit vector
+anti-aligned with the position vector:
+
+.. testcode::
+
+    from skyfield.functions import length_of
+
+    neg_position = -geocentric.position.au / length_of(geocentric.position.au)
+    print(neg_position)
+
+.. testoutput::
+
+    [ 0.57745914  0.2781511  -0.76757599]
+
+Now, to find the intersection of this vector with the Earth’s surface we can
+use the :meth:`~skyfield.toposlib.Geoid._intersection_of()` method:
+
+.. testcode::
+
+    intersection = wgs84._intersection_of(attitude)
+    print('Latitude:', intersection.latitude)
+    print('Longitude:', intersection.longitude)
+
+.. testoutput::
+
+    Latitude: 50deg 15' 19.6"
+    Longitude: -86deg 23' 23.3"
+
+
 Find a satellite’s range rate
 =============================
 

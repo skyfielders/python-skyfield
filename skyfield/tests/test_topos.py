@@ -1,10 +1,11 @@
 from assay import assert_raises
+from collections import namedtuple
 from numpy import abs, arange, sqrt
 
 from skyfield import constants
 from skyfield.api import Distance, load, wgs84, wms
 from skyfield.functions import length_of
-from skyfield.positionlib import Apparent, Barycentric
+from skyfield.positionlib import Apparent, Barycentric, ICRF
 from skyfield.toposlib import ITRSPosition, iers2010
 
 angle = (-15, 15, 35, 45)
@@ -265,3 +266,88 @@ def test_deprecated_position_subpoint_method(ts, angle):
     error_degrees = abs(b.longitude.degrees - angle)
     error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
     assert error_mas < 0.1
+
+def test_intersection_from_pole(ts):
+    t = ts.utc(2018, 1, 19, 14, 37, 55)
+    p = wgs84.latlon(90.0, 0.0, 1234.0).at(t)
+    direction = -p.xyz.au / length_of(p.xyz.au)
+    Vector = namedtuple("Vector", "center, target, t")
+    vector = Vector(p, direction, t)
+    earth_point = wgs84._intersection_of(vector)
+
+    error_degrees = abs(earth_point.latitude.degrees - 90.0)
+    error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
+    assert error_mas < 0.1
+    assert earth_point.elevation.m < 0.1
+
+def test_intersection_from_equator(ts):
+    t = ts.utc(2018, 1, 19, 14, 37, 55)
+    p = wgs84.latlon(0.0, 0.0, 1234.0).at(t)
+    direction = -p.xyz.au / length_of(p.xyz.au)
+    Vector = namedtuple("Vector", "center, target, t")
+    vector = Vector(p, direction, t)
+    earth_point = wgs84._intersection_of(vector)
+
+    error_degrees = abs(earth_point.latitude.degrees - 0.0)
+    error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
+    assert error_mas < 0.1
+
+    error_degrees = abs(earth_point.longitude.degrees - 0.0)
+    error_mas = 60.0 * 60.0 * 1000.0 * error_degrees
+    assert error_mas < 0.1
+    assert earth_point.elevation.m < 0.1
+
+def test_limb_intersection_points(ts):
+    t = ts.utc(2018, 1, 19, 14, 37, 55)
+    d = 100.0
+    a = wgs84.radius.au
+    c = a * (1.0 - 1.0 / wgs84.inverse_flattening)
+    pos = ICRF(position_au=[d, 0.0, 0.0], t=t, center=399)
+
+    # Vectors pointing to the polar and equatorial limbs of the Earth
+    direction_bottom_tangent = [-d, 0.0, -c] / sqrt(d**2 + c**2)
+    direction_top_tangent = [-d, 0.0, c] / sqrt(d**2 + c**2)
+    direction_left_tangent = [-d, -a, 0.0] / sqrt(d**2 + c**2)
+    direction_right_tangent = [-d, a, 0.0] / sqrt(d**2 + c**2)
+    Vector = namedtuple("Vector", "center, target, t")
+    bottom_tangent = Vector(pos, direction_bottom_tangent, t)
+    top_tangent = Vector(pos, direction_top_tangent, t)
+    left_tangent = Vector(pos, direction_left_tangent, t)
+    right_tangent = Vector(pos, direction_right_tangent, t)
+    # Attitude vector pointing straight down
+    zenith = Vector(pos, [-1.0, 0.0, 0.0], t)
+
+    intersection_bottom = wgs84._intersection_of(bottom_tangent)
+    intersection_top = wgs84._intersection_of(top_tangent)
+    intersection_left = wgs84._intersection_of(left_tangent)
+    intersection_right = wgs84._intersection_of(right_tangent)
+    intersection_zenith = wgs84._intersection_of(zenith)
+
+    # Viewed from sufficient distance, points of intersection should be nearly
+    # tangent to the north and south poles, and the zenith longitude +/- 90.0
+    zenith_lon = intersection_zenith.longitude.degrees
+    left_limb_lon = zenith_lon - 90.0
+    right_limb_lon = zenith_lon + 90.0
+
+    error_degrees = abs(intersection_bottom.latitude.degrees + 90.0)
+    assert error_degrees < 0.1
+    assert intersection_bottom.elevation.m < 0.1
+
+    error_degrees = abs(intersection_top.latitude.degrees - 90.0)
+    assert error_degrees < 0.1
+    assert intersection_top.elevation.m < 0.1
+
+    error_degrees = abs(intersection_left.latitude.degrees - 0.0)
+    assert error_degrees < 0.1
+
+    error_degrees = abs(intersection_left.longitude.degrees - left_limb_lon)
+    assert error_degrees < 0.1
+    assert intersection_left.elevation.m < 0.1
+
+    error_degrees = abs(intersection_right.latitude.degrees - 0.0)
+    assert error_degrees < 0.1
+
+    error_degrees = abs(intersection_right.longitude.degrees - right_limb_lon)
+    assert error_degrees < 0.1
+    assert intersection_right.elevation.m < 0.1
+

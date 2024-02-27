@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Raw transforms between coordinate frames, as NumPy matrices."""
 
-from numpy import array
+from numpy import array, cross
 from .constants import ANGVEL, ASEC2RAD, DAY_S, tau
 from .data.spice import inertial_frames as _inertial_frames
-from .functions import mxm, rot_x, rot_z
+from .functions import length_of, mxm, rot_x, rot_z
 
 def build_matrix():
     # 'xi0', 'eta0', and 'da0' are ICRS frame biases in arcseconds taken
@@ -155,6 +155,34 @@ class InertialFrame(object):
 
     def rotation_at(self, t):
         return self._matrix
+
+class LVLH(object):
+    """The Local Vertical Local Horizontal (LVLH) reference frame.
+
+    A reference frame for a body in orbit, according to CCSDS conventions.
+    The frame origin is centered on the body `position`, with z-axis in the
+    direction of the `position.center` (i.e., the negative position vector),
+    and y-axis opposite the orbital momentum vector.
+    """
+    def __init__(self, satellite):
+        self.satellite = satellite
+        self.__doc__ = (
+            "Center ({0}) Pointing Local Vertical Local Horizontal"
+            " reference frame."
+            ).format(satellite.center)
+
+    def rotation_at(self, t):
+        position = self.satellite.at(t)
+        position_vec = position.position.km
+        velocity_vec = position.velocity.km_per_s
+        z_lvlh = -position_vec / length_of(position_vec)
+        L_vec = cross(velocity_vec, z_lvlh)
+        y_lvlh = -L_vec / length_of(L_vec)
+        x_lvlh = cross(y_lvlh, z_lvlh)
+
+        matrix = array([x_lvlh, y_lvlh, z_lvlh]).T
+
+        return matrix
 
 equatorial_B1950_frame = InertialFrame(
     'Reference frame of the Earth’s mean equator and equinox at B1950.',

@@ -7,7 +7,9 @@ from numpy import (
 from sgp4.api import SGP4_ERRORS, Satrec
 
 from .constants import AU_KM, DAY_S, T0, tau
+from .framelib import LVLH
 from .functions import _T, mxm, mxv, rot_x, rot_y, rot_z
+from .positionlib import ICRF
 from .searchlib import _find_discrete, find_maxima
 from .timelib import compute_calendar_date
 from .vectorlib import VectorFunction
@@ -280,6 +282,36 @@ class EarthSatellite(VectorFunction):
 
         i = jd.argsort()
         return ts.tt_jd(jd[i]), v[i]
+
+    def _attitude(self, t, roll=0.0, pitch=0.0, yaw=0.0, rotation_order="xyz"):
+        """Return a unit vector in the attitude direction in ICRF coordinates.
+
+        Rotations are applied extrinsically relative to the LVLH frame axes,
+        where the neutral attitude vector is pointing along the z-axis.
+        Rotation angles should be provided as radians; `roll` is rotation about
+        the x-axis, `pitch` is about the y-axis, and `yaw` is about the z-axis.
+        """
+        rotations = {
+            "x": (roll, rot_x),
+            "y": (pitch, rot_y),
+            "z": (yaw, rot_z),
+        }
+
+        lvlh_attitude = array([0, 0, 1])
+        for axis in rotation_order:
+            angle, rotation = rotations[axis]
+            if angle != 0:
+                lvlh_attitude = mxv(rotation(angle), lvlh_attitude)
+
+        R = LVLH(self).rotation_at(t)
+        direction = mxv(R, lvlh_attitude)
+        attitude = ICRF(
+            position_au=self.at(t).xyz.au,
+            velocity_au_per_d=self.at(t).velocity.au_per_d,
+            t=t, center=self.at(t), target=direction
+        )
+
+        return attitude
 
 class TEME(object):
     """The satellite-specific True Equator Mean Equinox frame of reference.
