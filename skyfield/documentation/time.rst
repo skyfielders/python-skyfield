@@ -757,7 +757,7 @@ What are these three different uniform time scales?
 International Atomic Time (TAI) is maintained
 by the worldwide network of atomic clocks
 referenced by researchers with a need for very accurate time.
-The official leap second table
+The official :ref:`leap second table <the-leap-second-table>`
 is actually a table of offsets between TAI and UTC.
 At the end of June 2012, for example,
 the TAI−UTC offset was changed from 34.0 to 35.0
@@ -769,10 +769,14 @@ were already maintaining a uniform time scale of their own
 before TAI was established,
 using a slightly different starting point for the day.
 For practical purposes, TT is simply TAI
-plus exactly 32.184 seconds.
+plus exactly 32.184 seconds.
 So it is now more than a minute ahead of UTC.
-You can also retrieve Terrestrial Time as a floating point number of years
-of exactly 365.25 days each:
+
+You can not only ask Skyfield for TT as a Julian date and a calendar date,
+but as a floating-point number of years
+of exactly 365.25 days each —
+a value which is often used as the time parameter
+in long-term astronomical formulae:
 
 .. testcode::
 
@@ -790,10 +794,10 @@ and therefore unaffected by the Earth’s motion.
 The acceleration that Earth experiences in its orbit —
 sometimes speeding up, sometimes slowing down —
 varies the rate at which our atomic clocks
-seem to run to an outside observer,
+run relative to an outside observer,
 as predicted by Einstein’s theory of General Relativity.
-So physical simulations of the Solar System tend to use TDB,
-which is continuous with the *T*\ :sub:`eph` time scale
+So physical simulations of the Solar System use TDB as their clock.
+It is considered equivalent to the *T*\ :sub:`eph` time scale
 traditionally used for Solar System and spacecraft simulations
 at the Jet Propulsion Laboratory.
 
