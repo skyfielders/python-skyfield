@@ -170,7 +170,8 @@ combined with their magnitude to produce a plot.
    ax.set_xlim(7.0, 4.0)
    ax.set_ylim(-20, 20)
    ax.grid(True)
-   ax.set(title='The brightest stars in Orion')
+   ax.set(title='The brightest stars in Orion',
+          xlabel='Right ascension (h)', ylabel='Declination (°)')
    fig.savefig('bright_stars.png')
 
 The result of the simple filtering and plotting is an (admittedly
@@ -178,9 +179,8 @@ primitive) rendering of Orion!
 
 .. image:: bright_stars.png
 
-Skyfield does not yet offer star chart routines, but hopefully they will
-appear before the end of the year.  For now you can peek at the Skyfield
-file ``charting.py`` and experiment on your own.
+For a more complete example of code that draws a star chart,
+see :ref:`neowise-chart`.
 
 Building a single star from its coordinates
 ===========================================
