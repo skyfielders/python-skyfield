@@ -5,9 +5,10 @@ import sys
 from lxml import etree
 
 def main(argv):
-    d = 'skyfield/documentation/_build/html'
+    d = 'documentation/_build/html'
     for dirpath, dirnames, filenames in os.walk(d):
         dirnames.sort()
+        print(filenames)
         for filename in sorted(filenames):
             if filename.endswith('.html'):
                 check(os.path.join(dirpath, filename))

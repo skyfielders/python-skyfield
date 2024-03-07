@@ -114,4 +114,4 @@ who might benefit from it.
 
 .. _changelog:
 
-.. include:: ../../CHANGELOG.rst
+.. include:: ../CHANGELOG.rst

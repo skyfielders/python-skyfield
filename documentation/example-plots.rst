@@ -26,7 +26,7 @@ either with matplotlib or whatever other plotting library you prefer.
     del matplotlib
     import os
     import sys
-    sys.path[0:0] = ['../../examples']
+    sys.path[0:0] = ['../examples']
 
 .. _Venus chart:
 
@@ -81,7 +81,7 @@ A few notes:
    and can hopefully serve as a guide
    for similar charts of your own.
 
-.. include:: ../../examples/venus_evening_chart.py
+.. include:: ../examples/venus_evening_chart.py
    :literal:
 
 .. testcleanup::
@@ -110,7 +110,7 @@ Its code includes many design decisions and presentation tweaks
 that you will probably want to adjust for your own project.
 Use the script as a starting point:
 
-.. include:: ../../examples/comet_neowise_chart.py
+.. include:: ../examples/comet_neowise_chart.py
    :literal:
 
 .. testcleanup::
@@ -141,7 +141,7 @@ is:
 
     import goce_reentry_chart
 
-.. include:: ../../examples/goce_reentry_chart.py
+.. include:: ../examples/goce_reentry_chart.py
    :literal:
 
 .. testcleanup::

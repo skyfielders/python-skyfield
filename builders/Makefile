@@ -5,15 +5,15 @@ all:
 # Download and unzip:
 # http://scripts.sil.org/cms/scripts/render_download.php?format=file&media_id=GentiumPlus-5.000-web.zip&filename=GentiumPlus-5.000-web.zip
 
-GENTIUM_OUT := ../skyfield/documentation/_static/GentiumPlus-R-custom.woff
-UBUNTU_OUT := ../skyfield/documentation/_static/UbuntuMono-R-custom.woff
+GENTIUM_OUT := ../documentation/_static/GentiumPlus-R-custom.woff
+UBUNTU_OUT := ../documentation/_static/UbuntuMono-R-custom.woff
 
 fonts: $(GENTIUM_OUT) $(UBUNTU_OUT)
 
 GENTIUM_IN := $(HOME)/Downloads/GentiumPlus-5.000-web/web/GentiumPlus-R.woff
 UBUNTU_IN := /usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf
 
-TEXTS := $(wildcard ../skyfield/documentation/*.rst)
+TEXTS := $(wildcard ../documentation/*.rst)
 
 $(GENTIUM_OUT): $(GENTIUM_IN) $(TEXTS)
 	python2.7 strip_woff.py $(GENTIUM_IN) $(GENTIUM_OUT) $(TEXTS)

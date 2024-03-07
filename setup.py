@@ -50,7 +50,6 @@ setup(
         'skyfield.tests',
         ],
     package_data = {
-        'skyfield': ['documentation/*.rst'],
         'skyfield.data': ['*.gz', '*.npy', '*.npz'],
         'skyfield.tests': ['data/*'],
         },

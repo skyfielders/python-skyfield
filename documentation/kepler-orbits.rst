@@ -159,7 +159,7 @@ will be much faster than using a Python loop to read every line.
 Here’s an example script for performing the same search
 as the ``zgrep`` command shown above:
 
-.. include:: ../../design/mpc_make_excerpt.py
+.. include:: ../design/mpc_make_excerpt.py
    :literal:
 
 The same four asteroid orbits could then be extracted with::
