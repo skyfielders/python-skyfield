@@ -5,5 +5,10 @@ set -ex
 cd "$(readlink -f $(dirname "${BASH_SOURCE[0]}"))"
 cd ..
 
+# Alas!  Unless we 'rm' the build/ directory first, the wheel will
+# include old files that are no longer part of Skyfield but that are
+# left over from previous builds.
+rm -rf build/
+
 python setup.py sdist $@
 SKYFIELD_USE_SETUPTOOLS=yes python setup.py bdist_wheel $@
