@@ -45,16 +45,7 @@ for artificial satellites in Earth orbit:
    For earlier dates,
    you will want to pull an old TLE from the archives.
 
-4. A satellite’s orbital elements are in constant flux
-   from effects like atmospheric drag, the Moon’s gravity,
-   and its own propulsion.
-   In particular, the true anomaly parameter can swing wildly
-   for satellites with nearly circular orbits,
-   because the reference point from which true anomaly is measured —
-   the satellite’s perigee —
-   can be moved by even slight perturbations to the orbit.
-
-5. Given the low accuracy of TLE elements,
+4. Given the low accuracy of TLE elements,
    there is no point in calling the usual Skyfield
    :meth:`~skyfield.positionlib.Barycentric.observe()` method
    that repeatedly re-computes an object’s position
