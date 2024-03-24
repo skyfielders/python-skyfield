@@ -26,7 +26,18 @@ class PlanetaryConstants(object):
     def __init__(self):
         self.variables = {}
         self._binary_files = []
+        self._segment_list = []
         self._segment_map = {}
+
+    def __repr__(self):
+        r = []
+        a = r.append
+        a('PlanetaryConstants')
+        a('  {} key-values in .variables dict'.format(len(self.variables)))
+        a('  {} segments loaded'.format(len(self._segment_list)))
+        for segment in self._segment_list:
+            a('    {}'.format(segment))
+        return '\n'.join(r)
 
     @property
     def assignments(self):  # deprecated original name for the variables dict
@@ -68,6 +79,7 @@ class PlanetaryConstants(object):
         pck = PCK(DAF(file))
         self._binary_files.append(pck)
         for segment in pck.segments:
+            self._segment_list.append(segment)
             self._segment_map[segment.body] = segment
 
     def _get_assignment(self, key):
