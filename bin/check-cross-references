@@ -8,7 +8,7 @@ def main(argv):
     d = 'documentation/_build/html'
     for dirpath, dirnames, filenames in os.walk(d):
         dirnames.sort()
-        print(filenames)
+        #print(filenames)
         for filename in sorted(filenames):
             if filename.endswith('.html'):
                 check(os.path.join(dirpath, filename))
@@ -31,4 +31,6 @@ def check(path):
         print(' ', ''.join(code_element.itertext()))
 
 if __name__ == '__main__':
+    os.chdir(os.path.dirname(__file__))
+    os.chdir('..')
     main(sys.argv[1:])
