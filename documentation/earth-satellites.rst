@@ -20,7 +20,7 @@ Beware of these limitations:
    that they published in that report.
 
 2. Satellite orbital elements go rapidly out of date.
-   As explained below in `Checking an element set’s epoch`_,
+   As explained below in :ref:`tle-epoch`,
    you will want to pay attention to the “epoch” date —
    the date on which a particular element set is most accurate.
    The element set might only be useful for a couple of weeks
@@ -222,6 +222,8 @@ you can instantiate an :class:`~skyfield.sgp4lib.EarthSatellite` directly.
 .. testoutput::
 
     ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
+
+.. _tle-epoch:
 
 Checking a TLE’s epoch
 ======================
