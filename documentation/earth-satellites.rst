@@ -3,66 +3,55 @@
  Earth Satellites
 ==================
 
-Skyfield is able to predict the positions of Earth satellites
-by loading satellite orbital elements
-from Two-Line Element (TLE) files —
-published by organizations like `CelesTrak`_ —
-and running them through the SGP4 satellite propagation routine.
-But there several limitations to be aware of
-when using Skyfield to generate positions
-for artificial satellites in Earth orbit:
+Skyfield is able to predict the position of an Earth satellite
+by downloading the satellite’s standard SGP4 orbital elements.
+Orbital elements are published by organizations like `CelesTrak`_.
+Beware of these limitations:
 
 .. _Celestrak: https://celestrak.org/
 
-1. Do not expect perfect agreement between
-   any two pieces of software that are trying to predict
-   satellite positions from TLE data files.
-   As Vallado, Crawford, and Hujsak document
+1. Don’t expect perfect agreement between
+   any two pieces of software that are trying to predict satellite positions.
+   As Vallado, Crawford, and Hujsak point out
    in their crucial paper `Revisiting Spacetrack Report #3`_,
-   there are many slightly different versions
+   there are many different versions
    of the basic satellite prediction algorithm circulating in the wild.
-   Happily,
    Skyfield uses the corrected and updated version of the algorithm
-   that they created as part of writing that report.
+   that they published in that report.
 
-2. Satellite positions have limited precision.
-   Here’s what `Revisiting Spacetrack Report #3`_ says in Appendix B:
+2. Satellite orbital elements go rapidly out of date.
+   As explained below in `Checking an element set’s epoch`_,
+   you will want to pay attention to the “epoch” date —
+   the date on which a particular element set is most accurate.
+   The element set might only be useful for a couple of weeks
+   to either side of its epoch.
+   For earlier dates,
+   you will want to pull old elements from an archive;
+   for later dates,
+   you will want to download a fresh set of elements.
+
+3. Satellite orbits don’t have perfect accuracy.
+   According to `Revisiting Spacetrack Report #3`_:
 
       “The maximum accuracy for a TLE is
       limited by the number of decimal places in each field.
       In general, TLE data is accurate to about a kilometer or so
       at epoch and it quickly degrades.”
 
-3. Satellite elements go rapidly out of date.
-   As explained below in `Checking a TLE’s epoch`_,
-   you will want to pay attention to the “epoch” —
-   the date on which an element set is most accurate —
-   of every TLE element set you use.
-   Elements are only useful for a week or two
-   on either side of the epoch date.
-   For later dates,
-   you will want to download a fresh set of elements.
-   For earlier dates,
-   you will want to pull an old TLE from the archives.
-
-4. Given the low accuracy of TLE elements,
-   there is no point in calling the usual Skyfield
+4. Given how close Earth satellites are to Earth,
+   there’s no point in calling the usual Skyfield
    :meth:`~skyfield.positionlib.Barycentric.observe()` method
-   that repeatedly re-computes an object’s position
-   to account for the light-travel time to the observer.
-   As we will see below,
-   the difference is irrelevant for Earth satellites
-   and not worth the added expense of re-computing the position
-   several times in a row.
+   that accounts for light-travel time.
+   As shown below, simple vector subtraction should work just as well.
+
+5. Finally, note that even though several satellite elements
+   have familiar names like *inclination* and *eccentricity*,
+   they are not simple Kepler elements,
+   and the SGP4 routine will not predict the same position
+   as a simple Kepler orbit would.
 
 .. _Revisiting Spacetrack Report #3:
     https://celestrak.org/publications/AIAA/2006-6753/
-
-Note that even though several TLE elements
-have names that might remind you of Kepler orbital elements,
-like *inclination* and *eccentricity*,
-the SGP4 routine does not treat a satellite’s orbit as a simple ellipse,
-and will produce a different position than a Kepler orbit would.
 
 Loading TLE element sets
 ========================
