@@ -53,10 +53,94 @@ Beware of these limitations:
 .. _Revisiting Spacetrack Report #3:
     https://celestrak.org/publications/AIAA/2006-6753/
 
-Loading TLE element sets
-========================
+The TLE format and its rivals
+=============================
 
-Skyfield supports several approaches to loading TLE data.
+Where most folks download satellite element sets at Celestrak:
+
+https://celestrak.org/NORAD/elements/index.php
+
+Celestrak supports several data formats.
+The original Two-Line Element ‘TLE’ format —
+the URL will specify ``FORMAT=tle`` —
+describes a satellite orbit using two lines of dense ASCII text.
+Whitespace is significant
+because every character needs to be aligned in exactly the right column.
+Here, for example, are elements for the ISS::
+
+ ISS (ZARYA)             
+ 1 25544U 98067A   24127.82853009  .00015698  00000+0  27310-3 0  9995
+ 2 25544  51.6393 160.4574 0003580 140.6673 205.7250 15.50957674452123
+
+Here are the same elements as JSON —
+in this case,
+with ``FORMAT=json-pretty`` specified in the Celestrak URL
+because the ‘pretty’ newlines and indentation make it easy to read;
+use ``FORMAT=json`` if you don’t need the indentation
+and want data that’s more compact::
+
+ [{
+     "OBJECT_NAME": "ISS (ZARYA)",
+     "OBJECT_ID": "1998-067A",
+     "EPOCH": "2024-05-06T19:53:04.999776",
+     "MEAN_MOTION": 15.50957674,
+     "ECCENTRICITY": 0.000358,
+     "INCLINATION": 51.6393,
+     "RA_OF_ASC_NODE": 160.4574,
+     "ARG_OF_PERICENTER": 140.6673,
+     "MEAN_ANOMALY": 205.725,
+     "EPHEMERIS_TYPE": 0,
+     "CLASSIFICATION_TYPE": "U",
+     "NORAD_CAT_ID": 25544,
+     "ELEMENT_SET_NO": 999,
+     "REV_AT_EPOCH": 45212,
+     "BSTAR": 0.0002731,
+     "MEAN_MOTION_DOT": 0.00015698,
+     "MEAN_MOTION_DDOT": 0
+ }]
+
+And here are the same elements with ``FORMAT=CSV``::
+
+ OBJECT_NAME,OBJECT_ID,EPOCH,MEAN_MOTION,ECCENTRICITY,INCLINATION,RA_OF_ASC_NODE,ARG_OF_PERICENTER,MEAN_ANOMALY,EPHEMERIS_TYPE,CLASSIFICATION_TYPE,NORAD_CAT_ID,ELEMENT_SET_NO,REV_AT_EPOCH,BSTAR,MEAN_MOTION_DOT,MEAN_MOTION_DDOT
+ ISS (ZARYA),1998-067A,2024-05-06T19:53:04.999776,15.50957674,.000358,51.6393,160.4574,140.6673,205.7250,0,U,25544,999,45212,.2731E-3,.15698E-3,0
+
+Note these differences:
+
+* Even though today the JSON and CSV formats
+  carry exactly the same data as the TLE —
+  for example, all three of the examples above
+  give the inclination as 51.6393°,
+  with four digits past the decimal point —
+  both JSON and CSV will be able to carry greater precision in the future.
+  The old TLE format, by contrast,
+  can’t add more decimal places
+  because each element has a fixed-width number of characters.
+
+* The TLE format has run out of simple integer catalog numbers,
+  because the catalog number
+  (in the above example, ``25544``)
+  is limited to 5 digits.
+  The JSON and CSV formats, by contrast,
+  don’t place a limit on the size of the catalog number.
+
+* The JSON and CSV formats are self-documenting.
+  You can tell, even as a first-time reader,
+  which element is the inclination.
+  But the TLE lines provide no hint about which element is which.
+
+* The TLE and CSV formats are both very efficient,
+  and describe an orbit using about 150 characters.
+  Yes, the CSV file has that big 225-character header at the top,
+  but it only appears once,
+  no matter how many satellites are listed after it.
+  By contrast,
+  the bulky JSON format requires more than 400 characters per satellite
+  because the element names need to be repeated over again
+  for every satellite.
+
+There are more obscure formats in use at Celestrak,
+including ‘key-value notation (KVN)’ and an unfortunate XML format,
+but here we will focus on the mainstream formats listed above.
 
 Downloading a TLE file
 ----------------------
