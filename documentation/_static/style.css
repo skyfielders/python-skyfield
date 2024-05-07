@@ -139,6 +139,10 @@ code.py-obj {
     background: none;
     font-family: "Gentium Custom", sans-serif, serif;
 }
+ul > li {
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+}
 dt {
     display: inline-block;
     padding-left: 4em;
