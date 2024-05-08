@@ -309,15 +309,14 @@ you can instantiate an :class:`~skyfield.sgp4lib.EarthSatellite` directly.
 
 .. _tle-epoch:
 
-Checking a TLE’s epoch
-======================
+Checking an element set’s epoch
+===============================
 
-The “epoch” date of a satellite element set
-is the all-important date and time
-for which the set of elements is most accurate,
-and before or after which they go rapidly out of date.
-You can access this value as an attribute of the object
-in case your program wants to check how old the elements are:
+The ``.epoch`` time of a satellite element set
+is the date and time on which the element set is most accurate.
+Before or after that date,
+the element set will be less accurate.
+The epoch is a Skyfield :class:`~skyfield.timelib.Time` object:
 
 .. testcode::
 
