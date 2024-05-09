@@ -180,6 +180,15 @@ class Timescale(object):
         tup = year, month, day, hour, minute, second
         return self._utc(tup)
 
+    def _utc_jd(self, whole, fraction):
+        seconds = whole * DAY_S
+        seconds2, fraction = divmod(fraction * DAY_S, 1.0)
+        seconds += seconds2
+        seconds += interp(seconds, self._leap_utc, self._leap_offsets)
+        t = self.tai_jd(seconds / DAY_S, fraction / DAY_S)
+        #t._tai_seconds = seconds, fraction  # TODO: should this be set too?
+        return t
+
     def _utc(self, tup):
         # Build a Time from a UTC tuple, carefully preserving its exact
         # second number in the Time's hidden TAI seconds field.
