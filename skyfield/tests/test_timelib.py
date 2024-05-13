@@ -286,6 +286,10 @@ def test_building_time_from_utc_julian_date(ts):
     t = ts._utc_jd(2457754.5, one_second)
     assert t.utc == (2017, 1, 1, 0, 0, 1.0)
 
+def test_utc_julian_date_accuracy(ts):
+    t = ts._utc_jd(2460439.5, 0.36689744000250357)
+    assert t.utc_strftime('%H:%M:%S.%f') == '08:48:19.938816'
+
 def test_timescale_linspace(ts):
     t0 = ts.tt(2021, 11, 3, 6)
     t1 = ts.tt(2021, 11, 5, 18)

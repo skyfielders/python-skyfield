@@ -180,15 +180,6 @@ class Timescale(object):
         tup = year, month, day, hour, minute, second
         return self._utc(tup)
 
-    def _utc_jd(self, whole, fraction):
-        seconds = whole * DAY_S
-        seconds2, fraction = divmod(fraction * DAY_S, 1.0)
-        seconds += seconds2
-        seconds += interp(seconds, self._leap_utc, self._leap_offsets)
-        t = self.tai_jd(seconds / DAY_S, fraction / DAY_S)
-        #t._tai_seconds = seconds, fraction  # TODO: should this be set too?
-        return t
-
     def _utc(self, tup):
         # Build a Time from a UTC tuple, carefully preserving its exact
         # second number in the Time's hidden TAI seconds field.
@@ -271,6 +262,21 @@ class Timescale(object):
             if getattr(jd, 'ndim', 0):
                 return [strftime(format, item) for item in zip(*tup)]
             return strftime(format, tup)
+
+    def _utc_jd(self, whole, fraction):
+        # Switch from days to seconds.
+        seconds = whole * DAY_S
+        seconds2, fraction_s = divmod(fraction * DAY_S, 1.0)
+        seconds += seconds2
+
+        # Add an integer number of leap seconds.
+        seconds += interp(seconds, self._leap_utc, self._leap_offsets)
+
+        # Switch back to days.
+        whole, fraction = divmod(seconds, DAY_S)
+        fraction += fraction_s
+        fraction /= DAY_S
+        return self.tai_jd(whole, fraction)
 
     def tai(self, year=None, month=1, day=1, hour=0, minute=0, second=0.0,
             jd=None):
