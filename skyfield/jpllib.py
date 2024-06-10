@@ -71,7 +71,7 @@ class SpiceKernel(object):
         self.filename = os.path.basename(path)
         self.spk = SPK.open(path)
 
-        # workaround until jplephem.spk adopts sMDASegmet
+        # workaround until jplephem.spk adopts MDASegment
         # convert (useless) BaseSegments into MDASegments
         adjustpairs = False
         for idx, seg in enumerate(self.spk.segments):
