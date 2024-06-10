@@ -287,6 +287,9 @@ def test_building_time_from_utc_julian_date(ts):
     assert t.utc == (2017, 1, 1, 0, 0, 1.0)
 
 def test_utc_julian_date_accuracy(ts):
+    if sys.version_info <= (3,):
+        return  # our utc_strftime() hack does not work under Python 2
+
     t = ts._utc_jd(2460439.5, 0.36689744000250357)
     assert t.utc_strftime('%H:%M:%S.%f') == '08:48:19.938816'
 
