@@ -143,7 +143,7 @@ including a ‘key-value notation (KVN)’ and an unfortunate XML format,
 but here we will focus on the mainstream formats listed above.
 
 Downloading satellite elements
-==============================
+------------------------------
 
 Whether you choose one of CelesTrak’s
 `pre-packaged satellite lists
@@ -172,8 +172,7 @@ there are three issues to beware of:
   To avoid this, use the ``filename=`` optional argument
   to create a separate local file for each remote URL.
 
-Here’s the recommended pattern
-for downloading element sets with Skyfield:
+Here’s a useful pattern for downloading element sets with Skyfield:
 
 .. include:: ../examples/satellite_download.py
    :literal:
@@ -190,7 +189,7 @@ Instead, you will probably want to put the date in the filename,
 and archive each file along with your project’s code.
 
 Loading satellite elements
-==========================
+--------------------------
 
 Once you have downloaded a file of elements,
 use one of these patterns to load them into Skyfield.
@@ -198,10 +197,14 @@ For the traditional TLE format:
 
 .. testcode::
 
-    from skyfield.api import load, wgs84
+    from skyfield.api import load
+    from skyfield.iokit import parse_tle_file
 
     ts = load.timescale()
-    satellites = load.tle_file('stations.tle', ts)
+
+    with load.open('stations.tle') as f:
+        satellites = list(parse_tle_file(f, ts))
+
     print('Loaded', len(satellites), 'satellites')
 
 .. testoutput::
@@ -213,7 +216,7 @@ For the verbose but easy-to-read JSON format:
 .. testcode::
 
     import json
-    from skyfield.api import EarthSatellite
+    from skyfield.api import EarthSatellite, load
 
     with load.open('stations.json') as f:
         data = json.load(f)
@@ -231,7 +234,7 @@ For the more compact CSV format:
 .. testcode::
 
     import csv
-    from skyfield.api import EarthSatellite
+    from skyfield.api import EarthSatellite, load
 
     with load.open('stations.csv', mode='r') as f:
         data = list(csv.DictReader(f))
@@ -249,46 +252,26 @@ you are asked to provide a ``ts`` timescale object
 that Skyfield can use to turn each satellite’s ``.epoch`` date
 into a Skyfield :class:`~skyfield.timelib.Time`.
 
-Downloading a TLE file
-----------------------
+Loading satellite data from a string
+------------------------------------
 
-You can find satellite element sets at the
-`NORAD Two-Line Element Sets <http://celestrak.org/NORAD/elements/>`_
-page of the Celestrak web site.
+If your program has already loaded TLE, JSON, or CSV data into memory
+and doesn’t need to read it over again from a file,
+you can make the string behave like a file
+by wrapping it in a Python I/O object::
 
-Beware that the two-line element (TLE) format is very rigid.
-The meaning of each character
-is based on its exact offset from the beginning of the line.
-You must download and use the element set’s text
-without making any change to its whitespace.
+    # For TLE and JSON:
 
-Skyfield loader objects offer a :meth:`~skyfield.iokit.Loader.tle_file()`
-method that can download and cache a file full of satellite elements
-from a site like Celestrak.
-A popular observing target for satellite observers
-is the International Space Station,
-which is listed in Celestrak’s ``stations.txt`` file:
+    from io import BytesIO
+    f = BytesIO(byte_string)
 
-.. testsetup::
+    # For CSV:
 
-    stations_txt_bytes = b"""\
-    ISS (ZARYA)             \n\
-    1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082
-    2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
-    """ * 60
-    open('stations.txt', 'wb').write(stations_txt_bytes)
+    from io import StringIO
+    f = StringIO(text_string)
 
-.. testcode::
-
-    from skyfield.api import load, wgs84
-
-    stations_url = 'http://celestrak.org/NORAD/elements/stations.txt'
-    satellites = load.tle_file(stations_url)
-    print('Loaded', len(satellites), 'satellites')
-
-.. testoutput::
-
-    Loaded 60 satellites
+You can then use the resulting file object ``f``
+with the example code in the previous section.
 
 Indexing satellites by name or number
 -------------------------------------
@@ -308,7 +291,7 @@ using Python’s dictionary comprehension syntax:
 
 .. testoutput::
 
-    ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
+    ISS (ZARYA) catalog #25544 epoch 2024-05-09 08:48:20 UTC
 
 .. testcode::
 
@@ -318,86 +301,13 @@ using Python’s dictionary comprehension syntax:
 
 .. testoutput::
 
-    ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
-
-Performing a TLE query
-----------------------
-
-In addition to offering traditional text files
-like ``stations.txt`` and ``active.txt``,
-Celestrak supports queries that return TLE elements.
-
-But be careful!
-
-Because every query to Celestrak requests the same filename ``tle.php``
-Skyfield will by default only download the first result.
-Your second, third, and all subsequent attempts to query Celestrak
-will simply return the contents
-of the ``tle.php`` file that’s already on disk —
-giving you the results of your first query over and over again.
-
-Here are two easy remedies:
-
-1. Specify the argument ``reload=True``,
-   which asks Skyfield to always download new results
-   even if there is already a file on disk.
-   Every query will overwrite the file with new data.
-
-2. Or, specify a ``filename=`` argument
-   so that each query’s result
-   is saved to a file specific to that query.
-   Each query result will be saved to disk with its own filename.
-
-Here’s an example of the second approach —
-code that requests one specific satellite,
-saving the result to a file specific to the query:
-
-.. testcode::
-
-    n = 25544
-    url = 'https://celestrak.org/satcat/tle.php?CATNR={}'.format(n)
-    filename = 'tle-CATNR-{}.txt'.format(n)
-    satellites = load.tle_file(url, filename=filename)
-    print(satellites)
-
-.. testoutput::
-
-    [<EarthSatellite ISS (ZARYA) catalog #25544 epoch 2020-11-07 22:23:09 UTC>]
-
-The above code will download a new result
-each time it’s asked for a satellite that it hasn’t yet fetched.
-But note that when asked again for the same satellite,
-it will simply reload the existing file from disk
-unless ``reload=True`` is specified.
-
-Loading a TLE file from a string
---------------------------------
-
-If your program has already loaded the text of a TLE file,
-and you don’t need Skyfield to handle the download for you,
-then you can turn it into a list of Skyfield satellites
-with the :func:`~skyfield.iokit.parse_tle_file()` function.
-The function is a Python generator,
-so we use Python’s ``list()`` constructor
-to load all the satellites:
-
-.. testcode::
-
-    from io import BytesIO
-    from skyfield.iokit import parse_tle_file
-
-    f = BytesIO(stations_txt_bytes)
-    satellites = list(parse_tle_file(f))
-
-If it’s simpler in your case,
-you can instead pass :func:`~skyfield.iokit.parse_tle_file()`
-a simple list of lines.
+    ISS (ZARYA) catalog #25544 epoch 2024-05-09 08:48:20 UTC
 
 Loading a single TLE set from strings
 -------------------------------------
 
 If your program already has the two lines of TLE data for a satellite
-and doesn’t need Skyfield to download and parse a Celestrak file,
+and doesn’t need Skyfield to download and parse a CelesTrak file,
 you can instantiate an :class:`~skyfield.sgp4lib.EarthSatellite` directly.
 
 .. testcode::
@@ -507,6 +417,8 @@ how many times our example satellite rises above 30° of altitude
 over the span of a single day:
 
 .. testcode::
+
+    from skyfield.api import wgs84
 
     bluffton = wgs84.latlon(+40.8939, -83.8917)
     t0 = ts.utc(2014, 1, 23)
@@ -809,7 +721,6 @@ and ``False`` otherwise.
 .. testcode::
 
     eph = load('de421.bsp')
-    satellite = by_name['ISS (ZARYA)']
 
     two_hours = ts.utc(2014, 1, 20, 0, range(0, 120, 20))
     sunlit = satellite.at(two_hours).is_sunlit(eph)
@@ -856,7 +767,6 @@ through the :meth:`~skyfield.positionlib.ICRF.is_behind_earth()` method.
 
     eph = load('de421.bsp')
     earth, venus = eph['earth'], eph['venus']
-    satellite = by_name['ISS (ZARYA)']
 
     two_hours = ts.utc(2014, 1, 20, 0, range(0, 120, 20))
     p = (earth + satellite).at(two_hours).observe(venus).apparent()
