@@ -4,6 +4,7 @@
 from numpy import (
     array, concatenate, identity, multiply, ones_like, repeat,
 )
+from sgp4 import omm
 from sgp4.api import SGP4_ERRORS, Satrec
 
 from .constants import AU_KM, DAY_S, T0, tau
@@ -133,6 +134,23 @@ class EarthSatellite(VectorFunction):
         day += 0.5  # convert integer Julian day into Julian date float
         self.epoch = ts.utc(year, month, day + fraction + satrec.jdsatepochF)
 
+        self._setup(satrec)
+        return self
+
+    @classmethod
+    def from_omm(cls, ts, element_dict):
+        """Build an EarthSatellite from OMM text fields.
+
+        Provide a ``ts`` timescale object, and a Python dict of OMM
+        field names and values.  The timescale is used to build the
+        satellite's ``.epoch`` time.
+
+        """
+        self = cls.__new__(cls)
+        self.name = element_dict.get('OBJECT_NAME', None)
+        self.model = satrec = Satrec()
+        omm.initialize(satrec, element_dict)
+        self.epoch = ts._utc_jd(satrec.jdsatepoch, satrec.jdsatepochF)
         self._setup(satrec)
         return self
 

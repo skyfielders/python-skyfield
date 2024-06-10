@@ -8,7 +8,7 @@ by downloading the satellite’s standard SGP4 orbital elements.
 Orbital elements are published by organizations like `CelesTrak`_.
 Beware of these limitations:
 
-.. _Celestrak: https://celestrak.org/
+.. _CelesTrak: https://celestrak.org/
 
 1. Don’t expect perfect agreement between
    any two pieces of software that are trying to predict satellite positions.
@@ -56,28 +56,26 @@ Beware of these limitations:
 The TLE format and its rivals
 =============================
 
-Where most folks download satellite element sets at Celestrak:
+Most folks download satellite element sets from CelesTrak:
 
 https://celestrak.org/NORAD/elements/index.php
 
-Celestrak supports several data formats.
-The original Two-Line Element ‘TLE’ format —
-the URL will specify ``FORMAT=tle`` —
+CelesTrak supports several data formats.
+The original Two-Line Element ‘TLE’ format
 describes a satellite orbit using two lines of dense ASCII text.
 Whitespace is significant
 because every character needs to be aligned in exactly the right column.
-Here, for example, are elements for the ISS::
+Here, for example, are elements for the International Space Station (ISS)::
 
  ISS (ZARYA)             
  1 25544U 98067A   24127.82853009  .00015698  00000+0  27310-3 0  9995
  2 25544  51.6393 160.4574 0003580 140.6673 205.7250 15.50957674452123
 
-Here are the same elements as JSON —
-in this case,
-with ``FORMAT=json-pretty`` specified in the Celestrak URL
-because the ‘pretty’ newlines and indentation make it easy to read;
-use ``FORMAT=json`` if you don’t need the indentation
-and want data that’s more compact::
+But CelesTrak also supports modern formats.
+Here is the same element set in JSON format —
+specifically, CelesTrak’s ``FORMAT=json-pretty`` format,
+which adds indentation to make it easy to read;
+use ``FORMAT=json`` if you don’t need the extra spaces and newlines::
 
  [{
      "OBJECT_NAME": "ISS (ZARYA)",
@@ -99,7 +97,10 @@ and want data that’s more compact::
      "MEAN_MOTION_DDOT": 0
  }]
 
-And here are the same elements with ``FORMAT=CSV``::
+And here are the same elements with ``FORMAT=CSV``
+(this is only two lines of text,
+but your browser will probably wrap them
+to fit your screen)::
 
  OBJECT_NAME,OBJECT_ID,EPOCH,MEAN_MOTION,ECCENTRICITY,INCLINATION,RA_OF_ASC_NODE,ARG_OF_PERICENTER,MEAN_ANOMALY,EPHEMERIS_TYPE,CLASSIFICATION_TYPE,NORAD_CAT_ID,ELEMENT_SET_NO,REV_AT_EPOCH,BSTAR,MEAN_MOTION_DOT,MEAN_MOTION_DDOT
  ISS (ZARYA),1998-067A,2024-05-06T19:53:04.999776,15.50957674,.000358,51.6393,160.4574,140.6673,205.7250,0,U,25544,999,45212,.2731E-3,.15698E-3,0
@@ -113,75 +114,166 @@ Note these differences:
   with four digits past the decimal point —
   both JSON and CSV will be able to carry greater precision in the future.
   The old TLE format, by contrast,
-  can’t add more decimal places
+  will never be able to add more decimal places
   because each element has a fixed-width number of characters.
 
 * The TLE format has run out of simple integer catalog numbers,
-  because the catalog number
+  because it limits the catalog number
   (in the above example, ``25544``)
-  is limited to 5 digits.
+  to 5 digits.
   The JSON and CSV formats, by contrast,
   don’t place a limit on the size of the catalog number.
 
 * The JSON and CSV formats are self-documenting.
   You can tell, even as a first-time reader,
   which element is the inclination.
-  But the TLE lines provide no hint about which element is which.
+  The old TLE lines provide no hint about which element is which.
 
 * The TLE and CSV formats are both very efficient,
   and describe an orbit using about 150 characters.
-  Yes, the CSV file has that big 225-character header at the top,
-  but it only appears once,
+  Yes, the CSV file has that big 225-character header at the top;
+  but the header line only appears once,
   no matter how many satellites are listed after it.
   By contrast,
   the bulky JSON format requires more than 400 characters per satellite
-  because the element names need to be repeated over again
-  for every satellite.
+  because the element names need to be repeated again every time.
 
-There are more obscure formats in use at Celestrak,
-including ‘key-value notation (KVN)’ and an unfortunate XML format,
+There are more obscure formats in use at CelesTrak,
+including a ‘key-value notation (KVN)’ and an unfortunate XML format,
 but here we will focus on the mainstream formats listed above.
 
-Downloading a TLE file
-----------------------
+Downloading satellite elements
+------------------------------
 
-You can find satellite element sets at the
-`NORAD Two-Line Element Sets <http://celestrak.org/NORAD/elements/>`_
-page of the Celestrak web site.
+Whether you choose one of CelesTrak’s
+`pre-packaged satellite lists
+<https://celestrak.org/NORAD/elements/>`_
+like ‘Space Stations’ or ‘CubeSats’,
+or perform a
+`query for a particular satellite
+<https://celestrak.org/NORAD/documentation/gp-data-formats.php>`_,
+there are three issues to beware of:
 
-Beware that the two-line element (TLE) format is very rigid.
-The meaning of each character
-is based on its exact offset from the beginning of the line.
-You must download and use the element set’s text
-without making any change to its whitespace.
+* Be sure to save the data to a file the first time your script runs,
+  so that subsequent runs won’t need to download the same data again.
+  This is crucial to reducing the load on the CelesTrak servers
+  and helping them continue to provide CelesTrak as a free service.
 
-Skyfield loader objects offer a :meth:`~skyfield.iokit.Loader.tle_file()`
-method that can download and cache a file full of satellite elements
-from a site like Celestrak.
-A popular observing target for satellite observers
-is the International Space Station,
-which is listed in Celestrak’s ``stations.txt`` file:
+* Satellite elements gradually go out of date.
+  Once a file is a few days old,
+  you will probably want to download the file again.
 
-.. testsetup::
+* The CelesTrak data URLs all use the exact same filename.
+  So if you download the ‘Space Stations’
+  whose URL looks like ``gp.php?GROUP=stations``,
+  and then the ‘CubeSats’ with ``gp.php?GROUP=cubesat``,
+  then Skyfield will save them to the same filename ``gp.php``
+  and the CubeSats will wind up overwriting the Space Stations.
+  To avoid this, use the ``filename=`` optional argument
+  to create a separate local file for each remote URL.
 
-    stations_txt_bytes = b"""\
-    ISS (ZARYA)             \n\
-    1 25544U 98067A   14020.93268519  .00009878  00000-0  18200-3 0  5082
-    2 25544  51.6498 109.4756 0003572  55.9686 274.8005 15.49815350868473
-    """ * 60
-    open('stations.txt', 'wb').write(stations_txt_bytes)
+Here’s a useful pattern for downloading element sets with Skyfield:
+
+.. include:: ../examples/satellite_download.py
+   :literal:
+
+The next section will illustrate how to load satellites
+once you have downloaded the file.
+
+If your project is serious enough
+that you will need to be able to double-check and replicate old results later,
+then don’t follow this example —
+every time the file gets too old,
+this code will overwrite the file with new data.
+Instead, you will probably want to put the date in the filename,
+and archive each file along with your project’s code.
+
+Loading satellite elements
+--------------------------
+
+Once you have downloaded a file of elements,
+use one of these patterns to load them into Skyfield.
+For the traditional TLE format:
 
 .. testcode::
 
-    from skyfield.api import load, wgs84
+    from skyfield.api import load
+    from skyfield.iokit import parse_tle_file
 
-    stations_url = 'http://celestrak.org/NORAD/elements/stations.txt'
-    satellites = load.tle_file(stations_url)
+    ts = load.timescale()
+
+    with load.open('stations.tle') as f:
+        satellites = list(parse_tle_file(f, ts))
+
     print('Loaded', len(satellites), 'satellites')
 
 .. testoutput::
 
-    Loaded 60 satellites
+    Loaded 27 satellites
+
+For the verbose but easy-to-read JSON format:
+
+.. testcode::
+
+    import json
+    from skyfield.api import EarthSatellite, load
+
+    with load.open('stations.json') as f:
+        data = json.load(f)
+
+    ts = load.timescale()
+    sats = [EarthSatellite.from_omm(ts, fields) for fields in data]
+    print('Loaded', len(sats), 'satellites')
+
+.. testoutput::
+
+    Loaded 27 satellites
+
+For the more compact CSV format:
+
+.. testcode::
+
+    import csv
+    from skyfield.api import EarthSatellite, load
+
+    with load.open('stations.csv', mode='r') as f:
+        data = list(csv.DictReader(f))
+
+    ts = load.timescale()
+    sats = [EarthSatellite.from_omm(ts, fields) for fields in data]
+    print('Loaded', len(sats), 'satellites')
+
+.. testoutput::
+
+    Loaded 27 satellites
+
+In each case,
+you are asked to provide a ``ts`` timescale.
+Why?
+Because Skyfield needs the timescale’s knowledge of leap seconds
+to turn each satellite’s epoch date
+into an ``.epoch`` :class:`~skyfield.timelib.Time` object.
+
+Loading satellite data from a string
+------------------------------------
+
+If your program has already loaded TLE, JSON, or CSV data into memory
+and doesn’t need to read it over again from a file,
+you can make the string behave like a file
+by wrapping it in a Python I/O object::
+
+    # For TLE and JSON:
+
+    from io import BytesIO
+    f = BytesIO(byte_string)
+
+    # For CSV:
+
+    from io import StringIO
+    f = StringIO(text_string)
+
+You can then use the resulting file object ``f``
+with the example code in the previous section.
 
 Indexing satellites by name or number
 -------------------------------------
@@ -201,7 +293,7 @@ using Python’s dictionary comprehension syntax:
 
 .. testoutput::
 
-    ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
+    ISS (ZARYA) catalog #25544 epoch 2024-05-09 08:48:20 UTC
 
 .. testcode::
 
@@ -211,86 +303,13 @@ using Python’s dictionary comprehension syntax:
 
 .. testoutput::
 
-    ISS (ZARYA) catalog #25544 epoch 2014-01-20 22:23:04 UTC
-
-Performing a TLE query
-----------------------
-
-In addition to offering traditional text files
-like ``stations.txt`` and ``active.txt``,
-Celestrak supports queries that return TLE elements.
-
-But be careful!
-
-Because every query to Celestrak requests the same filename ``tle.php``
-Skyfield will by default only download the first result.
-Your second, third, and all subsequent attempts to query Celestrak
-will simply return the contents
-of the ``tle.php`` file that’s already on disk —
-giving you the results of your first query over and over again.
-
-Here are two easy remedies:
-
-1. Specify the argument ``reload=True``,
-   which asks Skyfield to always download new results
-   even if there is already a file on disk.
-   Every query will overwrite the file with new data.
-
-2. Or, specify a ``filename=`` argument
-   so that each query’s result
-   is saved to a file specific to that query.
-   Each query result will be saved to disk with its own filename.
-
-Here’s an example of the second approach —
-code that requests one specific satellite,
-saving the result to a file specific to the query:
-
-.. testcode::
-
-    n = 25544
-    url = 'https://celestrak.org/satcat/tle.php?CATNR={}'.format(n)
-    filename = 'tle-CATNR-{}.txt'.format(n)
-    satellites = load.tle_file(url, filename=filename)
-    print(satellites)
-
-.. testoutput::
-
-    [<EarthSatellite ISS (ZARYA) catalog #25544 epoch 2020-11-07 22:23:09 UTC>]
-
-The above code will download a new result
-each time it’s asked for a satellite that it hasn’t yet fetched.
-But note that when asked again for the same satellite,
-it will simply reload the existing file from disk
-unless ``reload=True`` is specified.
-
-Loading a TLE file from a string
---------------------------------
-
-If your program has already loaded the text of a TLE file,
-and you don’t need Skyfield to handle the download for you,
-then you can turn it into a list of Skyfield satellites
-with the :func:`~skyfield.iokit.parse_tle_file()` function.
-The function is a Python generator,
-so we use Python’s ``list()`` constructor
-to load all the satellites:
-
-.. testcode::
-
-    from io import BytesIO
-    from skyfield.iokit import parse_tle_file
-
-    f = BytesIO(stations_txt_bytes)
-    satellites = list(parse_tle_file(f))
-
-If it’s simpler in your case,
-you can instead pass :func:`~skyfield.iokit.parse_tle_file()`
-a simple list of lines.
+    ISS (ZARYA) catalog #25544 epoch 2024-05-09 08:48:20 UTC
 
 Loading a single TLE set from strings
 -------------------------------------
 
 If your program already has the two lines of TLE data for a satellite
-and doesn’t need Skyfield to download and parse a Celestrak file,
+and doesn’t need Skyfield to download and parse a CelesTrak file,
 you can instantiate an :class:`~skyfield.sgp4lib.EarthSatellite` directly.
 
 .. testcode::
@@ -400,6 +419,8 @@ how many times our example satellite rises above 30° of altitude
 over the span of a single day:
 
 .. testcode::
+
+    from skyfield.api import wgs84
 
     bluffton = wgs84.latlon(+40.8939, -83.8917)
     t0 = ts.utc(2014, 1, 23)
@@ -702,7 +723,6 @@ and ``False`` otherwise.
 .. testcode::
 
     eph = load('de421.bsp')
-    satellite = by_name['ISS (ZARYA)']
 
     two_hours = ts.utc(2014, 1, 20, 0, range(0, 120, 20))
     sunlit = satellite.at(two_hours).is_sunlit(eph)
@@ -749,7 +769,6 @@ through the :meth:`~skyfield.positionlib.ICRF.is_behind_earth()` method.
 
     eph = load('de421.bsp')
     earth, venus = eph['earth'], eph['venus']
-    satellite = by_name['ISS (ZARYA)']
 
     two_hours = ts.utc(2014, 1, 20, 0, range(0, 120, 20))
     p = (earth + satellite).at(two_hours).observe(venus).apparent()

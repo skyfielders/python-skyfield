@@ -158,7 +158,7 @@ class Loader(object):
         seconds = time() - mtime
         return seconds / 86400.0
 
-    def _exists(self, filename):
+    def exists(self, filename):
         return os.path.exists(self.path_to(filename))
 
     def __call__(self, filename, reload=False, backup=False, builtin=False):
@@ -346,7 +346,7 @@ class Loader(object):
         Service.  For details, see :ref:`downloading-timescale-files`.
 
         """
-        e = self._exists
+        e = self.exists
         if builtin:
             # See "build_arrays.py" for a notes on how these are stored.
             arrays = load_bundled_npy('iers.npz')
