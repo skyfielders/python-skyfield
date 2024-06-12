@@ -308,6 +308,7 @@ See :doc:`earth-satellites`.
 .. autosummary::
 
    EarthSatellite
+   EarthSatellite.from_omm
    EarthSatellite.from_satrec
    TEME
 

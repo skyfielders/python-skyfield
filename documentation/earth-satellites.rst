@@ -53,6 +53,8 @@ Beware of these limitations:
 .. _Revisiting Spacetrack Report #3:
     https://celestrak.org/publications/AIAA/2006-6753/
 
+.. _satellite-element-formats:
+
 The TLE format and its rivals
 =============================
 
@@ -187,6 +189,8 @@ every time the file gets too old,
 this code will overwrite the file with new data.
 Instead, you will probably want to put the date in the filename,
 and archive each file along with your project’s code.
+
+.. _loading-satellite-elements:
 
 Loading satellite elements
 --------------------------

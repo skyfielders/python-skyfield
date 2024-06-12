@@ -9,6 +9,27 @@ Changelog
 Released versions
 -----------------
 
+v1.49 — Upcoming
+----------------
+
+* A new :meth:`~skyfield.sgp4lib.EarthSatellite.from_omm()` Earth
+  Satellite constructor has been added to load satellite elements from
+  modern OMM data instead of from old TLE data.  The Earth satellite
+  documentation now :ref:`describes two OMM formats
+  <satellite-element-formats>` and :ref:`shows how to load satellites
+  from each one <loading-satellite-elements>`.  `#763
+  <https://github.com/skyfielders/python-skyfield/issues/763>`_
+
+* If you print an instance of the
+  :class:`~skyfield.planetarylib.PlanetaryConstants` class to the screen,
+  it will list all of the segments that it has loaded from binary kernels.
+  `#952 <https://github.com/skyfielders/python-skyfield/issues/952>`_
+
+* The Skyfield documentation is no longer installed alongside the Python
+  code, reducing the size of Skyfield by around 25%.  Users who need
+  offline access to the documentation will now need to download it
+  separately.
+
 v1.48 — 2024 February 7
 -----------------------
 
