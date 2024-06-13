@@ -9,8 +9,8 @@ Changelog
 Released versions
 -----------------
 
-v1.49 — Upcoming
-----------------
+v1.49 — 2024 June 13
+--------------------
 
 * A new :meth:`~skyfield.sgp4lib.EarthSatellite.from_omm()` Earth
   Satellite constructor has been added to load satellite elements from
