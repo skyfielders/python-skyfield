@@ -6,5 +6,5 @@ name = 'stations.csv'  # custom filename, not 'gp.php'
 base = 'https://celestrak.org/NORAD/elements/gp.php'
 url = base + '?GROUP=stations&FORMAT=csv'
 
-if not load.exists(name) or load.days_old(name) >= max_days:
+if not load._exists(name) or load.days_old(name) >= max_days:
     load.download(url, filename=name)
