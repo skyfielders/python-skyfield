@@ -98,7 +98,7 @@ def _to_spherical_and_rates(r, v):
     length = length_of(r)
     lat = arctan2(z, hypot(x, y));
     lon = arctan2(y, x) % tau
-    range_rate = dots(r, v) / length_of(r)
+    range_rate = dots(r, v) / length
 
     x2 = x * x
     y2 = y * y
