@@ -1,7 +1,7 @@
 """Basic operations that are needed repeatedly throughout Skyfield."""
 
 from numpy import (
-    arcsin, arctan2, array, cos, einsum, finfo, float64,
+    arctan2, array, cos, einsum, finfo, float64,
     full_like, hypot, load, nan, rollaxis, sin, sqrt, where,
 )
 from pkgutil import get_data
