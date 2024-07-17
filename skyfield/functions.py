@@ -1,8 +1,8 @@
 """Basic operations that are needed repeatedly throughout Skyfield."""
 
 from numpy import (
-    arcsin, arctan2, array, cos, einsum, finfo, float64,
-    full_like, load, nan, rollaxis, sin, sqrt, where,
+    arctan2, array, cos, einsum, finfo, float64,
+    full_like, hypot, load, nan, rollaxis, sin, sqrt, where,
 )
 from pkgutil import get_data
 from skyfield.constants import tau
@@ -86,7 +86,7 @@ def to_spherical(xyz):
     """
     r = length_of(xyz)
     x, y, z = xyz
-    theta = arcsin(z / (r + _AVOID_DIVIDE_BY_ZERO))
+    theta = arctan2(z, hypot(x, y))
     phi = arctan2(y, x) % tau
     return r, theta, phi
 
@@ -96,9 +96,9 @@ def _to_spherical_and_rates(r, v):
     xdot, ydot, zdot = v
 
     length = length_of(r)
-    lat = arcsin(z / (length + _AVOID_DIVIDE_BY_ZERO))
+    lat = arctan2(z, hypot(x, y));
     lon = arctan2(y, x) % tau
-    range_rate = dots(r, v) / length_of(r)
+    range_rate = dots(r, v) / length
 
     x2 = x * x
     y2 = y * y
