@@ -13,7 +13,7 @@ from numpy import array
 from jplephem.names import target_name_pairs
 
 from skyfield.api import load
-from skyfield.timelib import Time, calendar_tuple
+from skyfield.timelib import calendar_tuple
 from skyfield.vectorlib import (
     VectorSum, VectorFunction,
     _jpl_code_name_dict, _jpl_name
