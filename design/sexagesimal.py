@@ -1,6 +1,5 @@
 import math
 import numpy as np
-from numpy import around
 from time import time
 
 print('Which approach computes "units:minutes:sections.fraction" faster?')

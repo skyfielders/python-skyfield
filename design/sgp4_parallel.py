@@ -7,9 +7,9 @@ conversions from TEME?
 """
 import numpy as np
 from sgp4.api import SatrecArray, SGP4_ERRORS, accelerated
-from skyfield.api import load, utc, EarthSatellite, Topos
+from skyfield.api import load, EarthSatellite, Topos
 from skyfield.constants import ANGVEL, AU_KM, DAY_S, AU_M, tau
-from skyfield.sgp4lib import TEME_to_ITRF, _zero_zero_minus_one, theta_GMST1982, _cross
+from skyfield.sgp4lib import _zero_zero_minus_one, theta_GMST1982, _cross
 from skyfield.positionlib import build_position
 from skyfield.vectorlib import ObserverData
 from skyfield.functions import mxv, rot_z

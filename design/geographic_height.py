@@ -45,9 +45,9 @@
 # 6357 km - Earth radius at pole
 # 6335.4 km - Earth radius of curvature at equator
 
-from numpy import arctan2, cos, sin, sqrt
-from skyfield.api import load, wgs84, tau
-from skyfield.constants import AU_M, DEG2RAD, RAD2DEG
+from numpy import cos, sqrt
+from skyfield.api import load, wgs84
+from skyfield.constants import AU_M, RAD2DEG
 
 ts = load.timescale()
 t = ts.utc(2023, 3, 2, 4, 13, 0)

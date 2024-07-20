@@ -1,6 +1,5 @@
 """Print a table of how accurate IAU 2000B is with fewer coefficients."""
 
-import matplotlib.pyplot as plt
 from numpy import sqrt
 from skyfield.api import load
 from skyfield.nutationlib import iau2000a, iau2000b
