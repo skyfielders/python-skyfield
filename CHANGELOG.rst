@@ -47,6 +47,18 @@ v1.48 — 2024 February 7
   Antarctic, the new rising and setting routines now correctly set the
   value ``False`` not only for sunrise but also for sunset.
 
+* Fix: Skyfield no longer raises the following exception
+  if you call :meth:`~skyfield.positionlib.Barycentric.observe()`
+  on a position whose coordinate and time arrays are empty. ::
+
+   ValueError: zero-size array to reduction operation maximum which has no identity
+
+  Instead, an empty apparent position is now returned.
+  The exception was sometimes triggered by almanac routines
+  if you searched for an event that didn’t occur
+  between your start and end times.
+  `#991 <https://github.com/skyfielders/python-skyfield/issues/991>`_
+
 v1.47 — 2024 January 13
 -----------------------
 
