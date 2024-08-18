@@ -1,11 +1,6 @@
 import os
-
-if 'SKYFIELD_USE_SETUPTOOLS' in os.environ:
-    import setuptools
-    print('Using setuptools version', setuptools.__version__)
-
-from distutils.core import setup
-from distutils.command.sdist import sdist
+from setuptools import setup
+from setuptools.command.sdist import sdist
 
 import skyfield  # safe, because __init__.py contains no import statements
 
@@ -33,15 +28,13 @@ setup(
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Topic :: Scientific/Engineering :: Astronomy',
         ],
     packages=[
