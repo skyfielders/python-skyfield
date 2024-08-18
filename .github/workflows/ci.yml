@@ -1,5 +1,12 @@
-name: Skyfield CI
-on: [push]
+name: ci
+on:
+  push:
+    branches:
+      - master
+      - ci
+  pull_request:
+    branches:
+      - master
 jobs:
   doctest-and-lint:
     runs-on: ubuntu-latest
