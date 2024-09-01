@@ -106,35 +106,84 @@ Day Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set 
 Add one hour for daylight time, if and when in use.
 """
 
-def test(table, e, body):
-    usno_rises = []  # (month, minutes_into_day)
+MOON_TABLE_2 = """
+             o  ,    o  ,                                     LATITUDE 70                              Astronomical Applications Dept.
+Location:  000 00, N70 00                         Rise and Set for the Moon for 2023                   U. S. Naval Observatory        
+                                                                                                       Washington, DC  20392-5420     
+                                                            Universal Time                                                            
+                                                                                                                                      
+                                                                                                                                      
+       Jan.       Feb.       Mar.       Apr.       May        June       July       Aug.       Sept.      Oct.       Nov.       Dec.  
+Day Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set
+     h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m   h m  h m
+01  1047 0408  **** ****  **** ****  **** ****  1345 0421  1917 0100  ---- ----  ---- ----  1939 0619  1625 1026  **** ****  **** ****
+02  0950 0641  **** ****  **** ****  1216 0705  1538 0356       0016  ---- ----  2301       1910 0838  **** ****  **** ****  **** ****
+03  **** ****  **** ****  **** ****  1425 0626  1734 0332  ---- ----  ---- ----  2214 0416  1837 1057  **** ****  **** ****  1922 1507
+04  **** ****  **** ****  **** ****  1620 0558  1943 0306  ---- ----  ---- ----  2143 0656  1743 1337  **** ****  **** ****  2137 1420
+05  **** ****  **** ****  1225 0935  1814 0534  2232 0232  ---- ----  ---- ----  2115 0915  **** ****  **** ****  **** ****  2331 1350
+06  **** ****  1512 1053  1456 0834  2013 0509       0125  ---- ----  0144 0406  2047 1127  **** ****  **** ****  2208 1635       1325
+07  **** ****  1726 1009  1657 0802  2229 0441  ---- ----  ---- ----  0025 0720  2010 1345  **** ****  **** ****       1557  0119 1302
+07                                                                    2349                                                            
+08  **** ****  1921 0941  1850 0736       0401  ---- ----  ---- ----  2322 0942  1853 1646  **** ****  **** ****  0012 1529  0311 1236
+09  **** ****  2112 0917  2043 0713  ---- ----  ---- ----  0252 0719  2255 1151  **** ****  **** ****  2221 1903  0204 1505  0513 1202
+10  1745 1226  2305 0854  2244 0648  ---- ----  ---- ----  0201 0957  2226 1400  **** ****  **** ****       1806  0354 1440  0752 1059
+11  1949 1149       0829       0618  ---- ----  ---- ----  0130 1210  2146 1619  **** ****  **** ****  0046 1733  0550 1411  ---- ----
+12  2142 1123  0108 0757  0108 0530  ---- ----  ---- ----  0103 1416  **** ****  **** ****       2022  0244 1707  0803 1331  ---- ----
+13  2332 1100  0348 0656  ---- ----  ---- ----  0422 0958  0037 1624  **** ****  **** ****  0108 1940  0435 1643  ---- ----  ---- ----
+14       1037  ---- ----  ---- ----  ---- ----  0340 1224  0006 1851  **** ****  **** ****  0318 1911  0626 1617  ---- ----  ---- ----
+14                                                         2319                                                                       
+15  0129 1011  ---- ----  ---- ----  0716 0922  0310 1435  **** ****  **** ****       2316  0511 1846  0826 1546  ---- ----  ---- ----
+16  0342 0934  ---- ----  ---- ----  0554 1235  0244 1642  **** ****  **** ****  0048 2152  0701 1822  1053 1453  ---- ----  ---- ----
+17  ---- ----  ---- ----  ---- ----  0517 1458  0217 1856  **** ****  **** ****  0342 2117  0853 1755  ---- ----  ---- ----  1402 1907
+18  ---- ----  ---- ----  ---- ----  0449 1709  0143 2144  **** ****  **** ****  0543 2050  1057 1720  ---- ----  ---- ----  1314 2141
+19  ---- ----  1128 1205  0816 1242  0422 1921  0037       **** ****  **** ****  0733 2027  1344 1607  ---- ----  ---- ----  1243 2354
+20  ---- ----  0932 1600  0724 1527  0352 2146  **** ****  **** ****  0347 0022  0922 2003  ---- ----  ---- ----  1535 2142  1216     
+20                                                                         2328                                                       
+21  ---- ----  0854 1830  0651 1747  0310       **** ****  **** ****  0609 2257  1115 1935  ---- ----  ---- ----  1454       1148 0203
+22  ---- ----  0826 2044  0624 1959  **** ****  **** ****  **** ****  0805 2232  1325 1856  ---- ----  ---- ----  1425 0007  1113 0419
+23  1149 1628  0759 2254  0557 2216  **** ****  **** ****  0627 0149  0954 2209  ---- ----  ---- ----  1818 2119  1357 0219  1006 0711
+24  1059 1910  0731       0523       **** ****  **** ****  0837 0106  1144 2144  ---- ----  ---- ----  1708       1327 0432  **** ****
+25  1029 2125  0652 0114  0424 0059  **** ****  **** ****  1030 0038  1341 2114  ---- ----  ---- ----  1632 0020  1246 0657  **** ****
+26  1003 2331  **** ****  **** ****  **** ****  0610 0446  1220 0014  1604 2026  ---- ----  1927       1603 0243  **** ****  **** ****
+26                                                              2350                                                                  
+27  0938       **** ****  **** ****  **** ****  0906 0320  1413 2324  ---- ----  ---- ----  1838 0033  1534 0459  **** ****  **** ****
+28  0908 0138  **** ****  **** ****  **** ****  1108 0244  1620 2250  ---- ----  ---- ----  1806 0315  1500 0719  **** ****  **** ****
+29  0822 0402             **** ****  0925 0544  1301 0218  1916 2135  ---- ----  2208       1737 0537  1403 1005  **** ****  **** ****
+30  **** ****             **** ****  1146 0452  1454 0154  ---- ----  ---- ----  2046 0029  1706 0757  **** ****  **** ****  1625 1351
+31  **** ****             **** ****             1654 0130             ---- ----  2008 0350             **** ****             1901 1244
+               Note: Blank spaces in the table indicate that a rising or a setting did not occur during that 24 hr interval.
+
+(**** object continuously above horizon)                                                      (---- object continuously below horizon)
+
+Add one hour for daylight time, if and when in use.
+"""
+
+def test(table, e, body, t0, t1, topo, timezone):
+    usno_rises = []
 
     for line in table.splitlines():
         if not line[0:1].isdigit():
             continue
         day_of_month = int(line[:2])
-        months_and_texts = [(i+1, line[4+i*11:8+i*11]) for i in range(0, 11)]
+        months_and_texts = [(i+1, line[4+i*11:8+i*11]) for i in range(0, 12)]
         for month, text in months_and_texts:
             if text.isdigit():
                 hours = int(text[0:2])
                 minutes = int(text[2:4])
                 usno_rises.append((month, day_of_month, hours * 60 + minutes))
 
-    usno_rises.sort()
+    #usno_rises.sort()
     #print(usno_rises)
 
-    ts = load.timescale()
-    t0 = ts.utc(2023, 1, 1, 7)
-    t1 = ts.utc(2024, 1, 1, 7)
-    fredonia = wgs84.latlon(36 + 57/60.0, - (112 + 31/60.0))
-    observer = e['Earth'] + fredonia
+    observer = e['Earth'] + topo
     horizon = -0.8333
     if len(sys.argv) > 1:
         # old
         if body.target == 10:
-            f = almanac.sunrise_sunset(e, fredonia)
+            f = almanac.sunrise_sunset(e, topo)
         else:
-            f = almanac.risings_and_settings(e, body, fredonia, horizon)
+            f = almanac.risings_and_settings(e, body, topo, horizon)
+            f.step_days = 1 / 1440.0
         tt = time()
         t, y = almanac.find_discrete(t0, t1, f)
         duration = time() - tt
@@ -143,41 +192,64 @@ def test(table, e, body):
         # new
         tt = time()
         t, y = almanac.find_risings(observer, body, t0, t1) #, horizon)
+        t = t[y == True]
         duration = time() - tt
     print('Duration:', duration, 'seconds')
-    t -= dt.timedelta(hours=7)
+
+    t += timezone
 
     skyfield_rises = []
 
     thirty_seconds = 1.0 / 24.0 / 60.0 / 2.0  # to round to next minute
-    for ti in t + thirty_seconds:
+    for ti in t: # + thirty_seconds:
+        #print(ti.utc_strftime())
         u = ti.utc
         tup = u.month, u.day, u.hour * 60 + u.minute
         skyfield_rises.append(tup)
 
-    errors = defaultdict(int)
+    usno_dict = {(month, day): time for month, day, time in usno_rises}
+    skyfield_dict = {(month, day): time for month, day, time in skyfield_rises}
 
-    for u, s in zip(usno_rises, skyfield_rises):
-        month_and_day_matches = (u[0:2] == s[0:2])
-        if not month_and_day_matches:
-            print()
-            print('Error: usno', u, 'skyfield', s)
-            exit(1)
-        error = u[2] - s[2]
-        errors[error] += 1
-        print(error or '.', end=' ')
+    errors = []
+
+    for key in sorted(usno_dict.keys() | skyfield_dict.keys()):
+        month, day = key
+        u = usno_dict.get(key)
+        s = skyfield_dict.get(key)
+        if not u:
+            errors.append('usno-miss')
+            print('USNO does not list:', month, day, divmod(int(s), 60))
+            #continue
+        elif not s:
+            errors.append('skyfield-miss')
+            print('Skyfield is missing:', month, day, divmod(u, 60))
+            #continue
+        elif u == s:
+            errors.append('.')
+        else:
+            errors.append(str(u - s))
+    print(' '.join(errors))
     print()
-    print(sorted(errors.items()))
+    print('Errors encountered:', sorted(set(errors)))
 
     toff = t + dt.timedelta(hours=7)
     alt, az, _ = observer.at(toff).observe(body).apparent().altaz()
     print('Altitude min:', min(alt.degrees), ' max:', max(alt.degrees))
 
 def main():
+    ts = load.timescale()
     e = load('de421.bsp')
-    #e = load('de440.bsp')
-    test(SUN_TABLE, e, e['Sun'])
-    test(MOON_TABLE, e, e['Moon'])
+
+    t0 = ts.utc(2023, 1, 1, 7)
+    t1 = ts.utc(2024, 1, 1, 7)
+    fredonia = wgs84.latlon(36 + 57/60.0, - (112 + 31/60.0))
+    test(SUN_TABLE, e, e['Sun'], t0, t1, fredonia, dt.timedelta(hours=-7))
+    test(MOON_TABLE, e, e['Moon'], t0, t1, fredonia, dt.timedelta(hours=-7))
+
+    t0 = ts.utc(2023, 1, 1, 0)
+    t1 = ts.utc(2024, 1, 1, 0)
+    lat70 = wgs84.latlon(70, 0)
+    test(MOON_TABLE_2, e, e['Moon'], t0, t1, lat70, dt.timedelta(hours=0))
 
 if __name__ == '__main__':
     main()
