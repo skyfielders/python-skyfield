@@ -8,6 +8,7 @@
 import datetime as dt
 import sys
 from collections import defaultdict
+from textwrap import fill
 from time import time
 from skyfield import almanac
 from skyfield.api import load, wgs84
@@ -201,7 +202,7 @@ def test(table, e, body, t0, t1, topo, timezone):
     skyfield_rises = []
 
     thirty_seconds = 1.0 / 24.0 / 60.0 / 2.0  # to round to next minute
-    for ti in t: # + thirty_seconds:
+    for ti in t + thirty_seconds:
         #print(ti.utc_strftime())
         u = ti.utc
         tup = u.month, u.day, u.hour * 60 + u.minute
@@ -228,7 +229,7 @@ def test(table, e, body, t0, t1, topo, timezone):
             errors.append('.')
         else:
             errors.append(str(u - s))
-    print(' '.join(errors))
+    print(fill(' '.join(errors), 78))
     print()
     print('Errors encountered:', sorted(set(errors)))
 
@@ -243,8 +244,8 @@ def main():
     t0 = ts.utc(2023, 1, 1, 7)
     t1 = ts.utc(2024, 1, 1, 7)
     fredonia = wgs84.latlon(36 + 57/60.0, - (112 + 31/60.0))
-    test(SUN_TABLE, e, e['Sun'], t0, t1, fredonia, dt.timedelta(hours=-7))
-    test(MOON_TABLE, e, e['Moon'], t0, t1, fredonia, dt.timedelta(hours=-7))
+    # test(SUN_TABLE, e, e['Sun'], t0, t1, fredonia, dt.timedelta(hours=-7))
+    # test(MOON_TABLE, e, e['Moon'], t0, t1, fredonia, dt.timedelta(hours=-7))
 
     t0 = ts.utc(2023, 1, 1, 0)
     t1 = ts.utc(2024, 1, 1, 0)
