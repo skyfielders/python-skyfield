@@ -54,7 +54,11 @@ moon_x = az.degrees
 moon_y = alt.degrees
 
 horizon = -0.8444219217855957  # later, compute this instead of hard-coding
-arrow_style = {'arrowstyle': 'simple', 'lw': 0.2, 'fc': 'black'}
+arrow_style = {
+    'arrowstyle': 'simple',
+    'fc': 'black', 'lw': 0.2, 'relpos': (0, 0.5),
+    'shrinkA': 4, 'shrinkB': 12,
+}
 
 def make_plot(target, horizon_degrees=None):
     trace.clear()
@@ -74,20 +78,23 @@ def make_plot(target, horizon_degrees=None):
     ax.grid()
 
     degree = api.tau / 360.0
-    arrow_angle = 80.0 * degree
-    arrow_length = 25.0
+    arrow_x = 30.0
+    arrow_y = 10.0
     for i, t in enumerate(traced_times):
         print(t.utc_strftime())
         if i == 0:
             continue
         alt, az, distance = observer.at(t).observe(target).apparent().altaz()
         ax.plot(az.degrees, alt.degrees, 'o')
-        arrow_angle -= 20.0 * degree
-        arrow_x = np.cos(arrow_angle) * arrow_length
-        arrow_y = np.sin(arrow_angle) * arrow_length
-        ax.annotate(f'{i}  ({t[0].utc_strftime("%H:%M:%S")})',
-                    (az.degrees, alt.degrees), (arrow_x, arrow_y),
-                    'data', 'offset points', arrow_style)
+        #arrow_y -= 6.0
+        arrow_y -= 9.0
+        print((arrow_x, arrow_y))
+        ax.annotate(
+            f'{i}  ({t[0].utc_strftime("%H:%M:%S")})',
+            xy=(az.degrees, alt.degrees), xytext=(arrow_x, arrow_y),
+            textcoords='offset points',
+            arrowprops=arrow_style,
+        )
 
     if 0: #target is moon:
         # Trying to find the intersection by hand:
