@@ -97,7 +97,7 @@ def make_plot(target, horizon_degrees=None):
         )
 
     if 0: #target is moon:
-        # Trying to find the intersection by hand:
+        # Trying to find the intersection, assuming motion is a line:
         ty = traced_times[-2][0]
         tz = traced_times[-1][0]
         alty, azy, distance = observer.at(ty).observe(target).apparent().altaz()
@@ -125,8 +125,8 @@ def make_plot(target, horizon_degrees=None):
     ty = traced_times[-2][0]
     tz = traced_times[-1][0]
 
-    if 1: #target is moon:  # try number two
-        # Trying to find the intersection by hand:
+    if 0: #target is moon:  # try number two
+        # Trying to draw a great circle, to compare the Moon's motion to:
         vy = observer.at(ty).observe(target).apparent().frame_xyz(latlon).km
         vz = observer.at(tz).observe(target).apparent().frame_xyz(latlon).km
         print(vy)
@@ -163,6 +163,24 @@ def make_plot(target, horizon_degrees=None):
         # move across the sphere at a uniform rate!  So even if I answered
         # the above question, I wouldn't know the corresponding time.
 
+    if target is moon:
+        # Assume altitude has constant second derivative.
+
+        ty = traced_times[-1][0]
+        tz = traced_times[-2][0]
+        ay = observer.at(ty).observe(target).apparent()
+        az = observer.at(tz).observe(target).apparent()
+        alt_y, _, _, d_alt_y, _, _, = ay.frame_latlon_and_rates(latlon)
+        alt_z, _, _, d_alt_z, _, _, = az.frame_latlon_and_rates(latlon)
+        print('Y', alt_y, d_alt_y.degrees.per_day)
+        print('Z', alt_z, d_alt_z.degrees.per_day)
+
+        # So can we compute the intersection of this rising parabola
+        # with the target altitude?
+
+        target_alt = -0.0147393  # radians
+        print('target alt:', target_alt)
+
     # Drat!  The great-circle line drawn above misses the rising point
     # on the horizon, just like the naive line drawn directly across the
     # plot.  So the curving path of the Moon isn't just an artifact of
@@ -190,7 +208,7 @@ def make_plot(target, horizon_degrees=None):
     ax.axvline(180.0)
     return fig
 
-if 1:
+if 0:
     #fig, (ax, ax2) = plt.subplots(2)
     fig, ax = plt.subplots()
     t0 = ts.utc(2023, 2, 19)
@@ -216,6 +234,33 @@ if 1:
 
     # ax2.plot(minute, dec.degrees)
     fig.savefig('tmp4.png')
+
+if 1:
+    # How wildly do the first derivative and second derivative of the
+    # Moon's velocity in elevation change over the 15 minutes that we
+    # have bracketed?
+
+    fig, (ax1, ax2, ax3) = plt.subplots(3)
+    t0 = ts.utc(2023, 2, 19)
+    t = ts.linspace(
+        ts.utc(2023, 2, 19, 11, 21),
+        #ts.utc(2023, 2, 19, 11, 5),
+        ts.utc(2023, 2, 19, 11, 36),
+        299,
+    )
+    alt, az, distance = observer.at(t).observe(moon).apparent().altaz()
+    minute = (t - t0) * 1440 - 11*60
+
+    ax1.plot(minute, alt._degrees)
+    ax2.plot(minute[:-1], np.diff(alt._degrees))
+    ax3.plot(minute[:-2], np.diff(np.diff(alt._degrees)))
+
+    _2nd_derivative_max = np.diff(np.diff(alt._degrees)).max()
+    _2nd_derivative_min = np.diff(np.diff(alt._degrees)).min()
+    print('Percent 2nd derivative change:',
+          100 * _2nd_derivative_max / _2nd_derivative_min - 100)
+
+    fig.savefig('tmp5.png')
 
 # make_plot(stars[2], horizon).savefig('tmp1.png')
 # make_plot(stars[1], horizon).savefig('tmp2.png')
