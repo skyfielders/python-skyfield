@@ -325,6 +325,7 @@ def _setting_hour_angle(latitude, declination, altitude_radians):
     return ha
 
 def _rising_hour_angle(latitude, declination, altitude_radians):
+    #print('*********', altitude_radians)
     return - _setting_hour_angle(latitude, declination, altitude_radians)
 
 def _transit_ha(latitude, declination, altitude_radians):
@@ -393,6 +394,7 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     t = ts.tt_jd(interpolated_tt)
 
     ha_per_day = tau            # angle the celestrial sphere rotates in 1 day
+    #ha_per_day = 6.3003874
 
     # TODO: How many iterations do we need?  And can we cut down on that
     # number if we use velocity intelligently?  For now, we experiment
@@ -400,9 +402,11 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # repository, that checks both the old Skyfiled routines and this
     # new one against the USNO.  It suggests that 3 iterations is enough
     # for the Moon, the fastest-moving Solar System object, to match.
-    for i in 0, 1, 2:
+    #for i in 0, 1, 2:
+    for i in range(9):
         _fastify(t)
         ha, dec, distance = observer.at(t).observe(target).apparent().hadec()
+        #print(h(distance), 'radians')
         desired_ha = f(latitude, dec, h(distance))
         ha_adjustment = desired_ha - ha.radians
         ha_adjustment = (ha_adjustment + pi) % tau - pi

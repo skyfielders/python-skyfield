@@ -281,6 +281,8 @@ class EarthSatellite(VectorFunction):
 
         def below_horizon_at(t):
             cheat(t)
+            print(t.utc_strftime())
+            print(at(t).altaz()[0].degrees)
             return at(t).altaz()[0].degrees < altitude_degrees
 
         # The `jdo` array are the times of maxima, with their averages
