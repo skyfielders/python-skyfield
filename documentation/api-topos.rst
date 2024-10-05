@@ -24,7 +24,7 @@
    .. attribute:: model
 
       The :class:`Geoid`, like WGS84 or IERS2010,
-      that this position uses to map longitude, latitude, and elevation
+      that this position uses to map latitude, longitude, and elevation
       to a three-dimensional Cartesian position.
 
    .. attribute:: latitude

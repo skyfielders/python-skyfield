@@ -514,7 +514,7 @@ than those of the old J2000 system.)
 
     [-3918.87650458 -1887.64838745  5209.08801512]
 
-Satellite longitude, latitude, and height
+Satellite latitude, longitude, and height
 =========================================
 
 Once you have computed a geocentric satellite position,

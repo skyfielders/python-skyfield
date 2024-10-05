@@ -462,7 +462,7 @@ class ICRF(object):
         return Distance(r), Velocity(v)
 
     def frame_latlon(self, frame):
-        """Return longitude, latitude, and distance in the given frame.
+        """Return latitude, longitude, and distance in the given frame.
 
         Returns a 3-element tuple giving the latitude and longitude as
         :class:`~skyfield.units.Angle` objects and the range to the
@@ -477,7 +477,7 @@ class ICRF(object):
                 Distance(d))
 
     def frame_latlon_and_rates(self, frame):
-        """Return a reference frame longitude, latitude, range, and rates.
+        """Return a reference frame latitude, longitude, range, and rates.
 
         Return a 6-element tuple of 3 coordinates and 3 rates-of-change
         for this position in the given reference ``frame``:
