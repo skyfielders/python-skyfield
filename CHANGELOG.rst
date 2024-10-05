@@ -33,6 +33,10 @@ v1.49 — 2024 June 13
 v1.48 — 2024 February 7
 -----------------------
 
+* Skyfield is now compatible with NumPy 2.0!  (Previous versions of
+  Skyfield would raise an ``ImportError`` trying to import the symbol
+  ``float_``, which is now named ``float64``.)
+
 * Times now support the ``<`` operator, so Python can sort them.
 
 * For convenience, geoids like :data:`~skyfield.toposlib.wgs84` have a
