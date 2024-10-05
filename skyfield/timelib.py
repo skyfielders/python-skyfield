@@ -631,10 +631,8 @@ class Time(object):
         * ``%S`` second
         * ``%A`` day of week, ``%a`` its abbreviation
 
-        You can find the full list, along with options that control
-        field widths and leading zeros, at:
-
-        https://docs.python.org/3/library/time.html#time.strftime
+        The ``%Z`` and ``%z`` formats are not supported; instead, simply
+        use the literal characters ``'UTC'`` in your format string.
 
         If the smallest time unit in your format is minutes or seconds,
         then the time is rounded to the nearest minute or second.
