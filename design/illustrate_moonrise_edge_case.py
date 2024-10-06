@@ -82,13 +82,11 @@ def make_plot(target, horizon_degrees=None):
     arrow_x = 30.0
     arrow_y = 10.0
     for i, t in enumerate(traced_times):
-        print(t.utc_strftime())
         if i == 0:
             continue
         alt, az, distance = observer.at(t).observe(target).apparent().altaz()
         ax.plot(az.degrees, alt.degrees, 'o')
         arrow_y -= 9.0
-        print((arrow_x, arrow_y))
         ax.annotate(
             f'{i}  ({t[0].utc_strftime("%H:%M:%S")})',
             xy=(az.degrees, alt.degrees), xytext=(arrow_x, arrow_y),
@@ -193,7 +191,7 @@ def make_plot(target, horizon_degrees=None):
     # even on a small local scale, a little circle has a tighter curve
     # than a great circle.
 
-    if target is moon:
+    if 0: #target is moon:
         py = observer.at(ty).observe(target).apparent()
         pz = observer.at(tz).observe(target).apparent()
         pyk = py.velocity.km_per_s
@@ -235,7 +233,7 @@ if 0:
     # ax2.plot(minute, dec.degrees)
     fig.savefig('tmp4.png')
 
-if 1:
+if 0:
     # How wildly do the first derivative and second derivative of the
     # Moon's velocity in elevation change over the 15 minutes that we
     # have bracketed?
@@ -261,6 +259,45 @@ if 1:
           100 * _2nd_derivative_max / _2nd_derivative_min - 100)
 
     fig.savefig('tmp5.png')
+
+# https://math.stackexchange.com/questions/4000135/quadratic-formula-fails-numerically-at-small-a-coefficients
+
+def _q(a, b, c):
+    # when a x^2 + b x + c = 0
+    from math import sqrt
+    print('doing quadratic with:', a, b, c)
+    print('root:', (-b + sqrt(b*b - 4*a*c)) / 2*a)
+    print('root:', (-b - sqrt(b*b - 4*a*c)) / 2*a)
+    print('root alt:', - 2*c / (b + sqrt(b*b - 4*a*c)))
+    print('root alt:', )
+    return (-b - sqrt(b*b - 4*a*c)) / 2*a
+
+def _intersection(a0, a1, v0, v1):
+    # overdetermined, so, ignores v1
+    print('k would be:', 2 * (a1 - a0 - v0))
+    tx = _q(a1 - a0 - v0, v0, a0)
+    return tx
+
+print('i:', _intersection(-1, 1, 2-.0001, 2+.0001))
+
+def quadratic_play():
+    # Can we use velocities to compute a curve?
+    t0 = ts.utc(2023, 2, 19, 11, 21)
+    t1 = ts.utc(2023, 2, 19, 11, 36)
+
+    a0 = observer.at(t0).observe(moon).apparent()
+    a1 = observer.at(t1).observe(moon).apparent()
+
+    target_alt = -0.0147393  # radians
+
+    lat0,_,_, rate0,_,_ = a0.frame_latlon_and_rates(latlon)
+    lat1,_,_, rate1,_,_ = a1.frame_latlon_and_rates(latlon)
+    print(lat0.radians - target_alt)
+    print(lat1.radians - target_alt)
+    print(rate0.radians.per_day)
+    print(rate1.radians.per_day)
+
+quadratic_play()
 
 # make_plot(stars[2], horizon).savefig('tmp1.png')
 # make_plot(stars[1], horizon).savefig('tmp2.png')
