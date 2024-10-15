@@ -176,8 +176,28 @@ def make_plot(target, horizon_degrees=None):
         # So can we compute the intersection of this rising parabola
         # with the target altitude?
 
-        target_alt = -0.0147393  # radians
+        target_alt = horizon / 360.0 * tau
         print('target alt:', target_alt)
+
+        a0 = observer.at(ty).observe(moon).apparent()
+        a1 = observer.at(tz).observe(moon).apparent()
+
+        alt0,_,_, rate0,_,_ = a0.frame_latlon_and_rates(latlon)
+        alt1,_,_, rate1,_,_ = a1.frame_latlon_and_rates(latlon)
+
+        tdiff = tz - ty
+
+        t_scaled_offset = _intersection(
+            alt0.radians - target_alt,
+            alt1.radians - target_alt,
+            rate0.radians.per_day * tdiff,
+            rate1.radians.per_day * tdiff,
+        )
+
+        t_answer = ty + t_scaled_offset * tdiff
+        aa = observer.at(t_answer).observe(moon).apparent()
+        alt, az, distance = aa.altaz()
+        ax.plot(az.degrees, alt.degrees, 'ok')
 
     # Drat!  The great-circle line drawn above misses the rising point
     # on the horizon, just like the naive line drawn directly across the
@@ -269,18 +289,23 @@ def _q(a, b, c):
     print('root:', (-b + sqrt(b*b - 4*a*c)) / 2*a)
     print('root:', (-b - sqrt(b*b - 4*a*c)) / 2*a)
     print('root alt:', - 2*c / (b + sqrt(b*b - 4*a*c)))
-    print('root alt:', )
-    return (-b - sqrt(b*b - 4*a*c)) / 2*a
+    print('root alt:', - 2*c / (b - sqrt(b*b - 4*a*c)))
+    return - 2*c / (b + sqrt(b*b - 4*a*c))
 
 def _intersection(a0, a1, v0, v1):
-    # overdetermined, so, ignores v1
+    # Return the time at which a curve reaches a=0, given its position
+    # and velocity a0, v0 at time 0.0 and a1, v1 at time 1.0.
+    #
+    # (overdetermined, so, ignores v1)
+    print('intersection with:', a0, a1, v0, v1)
     print('k would be:', 2 * (a1 - a0 - v0))
     tx = _q(a1 - a0 - v0, v0, a0)
+    print('tx =', tx)
     return tx
 
 print('i:', _intersection(-1, 1, 2-.0001, 2+.0001))
 
-def quadratic_play():
+def quadratic_attempt():
     # Can we use velocities to compute a curve?
     t0 = ts.utc(2023, 2, 19, 11, 21)
     t1 = ts.utc(2023, 2, 19, 11, 36)
@@ -290,14 +315,41 @@ def quadratic_play():
 
     target_alt = -0.0147393  # radians
 
-    lat0,_,_, rate0,_,_ = a0.frame_latlon_and_rates(latlon)
-    lat1,_,_, rate1,_,_ = a1.frame_latlon_and_rates(latlon)
-    print(lat0.radians - target_alt)
-    print(lat1.radians - target_alt)
-    print(rate0.radians.per_day)
-    print(rate1.radians.per_day)
+    alt0,_,_, rate0,_,_ = a0.frame_latlon_and_rates(latlon)
+    alt1,_,_, rate1,_,_ = a1.frame_latlon_and_rates(latlon)
+    print(f'{alt0.radians - target_alt =}')
+    print(f'{alt1.radians - target_alt =}')
+    print(f'{rate0.radians.per_day =}')
+    print(f'{rate1.radians.per_day =}')
 
-quadratic_play()
+    print('projected velocity:', (alt1.radians - alt0.radians) /
+          (t1 - t0))
+
+    # Okay, can we get those numbers suited up for _intersection()?
+
+    tdiff = t1 - t0
+
+    t_scaled_offset = _intersection(
+        alt0.radians - target_alt,
+        alt1.radians - target_alt,
+        rate0.radians.per_day * tdiff,
+        rate1.radians.per_day * tdiff,
+    )
+
+    print('****', t_scaled_offset)
+
+    t_answer = t0 + t_scaled_offset * tdiff
+    print(t_answer.utc_strftime())
+
+    target_alt_degrees = target_alt / tau * 360.0
+
+    aa = observer.at(t_answer).observe(moon).apparent()
+    alt, az, distance = aa.altaz()
+    print('Alt degrees at t0:', alt0.degrees - target_alt_degrees)
+    print('Alt degrees at t1:', alt1.degrees - target_alt_degrees)
+    print('Alt degrees at end:', (alt.radians - target_alt) / tau * 360.0)
+
+quadratic_attempt()
 
 # make_plot(stars[2], horizon).savefig('tmp1.png')
 # make_plot(stars[1], horizon).savefig('tmp2.png')
