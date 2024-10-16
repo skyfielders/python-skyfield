@@ -11,6 +11,9 @@ from .searchlib import find_discrete
 from .nutationlib import iau2000b_radians
 from .units import Angle
 
+_SUN = 10
+_MOON = 301
+
 # Not only to support historic code but also for future convenience, let
 # folks import the search routine alongside the almanac routines.
 find_discrete
@@ -331,6 +334,27 @@ def _rising_hour_angle(latitude, declination, altitude_radians):
 def _transit_ha(latitude, declination, altitude_radians):
     return 0.0
 
+def _q(a, b, c):
+    # when a x^2 + b x + c = 0
+    from numpy import sqrt
+    # print('doing quadratic with:', a, b, c)
+    # print('root:', (-b + sqrt(b*b - 4*a*c)) / 2*a)
+    # print('root:', (-b - sqrt(b*b - 4*a*c)) / 2*a)
+    # print('root alt:', - 2*c / (b + sqrt(b*b - 4*a*c)))
+    # print('root alt:', - 2*c / (b - sqrt(b*b - 4*a*c)))
+    return - 2*c / (b + sqrt(b*b - 4*a*c))
+
+def _intersection(a0, a1, v0, v1):
+    # Return the time at which a curve reaches a=0, given its position
+    # and velocity a0, v0 at time 0.0 and a1, v1 at time 1.0.
+    #
+    # (overdetermined, so, ignores v1)
+    # print('intersection with:', a0, a1, v0, v1)
+    # print('k would be:', 2 * (a1 - a0 - v0))
+    tx = _q(a1 - a0 - v0, v0, a0)
+    # print('tx =', tx)
+    return tx
+
 # Per https://aa.usno.navy.mil/faq/RST_defs we estimate 34 arcminutes of
 # atmospheric refraction and 16 arcminutes for the radius of the Sun.
 _sun_horizon_radians = -50.0 / 21600.0 * tau
@@ -342,18 +366,16 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # horizon we are aiming for, in radians.
     if horizon_degrees is None:
         tt = getattr(target, 'target', None)
-        if tt == 10:
-            horizon_radians = _sun_horizon_radians
-            h = lambda distance: horizon_radians
-        elif tt == 301:
-            horizon_radians = _refraction_radians
-            h = lambda distance: horizon_radians - _moon_radius_m / distance.m
+        if tt == _SUN:
+            def h(distance): return _sun_horizon_radians
+        elif tt == _MOON:
+            def h(distance):
+                return _refraction_radians - _moon_radius_m / distance.m
         else:
-            horizon_radians = _refraction_radians
-            h = lambda distance: horizon_radians
+            def h(distance): return _refraction_radians
     else:
         horizon_radians = horizon_degrees / 360.0 * tau
-        h = lambda distance: horizon_radians
+        def h(distance): return horizon_radians
 
     geo = observer.vector_functions[-1]  # should we check observer.center?
     latitude = geo.latitude
@@ -402,18 +424,50 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # repository, that checks both the old Skyfiled routines and this
     # new one against the USNO.  It suggests that 3 iterations is enough
     # for the Moon, the fastest-moving Solar System object, to match.
-    #for i in 0, 1, 2:
-    for i in range(9):
+    for i in 0, 1, 2:
+    #for i in range(9):
         _fastify(t)
-        ha, dec, distance = observer.at(t).observe(target).apparent().hadec()
+        apparent = observer.at(t).observe(target).apparent()
+        ha, dec, distance = apparent.hadec()
         #print(h(distance), 'radians')
         desired_ha = f(latitude, dec, h(distance))
         ha_adjustment = desired_ha - ha.radians
         ha_adjustment = (ha_adjustment + pi) % tau - pi
         timebump = ha_adjustment / ha_per_day
+        previous_t = t
         t = ts.tt_jd(t.whole, t.tt_fraction + timebump)
 
-    is_above_horizon = (desired_ha % pi != 0.0)
+    v = observer.vector_functions[-1]
+    altitude0, _, distance0, rate0, _, _ = apparent.frame_latlon_and_rates(v)
+
+    _fastify(t)
+    apparent = observer.at(t).observe(target).apparent()
+    altitude1, _, distance1, rate1, _, _ = apparent.frame_latlon_and_rates(v)
+
+    tdiff = t - previous_t
+
+    # print((altitude0.radians - h(distance0)).shape)
+    # print((altitude1.radians - h(distance1)).shape)
+    # print((rate0.radians.per_day * tdiff).shape)
+    # print((rate1.radians.per_day * tdiff).shape)
+
+    t_scaled_offset = _intersection(
+        altitude0.radians - h(distance0),
+        altitude1.radians - h(distance1),
+        rate0.radians.per_day * tdiff,
+        rate1.radians.per_day * tdiff,
+    )
+    t_scaled_offset[np.isnan(t_scaled_offset)] = 1.0
+    t_scaled_offset = np.clip(t_scaled_offset, 0.0, 1.0)
+    # print(t_scaled_offset)
+
+    t = previous_t + t_scaled_offset * tdiff
+
+    is_above_horizon =  (
+        (desired_ha % pi != 0.0)
+        |
+        ((t_scaled_offset > 0.0) & (t_scaled_offset < 1.0))
+    )
     return t, is_above_horizon
 
 def find_risings(observer, target, start_time, end_time, horizon_degrees=None):
