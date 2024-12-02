@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Open a BPC file, read its angles, and produce rotation matrices."""
 
-from numpy import array, cos, nan, sin
+from numpy import array, cos, nan, sin, deg2rad, ndarray, pad
 from jplephem.pck import DAF, PCK
-from .constants import ASEC2RAD, AU_KM, DAY_S, tau
+from .constants import ASEC2RAD, AU_KM, DAY_S, tau, T0, D_JC
 from .data import text_pck
 from .functions import _T, mxv, mxm, mxmxm, rot_x, rot_y, rot_z
 from .units import Angle, Distance
@@ -263,3 +263,150 @@ class PlanetTopos(VectorFunction):
         # azimuth reads north-east rather than the other direction.
         R[1] *= -1
         return R
+
+class PlanetaryOrientation():
+  """Planet/moon orientation and shape using models from .tpc file
+  
+  Based on the models presented in pck00010.tpc, which is based on
+     
+  Archinal, B.A., A’Hearn, M.F., Bowell, E. et al. Report of the IAU
+  Working Group on Cartographic Coordinates and Rotational Elements: 2009.
+  Celest Mech Dyn Astr 109, 101–135 (2011).
+  https://doi.org/10.1007/s10569-010-9320-4
+
+  >>> from skyfield.api import load, PlanetaryConstants, PlanetaryOrientation
+  >>> pc = PlanetaryConstants()
+  >>> pc.read_text(load('pck00010.tpc'))
+  >>> jup_orientation = PlanetaryOrientation(pc, '599')
+  >>> t = load.timescale().utc(2020,1,1)
+  >>> jup_orientation.at(t).orientation # [RA, DEC, prime_meridian]
+  [268.05773343067165, 64.49711711016498, 6359115.859072568]
+
+  """
+  def __init__(self, pc, naifid):
+    self.a0 = None
+    self.d0 = None
+    self.W = None
+    self.orientation = [self.a0, self.d0, self.W]
+
+    pck = pc.variables
+
+    # make sure that naifid is a string number
+    naifid = str(naifid)
+    if naifid.upper().startswith('BODY'):
+      naifid = naifid[4:]
+
+    self.naifid = naifid
+
+    # not all variables are available for every body
+    # set to None if they aren't
+    self.pole_ra = self._getPCKvar(pck, naifid, 'POLE_RA')
+    self.pole_dec = self._getPCKvar(pck, naifid, 'POLE_DEC')
+    self.pm = self._getPCKvar(pck, naifid, 'PM')
+    self.long_axis = self._getPCKvar(pck, naifid, 'LONG_AXIS')
+    self.nut_prec_ra = self._getPCKvar(pck, naifid, 'NUT_PREC_RA')
+    self.nut_prec_dec = self._getPCKvar(pck, naifid, 'NUT_PREC_DEC')
+    self.nut_prec_pm = self._getPCKvar(pck, naifid, 'NUT_PREC_PM')
+    # NUT_PREC_ANGLES are listed under main planet barycenter number
+    self.nut_prec_angles = self._getPCKvar(pck, naifid[0], 'NUT_PREC_ANGLES')
+    self.radii = self._getPCKvar(pck, naifid, 'RADII')
+
+    # parse NUT_PREC_ANGLES into Nx2 array for easier use later
+    if self.nut_prec_angles is not None:
+      self.nut_prec_angles_array = array([ self.nut_prec_angles[::2],
+                                           self.nut_prec_angles[1::2] ])
+
+    # check if POLE and PM values (orientation) are available
+    # many moons don't have them
+    if (self.pole_ra is not None and
+        self.pole_dec is not None and
+        self.pm is not None):
+      self.orientation_model = True
+    else:
+      self.orientation_model = False
+
+    # check if _NUT_PREC_* values (nutation) are available
+    # not all bodies have it, most notably Earth
+    if (self.nut_prec_ra is not None and
+        self.nut_prec_dec is not None and
+        self.nut_prec_pm is not None and
+        self.nut_prec_angles is not None):
+      self.nutation_model = True
+
+      # some bodies need to pad _NUT_PREC_ arrays with zeroes so they are the
+      # same length as self.nut_prec_angles_array
+      num_npa = self.nut_prec_angles_array.shape[1]
+      self.nut_prec_ra = pad(self.nut_prec_ra, (0,num_npa-len(self.nut_prec_ra)))
+      self.nut_prec_dec = pad(self.nut_prec_dec, (0,num_npa-len(self.nut_prec_dec)))
+      self.nut_prec_pm = pad(self.nut_prec_pm, (0,num_npa-len(self.nut_prec_pm)))
+    else:
+      self.nutation_model = False
+
+    # check if RADII values (shape) are available
+    if (self.radii is not None):
+      self.shape_model = True
+    else:
+      self.shape_model = False
+
+    # check that at least one model is available
+    if (not self.orientation_model and
+        not self.nutation_model and
+        not self.shape_model):
+      e = 'No models found for BODY' + self.naifid + \
+          '. Verify that NAIF ID is correct'
+      raise KeyError(e)
+
+  def _getPCKvar(self, pckvars, naifid, var):
+    """Do .variables[key] but return None instead of throwing an exception."""
+    try:
+      key = 'BODY'+naifid+'_'+var # e.g. BODY399_POLE_RA
+      v = pckvars[key]
+    except KeyError:
+      v = None
+    return v
+
+  def at(self, t):
+    self.t = t
+    self._calcOrientation()
+    return self
+
+  def _calcOrientation(self, t=None):
+    if not self.orientation_model:
+      e = 'BODY' + self.naifid + ' does not have an orientation model'
+      raise AttributeError(e)
+
+    if t is None:
+      t = self.t
+    else:
+      self.t = t
+    
+    d = t.tdb - T0 # Interval in days from the standard epoch
+    T = d/D_JC # Interval in Julian centuries from the standard epoch
+
+    nut_prec_ra_sum = 0
+    nut_prec_dec_sum = 0
+    nut_prec_pm_sum = 0
+
+    # only do the nutation calculations if the necessary values are available
+    if self.nutation_model:
+      a1, a2 = self.nut_prec_angles_array
+      
+      # if time is an array, need to flip row into column
+      if isinstance(T, ndarray):
+        npa = deg2rad(a1 + a2*T.reshape(-1,1))
+      else:
+        npa = deg2rad(a1 + a2*T)
+
+      sum_axis = npa.ndim-1 # 0 for single time, 1 for time array
+      nut_prec_ra_sum = (self.nut_prec_ra*sin(npa)).sum(axis=sum_axis)
+      nut_prec_dec_sum = (self.nut_prec_dec*cos(npa)).sum(axis=sum_axis)
+      nut_prec_pm_sum = (self.nut_prec_pm*sin(npa)).sum(axis=sum_axis)
+
+    a0 = self.pole_ra[0] + self.pole_ra[1]*T + nut_prec_ra_sum
+    d0 = self.pole_dec[0] + self.pole_dec[1]*T + nut_prec_dec_sum
+    W = self.pm[0] + self.pm[1]*d + nut_prec_pm_sum
+
+    self.orientation = array([a0, d0, W])
+    self.a0, self.d0, self.W = self.orientation
+
+    return self.orientation
