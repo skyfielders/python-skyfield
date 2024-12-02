@@ -9,6 +9,17 @@ Changelog
 Released versions
 -----------------
 
+v1.50 — Not yet released
+------------------------
+
+* The time methods :meth:`~skyfield.timelib.Time.utc_datetime()` and
+  :meth:`~skyfield.timelib.Time.utc_datetime_and_leap_second()` now
+  intercept the ``ValueError`` that Python raises for a negative year or
+  a Julian-only leap day, and replace the generic error message with a
+  more specific one.
+  `#957 <https://github.com/skyfielders/python-skyfield/issues/957>`_
+  `#992 <https://github.com/skyfielders/python-skyfield/issues/992>`_
+
 v1.49 — 2024 June 13
 --------------------
 

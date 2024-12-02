@@ -554,10 +554,23 @@ class Time(object):
         if self.shape:
             zone = [utc] * self.shape[0]
             argsets = zip(year, month, day, hour, minute, second, micro, zone)
-            dt = array([datetime(*args) for args in argsets])
+            d = []
+            a = d.append
+            try:  # placed outside the loop for efficiency
+                for args in argsets:
+                    a(datetime(*args))
+            except ValueError as e:
+                _upgrade_datetime_exception(args, e)
+                raise
+            d = array(d)
         else:
-            dt = datetime(year, month, day, hour, minute, second, micro, utc)
-        return dt, leap_second
+            args = year, month, day, hour, minute, second, micro, utc
+            try:
+                d = datetime(*args)
+            except ValueError as e:
+                _upgrade_datetime_exception(args, e)
+                raise
+        return d, leap_second
 
     def utc_iso(self, delimiter='T', places=0):
         """Convert to an ISO 8601 string like ``2014-01-18T01:35:38Z`` in UTC.
@@ -1244,6 +1257,16 @@ def _strftime(format, year, month, day, hour, minute, second,
         if getattr(year, 'ndim', 0):
             return [strftime(format, item) for item in zip(*tup)]
         return strftime(format, tup)
+
+def _upgrade_datetime_exception(args, e):
+    year, month, day, hour, minute, second, micro, zone = args
+    if year < 0:
+        e.args = ("Python's datetime does not support negative"
+                  ' years like the year {}'.format(year),)
+    elif month == 2 and day == 29:
+        e.args = ("Python's datetime does not support Julian leap"
+                  ' days like {} February 29 that are missing from'
+                  ' the Gregorian calendar'.format(year),)
 
 _naive_complaint = """cannot interpret a datetime that lacks a timezone
 
