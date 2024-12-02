@@ -211,8 +211,11 @@ def test(regime, table, e, body, t0, t1, topo, timezone):
                    - almanac._moon_radius_m / distance.m)
         horizon = horizon / tau * 360.0
 
-    print('Altitude vs horizon: min', min(alt.degrees - horizon),
-          ', max', max(alt.degrees - horizon))
+    min_as = min(alt.degrees - horizon) * 3600.0
+    max_as = max(alt.degrees - horizon) * 3600.0
+
+    print(f'Altitude vs horizon: min {min_as:f} arcseconds,',
+          f' max {max_as:f} arcseconds')
 
     # Okay, now it's time to turn to the USNO table and see how well we
     # stack up again it.
