@@ -20,6 +20,12 @@ v1.50 — Not yet released
   `#957 <https://github.com/skyfielders/python-skyfield/issues/957>`_
   `#992 <https://github.com/skyfielders/python-skyfield/issues/992>`_
 
+* If you call ``load.timescale(builtin=False)`` to download an updated
+  copy of the IERS ``finals2000A.all`` Earth orientation data file,
+  Skyfield now fetches the file with HTTPS, since their old FTP server
+  seems to have disappeared.
+  `#1019 <https://github.com/skyfielders/python-skyfield/issues/1019>`_
+
 v1.49 — 2024 June 13
 --------------------
 
