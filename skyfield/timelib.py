@@ -3,7 +3,7 @@ import datetime as dt_module
 import re
 import sys
 from collections import namedtuple
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from numpy import (
     array, concatenate, cos, float64, int64, isnan, isinf, linspace,
     nan, ndarray, nonzero, pi, rollaxis, searchsorted, sin, where, zeros_like,
@@ -89,7 +89,7 @@ class Timescale(object):
     timescale.
 
     """
-    _utcnow = datetime.utcnow
+    _utcnow = lambda: datetime.now(timezone.utc)
     polar_motion_table = None
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
@@ -127,11 +127,11 @@ class Timescale(object):
 
         For the return value to be correct, your operating system time
         and timezone settings must be set so that the Python Standard
-        Library constructor ``datetime.datetime.utcnow()`` returns a
+        Library constructor `datetime.now(timezone.utc)` returns a
         correct UTC date and time.
 
         """
-        return self.from_datetime(self._utcnow().replace(tzinfo=utc))
+        return self.from_datetime(self._utcnow())
 
     def from_datetime(self, datetime):
         """Return a `Time` for a Python ``datetime``.
