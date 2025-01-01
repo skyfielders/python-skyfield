@@ -274,10 +274,10 @@ class Angle(Unit):
         elif radians is not None:
             self.radians = _to_array(radians)
         elif degrees is not None:
-            self._degrees = degrees = _to_array(_unsexagesimalize(degrees))
+            self.degrees = degrees = _to_array(_unsexagesimalize(degrees))
             self.radians = degrees / 360.0 * tau
         elif hours is not None:
-            self._hours = hours = _to_array(_unsexagesimalize(hours))
+            self.hours = hours = _to_array(_unsexagesimalize(hours))
             self.radians = hours / 24.0 * tau
 
         self.preference = (preference if preference is not None
@@ -297,50 +297,44 @@ class Angle(Unit):
 
     radians = getset('radians', 'Radians (𝜏 = 2𝜋 in a circle).')
 
+    # Deprecated names, to support legacy code.
     @reify
-    def _hours(self):
-        return self.radians * 24.0 / tau
-
+    def _hours(self): return self.hours
     @reify
-    def _degrees(self):
-        return self.radians * 360.0 / tau
+    def _degrees(self): return self.degrees
 
     @reify
     def hours(self):
         r"""Hours (24\ |h| in a circle)."""
-        if self.preference != 'hours':
-            raise WrongUnitError('hours')
-        return self._hours
+        return self.radians * 24.0 / tau
 
     @reify
     def degrees(self):
         """Degrees (360° in a circle)."""
-        if self.preference != 'degrees':
-            raise WrongUnitError('degrees')
-        return self._degrees
+        return self.radians * 360.0 / tau
 
     def arcminutes(self):
         """Return the angle in arcminutes."""
-        return self._degrees * 60.0
+        return self.degrees * 60.0
 
     def arcseconds(self):
         """Return the angle in arcseconds."""
-        return self._degrees * 3600.0
+        return self.degrees * 3600.0
 
     def mas(self):
         """Return the angle in milliarcseconds."""
-        return self._degrees * 3600000.0
+        return self.degrees * 3600000.0
 
     def __str__(self):
         size = self.radians.size
         if size == 0:
             return 'Angle []'
         if self.preference == 'degrees':
-            v = self._degrees
+            v = self.degrees
             fmt = _dsgn.format if self.signed else _dfmt.format
             places = 1
         else:
-            v = self._hours
+            v = self.hours
             fmt = _hfmt.format
             places = 2
         if size >= 2:
@@ -362,7 +356,7 @@ class Angle(Unit):
         """
         if warn and self.preference != 'hours':
             raise WrongUnitError('hms')
-        sign, units, minutes, seconds = _sexagesimalize_to_float(self._hours)
+        sign, units, minutes, seconds = _sexagesimalize_to_float(self.hours)
         return sign * units, sign * minutes, sign * seconds
 
     def signed_hms(self, warn=True):
@@ -374,7 +368,7 @@ class Angle(Unit):
         """
         if warn and self.preference != 'hours':
             raise WrongUnitError('signed_hms')
-        return _sexagesimalize_to_float(self._hours)
+        return _sexagesimalize_to_float(self.hours)
 
     def hstr(self, places=2, warn=True, format=_hfmt):
         """Return a string like ``12h 07m 30.00s``; see `Formatting angles`.
@@ -386,7 +380,7 @@ class Angle(Unit):
         """
         if warn and self.preference != 'hours':
             raise WrongUnitError('hstr')
-        hours = self._hours
+        hours = self.hours
         shape = getattr(hours, 'shape', ())
         fmt = format.format  # `format()` method of `format` string
         if shape:
@@ -401,7 +395,7 @@ class Angle(Unit):
         """
         if warn and self.preference != 'degrees':
             raise WrongUnitError('dms')
-        sign, units, minutes, seconds = _sexagesimalize_to_float(self._degrees)
+        sign, units, minutes, seconds = _sexagesimalize_to_float(self.degrees)
         return sign * units, sign * minutes, sign * seconds
 
     def signed_dms(self, warn=True):
@@ -413,7 +407,7 @@ class Angle(Unit):
         """
         if warn and self.preference != 'degrees':
             raise WrongUnitError('signed_dms')
-        return _sexagesimalize_to_float(self._degrees)
+        return _sexagesimalize_to_float(self.degrees)
 
     def dstr(self, places=1, warn=True, format=None):
         """Return a string like ``181deg 52' 30.0"``; see `Formatting angles`.
@@ -425,7 +419,7 @@ class Angle(Unit):
         """
         if warn and self.preference != 'degrees':
             raise WrongUnitError('dstr')
-        degrees = self._degrees
+        degrees = self.degrees
         signed = self.signed
         if format is None:
             format = _dsgn if signed else _dfmt

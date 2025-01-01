@@ -85,7 +85,7 @@ class Star(object):
                      'names', 'epoch']:
             value = getattr(self, name)
             if isinstance(value, Angle):
-                value = value._degrees
+                value = value.degrees
             shape = getattr(value, 'shape', None)
             if shape:
                 shapes = ','.join(str(n) for n in shape)

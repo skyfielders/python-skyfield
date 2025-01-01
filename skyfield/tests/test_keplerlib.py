@@ -95,7 +95,7 @@ def test_minor_planet_with_negative_M():
     # We can't expect close agreement, since the HORIZONS orbital
     # elements are different than MPC's.
     assert ceres.target == '(2) Pallas'
-    assert abs(ra._degrees - 92.750) < 0.006
+    assert abs(ra.degrees - 92.750) < 0.006
     assert abs(dec.degrees - -10.561) < 0.002
 
 def test_comet():
