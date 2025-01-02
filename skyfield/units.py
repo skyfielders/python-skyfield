@@ -4,6 +4,7 @@
 """
 import numpy as np
 from numpy import abs, copysign, isnan
+from types import MethodType
 from .constants import AU_KM, AU_M, C, DAY_S, tau
 from .descriptorlib import reify
 from .functions import _to_array, length_of
@@ -52,18 +53,27 @@ class getset(object):
         self.conversion_factor = conversion_factor
         self.core_unit = core_unit
 
+        if conversion_factor is None:
+            def _constructor(cls, value):
+                value = _to_array(value)
+                obj = cls.__new__(cls)
+                setattr(obj, name, value)
+                return obj
+
+        else:
+            def _constructor(cls, value):
+                value = _to_array(value)
+                obj = cls.__new__(cls)
+                setattr(obj, name, value)
+                setattr(obj, core_unit, value / conversion_factor)
+                return obj
+
+        _constructor.__doc__ = self.__doc__
+        self._constructor = _constructor
+
     def __get__(self, instance, objtype=None):
         if instance is None:  # the class itself has been asked for this name
-            def constructor(value):
-                value = _to_array(value)
-                obj = objtype.__new__(objtype)
-                setattr(obj, self.name, value)
-                conversion_factor = self.conversion_factor
-                if conversion_factor is not None:
-                    setattr(obj, self.core_unit, value / conversion_factor)
-                return obj
-            constructor.__doc__ = self.__doc__
-            return constructor
+            return MethodType(self._constructor, objtype)
         value = getattr(instance, self.core_unit) * self.conversion_factor
         instance.__dict__[self.name] = value
         return value
