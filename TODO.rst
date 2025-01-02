@@ -120,10 +120,6 @@ forget.
   ephemeris for a raw position in au, without having to spin up a body
   object and have it spin up a `Distance` object.
 
-* We currently download most SPICE kernels from NAIF, but have to use
-  FTP for fetching DE422.  Are the files from the two sites equivalent
-  and do they have the same data?  Should we prefer one or the other?
-
 * We should have an illustration of Earth satellite heights above the
   surface, plotted against a blue atmosphere fading out into the black
   of space as the plot goes upwards towards the top.
@@ -191,10 +187,3 @@ Adding more smarts to ephemeris handling
   need to be vectorized and updated to use a Skyfield approach to vector
   and matrix operations.  When complete and documented, make a comment
   at: https://github.com/skyfielders/python-skyfield/issues/350
-
-For 2.0
-=======
-
-* Remove old deprecation warnings for pre-1.0 behaviors.
-
-* Remove support and tests for old ephemeris Python packages.

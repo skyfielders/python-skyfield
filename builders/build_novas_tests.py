@@ -43,7 +43,7 @@ def main():
         from skyfield.functions import BytesIO, length_of
         from .fixes import low_precision_ERA
 
-        OLD_AU_KM = 149597870.691  # TODO: load from de405
+        OLD_AU_KM = 149597870.691
         OLD_AU = AU_KM / OLD_AU_KM
 
         one_second = 1.0 / 24.0 / 60.0 / 60.0

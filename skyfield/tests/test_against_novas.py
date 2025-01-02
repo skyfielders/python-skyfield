@@ -9,7 +9,7 @@ from skyfield.data import hipparcos
 from skyfield.functions import BytesIO, length_of
 from .fixes import low_precision_ERA
 
-OLD_AU_KM = 149597870.691  # TODO: load from de405
+OLD_AU_KM = 149597870.691
 OLD_AU = AU_KM / OLD_AU_KM
 
 one_second = 1.0 / 24.0 / 60.0 / 60.0
@@ -517,7 +517,7 @@ def test_mercury_geocentric_date2(de405, ts):
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, 18.138225455402914, 0.0002 * ra_arcsecond)
-    compare(dec.degrees, -24.418845803732086, 0.0001 * arcsecond)
+    compare(dec.degrees, -24.41884580373209, 0.0001 * arcsecond)
 
 def test_mercury_geocentric_date3(de405, ts):
     t = ts.tt_jd(2456164.5)
@@ -565,7 +565,7 @@ def test_mercury_geocentric_date4(de405, ts):
 
     ra, dec, distance = apparent.radec(epoch='date')
     compare(ra.hours, (7.874971625095716, 2.4616767226464757, 18.138225455402914, 9.307566088097714), 0.0002 * ra_arcsecond)
-    compare(dec.degrees, (22.415970392044656, 11.207785493244957, -24.418845803732086, 16.631743449679668), 0.0001 * arcsecond)
+    compare(dec.degrees, (22.415970392044656, 11.207785493244957, -24.41884580373209, 16.631743449679668), 0.0001 * arcsecond)
 
 def test_venus_geocentric_date0(de405, ts):
     t = ts.tt_jd(2440423.345833333)
