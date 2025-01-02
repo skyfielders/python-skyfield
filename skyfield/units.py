@@ -102,7 +102,6 @@ class Distance(Unit):
     def __init__(self, au=None, km=None, m=None):
         if au is not None:
             self.au = _to_array(au)
-            """Astronomical units."""
         elif km is not None:
             self.km = km = _to_array(km)
             self.au = km / AU_KM
