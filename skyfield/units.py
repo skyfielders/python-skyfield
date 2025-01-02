@@ -97,8 +97,6 @@ class Distance(Unit):
     149597870.70 km
 
     """
-    _warned = False
-
     def __init__(self, au=None, km=None, m=None):
         if au is not None:
             self.au = _to_array(au)
@@ -157,8 +155,6 @@ class Velocity(Unit):
     array to its ``au_per_d=`` parameter.
 
     """
-    _warned = False
-
     # TODO: consider reworking this class to return a Rate object.
 
     def __init__(self, au_per_d=None, km_per_s=None):
