@@ -150,6 +150,14 @@ def rot_z(theta):
     one = zero + 1.0
     return array(((c, -s, zero), (s, c, zero), (zero, zero, one)))
 
+# The rotation matrices R1, R2, and R3 in _The Explanatory Supplement to
+# the Astronomical Almanac_ use a left-handed rotation around the x and
+# z axes.  In case anyone needs them:
+
+def R1(theta): return rot_x(-theta)
+def R2(theta): return rot_y(theta)
+def R3(theta): return rot_z(-theta)
+
 def angular_velocity_matrix(angular_velocity_vector):
     x, y, z = angular_velocity_vector
     zero = x * 0.0
