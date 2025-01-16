@@ -21,15 +21,13 @@ def setup(utc=(2015, 10, 11, 10)):
     # installed.  So instead of waiting, let's import it now.
     __import__('pandas')
 
-    fake_now = dt.datetime(*utc, tzinfo=dt.timezone.utc)
+    fake_now = dt.datetime(*utc)
     skyfield.api.load = skyfield.iokit.Loader('.', verbose=False)
-    skyfield.timelib.Timescale._utcnow = lambda: fake_now
     datetime._fake_now = fake_now
     dt.datetime = datetime
 
 def teardown():
     skyfield.api.load = skyfield.iokit.Loader('.')
-    skyfield.timelib.Timescale._utcnow = lambda: dt.datetime.now(dt.timezone.utc)
     dt.datetime = _real_datetime_class
 
 class low_precision_ERA(object):
