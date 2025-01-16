@@ -15,6 +15,15 @@ def needs_astropy(test):
     """Skip `test` if AstroPy is not available."""
     return None if (u is None) else test
 
+def test_angle_units():
+    a = Angle(degrees=123.0)
+    assert a.degrees == 123.0
+    assert a._degrees == 123.0
+
+    a = Angle(hours=12.0)
+    assert a.hours == 12.0
+    assert a._hours == 12.0
+
 def test_degree_rounding():
     tenth = 0.1 / 60.0 / 60.0  # of an arcsecond
 
@@ -47,7 +56,7 @@ def test_angle_scalar_strs():
 
 def test_angle_array_strs():
     h = Angle(hours=array([0.5, nan, -13]))
-    d = Angle(degrees=h._degrees)
+    d = Angle(degrees=h.degrees)
 
     assert str(h) == '3 values from 00h 30m 00.00s to -13h 00m 00.00s'
     assert str(d) == '''3 values from 07deg 30' 00.0" to -195deg 00' 00.0"'''

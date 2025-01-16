@@ -282,8 +282,6 @@ Here are all three effects applied to Barnard’s star:
 
 .. testcode::
 
-    from skyfield.api import T0
-
     barnard = Star(ra_hours=(17, 57, 48.49803),
                    dec_degrees=(4, 41, 36.2072),
                    ra_mas_per_year=-798.71,

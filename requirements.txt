@@ -1,6 +1,7 @@
 astropy==3.2.2
 beautifulsoup4==4.6.0
 html5lib==1.0.1
+jinja2==3.0.3
 lxml==4.9.1
 mock==2.0.0
 numpy==1.15.4

@@ -33,7 +33,7 @@ def test_separation_from_on_two_array_values():
     p0 = ICRF(([1,1], [0,0], [0,0]))
     p1 = ICRF(([0,-1], [1,0], [0,0]))
     sep = p0.separation_from(p1)
-    d = sep._degrees
+    d = sep.degrees
     assert len(d) == 2
     assert d[0] == 90.0
     assert d[1] == 180.0
@@ -42,7 +42,7 @@ def test_separation_from_on_an_array_and_a_scalar():
     p0 = ICRF(([1,0], [0,1], [0,0]))
     p1 = ICRF((0, 0, 1))
     sep = p0.separation_from(p1)
-    d = sep._degrees
+    d = sep.degrees
     assert len(d) == 2
     assert d[0] == 90.0
     assert d[1] == 90.0
@@ -50,7 +50,7 @@ def test_separation_from_on_an_array_and_a_scalar():
     # And the other way around:
 
     sep = p1.separation_from(p0)
-    d = sep._degrees
+    d = sep.degrees
     assert len(d) == 2
     assert d[0] == 90.0
     assert d[1] == 90.0
@@ -243,8 +243,8 @@ def test_cirs_era():
     era = 360.0 * earth_rotation_angle(st.ut1)
 
     tol = (1e-8 / 3600.0)  # 10 nano arc-second precision
-    assert np.allclose(tio_ra._degrees, era, rtol=0.0, atol=tol)
-    assert np.allclose(tio_dec._degrees, 0.0, rtol=0.0, atol=tol)
+    assert np.allclose(tio_ra.degrees, era, rtol=0.0, atol=tol)
+    assert np.allclose(tio_dec.degrees, 0.0, rtol=0.0, atol=tol)
 
 
 # Check a line of points along the terrestrial prime meridian all have the same
@@ -266,8 +266,8 @@ def test_cirs_meridian():
     era = 360.0 * earth_rotation_angle(st.ut1)
 
     tol = (1e-7 / 3600.0)  # 100 nano arc-second precision
-    assert np.allclose(md_ra._degrees, era, rtol=0.0, atol=tol)
-    assert np.allclose(md_dec._degrees, 90 - alt, rtol=0.0, atol=tol)
+    assert np.allclose(md_ra.degrees, era, rtol=0.0, atol=tol)
+    assert np.allclose(md_dec.degrees, 90 - alt, rtol=0.0, atol=tol)
 
 
 # Check a set of positions and times against results calculated externally
@@ -327,8 +327,8 @@ def test_cirs_sofa():
         with low_precision_ERA():
             ra_cirs, dec_cirs, _ = earth.at(st).observe(ss).apparent().cirs_radec(st)
 
-        assert np.allclose(ra_cirs._degrees, ra_sofa, rtol=0.0, atol=tol)
-        assert np.allclose(dec_cirs._degrees, dec_sofa, rtol=0.0, atol=tol)
+        assert np.allclose(ra_cirs.degrees, ra_sofa, rtol=0.0, atol=tol)
+        assert np.allclose(dec_cirs.degrees, dec_sofa, rtol=0.0, atol=tol)
 
 def test_phase_angle_and_fraction_illuminated():
     ts = api.load.timescale()

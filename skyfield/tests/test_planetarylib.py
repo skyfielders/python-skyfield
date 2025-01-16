@@ -206,7 +206,7 @@ def test_observing_earth_from_location_on_moon():
     ra, dec, distance = astrometric.radec()
     want = 270.2590484, -22.8079717
     arcsecond = 1.0 / 3600.0
-    assert abs(ra._degrees - want[0]) < 0.03 * arcsecond
+    assert abs(ra.degrees - want[0]) < 0.03 * arcsecond
     assert abs(dec.degrees - want[1]) < 0.03 * arcsecond
 
     # See the file `horizons/earth-from-moon-topos` for the HORIZONS

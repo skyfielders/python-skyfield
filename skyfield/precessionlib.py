@@ -54,7 +54,7 @@ def compute_precession(jd_tdb):
     cd = cos(chia)
 
     # Compute elements of precession rotation matrix equivalent to
-    # R3(-chi_a) R1(omega_a) R3(psi_a) R1(-epsilon_0).
+    # R3(chi_a) R1(-omega_a) R3(-psi_a) R1(epsilon_0).
 
     rot3 = array(((cd * cb - sb * sd * cc,
                    cd * sb * ca + sd * cc * cb * ca - sa * sd * sc,

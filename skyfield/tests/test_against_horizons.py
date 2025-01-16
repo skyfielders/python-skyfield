@@ -56,8 +56,8 @@ def test_fk4_frame(ts):
     e = api.load('de421.bsp')
     astrometric = e['earth'].at(ts.utc(1980, 1, 1, 0, 0)).observe(e['moon'])
     dec, ra, d = astrometric.frame_latlon(framelib.equatorial_B1950_frame)
-    print(ra._degrees, dec.degrees)
-    compare(ra._degrees, 82.36186, 0.00006) # TODO: why is this not 0.00001?
+    print(ra.degrees, dec.degrees)
+    compare(ra.degrees, 82.36186, 0.00006) # TODO: why is this not 0.00001?
     compare(dec.degrees, 18.53432, 0.00006)
 
 def test_galactic_frame(ts):
@@ -85,7 +85,7 @@ def test_callisto_astrometric(ts):
     # the test, so:
     a = e['earth'].at(ts.tt(jd=2471184.5007775929)).observe(e['callisto'])
     ra, dec, distance = a.radec()
-    compare(ra._degrees, 217.1839292, 0.001 * arcsecond)
+    compare(ra.degrees, 217.1839292, 0.001 * arcsecond)
     compare(dec.degrees, -13.6892791, 0.001 * arcsecond)
     compare(distance.au, 6.31079291776184, 0.2 * meter)
 
@@ -120,7 +120,7 @@ def test_moon_from_boston_astrometric():
     boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8))
     a = boston.at(t).observe(e['moon'])
     ra, dec, distance = a.radec()
-    compare(ra._degrees, 121.4796470, 0.001 * arcsecond)
+    compare(ra.degrees, 121.4796470, 0.001 * arcsecond)
     compare(dec.degrees, 14.9108450, 0.001 * arcsecond)
     compare(distance.au, 0.00265828588792, 0.05 * meter)
 

@@ -9,6 +9,29 @@ Changelog
 Released versions
 -----------------
 
+v1.50 — Not yet released
+------------------------
+
+* Skyfield no longer tries to protect users by raising an exception if,
+  contrary to the usual custom in astronomy, they ask for ``ra.degrees``
+  or ``dec.hours``.  So users no longer need to add an underscore prefix
+  (``_degrees`` or ``_hours``) to bypass the exception, though both
+  names will keep working to support legacy code.
+
+* The time methods :meth:`~skyfield.timelib.Time.utc_datetime()` and
+  :meth:`~skyfield.timelib.Time.utc_datetime_and_leap_second()` now
+  intercept the ``ValueError`` that Python raises for a negative year or
+  a Julian-only leap day, and replace the generic error message with a
+  more specific one.
+  `#957 <https://github.com/skyfielders/python-skyfield/issues/957>`_
+  `#992 <https://github.com/skyfielders/python-skyfield/issues/992>`_
+
+* If you call ``load.timescale(builtin=False)`` to download an updated
+  copy of the IERS ``finals2000A.all`` Earth orientation data file,
+  Skyfield now fetches the file with HTTPS, since their old FTP server
+  seems to have disappeared.
+  `#1019 <https://github.com/skyfielders/python-skyfield/issues/1019>`_
+
 v1.49 — 2024 June 13
 --------------------
 

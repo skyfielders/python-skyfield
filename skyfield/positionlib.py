@@ -55,21 +55,7 @@ def position_of_radec(ra_hours, dec_degrees, distance_au=_GIGAPARSEC_AU,
 
 def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
                         t=None, center=None, target=None):
-    """DEPRECATED version of ``position_of_radec()``.
-
-    Problems:
-
-    * The ``distance`` parameter specifies no unit, contrary to Skyfield
-      best practices.  I have no idea what I was thinking.
-
-    * The default ``distance`` is far too small, since most objects for
-      which users specify an RA and declination are out on the celestial
-      sphere.  The hope was that users would see the length 1.0 and
-      think, “ah, yes, that’s obviously a fake placeholder value.”  But
-      it’s more likely that users will not even check the distance, or
-      maybe not even realize that a distance is involved.
-
-    """
+    """DEPRECATED version of ``position_of_radec()``."""
     return position_of_radec(ra_hours, dec_degrees, distance, epoch,
                              t, center, target)
 

@@ -376,6 +376,12 @@ def test_utc_datetime_and_leap_second(ts):
     assert dt == datetime(1969, 7, 20, 20, 18, 0, 0, utc)
     assert leap_second == 0
 
+    t = ts.utc(1969, 7, 20, 20, [18, 19])
+    dt, leap_second = t.utc_datetime_and_leap_second()
+    assert list(dt) == [datetime(1969, 7, 20, 20, 18, 0, 0, utc),
+                        datetime(1969, 7, 20, 20, 19, 0, 0, utc)]
+    assert list(leap_second) == [0,0]
+
 def test_utc_datetime_microseconds_round_trip(ts):
     dt = datetime(2020, 5, 10, 11, 50, 9, 727799, tzinfo=utc)
     t = ts.from_datetime(dt)
@@ -389,6 +395,28 @@ def test_utc_datetime_agrees_with_public_utc_tuple(ts):
     t = ts.utc(2021, 1, 1, 23, 59, 59.9999798834251798497)
     assert t.utc[:5] == (2021, 1, 1, 23, 59)
     assert t.utc_strftime("%j") == '001'
+
+def test_utc_datetime_exception_for_negative_year():
+    ts = api.load.timescale()
+    ts.julian_calendar_cutoff = GREGORIAN_START
+    t = ts.utc(-1, 1, 1)
+    with assert_raises(ValueError, 'negative years like the year -1'):
+        t.utc_datetime()
+
+    t = ts.utc([-2, -3, -1], 1, 1)
+    with assert_raises(ValueError, 'negative years like the year -2'):
+        t.utc_datetime()
+
+def test_utc_datetime_exception_for_julian_leap_day():
+    ts = api.load.timescale()
+    ts.julian_calendar_cutoff = GREGORIAN_START
+    t = ts.utc(700, 2, 29)
+    with assert_raises(ValueError, 'Julian leap days like 700 February 29'):
+        t.utc_datetime()
+
+    t = ts.utc(700, 2, [28, 29, 30])
+    with assert_raises(ValueError, 'Julian leap days like 700 February 29'):
+        t.utc_datetime()
 
 def test_iso_of_decimal_that_rounds_up(ts):
     t = ts.utc(1915, 12, 2, 3, 4, 5.6786786)

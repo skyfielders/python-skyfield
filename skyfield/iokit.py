@@ -60,7 +60,7 @@ def _filename_of(url):
     return urlparse(url).path.split('/')[-1]
 
 _IERS = 'https://hpiers.obspm.fr/iers/bul/bulc/'
-_IERS2 = 'ftp://ftp.iers.org/products/eop/rapid/standard/'
+_IERS2 = 'https://datacenter.iers.org/products/eop/rapid/standard/'
 _JPL = 'https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/'
 _NAIF_KERNELS = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/'
 _NAIF = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/'

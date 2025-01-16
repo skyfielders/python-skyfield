@@ -95,7 +95,7 @@ class GeographicPosition(ITRSPosition):
 
         """
         sprime = -47.0e-6 * (t.whole - T0 + t.tdb_fraction) / 36525.0
-        return (t.gast + self.longitude._hours + sprime / 54000.0) % 24.0
+        return (t.gast + self.longitude.hours + sprime / 54000.0) % 24.0
 
     def refract(self, altitude_degrees, temperature_C, pressure_mbar):
         """Predict how the atmosphere will refract a position.
