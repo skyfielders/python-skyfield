@@ -134,7 +134,7 @@ you can print to the screen:
 
 .. testcode::
 
-    print(planets.spk.daf.comments())
+    print(planets.spk.comments())
 
 .. testoutput::
 
