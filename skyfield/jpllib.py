@@ -72,6 +72,7 @@ class SpiceKernel(object):
         self.segments = [SPICESegment(self, s) for s in self.spk.segments]
         self.codes = set(s.center for s in self.segments).union(
                          s.target for s in self.segments)
+        self.comments = self.spk.comments  # deprecated pass-through method
 
     def __repr__(self):
         return '<{0} {1!r}>'.format(type(self).__name__, self.path)
@@ -100,24 +101,6 @@ class SpiceKernel(object):
         # unless the metadata also disappears.
         del self.segments[:]
         self.codes.clear()
-
-    def comments(self):
-        """Return the comments string of this kernel.
-
-        The resulting string often contains embedded newlines, and is
-        formatted for a human reader.
-
-        >>> print(planets.comments())
-        ; de421.bsp LOG FILE
-        ;
-        ; Created 2008-02-12/11:33:34.00.
-        ...
-        LEAPSECONDS_FILE    = naif0007.tls
-        SPK_FILE            = de421.bsp
-        ...
-
-        """
-        return self.spk.comments()
 
     def names(self):
         """Return all target names that are valid with this kernel.

@@ -182,7 +182,6 @@ See :doc:`planets`.
 
    SpiceKernel
    SpiceKernel.close
-   SpiceKernel.comments
    SpiceKernel.names
    SpiceKernel.decode
 
