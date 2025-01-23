@@ -28,5 +28,6 @@ GS = 1.32712440017987e+20
 # Time.
 T0 = 2451545.0
 B1950 = 2433282.4235
+D_JC = 36525 # days in a Julian century
 
 C_AUDAY = C * DAY_S / AU_M
