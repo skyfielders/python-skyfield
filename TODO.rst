@@ -7,6 +7,10 @@ are appropriate for sprints and collaboration, and longer-term goals
 that the code base is not quite ready for yet but that we do not want to
 forget.
 
+* Look over bugs listed for the NOVAS library, and see if any of the
+  fixes also need to be made here in Skyfield:
+  https://github.com/Smithsonian/SuperNOVAS?tab=readme-ov-file#fixed-novas-c-31-issues
+
 * While ``is_sunlit()`` is easy to use with a bare Earth satellite
   because it expects to compute the positions of both Earth and Sun, the
   ``phase_angle()`` method instead needs the position to already know
