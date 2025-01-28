@@ -153,6 +153,25 @@ def test_position_from_radec():
     p = api.position_from_radec(6, 0)
     assert length_of(p.position.au - [0, 1, 0]) < 1e-16
 
+def test_ssb():
+    ts = api.load.timescale()
+    t = ts.utc(2025, 1, 28)
+    p = api.SSB.at(t)
+    z = [0,0,0]
+    assert p.xyz.au.tolist() == z
+    assert p.velocity.au_per_d.tolist() == z
+
+    star = Star(ra_hours=12, dec_degrees=345)
+    p.observe(star)
+
+    t = ts.utc(2025, 1, [28,29])
+    p = api.SSB.at(t)
+    z2 = [[0,0], [0,0], [0,0]]
+    assert p.xyz.au.tolist() == z2
+    assert p.velocity.au_per_d.tolist() == z2
+
+    p.observe(star)
+
 def test_velocity_in_ITRF_to_GCRS2():
     # TODO: Get test working with these vectors too, showing it works
     # with a non-zero velocity vector, but in that case the test will

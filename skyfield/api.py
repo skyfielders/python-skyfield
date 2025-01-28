@@ -11,7 +11,7 @@ from .constants import B1950, T0, pi, tau
 from .constellationlib import load_constellation_map, load_constellation_names
 from .iokit import Loader, load_file
 from .planetarylib import PlanetaryConstants
-from .positionlib import position_from_radec, position_of_radec
+from .positionlib import SSB, position_from_radec, position_of_radec
 from .starlib import Star
 from .sgp4lib import EarthSatellite
 from .timelib import (
@@ -27,7 +27,7 @@ S = W = -1.0
 __all__ = [
     'Angle', 'B1950', 'Distance', 'E', 'EarthSatellite',
     'GREGORIAN_START', 'GREGORIAN_START_ENGLAND',
-    'Loader', 'PlanetaryConstants', 'N', 'S', 'Star', 'W',
+    'Loader', 'PlanetaryConstants', 'N', 'S', 'SSB', 'Star', 'W',
     'T0', 'Time', 'Timescale', 'Topos', 'Velocity',
     'datetime', 'iers2010', 'load', 'load_constellation_map',
     'load_constellation_names', 'load_file',

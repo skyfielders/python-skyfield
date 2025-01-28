@@ -82,3 +82,9 @@ Building a position from right ascension and declination
 ========================================================
 
 .. autofunction:: position_of_radec
+
+The position of the Solar System Barycenter
+===========================================
+
+.. autoclass:: SSB
+   :members:

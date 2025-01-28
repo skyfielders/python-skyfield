@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Classes representing different kinds of astronomical position."""
 
-from numpy import array, cos, einsum, full, reshape, nan, nan_to_num
+from numpy import array, cos, einsum, full, reshape, nan, nan_to_num, zeros
 from . import framelib
 from .constants import ANGVEL, AU_M, C, ERAD, DAY_S, RAD2DEG, pi, tau
 from .descriptorlib import reify
@@ -58,6 +58,16 @@ def position_from_radec(ra_hours, dec_degrees, distance=1.0, epoch=None,
     """DEPRECATED version of ``position_of_radec()``."""
     return position_of_radec(ra_hours, dec_degrees, distance, epoch,
                              t, center, target)
+
+class SSB(object):
+    """The Solar System Barycenter."""
+    @staticmethod
+    def at(t):
+        """Return the position of the Solar System Barycenter at time ``t``."""
+        shape = (3,)
+        if t.shape:
+            shape += t.shape
+        return Barycentric(zeros(shape), zeros(shape), t)
 
 class ICRF(object):
     """An |xyz| position and velocity oriented to the ICRF axes.

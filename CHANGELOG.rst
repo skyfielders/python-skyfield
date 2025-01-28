@@ -12,6 +12,10 @@ Released versions
 v1.50 — Not yet released
 ------------------------
 
+* Skyfield now offers a Solar System Barycenter object, so users don’t
+  have to construct the position themselves: ``SSB.at(t)`` returns a
+  position whose coordinates and velocity are both zero in the ICRS.
+
 * Skyfield no longer tries to protect users by raising an exception if,
   contrary to the usual custom in astronomy, they ask for ``ra.degrees``
   or ``dec.hours``.  So users no longer need to add an underscore prefix
