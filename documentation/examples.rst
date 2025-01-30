@@ -549,7 +549,7 @@ as the target moves across the sky:
    Or, if you instead want to know how fast the target is moving
    against the background of stars,
    you can pass Skyfield’s built-in
-   :data:`~skyfield.framelib.true_equator_and_equinox_of_date` reference frame
+   :class:`~skyfield.framelib.true_equator_and_equinox_of_date` reference frame
    to compute rates of moment in right ascension and declination:
 
    .. testcode::

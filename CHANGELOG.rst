@@ -12,6 +12,10 @@ Released versions
 v1.50 — Not yet released
 ------------------------
 
+* A new :class:`~skyfield.framelib.mean_equator_and_equinox_of_date`
+  coordinate frame lets users generate the same coordinates that an
+  almanac might give.
+
 * Skyfield now offers a Solar System Barycenter object, so users don’t
   have to construct the position themselves: ``SSB.at(t)`` returns a
   position whose coordinates and velocity are both zero in the ICRS.

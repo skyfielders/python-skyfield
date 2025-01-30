@@ -1,6 +1,6 @@
 from numpy import cos
 from skyfield import framelib
-from skyfield.api import Topos, load, wgs84
+from skyfield.api import SSB, Star, Topos, load, wgs84
 from skyfield.constants import AU_M, ERAD
 from skyfield.positionlib import Geocentric
 
@@ -85,6 +85,23 @@ def test_frame_without_spin():
     f = framelib.true_equator_and_equinox_of_date
     r, v = g.frame_xyz_and_velocity(f)
     Geocentric.from_time_and_frame_vectors(t, f, r, v)
+
+def test_true_equator_and_equinox_of_date():
+    ts = load.timescale()
+    t = ts.utc(2025, 7, 2.375)
+    alpha_andromeda = Star(
+        ra_hours=0.13976888866666667, dec_degrees=29.09082805,
+        ra_mas_per_year=135.68, dec_mas_per_year=-162.95, parallax_mas=33.6,
+        epoch=ts.J(1991.25),
+    )
+    dec, ra, _ = SSB.at(t).observe(alpha_andromeda).frame_latlon(
+        framelib.mean_equator_and_equinox_of_date
+    )
+    ra.preference = 'hours'
+
+    # Position from page H2 of the 2025 Astronomical Almanac:
+    assert ra.hstr(places=1) == '00h 09m 42.7s'
+    assert dec.dstr() == '+29deg 13\' 52.0"'
 
 def test_tirs_at_least_runs():
     # TODO: find an external source for a TIRS vector to test against.
