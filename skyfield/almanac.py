@@ -434,8 +434,8 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # new one against the USNO.  It suggests that 3 iterations is enough
     # for the Moon, the fastest-moving Solar System object, to match.
     #for i in 0,:
-    for i in 0, 1:
-    #for i in 0, 1, 2:
+    #for i in 0, 1:
+    for i in 0, 1, 2:
     #for i in range(9):
         _fastify(t)
         apparent = observer.at(t).observe(target).apparent()
@@ -459,7 +459,7 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
         t = ts.tt_jd(t.whole, t.tt_fraction + timebump)
 
     #if 1:  # try tweaking
-    if 0:
+    if 1:
         v = observer.vector_functions[-1]
         altitude0, _, distance0, rate0, _, _ = (
             apparent.frame_latlon_and_rates(v))

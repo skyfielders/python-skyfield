@@ -236,11 +236,11 @@ def test(regime, table, e, body, t0, t1, topo, timezone):
 
     ts = t.ts
 
-    i = (alt.degrees - horizon).argmin()
+    i = vs_horizon.argmin()
     print(f'Worst undershot is at index {i}:')
     show_shot()
 
-    i = (alt.degrees - horizon).argmax()
+    i = vs_horizon.argmax()
     print(f'Worst overshot is at index {i}:')
     show_shot()
 
