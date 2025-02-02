@@ -334,7 +334,7 @@ def _rising_hour_angle(latitude, declination, altitude_radians):
 def _transit_ha(latitude, declination, altitude_radians):
     return 0.0
 
-def _q(a, b, c):
+def _q(a, b, c, sign):
     # when a x^2 + b x + c = 0
     from numpy import sqrt
     # print('doing quadratic with:', a, b, c)
@@ -342,7 +342,7 @@ def _q(a, b, c):
     # print('root:', (-b - sqrt(b*b - 4*a*c)) / 2*a)
     # print('root alt:', - 2*c / (b + sqrt(b*b - 4*a*c)))
     # print('root alt:', - 2*c / (b - sqrt(b*b - 4*a*c)))
-    return - 2*c / (b + sqrt(b*b - 4*a*c))
+    return - 2*c / (b + sign * sqrt(b*b - 4*a*c))
 
 def _intersection(a0, a1, v0, v1):
     # Return the time at which a curve reaches a=0, given its position
@@ -351,7 +351,8 @@ def _intersection(a0, a1, v0, v1):
     # (overdetermined, so, ignores v1)
     # print('intersection with:', a0, a1, v0, v1)
     # print('k would be:', 2 * (a1 - a0 - v0))
-    tx = _q(a1 - a0 - v0, v0, a0)
+    sign = 1 - 2 * (a0 > a1)
+    tx = _q(a1 - a0 - v0, v0, a0, sign)
     # print('tx =', tx)
     return tx
 
@@ -365,10 +366,10 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # Build a function h() that returns the angle above or below the
     # horizon we are aiming for, in radians.
     if horizon_degrees is None:
-        tt = getattr(target, 'target', None)
-        if tt == _SUN:
+        target_id = getattr(target, 'target', None)
+        if target_id == _SUN:
             def h(distance): return _sun_horizon_radians
-        elif tt == _MOON:
+        elif target_id == _MOON:
             def h(distance):
                 return _refraction_radians - _moon_radius_m / distance.m
         else:
@@ -471,11 +472,6 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
 
         tdiff = t - previous_t
 
-        # print((altitude0.radians - h(distance0)).shape)
-        # print((altitude1.radians - h(distance1)).shape)
-        # print((rate0.radians.per_day * tdiff).shape)
-        # print((rate1.radians.per_day * tdiff).shape)
-
         t_scaled_offset = _intersection(
             altitude0.radians - h(distance0),
             altitude1.radians - h(distance1),
@@ -487,6 +483,27 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
         # print(t_scaled_offset)
 
         t = previous_t + t_scaled_offset * tdiff
+
+        if target_id == _MOON:
+            i = 229
+            print((altitude0.radians[i] - h(distance0)[i]) / tau * 360 * 3600)
+            print((altitude1.radians[i] - h(distance1)[i]) / tau * 360 * 3600)
+            # print((altitude1.radians[i] - h(distance1)[i]).shape)
+            # print((rate0.radians.per_day * tdiff).shape)
+            # print((rate1.radians.per_day * tdiff).shape)
+
+            print('t_scaled_offset inputs:')
+            print((altitude0.radians - h(distance0))[i])
+            print((altitude1.radians - h(distance1))[i])
+            print((rate0.radians.per_day * tdiff)[i])
+            print((rate1.radians.per_day * tdiff)[i])
+
+            print('t_scaled_offset output:')
+
+            print(f'= {t_scaled_offset[i]}')
+            print(t[i])
+            print(previous_t[i])
+            print(previous_t[i] + tdiff[i])
 
         is_above_horizon =  (
             (desired_ha % pi != 0.0)
