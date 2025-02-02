@@ -13,6 +13,7 @@ from .units import Angle
 
 _SUN = 10
 _MOON = 301
+_MICROSECOND = 1 / 24.0 / 3600.0 / 1e6
 
 # Not only to support historic code but also for future convenience, let
 # folks import the search routine alongside the almanac routines.
@@ -462,7 +463,7 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
         normalize = normalize_plus_or_minus_pi
 
         timebump = ha_adjustment / ha_per_day
-        timebump[timebump == 0.0] = 0.00000000001  # TODO
+        timebump[timebump == 0.0] = _MICROSECOND   # avoid divide-by-zero below
         previous_t = t
         t = ts.tt_jd(t.whole, t.tt_fraction + timebump)
 
