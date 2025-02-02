@@ -180,9 +180,9 @@ def test(regime, table, e, body, t0, t1, topo, timezone):
     #print(usno_rises)
 
     observer = e['Earth'] + topo
-    horizon = -0.8333
 
     if regime == 'old':
+        horizon = -0.8333
         if body.target == name_codes['SUN']:
             f = almanac.sunrise_sunset(e, topo)
         else:
@@ -193,8 +193,9 @@ def test(regime, table, e, body, t0, t1, topo, timezone):
         duration = time() - tt
         t = t[y == 1]
     else:
+        horizon = -0.8333333333333333
         tt = time()
-        t, y = almanac.find_risings(observer, body, t0, t1) #, horizon)
+        t, y = almanac.find_risings(observer, body, t0, t1)
         t = t[y == True]
         duration = time() - tt
     print(f'Compute time: {duration:.3f} seconds')
@@ -206,16 +207,42 @@ def test(regime, table, e, body, t0, t1, topo, timezone):
 
     alt, az, distance = observer.at(t).observe(body).apparent().altaz()
 
-    if body.target == name_codes['MOON']:
-        horizon = (almanac._refraction_radians
-                   - almanac._moon_radius_m / distance.m)
-        horizon = horizon / tau * 360.0
+    if regime == 'new' and body.target == name_codes['MOON']:
+        horizon_array = (almanac._refraction_radians
+                         - almanac._moon_radius_m / distance.m)
+        horizon_array = horizon_array / tau * 360.0
+    else:
+        horizon_array = horizon + 0.0 * t.tt
 
-    min_as = min(alt.degrees - horizon) * 3600.0
-    max_as = max(alt.degrees - horizon) * 3600.0
+    vs_horizon = alt.degrees - horizon_array
+    min_as = min(vs_horizon) * 3600.0
+    max_as = max(vs_horizon) * 3600.0
 
     print(f'Altitude vs horizon: min {min_as:f} arcseconds,',
           f' max {max_as:f} arcseconds')
+
+    def show_shot():
+        h = horizon_array[i]
+        d = t[i].utc_datetime()
+        for offset in -1, 0, 1:
+            d2 = d + dt.timedelta(milliseconds=offset)
+            t2 = ts.from_datetime(d2)
+            alt2, _, _ = observer.at(t2).observe(body).apparent().altaz()
+            print('  {}  {}  {: .6f} arcseconds'.format(
+                t2.utc_strftime('%Y-%m-%d %H:%M:%S.%f'),
+                alt2.dstr(6),
+                (alt2.degrees - h) * 3600.0,
+            ))
+
+    ts = t.ts
+
+    i = (alt.degrees - horizon).argmin()
+    print(f'Worst undershot is at index {i}:')
+    show_shot()
+
+    i = (alt.degrees - horizon).argmax()
+    print(f'Worst overshot is at index {i}:')
+    show_shot()
 
     # Okay, now it's time to turn to the USNO table and see how well we
     # stack up again it.
