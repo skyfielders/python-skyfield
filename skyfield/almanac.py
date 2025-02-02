@@ -415,8 +415,17 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     interpolated_tt = (b * tt[i] + a * tt[i+1]) / (a + b)
     t = ts.tt_jd(interpolated_tt)
 
-    ha_per_day = tau            # angle the celestrial sphere rotates in 1 day
-    #ha_per_day = 6.3003874
+    old_tt = tt[i]
+    old_ha_radians = ha.radians[i]
+    #ha_per_day = tau            # angle the celestrial sphere rotates in 1 day
+
+    def normalize_zero_to_tau(radians):
+        return radians % tau
+
+    def normalize_plus_or_minus_pi(radians):
+        return (radians + pi) % tau - pi
+
+    normalize = normalize_zero_to_tau
 
     # TODO: How many iterations do we need?  And can we cut down on that
     # number if we use velocity intelligently?  For now, we experiment
@@ -424,50 +433,69 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # repository, that checks both the old Skyfiled routines and this
     # new one against the USNO.  It suggests that 3 iterations is enough
     # for the Moon, the fastest-moving Solar System object, to match.
-    for i in 0, 1, 2:
+    #for i in 0,:
+    for i in 0, 1:
+    #for i in 0, 1, 2:
     #for i in range(9):
         _fastify(t)
         apparent = observer.at(t).observe(target).apparent()
         ha, dec, distance = apparent.hadec()
-        #print(h(distance), 'radians')
         desired_ha = f(latitude, dec, h(distance))
         ha_adjustment = desired_ha - ha.radians
         ha_adjustment = (ha_adjustment + pi) % tau - pi
+
+        ha_diff = normalize(ha.radians - old_ha_radians)
+        t_diff = t.tt - old_tt
+        ha_per_day = ha_diff / t_diff
+        #print('    ha_per_day', max(ha_per_day), min(ha_per_day))
+        #ha_per_day = tau
+        old_ha_radians = ha.radians
+        old_tt = t.tt
+
+        normalize = normalize_plus_or_minus_pi
+
         timebump = ha_adjustment / ha_per_day
         previous_t = t
         t = ts.tt_jd(t.whole, t.tt_fraction + timebump)
 
-    v = observer.vector_functions[-1]
-    altitude0, _, distance0, rate0, _, _ = apparent.frame_latlon_and_rates(v)
+    #if 1:  # try tweaking
+    if 0:
+        v = observer.vector_functions[-1]
+        altitude0, _, distance0, rate0, _, _ = (
+            apparent.frame_latlon_and_rates(v))
 
-    _fastify(t)
-    apparent = observer.at(t).observe(target).apparent()
-    altitude1, _, distance1, rate1, _, _ = apparent.frame_latlon_and_rates(v)
+        _fastify(t)
+        apparent = observer.at(t).observe(target).apparent()
+        altitude1, _, distance1, rate1, _, _ = (
+            apparent.frame_latlon_and_rates(v))
 
-    tdiff = t - previous_t
+        tdiff = t - previous_t
 
-    # print((altitude0.radians - h(distance0)).shape)
-    # print((altitude1.radians - h(distance1)).shape)
-    # print((rate0.radians.per_day * tdiff).shape)
-    # print((rate1.radians.per_day * tdiff).shape)
+        # print((altitude0.radians - h(distance0)).shape)
+        # print((altitude1.radians - h(distance1)).shape)
+        # print((rate0.radians.per_day * tdiff).shape)
+        # print((rate1.radians.per_day * tdiff).shape)
 
-    t_scaled_offset = _intersection(
-        altitude0.radians - h(distance0),
-        altitude1.radians - h(distance1),
-        rate0.radians.per_day * tdiff,
-        rate1.radians.per_day * tdiff,
-    )
-    t_scaled_offset[np.isnan(t_scaled_offset)] = 1.0
-    t_scaled_offset = np.clip(t_scaled_offset, 0.0, 1.0)
-    # print(t_scaled_offset)
+        t_scaled_offset = _intersection(
+            altitude0.radians - h(distance0),
+            altitude1.radians - h(distance1),
+            rate0.radians.per_day * tdiff,
+            rate1.radians.per_day * tdiff,
+        )
+        t_scaled_offset[np.isnan(t_scaled_offset)] = 1.0
+        t_scaled_offset = np.clip(t_scaled_offset, 0.0, 1.0)
+        # print(t_scaled_offset)
 
-    t = previous_t + t_scaled_offset * tdiff
+        t = previous_t + t_scaled_offset * tdiff
 
-    is_above_horizon =  (
-        (desired_ha % pi != 0.0)
-        |
-        ((t_scaled_offset > 0.0) & (t_scaled_offset < 1.0))
-    )
+        is_above_horizon =  (
+            (desired_ha % pi != 0.0)
+            |
+            ((t_scaled_offset > 0.0) & (t_scaled_offset < 1.0))
+        )
+    else:
+        is_above_horizon = (desired_ha % pi != 0.0)
+
     return t, is_above_horizon
 
 def find_risings(observer, target, start_time, end_time, horizon_degrees=None):
