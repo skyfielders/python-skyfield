@@ -335,14 +335,18 @@ def _transit_ha(latitude, declination, altitude_radians):
     return 0.0
 
 def _q(a, b, c, sign):
-    # when a x^2 + b x + c = 0
     from numpy import sqrt
     # print('doing quadratic with:', a, b, c)
     # print('root:', (-b + sqrt(b*b - 4*a*c)) / 2*a)
     # print('root:', (-b - sqrt(b*b - 4*a*c)) / 2*a)
     # print('root alt:', - 2*c / (b + sqrt(b*b - 4*a*c)))
     # print('root alt:', - 2*c / (b - sqrt(b*b - 4*a*c)))
-    return - 2*c / (b + sign * sqrt(b*b - 4*a*c))
+
+    # Avoid 'RuntimeWarning: invalid value encountered in sqrt' when
+    # zero comes out as something like -2.5139101035975277e-30 instead.
+    discriminant = np.maximum(b*b - 4*a*c, 0.0)
+
+    return - 2*c / (b + sign * sqrt(discriminant))
 
 def _intersection(a0, a1, v0, v1):
     # Return the time at which a curve reaches a=0, given its position
@@ -353,7 +357,6 @@ def _intersection(a0, a1, v0, v1):
     # print('k would be:', 2 * (a1 - a0 - v0))
     sign = 1 - 2 * (a0 > a1)
     tx = _q(a1 - a0 - v0, v0, a0, sign)
-    # print('tx =', tx)
     return tx
 
 # Per https://aa.usno.navy.mil/faq/RST_defs we estimate 34 arcminutes of
@@ -407,6 +410,7 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # runs of several times `t` that all precede the same rising, let's
     # throw the first few out and keep only the last one.
     i, = np.nonzero(np.diff(difference) > 0.0)
+    old_t = t[i]
 
     # When might each rising have actually taken place?  Let's
     # interpolate between the two times that bracket each rising.
@@ -416,7 +420,6 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     interpolated_tt = (b * tt[i] + a * tt[i+1]) / (a + b)
     t = ts.tt_jd(interpolated_tt)
 
-    old_tt = tt[i]
     old_ha_radians = ha.radians[i]
     #ha_per_day = tau            # angle the celestrial sphere rotates in 1 day
 
@@ -446,16 +449,20 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
         ha_adjustment = (ha_adjustment + pi) % tau - pi
 
         ha_diff = normalize(ha.radians - old_ha_radians)
-        t_diff = t.tt - old_tt
+        t_diff = t - old_t
+        # print()
+        # print(i)
+        # print(t_diff)
         ha_per_day = ha_diff / t_diff
         #print('    ha_per_day', max(ha_per_day), min(ha_per_day))
         #ha_per_day = tau
         old_ha_radians = ha.radians
-        old_tt = t.tt
+        old_t = t
 
         normalize = normalize_plus_or_minus_pi
 
         timebump = ha_adjustment / ha_per_day
+        timebump[timebump == 0.0] = 0.00000000001  # TODO
         previous_t = t
         t = ts.tt_jd(t.whole, t.tt_fraction + timebump)
 

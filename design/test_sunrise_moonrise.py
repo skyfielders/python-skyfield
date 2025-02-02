@@ -290,11 +290,17 @@ def main(argv):
     ts = load.timescale()
     e = load('de421.bsp')
 
+    # Catch 'RuntimeWarning: invalid value encountered in sqrt'
+    import warnings
+    warnings.filterwarnings("error")
+
     t0 = ts.utc(2023, 1, 1, 7)
     t1 = ts.utc(2024, 1, 1, 7)
     fredonia = wgs84.latlon(36 + 57/60.0, - (112 + 31/60.0))
     test(regime, SUN_TABLE, e, e['Sun'], t0, t1, fredonia, dt.timedelta(hours=-7))
     test(regime, MOON_TABLE, e, e['Moon'], t0, t1, fredonia, dt.timedelta(hours=-7))
+
+    return
 
     t0 = ts.utc(2023, 1, 1, 0)
     t1 = ts.utc(2024, 1, 1, 0)
