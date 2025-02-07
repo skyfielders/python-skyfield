@@ -4,13 +4,14 @@ import os
 from collections import defaultdict
 
 from jplephem.exceptions import OutOfRangeError
-from jplephem.spk import SPK
+from jplephem.spk import SPK, BaseSegment
 from jplephem.names import target_name_pairs
 
 from .constants import AU_KM, DAY_S
 from .errors import EphemerisRangeError
 from .timelib import compute_calendar_date
 from .vectorlib import VectorFunction, VectorSum, _jpl_code_name_dict
+from .jpl_mdasegment import MDASegment
 
 _jpl_name_code_dict = dict(
     (name, target) for (target, name) in target_name_pairs
@@ -69,6 +70,19 @@ class SpiceKernel(object):
         self.path = path
         self.filename = os.path.basename(path)
         self.spk = SPK.open(path)
+
+        # workaround until jplephem.spk adopts MDASegment
+        # convert (useless) BaseSegments into MDASegments
+        adjustpairs = False
+        for idx, seg in enumerate(self.spk.segments):
+            if seg.data_type in [1, 21] and isinstance(seg, BaseSegment):
+                adjustpairs = True
+                descriptor = [seg.start_second, seg.end_second, seg.target, seg.center,
+                                seg.frame, seg.data_type, seg.start_i, seg.end_i]
+                self.spk.segments[idx] = MDASegment(seg.daf, seg.source, descriptor)
+        if adjustpairs:
+            self.spk.pairs = dict(((s.center, s.target), s) for s in self.spk.segments)
+
         self.segments = [SPICESegment(self, s) for s in self.spk.segments]
         self.codes = set(s.center for s in self.segments).union(
                          s.target for s in self.segments)
@@ -177,6 +191,9 @@ class SPICESegment(VectorFunction):
             return object.__new__(ChebyshevPosition)
         if spk_segment.data_type == 3:
             return object.__new__(ChebyshevPositionVelocity)
+        if spk_segment.data_type in [1, 21]:
+            return object.__new__(MDAPosition)
+
         raise ValueError('SPK data type {0} not yet supported'
                          .format(spk_segment.data_type))
 
@@ -218,6 +235,26 @@ class ChebyshevPositionVelocity(SPICESegment):
     def _at(self, t):
         pv = self.spk_segment.compute(t.whole, t.tdb_fraction)
         return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM, None, None
+
+
+class MDAPosition(SPICESegment):
+    def _at(self, t):
+        segment = self.spk_segment
+        try:
+            position, velocity = segment.compute_and_differentiate(
+                t.whole, t.tdb_fraction)
+        except OutOfRangeError as e:
+            start_time, end_time = self.time_range(t.ts)
+            s = '%04d-%02d-%02d' % start_time.tdb_calendar()[:3]
+            t = '%04d-%02d-%02d' % end_time.tdb_calendar()[:3]
+            text = 'ephemeris segment only covers dates %s through %s' % (s, t)
+            mask = e.out_of_range_times
+            segment = self.spk_segment
+            e = EphemerisRangeError(text, start_time, end_time, mask, segment)
+            e.__cause__ = None  # avoid exception chaining in Python 3
+            raise e
+
+        return position / AU_KM, velocity / AU_KM, None, None
 
 
 def _center(code, segment_dict):
