@@ -1,0 +1,21 @@
+
+digraph Time {
+rankdir=LR
+M -> precession_matrix
+M -> nutation_matrix
+_nutation_angles_radians -> "iau2000a_radians()"
+_mean_obliquity_radians -> "mean_obliquity()"
+nutation_matrix -> _nutation_angles_radians
+nutation_matrix -> _mean_obliquity_radians
+nutation_matrix -> "build_nutation_matrix()"
+precession_matrix -> "compute_precession()"
+
+"o.at(t)" -> "itrs.rotation_at(t)"
+"itrs.rotation_at(t)" -> gast
+"itrs.rotation_at(t)" -> M
+
+gast -> _nutation_angles_radians
+gast -> "equation_of_the_equinoxes()"
+gast -> _mean_obliquity_radians
+gast -> gmst
+}
