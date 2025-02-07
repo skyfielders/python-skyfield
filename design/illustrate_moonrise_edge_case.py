@@ -7,6 +7,10 @@ from skyfield import VERSION, almanac, api, functions
 from skyfield.api import load, Topos, wgs84, N, S, E, W
 from skyfield.nutationlib import iau2000b
 
+# Avoid 'This probably means that Tcl wasn't installed properly' error.
+import matplotlib
+matplotlib.use('Agg')
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -161,7 +165,7 @@ def make_plot(target, horizon_degrees=None):
         # move across the sphere at a uniform rate!  So even if I answered
         # the above question, I wouldn't know the corresponding time.
 
-    if target is moon:
+    if 0:  #target is moon:
         # Assume altitude has constant second derivative.
 
         ty = traced_times[-1][0]
@@ -303,7 +307,7 @@ def _intersection(a0, a1, v0, v1):
     print('tx =', tx)
     return tx
 
-print('i:', _intersection(-1, 1, 2-.0001, 2+.0001))
+#print('i:', _intersection(-1, 1, 2-.0001, 2+.0001))
 
 def quadratic_attempt():
     # Can we use velocities to compute a curve?
@@ -317,10 +321,10 @@ def quadratic_attempt():
 
     alt0,_,_, rate0,_,_ = a0.frame_latlon_and_rates(latlon)
     alt1,_,_, rate1,_,_ = a1.frame_latlon_and_rates(latlon)
-    print(f'{alt0.radians - target_alt =}')
-    print(f'{alt1.radians - target_alt =}')
-    print(f'{rate0.radians.per_day =}')
-    print(f'{rate1.radians.per_day =}')
+    print(f'{alt0.radians - target_alt }=')
+    print(f'{alt1.radians - target_alt }=')
+    print(f'{rate0.radians.per_day }=')
+    print(f'{rate1.radians.per_day }=')
 
     print('projected velocity:', (alt1.radians - alt0.radians) /
           (t1 - t0))
@@ -349,7 +353,7 @@ def quadratic_attempt():
     print('Alt degrees at t1:', alt1.degrees - target_alt_degrees)
     print('Alt degrees at end:', (alt.radians - target_alt) / tau * 360.0)
 
-quadratic_attempt()
+#quadratic_attempt()
 
 # make_plot(stars[2], horizon).savefig('tmp1.png')
 # make_plot(stars[1], horizon).savefig('tmp2.png')

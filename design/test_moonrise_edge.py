@@ -86,7 +86,10 @@ t = ts.linspace(t0, t1, 3600)
 a = observer.at(t).observe(moon).apparent()
 alt, az, distance = a.altaz()
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
 fig, [ax, ax2] = plt.subplots(2)
 #ax.plot(t.tt - t0.tt, alt.degrees, label='Altitude') #, linestyle='--')
 ax.plot(az.degrees, alt.degrees, label='Altitude') #, linestyle='--')

@@ -162,7 +162,7 @@ Day Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set  Rise  Set 
 Add one hour for daylight time, if and when in use.
 """
 
-def test(regime, table, e, body, t0, t1, topo, timezone):
+def test(regime, table, e, body, t0, t1, topo, timezone, verbose):
     usno_rises = []
 
     for line in table.splitlines():
@@ -215,6 +215,15 @@ def test(regime, table, e, body, t0, t1, topo, timezone):
         horizon_array = horizon + 0.0 * t.tt
 
     vs_horizon = alt.degrees - horizon_array
+
+    # if verbose:
+    #     for t_i, alt_str, vs_i in zip(t, alt.dstr(6), vs_horizon):
+    #         print('  {}  {}  {: .6f} arcseconds'.format(
+    #             t_i.utc_strftime('%Y-%m-%d %H:%M:%S.%f'),
+    #             alt_str,
+    #             vs_i * 3600.0,
+    #         ))
+
     min_as = min(vs_horizon) * 3600.0
     max_as = max(vs_horizon) * 3600.0
 
@@ -232,6 +241,19 @@ def test(regime, table, e, body, t0, t1, topo, timezone):
                 t2.utc_strftime('%Y-%m-%d %H:%M:%S.%f'),
                 alt2.dstr(6),
                 (alt2.degrees - h) * 3600.0,
+            ))
+        if verbose:
+            def f(t2):
+                alt2, _, _ = observer.at(t2).observe(body).apparent().altaz()
+                arcseconds = (alt2.degrees - h) * 3600.0
+                return arcseconds > 0.0
+            hour = 1.0 / 24.0
+            #µsec = hour / 3600.00 / 1e6
+            f.step_days = hour / 4.0
+            t3, y3 = almanac.find_discrete(t[i] - hour, t[i] + hour, f)#, µsec)
+            print('  {}  {}  <-- true zero crossing'.format(
+                t3[0].utc_strftime('%Y-%m-%d %H:%M:%S.%f'),
+                y3,
             ))
 
     ts = t.ts
@@ -284,29 +306,33 @@ def main(argv):
     parser = argparse.ArgumentParser(description='test risings against USNO')
     parser.add_argument('regime', choices=('old', 'new'),
                         help='whether to use old or new rising finder')
+    parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args(argv)
     regime = args.regime
+    verbose = args.verbose
 
     ts = load.timescale()
     e = load('de421.bsp')
 
-    # Catch 'RuntimeWarning: invalid value encountered in sqrt'
+    # On 'RuntimeWarning: invalid value encountered in sqrt', stop with
+    # a traceback instead of just printing a warning and moving on.
     import warnings
     warnings.filterwarnings("error")
 
     t0 = ts.utc(2023, 1, 1, 7)
     t1 = ts.utc(2024, 1, 1, 7)
     fredonia = wgs84.latlon(36 + 57/60.0, - (112 + 31/60.0))
-    test(regime, SUN_TABLE, e, e['Sun'], t0, t1, fredonia, dt.timedelta(hours=-7))
-    test(regime, MOON_TABLE, e, e['Moon'], t0, t1, fredonia, dt.timedelta(hours=-7))
-
-    return
+    timezone = dt.timedelta(hours=-7)
+    test(regime, SUN_TABLE, e, e['Sun'], t0, t1, fredonia, timezone, verbose)
+    test(regime, MOON_TABLE, e, e['Moon'], t0, t1, fredonia, timezone, verbose)
 
     t0 = ts.utc(2023, 1, 1, 0)
     t1 = ts.utc(2024, 1, 1, 0)
     timezone = dt.timedelta(hours=0)
     lat70 = wgs84.latlon(70, 0)
-    test(regime, MOON_TABLE_2, e, e['Moon'], t0, t1, lat70, timezone)
+    test(regime, MOON_TABLE_2, e, e['Moon'], t0, t1, lat70, timezone, verbose)
+
+    e.close()
 
 if __name__ == '__main__':
     main(sys.argv[1:])

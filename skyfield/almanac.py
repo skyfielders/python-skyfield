@@ -412,6 +412,7 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # throw the first few out and keep only the last one.
     i, = np.nonzero(np.diff(difference) > 0.0)
     old_t = t[i]
+    orig_t = old_t
 
     # When might each rising have actually taken place?  Let's
     # interpolate between the two times that bracket each rising.
@@ -441,7 +442,7 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     #for i in 0,:
     #for i in 0, 1:
     for i in 0, 1, 2:
-    #for i in range(9):
+    #for i in 0, 1, 2, 3:
         _fastify(t)
         apparent = observer.at(t).observe(target).apparent()
         ha, dec, distance = apparent.hadec()
@@ -473,8 +474,20 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
         altitude0, _, distance0, rate0, _, _ = (
             apparent.frame_latlon_and_rates(v))
 
-        _fastify(t)
+        # _fastify(t)
+        t.M = previous_t.M
+        t._nutation_angles_radians = previous_t._nutation_angles_radians
+        # from time import time
+        # t0 = time()
         apparent = observer.at(t).observe(target).apparent()
+        # print(time() - t0)
+
+        # from .functions import angle_between, A, mxv
+        # print(angle_between(
+        #     mxv(old_t.M, A[1,1,1]),
+        #     mxv(t.M, A[1,1,1]),
+        # ) / tau * 360.0 * 3600.0)
+
         altitude1, _, distance1, rate1, _, _ = (
             apparent.frame_latlon_and_rates(v))
 
@@ -486,38 +499,45 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
             rate0.radians.per_day * tdiff,
             rate1.radians.per_day * tdiff,
         )
-        t_scaled_offset[np.isnan(t_scaled_offset)] = 1.0
+        #print(t_scaled_offset * tdiff)
+        #t_scaled_offset[np.isnan(t_scaled_offset)] = 1.0
         t_scaled_offset = np.clip(t_scaled_offset, 0.0, 1.0)
         # print(t_scaled_offset)
 
+        old_t = t
         t = previous_t + t_scaled_offset * tdiff
 
-        if target_id == _MOON:
-            i = 229
-            print((altitude0.radians[i] - h(distance0)[i]) / tau * 360 * 3600)
-            print((altitude1.radians[i] - h(distance1)[i]) / tau * 360 * 3600)
-            # print((altitude1.radians[i] - h(distance1)[i]).shape)
-            # print((rate0.radians.per_day * tdiff).shape)
-            # print((rate1.radians.per_day * tdiff).shape)
+        # if target_id == _MOON:
+        #     i = 229
+        #     print((altitude0.radians[i] - h(distance0)[i]) / tau * 360 * 3600)
+        #     print((altitude1.radians[i] - h(distance1)[i]) / tau * 360 * 3600)
+        #     # print((altitude1.radians[i] - h(distance1)[i]).shape)
+        #     # print((rate0.radians.per_day * tdiff).shape)
+        #     # print((rate1.radians.per_day * tdiff).shape)
 
-            print('t_scaled_offset inputs:')
-            print((altitude0.radians - h(distance0))[i])
-            print((altitude1.radians - h(distance1))[i])
-            print((rate0.radians.per_day * tdiff)[i])
-            print((rate1.radians.per_day * tdiff)[i])
+        #     print('t_scaled_offset inputs:')
+        #     print((altitude0.radians - h(distance0))[i])
+        #     print((altitude1.radians - h(distance1))[i])
+        #     print((rate0.radians.per_day * tdiff)[i])
+        #     print((rate1.radians.per_day * tdiff)[i])
 
-            print('t_scaled_offset output:')
+        #     print('t_scaled_offset output:')
 
-            print(f'= {t_scaled_offset[i]}')
-            print(t[i])
-            print(previous_t[i])
-            print(previous_t[i] + tdiff[i])
+        #     print(f'= {t_scaled_offset[i]}')
+        #     print(t[i])
+        #     print(previous_t[i])
+        #     print(previous_t[i] + tdiff[i])
 
         is_above_horizon =  (
             (desired_ha % pi != 0.0)
             |
             ((t_scaled_offset > 0.0) & (t_scaled_offset < 1.0))
         )
+
+        # for i in range(10):
+        #     print(i, old_t[i].utc_strftime(), t[i].utc_strftime(),
+        #           is_above_horizon[i])
+
     else:
         is_above_horizon = (desired_ha % pi != 0.0)
 
