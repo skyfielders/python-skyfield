@@ -1,7 +1,7 @@
 """Formulae for specific earth behaviors and effects."""
 
 from numpy import (abs, arcsin, arccos, arctan2, array, clip, cos,
-                   minimum, pi, sin, sqrt, tan, where, zeros_like)
+                   minimum, pi, sin, sqrt, tan, where, zeros_like, dot)
 
 from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
                         IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0, tau)
@@ -91,7 +91,7 @@ def compute_limb_angle(position_au, observer_au):
 
     # Compute zenith distance of observed object.
 
-    coszd = dots(position_au, observer_au) / (disobj * disobs)
+    coszd = dot(observer_au, position_au) / (disobj * disobs)
     coszd = clip(coszd, -1.0, 1.0)
     zdobj = arccos(coszd)
 
