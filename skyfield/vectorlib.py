@@ -5,7 +5,7 @@ from numpy import max
 from .constants import C_AUDAY
 from .descriptorlib import reify
 from .errors import DeprecationError
-from .functions import length_of
+from .functions import length_of, _reconcile
 from .positionlib import build_position
 from .timelib import Time
 
@@ -215,8 +215,10 @@ class VectorSum(VectorFunction):
             p2, v2, _, message = vf._at(t)
             if vf.center == 399:
                 gcrs_position = -p
-            p += p2
-            v += v2
+            p, p2 = _reconcile(p, p2)
+            p = p + p2
+            v, v2 = _reconcile(v, v2)
+            v = v + v2
         if vfs[0].center == 0 and vf.center == 399:
             gcrs_position = p2
         return p, v, gcrs_position, message
@@ -241,6 +243,7 @@ def _correct_for_light_travel_time(observer, target):
 
     tposition, tvelocity, gcrs_position, message = target._at(t)
 
+    tposition, cposition = _reconcile(tposition, cposition)
     distance = length_of(tposition - cposition)
     light_time0 = 0.0
     for i in range(10):
@@ -259,6 +262,7 @@ def _correct_for_light_travel_time(observer, target):
         light_time0 = light_time
     else:
         raise ValueError('light-travel time failed to converge')
+    tvelocity, cvelocity = _reconcile(tvelocity, cvelocity)
     return tposition - cposition, tvelocity - cvelocity, t, light_time
 
 def _jpl_name(target):
