@@ -47,7 +47,7 @@ import matplotlib.pyplot as plt
 
 TARGET = 'moon'
 YEAR_MONTH_DAY = 2023, 8, 16
-ZOOM_ARCSECONDS = 1e1
+ZOOM_ARCSECONDS = None
 
 # You will get a diagram in return.
 

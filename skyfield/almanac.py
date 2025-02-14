@@ -4,7 +4,7 @@
 from __future__ import division
 
 import numpy as np
-from numpy import cos, sin, zeros_like
+from numpy import cos, sin, sqrt, zeros_like
 from .constants import pi, tau
 from .framelib import ecliptic_frame
 from .searchlib import find_discrete
@@ -329,36 +329,21 @@ def _setting_hour_angle(latitude, declination, altitude_radians):
     return ha
 
 def _rising_hour_angle(latitude, declination, altitude_radians):
-    #print('*********', altitude_radians)
     return - _setting_hour_angle(latitude, declination, altitude_radians)
 
 def _transit_ha(latitude, declination, altitude_radians):
     return 0.0
 
 def _q(a, b, c, sign):
-    from numpy import sqrt
-    # print('doing quadratic with:', a, b, c)
-    # print('root:', (-b + sqrt(b*b - 4*a*c)) / 2*a)
-    # print('root:', (-b - sqrt(b*b - 4*a*c)) / 2*a)
-    # print('root alt:', - 2*c / (b + sqrt(b*b - 4*a*c)))
-    # print('root alt:', - 2*c / (b - sqrt(b*b - 4*a*c)))
-
-    # Avoid 'RuntimeWarning: invalid value encountered in sqrt' when
-    # zero comes out as something like -2.5139101035975277e-30 instead.
-    discriminant = np.maximum(b*b - 4*a*c, 0.0)
-
+    discriminant = np.maximum(b*b - 4*a*c, 0.0)  # avoid tiny negative results
     return - 2*c / (b + sign * sqrt(discriminant))
 
-def _intersection(a0, a1, v0, v1):
-    # Return the time at which a curve reaches a=0, given its position
-    # and velocity a0, v0 at time 0.0 and a1, v1 at time 1.0.
-    #
-    # (overdetermined, so, ignores v1)
-    # print('intersection with:', a0, a1, v0, v1)
-    # print('k would be:', 2 * (a1 - a0 - v0))
-    sign = 1 - 2 * (a0 > a1)
-    tx = _q(a1 - a0 - v0, v0, a0, sign)
-    return tx
+def _intersection(y0, y1, v0, v1):
+    # Return x at which a curve reaches y=0, given its position and
+    # velocity y0,v0 at x=0 and y1,v1 at x=1.  For details, see
+    # `design/intersect_function.py` in the Skyfield repository.
+    sign = 1 - 2 * (y0 > y1)
+    return _q(y1 - y0 - v0, v0, y0, sign)
 
 # Per https://aa.usno.navy.mil/faq/RST_defs we estimate 34 arcminutes of
 # atmospheric refraction and 16 arcminutes for the radius of the Sun.
@@ -421,8 +406,10 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # runs of several times `t` that all precede the same rising, let's
     # throw the first few out and keep only the last one.
     i, = np.nonzero(np.diff(difference) > 0.0)
+
+    # Trim a few arrays down to just the matching elements.
+    old_ha_radians = ha.radians[i]
     old_t = t[i]
-    orig_t = old_t
 
     # When might each rising have actually taken place?  Let's
     # interpolate between the two times that bracket each rising.
@@ -432,9 +419,6 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     interpolated_tt = (b * tt[i] + a * tt[i+1]) / (a + b)
     t = ts.tt_jd(interpolated_tt)
 
-    old_ha_radians = ha.radians[i]
-    #ha_per_day = tau            # angle the celestrial sphere rotates in 1 day
-
     def normalize_zero_to_tau(radians):
         return radians % tau
 
@@ -443,115 +427,85 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
 
     normalize = normalize_zero_to_tau
 
-    # TODO: How many iterations do we need?  And can we cut down on that
-    # number if we use velocity intelligently?  For now, we experiment
-    # using the ./design/test_sunrise_moonrise.py script in the
-    # repository, that checks both the old Skyfiled routines and this
-    # new one against the USNO.  It suggests that 3 iterations is enough
-    # for the Moon, the fastest-moving Solar System object, to match.
-    #for i in 0,:
-    #for i in 0, 1:
+    # How did we decide on this many iterations?  We played with the
+    # script ./design/test_sunrise_moonrise.py in the repository.
     for i in 0, 1, 2:
-    #for i in 0, 1, 2, 3:
         _fastify(t)
+
+        # Expensive: generate true ha/dec at `t`.
         apparent = observer.at(t).observe(target).apparent()
         ha, dec, distance = apparent.hadec()
+
+        # Estimate where the horizon-crossing is.
         desired_ha = f(latitude, dec, h(distance))
         ha_adjustment = desired_ha - ha.radians
         ha_adjustment = (ha_adjustment + pi) % tau - pi
 
+        # Figure out how fast the target's HA is changing.
         ha_diff = normalize(ha.radians - old_ha_radians)
         t_diff = t - old_t
-        # print()
-        # print(i)
-        # print(t_diff)
         ha_per_day = ha_diff / t_diff
-        #print('    ha_per_day', max(ha_per_day), min(ha_per_day))
-        #ha_per_day = tau
+
+        # Remember this iteration's HA and `t` for the next iteration.
         old_ha_radians = ha.radians
         old_t = t
 
-        normalize = normalize_plus_or_minus_pi
-
+        # The big moment!  Carefully adjust `t` towards intersection.
         timebump = ha_adjustment / ha_per_day
-        timebump[timebump == 0.0] = _MICROSECOND   # avoid divide-by-zero below
+        timebump[timebump == 0.0] = _MICROSECOND   # avoid divide-by-zero
         previous_t = t
         t = ts.tt_jd(t.whole, t.tt_fraction + timebump)
 
-    #if 1:  # try tweaking
-    if 1:
-        v = observer.vector_functions[-1]
-        altitude0, _, distance0, rate0, _, _ = (
-            apparent.frame_latlon_and_rates(v))
+        # Different `normalize` for all but the first iteration.
+        normalize = normalize_plus_or_minus_pi
 
-        # _fastify(t)
-        t.M = previous_t.M
-        t._nutation_angles_radians = previous_t._nutation_angles_radians
-        # from time import time
-        # t0 = time()
-        apparent = observer.at(t).observe(target).apparent()
-        # print(time() - t0)
+    if f is _transit_ha:
+        return t
 
-        # from .functions import angle_between, A, mxv
-        # print(angle_between(
-        #     mxv(old_t.M, A[1,1,1]),
-        #     mxv(t.M, A[1,1,1]),
-        # ) / tau * 360.0 * 3600.0)
+    # In almost all cases, we are now happy.  But for rising and setting
+    # calculations at high latitudes where the target barely scrapes the
+    # horizon, we might be stuck between two solutions, and need to
+    # interpolate between them.
 
-        altitude1, _, distance1, rate1, _, _ = (
-            apparent.frame_latlon_and_rates(v))
+    # Snag the observer's GeographicPosition and learn the target's
+    # altitude vs the horizon and how fast it's moving vertically at
+    # the second-to-last `t` we computed above.
+    v = observer.vector_functions[-1]
+    altitude0, _, distance0, rate0, _, _ = (
+        apparent.frame_latlon_and_rates(v))
 
-        tdiff = t - previous_t
+    # Even faster than _fastify(t) is to just assume that nutation
+    # doesn't have much time to move over this short interval.
+    t.M = previous_t.M
+    t._nutation_angles_radians = previous_t._nutation_angles_radians
 
-        t_scaled_offset = _intersection(
-            altitude0.radians - h(distance0),
-            altitude1.radians - h(distance1),
-            rate0.radians.per_day * tdiff,
-            rate1.radians.per_day * tdiff,
-        )
-        #print(t_scaled_offset * tdiff)
-        #t_scaled_offset[np.isnan(t_scaled_offset)] = 1.0
-        print(t_scaled_offset)
-        #t_scaled_offset = np.clip(t_scaled_offset, 0.0, 1.0)
-        t_scaled_offset = np.clip(t_scaled_offset, -1.0, +2.0)
-        # print(t_scaled_offset)
+    # And again, this time with the very final `t` we computed.
+    apparent = observer.at(t).observe(target).apparent()
+    altitude1, _, distance1, rate1, _, _ = (
+        apparent.frame_latlon_and_rates(v))
 
-        old_t = t
-        t = previous_t + t_scaled_offset * tdiff
+    # Using the target's altitude and altitude-velocity at the final
+    # two times we computed, compute where it crosses the horizon.
+    tdiff = t - previous_t
+    t_scaled_offset = _intersection(
+        altitude0.radians - h(distance0),
+        altitude1.radians - h(distance1),
+        rate0.radians.per_day * tdiff,
+        rate1.radians.per_day * tdiff,
+    )
 
-        # if target_id == _MOON:
-        #     i = 229
-        #     print((altitude0.radians[i] - h(distance0)[i]) / tau * 360 * 3600)
-        #     print((altitude1.radians[i] - h(distance1)[i]) / tau * 360 * 3600)
-        #     # print((altitude1.radians[i] - h(distance1)[i]).shape)
-        #     # print((rate0.radians.per_day * tdiff).shape)
-        #     # print((rate1.radians.per_day * tdiff).shape)
+    # In case the parabola for some reason goes crazy, don't let our
+    # solution be thrown too far away from our final two times.
+    t_scaled_offset = np.clip(t_scaled_offset, -1.0, +2.0)
 
-        #     print('t_scaled_offset inputs:')
-        #     print((altitude0.radians - h(distance0))[i])
-        #     print((altitude1.radians - h(distance1))[i])
-        #     print((rate0.radians.per_day * tdiff)[i])
-        #     print((rate1.radians.per_day * tdiff)[i])
+    old_t = t
+    t = previous_t + t_scaled_offset * tdiff
 
-        #     print('t_scaled_offset output:')
-
-        #     print(f'= {t_scaled_offset[i]}')
-        #     print(t[i])
-        #     print(previous_t[i])
-        #     print(previous_t[i] + tdiff[i])
-
-        is_above_horizon =  (
-            (desired_ha % pi != 0.0)
-            |
-            ((t_scaled_offset > 0.0) & (t_scaled_offset < 1.0))
-        )
-
-        # for i in range(10):
-        #     print(i, old_t[i].utc_strftime(), t[i].utc_strftime(),
-        #           is_above_horizon[i])
-
-    else:
-        is_above_horizon = (desired_ha % pi != 0.0)
+    is_above_horizon =  (
+        (desired_ha % pi != 0.0)
+        |
+        ((t_scaled_offset > 0.0) & (t_scaled_offset < 1.0))
+    )
 
     return t, is_above_horizon
 
@@ -609,5 +563,4 @@ def find_transits(observer, target, start_time, end_time):
     .. versionadded:: 1.47
 
     """
-    t, _ = _find(observer, target, start_time, end_time, 0.0, _transit_ha)
-    return t
+    return _find(observer, target, start_time, end_time, 0.0, _transit_ha)

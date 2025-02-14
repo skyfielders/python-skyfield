@@ -25,10 +25,10 @@ design/test_sunrise_moonrise.py
 
 design/plot_search_for_rising.py
 
-  KEEP WRITING.  Draws a plot tmp.png to show the search for a
-  particular rising that I’m curious about, that the above script shows
-  as one of the 70° worse cases.  I’m wondering why the search never
-  reaches the exact millisecond of rising.
+  KEEP.  Draws a plot tmp.png to show the search for a particular rising
+  that I’m curious about, that the above script shows as one of the 70°
+  worse cases.  I’m wondering why the search never reaches the exact
+  millisecond of rising.
 
 design/illustrate_moonrise_edge_case.py
 
@@ -43,6 +43,4 @@ design/test_moonrise_edge.py
 
 design/intersect_function.py
 
-  DISCARD?  Crucial while writing, but maybe throw-away?  Pure math: the
-  parabola intersect function, with little tests for all four situations
-  that it has to handle mathematically.
+  KEEP, in case I ever want to revisit its design and tweak it more.

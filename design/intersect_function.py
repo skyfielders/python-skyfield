@@ -56,4 +56,3 @@ def test_intersection():
     t = _intersection(5, -5, -9.9, -10.1)
     assert t > 0.50
     assert t < 0.51
-    asdf

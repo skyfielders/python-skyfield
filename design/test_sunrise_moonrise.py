@@ -216,14 +216,6 @@ def test(regime, table, e, body, t0, t1, topo, timezone, verbose):
 
     vs_horizon = alt.degrees - horizon_array
 
-    # if verbose:
-    #     for t_i, alt_str, vs_i in zip(t, alt.dstr(6), vs_horizon):
-    #         print('  {}  {}  {: .6f} arcseconds'.format(
-    #             t_i.utc_strftime('%Y-%m-%d %H:%M:%S.%f'),
-    #             alt_str,
-    #             vs_i * 3600.0,
-    #         ))
-
     min_as = min(vs_horizon) * 3600.0
     max_as = max(vs_horizon) * 3600.0
 
@@ -275,7 +267,6 @@ def test(regime, table, e, body, t0, t1, topo, timezone, verbose):
 
     thirty_seconds = 1.0 / 24.0 / 60.0 / 2.0  # to round to next minute
     for ti in t + thirty_seconds:
-        #print(ti.utc_strftime())
         u = ti.utc
         tup = u.month, u.day, u.hour * 60 + u.minute
         skyfield_rises.append(tup)
