@@ -498,13 +498,11 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # solution be thrown too far away from our final two times.
     t_scaled_offset = np.clip(t_scaled_offset, -1.0, +2.0)
 
-    old_t = t
     t = previous_t + t_scaled_offset * tdiff
 
-    is_above_horizon =  (
+    is_above_horizon =  (  # TODO: it's not clear this will always be correct
         (desired_ha % pi != 0.0)
-        |
-        ((t_scaled_offset > 0.0) & (t_scaled_offset < 1.0))
+        | ((t_scaled_offset > 0.0) & (t_scaled_offset < 1.0))
     )
 
     return t, is_above_horizon
