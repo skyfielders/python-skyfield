@@ -366,18 +366,28 @@ _sun_horizon_radians = -50.0 / 21600.0 * tau
 _refraction_radians = -34.0 / 21600.0 * tau
 _moon_radius_m = 1.7374e6
 
+def build_horizon_function(target):
+    """Build and return a horizon function `h()` for the given `target`.
+
+    The returned function takes a Distance argument giving the distance
+    from the observer to the target, and returns a negative angle in
+    radians giving the altitude which, when reached by the target's
+    center, places it at the moment of rising.
+
+    """
+    target_id = getattr(target, 'target', None)
+    if target_id == _SUN:
+        def h(distance): return _sun_horizon_radians
+    elif target_id == _MOON:
+        def h(distance):
+            return _refraction_radians - _moon_radius_m / distance.m
+    else:
+        def h(distance): return _refraction_radians
+    return h
+
 def _find(observer, target, start_time, end_time, horizon_degrees, f):
-    # Build a function h() that returns the angle above or below the
-    # horizon we are aiming for, in radians.
     if horizon_degrees is None:
-        target_id = getattr(target, 'target', None)
-        if target_id == _SUN:
-            def h(distance): return _sun_horizon_radians
-        elif target_id == _MOON:
-            def h(distance):
-                return _refraction_radians - _moon_radius_m / distance.m
-        else:
-            def h(distance): return _refraction_radians
+        h = build_horizon_function(target)
     else:
         horizon_radians = horizon_degrees / 360.0 * tau
         def h(distance): return horizon_radians
@@ -501,7 +511,9 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
         )
         #print(t_scaled_offset * tdiff)
         #t_scaled_offset[np.isnan(t_scaled_offset)] = 1.0
-        t_scaled_offset = np.clip(t_scaled_offset, 0.0, 1.0)
+        print(t_scaled_offset)
+        #t_scaled_offset = np.clip(t_scaled_offset, 0.0, 1.0)
+        t_scaled_offset = np.clip(t_scaled_offset, -1.0, +2.0)
         # print(t_scaled_offset)
 
         old_t = t
