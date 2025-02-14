@@ -1,0 +1,48 @@
+
+This ‘investigate-moon-rising’ branch has gone on long enough that I
+need some notes, to remember which scripts are important and where it’s
+heading each time I sit down to work on it again.
+
+The goal is to land on `master` the changes in `skyfield/almanac.py` for
+the new rising / setting routine, so that it no longer misses edge-case
+high-latitude rises and sets where the Sun or Moon barely grazes the
+horizon.  See:
+
+https://github.com/skyfielders/python-skyfield/issues/998
+
+Here are the various test scripts that I’ve touched along the way, in
+rough order of importance:
+
+design/test_sunrise_moonrise.py
+
+  Crucial investigation script, that I want to keep!  Tests the rising
+  routine against one normal year of USNO sunrise, then one normal year
+  of moonrise, then a difficult year of latitude 70° moonrise.  For each
+  year, shows the two worse risings by stepping through the adjacent
+  milliseconds so that I can see whether rising really intersected the
+  correct millisecond.  Also is fun to run to see the difference in
+  speed between the old and new routines!
+
+design/plot_search_for_rising.py
+
+  KEEP WRITING.  Draws a plot tmp.png to show the search for a
+  particular rising that I’m curious about, that the above script shows
+  as one of the 70° worse cases.  I’m wondering why the search never
+  reaches the exact millisecond of rising.
+
+design/illustrate_moonrise_edge_case.py
+
+  DISCARD.  Big sprawling script that started out merely drawing a plot,
+  but wound up having prototype versions of several ‘final step’ search
+  routines before the winner was selected.  I’m mining it for ideas as I
+  write the above script as a keepable replacement.
+
+design/test_moonrise_edge.py
+
+  (deleted)
+
+design/intersect_function.py
+
+  DISCARD?  Crucial while writing, but maybe throw-away?  Pure math: the
+  parabola intersect function, with little tests for all four situations
+  that it has to handle mathematically.
