@@ -20,6 +20,13 @@ v1.50 — Not yet released
   have to construct the position themselves: ``SSB.at(t)`` returns a
   position whose coordinates and velocity are both zero in the ICRS.
 
+* The routines added last year, :func:`~skyfield.almanac.find_risings()`
+  and :func:`~skyfield.almanac.find_settings()`, could occasionally miss
+  a sunrise or moonrise at high latitudes like 70°N where the Sun or
+  Moon barely crests the horizon.  This has been fixed at a moderate
+  cost to their runtime.
+  `#998 <https://github.com/skyfielders/python-skyfield/issues/998>`_
+
 * Skyfield no longer tries to protect users by raising an exception if,
   contrary to the usual custom in astronomy, they ask for ``ra.degrees``
   or ``dec.hours``.  So users no longer need to add an underscore prefix

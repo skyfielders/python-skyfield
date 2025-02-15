@@ -102,6 +102,23 @@ def test_sunrise_sunset_new():
         return t, array([1, 0])
     _sunrise_sunset(f)
 
+def test_new_moonrise_at_70_degrees_north():
+    ts = api.load.timescale()
+    t0 = ts.utc(2023, 2, 19)
+    t1 = ts.utc(2023, 2, 20)
+    e = api.load('de421.bsp')
+    seventy = e['earth'] + api.wgs84.latlon(70, 0)
+
+    t, y = almanac.find_risings(seventy, e['moon'], t0, t1)
+    strings = t.utc_strftime('%Y-%m-%d %H:%M')
+    assert strings == ['2023-02-19 11:28']
+    assert list(y) == [1]
+
+    t, y = almanac.find_settings(seventy, e['moon'], t0, t1)
+    strings = t.utc_strftime('%Y-%m-%d %H:%M')
+    assert strings == ['2023-02-19 12:05']
+    assert list(y) == [1]
+
 def test_dark_twilight_day():
     ts = api.load.timescale()
     t0 = ts.utc(2019, 11, 8, 4)
