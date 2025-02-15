@@ -9,7 +9,7 @@ Changelog
 Released versions
 -----------------
 
-v1.50 — Not yet released
+v1.50 — 2024 February 15
 ------------------------
 
 * A new :class:`~skyfield.framelib.mean_equator_and_equinox_of_date`
