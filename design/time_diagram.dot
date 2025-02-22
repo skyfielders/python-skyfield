@@ -18,4 +18,10 @@ gast -> _nutation_angles_radians
 gast -> "equation_of_the_equinoxes()"
 gast -> _mean_obliquity_radians
 gast -> gmst
+gmst -> "sidereal_time()"
+"sidereal_time()" -> "earth_rotation_angle()"
+
+ut1 -> ut1_fraction
+ut1_fraction -> delta_t
+delta_t -> "ts.delta_t_function()"
 }
