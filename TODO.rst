@@ -191,3 +191,10 @@ Adding more smarts to ephemeris handling
   need to be vectorized and updated to use a Skyfield approach to vector
   and matrix operations.  When complete and documented, make a comment
   at: https://github.com/skyfielders/python-skyfield/issues/350
+
+* Maybe someday keep notes on ‘the story of Skyfield’ somewhere in the
+  repository, for details I later forget — like the fact I just
+  rediscovered, that an ephemeris object like ``earth`` used to have
+  methods ``.geometry_of(another_body)``, ``.topos(...)``, and
+  ``.satellite(...)``, all of which went away once the concept of vector
+  addition and subtraction were added to Skyfield.

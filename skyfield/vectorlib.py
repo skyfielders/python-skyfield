@@ -4,7 +4,6 @@ from jplephem.names import target_names as _jpl_code_name_dict
 from numpy import max
 from .constants import C_AUDAY
 from .descriptorlib import reify
-from .errors import DeprecationError
 from .functions import length_of
 from .positionlib import build_position
 from .timelib import Time
@@ -103,62 +102,6 @@ class VectorFunction(object):
                              ' but this vector has the center {0}'
                              .format(self.center_name))
         return _correct_for_light_travel_time(observer, self)
-
-    def geometry_of(self, other):
-        raise DeprecationError(
-"""the geometry_of() method has, alas, been deprecated
-
-This old method has been replaced by an improved interface.  If you just
-need your software working again, install Skyfield 0.9.1 for a quick fix:
-
-    pip install skyfield==0.9.1
-
-Or, to update your old code, replace each operation that looks like:
-
-    position = boston.geometry_of(satellite).at(t)
-
-with the vector math that was previously hiding inside the old method:
-
-    position = (satellite - boston).at(t)""")
-
-    def topos(self, latitude=None, longitude=None, latitude_degrees=None,
-              longitude_degrees=None, elevation_m=0.0, x=0.0, y=0.0):
-        raise DeprecationError(
-"""the topos() method has, alas, been deprecated
-
-This old method has been replaced by an improved interface.  If you just
-need your software working again, install Skyfield 0.9.1 for a quick fix:
-
-    pip install skyfield==0.9.1
-
-Or, to update your old code, replace each operation that looks like:
-
-    boston = earth.topos(...)
-
-with the vector math that was previously hiding inside the old method:
-
-    from skyfield.api import Topos
-    boston = earth + Topos(...)""")
-
-    def satellite(self, text):
-        raise DeprecationError(
-"""the satellite() method has, alas, been deprecated
-
-This old method has been replaced by an improved interface.  If you just
-need your software working again, install Skyfield 0.9.1 for a quick fix:
-
-    pip install skyfield==0.9.1
-
-Or, to update your old code, replace each operation that looks like:
-
-    sat = earth.satellite(tle_text)
-
-with the vector math (and the little bit of text manipulation) that was
-previously hiding inside the old method:
-
-    from skyfield.api import EarthSatellite
-    line1, line2 = tle_text.splitlines()[-2:]
-    sat = earth + EarthSatellite(line1, line2)""")
 
 class ReversedVector(VectorFunction):
     def __init__(self, vector_function):
