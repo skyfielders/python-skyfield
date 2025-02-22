@@ -75,7 +75,6 @@ sample_spacetrack_three_line_text = b"""\
 def test_celestrak():
     f = BytesIO(sample_celestrak_text)
     s = list(parse_tle(f))
-    print(s)
     assert len(s) == 2
     assert s[0][0] == ['ISS (ZARYA)', 'ISS', 'ZARYA']
     assert s[0][1].name == 'ISS (ZARYA)'
@@ -86,7 +85,6 @@ def test_spacetrack_two_line():
     f = BytesIO(sample_spacetrack_two_line_text)
     s = list(parse_tle(f))
     assert len(s) == 2
-    print(s)
     assert s[0][0] == ()
     assert s[0][1].name is None
     assert s[1][0] == ()
@@ -96,7 +94,6 @@ def test_spacetrack_three_line():
     f = BytesIO(sample_spacetrack_three_line_text)
     s = list(parse_tle(f))
     assert len(s) == 2
-    print(s)
     assert s[0][0] == ['First']
     assert s[0][1].name == 'First'
     assert s[1][0] == ['Second']

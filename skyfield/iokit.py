@@ -413,48 +413,17 @@ def load_file(path):
     raise ValueError('unrecognized file extension: {}'.format(path))
 
 def parse_tle(fileobj):
-    """Parse a file of TLE satellite element sets.
-
-    DEPRECATED: this routine is overly complicated, doing extra work to
-    try to guess several ways in which the user might want to look up
-    satellites by name.  Use ``parse_tle_file()`` instead.
-
-    TODO: convert this into a wrapper around ``parse_tle_file()``.
-
-    """
-    b0 = b1 = b''
-    for b2 in fileobj:
-        if (b1.startswith(b'1 ') and len(b1) >= 69 and
-            b2.startswith(b'2 ') and len(b2) >= 69):
-
-            b0 = b0.rstrip(b'\n\r')
-            if len(b0) == 24:   # Celestrak
-                name = b0.decode('ascii').rstrip()
-                names = [name]
-            elif b0.startswith(b'0 '): # Spacetrack 3-line format
-                name = b0[2:].decode('ascii').rstrip()
-                names = [name]
-            else:
-                name = None
-                names = ()
-
-            line1 = b1.decode('ascii')
-            line2 = b2.decode('ascii')
-            sat = EarthSatellite(line1, line2, name)
-
-            if name and ' (' in name:
-                # Given a name like `ISS (ZARYA)` or `HTV-6 (KOUNOTORI
-                # 6)`, also support lookup by the name inside or outside
-                # the parentheses.
-                short_name, secondary_name = name.split(' (')
+    """DEPRECATED: call the simpler `parse_tle_file()` routine instead."""
+    for sat in parse_tle_file(fileobj):
+        names = ()
+        if sat.name:
+            names = [sat.name]
+            if ' (' in sat.name:  # A name like `HTV-6 (KOUNOTORI 6)`.
+                short_name, secondary_name = sat.name.split(' (')
                 secondary_name = secondary_name.rstrip(')')
                 names.append(short_name)
                 names.append(secondary_name)
-
-            yield names, sat
-
-        b0 = b1
-        b1 = b2
+        yield names, sat
 
 def parse_tle_file(lines, ts=None, skip_names=False):
     """Parse lines of TLE satellite data, yielding a sequence of satellites.
@@ -495,7 +464,7 @@ def parse_tle_file(lines, ts=None, skip_names=False):
             line2 = b2.decode('ascii')
             yield EarthSatellite(line1, line2, name, ts)
 
-            b0 = b1 = b''
+            b0 = b1 = b''  # don't accidentally use line 2 as next sat's name
         else:
             b0 = b1
             b1 = b2
