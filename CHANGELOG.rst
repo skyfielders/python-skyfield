@@ -12,6 +12,12 @@ Released versions
 Next version
 ------------
 
+* Skyfield now supports ephemeris files like ``de441.bsp`` that have two
+  or more segments per target.  In earlier versions of Skyfield, only
+  one segment per target would get used, which for ``de441.bsp`` was
+  cutting the range of supported dates in half.
+  `#691 <https://github.com/skyfielders/python-skyfield/issues/691>`_
+
 * The documentation now uses the newer name ``.xyz``, which has been
   quietly supported for around three years, for the
   :class:`~skyfield.positionlib.ICRF` attribute that was originally
@@ -20,11 +26,11 @@ Next version
   little redundant, asking for the ``position`` of a ``position``::
 
     position = mars.at(t)
-    print(position.position)
+    x, y, z = position.position
 
   So Skyfield now encourages code to ask for ``position.xyz`` instead.
-  Another advantage is that the new name self-documents that it holds a
-  numeric vector with three components.
+  Another advantage is that the new name is self-documenting: it holds a
+  3-vector with Cartesian components.
 
 v1.50 — 2024 February 15
 ------------------------

@@ -1,5 +1,6 @@
 """An interface between JPL ephemerides and Skyfield."""
 
+import numpy as np
 import os
 from collections import defaultdict
 
@@ -73,6 +74,17 @@ class SpiceKernel(object):
         self.codes = set(s.center for s in self.segments).union(
                          s.target for s in self.segments)
         self.comments = self.spk.comments  # deprecated pass-through method
+
+        # Pre-compute which segments lead to which targets.
+        d = defaultdict(list)
+        for segment in self.segments:
+            d[segment.target].append(segment)
+
+        # Go ahead and build a vector function for each target.
+        self._vector_functions = {
+            target: segments[0] if len(segments) == 1 else Stack(segments)
+            for target, segments in d.items()
+        }
 
     def __repr__(self):
         return '<{0} {1!r}>'.format(type(self).__name__, self.path)
@@ -153,15 +165,17 @@ class SpiceKernel(object):
     def __getitem__(self, target):
         """Return a vector function for computing the location of `target`."""
         target = self.decode(target)
-        segments = self.segments
-        segment_dict = dict((segment.target, segment) for segment in segments)
-        chain = tuple(_center(target, segment_dict))
-        if len(chain) == 1:
-            return chain[0]
-        chain = chain[::-1]
-        center = chain[0].center
-        target = chain[-1].target
-        return VectorSum(center, target, chain)
+        vector_functions = self._vector_functions
+        vf = vector_functions[target]
+        if vf.center == 0:
+            return vf
+        vfs = [vf]
+        center = vf.center
+        while center in vector_functions:
+            vf = vector_functions[center]
+            vfs.append(vf)
+            center = vf.center
+        return VectorSum(center, target, tuple(reversed(vfs)))
 
     def __contains__(self, name_or_code):
         if isinstance(name_or_code, int):
@@ -213,19 +227,48 @@ class ChebyshevPosition(SPICESegment):
 
         return position / AU_KM, velocity / AU_KM, None, None
 
-
 class ChebyshevPositionVelocity(SPICESegment):
     def _at(self, t):
         pv = self.spk_segment.compute(t.whole, t.tdb_fraction)
         return pv[:3] / AU_KM, pv[3:] * DAY_S / AU_KM, None, None
 
+class Stack(VectorFunction):
+    """Several segments for one target, that might cover different dates."""
+    def __init__(self, segments):
+        self.center = segments[0].center
+        self.target = segments[0].target  # all segments have same target
 
-def _center(code, segment_dict):
-    """Starting with `code`, follow segments from target to center."""
-    while code in segment_dict:
-        segment = segment_dict[code]
-        yield segment
-        code = segment.center
+        # Hopefully all segments have the same center, since we
+        # ourselves can only advertise a single `.center`.  If not, drop
+        # segments that don't match our arbitrary choice of center.
+        segments[:] = (s for s in segments if s.center == self.center)
+        self.segments = segments
+
+    def _at(self, t):
+        if not t.shape:
+            for segment in reversed(self.segments):
+                spk = segment.spk_segment
+                if spk.start_jd <= t.tdb <= spk.end_jd:
+                    break
+            return segment._at(t)
+
+        shape = (3,) + t.shape
+        position = np.empty(shape)
+        velocity = np.empty(shape)
+        position.fill(np.nan)
+        velocity.fill(np.nan)
+        for segment in self.segments:
+            spk = segment.spk_segment
+            matches = (spk.start_jd <= t.tdb) & (t.tdb <= spk.end_jd)
+            indices = matches.nonzero()[0]
+            if len(indices) == 0:
+                continue
+            t_i = t[indices]
+            position_i, velocity_i, _, _ = segment._at(t_i)
+            position[:, indices] = position_i
+            velocity[:, indices] = velocity_i
+        # TODO: check for nan's? or let user do that?
+        return position, velocity, None, None
 
 def _format_code_and_name(code):
     name = _jpl_code_name_dict.get(code, None)
