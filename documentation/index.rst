@@ -82,7 +82,7 @@ and return results in native AstroPy units:
 .. testcode::
 
     from astropy import units as u
-    xyz = astrometric.position.to(u.au)
+    xyz = astrometric.xyz.to(u.au)
     altitude = alt.to(u.deg)
 
     print(xyz)

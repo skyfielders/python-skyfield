@@ -49,7 +49,7 @@ def add_deflection(position, observer, ephemeris, t,
 
         # Get position of gravitating body wrt ss barycenter at time 't_tdb'.
 
-        bposition = deflector.at(ts.tdb(jd=jd_tdb)).position.au  # TODO
+        bposition = deflector.at(ts.tdb(jd=jd_tdb)).xyz.au  # TODO
 
         # Get position of gravitating body wrt observer at time 'jd_tdb'.
 
@@ -74,7 +74,7 @@ def add_deflection(position, observer, ephemeris, t,
         # if tlt < dlt:
         #     tclose = jd - tlt
 
-        bposition = deflector.at(ts.tdb(jd=tclose)).position.au  # TODO
+        bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
         rmass = rmasses[name]
         _add_deflection(position, observer, bposition, rmass)
 
@@ -82,7 +82,7 @@ def add_deflection(position, observer, ephemeris, t,
 
     if include_earth_deflection.any():
         deflector = ephemeris['earth']
-        bposition = deflector.at(ts.tdb(jd=tclose)).position.au  # TODO
+        bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
         rmass = rmasses['earth']
         # TODO: Make the following code less messy, maybe by having
         # _add_deflection() return a new vector instead of modifying the

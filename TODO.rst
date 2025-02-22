@@ -97,7 +97,6 @@ forget.
 
 * Several interesting API questions arise because of
   `this Stack Overflow question <https://stackoverflow.com/questions/62654081/path-between-two-topos-locations-determine-latitude-and-longitude-where-a-giv>`_.
-  Should I finally go through with renaming ``.position`` to ``.xyz``?
   Should ``.from_altaz()`` retain observer data
   so that a follow-up ``.altaz()`` returns the same coordinates?
   Should positions fully support math,
@@ -142,9 +141,9 @@ forget.
 
 * Solar eclipses.
 
-* Some users need to add offsets to vectors like .position and .velocity
+* Some users need to add offsets to vectors like .xyz and .velocity
   so should there be some official way to do so?  We should either
-  document the maneuver ``.position = Distance(au=old_position.au +
+  document the maneuver ``.xyz = Distance(au=old_position.au +
   xyz)`` or (gulp!) make ``Distance`` objects susceptible of being
   modified in-place without their various units going out of sync.
 

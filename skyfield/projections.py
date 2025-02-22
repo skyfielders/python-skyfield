@@ -41,7 +41,7 @@ def build_stereographic_projection(center):
     # TODO: Computing the center should really be done using
     # optimization, as in:
     # https://math.stackexchange.com/questions/409217/
-    p = center.position.au
+    p = center.xyz.au
     u = p / length_of(p)
     if len(u.shape) > 1:
         c = u.mean(axis=1)
@@ -51,7 +51,7 @@ def build_stereographic_projection(center):
     x_c, y_c, z_c = c
 
     def project(position):
-        p = position.position.au
+        p = position.xyz.au
         u = p / length_of(p)
         x, y, z = u
 #        x_out = (x*y_c/sqrt(x_c**2 + y_c**2) - x_c*y/sqrt(x_c**2 + y_c**2))/(x*x_c*sqrt(-z_c**2 + 1)/sqrt(x_c**2 + y_c**2) + y*y_c*sqrt(-z_c**2 + 1)/sqrt(x_c**2 + y_c**2) + z*z_c + 1)

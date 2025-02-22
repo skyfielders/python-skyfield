@@ -77,7 +77,7 @@ class ICRF(object):
     to within 0.02 arcseconds.  It also supersedes older equinox-based
     systems like B1900 and B1950.
 
-    Each instance of this class provides a ``.position`` vector and a
+    Each instance of this class provides a ``.xyz`` vector and a
     ``.velocity`` vector that specify |xyz| coordinates along the axes
     of the ICRF.  A specific time ``.t`` might be specified or might be
     ``None``.
@@ -93,7 +93,7 @@ class ICRF(object):
         self.t = t
         self.position = self.xyz = Distance(position_au)
         if velocity_au_per_d is None:
-            velocity_au_per_d = full(self.position.au.shape, nan)
+            velocity_au_per_d = full(self.xyz.au.shape, nan)
         self.velocity = Velocity(velocity_au_per_d)
         self.center = self._default_center if center is None else center
         self.target = target
@@ -169,7 +169,7 @@ class ICRF(object):
                 "you can only subtract two vectors"
                 " if they both start at the same center"
             )
-        p = self.position.au - body.position.au
+        p = self.xyz.au - body.xyz.au
         if self.velocity is None or body.velocity is None:
             v = None
         else:
@@ -178,7 +178,7 @@ class ICRF(object):
 
     def __getitem__(self, i):
         return type(self)(
-            self.position.au[:,i],
+            self.xyz.au[:,i],
             self.velocity.au_per_d[:,i],
             self.t[i],
             self.center,
@@ -187,7 +187,7 @@ class ICRF(object):
 
     def __neg__(self):
         return type(self)(
-            -self.position.au,
+            -self.xyz.au,
             -self.velocity.au_per_d,
             self.t,
             self.target,
@@ -207,7 +207,7 @@ class ICRF(object):
         1.41421 au
 
         """
-        return Distance(length_of(self.position.au))
+        return Distance(length_of(self.xyz.au))
 
     def speed(self):
         """Compute the magnitude of the velocity vector.
@@ -257,7 +257,7 @@ class ICRF(object):
         To get J2000.0 coordinates, simply pass ``ts.J2000``.
 
         """
-        position_au = self.position.au
+        position_au = self.xyz.au
         if epoch is not None:
             if isinstance(epoch, Time):
                 pass
@@ -296,7 +296,7 @@ class ICRF(object):
 
         """
         R = framelib.itrs.rotation_at(self.t)
-        r = mxv(R, self.position.au)
+        r = mxv(R, self.xyz.au)
         au, dec, sublongtiude = to_spherical(r)
         lon = getattr(self.center, 'longitude', None)
         if lon is None:
@@ -355,8 +355,8 @@ class ICRF(object):
         3 values from 43deg 23' 23.1" to 42deg 49' 46.6"
 
         """
-        u = self.position.au
-        v = another_icrf.position.au
+        u = self.xyz.au
+        v = another_icrf.xyz.au
 
         # Allow an array of positions to be compared with a single other
         # position.
@@ -390,7 +390,7 @@ class ICRF(object):
                              ' a floating point Terrestrial Time (TT),'
                              ' or the string "date" for epoch-of-date')
 
-        vector = mxv(epoch.C, self.position.au)
+        vector = mxv(epoch.C, self.xyz.au)
         return Distance(vector)
 
     def cirs_radec(self, epoch):
@@ -436,7 +436,7 @@ class ICRF(object):
         `reference_frames`.
 
         """
-        return Distance(mxv(frame.rotation_at(self.t), self.position.au))
+        return Distance(mxv(frame.rotation_at(self.t), self.xyz.au))
 
     def frame_xyz_and_velocity(self, frame):
         """Return |xyz| position and velocity vectors in a reference frame.
@@ -448,7 +448,7 @@ class ICRF(object):
 
         """
         R = frame.rotation_at(self.t)
-        r, v = self.position.au, self.velocity.au_per_d
+        r, v = self.xyz.au, self.velocity.au_per_d
         r = mxv(R, r)
         v = mxv(R, v)
         at = getattr(frame, '_dRdt_times_RT_at', None)
@@ -466,7 +466,7 @@ class ICRF(object):
         `reference_frames`.
 
         """
-        vector = mxv(frame.rotation_at(self.t), self.position.au)
+        vector = mxv(frame.rotation_at(self.t), self.xyz.au)
         d, lat, lon = to_spherical(vector)
         return (Angle(radians=lat, signed=True),
                 Angle(radians=lon),
@@ -526,7 +526,7 @@ class ICRF(object):
                 .format(self.center)
             )
 
-        x, y, z = self.position.au
+        x, y, z = self.xyz.au
         return SkyCoord(frame=frame, representation_type='cartesian',
                         unit=au, x=x, y=y, z=z)
 
@@ -547,8 +547,8 @@ class ICRF(object):
         # TODO: should we have the body .observe() the Sun, to account
         # for light travel time?
         s = sun.at(self.t)
-        u = self.position.au
-        v = u - s.position.au + self.center_barycentric.position.au
+        u = self.xyz.au
+        v = u - s.xyz.au + self.center_barycentric.xyz.au
         return Angle(radians=angle_between(u, v))
 
     def fraction_illuminated(self, sun):
@@ -578,14 +578,14 @@ class ICRF(object):
 
         """
         if self.center == 399:
-            earth_m = - self.position.m
+            earth_m = - self.xyz.m
         else:
             gcrs_position = self._observer_gcrs_au
             if gcrs_position is None:
                 raise ValueError('cannot tell whether this position is sunlit')
-            earth_m = - self.position.m - gcrs_position * AU_M
+            earth_m = - self.xyz.m - gcrs_position * AU_M
 
-        sun_m = (ephemeris['sun'] - ephemeris['earth']).at(self.t).position.m
+        sun_m = (ephemeris['sun'] - ephemeris['earth']).at(self.t).xyz.m
         near, far = intersect_line_and_sphere(sun_m + earth_m, earth_m, ERAD)
         return nan_to_num(far) <= 0
 
@@ -602,7 +602,7 @@ class ICRF(object):
             raise ValueError('can only compute Earth occultation for'
                              ' positions observed from an Earth satellite')
         earth_m = - observer_gcrs_au * AU_M
-        vector_m = self.position.m
+        vector_m = self.xyz.m
         near, far = intersect_line_and_sphere(vector_m, earth_m, ERAD)
         length_m = length_of(vector_m)
         return (nan_to_num(far) > 0) & (nan_to_num(near) < length_m)
@@ -664,7 +664,7 @@ class Barycentric(ICRF):
     >>> mars.at(t)
     <Barycentric BCRS position and velocity at date t center=0 target=499>
 
-    This class’s ``.position`` and ``.velocity`` are |xyz| vectors in
+    This class’s ``.xyz`` and ``.velocity`` are |xyz| vectors in
     the Barycentric Celestial Reference System (BCRS), the modern
     replacement for J2000 coordinates measured from the Solar System
     Barycenter.
@@ -707,7 +707,7 @@ class Astrometric(ICRF):
     usually generated in Skyfield by calling the `Barycentric` method
     `observe()`, which performs the light-time correction.
 
-    Both the ``.position`` and ``.velocity`` are |xyz| vectors
+    Both the ``.xyz`` and ``.velocity`` are |xyz| vectors
     oriented along the axes of the ICRF, the modern replacement for the
     J2000 reference frame.
 
@@ -742,10 +742,10 @@ class Astrometric(ICRF):
 
         """
         t = self.t
-        target_au = self.position.au.copy()
+        target_au = self.xyz.au.copy()
 
         cb = self.center_barycentric
-        bcrs_position = cb.position.au
+        bcrs_position = cb.xyz.au
         bcrs_velocity = cb.velocity.au_per_d
         observer_gcrs_au = cb._observer_gcrs_au
 
@@ -802,7 +802,7 @@ class Apparent(ICRF):
     These positions are usually produced in Skyfield by calling the
     `apparent()` method of an `Astrometric` object.
 
-    Both the ``.position`` and ``.velocity`` are |xyz| vectors
+    Both the ``.xyz`` and ``.velocity`` are |xyz| vectors
     oriented along the axes of the ICRF, the modern replacement for the
     J2000 reference frame.  If the observer is at the geocenter, they
     are more specifically GCRS coordinates.  Two common coordinates that
@@ -826,7 +826,7 @@ class Geocentric(ICRF):
     same instant, without accounting for light-travel time or the effect
     of relativity on the light itself.
 
-    Its ``.position`` and ``.velocity`` vectors have |xyz| axes that
+    Its ``.xyz`` and ``.velocity`` vectors have |xyz| axes that
     are those of the Geocentric Celestial Reference System (GCRS), an
     inertial system that is an update to J2000 and that does not rotate
     with the Earth itself.
@@ -857,7 +857,7 @@ def _to_altaz(position, temperature_C, pressure_mbar):
         else:
             raise ValueError(_altaz_message)
 
-    position_au = mxv(R, position.position.au)
+    position_au = mxv(R, position.xyz.au)
     r_au, alt, az = to_spherical(position_au)
 
     if temperature_C is None:
@@ -884,7 +884,7 @@ _altaz_message = (
 
 class _Fake(ICRF):  # support for deprecated frame rotation methods above
     def __init__(self, original, epoch):
-        self.position = original.position
+        self.xyz = original.xyz
         if isinstance(epoch, Time):
             self.t = epoch
         elif isinstance(epoch, float):

@@ -328,7 +328,7 @@ Astronomical positions
 
 The `ICRF` three-dimensional position vector serves as the base class
 for all of the following position classes.  Each class represents an
-|xyz| ``.position`` and ``.velocity`` vector oriented to the axes of
+|xyz| ``.xyz`` and ``.velocity`` vector oriented to the axes of
 the International Celestial Reference System (ICRS),
 an inertial system that’s an update to J2000
 and that does not rotate with respect to the universe.
@@ -364,7 +364,7 @@ All position objects offer five basic attributes:
 .. PAT START
 
 ============= ========================================
-``.position`` An |xyz| `Distance`.
+``.xyz``      An |xyz| `Distance`.
 ``.velocity`` An |xyz| `Velocity`, or ``None``.
 ``.t``        The `Time` of the position, or ``None``.
 ``.center``   Body the vector is measured from.
@@ -372,6 +372,9 @@ All position objects offer five basic attributes:
 ============= ========================================
 
 .. PAT END
+
+The ``.xyz`` attribute used to be named ``.position``.  To support older
+code, Skyfield will always recognize the original name as an alias.
 
 All positions support these methods:
 

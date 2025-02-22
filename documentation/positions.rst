@@ -224,7 +224,7 @@ They support operations like:
 
 .. testcode::
 
-    print('Earth x,y,z:', barycentric.position.au, 'au')
+    print('Earth x,y,z:', barycentric.xyz.au, 'au')
     print('Mars relative velocity:', astrometric.velocity.km_per_s, 'km/s')
     print('Time of observation:', apparent.t.utc_strftime())
 

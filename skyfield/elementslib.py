@@ -42,10 +42,10 @@ def osculating_elements_of(position, reference_frame=None, gm_km3_s2=None):
                     ' should specify one using the `gm_km3_s2` keyword argument')
 
     if reference_frame is not None:
-        position_vec = Distance(reference_frame.dot(position.position.au))
+        position_vec = Distance(reference_frame.dot(position.xyz.au))
         velocity_vec = Velocity(reference_frame.dot(position.velocity.au_per_d))
     else:
-        position_vec = position.position
+        position_vec = position.xyz
         velocity_vec = position.velocity
 
     return OsculatingElements(position_vec,

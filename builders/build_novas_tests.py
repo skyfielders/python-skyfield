@@ -291,7 +291,7 @@ def output_ephemeris_tests():
     def test_position_and_velocity(de405, ts):
         t = ts.tt_jd({jd!r})
         e = de405['earth'].at(t)
-        compare(e.position.au, {pos!r}, 10 * meter)
+        compare(e.xyz.au, {pos!r}, 10 * meter)
         compare(e.velocity.au_per_d, {vel!r}, 1e-5 * meter / one_second)
 
     """)
@@ -316,7 +316,7 @@ def output_geocentric_tests(dates):
             e = de405['earth'].at(t)
             p = de405[{planet!r}]
 
-            distance = length_of((e - p.at(t)).position.au)
+            distance = length_of((e - p.at(t)).xyz.au)
             compare(distance * OLD_AU, {distance1!r}, 0.014 * meter)
 
             astrometric = e.observe(p)

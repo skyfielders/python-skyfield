@@ -72,7 +72,7 @@ def test_callisto_geometry(ts):
     e = api.load_file(_data_path('jup310-2053-10-08.bsp'))
     a = (e['callisto'] - e['earth']).at(ts.tdb(jd=2471184.5))
     print(a)
-    compare(a.position.au,
+    compare(a.xyz.au,
       [-4.884815926454119E+00, -3.705745549073268E+00, -1.493487818022234E+00],
       0.001 * meter)
     compare(a.velocity.au_per_d,
@@ -97,7 +97,7 @@ def test_boston_geometry():
     boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8))
     a = (e['earth'] - boston).at(t)
     meter = 1e-3
-    compare(a.position.km,
+    compare(a.xyz.km,
       [-1.764697476371664E+02, -4.717131288041386E+03, -4.274926422016179E+03],
       0.7 * meter)
 
@@ -108,7 +108,7 @@ def test_moon_from_boston_geometry():
     t = ts.tdb(2015, 3, 2)
     boston = e['earth'] + Topos((42, 21, 24.1), (-71, 3, 24.8))
     a = (e['moon'] - boston).at(t)
-    compare(a.position.au,
+    compare(a.xyz.au,
       [-1.341501206552443E-03, 2.190483327459023E-03, 6.839177007993498E-04],
       1.1 * meter)
 

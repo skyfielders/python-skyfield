@@ -17,7 +17,7 @@ def main():
     observer = planets['earth'].at(t)
     target = planets['mars']
     r, v, t2, light_time = cfltt(observer, target)
-    print(t.shape, observer.position.km.shape, r.shape)
+    print(t.shape, observer.xyz.km.shape, r.shape)
 
     print('==== N times, one observer, one target ====')
 
@@ -26,7 +26,7 @@ def main():
     observer = planets['earth'].at(t)
     target = planets['mars']
     r, v, t2, light_time = cfltt(observer, target)
-    print(t.shape, observer.position.km.shape, '->', r.shape)
+    print(t.shape, observer.xyz.km.shape, '->', r.shape)
     print('Here is where the planet wound up:')
     print(r)
 
@@ -45,17 +45,17 @@ def main():
         earth._at = build_multi_at(earth._at)
 
     observer = earth.at(t)
-    print('observer', observer.position.au.shape)
+    print('observer', observer.xyz.au.shape)
 
     target = planets['mars']
     target._at = build_multi_at(target._at)  # Turn Mars into 2 planets.
-    print('target', target.at(t).position.au.shape)
+    print('target', target.at(t).xyz.au.shape)
 
     # t = ts.tt(t.tt[:,None])  # What if we add a dimension to t?
     # print('t', t.shape)
 
     r, v, t2, light_time = _correct_for_light_travel_time2(observer, target)
-    print(t.shape, observer.position.km.shape, '->', r.shape)
+    print(t.shape, observer.xyz.km.shape, '->', r.shape)
 
     print('Does it look like a second planet 1 AU away at the same 4 times?')
     print('First planet:')
@@ -74,17 +74,17 @@ def main():
         earth = planets['earth']
         earth._at = build_multi_at(earth._at)
     observer = earth.at(t)
-    print('observer', observer.position.au.shape)
+    print('observer', observer.xyz.au.shape)
 
     target = planets['mars']
     target._at = build_multi_at(target._at)  # Turn Mars into 2 planets.
-    print('target', target.at(t).position.au.shape)
+    print('target', target.at(t).xyz.au.shape)
 
     # t = ts.tt(t.tt[:,None])  # What if we add a dimension to t?
     # print('t', t.shape)
 
     r, v, t2, light_time = _correct_for_light_travel_time3(observer, target)
-    print(t.shape, observer.position.km.shape, '->', r.shape)
+    print(t.shape, observer.xyz.km.shape, '->', r.shape)
 
     print('Does it look like a second planet 1 AU away at the same 4 times?')
     print('First planet:')
@@ -109,15 +109,15 @@ def main():
 
     earth = planets['earth']
     observer = earth.at(t)
-    print('observer', observer.position.au.shape)
+    print('observer', observer.xyz.au.shape)
     print('Supplementing dimensions')
-    observer.position.au = observer.position.au[:,:,None]
+    observer.xyz.au = observer.xyz.au[:,:,None]
     observer.velocity.au_per_d = observer.velocity.au_per_d[:,:,None]
-    print('observer', observer.position.au.shape)
+    print('observer', observer.xyz.au.shape)
 
     target = planets['mars']
     target._at = build_multi_at(target._at)  # Turn Mars into 2 planets.
-    print('target', target.at(t).position.au.shape)
+    print('target', target.at(t).xyz.au.shape)
 
     # TODO: if we work out how we can expand the time's dimensions, as
     # in the following line, before earth.at(t) without raising an
@@ -130,7 +130,7 @@ def main():
     # print('t !!!!!!!!!!!!!!', t.tdb_fraction.shape)
 
     r, v, t2, light_time = _correct_for_light_travel_time4(observer, target)
-    print(t.shape, observer.position.au.shape, '->', r.shape)
+    print(t.shape, observer.xyz.au.shape, '->', r.shape)
 
     print('Does it look like a second planet 1 AU away at the same 4 times?')
     print('First planet:')
@@ -180,7 +180,7 @@ def _correct_for_light_travel_time(observer, target):
     whole = t.whole
     tdb_fraction = t.tdb_fraction
 
-    cposition = observer.position.au
+    cposition = observer.xyz.au
     cvelocity = observer.velocity.au_per_d
 
     tposition, tvelocity, gcrs_position, message = target._at(t)
@@ -222,7 +222,7 @@ def _correct_for_light_travel_time2(observer, target):
     whole = t.whole
     tdb_fraction = t.tdb_fraction
 
-    cposition = observer.position.au
+    cposition = observer.xyz.au
     cvelocity = observer.velocity.au_per_d
 
     tposition, tvelocity, gcrs_position, message = target._at(t)
@@ -276,7 +276,7 @@ def _correct_for_light_travel_time3(observer, target):
     whole = t.whole
     tdb_fraction = t.tdb_fraction
 
-    cposition = observer.position.au
+    cposition = observer.xyz.au
     cvelocity = observer.velocity.au_per_d
 
     cposition = cposition.T
@@ -327,7 +327,7 @@ def _correct_for_light_travel_time4(observer, target):
     whole = t.whole
     tdb_fraction = t.tdb_fraction
 
-    cposition = observer.position.au
+    cposition = observer.xyz.au
     cvelocity = observer.velocity.au_per_d
 
     print('======', cposition.shape)

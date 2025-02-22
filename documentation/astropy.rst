@@ -59,7 +59,7 @@ between the two libraries:
       t = ts.utc(1980, 1, 1)
       barycentric = earth.at(t)
 
-      print(barycentric.position.to(u.au))
+      print(barycentric.xyz.to(u.au))
       print(barycentric.velocity.to(u.au / u.day))
 
    .. testoutput::

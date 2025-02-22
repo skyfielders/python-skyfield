@@ -3,7 +3,7 @@ from skyfield import api
 from skyfield.constants import DAY_S, tau
 from skyfield.earthlib import earth_rotation_angle
 from skyfield.framelib import true_equator_and_equinox_of_date
-from skyfield.functions import from_spherical, length_of, mxv, rot_z
+from skyfield.functions import A, from_spherical, length_of, mxv, rot_z
 from skyfield.positionlib import Geocentric, ICRF, ITRF_to_GCRS2, _GIGAPARSEC_AU
 from skyfield.starlib import Star
 from .fixes import low_precision_ERA
@@ -17,7 +17,7 @@ def test_subtraction():
     assert p.center == 399
     assert p.target == 499
     assert isinstance(p, Geocentric)
-    assert tuple(p.position.au) == (9, 18, 27)
+    assert tuple(p.xyz.au) == (9, 18, 27)
     assert tuple(p.velocity.au_per_d) == (36, 45, 54)
 
     p1.center = 1
@@ -123,23 +123,23 @@ def test_position_of_radec():
     epsilon = _GIGAPARSEC_AU * 1e-16
 
     p = api.position_of_radec(0, 0)
-    assert length_of(p.position.au - [_GIGAPARSEC_AU, 0, 0]) < epsilon
+    assert length_of(p.xyz.au - [_GIGAPARSEC_AU, 0, 0]) < epsilon
 
     p = api.position_of_radec(6, 0)
-    assert length_of(p.position.au - [0, _GIGAPARSEC_AU, 0]) < epsilon
+    assert length_of(p.xyz.au - [0, _GIGAPARSEC_AU, 0]) < epsilon
 
     epsilon = 2e-16
 
     p = api.position_of_radec(12, 90, 2)
-    assert length_of(p.position.au - [0, 0, 2]) < epsilon
+    assert length_of(p.xyz.au - [0, 0, 2]) < epsilon
 
     p = api.position_of_radec(12, 90, distance_au=2)
-    assert length_of(p.position.au - [0, 0, 2]) < epsilon
+    assert length_of(p.xyz.au - [0, 0, 2]) < epsilon
 
     ts = api.load.timescale()
     epoch = ts.tt_jd(api.B1950)
     p = api.position_of_radec(0, 0, 1, epoch=epoch)
-    assert length_of(p.position.au - [1, 0, 0]) > 1e-16
+    assert length_of(p.xyz.au - [1, 0, 0]) > 1e-16
     ra, dec, distance = p.radec(epoch=epoch)
     assert abs(ra.hours) < 1e-12
     assert abs(dec.degrees) < 1e-12
@@ -148,10 +148,10 @@ def test_position_of_radec():
 def test_position_from_radec():
     # Only a couple of minimal tests, since the routine is deprecated.
     p = api.position_from_radec(0, 0)
-    assert length_of(p.position.au - [1, 0, 0]) < 1e-16
+    assert length_of(p.xyz.au - [1, 0, 0]) < 1e-16
 
     p = api.position_from_radec(6, 0)
-    assert length_of(p.position.au - [0, 1, 0]) < 1e-16
+    assert length_of(p.xyz.au - [0, 1, 0]) < 1e-16
 
 def test_ssb():
     ts = api.load.timescale()
@@ -265,7 +265,6 @@ def test_cirs_era():
     assert np.allclose(tio_ra.degrees, era, rtol=0.0, atol=tol)
     assert np.allclose(tio_dec.degrees, 0.0, rtol=0.0, atol=tol)
 
-
 # Check a line of points along the terrestrial prime meridian all have the same
 # CIRS RA, and that their declinations are correct.
 def test_cirs_meridian():
@@ -287,7 +286,6 @@ def test_cirs_meridian():
     tol = (1e-7 / 3600.0)  # 100 nano arc-second precision
     assert np.allclose(md_ra.degrees, era, rtol=0.0, atol=tol)
     assert np.allclose(md_dec.degrees, 90 - alt, rtol=0.0, atol=tol)
-
 
 # Check a set of positions and times against results calculated externally
 # using the IAU SOFA library (20180130 release). For reference the code used
@@ -400,3 +398,10 @@ def test_astropy_conversion():
     p = ICRF(r, t=t, center=3)
     with assert_raises(NotImplementedError):
         a = p.to_skycoord()
+
+def test_old_position_attribute():
+    ts = api.load.timescale()
+    t = ts.tt(2022, 1, 3)
+    r = A[6, 7, 8]
+    p = ICRF(r, t=t, center=0)
+    assert tuple(p.position.au) == (6, 7, 8)

@@ -45,7 +45,7 @@ distance_sun_travels_in_one_orbit = solar_radius_km * api.tau
 sun_km_per_s = distance_sun_travels_in_one_orbit / 10 / 365.25 / 24 / 60 / 60
 print('Sun km/s:', sun_km_per_s)
 
-light_delay_seconds = s2[0].position.length().light_seconds()
+light_delay_seconds = s2[0].xyz.length().light_seconds()
 print('Sample light delay from Sun to Earth (seconds):', light_delay_seconds)
 
 print('How far does the Sun move in that time?')

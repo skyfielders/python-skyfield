@@ -540,7 +540,7 @@ We can compute the position of the Earth as an example:
     earth = planets['earth']
 
     t = ts.utc(2014, 1, 1)
-    pos = earth.at(t).position.au
+    pos = earth.at(t).xyz.au
     print(pos)
 
 .. testoutput::
@@ -553,7 +553,7 @@ We can compute the position of the Earth as an example:
 
     days = [1, 2, 3, 4]
     t = ts.utc(2014, 1, days)
-    pos = earth.at(t).position.au
+    pos = earth.at(t).xyz.au
     print(pos)
 
 .. testoutput::

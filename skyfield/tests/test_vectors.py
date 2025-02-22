@@ -39,7 +39,7 @@ def test_negation():
     neg = -usno
     p1 = usno.at(t)
     p2 = neg.at(t)
-    assert (p1.position.au == - p2.position.au).all()
+    assert (p1.xyz.au == - p2.xyz.au).all()
     assert (p1.velocity.au_per_d == - p2.velocity.au_per_d).all()
 
     # A second negation should return the unwrapped original.

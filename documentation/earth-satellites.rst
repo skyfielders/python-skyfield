@@ -508,7 +508,7 @@ than those of the old J2000 system.)
    t = ts.utc(2014, 1, 23, 11, 18, 7)
 
    geocentric = satellite.at(t)
-   print(geocentric.position.km)
+   print(geocentric.xyz.km)
 
 .. testoutput::
 
@@ -586,7 +586,7 @@ as plain |xyz| coordinates:
 .. testcode::
 
    topocentric = difference.at(t)
-   print(topocentric.position.km)
+   print(topocentric.xyz.km)
 
 .. testoutput::
 
@@ -928,12 +928,12 @@ that are limiting this TLE set’s predictions:
 
     geocentric = sat.at(ts.utc(2013, 11, 9))
     print('Before:')
-    print(geocentric.position.km)
+    print(geocentric.xyz.km)
     print(geocentric.message)
 
     geocentric = sat.at(ts.utc(2013, 11, 13))
     print('\nAfter:')
-    print(geocentric.position.km)
+    print(geocentric.xyz.km)
     print(geocentric.message)
 
 .. testoutput::

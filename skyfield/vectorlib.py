@@ -179,7 +179,7 @@ def _correct_for_light_travel_time(observer, target):
     whole = t.whole
     tdb_fraction = t.tdb_fraction
 
-    cposition = observer.position.au
+    cposition = observer.xyz.au
     cvelocity = observer.velocity.au_per_d
 
     tposition, tvelocity, gcrs_position, message = target._at(t)

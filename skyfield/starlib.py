@@ -109,20 +109,20 @@ class Star(object):
     def _observe_from_bcrs(self, observer):
         position, velocity = self._position_au, self._velocity_au_per_d
         t = observer.t
-        dt = light_time_difference(position, observer.position.au)
+        dt = light_time_difference(position, observer.xyz.au)
         if t.shape:
             position = (outer(velocity, t.tdb + dt - self.epoch).T + position).T
         else:
             position = position + velocity * (t.tdb + dt - self.epoch)
         if len(position.shape) > 1:
-            if len(observer.position.au.shape) > 1:
-                vector = position - observer.position.au
+            if len(observer.xyz.au.shape) > 1:
+                vector = position - observer.xyz.au
                 vel = (observer.velocity.au_per_d.T - velocity).T
             else:
-                vector = (position.T - observer.position.au).T
+                vector = (position.T - observer.xyz.au).T
                 vel = (observer.velocity.au_per_d - velocity.T).T
         else:
-            vector = position - observer.position.au
+            vector = position - observer.xyz.au
             vel = (observer.velocity.au_per_d.T - velocity).T
         distance = length_of(vector)
         light_time = distance / C_AUDAY

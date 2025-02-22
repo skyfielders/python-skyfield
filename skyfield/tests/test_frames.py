@@ -69,11 +69,11 @@ def test_from_frame_method():
     r, v = g1.frame_xyz_and_velocity(framelib.itrs) # which we trust: see above
 
     g2 = Geocentric.from_time_and_frame_vectors(t, framelib.itrs, r, v)
-    assert max(abs(g2.position.au - [1,2,3])) < 2e-14
+    assert max(abs(g2.xyz.au - [1,2,3])) < 2e-14
     assert max(abs(g2.velocity.au_per_d - [4,5,6])) < 3e-14
 
     # Make sure original vectors were not harmed (for example, by "+=").
-    assert list(g1.position.au) == [1,2,3]
+    assert list(g1.xyz.au) == [1,2,3]
     assert list(g1.velocity.au_per_d) == [4,5,6]
 
 def test_frame_without_spin():

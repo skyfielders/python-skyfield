@@ -41,12 +41,12 @@ def test_iss_against_horizons():
 
     t = ts.tdb(2018, 7, 4)
     p = s.at(t)
-    assert abs(p.position.au - hp[:,0]).max() < two_meters
+    assert abs(p.xyz.au - hp[:,0]).max() < two_meters
     assert abs(p.velocity.au_per_d - hv[:,0]).max() < three_km_per_hour
 
     t = ts.tdb(2018, 7, [4, 5])
     p = s.at(t)
-    assert abs(p.position.au - hp).max() < two_meters
+    assert abs(p.xyz.au - hp).max() < two_meters
     assert abs(p.velocity.au_per_d - hv).max() < three_km_per_hour
 
 # The following tests are based on the text of

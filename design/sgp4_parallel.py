@@ -108,15 +108,15 @@ def test_iss():
     satellites = [iss]
     city = Topos('44.0247 N', '88.5426 W')
     for geo1 in positions_for(satellites, city, times):
-        print(geo1.position.km)
+        print(geo1.xyz.km)
     #
     print("Compare to EarthSatellite at():")
     difference = iss - city
     geo2 = difference.at(times)
     #geo2 = iss.at(times)
-    print(geo2.position.km)
+    print(geo2.xyz.km)
     #
-    assert np.allclose(geo1.position.km, geo2.position.km)
+    assert np.allclose(geo1.xyz.km, geo2.xyz.km)
     one_m_per_hour = 1.0 * 24.0 / AU_M
     assert abs(geo1.velocity.au_per_d - geo2.velocity.au_per_d).max() < one_m_per_hour
 
@@ -136,8 +136,8 @@ def test_two_sats():
     kestrel1, iss1 = positions
     iss2 = (iss - city).at(times)
     kestrel2 = (kestrel - city).at(times)
-    assert np.allclose(iss1.position.km, iss2.position.km)
-    assert np.allclose(kestrel1.position.km, kestrel2.position.km)
+    assert np.allclose(iss1.xyz.km, iss2.xyz.km)
+    assert np.allclose(kestrel1.xyz.km, kestrel2.xyz.km)
     assert np.allclose(iss1.velocity.au_per_d, iss2.velocity.au_per_d)
     assert np.allclose(kestrel1.velocity.au_per_d, kestrel2.velocity.au_per_d)
 

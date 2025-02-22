@@ -61,7 +61,7 @@ def test_wgs84_velocity_matches_actual_motion():
     t = ts.utc(2019, 11, 2, 3, 53, [0, 1.0 / factor])
     jacob = wgs84.latlon(36.7138, -112.2169)
     p = jacob.at(t)
-    velocity1 = p.position.km[:,1] - p.position.km[:,0]
+    velocity1 = p.xyz.km[:,1] - p.xyz.km[:,0]
     velocity2 = p.velocity.km_per_s[:,0]
     assert length_of(velocity2 - factor * velocity1) < 0.0007
 
@@ -106,7 +106,7 @@ def test_polar_motion_when_computing_topos_position(ts):
     #               yp_arcseconds, top.itrs_xyz.km, method=1))
 
     expected = (3129.530248036487, -3535.1665884086683, 4273.94957733827)
-    assert max(abs(top.at(t).position.km - expected)) < 3e-11
+    assert max(abs(top.at(t).xyz.km - expected)) < 3e-11
 
 def test_polar_motion_when_computing_altaz_coordinates(ts):
     latitude = 37.3414

@@ -176,7 +176,7 @@ def test_horizons_position_of_latitude_longitude_on_moon():
 
     want = -1.043588965592271E-05, -3.340834944508400E-06, 3.848560523814720E-06
     meter = 1.0 / AU_M
-    assert abs(geometric.position.au - want).max() < 101 * meter
+    assert abs(geometric.xyz.au - want).max() < 101 * meter
 
     want = 3.480953228580460E-07, -2.173626424774260E-06, -9.429610667799021E-07
     assert abs(geometric.velocity.au_per_d - want).max() < 1.6e-10
@@ -265,7 +265,7 @@ def test_using_elevation_to_locate_center_of_moon():
     a2 = (eph['moon'] + place).at(t)
 
     mm = 1e-3
-    assert max(abs(a1.position.m - a2.position.m)) < mm
+    assert max(abs(a1.xyz.m - a2.xyz.m)) < mm
 
 def test_frame_alias():
     pc = PlanetaryConstants()

@@ -9,6 +9,23 @@ Changelog
 Released versions
 -----------------
 
+Next version
+------------
+
+* The documentation now uses the newer name ``.xyz``, which has been
+  quietly supported for around three years, for the
+  :class:`~skyfield.positionlib.ICRF` attribute that was originally
+  named ``.position`` and holds its position vector.  The old name
+  (which will continue to be supported) could lead to code that looked a
+  little redundant, asking for the ``position`` of a ``position``::
+
+    position = mars.at(t)
+    print(position.position)
+
+  So Skyfield now encourages code to ask for ``position.xyz`` instead.
+  Another advantage is that the new name self-documents that it holds a
+  numeric vector with three components.
+
 v1.50 — 2024 February 15
 ------------------------
 

@@ -79,7 +79,7 @@ def test_star_vector_from_earth(ts):
 
     star = api.Star(ra_hours=[1.0, 2.0], dec_degrees=[+3.0, +4.0])
     p = e.observe(star)
-    assert p.position.au.shape == (3, 2)
+    assert p.xyz.au.shape == (3, 2)
     assert p.velocity.au_per_d.shape == (3, 2)
     assert p.t.shape == (2,)
     assert (p.t.tt == api.T0).all()
@@ -87,8 +87,8 @@ def test_star_vector_from_earth(ts):
 
     a1 = e.observe(api.Star(ra_hours=1.0, dec_degrees=+3.0)).apparent()
     a2 = e.observe(api.Star(ra_hours=2.0, dec_degrees=+4.0)).apparent()
-    assert (a1.position.au == a.position.au[:,0]).all()
-    assert (a2.position.au == a.position.au[:,1]).all()
+    assert (a1.xyz.au == a.xyz.au[:,0]).all()
+    assert (a2.xyz.au == a.xyz.au[:,1]).all()
 
 def test_star_vector_from_topos(ts):
     t = ts.tt_jd(api.T0)
@@ -98,7 +98,7 @@ def test_star_vector_from_topos(ts):
 
     star = api.Star(ra_hours=[1.0, 2.0], dec_degrees=[+3.0, +4.0])
     p = b.observe(star)
-    assert p.position.au.shape == (3, 2)
+    assert p.xyz.au.shape == (3, 2)
     assert p.velocity.au_per_d.shape == (3, 2)
     assert p.t.shape == (2,)
     assert (p.t.tt == api.T0).all()
@@ -106,8 +106,8 @@ def test_star_vector_from_topos(ts):
 
     a1 = b.observe(api.Star(ra_hours=1.0, dec_degrees=+3.0)).apparent()
     a2 = b.observe(api.Star(ra_hours=2.0, dec_degrees=+4.0)).apparent()
-    assert (a1.position.au == a.position.au[:,0]).all()
-    assert (a2.position.au == a.position.au[:,1]).all()
+    assert (a1.xyz.au == a.xyz.au[:,0]).all()
+    assert (a2.xyz.au == a.xyz.au[:,1]).all()
 
 def test_hadec_needs_a_longitude(ts):
     e = api.load('de421.bsp')

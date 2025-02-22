@@ -23,7 +23,7 @@ def main():
             for degrees in trial_angles:
                 top = Topos(latitude_degrees=degrees, longitude_degrees=123,
                             elevation_m=elevation_m)
-                xyz_au = top.at(t).position.au
+                xyz_au = top.at(t).xyz.au
                 xyz_au = einsum('ij...,j...->i...', t.M, xyz_au)
                 lat, lon, elev = reverse_terra(xyz_au, t.gast, n)
                 lat = lat / DEG2RAD
