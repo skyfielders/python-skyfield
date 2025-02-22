@@ -254,8 +254,6 @@ class ICRF(object):
         03h 22m 54.73s
         +18deg 33' 04.5"
 
-        To get J2000.0 coordinates, simply pass ``ts.J2000``.
-
         """
         position_au = self.xyz.au
         if epoch is not None:
