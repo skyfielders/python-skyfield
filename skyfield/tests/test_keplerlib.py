@@ -15,7 +15,7 @@ except:
 
 seterr(all='raise')
 
-# Test against HORIZONS.
+# Tests against HORIZONS.
 
 def test_against_horizons():
     # See the following files in the Skyfield repository:
@@ -153,6 +153,31 @@ def test_comet_with_eccentricity_of_exactly_one():
     # tenth of an arcsecond among friends?)
     assert str(ra).startswith('18h 46m 46.4')
     assert str(dec).startswith("-72deg 05' 33.")
+
+# Dimensions.
+
+def test_kepler_shape_with_time_of_length_one():
+    ts = load.timescale()
+    t = ts.utc(2025, 2, [22])
+
+    k = KeplerOrbit._from_mean_anomaly(
+        semilatus_rectum_au=2.7524322097077203,
+        eccentricity=7.705857791518426E-02,
+        inclination_degrees=2.718528770987308E+01,
+        longitude_of_ascending_node_degrees=2.336112629072238E+01,
+        argument_of_perihelion_degrees=1.328964361683606E+02,
+        mean_anomaly_degrees=1.382501360489816E+02,
+        epoch=t,
+        gm_km3_s2=GM_SUN,
+        center=10,
+    )
+    t = ts.utc(2025, 2, 22)
+    p = k.at(t)
+    assert p.xyz.au.shape == (3,)
+
+    t = ts.utc(2025, 2, [22])
+    p = k.at(t)
+    assert p.xyz.au.shape == (3, 1)
 
 # Test various round-trips through the kepler orbit object.
 

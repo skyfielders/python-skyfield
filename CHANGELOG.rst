@@ -29,8 +29,15 @@ Next version
     x, y, z = position.position
 
   So Skyfield now encourages code to ask for ``position.xyz`` instead.
-  Another advantage is that the new name is self-documenting: it holds a
-  3-vector with Cartesian components.
+  An advantage is that the new name is self-documenting: the name
+  reminds the user that it is a 3-vector with Cartesian components.
+
+* Fix: bodies with Kepler orbits (like comets and asteroids) were
+  incorrectly returning positions with only a single dimension if given
+  a :class:`~skyfield.timelib.Time` that was an array but had only one
+  element.  This could cause the rising and setting almanac routines to
+  raise a ``ValueError`` if they found only a single rising or setting.
+  `#959 <https://github.com/skyfielders/python-skyfield/issues/959>`_
 
 * Fix: the position vectors for Kepler orbit bodies, like comets and
   asteroids, now have a useful ``.target_name`` like ``'Ceres'`` or

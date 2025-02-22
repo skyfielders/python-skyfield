@@ -5,8 +5,7 @@ import math
 from numpy import (
     abs, amax, amin, arange, arccos, arctan, array, atleast_1d,
     clip, copy, copyto, cos, cosh, exp, full_like, log, ndarray, newaxis,
-    pi, power, repeat, sign, sin, sinh, squeeze, sqrt, sum,
-    tan, tanh, zeros_like,
+    pi, power, repeat, sign, sin, sinh, sqrt, sum, tan, tanh, zeros_like,
 )
 from skyfield.constants import AU_KM, DAY_S, DEG2RAD
 from skyfield.functions import dots, length_of, mxv
@@ -149,7 +148,6 @@ class _KeplerOrbit(VectorFunction):
                    target_name=target_name,
         )
 
-
     @classmethod
     def _from_mean_anomaly(
             cls,
@@ -238,7 +236,6 @@ class _KeplerOrbit(VectorFunction):
             vel = mxv(self._rotation, vel)
         return pos, vel, None, None
 
-
     @reify
     def elements_at_epoch(self):
         return OsculatingElements(self.position_at_epoch,
@@ -247,27 +244,24 @@ class _KeplerOrbit(VectorFunction):
                                   mu_km_s = self.mu_au3_d2 / _CONVERT_GM,
         )
 
-
     def __str__(self):
         ele = self.elements_at_epoch
         if self.target_name:
-            return 'KeplerOrbit {0} {1} -> {2} {3}'.format(self.center,
-                                                           self.center_name,
-                                                           self.target,
-                                                           self.target_name,
+            return 'KeplerOrbit {0} -> {1}'.format(
+                self.center_name,
+                self.target_name,
             )
-        else:
-            ele = self.elements_at_epoch
-            string = 'KeplerOrbit {0} {1} -> q={2:.2}au e={3:.3f} i={4:.1f} Om={5:.1f} w={6:.1f}'
-            return string.format(self.center,
-                                 self.center_name,
-                                 ele.periapsis_distance.au,
-                                 ele.eccentricity,
-                                 ele.inclination.degrees,
-                                 ele.longitude_of_ascending_node.degrees,
-                                 ele.argument_of_periapsis.degrees,
-            )
-
+        ele = self.elements_at_epoch
+        string = ('KeplerOrbit {} ->'
+                  ' q={:.2}au e={:.3f} i={:.1f} Om={:.1f} w={:.1f}')
+        return string.format(
+            self.center_name,
+            ele.periapsis_distance.au,
+            ele.eccentricity,
+            ele.inclination.degrees,
+            ele.longitude_of_ascending_node.degrees,
+            ele.argument_of_periapsis.degrees,
+        )
 
     def __repr__(self):
         return '<{0}>'.format(str(self))
@@ -305,7 +299,6 @@ def true_anomaly_hyperbolic(e, E):
     """
     return 2.0 * arctan(sqrt((e + 1.0) / (e - 1.0)) * tanh(E/2))
 
-
 def true_anomaly_closed(e, E):
     """Calculates true anomaly from eccentricity and eccentric anomaly.
 
@@ -313,7 +306,6 @@ def true_anomaly_closed(e, E):
 
     """
     return 2.0 * arctan(sqrt((1.0 + e) / (1.0 - e)) * tan(E/2))
-
 
 def true_anomaly_parabolic(p, gm, M):
     """Calculates true anomaly from semi-latus rectum, gm, and mean anomaly.
@@ -327,7 +319,6 @@ def true_anomaly_parabolic(p, gm, M):
     A = 3 / 2 * sqrt(gm / (2 * periapsis_distance**3)) * delta_t
     B = (A + (A*A + 1))**(1/3)
     return 2 * arctan(B - 1/B)
-
 
 def ele_to_vec(p, e, i, Om, w, v, mu):
     """Calculates state vectors from orbital elements. Also checks for invalid
@@ -381,9 +372,7 @@ def ele_to_vec(p, e, i, Om, w, v, mu):
 
     return array([X, Y, Z]), array([X_dot, Y_dot, Z_dot])
 
-
 dpmax = sys.float_info.max
-
 
 def find_trunc():
     denom = 2
@@ -396,7 +385,6 @@ def find_trunc():
         trunc = trunc + 1
         x = 1 / denom
     return trunc
-
 
 trunc = find_trunc()
 odd_factorials = array([math.factorial(i) for i in range(3, trunc*2, 2)])
@@ -463,6 +451,8 @@ def propagate(position, velocity, t0, t1, gm):
     gm : float
         Gravitational parameter in units that match the other arguments
     """
+    output_shape = (3,) + t1.shape
+
     gm = atleast_1d(gm)
     if (gm <= 0).any():
         raise ValueError("'gm' should be positive")
@@ -497,7 +487,6 @@ def propagate(position, velocity, t0, t1, gm):
     bq = b * q
     qovr0 = q / r0
 
-
     maxc = amax(array([abs(br0),
                abs(b2rv),
                abs(bq),
@@ -529,7 +518,6 @@ def propagate(position, velocity, t0, t1, gm):
     def kepler_1d(x, orb_inds):
         _, c1, c2, c3 = stumpff(x*x*repeat(f, orb_inds))
         return x*(c1*repeat(br0, orb_inds) + x*(c2*repeat(b2rv, orb_inds) + x*(c3*repeat(bq, orb_inds))))
-
 
     t1 = atleast_1d(t1)
     t0 = atleast_1d(t0)
@@ -622,4 +610,6 @@ def propagate(position, velocity, t0, t1, gm):
     position_prop = pc[newaxis, :, :]*position[:, :, newaxis] + vc[newaxis, :, :]*velocity[:, :, newaxis]
     velocity_prop = pcdot[newaxis, :, :]*position[:, :, newaxis] + vcdot[newaxis, :, :]*velocity[:, :, newaxis]
 
-    return squeeze(position_prop), squeeze(velocity_prop)
+    position_prop.shape = output_shape
+    velocity_prop.shape = output_shape
+    return position_prop, velocity_prop
