@@ -40,7 +40,7 @@ def test_against_horizons():
         epoch=t,
         gm_km3_s2=GM_SUN,
         center=None,
-        target=None,
+        target_name=None,
     )
     r, v = k._at(t)[:2]
     sun_au = [
@@ -70,7 +70,8 @@ def test_minor_planet_with_positive_M():
     ceres = mpc.mpcorb_orbit(row, ts, GM_SUN)
     ra, dec, distance = eph['earth'].at(t).observe(eph['sun'] + ceres).radec()
 
-    assert ceres.target == '(1) Ceres'
+    assert ceres.target is ceres
+    assert ceres.target_name == '(1) Ceres'
     assert abs(ra.hours - 23.1437) < 0.00005
     assert abs(dec.degrees - -17.323) < 0.0005
 
@@ -94,7 +95,8 @@ def test_minor_planet_with_negative_M():
 
     # We can't expect close agreement, since the HORIZONS orbital
     # elements are different than MPC's.
-    assert ceres.target == '(2) Pallas'
+    assert ceres.target is ceres
+    assert ceres.target_name == '(2) Pallas'
     assert abs(ra.degrees - 92.750) < 0.006
     assert abs(dec.degrees - -10.561) < 0.002
 
@@ -125,7 +127,8 @@ def test_comet():
         assert abs(dec_want.arcseconds() - dec.arcseconds()) < 0.2
         assert abs(distance.au - 43.266) < 0.0005
 
-        assert k.target == 'C/1995 O1 (Hale-Bopp)'
+        assert k.target is k
+        assert k.target_name == 'C/1995 O1 (Hale-Bopp)'
 
 def test_comet_with_eccentricity_of_exactly_one():
     ts = load.timescale()

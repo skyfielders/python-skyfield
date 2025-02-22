@@ -32,6 +32,10 @@ Next version
   Another advantage is that the new name is self-documenting: it holds a
   3-vector with Cartesian components.
 
+* Fix: the position vectors for Kepler orbit bodies, like comets and
+  asteroids, now have a useful ``.target_name`` like ``'Ceres'`` or
+  ``'1P/Halley'`` instead of the less informative value ``'str'``.
+
 v1.50 — 2024 February 15
 ------------------------
 

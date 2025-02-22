@@ -25,7 +25,7 @@ class _KeplerOrbit(VectorFunction):
                  epoch,
                  mu_au3_d2,
                  center=None,
-                 target=None,
+                 target_name=None,
         ):
         """ Calculates the position of an object using 2 body propagation
 
@@ -50,9 +50,13 @@ class _KeplerOrbit(VectorFunction):
         self.epoch = epoch
         self.mu_au3_d2 = mu_au3_d2
         self.center = center
-        self.target = target
+        self.target_name = target_name
 
         self._rotation = None  # TODO: make argument?
+
+    @property
+    def target(self):
+        return self  # this instance itself represents the target object
 
     @classmethod
     def _from_periapsis(
@@ -65,7 +69,7 @@ class _KeplerOrbit(VectorFunction):
             t_periapsis,
             gm_km3_s2,
             center=None,
-            target=None,
+            target_name=None,
         ):
         """Build a `KeplerOrbit` given its parameters and date of periapsis."""
         gm_au3_d2 = gm_km3_s2 * _CONVERT_GM
@@ -84,7 +88,7 @@ class _KeplerOrbit(VectorFunction):
             t_periapsis,
             gm_au3_d2,
             center,
-            target,
+            target_name,
         )
 
     @classmethod
@@ -93,7 +97,7 @@ class _KeplerOrbit(VectorFunction):
                           mu_km_s=None,
                           mu_au3_d2=None,
                           center=None,
-                          target=None,
+                          target_name=None,
         ):
         """ Creates a `KeplerOrbit` object from elements using true anomaly
 
@@ -142,7 +146,7 @@ class _KeplerOrbit(VectorFunction):
                    epoch,
                    mu_km_s,
                    center=center,
-                   target=target,
+                   target_name=target_name,
         )
 
 
@@ -158,7 +162,7 @@ class _KeplerOrbit(VectorFunction):
             epoch,
             gm_km3_s2,
             center=None,
-            target=None,
+            target_name=None,
         ):
         """ Creates a `KeplerOrbit` object from elements using mean anomaly
 
@@ -214,7 +218,7 @@ class _KeplerOrbit(VectorFunction):
             epoch,
             gm_au3_d2,
             center,
-            target,
+            target_name,
         )
 
     def _at(self, time):
