@@ -44,11 +44,10 @@ def main(argv):
         url = 'https://maia.usno.navy.mil/ser7/finals2000A.all'
         f = load.open(url)
     with f:
-        utc_mjd, dut1 = iers.parse_dut1_from_finals_all(f)
-
+        finals2000A = iers.parse_x_y_dut1_from_finals_all(f)
 
     daily_tt, daily_delta_t, leap_dates, leap_offsets = (
-        iers.build_timescale_arrays(utc_mjd, dut1)
+        iers.build_timescale_arrays(finals2000A['utc_mjd'], finals2000A['dut1'])
     )
 
     # Removing the 1.0 increment between terms offers vastly improved
