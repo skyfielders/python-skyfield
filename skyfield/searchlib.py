@@ -58,18 +58,18 @@ def _find_discrete(ts, jd, f, epsilon, num):
         indices = flatnonzero(diff(y))
         if not len(indices):
             # Nothing found, so immediately return empty arrays.
-            ends = jd.take(indices)
-            y = y.take(indices)
+            ends = jd[indices]
+            y = y[indices]
             break
 
-        starts = jd.take(indices)
-        ends = jd.take(indices + 1)
+        starts = jd[indices]
+        ends = jd[indices + 1]
 
         # Since we start with equal intervals, they all should fall
         # below epsilon at around the same time; so for efficiency we
         # only test the first pair.
         if ends[0] - starts[0] <= epsilon:
-            y = y.take(indices + 1)
+            y = y[indices + 1]
             # Keep only the last of several zero crossings that might
             # possibly be separated by less than epsilon.
             mask = concatenate(((diff(ends) > 3.0 * epsilon), (True,)))
@@ -174,8 +174,8 @@ def find_maxima(start_time, end_time, f, epsilon=1.0 / DAY_S, num=12):
             jd = y = y[0:0]
             break
 
-        starts = jd.take(left)
-        ends = jd.take(right)
+        starts = jd[left]
+        ends = jd[right]
 
         jd = o(starts, start_alpha).flatten() + o(ends, end_alpha).flatten()
         jd = _remove_adjacent_duplicates(jd)
@@ -197,21 +197,21 @@ def _identify_maxima(x, y):
 
     # Choose every point that is higher than the two adjacent points.
     indices = flatnonzero(dsd == -2) + 1
-    peak_x = x.take(indices)
-    peak_y = y.take(indices)
+    peak_x = x[indices]
+    peak_y = y[indices]
 
     # Also choose the midpoint between the edges of a plateau, if both
     # edges are in view.  First we eliminate runs of zeroes, then look
     # for adjacent -1 values, then map those back to the main array.
     indices = flatnonzero(dsd)
-    dsd2 = dsd.take(indices)
+    dsd2 = dsd[indices]
     minus_ones = dsd2 == -1
     plateau_indices = flatnonzero(minus_ones[:-1] & minus_ones[1:])
-    plateau_left_indices = indices.take(plateau_indices)
-    plateau_right_indices = indices.take(plateau_indices + 1) + 2
-    plateau_x = x.take(plateau_left_indices) + x.take(plateau_right_indices)
+    plateau_left_indices = indices[plateau_indices]
+    plateau_right_indices = indices[plateau_indices + 1] + 2
+    plateau_x = x[plateau_left_indices] + x[plateau_right_indices]
     plateau_x /= 2.0
-    plateau_y = y.take(plateau_left_indices + 1)
+    plateau_y = y[plateau_left_indices + 1]
 
     x = concatenate((peak_x, plateau_x))
     y = concatenate((peak_y, plateau_y))
