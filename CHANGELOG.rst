@@ -32,6 +32,9 @@ Next version
   An advantage is that the new name is self-documenting: the name
   reminds the user that it is a 3-vector of Cartesian components.
 
+* Skyfield’s internal table for the ∆T Earth orientation parameter has
+  been updated, so that its predictions now extend to 2026-02-28.
+
 * Fix: the :meth:`~skyfield.sgp4lib.EarthSatellite.find_events()` Earth
   satellite method was returning an empty list of events if the only
   event in the time period was a lone rising or setting.  It should now
