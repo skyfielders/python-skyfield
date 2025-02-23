@@ -1,9 +1,9 @@
 """Elegant astronomy for Python
 
 Most users will use Skyfield by importing ``skyfield.api`` and using the
-functions and classes there.  See the ``documentation`` directory inside
-the repository, as well as the http://rhodesmill.org/skyfield/ site!
+functions and classes there.  Visit https://rhodesmill.org/skyfield/ or
+read the same content in the ``documentation`` directory in the repo.
 
 """
-VERSION = 1, 50
+VERSION = 1, 51
 __version__ = '.'.join(map(str, VERSION))

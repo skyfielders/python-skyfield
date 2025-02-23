@@ -9,8 +9,8 @@ Changelog
 Released versions
 -----------------
 
-Next version
-------------
+v1.51 — 2024 February 23
+------------------------
 
 * Skyfield now supports ephemeris files like ``de441.bsp`` that have two
   or more segments per target.  In earlier versions of Skyfield, only
