@@ -40,6 +40,6 @@ setup(
         'certifi>=2017.4.17',  # version constraint copied from Requests
         'jplephem>=2.13',
         'numpy',
-        'sgp4>=2.2',
+        'sgp4>=2.13',
     ],
 )
