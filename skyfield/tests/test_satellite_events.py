@@ -1,5 +1,6 @@
 from skyfield.api import EarthSatellite, load, wgs84
 
+debug = False
 second = 1.0 / 24.0 / 3600.0
 
 def test_satellite_events_on_several_satellites():
@@ -17,20 +18,21 @@ def test_satellite_events_on_several_satellites():
         print('{}: {} events'.format(name, len(t)))
 
         assert len(t) == len(y)
-        assert len(t) == number_events_expected
-
         if len(t) == 0:
+            assert len(t) == number_events_expected
             return
 
         geometric = sat - topos
-        t3 = ts.tt_jd((t.tt[:,None] + [[-second, 0, +second]]).flatten())
+        t3 = ts.tt_jd((t.tt[:,None] + [[-second/2, 0, +second/2]]).flatten())
         alt = geometric.at(t3).altaz()[0].degrees
         last_event = None
 
         for i, (ti, yi) in enumerate(zip(t, y)):
             j = i*3
             alt1, alt2, alt3 = alt[j], alt[j+1], alt[j+2]
-            print(i, ti, yi, alt1, alt2, alt3)
+            if debug:
+                print('{:3d}  {}  {}  {:12.9f} {:12.9f} {:12.9f}'.format(
+                    i, ti.utc_strftime(), yi, alt1, alt2, alt3))
             event = ('rise', 'culminate', 'set')[yi]
             if event == 'rise':
                 assert alt1 < alt2 < alt3
@@ -45,6 +47,10 @@ def test_satellite_events_on_several_satellites():
                 assert alt1 > horizon > alt3
                 assert last_event in (None, 'culminate')
             last_event = event
+
+        # Check this last, so that events still get printed out (with
+        # `debug=True`) even if their total number is incorrect.
+        assert len(t) == number_events_expected
 
     # Start easy: typical LEO.
 
@@ -114,6 +120,19 @@ def test_satellite_events_on_several_satellites():
         '1 43477U 18047B   20011.66650462 +.00000719  00000-0 +29559-4 0    08',
         '2 43477  88.9974 159.0391 0019438 141.4770 316.8932 15.23958285 91199',
         90,
+    )
+
+    # Issue #559: avoid missing a rising that's very close to culmination.
+
+    t0 = ts.tt_jd(2459277.4)
+    t1 = ts.tt_jd(2459277.6)
+    topos = wgs84.latlon(+53.10373, +8.85132)
+    horizon = 25.0
+    run_sat(
+        'Starlink 172',
+        '1 00172U 19029BR  21063.59692852  .00001103  00000-0  33518-4 0  9998',
+        '2 00172 53.00000  36.7036 0003481 299.7327  99.3331 15.05527065  1779',
+        6,
     )
 
     # Issue #996: detect setting even if we missed the culmination

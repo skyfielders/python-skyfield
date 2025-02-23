@@ -46,6 +46,11 @@ Next version
   return an accurate setting time.
   `#1000 <https://github.com/skyfielders/python-skyfield/issues/1000>`_
 
+* Fix: the :meth:`~skyfield.sgp4lib.EarthSatellite.find_events()` Earth
+  satellite method would miss a rising that came a fraction of a second
+  before the corresponding culmination.  It should now find both.
+  `#559 <https://github.com/skyfielders/python-skyfield/issues/559>`_
+
 * Fix: bodies with Kepler orbits (like comets and asteroids) were
   incorrectly returning positions with only a single dimension if given
   a :class:`~skyfield.timelib.Time` that was an array but had only one
