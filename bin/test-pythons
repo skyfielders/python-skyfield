@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -e
+
+cd "$(readlink -f $(dirname "${BASH_SOURCE[0]}"))"
+cd ..
+
+./bin/build
+
+for version in 3.7 3.13
+do
+    echo
+    echo $version
+    echo
+    venv=.tox/$version
+    if [ ! -d $venv ]
+    then
+        uv venv --python $version $venv
+    fi
+    source $venv/bin/activate
+    pushd ci
+    uv pip install pytz pandas
+    uv pip install ../dist/skyfield-1.51-py3-none-any.whl
+    uv pip install ~/assay
+    assay --batch skyfield.tests
+    popd
+done
