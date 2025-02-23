@@ -12,9 +12,9 @@ def test_satellite_events_on_several_satellites():
     # 3) No double rises or double sets
 
     def run_sat(name, line1, line2, number_events_expected):
-        print(name)
         sat = EarthSatellite(line1, line2, name)
         t, y = sat.find_events(topos, t0, t1, horizon)
+        print('{}: {} events'.format(name, len(t)))
 
         assert len(t) == len(y)
         assert len(t) == number_events_expected
@@ -116,7 +116,20 @@ def test_satellite_events_on_several_satellites():
         90,
     )
 
-    # Issue #996: should detect rising without needing a culmination
+    # Issue #996: detect setting even if we missed the culmination
+
+    t0 = ts.utc(2022, 1, 2, 3, 15)
+    t1 = ts.utc(2022, 1, 2, 3, 45)
+    topos = wgs84.latlon(-24.626331, -70.403964, 2369.34)
+    horizon = 30.0
+    run_sat(
+        'O3B PFM',
+        '1 39191U 13031D   21365.68950013 -.00000013  00000-0  00000-0 0  9995',
+        '2 39191 000.0397 004.0913 0002586 278.0623 077.8173 05.00115674155430',
+        1,
+    )
+
+    # Issue #996 (comment): detect rising without a culmination
 
     t0 = ts.utc(2024, 8, 26, 8, 38)
     t1 = t0 + 5.0/24.0

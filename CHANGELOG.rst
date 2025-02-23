@@ -32,6 +32,11 @@ Next version
   An advantage is that the new name is self-documenting: the name
   reminds the user that it is a 3-vector with Cartesian components.
 
+* Fix: the :meth:`~skyfield.sgp4lib.EarthSatellite.find_events()` Earth
+  satellite method was returning an empty list of events if the only
+  event in the time period was a sole rising or setting.  It should now
+  find them successfully.
+
 * Fix: bodies with Kepler orbits (like comets and asteroids) were
   incorrectly returning positions with only a single dimension if given
   a :class:`~skyfield.timelib.Time` that was an array but had only one
