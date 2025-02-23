@@ -1,24 +1,8 @@
-import os
-
-if 'SKYFIELD_USE_SETUPTOOLS' in os.environ:
-    import setuptools
-    print('Using setuptools version', setuptools.__version__)
-
 from distutils.core import setup
-from distutils.command.sdist import sdist
 
 import skyfield  # safe, because __init__.py contains no import statements
 
-class my_sdist(sdist):
-    def make_distribution(self):
-        # See https://github.com/skyfielders/python-skyfield/issues/378
-        for path in self.filelist.files:
-            if os.path.isfile(path):  # so we don't "chmod a-x" any directories
-                os.chmod(path, 0o644)
-        sdist.make_distribution(self)
-
 setup(
-    cmdclass={'sdist': my_sdist},
     name='skyfield',
     version=skyfield.__version__,
     description=skyfield.__doc__.split('\n', 1)[0],

@@ -1,14 +1,25 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 cd "$(readlink -f $(dirname "${BASH_SOURCE[0]}"))"
 cd ..
 
-# Alas!  Unless we 'rm' the build/ directory first, the wheel will
-# include old files that are no longer part of Skyfield but that are
-# left over from previous builds.
-rm -rf build/
+echo
+echo 'Have you remembered to rebuild the delta-T tables?'
+echo
 
-python setup.py sdist $@
-SKYFIELD_USE_SETUPTOOLS=yes python setup.py bdist_wheel $@
+echo 'Looking for bad file permissions...'
+bad=$(
+    find skyfield -type f ! -perm -644
+    find skyfield -type d ! -perm -755
+)
+if [ -n "$bad" ]
+then
+    ls -ld $bad
+    exit 1
+fi
+echo 'Everything looks good!'
+echo
+
+PYTHONDONTWRITEBYTECODE= uv build
