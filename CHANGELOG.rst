@@ -36,7 +36,9 @@ Next version
   satellite method was returning an empty list of events if the only
   event in the time period was a lone rising or setting.  It should now
   detect and return them.
+  `#856 <https://github.com/skyfielders/python-skyfield/issues/856>`_
   `#996 <https://github.com/skyfielders/python-skyfield/issues/996>`_
+  `#1017 <https://github.com/skyfielders/python-skyfield/issues/1017>`_
 
 * Fix: the :meth:`~skyfield.sgp4lib.EarthSatellite.find_events()` Earth
   satellite method, faced with a single pass that was very close to the
