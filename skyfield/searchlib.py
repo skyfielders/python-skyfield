@@ -65,10 +65,7 @@ def _find_discrete(ts, jd, f, epsilon, num):
         starts = jd[indices]
         ends = jd[indices + 1]
 
-        # Since we start with equal intervals, they all should fall
-        # below epsilon at around the same time; so for efficiency we
-        # only test the first pair.
-        if ends[0] - starts[0] <= epsilon:
+        if (ends - starts).max() <= epsilon:
             y = y[indices + 1]
             # Keep only the last of several zero crossings that might
             # possibly be separated by less than epsilon.

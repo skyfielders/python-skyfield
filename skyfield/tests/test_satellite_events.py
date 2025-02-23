@@ -141,3 +141,21 @@ def test_satellite_events_on_several_satellites():
         '2 41105   5.0153  78.6193 0002491 153.4123  31.4253  1.00270890 31881',
         1,
     )
+
+def test_earth_satellite_pass_very_close_to_start_time():
+    ts = load.timescale()
+    t0 = ts.utc(2024, 9, 5)
+    t1 = ts.utc(2024, 9, 6)
+    observer = wgs84.latlon(+48.6622, +34.8862, 0)
+    satellite = EarthSatellite(
+        '1 38707U 12039A   24247.82317651  .00138984  00000-0  16635-2 0  9998',
+        '2 38707  97.4945 189.8924 0007050 108.0286 252.1739 15.60479551673427',
+        'KANOPUS', ts,
+    )
+    t, y = satellite.find_events(observer, t0, t1, 70.0)
+    assert list(y) == [0, 1, 2]
+    assert t.utc_strftime() == [
+        '2024-09-05 00:00:32 UTC',
+        '2024-09-05 00:00:50 UTC',
+        '2024-09-05 00:01:08 UTC',  # was 00:02:56 before bug was fixed
+    ]

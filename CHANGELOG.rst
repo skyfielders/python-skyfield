@@ -30,12 +30,19 @@ Next version
 
   So Skyfield now encourages code to ask for ``position.xyz`` instead.
   An advantage is that the new name is self-documenting: the name
-  reminds the user that it is a 3-vector with Cartesian components.
+  reminds the user that it is a 3-vector of Cartesian components.
 
 * Fix: the :meth:`~skyfield.sgp4lib.EarthSatellite.find_events()` Earth
   satellite method was returning an empty list of events if the only
-  event in the time period was a sole rising or setting.  It should now
-  find them successfully.
+  event in the time period was a lone rising or setting.  It should now
+  detect and return them.
+  `#996 <https://github.com/skyfielders/python-skyfield/issues/996>`_
+
+* Fix: the :meth:`~skyfield.sgp4lib.EarthSatellite.find_events()` Earth
+  satellite method, faced with a single pass that was very close to the
+  start time, was returning an inaccurate setting time.  It should now
+  return an accurate setting time.
+  `#1000 <https://github.com/skyfielders/python-skyfield/issues/1000>`_
 
 * Fix: bodies with Kepler orbits (like comets and asteroids) were
   incorrectly returning positions with only a single dimension if given
