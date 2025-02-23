@@ -266,8 +266,6 @@ class EarthSatellite(VectorFunction):
 
         altitude_at.step_days = step_days
         tmax, altitude = find_maxima(t0, t1, altitude_at, half_second, 12)
-        if not tmax:
-            return tmax, ones_like(tmax)
 
         # Next, filter out the maxima that are not high enough.
 

@@ -14,7 +14,7 @@ def test_satellite_events_on_several_satellites():
     def run_sat(name, line1, line2, number_events_expected):
         print(name)
         sat = EarthSatellite(line1, line2, name)
-        t, y = sat.find_events(boston, t0, t1, horizon)
+        t, y = sat.find_events(topos, t0, t1, horizon)
 
         assert len(t) == len(y)
         assert len(t) == number_events_expected
@@ -22,7 +22,7 @@ def test_satellite_events_on_several_satellites():
         if len(t) == 0:
             return
 
-        geometric = sat - boston
+        geometric = sat - topos
         t3 = ts.tt_jd((t.tt[:,None] + [[-second, 0, +second]]).flatten())
         alt = geometric.at(t3).altaz()[0].degrees
         last_event = None
@@ -50,6 +50,7 @@ def test_satellite_events_on_several_satellites():
 
     t0 = ts.tai(2014, 11, 10)
     t1 = ts.tai(2014, 11, 11)
+    topos = boston
 
     run_sat(
         'TIANGONG 1',
@@ -113,4 +114,17 @@ def test_satellite_events_on_several_satellites():
         '1 43477U 18047B   20011.66650462 +.00000719  00000-0 +29559-4 0    08',
         '2 43477  88.9974 159.0391 0019438 141.4770 316.8932 15.23958285 91199',
         90,
+    )
+
+    # Issue #996: should detect rising without needing a culmination
+
+    t0 = ts.utc(2024, 8, 26, 8, 38)
+    t1 = t0 + 5.0/24.0
+    topos = wgs84.latlon(55.671429, 37.62539, 180.0)
+    horizon = 14.0
+    run_sat(
+        'ELEKTRO-L',
+        '1 41105U 15074A   24238.84268576 -.00000128  00000+0  00000+0 0  9993',
+        '2 41105   5.0153  78.6193 0002491 153.4123  31.4253  1.00270890 31881',
+        1,
     )
