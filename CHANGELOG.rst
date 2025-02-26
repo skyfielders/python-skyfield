@@ -9,7 +9,7 @@ Changelog
 Released versions
 -----------------
 
-v1.51 — 2024 February 23
+v1.51 — 2025 February 23
 ------------------------
 
 * Skyfield now supports ephemeris files like ``de441.bsp`` that have two
@@ -65,7 +65,7 @@ v1.51 — 2024 February 23
   asteroids, now have a useful ``.target_name`` like ``'Ceres'`` or
   ``'1P/Halley'`` instead of the less informative value ``'str'``.
 
-v1.50 — 2024 February 15
+v1.50 — 2025 February 15
 ------------------------
 
 * A new :class:`~skyfield.framelib.mean_equator_and_equinox_of_date`
