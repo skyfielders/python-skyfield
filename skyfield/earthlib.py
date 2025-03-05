@@ -1,7 +1,7 @@
 """Formulae for specific earth behaviors and effects."""
 
-from numpy import (abs, arcsin, arccos, arctan2, array, clip, cos,
-                   minimum, pi, sin, sqrt, tan, where, zeros_like)
+from numpy import (abs, arcsin, arccos, arctan2, array, clip, cos, minimum,
+                   nan_to_num, pi, sin, sqrt, tan, where, zeros_like)
 
 from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
                         IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0, tau)
@@ -105,7 +105,6 @@ def compute_limb_angle(position_au, observer_au):
 
     return limb_angle, nadir_angle
 
-
 def sidereal_time(t):
     """Compute Greenwich Mean Sidereal Time (GMST) in hours at time ``t``."""
 
@@ -125,7 +124,6 @@ def sidereal_time(t):
 
     return (st / 54000.0 + theta * 24.0) % 24.0
 
-
 def earth_rotation_angle(jd_ut1, fraction_ut1=0.0):
     """Return the value of the Earth Rotation Angle (theta) for a UT1 date.
 
@@ -135,7 +133,6 @@ def earth_rotation_angle(jd_ut1, fraction_ut1=0.0):
     """
     th = 0.7790572732640 + 0.00273781191135448 * (jd_ut1 - T0 + fraction_ut1)
     return (th % 1.0 + jd_ut1 % 1.0 + fraction_ut1) % 1.0
-
 
 def refraction(alt_degrees, temperature_C, pressure_mbar):
     """Given an observed altitude, estimate atmospheric refraction, in degrees.
@@ -148,14 +145,13 @@ def refraction(alt_degrees, temperature_C, pressure_mbar):
     d = r * (0.28 * pressure_mbar / (temperature_C + 273.0))
     return where((-1.0 <= alt_degrees) & (alt_degrees <= 89.9), d, 0.0)
 
-
 def refract(alt_degrees, temperature_C, pressure_mbar):
     """Given an unrefracted `alt` determine where it will appear in the sky."""
     alt = alt_degrees
     while True:
         alt1 = alt
         alt = alt_degrees + refraction(alt, temperature_C, pressure_mbar)
-        converged = abs(alt - alt1).max() <= 3.0e-5
+        converged = nan_to_num(abs(alt - alt1)).max() <= 3.0e-5
         if converged:
             break
     return alt

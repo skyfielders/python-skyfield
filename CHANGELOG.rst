@@ -9,6 +9,15 @@ Changelog
 Released versions
 -----------------
 
+Unreleased future version
+-------------------------
+
+* Fix: if the :meth:`~skyfield.positionlib.ICRF.altaz()` method was
+  given a position with a NaN coordinate and ``temperature_C`` and
+  ``pressure_mbar`` parameters with which to compute refraction, then it
+  would loop forever.
+  `#1046 <https://github.com/skyfielders/python-skyfield/issues/1046>`_
+
 v1.51 — 2025 February 23
 ------------------------
 

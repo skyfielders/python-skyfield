@@ -1,5 +1,5 @@
-from numpy import array, sqrt
-from skyfield.earthlib import AU_M, ERAD, reverse_terra, tau
+from numpy import array, isnan, nan, sqrt
+from skyfield.earthlib import AU_M, ERAD, refract, reverse_terra, tau
 
 def test_reverse_terra_with_zero_iterations():
     # With zero iterations, should return "geocentric" rather than
@@ -9,3 +9,6 @@ def test_reverse_terra_with_zero_iterations():
     assert abs(lat - tau / 8) < 1e-16
     assert lon == 0.0
     assert abs(elevation_m - (AU_M * sqrt(2) - ERAD)) < one_millimeter
+
+def test_refract_with_nan_does_not_loop_forever():
+    assert isnan(refract(nan, 10.0, 1010.0))
