@@ -76,7 +76,9 @@ def add_deflection(position, observer, ephemeris, t,
 
         bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
         rmass = rmasses[name]
-        position += compute_deflection(position, observer, bposition, rmass)
+        pq = observer + position - bposition
+        pe = observer - bposition
+        position += compute_deflection(position, pq, pe, rmass)
 
     # If observer is not at geocenter, add in deflection due to Earth.
 
@@ -84,9 +86,11 @@ def add_deflection(position, observer, ephemeris, t,
         deflector = ephemeris['earth']
         bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
         rmass = rmasses['earth']
-        d = compute_deflection(position, observer, bposition, rmass)
+        pq = observer + position - bposition
+        pe = observer - bposition
+        d = compute_deflection(position, pq, pe, rmass)
         if include_earth_deflection.shape:
-            d *= include_earth_deflection  # where False, drop `d` to zero
+            d *= include_earth_deflection  # where False, set `d` to zero
         position += d
 
 def light_time_difference(position, observer_position):
@@ -107,8 +111,12 @@ def light_time_difference(position, observer_position):
     diflt = einsum('a...,a...', u1, observer_position) / C_AUDAY
     return diflt
 
-def compute_deflection(position, observer, deflector, rmass):
+def compute_deflection(position, pq, pe, rmass):
     """Correct a position vector for how one particular mass deflects light.
+
+    TODO: update this docstring
+    # Construct vector 'pq' from gravitating body to observed object and
+    # construct vector 'pe' from gravitating body to observer.
 
     Given the ICRS `position` |xyz| of an object (AU) together with
     the positions of an `observer` and a `deflector` of reciprocal mass
@@ -116,12 +124,6 @@ def compute_deflection(position, observer, deflector, rmass):
     the presence of the deflector will deflect the image of the object.
 
     """
-    # Construct vector 'pq' from gravitating body to observed object and
-    # construct vector 'pe' from gravitating body to observer.
-
-    pq = observer + position - deflector
-    pe = observer - deflector
-
     # Compute vector magnitudes and unit vectors.
 
     pmag = length_of(position)
