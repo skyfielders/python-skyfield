@@ -60,7 +60,7 @@ class mean_equator_and_equinox_of_date(object):
     """
     @staticmethod
     def rotation_at(t):
-        return t.P
+        return mxm(t.P, ICRS_to_J2000)
 
 class true_equator_and_equinox_of_date(object):
     """The dynamical frame of Earth’s true equator and true equinox of date.

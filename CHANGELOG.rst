@@ -18,6 +18,10 @@ Unreleased future version
   would loop forever.
   `#1046 <https://github.com/skyfielders/python-skyfield/issues/1046>`_
 
+* Fix: the new :class:`~skyfield.framelib.mean_equator_and_equinox_of_date`
+  reference frame was off by nearly 0.02 arcseconds because it applied
+  precession but forgot to apply the frame tie between ICRS and J2000.
+
 v1.51 — 2025 February 23
 ------------------------
 
