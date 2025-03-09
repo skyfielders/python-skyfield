@@ -76,7 +76,7 @@ def add_deflection(position, observer, ephemeris, t,
 
         bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
         rmass = rmasses[name]
-        _add_deflection(position, observer, bposition, rmass)
+        position += compute_deflection(position, observer, bposition, rmass)
 
     # If observer is not at geocenter, add in deflection due to Earth.
 
@@ -84,16 +84,10 @@ def add_deflection(position, observer, ephemeris, t,
         deflector = ephemeris['earth']
         bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
         rmass = rmasses['earth']
-        # TODO: Make the following code less messy, maybe by having
-        # _add_deflection() return a new vector instead of modifying the
-        # old one in-place.
-        deflected_position = position.copy()
-        _add_deflection(deflected_position, observer, bposition, rmass)
+        d = compute_deflection(position, observer, bposition, rmass)
         if include_earth_deflection.shape:
-            position[:,include_earth_deflection] = (
-                deflected_position[:,include_earth_deflection])
-        else:
-            position[:] = deflected_position[:]
+            d *= include_earth_deflection  # where False, drop `d` to zero
+        position += d
 
 def light_time_difference(position, observer_position):
     """Returns the difference in light-time, for a star,
@@ -113,7 +107,7 @@ def light_time_difference(position, observer_position):
     diflt = einsum('a...,a...', u1, observer_position) / C_AUDAY
     return diflt
 
-def _add_deflection(position, observer, deflector, rmass):
+def compute_deflection(position, observer, deflector, rmass):
     """Correct a position vector for how one particular mass deflects light.
 
     Given the ICRS `position` |xyz| of an object (AU) together with
@@ -146,19 +140,16 @@ def _add_deflection(position, observer, deflector, rmass):
 
     # If gravitating body is observed object, or is on a straight line
     # toward or away from observed object to within 1 arcsec, deflection
-    # is set to zero set 'pos2' equal to 'pos1'.
+    # is set to zero.
 
-    make_no_correction = abs(edotp) > 0.99999999999
+    flag = abs(edotp) <= 0.99999999999
 
     # Compute scalar factors.
 
     fac1 = 2.0 * GS / (C * C * emag * AU_M * rmass)
     fac2 = 1.0 + qdote
 
-    # Correct position vector.
-
-    position += where(make_no_correction, 0.0,
-                      fac1 * (pdotq * ehat - edotp * qhat) / fac2 * pmag)
+    return flag * fac1 * (pdotq * ehat - edotp * qhat) / fac2 * pmag
 
 def add_aberration(position, velocity, light_time):
     """Correct a relative position vector for aberration of light.
