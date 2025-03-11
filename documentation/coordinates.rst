@@ -295,7 +295,7 @@ which measures ±180° from your own local meridian.
 To make the hour angle and declination even more useful
 for pointing real-world instruments,
 Skyfield includes the effect of polar motion
-if you have :ref:`loaded a polar motion table <polar motion>`.
+if you have :ref:`loaded a polar motion table <polar-motion>`.
 In that case the declination you get from
 :meth:`~skyfield.positionlib.ICRF.hadec()`
 will vary slightly from the declination returned by
