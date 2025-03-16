@@ -443,10 +443,13 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
         ha_adjustment = desired_ha - ha.radians
         ha_adjustment = (ha_adjustment + pi) % tau - pi
 
-        # Figure out how fast the target's HA is changing.
-        ha_diff = normalize(ha.radians - old_ha_radians)
-        t_diff = t - old_t
-        ha_per_day = ha_diff / t_diff
+        # Figure out how fast the target's HA is changing.  After two
+        # iterations, just keep using the same value, in case t_diff
+        # gets so small that ha_diff drops to zero.
+        if i < 2:
+            ha_diff = normalize(ha.radians - old_ha_radians)
+            t_diff = t - old_t
+            ha_per_day = ha_diff / t_diff
 
         # Remember this iteration's HA and `t` for the next iteration.
         old_ha_radians = ha.radians
