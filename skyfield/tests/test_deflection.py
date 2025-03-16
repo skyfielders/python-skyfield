@@ -16,25 +16,49 @@ from skyfield.framelib import ecliptic_frame as ef
 # It's encouraging that Skyfield thinks that Earth deflection affects
 # altitude but not azimuth, and bumps altitude up.
 
-def stringify(angle1, angle2):
-    return ' '.join('%.2f' % n for n in angle1.mas() - angle2.mas())
-
-def test_sun_deflection():
+def trial(deflector_name, target_name, year, month, day):
     ts = load.timescale()
-    t = ts.tt(2015, 3, 16, arange(0, 25, 6))
+    t = ts.tt(year, month, day, arange(0, 25, 6))
     eph = load('de421.bsp')
     earth = eph['earth']
-    jupiter = eph['jupiter barycenter']
+    target = eph[target_name]
     lowell = earth + wgs84.latlon(35.2029, -111.6646)
-    lat1, lon1, _ = lowell.at(t).observe(jupiter).apparent().frame_latlon(ef)
+    astrometric = lowell.at(t).observe(target)
+    lat1, lon1, _ = astrometric.apparent().frame_latlon(ef)
 
-    old = relativity.rmasses['sun']
-    relativity.rmasses['sun'] = 1e100  # almost no mass
-    lat2, lon2, _ = lowell.at(t).observe(jupiter).apparent().frame_latlon(ef)
-    relativity.rmasses['sun'] = old
+    old = relativity.rmasses[deflector_name]
+    relativity.rmasses[deflector_name] = 1e100  # almost no mass
+    lat2, lon2, _ = astrometric.apparent().frame_latlon(ef)
+    relativity.rmasses[deflector_name] = old
 
-    assert stringify(lat1, lat2) == '-0.02 -0.02 -0.02 -0.02 -0.02'
-    assert stringify(lon1, lon2) == '1.27 1.28 1.29 1.30 1.31'
+    return lat1.mas() - lat2.mas(), lon1.mas() - lon2.mas()
+
+def stringify(difference_mas):
+    return ' '.join('%.2f' % n for n in difference_mas)
+
+# The following deflection angles have not been checked against an
+# external authority.  They are simply what Skyfield 1.51 did when
+# tested.  But at least this test prevents us from changing behavior in
+# the future without knowing it.  It's at least encouraging that Earth
+# deflection affects altitude not azimuth, and bumps altitude up, as we
+# would expect.
+
+def test_sun_deflection():
+    lat_mas, lon_mas = trial('sun', 'jupiter barycenter', 2025, 3, 16)
+    assert stringify(lat_mas) == '-0.01 -0.01 -0.01 -0.01 -0.01'
+    assert stringify(lon_mas) == '4.16 4.17 4.19 4.21 4.22'
+
+def test_jupiter_deflection():
+    # Very close conjunction of 0.1 degrees.
+    lat_mas, lon_mas = trial('jupiter', 'saturn barycenter', 2020, 12, 21)
+    assert stringify(lat_mas) == '0.20 0.25 0.31 0.33 0.31'
+    assert stringify(lon_mas) == '0.16 0.14 0.09 0.01 -0.08'
+
+def test_saturn_deflection():
+    # Conjunction, fairly distant 0.83 degrees separation.
+    lat_mas, lon_mas = trial('saturn', 'neptune barycenter', 2026, 2, 20)
+    assert stringify(lat_mas) == '0.01 0.01 0.01 0.01 0.01'
+    assert stringify(lon_mas) == '0.00 0.00 0.00 -0.00 -0.00'
 
 def test_earth_deflection():
     ts = load.timescale()
@@ -52,12 +76,6 @@ def test_earth_deflection():
 
     dalt = ' '.join('%.2f' % n for n in alt1.mas() - alt2.mas())
     daz = ' '.join('%.2f' % n for n in az1.mas() - az2.mas())
-
-    # These values have not been checked against an external authority.
-    # They are simply what Skyfield 1.51 did when tested.  But at least
-    # this test prevents us from changing behavior in the future without
-    # knowing it.  It's at least encouraging that Earth deflection
-    # affects altitude not azimuth, and bumps altitude up.
 
     s = '0.19 0.11 0.06 0.06 0.12 0.19 0.30 0.00 0.00 0.00 0.00 0.29 0.19'
     assert dalt == s
