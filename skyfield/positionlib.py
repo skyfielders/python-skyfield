@@ -765,14 +765,11 @@ class Astrometric(ICRF):
                        self._ephemeris, t, skip_earth_deflection)
 
         if observer_gcrs_au is not None:
-            limb_angle, nadir_angle = compute_limb_angle(
-                target_au, observer_gcrs_au)
-            include_earth_deflection = nadir_angle >= 0.8
-            pq = target_au + observer_gcrs_au
-            pe = observer_gcrs_au
-            d = compute_deflection(target_au, pq, pe, rmasses['earth'])
-            d *= include_earth_deflection  # where False, set `d` to zero
-            target_au += d
+            rmass = rmasses['earth']
+            d = compute_deflection(target_au, observer_gcrs_au, rmass)
+
+            _, nadir_angle = compute_limb_angle(target_au, observer_gcrs_au)
+            target_au += d * (nadir_angle >= 0.8)
 
         add_aberration(target_au, bcrs_velocity, self.light_time)
 

@@ -76,9 +76,8 @@ def add_deflection(position, observer, ephemeris, t,
 
         bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
         rmass = rmasses[name]
-        pq = observer + position - bposition
         pe = observer - bposition
-        position += compute_deflection(position, pq, pe, rmass)
+        position += compute_deflection(position, pe, rmass)
 
     # If observer is not at geocenter, add in deflection due to Earth.
 
@@ -86,9 +85,8 @@ def add_deflection(position, observer, ephemeris, t,
         deflector = ephemeris['earth']
         bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
         rmass = rmasses['earth']
-        pq = observer + position - bposition
         pe = observer - bposition
-        d = compute_deflection(position, pq, pe, rmass)
+        d = compute_deflection(position, pe, rmass)
         if include_earth_deflection.shape:
             d *= include_earth_deflection  # where False, set `d` to zero
         position += d
@@ -111,7 +109,7 @@ def light_time_difference(position, observer_position):
     diflt = einsum('a...,a...', u1, observer_position) / C_AUDAY
     return diflt
 
-def compute_deflection(position, pq, pe, rmass):
+def compute_deflection(position, pe, rmass):
     """Correct a position vector for how one particular mass deflects light.
 
     TODO: update this docstring
@@ -124,6 +122,8 @@ def compute_deflection(position, pq, pe, rmass):
     the presence of the deflector will deflect the image of the object.
 
     """
+    pq = position + pe
+
     # Compute vector magnitudes and unit vectors.
 
     pmag = length_of(position)
