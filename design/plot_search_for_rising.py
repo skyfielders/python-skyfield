@@ -30,6 +30,7 @@ with the new risings routine, I can quickly adapt this script to their
 case to see what's going on.
 
 """
+import sys
 from datetime import date, datetime, timedelta
 from math import atan, degrees, tau
 from skyfield import VERSION, almanac, api, functions
@@ -43,17 +44,23 @@ matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Tweak these.
+# Tweak these, or provide command line arguments.
 
 TARGET = 'moon'
 YEAR_MONTH_DAY = 2023, 8, 16
 ZOOM_ARCSECONDS = None
+
+if len(sys.argv) > 1:
+    target = sys.argv[1]
+    if len(sys.argv) > 2:
+        YEAR_MONTH_DAY = [int(s) for s in sys.argv[2].split('-')]
 
 # You will get a diagram in return.
 
 ts = load.timescale()
 t0 = ts.utc(*YEAR_MONTH_DAY) #- 0.1
 t1 = t0 + 1.0 #+ 1.1
+print('Searching for rising between', t0.utc_strftime(), '-', t1.utc_strftime())
 
 eph = load('de421.bsp')
 earth = eph['earth']
@@ -69,6 +76,8 @@ real_at = observer.at
 observer.at = tracing_at
 
 final_t, y = almanac.find_risings(observer, target, t0, t1)
+print('Found risings at:', final_t.utc_strftime())
+print('Transit flags:', y)
 
 import matplotlib
 matplotlib.use('Agg')
@@ -92,7 +101,8 @@ for i, t in enumerate(times, 1):
 
 h = almanac.build_horizon_function(target)
 horizon_degrees = h(distance) / tau * 360.0
-horizon_degrees = horizon_degrees[0]
+if hasattr(horizon_degrees, 'shape'):  # Moon horizon will be an array
+    horizon_degrees = horizon_degrees[0]
 print(f'Horizon: {horizon_degrees}°')
 ax.axhline(horizon_degrees)
 
