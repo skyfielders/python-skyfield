@@ -11,7 +11,9 @@ from .functions import (
     length_of, mxm, mxv, rot_z, to_spherical,
 )
 from .geometry import intersect_line_and_sphere
-from .relativity import add_aberration, add_deflection
+from .relativity import (
+    add_aberration, add_deflection, compute_deflection, rmasses,
+)
 from .timelib import Time
 from .units import Angle, AngleRate, Distance, Velocity, _interpret_angle
 
@@ -758,15 +760,19 @@ class Astrometric(ICRF):
             if observer_gcrs_au is not None:
                 observer_gcrs_au = observer_gcrs_au.reshape(shape)
 
-        if observer_gcrs_au is None:
-            include_earth_deflection = array((False,))
-        else:
+        skip_earth_deflection = array((False,))
+        add_deflection(target_au, bcrs_position,
+                       self._ephemeris, t, skip_earth_deflection)
+
+        if observer_gcrs_au is not None:
             limb_angle, nadir_angle = compute_limb_angle(
                 target_au, observer_gcrs_au)
             include_earth_deflection = nadir_angle >= 0.8
-
-        add_deflection(target_au, bcrs_position,
-                       self._ephemeris, t, include_earth_deflection)
+            pq = target_au + observer_gcrs_au
+            pe = observer_gcrs_au
+            d = compute_deflection(target_au, pq, pe, rmasses['earth'])
+            d *= include_earth_deflection  # where False, set `d` to zero
+            target_au += d
 
         add_aberration(target_au, bcrs_velocity, self.light_time)
 
