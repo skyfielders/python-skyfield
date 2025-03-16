@@ -6,8 +6,37 @@ Run `design/measure_earth_deflection.py` to draw a quick graph.
 from numpy import arange, diff
 from skyfield import relativity
 from skyfield.api import load, wgs84
+from skyfield.framelib import ecliptic_frame as ef
 
-def test_earth_deflection_magnitude_and_direction():
+# The expected offsets for deflection in the following tests have NOT
+# been confirmed against an external authority; they are simply what
+# Skyfield 1.51 did when these tests were written.  But at least they
+# stop us from accidentally changing Skyfield's behavior going forward.
+#
+# It's encouraging that Skyfield thinks that Earth deflection affects
+# altitude but not azimuth, and bumps altitude up.
+
+def stringify(angle1, angle2):
+    return ' '.join('%.2f' % n for n in angle1.mas() - angle2.mas())
+
+def test_sun_deflection():
+    ts = load.timescale()
+    t = ts.tt(2015, 3, 16, arange(0, 25, 6))
+    eph = load('de421.bsp')
+    earth = eph['earth']
+    jupiter = eph['jupiter barycenter']
+    lowell = earth + wgs84.latlon(35.2029, -111.6646)
+    lat1, lon1, _ = lowell.at(t).observe(jupiter).apparent().frame_latlon(ef)
+
+    old = relativity.rmasses['sun']
+    relativity.rmasses['sun'] = 1e100  # almost no mass
+    lat2, lon2, _ = lowell.at(t).observe(jupiter).apparent().frame_latlon(ef)
+    relativity.rmasses['sun'] = old
+
+    assert stringify(lat1, lat2) == '-0.02 -0.02 -0.02 -0.02 -0.02'
+    assert stringify(lon1, lon2) == '1.27 1.28 1.29 1.30 1.31'
+
+def test_earth_deflection():
     ts = load.timescale()
     t = ts.tt(2015, 3, 16, arange(0, 25, 2))
     eph = load('de421.bsp')
