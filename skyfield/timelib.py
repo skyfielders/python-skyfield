@@ -51,7 +51,7 @@ if hasattr(dt_module, 'timezone'):
     utc = dt_module.timezone.utc
     @staticmethod
     def _utcnow():
-        return datetime.now(dt_module.UTC)
+        return datetime.now(utc)  # datetime.UTC was not added until 3.11
 else:
     class UTC(dt_module.tzinfo):
         'UTC'
