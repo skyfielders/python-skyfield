@@ -22,6 +22,9 @@ Unreleased future version
   reference frame was off by nearly 0.02 arcseconds because it applied
   precession but forgot to apply the frame tie between ICRS and J2000.
 
+* To avoid deprecation warnings on recent Pythons, Skyfield now avoids
+  Python’s old ``datetime.utcnow()`` method.
+
 v1.51 — 2025 February 23
 ------------------------
 

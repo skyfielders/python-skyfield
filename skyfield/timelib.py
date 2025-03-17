@@ -49,6 +49,9 @@ class CalendarArray(ndarray):
 
 if hasattr(dt_module, 'timezone'):
     utc = dt_module.timezone.utc
+    @staticmethod
+    def _utcnow():
+        return datetime.now(dt_module.UTC)
 else:
     class UTC(dt_module.tzinfo):
         'UTC'
@@ -61,6 +64,7 @@ else:
             return self.zero
 
     utc = UTC()
+    _utcnow = datetime.utcnow
 
 # Much of the following code is adapted from the USNO's "novas.c".
 
@@ -89,7 +93,7 @@ class Timescale(object):
     timescale.
 
     """
-    _utcnow = datetime.utcnow
+    _utcnow = _utcnow
     polar_motion_table = None
 
     def __init__(self, delta_t_recent, leap_dates, leap_offsets):
@@ -123,14 +127,7 @@ class Timescale(object):
         self._leap_tai = self._leap_utc + self._leap_offsets
 
     def now(self):
-        """Return the current date and time as a `Time` object.
-
-        For the return value to be correct, your operating system time
-        and timezone settings must be set so that the Python Standard
-        Library constructor ``datetime.datetime.utcnow()`` returns a
-        correct UTC date and time.
-
-        """
+        """Return the current date and time as a `Time` object."""
         return self.from_datetime(self._utcnow().replace(tzinfo=utc))
 
     def from_datetime(self, datetime):

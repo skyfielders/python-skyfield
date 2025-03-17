@@ -110,6 +110,10 @@ def test_time_creation_methods(ts, continuous_timescale, time_value):
     string = strftime('%S.%f')
     assert string == '37.500000'
 
+def test_now(ts):
+    t = ts.now()
+    assert isinstance(t, Time)
+
 def test_months_overflow_correctly(ts):
     assert ts.tt(2020, -1).tt_strftime('%Y-%m') == '2019-11'
     assert ts.tt(2020, 15).tt_strftime('%Y-%m') == '2021-03'

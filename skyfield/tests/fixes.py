@@ -29,7 +29,7 @@ def setup(utc=(2015, 10, 11, 10)):
 
 def teardown():
     skyfield.api.load = skyfield.iokit.Loader('.')
-    skyfield.timelib.Timescale._utcnow = dt.datetime.utcnow
+    skyfield.timelib.Timescale._utcnow = skyfield.timelib._utcnow
     dt.datetime = _real_datetime_class
 
 class low_precision_ERA(object):
