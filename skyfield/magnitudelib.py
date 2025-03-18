@@ -244,7 +244,7 @@ def _saturn_magnitude(r, delta, ph_ang, sun_sub_lat, earth_sub_lat, rings=True):
             -8.95 - 3.7e-4 * ph_ang + 6.16e-4 * ph_ang**2,
         ),
         where(
-            (ph_ang > geocentric_phase_angle_limit) & (~rings),
+            (ph_ang > geocentric_phase_angle_limit) & _not(rings),
 
             # Use equation #12 for globe-alone beyond geocentric phase
             # angle limit
@@ -257,6 +257,9 @@ def _saturn_magnitude(r, delta, ph_ang, sun_sub_lat, earth_sub_lat, rings=True):
 
     ap_mag = ap_mag + distance_mag_factor
     return ap_mag
+
+def _not(b):
+    return 1 - b  # since ~b raises a DeprecationWarning in Python 3.13
 
 def _uranus_magnitude(r, delta, ph_ang,
                       sun_sub_lat_planetog, earth_sub_lat_planetog):
