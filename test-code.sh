@@ -1,9 +1,10 @@
 #!/bin/bash
 
-export PYTHONWARNINGS=d
+export PYTHONWARNINGS=error
 
 cd "$(readlink -f $(dirname "${BASH_SOURCE[0]}"))"/ci
 echo 'Changing to CI directory: cd' $(pwd)
+echo 'Python version:' $(python --version)
 
 set -e
 if ! command -v assay >/dev/null
@@ -17,14 +18,17 @@ to install all of the tools and libraries for Skyfield development.
 EOF
     exit 2
 fi
-r=$(git rev-parse --show-toplevel)
-if grep ' $' \
-        $(git ls-files $r/design $r/examples $r/skyfield | grep '\.py$') \
-        /dev/null  # prevent hanging on a grep of stdin if ls-files fails
+if command -v git >/dev/null
 then
-    echo
-    echo 'Error: trailing whitespace detected on the above-listed lines'
-    exit 1
+    r=$(git rev-parse --show-toplevel)
+    if grep ' $' \
+            $(git ls-files $r/design $r/examples $r/skyfield | grep '\.py$') \
+            /dev/null  # prevent hanging on a grep of stdin if ls-files fails
+    then
+        echo
+        echo 'Error: trailing whitespace detected on the above-listed lines'
+        exit 1
+    fi
 fi
 if python --version | grep -q 'Python 3' && command -v pyflakes >/dev/null
 then
