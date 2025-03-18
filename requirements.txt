@@ -8,6 +8,7 @@ numpy==1.15.4
 matplotlib==3.3.0
 pandas==1.0.0
 pyflakes==2.1.1
+pygments==2.17.2
 python-dateutil>=2.5.0
 pytz
 sphinx==1.7.2
