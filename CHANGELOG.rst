@@ -9,13 +9,19 @@ Changelog
 Released versions
 -----------------
 
-Unreleased future version
--------------------------
+v1.52 — 2025 March 18
+---------------------
+
+* Fix: on rare occasions the :func:`~skyfield.almanac.find_risings()`
+  and :func:`~skyfield.almanac.find_settings()` routines could return an
+  invalid result if no rising or setting was found, instead of returning
+  the moment of transit as their fallback result.
+  `#1057 <https://github.com/skyfielders/python-skyfield/issues/1057>`_
 
 * Fix: if the :meth:`~skyfield.positionlib.ICRF.altaz()` method was
-  given a position with a NaN coordinate and ``temperature_C`` and
-  ``pressure_mbar`` parameters with which to compute refraction, then it
-  would loop forever.
+  given a position with a NaN coordinate, and was passed
+  ``temperature_C`` and ``pressure_mbar`` parameters with which to
+  compute refraction, then it would loop forever.
   `#1046 <https://github.com/skyfielders/python-skyfield/issues/1046>`_
 
 * Fix: the new :class:`~skyfield.framelib.mean_equator_and_equinox_of_date`
@@ -23,8 +29,8 @@ Unreleased future version
   precession but forgot to apply the frame tie between ICRS and J2000.
 
 * To avoid deprecation warnings on recent Pythons, Skyfield now avoids
-  Python’s old ``datetime.utcnow()`` method, and avoids applying the
-  ``~`` unary operator.
+  Python’s ``datetime.utcnow()`` method, and avoids applying the ``~``
+  unary operator.
 
 v1.51 — 2025 February 23
 ------------------------
