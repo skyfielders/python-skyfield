@@ -1,4 +1,4 @@
-from numpy import abs, einsum, sqrt, where
+from numpy import abs, clip, einsum, sqrt, where
 
 from .constants import C, AU_M, C_AUDAY, GS
 from .functions import _AVOID_DIVIDE_BY_ZERO, dots, length_of
@@ -63,16 +63,8 @@ def add_deflection(position, observer, ephemeris, t,
         # Get position of gravitating body wrt ss barycenter at time when
         # incoming photons were closest to it.
 
-        tclose = jd_tdb
-
-        # if dlt > 0.0:
-        #     tclose = jd - dlt
-
-        tclose = where(dlt > 0.0, jd_tdb - dlt, tclose)
-        tclose = where(tlt < dlt, jd_tdb - tlt, tclose)
-
-        # if tlt < dlt:
-        #     tclose = jd - tlt
+        dlt = clip(dlt, 0.0, tlt)
+        tclose = jd_tdb - dlt
 
         bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
         rmass = rmasses[name]
@@ -91,7 +83,7 @@ def add_deflection(position, observer, ephemeris, t,
             d *= include_earth_deflection  # where False, set `d` to zero
         position += d
 
-def light_time_difference(position, observer_position):
+def light_time_difference(position, deflector_position):
     """Returns the difference in light-time, for a star,
       between the barycenter of the solar system and the observer (or
       the geocenter).
@@ -106,7 +98,7 @@ def light_time_difference(position, observer_position):
     # Light-time returned is the projection of vector 'pos_obs' onto the
     # unit vector 'u1' (formed from 'pos1'), divided by the speed of light.
 
-    diflt = einsum('a...,a...', u1, observer_position) / C_AUDAY
+    diflt = einsum('a...,a...', u1, deflector_position) / C_AUDAY
     return diflt
 
 def compute_deflection(position, pe, rmass):
