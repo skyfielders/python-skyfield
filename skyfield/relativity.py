@@ -47,41 +47,47 @@ def add_deflection(position, observer, ephemeris, t,
         except KeyError:
             deflector = ephemeris[name + ' barycenter']
 
-        # Get position of gravitating body wrt ss barycenter at time 't_tdb'.
-
-        bposition = deflector.at(ts.tdb(jd=jd_tdb)).xyz.au  # TODO
-
-        # Get position of gravitating body wrt observer at time 'jd_tdb'.
-
-        gpv = bposition - observer
-
-        # Compute light-time from point on incoming light ray that is closest
-        # to gravitating body.
-
-        dlt = light_time_difference(position, gpv)
-
-        # Get position of gravitating body wrt ss barycenter at time when
-        # incoming photons were closest to it.
-
-        dlt = clip(dlt, 0.0, tlt)
-        tclose = jd_tdb - dlt
-
-        bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
+        pe = compute_deflector_position(
+            ts, jd_tdb, observer, position, deflector, tlt,
+        )
         rmass = rmasses[name]
-        pe = observer - bposition
         position += compute_deflection(position, pe, rmass)
 
     # If observer is not at geocenter, add in deflection due to Earth.
 
     if include_earth_deflection.any():
         deflector = ephemeris['earth']
-        bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
+        bposition = deflector.at(t).xyz.au  # TODO
         rmass = rmasses['earth']
         pe = observer - bposition
         d = compute_deflection(position, pe, rmass)
         if include_earth_deflection.shape:
             d *= include_earth_deflection  # where False, set `d` to zero
         position += d
+
+def compute_deflector_position(ts, jd_tdb, observer, position, deflector, tlt):
+    # Get position of gravitating body wrt ss barycenter at time 't_tdb'.
+
+    bposition = deflector.at(ts.tdb(jd=jd_tdb)).xyz.au  # TODO
+
+    # Get position of gravitating body wrt observer at time 'jd_tdb'.
+
+    gpv = bposition - observer
+
+    # Compute light-time from point on incoming light ray that is closest
+    # to gravitating body.
+
+    dlt = light_time_difference(position, gpv)
+
+    # Get position of gravitating body wrt ss barycenter at time when
+    # incoming photons were closest to it.
+
+    dlt = clip(dlt, 0.0, tlt)
+    tclose = jd_tdb - dlt
+
+    bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
+    pe = observer - bposition
+    return pe
 
 def light_time_difference(position, deflector_position):
     """Returns the difference in light-time, for a star,
