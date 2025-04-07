@@ -47,7 +47,7 @@ def add_deflection(position, observer, ephemeris, t,
         except KeyError:
             deflector = ephemeris[name + ' barycenter']
 
-        pe = compute_deflector_position(
+        pe = _compute_deflector_position(
             ts, jd_tdb, observer, position, deflector, tlt,
         )
         rmass = rmasses[name]
@@ -65,7 +65,7 @@ def add_deflection(position, observer, ephemeris, t,
             d *= include_earth_deflection  # where False, set `d` to zero
         position += d
 
-def compute_deflector_position(ts, jd_tdb, observer, position, deflector, tlt):
+def _compute_deflector_position(ts, jd_tdb, observer, position, deflector, tlt):
     # Get position of gravitating body wrt ss barycenter at time 't_tdb'.
 
     bposition = deflector.at(ts.tdb(jd=jd_tdb)).xyz.au  # TODO

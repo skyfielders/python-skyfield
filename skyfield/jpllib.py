@@ -237,6 +237,7 @@ class Stack(VectorFunction):
     def __init__(self, segments):
         self.center = segments[0].center
         self.target = segments[0].target  # all segments have same target
+        self.ephemeris = segments[0].ephemeris
 
         # Hopefully all segments have the same center, since we
         # ourselves can only advertise a single `.center`.  If not, drop
