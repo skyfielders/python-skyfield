@@ -174,21 +174,21 @@ class Timescale(object):
         if hasattr(year, '__len__') and isinstance(year[0], datetime):
             return self.from_datetimes(year)
 
-        tup = year, month, day, hour, minute, second
+        a = _to_array
+        tup = a(year), a(month), a(day), a(hour), a(minute), a(second)
         return self._utc(tup)
 
     def _utc(self, tup):
         # Build a Time from a UTC tuple, carefully preserving its exact
         # second number in the Time's hidden TAI seconds field.
         year, month, day, hour, minute, second = tup
-        a = _to_array
         cutoff = self.julian_calendar_cutoff
 
         # Figure out exactly the TAI second number.
-        seconds = (julian_day(a(year), a(month), a(day), cutoff) - 0.5) * DAY_S
+        seconds = (julian_day(year, month, day, cutoff) - 0.5) * DAY_S
         seconds, sfr = divmod(seconds, 1.0)  # in case there were any fractions
         seconds += interp(seconds, self._leap_utc, self._leap_offsets)
-        more = a(hour) * 3600.0 + a(minute) * 60.0 + a(second)
+        more = hour * 3600.0 + minute * 60.0 + second
         seconds2, sfr = divmod(sfr + more, 1.0)
         seconds += seconds2
 
