@@ -764,6 +764,11 @@ class Astrometric(ICRF):
         add_deflection(target_au, bcrs_position,
                        self._ephemeris, t, skip_earth_deflection)
 
+        # rmass = rmasses['saturn']
+        # deflector_au = 1
+        # d = compute_deflection(target_au, deflector_au, rmass)
+        # target_au += d
+
         if observer_gcrs_au is not None:
             rmass = rmasses['earth']
             d = compute_deflection(target_au, observer_gcrs_au, rmass)

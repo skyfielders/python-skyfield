@@ -39,8 +39,6 @@ def add_deflection(position, observer, ephemeris, t,
 
     # Cycle through gravitating bodies.
 
-    jd_tdb = t.tdb
-    ts = t.ts
     for name in deflectors[:count]:
         try:
             deflector = ephemeris[name]
@@ -48,7 +46,7 @@ def add_deflection(position, observer, ephemeris, t,
             deflector = ephemeris[name + ' barycenter']
 
         pe = _compute_deflector_position(
-            ts, jd_tdb, observer, position, deflector, tlt,
+            t, observer, position, deflector, tlt,
         )
         rmass = rmasses[name]
         position += compute_deflection(position, pe, rmass)
@@ -65,10 +63,10 @@ def add_deflection(position, observer, ephemeris, t,
             d *= include_earth_deflection  # where False, set `d` to zero
         position += d
 
-def _compute_deflector_position(ts, jd_tdb, observer, position, deflector, tlt):
+def _compute_deflector_position(t, observer, position, deflector, tlt):
     # Get position of gravitating body wrt ss barycenter at time 't_tdb'.
 
-    bposition = deflector.at(ts.tdb(jd=jd_tdb)).xyz.au  # TODO
+    bposition = deflector.at(t).xyz.au
 
     # Get position of gravitating body wrt observer at time 'jd_tdb'.
 
@@ -79,13 +77,14 @@ def _compute_deflector_position(ts, jd_tdb, observer, position, deflector, tlt):
 
     dlt = light_time_difference(position, gpv)
 
+    # Should really add TDB offset, not TT, but doesn't matter.
+
+    tclose = t - clip(dlt, 0.0, tlt)
+
     # Get position of gravitating body wrt ss barycenter at time when
     # incoming photons were closest to it.
 
-    dlt = clip(dlt, 0.0, tlt)
-    tclose = jd_tdb - dlt
-
-    bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
+    bposition = deflector.at(tclose).xyz.au
     pe = observer - bposition
     return pe
 
