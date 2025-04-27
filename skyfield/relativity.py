@@ -35,7 +35,7 @@ rmasses = {
 }
 
 def add_deflection(position, observer, ephemeris, t,
-                   include_earth_deflection, count=2):  #TODO: set back to 3
+                   include_earth_deflection, count=3):
     """Update `position` for how solar system masses will deflect its light.
 
     Given the ICRS `position` |xyz| of an object (au) that is being

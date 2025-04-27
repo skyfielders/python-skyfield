@@ -760,20 +760,24 @@ class Astrometric(ICRF):
             if observer_gcrs_au is not None:
                 observer_gcrs_au = observer_gcrs_au.reshape(shape)
 
-        skip_earth_deflection = array((False,))
-        add_deflection(target_au, bcrs_position,
-                       self._ephemeris, t, skip_earth_deflection)
+        # skip_earth_deflection = array((False,))
+        # add_deflection(target_au, bcrs_position,
+        #                self._ephemeris, t, skip_earth_deflection)
 
         from .relativity import _compute_deflector_position
 
-        deflector = self._ephemeris[6]
         tlt = length_of(target_au) / C_AUDAY
-        deflector_au = _compute_deflector_position(
-            t, bcrs_position, target_au, deflector, tlt,
-        )
-        rmass = rmasses[699]  # saturn
-        d = compute_deflection(target_au, deflector_au, rmass)
-        target_au += d
+
+        for code in 10, 599, 699:
+            rmass = rmasses[code]
+            if (code % 100 == 99) and (code not in self._ephemeris):
+                code //= 100
+            deflector = self._ephemeris[code]
+            deflector_au = _compute_deflector_position(
+                t, bcrs_position, target_au, deflector, tlt,
+            )
+            d = compute_deflection(target_au, deflector_au, rmass)
+            target_au += d
 
         # pe = _compute_deflector_position(
         #     t, observer, position, deflector, tlt,
