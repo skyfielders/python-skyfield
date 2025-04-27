@@ -20,7 +20,7 @@ rmasses = {
     }
 
 def add_deflection(position, observer, ephemeris, t,
-                   include_earth_deflection, count=3):
+                   include_earth_deflection, count=2):  #TODO: set back to 3
     """Update `position` for how solar system masses will deflect its light.
 
     Given the ICRS `position` |xyz| of an object (au) that is being
@@ -64,12 +64,9 @@ def add_deflection(position, observer, ephemeris, t,
         position += d
 
 def _compute_deflector_position(t, observer, position, deflector, tlt):
-    # Get position of gravitating body wrt ss barycenter at time 't_tdb'.
+    # Get position of gravitating body wrt observer.
 
     bposition = deflector.at(t).xyz.au
-
-    # Get position of gravitating body wrt observer at time 'jd_tdb'.
-
     gpv = bposition - observer
 
     # Compute light-time from point on incoming light ray that is closest

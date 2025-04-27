@@ -3,7 +3,7 @@
 
 from numpy import array, cos, einsum, full, reshape, nan, nan_to_num, zeros
 from . import framelib
-from .constants import ANGVEL, AU_M, C, ERAD, DAY_S, RAD2DEG, pi, tau
+from .constants import ANGVEL, AU_M, C, C_AUDAY, ERAD, DAY_S, RAD2DEG, pi, tau
 from .descriptorlib import reify
 from .earthlib import compute_limb_angle
 from .functions import (
@@ -764,10 +764,22 @@ class Astrometric(ICRF):
         add_deflection(target_au, bcrs_position,
                        self._ephemeris, t, skip_earth_deflection)
 
-        # rmass = rmasses['saturn']
-        # deflector_au = 1
-        # d = compute_deflection(target_au, deflector_au, rmass)
-        # target_au += d
+        from .relativity import _compute_deflector_position
+
+        deflector = self._ephemeris['saturn barycenter']
+        tlt = length_of(target_au) / C_AUDAY
+        deflector_au = _compute_deflector_position(
+            t, bcrs_position, target_au, deflector, tlt,
+        )
+        rmass = rmasses['saturn']
+        d = compute_deflection(target_au, deflector_au, rmass)
+        target_au += d
+
+        # pe = _compute_deflector_position(
+        #     t, observer, position, deflector, tlt,
+        # )
+        # rmass = rmasses[name]
+        # position += compute_deflection(position, pe, rmass)
 
         if observer_gcrs_au is not None:
             rmass = rmasses['earth']
