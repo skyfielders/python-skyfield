@@ -8,6 +8,7 @@ from numpy import array, inf
 from skyfield import api
 from skyfield.constants import DAY_S, T0
 from skyfield.data import iers
+from skyfield.functions import A
 from skyfield.timelib import (
     GREGORIAN_START, GREGORIAN_START_ENGLAND, Time, Timescale,
     calendar_tuple, compute_calendar_date, julian_date, julian_day, utc,
@@ -812,5 +813,9 @@ def test_time_math(ts):
     bump = dt_module.timedelta(microseconds=300)
     assert (t - bump).utc_jpl() == 'A.D. 2020-Jun-08 02:58:50.8157 UTC'
     assert (t + bump).utc_jpl() == 'A.D. 2020-Jun-08 02:58:50.8163 UTC'
+
+    bump = A[1.0, 2.0]  # TODO: make this work with one element
+    assert tuple((t - bump).tt) == (2459007.625, 2459006.625)
+    assert tuple((t + bump).tt) == (2459009.625, 2459010.625)
 
     assert t < t + 1

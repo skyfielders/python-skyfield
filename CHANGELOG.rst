@@ -5,6 +5,13 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
+Next version
+------------
+
+* You can now subtract a NumPy array of floating point TT days from a
+  Skyfield :class:`~skyfield.timelib.Time` object of the same length;
+  previously, only a plain int or float was supported as the subtrahend.
+
 -----------------
 Released versions
 -----------------
