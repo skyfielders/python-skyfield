@@ -8,15 +8,8 @@ from skyfield import relativity
 from skyfield.api import load, wgs84
 from skyfield.framelib import ecliptic_frame as ef
 
-# The expected offsets for deflection in the following tests have NOT
-# been confirmed against an external authority; they are simply what
-# Skyfield 1.51 did when these tests were written.  But at least they
-# stop us from accidentally changing Skyfield's behavior going forward.
-#
-# It's encouraging that Skyfield thinks that Earth deflection affects
-# altitude but not azimuth, and bumps altitude up.
-
 def trial(deflector_name, target_name, year, month, day):
+    """Compare apparent() lat/lon with a given deflector turned on and off."""
     ts = load.timescale()
     t = ts.tt(year, month, day, arange(0, 25, 6))
     eph = load('de421.bsp')
@@ -36,12 +29,10 @@ def trial(deflector_name, target_name, year, month, day):
 def stringify(difference_mas):
     return ' '.join('%.2f' % n for n in difference_mas)
 
-# The following deflection angles have not been checked against an
-# external authority.  They are simply what Skyfield 1.51 did when
-# tested.  But at least this test prevents us from changing behavior in
-# the future without knowing it.  It's at least encouraging that Earth
-# deflection affects altitude not azimuth, and bumps altitude up, as we
-# would expect.
+# The expected offsets for deflection in the following tests have NOT
+# been confirmed against an external authority; they are simply what
+# Skyfield 1.51 did when these tests were written.  But at least they
+# stop us from accidentally changing Skyfield's behavior going forward.
 
 def test_sun_deflection():
     lat_mas, lon_mas = trial('sun', 'jupiter barycenter', 2025, 3, 16)
@@ -59,6 +50,16 @@ def test_saturn_deflection():
     lat_mas, lon_mas = trial('saturn', 'neptune barycenter', 2026, 2, 20)
     assert stringify(lat_mas) == '0.01 0.01 0.01 0.01 0.01'
     assert stringify(lon_mas) == '0.00 0.00 0.00 -0.00 -0.00'
+
+def test_moon_deflection():  # TODO: better dates
+    # Moon, the next deflector, should be turned off by default.
+    lat_mas, lon_mas = trial('moon', 'neptune barycenter', 2024, 12, 9.364)
+    assert stringify(lat_mas) == '0.00 0.00 0.00 0.00 0.00'
+    assert stringify(lon_mas) == '0.00 0.00 0.00 0.00 0.00'
+
+# Not tested against an external authority; but it's encouraging that
+# Earth deflection affects altitude not azimuth, and bumps altitude up
+# not down.
 
 def test_earth_deflection():
     ts = load.timescale()
