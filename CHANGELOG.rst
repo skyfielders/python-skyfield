@@ -12,6 +12,13 @@ Released versions
 Unreleased future version
 -------------------------
 
+* You can now subtract a NumPy array of floating point TT days from a
+  Skyfield :class:`~skyfield.timelib.Time` object; previously, only a
+  plain float was supported as the subtrahend. (TODO: word choice?)
+
+Unreleased future version
+-------------------------
+
 * Fix: if the :meth:`~skyfield.positionlib.ICRF.altaz()` method was
   given a position with a NaN coordinate and ``temperature_C`` and
   ``pressure_mbar`` parameters with which to compute refraction, then it

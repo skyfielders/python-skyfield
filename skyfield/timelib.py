@@ -942,7 +942,7 @@ class Time(object):
         elif isinstance(other_time, timedelta):
             w = other_time.days
             f = other_time.seconds / DAY_S + other_time.microseconds / DAY_US
-        elif isinstance(other_time, (int, float)):
+        elif isinstance(other_time, (int, float, ndarray)):
             w, f = divmod(other_time, 1.0)
         else:
             return NotImplemented
