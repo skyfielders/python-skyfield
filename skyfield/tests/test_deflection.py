@@ -7,6 +7,7 @@ from numpy import arange, diff
 from skyfield import relativity
 from skyfield.api import load, wgs84
 from skyfield.framelib import ecliptic_frame as ef
+from skyfield.jpllib import _jpl_name_code_dict as jpl_codes
 
 def trial(deflector_name, target_name, year, month, day):
     """Compare apparent() lat/lon with a given deflector turned on and off."""
@@ -19,10 +20,11 @@ def trial(deflector_name, target_name, year, month, day):
     astrometric = lowell.at(t).observe(target)
     lat1, lon1, _ = astrometric.apparent().frame_latlon(ef)
 
-    old = relativity.rmasses[deflector_name]
-    relativity.rmasses[deflector_name] = 1e100  # almost no mass
+    code = jpl_codes[deflector_name.upper()]
+    old = relativity.rmasses[code]
+    relativity.rmasses[code] = 1e100  # almost no mass
     lat2, lon2, _ = astrometric.apparent().frame_latlon(ef)
-    relativity.rmasses[deflector_name] = old
+    relativity.rmasses[code] = old
 
     return lat1.mas() - lat2.mas(), lon1.mas() - lon2.mas()
 

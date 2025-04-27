@@ -766,12 +766,12 @@ class Astrometric(ICRF):
 
         from .relativity import _compute_deflector_position
 
-        deflector = self._ephemeris['saturn barycenter']
+        deflector = self._ephemeris[6]
         tlt = length_of(target_au) / C_AUDAY
         deflector_au = _compute_deflector_position(
             t, bcrs_position, target_au, deflector, tlt,
         )
-        rmass = rmasses['saturn']
+        rmass = rmasses[699]  # saturn
         d = compute_deflection(target_au, deflector_au, rmass)
         target_au += d
 

@@ -3,9 +3,24 @@ from numpy import abs, clip, einsum, sqrt, where
 from .constants import C, AU_M, C_AUDAY, GS
 from .functions import _AVOID_DIVIDE_BY_ZERO, dots, length_of
 
-deflectors = ['sun', 'jupiter', 'saturn', 'moon', 'venus', 'uranus', 'neptune']
+# Sun Jupiter Saturn Moon Venus Uranus Neptune
+deflectors = 10, 599, 699, 301, 299, 799, 899
 rmasses = {
     # earth-moon barycenter: 328900.561400
+    199: 6023600.0,             # mercury
+    299: 408523.71,             # venus
+    399: 332946.050895,         # earth
+    499: 3098708.0,             # mars
+    599: 1047.3486,             # jupiter
+    699: 3497.898,              # saturn
+    799: 22902.98,              # uranus
+    899: 19412.24,              # neptune
+    999: 135200000.0,           # pluto
+    10: 1.0,                    # sun
+    301: 27068700.387534,       # moon
+
+    # For compatibility with any user code that discovered and used this
+    # undocumented `rmasses` dict prior to Skyfield 1.53:
     'mercury': 6023600.0,
     'venus': 408523.71,
     'earth': 332946.050895,
@@ -17,7 +32,7 @@ rmasses = {
     'pluto': 135200000.0,
     'sun': 1.0,
     'moon': 27068700.387534,
-    }
+}
 
 def add_deflection(position, observer, ephemeris, t,
                    include_earth_deflection, count=2):  #TODO: set back to 3
@@ -39,16 +54,17 @@ def add_deflection(position, observer, ephemeris, t,
 
     # Cycle through gravitating bodies.
 
-    for name in deflectors[:count]:
-        try:
-            deflector = ephemeris[name]
-        except KeyError:
-            deflector = ephemeris[name + ' barycenter']
+    for code in deflectors[:count]:
+        rmass = rmasses[code]
+        if code not in ephemeris.codes:
+            barycenter_code = code // 100
+            if barycenter_code in ephemeris:
+                code = barycenter_code
 
+        deflector = ephemeris[code]
         pe = _compute_deflector_position(
             t, observer, position, deflector, tlt,
         )
-        rmass = rmasses[name]
         position += compute_deflection(position, pe, rmass)
 
     # If observer is not at geocenter, add in deflection due to Earth.
