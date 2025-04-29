@@ -3,8 +3,7 @@ from numpy import abs, clip, einsum, sqrt, where
 from .constants import C, AU_M, C_AUDAY, GS
 from .functions import _AVOID_DIVIDE_BY_ZERO, dots, length_of
 
-# Sun Jupiter Saturn Moon Venus Uranus Neptune
-deflectors = 10, 599, 699, 301, 299, 799, 899
+deflectors = ['sun', 'jupiter', 'saturn', 'moon', 'venus', 'uranus', 'neptune']
 rmasses = {
     # earth-moon barycenter: 328900.561400
     199: 6023600.0,             # mercury
@@ -54,14 +53,13 @@ def add_deflection(position, observer, ephemeris, t,
 
     # Cycle through gravitating bodies.
 
-    for code in deflectors[:count]:
-        rmass = rmasses[code]
-        if code not in ephemeris.codes:
-            barycenter_code = code // 100
-            if barycenter_code in ephemeris:
-                code = barycenter_code
+    for name in deflectors[:count]:
+        try:
+            deflector = ephemeris[name]
+        except KeyError:
+            deflector = ephemeris[name + ' barycenter']
 
-        deflector = ephemeris[code]
+        rmass = rmasses[name]
         pe = _compute_deflector_position(
             t, observer, position, deflector, tlt,
         )
@@ -71,7 +69,7 @@ def add_deflection(position, observer, ephemeris, t,
 
     if include_earth_deflection.any():
         deflector = ephemeris['earth']
-        bposition = deflector.at(t).xyz.au  # TODO
+        bposition = deflector.at(t).xyz.au
         rmass = rmasses['earth']
         pe = observer - bposition
         d = compute_deflection(position, pe, rmass)

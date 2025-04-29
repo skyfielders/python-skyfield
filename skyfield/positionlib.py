@@ -12,7 +12,7 @@ from .functions import (
 )
 from .geometry import intersect_line_and_sphere
 from .relativity import (
-    add_aberration, add_deflection, compute_deflection, rmasses,
+    _compute_deflector_position, add_aberration, compute_deflection, rmasses,
 )
 from .timelib import Time
 from .units import Angle, AngleRate, Distance, Velocity, _interpret_angle
@@ -723,7 +723,7 @@ class Astrometric(ICRF):
             ' try calling .apparent() first to get an apparent position'
         )
 
-    def apparent(self):
+    def apparent(self, deflectors=(10, 599, 699)):
         """Compute an :class:`Apparent` position for this body.
 
         This applies two effects to the position that arise from
@@ -739,6 +739,11 @@ class Astrometric(ICRF):
         frame of the Solar System barycenter and to the reference frame
         of the observer.  In the specific case of an Earth observer, the
         output reference frame is the GCRS.
+
+        By default, deflection considers only four masses: the Sun,
+        Jupiter, and Saturn; and the Earth, if the observer is on the
+        Earth's surface or in Earth orbit.  TODO: how should I let them
+        control Earth deflection?
 
         """
         t = self.t
@@ -760,15 +765,9 @@ class Astrometric(ICRF):
             if observer_gcrs_au is not None:
                 observer_gcrs_au = observer_gcrs_au.reshape(shape)
 
-        # skip_earth_deflection = array((False,))
-        # add_deflection(target_au, bcrs_position,
-        #                self._ephemeris, t, skip_earth_deflection)
-
-        from .relativity import _compute_deflector_position
-
         tlt = length_of(target_au) / C_AUDAY
 
-        for code in 10, 599, 699:
+        for code in deflectors:
             rmass = rmasses[code]
             if (code % 100 == 99) and (code not in self._ephemeris):
                 code //= 100
@@ -779,14 +778,8 @@ class Astrometric(ICRF):
             d = compute_deflection(target_au, deflector_au, rmass)
             target_au += d
 
-        # pe = _compute_deflector_position(
-        #     t, observer, position, deflector, tlt,
-        # )
-        # rmass = rmasses[name]
-        # position += compute_deflection(position, pe, rmass)
-
         if observer_gcrs_au is not None:
-            rmass = rmasses['earth']
+            rmass = rmasses[399]
             d = compute_deflection(target_au, observer_gcrs_au, rmass)
 
             _, nadir_angle = compute_limb_angle(target_au, observer_gcrs_au)
@@ -794,9 +787,8 @@ class Astrometric(ICRF):
 
         add_aberration(target_au, bcrs_velocity, self.light_time)
 
+        # Note that aberration and deflection are not applied to velocity.
         v = self.velocity.au_per_d
-        if v is not None:
-            pass  # TODO: how to apply aberration and deflection to velocity?
 
         apparent = Apparent(target_au, v, t, self.center, self.target)
         apparent.center_barycentric = self.center_barycentric

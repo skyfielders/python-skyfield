@@ -3,11 +3,24 @@
 Run `design/measure_earth_deflection.py` to draw a quick graph.
 
 """
+from contextlib import contextmanager
 from numpy import arange, diff
 from skyfield import relativity
 from skyfield.api import load, wgs84
 from skyfield.framelib import ecliptic_frame as ef
 from skyfield.jpllib import _jpl_name_code_dict as jpl_codes
+
+@contextmanager
+def patch_rmass(name):
+    code = jpl_codes[name.upper()]
+    old = relativity.rmasses[name]
+    relativity.rmasses[code] = 1e100  # almost no mass
+    relativity.rmasses[name] = 1e100
+    try:
+        yield
+    finally:
+        relativity.rmasses[code] = old
+        relativity.rmasses[name] = old
 
 def trial(deflector_name, target_name, year, month, day):
     """Compare apparent() lat/lon with a given deflector turned on and off."""
@@ -20,11 +33,8 @@ def trial(deflector_name, target_name, year, month, day):
     astrometric = lowell.at(t).observe(target)
     lat1, lon1, _ = astrometric.apparent().frame_latlon(ef)
 
-    code = jpl_codes[deflector_name.upper()]
-    old = relativity.rmasses[code]
-    relativity.rmasses[code] = 1e100  # almost no mass
-    lat2, lon2, _ = astrometric.apparent().frame_latlon(ef)
-    relativity.rmasses[code] = old
+    with patch_rmass(deflector_name):
+        lat2, lon2, _ = astrometric.apparent().frame_latlon(ef)
 
     return lat1.mas() - lat2.mas(), lon1.mas() - lon2.mas()
 
@@ -53,7 +63,7 @@ def test_saturn_deflection():
     assert stringify(lat_mas) == '0.01 0.01 0.01 0.01 0.01'
     assert stringify(lon_mas) == '0.00 0.00 0.00 -0.00 -0.00'
 
-def test_moon_deflection():  # TODO: better dates
+def test_moon_deflection():
     # Moon, the next deflector, should be turned off by default.
     lat_mas, lon_mas = trial('moon', 'neptune barycenter', 2024, 12, 9.364)
     assert stringify(lat_mas) == '0.00 0.00 0.00 0.00 0.00'
@@ -72,10 +82,8 @@ def test_earth_deflection():
     lowell = earth + wgs84.latlon(35.2029, -111.6646)
     alt1, az1, _ = lowell.at(t).observe(jupiter).apparent().altaz()
 
-    old = relativity.rmasses['earth']
-    relativity.rmasses['earth'] = 1e100  # almost no mass
-    alt2, az2, _ = lowell.at(t).observe(jupiter).apparent().altaz()
-    relativity.rmasses['earth'] = old
+    with patch_rmass('earth'):
+        alt2, az2, _ = lowell.at(t).observe(jupiter).apparent().altaz()
 
     dalt = ' '.join('%.2f' % n for n in alt1.mas() - alt2.mas())
     daz = ' '.join('%.2f' % n for n in az1.mas() - az2.mas())
