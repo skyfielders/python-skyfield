@@ -16,8 +16,8 @@ Unreleased future version
   Skyfield :class:`~skyfield.timelib.Time` object; previously, only a
   plain float was supported as the subtrahend.
 
-Unreleased future version
--------------------------
+Unreleased future version 2
+---------------------------
 
 * Fix: if the :meth:`~skyfield.positionlib.ICRF.altaz()` method was
   given a position with a NaN coordinate and ``temperature_C`` and
