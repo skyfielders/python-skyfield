@@ -12,7 +12,7 @@ from .functions import (
 )
 from .geometry import intersect_line_and_sphere
 from .relativity import (
-    _compute_deflector_position, add_aberration, compute_deflection, rmasses,
+    _compute_deflection, _compute_deflector_position, add_aberration, rmasses,
 )
 from .timelib import Time
 from .units import Angle, AngleRate, Distance, Velocity, _interpret_angle
@@ -775,12 +775,12 @@ class Astrometric(ICRF):
             deflector_au = _compute_deflector_position(
                 t, bcrs_position, target_au, deflector, tlt,
             )
-            d = compute_deflection(target_au, deflector_au, rmass)
+            d = _compute_deflection(target_au, deflector_au, rmass)
             target_au += d
 
         if observer_gcrs_au is not None:
             rmass = rmasses[399]
-            d = compute_deflection(target_au, observer_gcrs_au, rmass)
+            d = _compute_deflection(target_au, observer_gcrs_au, rmass)
 
             _, nadir_angle = compute_limb_angle(target_au, observer_gcrs_au)
             target_au += d * (nadir_angle >= 0.8)
