@@ -102,9 +102,12 @@ def _compute_deflector_position(t, observer, position, deflector, tlt):
     return pe
 
 def light_time_difference(position, deflector_position):
-    """Returns the difference in light-time, for a star,
-      between the barycenter of the solar system and the observer (or
-      the geocenter).
+    """When did the light from ``position`` pass closest to a given deflector?
+
+    Given an observer at the origin and a ``position`` |xyz| in AU, how
+    recently did the light from the position pass closest to the object
+    whose |xyz| is given as ``deflector_position``?  The answer is
+    returned as a floating point number of days.
 
     """
     # From 'pos1', form unit vector 'u1' in direction of star or light
