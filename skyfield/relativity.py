@@ -78,6 +78,8 @@ def add_deflection(position, observer, ephemeris, t,
         position += d
 
 def _compute_deflector_position(t, observer, position, deflector, tlt):
+    """Compute where a deflector was when closest to a light beam."""
+
     # Get position of gravitating body wrt observer.
 
     bposition = deflector.at(t).xyz.au
@@ -118,16 +120,11 @@ def light_time_difference(position, deflector_position):
     return diflt
 
 def _compute_deflection(position, pe, rmass):
-    """Correct a position vector for how one particular mass deflects light.
+    """Compute how much a mass will deflect a position.
 
-    TODO: update this docstring
-    # Construct vector 'pq' from gravitating body to observed object and
-    # construct vector 'pe' from gravitating body to observer.
-
-    Given the ICRS `position` |xyz| of an object (AU) together with
-    the positions of an `observer` and a `deflector` of reciprocal mass
-    `rmass`, this function updates `position` in-place to show how much
-    the presence of the deflector will deflect the image of the object.
+    The ``position`` is relative to the observer in AU; ``pe`` is the
+    position of the observer relative to the deflector in AU; and
+    ``rmass`` is the deflector's reciprocal mass.
 
     """
     pq = position + pe

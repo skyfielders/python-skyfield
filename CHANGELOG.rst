@@ -14,7 +14,7 @@ Unreleased future version
 
 * You can now subtract a NumPy array of floating point TT days from a
   Skyfield :class:`~skyfield.timelib.Time` object; previously, only a
-  plain float was supported as the subtrahend. (TODO: word choice?)
+  plain float was supported as the subtrahend.
 
 Unreleased future version
 -------------------------

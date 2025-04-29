@@ -726,24 +726,24 @@ class Astrometric(ICRF):
     def apparent(self, deflectors=(10, 599, 699)):
         """Compute an :class:`Apparent` position for this body.
 
-        This applies two effects to the position that arise from
-        relativity and shift slightly where the other body will appear
-        in the sky: the deflection that the image will experience if its
-        light passes close to large masses in the Solar System, and the
-        aberration of light caused by the observer's own velocity.
+        This applies two effects to an astrometric position that arise
+        from relativity and that shift the position slightly: deflection
+        as light passes massive bodies on its way to the observer, and
+        the aberration of light caused by the observer's own velocity.
 
-        >>> earth.at(t).observe(mars).apparent()
-        <Apparent GCRS position and velocity at date t center=399 target=499>
+        These two transforms convert the position from the BCRS
+        reference frame of the Solar System barycenter to the reference
+        frame of the observer.  In the specific case where the observer
+        is the Earth, the output reference frame is the GCRS.
 
-        These transforms convert the position from the BCRS reference
-        frame of the Solar System barycenter and to the reference frame
-        of the observer.  In the specific case of an Earth observer, the
-        output reference frame is the GCRS.
+        The default value of the ``deflectors`` argument selects the
+        three largest Solar System masses for deflection: the Sun 10,
+        Jupiter 599, and Saturn 699.  The caller can override this by
+        providing their own tuple of codes, or an empty tuple.
 
-        By default, deflection considers only four masses: the Sun,
-        Jupiter, and Saturn; and the Earth, if the observer is on the
-        Earth's surface or in Earth orbit.  TODO: how should I let them
-        control Earth deflection?
+        If the observer is on the Earth's surface or in Earth orbit,
+        then Skyfield also applies the deflection caused by the Earth's
+        own mass.
 
         """
         t = self.t
@@ -767,7 +767,7 @@ class Astrometric(ICRF):
 
         tlt = length_of(target_au) / C_AUDAY
 
-        for code in deflectors:
+        for code in deflectors:  # TODO: skip ourselves?
             rmass = rmasses[code]
             if (code % 100 == 99) and (code not in self._ephemeris):
                 code //= 100
