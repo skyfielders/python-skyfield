@@ -8,6 +8,12 @@ Changelog
 Next version
 ------------
 
+* The two routines :func:`~skyfield.almanac.find_risings()` and
+  :func:`~skyfield.almanac.find_settings()` now skip deflection when
+  computing the target’s apparent position, which increases their speed
+  by around 30%.  The routines aim for only millisecond precision, while
+  deflection only makes a difference of a couple of microseconds.
+
 * You can now subtract a NumPy array of floating point TT days from a
   Skyfield :class:`~skyfield.timelib.Time` object of the same length;
   previously, only a plain int or float was supported as the subtrahend.

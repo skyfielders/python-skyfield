@@ -392,7 +392,9 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
 
     # Determine the target's hour angle and declination at those times.
     _fastify(t)
-    ha, dec, distance = observer.at(t).observe(target).apparent().hadec()
+    no_deflectors = ()
+    apparent = observer.at(t).observe(target).apparent(no_deflectors)
+    ha, dec, distance = apparent.hadec()
 
     # Invoke our geometry formula: for each time `t`, predict the hour
     # angle at which the target will next reach the horizon, if its
@@ -435,7 +437,7 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
         _fastify(t)
 
         # Expensive: generate true ha/dec at `t`.
-        apparent = observer.at(t).observe(target).apparent()
+        apparent = observer.at(t).observe(target).apparent(no_deflectors)
         ha, dec, distance = apparent.hadec()
 
         # Estimate where the horizon-crossing is.
@@ -476,8 +478,7 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     # altitude vs the horizon and how fast it's moving vertically at
     # the second-to-last `t` we computed above.
     v = observer.vector_functions[-1]
-    altitude0, _, distance0, rate0, _, _ = (
-        apparent.frame_latlon_and_rates(v))
+    altitude0, _, distance0, rate0, _, _ = apparent.frame_latlon_and_rates(v)
 
     # Even faster than _fastify(t) is to just assume that nutation
     # doesn't have much time to move over this short interval.
@@ -485,9 +486,8 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     t._nutation_angles_radians = previous_t._nutation_angles_radians
 
     # And again, this time with the very final `t` we computed.
-    apparent = observer.at(t).observe(target).apparent()
-    altitude1, _, distance1, rate1, _, _ = (
-        apparent.frame_latlon_and_rates(v))
+    apparent = observer.at(t).observe(target).apparent(no_deflectors)
+    altitude1, _, distance1, rate1, _, _ = apparent.frame_latlon_and_rates(v)
 
     # Using the target's altitude and altitude-velocity at the final
     # two times we computed, compute where it crosses the horizon.
