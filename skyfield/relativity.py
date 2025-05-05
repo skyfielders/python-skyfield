@@ -1,4 +1,4 @@
-from numpy import abs, einsum, sqrt, where
+from numpy import abs, clip, einsum, sqrt, where
 
 from .constants import C, AU_M, C_AUDAY, GS
 from .functions import _AVOID_DIVIDE_BY_ZERO, dots, length_of
@@ -6,6 +6,20 @@ from .functions import _AVOID_DIVIDE_BY_ZERO, dots, length_of
 deflectors = ['sun', 'jupiter', 'saturn', 'moon', 'venus', 'uranus', 'neptune']
 rmasses = {
     # earth-moon barycenter: 328900.561400
+    199: 6023600.0,             # mercury
+    299: 408523.71,             # venus
+    399: 332946.050895,         # earth
+    499: 3098708.0,             # mars
+    599: 1047.3486,             # jupiter
+    699: 3497.898,              # saturn
+    799: 22902.98,              # uranus
+    899: 19412.24,              # neptune
+    999: 135200000.0,           # pluto
+    10: 1.0,                    # sun
+    301: 27068700.387534,       # moon
+
+    # For compatibility with any user code that discovered and used this
+    # undocumented `rmasses` dict prior to Skyfield 1.53:
     'mercury': 6023600.0,
     'venus': 408523.71,
     'earth': 332946.050895,
@@ -17,7 +31,7 @@ rmasses = {
     'pluto': 135200000.0,
     'sun': 1.0,
     'moon': 27068700.387534,
-    }
+}
 
 def add_deflection(position, observer, ephemeris, t,
                    include_earth_deflection, count=3):
@@ -39,66 +53,61 @@ def add_deflection(position, observer, ephemeris, t,
 
     # Cycle through gravitating bodies.
 
-    jd_tdb = t.tdb
-    ts = t.ts
     for name in deflectors[:count]:
         try:
             deflector = ephemeris[name]
         except KeyError:
             deflector = ephemeris[name + ' barycenter']
 
-        # Get position of gravitating body wrt ss barycenter at time 't_tdb'.
-
-        bposition = deflector.at(ts.tdb(jd=jd_tdb)).xyz.au  # TODO
-
-        # Get position of gravitating body wrt observer at time 'jd_tdb'.
-
-        gpv = bposition - observer
-
-        # Compute light-time from point on incoming light ray that is closest
-        # to gravitating body.
-
-        dlt = light_time_difference(position, gpv)
-
-        # Get position of gravitating body wrt ss barycenter at time when
-        # incoming photons were closest to it.
-
-        tclose = jd_tdb
-
-        # if dlt > 0.0:
-        #     tclose = jd - dlt
-
-        tclose = where(dlt > 0.0, jd_tdb - dlt, tclose)
-        tclose = where(tlt < dlt, jd_tdb - tlt, tclose)
-
-        # if tlt < dlt:
-        #     tclose = jd - tlt
-
-        bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
         rmass = rmasses[name]
-        _add_deflection(position, observer, bposition, rmass)
+        pe = _compute_deflector_position(
+            t, observer, position, deflector, tlt,
+        )
+        position += _compute_deflection(position, pe, rmass)
 
     # If observer is not at geocenter, add in deflection due to Earth.
 
     if include_earth_deflection.any():
         deflector = ephemeris['earth']
-        bposition = deflector.at(ts.tdb(jd=tclose)).xyz.au  # TODO
+        bposition = deflector.at(t).xyz.au
         rmass = rmasses['earth']
-        # TODO: Make the following code less messy, maybe by having
-        # _add_deflection() return a new vector instead of modifying the
-        # old one in-place.
-        deflected_position = position.copy()
-        _add_deflection(deflected_position, observer, bposition, rmass)
+        pe = observer - bposition
+        d = _compute_deflection(position, pe, rmass)
         if include_earth_deflection.shape:
-            position[:,include_earth_deflection] = (
-                deflected_position[:,include_earth_deflection])
-        else:
-            position[:] = deflected_position[:]
+            d *= include_earth_deflection  # where False, set `d` to zero
+        position += d
 
-def light_time_difference(position, observer_position):
-    """Returns the difference in light-time, for a star,
-      between the barycenter of the solar system and the observer (or
-      the geocenter).
+def _compute_deflector_position(t, observer, position, deflector, tlt):
+    """Compute where a deflector was when closest to a light beam."""
+
+    # Get position of gravitating body wrt observer.
+
+    bposition = deflector.at(t).xyz.au
+    gpv = bposition - observer
+
+    # Compute light-time from point on incoming light ray that is closest
+    # to gravitating body.
+
+    dlt = light_time_difference(position, gpv)
+
+    # Should really add TDB offset, not TT, but doesn't matter.
+
+    tclose = t - clip(dlt, 0.0, tlt)
+
+    # Get position of gravitating body wrt ss barycenter at time when
+    # incoming photons were closest to it.
+
+    bposition = deflector.at(tclose).xyz.au
+    pe = observer - bposition
+    return pe
+
+def light_time_difference(position, deflector_position):
+    """When did the light from ``position`` pass closest to a given deflector?
+
+    Given an observer at the origin and a ``position`` |xyz| in AU, how
+    recently did the light from the position pass closest to the object
+    whose |xyz| is given as ``deflector_position``?  The answer is
+    returned as a floating point number of days.
 
     """
     # From 'pos1', form unit vector 'u1' in direction of star or light
@@ -110,23 +119,18 @@ def light_time_difference(position, observer_position):
     # Light-time returned is the projection of vector 'pos_obs' onto the
     # unit vector 'u1' (formed from 'pos1'), divided by the speed of light.
 
-    diflt = einsum('a...,a...', u1, observer_position) / C_AUDAY
+    diflt = einsum('a...,a...', u1, deflector_position) / C_AUDAY
     return diflt
 
-def _add_deflection(position, observer, deflector, rmass):
-    """Correct a position vector for how one particular mass deflects light.
+def _compute_deflection(position, pe, rmass):
+    """Compute how much a mass will deflect a position.
 
-    Given the ICRS `position` |xyz| of an object (AU) together with
-    the positions of an `observer` and a `deflector` of reciprocal mass
-    `rmass`, this function updates `position` in-place to show how much
-    the presence of the deflector will deflect the image of the object.
+    The ``position`` is relative to the observer in AU; ``pe`` is the
+    position of the observer relative to the deflector in AU; and
+    ``rmass`` is the deflector's reciprocal mass.
 
     """
-    # Construct vector 'pq' from gravitating body to observed object and
-    # construct vector 'pe' from gravitating body to observer.
-
-    pq = observer + position - deflector
-    pe = observer - deflector
+    pq = position + pe
 
     # Compute vector magnitudes and unit vectors.
 
@@ -146,19 +150,16 @@ def _add_deflection(position, observer, deflector, rmass):
 
     # If gravitating body is observed object, or is on a straight line
     # toward or away from observed object to within 1 arcsec, deflection
-    # is set to zero set 'pos2' equal to 'pos1'.
+    # is set to zero.
 
-    make_no_correction = abs(edotp) > 0.99999999999
+    flag = abs(edotp) <= 0.99999999999
 
     # Compute scalar factors.
 
     fac1 = 2.0 * GS / (C * C * emag * AU_M * rmass)
     fac2 = 1.0 + qdote
 
-    # Correct position vector.
-
-    position += where(make_no_correction, 0.0,
-                      fac1 * (pdotq * ehat - edotp * qhat) / fac2 * pmag)
+    return flag * fac1 * (pdotq * ehat - edotp * qhat) / fac2 * pmag
 
 def add_aberration(position, velocity, light_time):
     """Correct a relative position vector for aberration of light.

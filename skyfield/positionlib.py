@@ -3,7 +3,7 @@
 
 from numpy import array, cos, einsum, full, reshape, nan, nan_to_num, zeros
 from . import framelib
-from .constants import ANGVEL, AU_M, C, ERAD, DAY_S, RAD2DEG, pi, tau
+from .constants import ANGVEL, AU_M, C, C_AUDAY, ERAD, DAY_S, RAD2DEG, pi, tau
 from .descriptorlib import reify
 from .earthlib import compute_limb_angle
 from .functions import (
@@ -11,7 +11,9 @@ from .functions import (
     length_of, mxm, mxv, rot_z, to_spherical,
 )
 from .geometry import intersect_line_and_sphere
-from .relativity import add_aberration, add_deflection
+from .relativity import (
+    _compute_deflection, _compute_deflector_position, add_aberration, rmasses,
+)
 from .timelib import Time
 from .units import Angle, AngleRate, Distance, Velocity, _interpret_angle
 
@@ -721,22 +723,27 @@ class Astrometric(ICRF):
             ' try calling .apparent() first to get an apparent position'
         )
 
-    def apparent(self):
+    def apparent(self, deflectors=(10, 599, 699)):
         """Compute an :class:`Apparent` position for this body.
 
-        This applies two effects to the position that arise from
-        relativity and shift slightly where the other body will appear
-        in the sky: the deflection that the image will experience if its
-        light passes close to large masses in the Solar System, and the
-        aberration of light caused by the observer's own velocity.
+        This applies two effects to an astrometric position that arise
+        from relativity and that shift the position slightly: deflection
+        as light passes massive bodies on its way to the observer, and
+        the aberration of light caused by the observer's own velocity.
 
-        >>> earth.at(t).observe(mars).apparent()
-        <Apparent GCRS position and velocity at date t center=399 target=499>
+        These two transforms convert the position from the BCRS
+        reference frame of the Solar System barycenter to the reference
+        frame of the observer.  In the specific case where the observer
+        is the Earth, the output reference frame is the GCRS.
 
-        These transforms convert the position from the BCRS reference
-        frame of the Solar System barycenter and to the reference frame
-        of the observer.  In the specific case of an Earth observer, the
-        output reference frame is the GCRS.
+        The default value of the ``deflectors`` argument selects the
+        three largest Solar System masses for deflection: the Sun 10,
+        Jupiter 599, and Saturn 699.  The caller can override this by
+        providing their own tuple of codes, or an empty tuple.
+
+        If the observer is on the Earth's surface or in Earth orbit,
+        then Skyfield also applies the deflection caused by the Earth's
+        own mass.
 
         """
         t = self.t
@@ -758,21 +765,30 @@ class Astrometric(ICRF):
             if observer_gcrs_au is not None:
                 observer_gcrs_au = observer_gcrs_au.reshape(shape)
 
-        if observer_gcrs_au is None:
-            include_earth_deflection = array((False,))
-        else:
-            limb_angle, nadir_angle = compute_limb_angle(
-                target_au, observer_gcrs_au)
-            include_earth_deflection = nadir_angle >= 0.8
+        tlt = length_of(target_au) / C_AUDAY
 
-        add_deflection(target_au, bcrs_position,
-                       self._ephemeris, t, include_earth_deflection)
+        for code in deflectors:  # TODO: skip ourselves?
+            rmass = rmasses[code]
+            if (code % 100 == 99) and (code not in self._ephemeris):
+                code //= 100
+            deflector = self._ephemeris[code]
+            deflector_au = _compute_deflector_position(
+                t, bcrs_position, target_au, deflector, tlt,
+            )
+            d = _compute_deflection(target_au, deflector_au, rmass)
+            target_au += d
+
+        if observer_gcrs_au is not None:
+            rmass = rmasses[399]
+            d = _compute_deflection(target_au, observer_gcrs_au, rmass)
+
+            _, nadir_angle = compute_limb_angle(target_au, observer_gcrs_au)
+            target_au += d * (nadir_angle >= 0.8)
 
         add_aberration(target_au, bcrs_velocity, self.light_time)
 
+        # Note that aberration and deflection are not applied to velocity.
         v = self.velocity.au_per_d
-        if v is not None:
-            pass  # TODO: how to apply aberration and deflection to velocity?
 
         apparent = Apparent(target_au, v, t, self.center, self.target)
         apparent.center_barycentric = self.center_barycentric
