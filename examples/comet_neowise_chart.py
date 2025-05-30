@@ -42,7 +42,8 @@ with load.open(hipparcos.URL) as f:
 # of the stars at which each edge stars, and the star at which each edge
 # ends.
 
-url = ('https://raw.githubusercontent.com/Stellarium/stellarium/master'
+url = ('https://raw.githubusercontent.com/Stellarium/stellarium/'
+       'eb47095a9282cf6b981f6e37fe1ea3a3ae0fd167'
        '/skycultures/modern_st/constellationship.fab')
 
 with load.open(url) as f:
