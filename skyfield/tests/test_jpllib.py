@@ -1,6 +1,8 @@
 import os
 from skyfield.api import load, load_file
 
+from assay import assert_raises
+
 def _data_path(filename):
     return os.path.join(os.path.dirname(__file__), 'data', filename)
 
@@ -27,3 +29,31 @@ def test_multiple_non_overlapping_segments_per_target():
     pluto.at(t).observe(pluto).apparent()
 
     # TODO: SSB.at(t).observe() fails the above test.
+
+# Verify that ephemeris objects let their segments be edited.
+
+def test_removing_segments_from_jpl_ephemeris():
+    eph = load('de421.bsp')
+    eph.segments = [s for s in eph.segments if s.target in (3, 4)]
+
+    assert len(eph.segments) == 2
+    assert 2 not in eph
+    assert 3 in eph
+    assert eph.codes == {0, 3, 4}
+    assert eph.names() == {
+        0: ['SOLAR_SYSTEM_BARYCENTER', 'SSB', 'SOLAR SYSTEM BARYCENTER'],
+        3: ['EARTH_BARYCENTER', 'EMB', 'EARTH MOON BARYCENTER',
+            'EARTH-MOON BARYCENTER', 'EARTH BARYCENTER'],
+        4: ['MARS_BARYCENTER', 'MARS BARYCENTER'],
+    }
+
+    assert repr(eph) == "<SpiceKernel 'de421.bsp'>"
+    assert str(eph) == """\
+Segments from kernel file 'de421.bsp':
+  JD 2414864.50 - JD 2471184.50  (1899-07-28 through 2053-10-08)
+      0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
+      0 -> 4    SOLAR SYSTEM BARYCENTER -> MARS BARYCENTER"""
+
+    assert type(eph[4]).__name__ == 'ChebyshevPosition'
+    with assert_raises(KeyError):
+        eph[5]

@@ -176,7 +176,7 @@ Here, for example, are the targets supported by DE421:
 
 .. testoutput::
 
-    SPICE kernel file 'de421.bsp' has 15 segments
+    Segments from kernel file 'de421.bsp':
       JD 2414864.50 - JD 2471184.50  (1899-07-28 through 2053-10-08)
           0 -> 1    SOLAR SYSTEM BARYCENTER -> MERCURY BARYCENTER
           0 -> 2    SOLAR SYSTEM BARYCENTER -> VENUS BARYCENTER

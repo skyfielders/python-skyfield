@@ -37,10 +37,8 @@ def test_astrometric_position_does_not_allow_altaz(ts):
     with assert_raises(ValueError, 'it is not useful to call .altaz'):
         a.altaz()
 
-def test_ephemeris_contains_method(ts):
+def test_ephemeris_in_operator_accepts_strings(ts):
     e = api.load('de421.bsp')
-    assert (399 in e) is True
-    assert (398 in e) is False
     assert ('earth' in e) is True
     assert ('Earth' in e) is True
     assert ('EARTH' in e) is True
