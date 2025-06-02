@@ -32,7 +32,7 @@ def test_multiple_non_overlapping_segments_per_target():
 
 # Verify that ephemeris objects let their segments be edited.
 
-def test_removing_segments_from_jpl_ephemeris():
+def test_removing_segments_from_ephemeris():
     eph = load('de421.bsp')
     eph.segments = [s for s in eph.segments if s.target in (3, 4)]
 
@@ -55,5 +55,50 @@ Segments from kernel file 'de421.bsp':
       0 -> 4    SOLAR SYSTEM BARYCENTER -> MARS BARYCENTER"""
 
     assert type(eph[4]).__name__ == 'ChebyshevPosition'
-    with assert_raises(KeyError):
+    with assert_raises(KeyError, 'is missing 5'):
         eph[5]
+
+def test_adding_segments_to_ephemeris():
+    eph = load('de405.bsp')
+    eph.segments = [s for s in eph.segments if s.target == 3]
+
+    eph2 = load('de421.bsp')
+    eph.segments.extend((s for s in eph2.segments if s.target in (301, 399)))
+
+    assert len(eph.segments) == 3
+    assert 2 not in eph
+    assert 3 in eph
+    assert 301 in eph
+    assert eph.codes == {0, 3, 301, 399}
+    assert eph.names() == {
+        0: ['SOLAR_SYSTEM_BARYCENTER', 'SSB', 'SOLAR SYSTEM BARYCENTER'],
+        3: ['EARTH_BARYCENTER', 'EMB', 'EARTH MOON BARYCENTER',
+            'EARTH-MOON BARYCENTER', 'EARTH BARYCENTER'],
+        301: ['MOON'], 399: ['EARTH'],
+    }
+
+    assert repr(eph) == "<SpiceKernel 'de405.bsp' 'de421.bsp'>"
+    assert str(eph) == """\
+Segments from kernel file 'de405.bsp':
+  JD 2305424.50 - JD 2525008.50  (1599-12-08 through 2201-02-19)
+      0 -> 3    SOLAR SYSTEM BARYCENTER -> EARTH BARYCENTER
+And from kernel file 'de421.bsp':
+  JD 2414864.50 - JD 2471184.50  (1899-07-28 through 2053-10-08)
+      3 -> 301  EARTH BARYCENTER -> MOON
+      3 -> 399  EARTH BARYCENTER -> EARTH"""
+
+    vs = eph[399]
+    assert type(vs).__name__ == 'VectorSum'
+    assert str(vs) == """\
+Sum of 2 vectors:
+ 'de405.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
+ 'de421.bsp' segment 3 EARTH BARYCENTER -> 399 EARTH"""
+
+    with assert_raises(KeyError):
+        eph[4]
+
+def test_ephemeris_lacking_segments_to_connect_to_barycenter():
+    eph = load('de421.bsp')
+    eph.segments = [s for s in eph.segments if s.target == 399]
+    with assert_raises(KeyError, "Barycenter to the target 'Earth'"):
+        eph['Earth']

@@ -73,19 +73,12 @@ class SpiceKernel(object):
         self.segments = [SPICESegment(self, s) for s in self.spk.segments]
         self.comments = self.spk.comments  # deprecated pass-through method
 
-        # Pre-compute which segments lead to which targets.
-        d = defaultdict(list)
-        for segment in self.segments:
-            d[segment.target].append(segment)
-
-        # Go ahead and build a vector function for each target.
-        self._vector_functions = {
-            target: segments[0] if len(segments) == 1 else Stack(segments)
-            for target, segments in d.items()
-        }
-
     def __repr__(self):
-        return '<{0} {1!r}>'.format(type(self).__name__, self.path)
+        paths = sorted({s.ephemeris.path for s in self.segments})
+        return '<{} {}>'.format(
+            type(self).__name__,
+            ' '.join(repr(path) for path in paths),
+        )
 
     def __str__(self):
         lines = []
@@ -94,8 +87,9 @@ class SpiceKernel(object):
         ephemeris = start = end = None
         for s in self.segments:
             if ephemeris is not s.ephemeris:
+                word = 'Segments' if (ephemeris is None) else 'And'
                 ephemeris = s.ephemeris
-                a('Segments from kernel file {!r}:'.format(ephemeris.filename))
+                a('{} from kernel file {!r}:'.format(word, ephemeris.filename))
             spk = s.spk_segment
             if start != spk.start_jd or end != spk.end_jd:
                 start, end = spk.start_jd, spk.end_jd
@@ -170,17 +164,28 @@ class SpiceKernel(object):
 
     def __getitem__(self, target):
         """Return a vector function for computing the location of `target`."""
+        target_arg = target
         target = self.decode(target)
-        vector_functions = self._vector_functions
-        vf = vector_functions[target]
-        if vf.center == 0:
-            return vf
-        vfs = [vf]
-        center = vf.center
-        while center in vector_functions:
-            vf = vector_functions[center]
+        center = target
+        vfs = []
+
+        while center != 0:
+            matches = [s for s in self.segments if s.target == center]
+            if not matches:
+                raise KeyError(
+                    'the segments of this ephemeris cannot connect the Solar'
+                    ' System Barycenter to the target {!r}'.format(target_arg)
+                )
+            elif len(matches) == 1:
+                vf = matches[0]
+            else:
+                vf = Stack(matches)
             vfs.append(vf)
             center = vf.center
+
+        if len(vfs) == 1:
+            return vfs[0]
+
         return VectorSum(center, target, tuple(reversed(vfs)))
 
     def __contains__(self, name_or_code):
