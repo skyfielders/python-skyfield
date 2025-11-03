@@ -22,7 +22,9 @@ Comets
 ======
 
 The `IAU Minor Planet Center <https://www.minorplanetcenter.net/>`_
-distributes a ``CometEls.txt`` file
+distributes a
+`CometEls.txt <https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt>`_
+file
 of orbital elements for predicting comet positions.
 The file is plain text,
 so feel free to open it with a text editor
