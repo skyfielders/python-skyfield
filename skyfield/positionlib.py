@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Classes representing different kinds of astronomical position."""
 
+from jplephem.names import target_names as target_names
 from numpy import array, cos, einsum, full, reshape, nan, nan_to_num, zeros
+
 from . import framelib
 from .constants import ANGVEL, AU_M, C, C_AUDAY, ERAD, DAY_S, RAD2DEG, pi, tau
 from .descriptorlib import reify
@@ -771,7 +773,14 @@ class Astrometric(ICRF):
             rmass = rmasses[code]
             if (code % 100 == 99) and (code not in self._ephemeris):
                 code //= 100
-            deflector = self._ephemeris[code]
+            try:
+                deflector = self._ephemeris[code]
+            except KeyError:
+                m = _deflector_message.format(code, target_names[code])
+                e = ValueError(m)
+                e.__cause__ = None
+                e.target = code
+                raise e
             deflector_au = _compute_deflector_position(
                 t, bcrs_position, target_au, deflector, tlt,
             )
@@ -794,6 +803,18 @@ class Astrometric(ICRF):
         apparent.center_barycentric = self.center_barycentric
         apparent._observer_gcrs_au = observer_gcrs_au
         return apparent
+
+_deflector_message = """\
+ephemeris is missing '{0} {1}'
+
+By default, apparent() computes how the target's light is deflected by
+the gravity of the Sun, Jupiter, and Saturn.  Either add the missing
+body to your ephemeris, or adjust your call to apparent() like this:
+
+    position.apparent(deflectors=(10, 599))  # only Sun and Jupiter
+    position.apparent(deflectors=())         # turn deflection off
+
+"""
 
 class Apparent(ICRF):
     """An apparent |xyz| position relative to a particular observer.

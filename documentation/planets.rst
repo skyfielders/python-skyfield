@@ -199,8 +199,8 @@ for any body that an ephemeris links to target zero,
 the Solar System barycenter.
 For example,
 DE421 — as you can see above —
-provides a segment directly linking the Solar System barycenter
-with the Sun:
+provides a segment directly linking the Sun
+to the Solar System barycenter:
 
 .. testcode::
 
@@ -211,11 +211,10 @@ with the Sun:
 
     'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 10 SUN
 
-By contrast,
-generating a position for the Moon with DE421
-requires Skyfield to add together two segments behind the scenes.
-The first segment provides the position of the Earth-Moon center of gravity,
-while the second segment provides the offset from there to the Moon.
+Linking the Moon to the Solar System barycenter with DE421
+requires two segments,
+one providing the vector to the Earth-Moon system’s center of gravity,
+and the second providing the vector from there to the Moon.
 
 .. testcode::
 
@@ -228,18 +227,91 @@ while the second segment provides the offset from there to the Moon.
      'de421.bsp' segment 0 SOLAR SYSTEM BARYCENTER -> 3 EARTH BARYCENTER
      'de421.bsp' segment 3 EARTH BARYCENTER -> 301 MOON
 
+Each time you ask this ``moon`` object for a position,
+it computes both vectors and adds them together for you.
+
 Note that most planets are so massive compared to their moons
 that you can ignore the difference
 between the planet and its system barycenter.
 If you want to observe Mars or Jupiter from elsewhere in the Solar System,
 just ask for the ``Mars Barycenter``
-or ``Jupiter Barycenter`` position instead.
-The Earth-Moon system is unusual
-for featuring a satellite with so much mass —
-though even in that case,
-their common barycenter is always inside the Earth.
-Only Pluto has a satellite so massive and so distant
-that the Pluto-Charon barycenter is in space between them.
+or ``Jupiter Barycenter``.
+Only the Earth and Pluto have such massive moons
+that their system barycenters are poor approximations
+for the position of the planets themselves.
+
+Loading several ephemeris files
+===============================
+
+You may sometimes need to load segments
+from several different ephemeris files at once.
+For example,
+if you load ``jup310.bsp`` for its support of Jupiter’s moons,
+you will find that it doesn’t include most of the other planets.
+This means that you will get an error
+if you try to compute an apparent position,
+because Skyfield —
+wanting to provide its usual high precision —
+will try to compute how much the position is deflected
+by the gravity of the Sun, Jupiter, and Saturn,
+but Saturn is missing from ``jup310.bsp``.
+
+.. testcode::
+
+    jup310 = load('jup310.bsp')
+    ganymede = jup310['Ganymede']
+
+    a = ganymede.at(t).observe(earth).apparent()
+
+.. testoutput::
+
+    Traceback (most recent call last):
+      ...
+    ValueError: ephemeris is missing '6 SATURN BARYCENTER'...
+
+If you simply don’t need the extra accuracy
+that is provided by accounting for deflection,
+you can turn deflection off
+by replacing the default tuple of deflectors ``(10, 599, 699)``
+(which means Sun, Jupiter, Saturn)
+with an empty tuple:
+
+.. testcode::
+
+    no_deflectors = ()
+    a = ganymede.at(t).observe(earth).apparent(no_deflectors)
+
+Or, you can leave deflection turned on,
+and supplement your in-memory ephemeris object
+with additional segments
+loaded from another ephemeris file.
+Since the ``.segments`` attribute of an ephemeris object
+is simply a Python list,
+you can ``.extend()`` it with further segments:
+
+.. testcode::
+
+    before = len(jup310.segments)
+
+    de421 = load('de421.bsp')
+    jup310.segments.extend(de421.segments)
+
+    after = len(jup310.segments)
+    print('Expanded ephemeris from {} to {} segments'
+          .format(before, after))
+
+    a = ganymede.at(t).observe(earth).apparent()
+
+.. testoutput::
+
+    Expanded ephemeris from 13 to 28 segments
+
+Note that extending the segment list
+does not make any change to your files on disk;
+the files ``de421.bsp`` and ``jup310.bsp`` are left unmodified.
+Instead, the ``.extend()`` maneuver
+simply collects the segments together in memory
+where a single Python ephemeris object can see them.
 
 .. _Making an ephemeris excerpt:
 
