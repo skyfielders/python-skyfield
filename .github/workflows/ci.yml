@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
-      run:
+      run: |
         apt update
         apt install -y -y -q -q python3-pip
         virtualenv V
