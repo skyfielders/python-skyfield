@@ -13,7 +13,8 @@ on:
 
 jobs:
   doctest-and-lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container: ubuntu:20.04
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -40,7 +41,8 @@ jobs:
         pyflakes $(find skyfield/ -name '*.py')
 
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container: ubuntu:20.04
     strategy:
       fail-fast: false
       matrix:
