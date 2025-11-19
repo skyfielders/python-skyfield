@@ -20,7 +20,7 @@ jobs:
     - name: Set up Python
       run: |
         apt update
-        apt install -y -y -q -q python3-pip
+        apt install -y -y -q -q python3-pip python3-virtualenv
         virtualenv V
 
     - name: Install pinned dependencies
