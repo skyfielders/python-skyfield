@@ -53,6 +53,7 @@ jobs:
 
     - name: Install
       run: |
+        apt update
         apt install -q -q python3-virtualenv virtualenv
         virtualenv -p ${{matrix.python}} V
 
