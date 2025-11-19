@@ -24,22 +24,29 @@ jobs:
         virtualenv V
 
     - name: Install pinned dependencies
+      shell: bash
       run: |
         source ./V/bin/activate
         python -m pip install --upgrade pip
         pip install astropy==3.0.1 docutils==0.17.1 matplotlib==3.3.0 numpy==1.15.4 pandas==1.0.0 pyflakes scipy==1.2.2 sphinx==1.7.2 spktype21
 
     - name: Install Skyfield
+      shell: bash
       run: |
+        source ./V/bin/activate
         python setup.py sdist
         pip install -e .
 
     - name: Doctest
+      shell: bash
       run: |
+        source ./V/bin/activate
         ./test-docs.sh
 
     - name: Lint
+      shell: bash
       run: |
+        source ./V/bin/activate
         pyflakes $(find skyfield/ -name '*.py')
 
   test:
