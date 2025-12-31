@@ -48,11 +48,25 @@ SEASONS = [
     'Winter',
 ]
 
+SEASONS_SOUTH = [
+    'Autumn',
+    'Winter',
+    'Spring',
+    'Summer',
+]
+
 SEASON_EVENTS = [
     'Vernal Equinox',
     'Summer Solstice',
     'Autumnal Equinox',
     'Winter Solstice',
+]
+
+SEASON_EVENTS_SOUTH = [
+    'Autumnal Equinox',
+    'Winter Solstice',
+    'Vernal Equinox',
+    'Summer Solstice',
 ]
 
 SEASON_EVENTS_NEUTRAL = [
