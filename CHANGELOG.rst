@@ -8,11 +8,17 @@ Changelog
 Next version
 ------------
 
+* The :meth:`~skyfield.positionlib.Astrometric.apparent()` method now
+  accepts an optional ``deflectors=`` argument that lets callers control
+  the list of bodies (by default the Sun, Jupiter, and Saturn) for which
+  the deflection of light is computed.  Callers can provide an empty
+  list to turn deflection off.
+
 * The two routines :func:`~skyfield.almanac.find_risings()` and
   :func:`~skyfield.almanac.find_settings()` now skip deflection when
   computing the target’s apparent position, which increases their speed
   by around 30%.  The routines aim for only millisecond precision, while
-  deflection only makes a difference of a couple of microseconds.
+  deflection only makes a difference of microseconds.
 
 * You can now subtract a NumPy array of floating point TT days from a
   Skyfield :class:`~skyfield.timelib.Time` object of the same length;
