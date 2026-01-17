@@ -15,6 +15,21 @@ def main(argv):
     parser = argparse.ArgumentParser(description='Save arrays to a file')
     parser.parse_args(argv)
 
+    # The data in these two binary files does not change from one
+    # Skyfield version to the next, yet (as of 2026 January) they are
+    # coming out slightly different when rebuilt.  Maybe NumPy has
+    # changed its zip file formatting, or compression level?  Anyway,
+    # let's stop automatically rebuilding them for now to avoid noise in
+    # our version control history.
+    #
+    # rebuild_nutation_npz()
+    # rebuild_delta_t_npz()
+
+    # But we do rebuild the IERS data, because it's new each time.
+
+    rebuild_iers_npz()
+
+def rebuild_nutation_npz():
     g = globals()
     save('skyfield/data/nutation', {key: g[key] for key in [
         'ke0_t',
@@ -29,6 +44,7 @@ def main(argv):
         'se0_t_1',
     ]})
 
+def rebuild_delta_t_npz():
     url = 'http://astro.ukho.gov.uk/nao/lvm/Table-S15.2020.txt'
     with load.open(url) as f:
         names, s15_table = parse_S15_table(f)
@@ -37,6 +53,7 @@ def main(argv):
         'Table-S15.2020.txt': s15_table,
     })
 
+def rebuild_iers_npz():
     url = load.build_url('finals2000A.all')
     try:
         f = load.open(url)
