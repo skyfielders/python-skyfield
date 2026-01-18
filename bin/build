@@ -23,3 +23,8 @@ echo 'Everything looks good!'
 echo
 
 PYTHONDONTWRITEBYTECODE= uv build
+
+echo
+echo 'See `cheat-sheet` to remind yourself how to publish to PyPI.'
+echo 'Then run `bin/publish-docs` to update the website.'
+echo
