@@ -5,8 +5,18 @@ Changelog
 .. TODO After finding how to test TIRS reference frame, add it to changelog.
         And double-check the constellation boundaries array.
 
-Next version
-------------
+-----------------
+Released versions
+-----------------
+
+v1.54 — 2026 January 18
+-----------------------
+
+* Skyfield’s internal table for the ∆T Earth orientation parameter has
+  been updated, so observations extend to this month and predictions to
+  January 2027.  Compared to the previous version of Skyfield, this
+  changes the Earth’s rotation angle by up to 0.2 arcseconds in 2025 and
+  1.1 arcseconds in 2026.
 
 * The :meth:`~skyfield.positionlib.Astrometric.apparent()` method now
   accepts an optional ``deflectors=`` argument that lets callers control
@@ -23,10 +33,6 @@ Next version
 * You can now subtract a NumPy array of floating point TT days from a
   Skyfield :class:`~skyfield.timelib.Time` object of the same length;
   previously, only a plain int or float was supported as the subtrahend.
-
------------------
-Released versions
------------------
 
 v1.53 — 2025 April 7
 --------------------
