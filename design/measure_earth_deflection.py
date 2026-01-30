@@ -11,7 +11,15 @@ lowell = earth + wgs84.latlon(35.2029, -111.6646)
 
 a1 = lowell.at(t).observe(jupiter).apparent()
 
-relativity.rmasses['earth'] = 1e100  # almost no mass
+# Monkey-patch the Earth mass used by the deflection logic so we can see
+# what difference that makes for a typical position.  Note that 'rmass'
+# is an inverse ratio, so a big number means a small mass.
+
+new_earth_rmass = 1e100  # almost no mass
+
+relativity.rmasses[399] = new_earth_rmass
+relativity.rmasses['earth'] = new_earth_rmass
+
 a2 = lowell.at(t).observe(jupiter).apparent()
 
 sep_mas = a2.separation_from(a1).mas()
