@@ -396,16 +396,16 @@ def output_topocentric_tests(dates):
 
             apparent = usno.at(t).observe(de405[{planet!r}]).apparent()
             ra, dec, distance = apparent.radec()
-            compare(ra.hours, {ra1!r}, 0.0005 * ra_arcsecond)
-            compare(dec.degrees, {dec1!r}, 0.0005 * arcsecond)
+            compare(ra.hours, {ra1!r}, 0.00001 * ra_arcsecond)
+            compare(dec.degrees, {dec1!r}, 0.00001 * arcsecond)
 
             ra, dec, distance = apparent.radec(epoch='date')
-            compare(ra.hours, {ra2!r}, 0.0005 * ra_arcsecond)
-            compare(dec.degrees, {dec2!r}, 0.0005 * arcsecond)
+            compare(ra.hours, {ra2!r}, 0.00001 * ra_arcsecond)
+            compare(dec.degrees, {dec2!r}, 0.00001 * arcsecond)
 
             alt, az, distance = apparent.altaz()
-            compare(alt.degrees, {alt!r}, 0.0005 * arcsecond)
-            compare(az.degrees, {az!r}, 0.0005 * arcsecond)
+            compare(alt.degrees, {alt!r}, 0.00001 * arcsecond)
+            compare(az.degrees, {az!r}, 0.00001 * arcsecond)
 
             alt, az, distance = apparent.altaz('standard')
             compare(alt.degrees, {alt2!r}, 0.0005 * arcsecond)

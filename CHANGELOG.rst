@@ -34,6 +34,14 @@ v1.54 — 2026 January 18
   Skyfield :class:`~skyfield.timelib.Time` object of the same length;
   previously, only a plain int or float was supported as the subtrahend.
 
+* Bugfix: the ``apparent()`` method in previous Skyfield versions was
+  using the wrong coordinates for Earth’s center when computing how
+  Earth’s gravity deflects positions for topocentric observers.  This
+  has been fixed, and Skyfield’s test suite shows that agreement with
+  the Naval Observatory’s high-precision NOVAS library has improved from
+  0.5 mas to 0.01 mas for topocentric positions.  (Astrometric positions
+  were already agreeing at the 0.01 mas level.)
+
 v1.53 — 2025 April 7
 --------------------
 
