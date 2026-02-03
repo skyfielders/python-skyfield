@@ -47,8 +47,8 @@ Through the following sections,
 we will see how to ask for both Cartesian and spherical coordinates
 in a variety of coordinate systems.
 
-ICRS and equatorial right ascension and declination
-===================================================
+ICRS right ascension and declination
+====================================
 
 *Equatorial* coordinates,
 which measure angles from the Earth’s equator and poles,
@@ -84,9 +84,9 @@ astronomers decided it was time to get off of the equatorial treadmill.
 They defined a new coordinate system:
 the ICRS (International Celestial Reference System).
 Its axes point almost exactly along the old J2000 axes,
-but are permanent and immobile,
-and can achieve unbounded precision
-because instead of using the Earth
+but are permanent and immobile.
+It can achieve unbounded precision because,
+instead of using the Earth,
 its axes are tied to the locations of very distant quasars.
 
 In the :doc:`positions` chapter
@@ -140,57 +140,86 @@ Note that ``.xyz`` is a :class:`~skyfield.units.Distance` object
 and supports not only ``.au``
 but also several other units of measure.
 
+Equatorial right ascension and declination
+==========================================
+
 If instead of using the permanent ICRS
-you want to measure coordinates against the Earth’s axes as they precess,
-then retrieving spherical coordinates is easy:
-simply provide a date to :meth:`~skyfield.positionlib.ICRF.radec()`
+you want right ascension and declination
+measured against the Earth’s true equator and axes,
+then retrieving spherical coordinates is easy.
+Simply provide a date to :meth:`~skyfield.positionlib.ICRF.radec()`
 and it will return a right ascension and declination
 relative to the Earth’s equator and equinox as of that date.
+Or provide the string ``'date'`` and the date of the position itself is used.
+You can find example code in the ‘Positions’ chapter
+in the sections :ref:`astrometric_ra_dec` and :ref:`apparent_ra_dec`.
 
-It’s less usual for someone to want |xyz| coordinates
-measured against the real equator and equinox,
-so there’s no built-in method to retrieve them.
-Instead, you’ll need to import the reference frame itself
-and pass it to the position’s
-:meth:`~skyfield.positionlib.ICRF.frame_xyz()` method:
+But maybe your situation is more complicated.
+You might want |xyz| coordinates instead of right ascension and declination.
+Or maybe you want coordinates measured against the mean equator and equinox
+instead of the true equator and equinox.
+
+In that case you will want to import one of these two reference frames:
+
+* :class:`~skyfield.framelib.true_equator_and_equinox_of_date` —
+  a reference frame
+  that accounts for nearly every wobble of the Earth’s real axis.
+  The effects of both precession and nutation are included.
+  (The only effect omitted is the tiny daily offset 𝑥 and 𝑦
+  that you may have loaded from an IERS data file
+  as described in the :ref:`polar-motion` section.)
+
+* :class:`~skyfield.framelib.mean_equator_and_equinox_of_date` —
+  a reference frame
+  that includes only the smooth long-term motion of precession,
+  but omits all of the smaller wobbles in the Earth’s axis
+  that we call nutation.
+  The mean equator and equinox are sometimes used to tabulate coordinates
+  in books like the *Astronomical Almanac*.
+
+You can get both spherical and |xyz| coordinates
+for either of these reference frames
+by importing them and using them like this:
+
+.. TODO add a new method frame_radec and use it below instead of frame_latlon
 
 .. testcode::
 
-    from skyfield.framelib import \
-        true_equator_and_equinox_of_date as of_date
-
-    print('Cartesian equinox-of-date coordinates:')
-
-    x, y, z = position.frame_xyz(of_date).au
-
-    print('  x = {:.3f} au'.format(x))
-    print('  y = {:.3f} au'.format(y))
-    print('  z = {:.3f} au'.format(z))
-    print()
+    from skyfield.framelib import true_equator_and_equinox_of_date
 
     print('Spherical equinox-of-date coordinates:')
 
-    ra, dec, distance = position.radec(position.t)
+    dec, ra, distance = position.frame_latlon(true_equator_and_equinox_of_date)
+
+    ra.preference = 'hours'  # print hours instead of degrees
 
     print(' ', ra, 'right ascension')
     print(' ', dec, 'declination')
     print(' ', distance, 'distance')
 
-.. testoutput::
+    print()
+    print('Cartesian equinox-of-date coordinates:')
 
-    Cartesian equinox-of-date coordinates:
-      x = -1.510 au
-      y = -1.808 au
-      z = -0.775 au
+    x, y, z = position.frame_xyz(true_equator_and_equinox_of_date).au
+
+    print('  x = {:.6f} au'.format(x))
+    print('  y = {:.6f} au'.format(y))
+    print('  z = {:.6f} au'.format(z))
+
+.. testoutput::
 
     Spherical equinox-of-date coordinates:
       15h 20m 28.70s right ascension
       -18deg 13' 18.5" declination
       2.47983 au distance
 
-Note that the distance is exactly the same as before,
-because this is exactly the same position —
-it’s merely being measured against a slightly different set of axes.
+    Cartesian equinox-of-date coordinates:
+      x = -1.510302 au
+      y = -1.807555 au
+      z = -0.775435 au
+
+The code will look almost exactly the same for the mean equator and equinox,
+except for which frame is imported and used.
 
 .. _horizontal-coordinates:
 
@@ -276,7 +305,8 @@ Hour Angle and Declination
 If you are pointing a telescope or other instrument,
 you might be interested in a variation on equatorial coordinates:
 replacing right ascension with *hour angle,*
-which measures ±180° from your own local meridian.
+which measures ±180° from your own local meridian,
+whose hour angle is 0°.
 
 .. testcode::
 

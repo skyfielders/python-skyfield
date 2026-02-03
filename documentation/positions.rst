@@ -265,6 +265,8 @@ like an Earth satellite or latitude-longitude position,
 then the ``.center`` and ``.target``
 will be those Skyfield objects themselves.
 
+.. _astrometric_ra_dec:
+
 Astrometric right ascension and declination
 ===========================================
 
@@ -379,6 +381,8 @@ you can build a time object and pass it to  :meth:`~ICRF.radec()`:
 
     equinox = ts.J(1991.25)
     ra, dec, distance = astrometric.radec(equinox)
+
+.. _apparent_ra_dec:
 
 Apparent right ascension and declination
 ========================================
