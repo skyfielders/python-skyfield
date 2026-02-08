@@ -1,0 +1,16 @@
+astropy==5.1
+beautifulsoup4==4.6.0
+html5lib==1.0.1
+jinja2==3.0.3
+lxml==4.9.1
+mock==2.0.0
+numpy==1.18.5
+matplotlib==3.3.0
+pandas==1.3.5
+pyflakes==2.1.1
+pygments==2.17.2
+python-dateutil>=2.5.0
+pytz
+sphinx==1.7.2
+spktype21
+https://github.com/brandon-rhodes/assay/archive/master.zip

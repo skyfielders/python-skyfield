@@ -12,70 +12,20 @@ on:
       - master
 
 jobs:
-  doctest-and-lint:
-    runs-on: ubuntu-20.04
+  test-and-doctest:
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Run tests and doctests inside container
+      run: ./containers/ci/run bash -c './test-code.sh && ./test-docs.sh'
+
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
       uses: actions/setup-python@v2
-      with:
-        python-version: 3.6.15
-
-    - name: Install pinned dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install astropy==3.0.1 docutils==0.17.1 matplotlib==3.3.0 numpy==1.15.4 pandas==1.0.0 pyflakes scipy==1.2.2 sphinx==1.7.2 spktype21
-
-    - name: Install Skyfield
-      run: |
-        python setup.py sdist
-        pip install -e .
-
-    - name: Doctest
-      run: |
-        ./test-docs.sh
-
-    - name: Lint
-      run: |
-        pyflakes $(find skyfield/ -name '*.py')
-
-  test:
-    runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
-      matrix:
-        python: [python2, python3]
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Install
-      run: |
-        sudo apt install -q -q python3-virtualenv virtualenv
-        virtualenv -p ${{matrix.python}} V
-
-    - name: Build scripts
-      run: |
-        cat <<'EOF' > GITHUB_INSTALL.sh
-        source ./V/bin/activate
-        echo PATH is $PATH
-        which python
-        python --version
-        python -m pip install --upgrade pip
-        python setup.py sdist
-        python -m pip install dist/*
-        python -m pip install mock pandas
-        python -m pip install https://github.com/brandon-rhodes/assay/archive/master.zip
-        EOF
-        cat <<'EOF' > GITHUB_TEST.sh
-        source ./V/bin/activate
-        cd ci && ../test-code.sh
-        EOF
-
-    - name: Install
-      run: |
-        bash -e -x GITHUB_INSTALL.sh
-
-    - name: Test
-      run: |
-        bash -e -x GITHUB_TEST.sh
+    - name: Install linter
+      run: python -m pip install --upgrade pyflakes
+    - name: Run linter
+      run: pyflakes $(find skyfield/ -name '*.py')

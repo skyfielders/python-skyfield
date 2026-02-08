@@ -1,0 +1,10 @@
+#!/bin/bash
+
+name=skyfield-ci
+
+set -e
+cd "$(readlink -f $(dirname "${BASH_SOURCE[0]}"))"
+podman build -t $name .
+exec podman run -it \
+     -v $PWD/../..:/src \
+     $name "$@"

@@ -1,1 +1,5 @@
 Data files to help tests in Continuous Integration avoid repeated I/O.
+Here is the command that built the small excerpt of ‘jup310.bsp’ which
+is here to power the doctest ‘planets.rst’:
+
+python -m jplephem excerpt 2021/2/26 2021/2/27 jup310.bsp ci/jup310.bsp
