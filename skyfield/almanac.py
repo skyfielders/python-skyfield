@@ -336,7 +336,9 @@ def _transit_ha(latitude, declination, altitude_radians):
 
 def _q(a, b, c, sign):
     discriminant = np.maximum(b*b - 4*a*c, 0.0)  # avoid tiny negative results
-    return - 2*c / (b + sign * sqrt(discriminant))
+    denominator = b + sign * sqrt(discriminant)
+    q = np.zeros_like(denominator)
+    return np.divide(-2 * c, denominator, out=q, where=(denominator != 0))
 
 def _intersection(y0, y1, v0, v1):
     # Return x at which a curve reaches y=0, given its position and
