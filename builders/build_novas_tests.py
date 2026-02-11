@@ -40,7 +40,7 @@ def main():
         from skyfield.api import Topos, load
         from skyfield.constants import AU_KM, AU_M
         from skyfield.data import hipparcos
-        from skyfield.functions import BytesIO, length_of
+        from skyfield.functions import A, BytesIO, length_of
         from .fixes import low_precision_ERA
 
         OLD_AU_KM = 149597870.691
@@ -237,15 +237,35 @@ def output_subroutine_tests(dates):
                 compare(r, {r!r}, 1e-9 * arcsecond)
             """)
 
+    location = novas.make_on_surface(0.0, 0.0, 0, 10.0, 1010.0)
+    angle_in = [-5, -1, 15, 89.95]
+    angle_out = [novas.refract(location, 90 - a, 2) for a in angle_in]
+
+    output(locals(), """\
+        def test_refraction_with_angle_array():
+            r = earthlib.refraction(A{angle_in}, 10.0, 1010.0)
+            compare(r, {angle_out!r}, 1e-9 * arcsecond)
+        """)
+
     northpole = novas.make_on_surface(90.0, 0.0, 0.0, 10.0, 1010.0)
 
-    for i, angle in enumerate([-90, -2, -1, 0, 1, 3, 9, 90]):
-        alt, az = altaz_maneuver(T0, northpole, 0.0, angle, ref=2)
+    alt_in = []
+    alt_out = []
+    for i, alt in enumerate([-90, -2, -1, 0, 1, 3, 9, 90]):
+        alt2, az = altaz_maneuver(T0, northpole, 0.0, alt, ref=2)
         output(locals(), """\
             def test_refract{i}():
-                alt = earthlib.refract({angle!r}, 10.0, 1010.0)
-                compare(alt, {alt!r}, 1e-9 * arcsecond)
+                alt = earthlib.refract({alt!r}, 10.0, 1010.0)
+                compare(alt, {alt2!r}, 1e-9 * arcsecond)
             """)
+        alt_in.append(alt)
+        alt_out.append(alt2)
+
+    output(locals(), """\
+        def test_refract_with_angle_array():
+            r = earthlib.refract(A{alt_in}, 10.0, 1010.0)
+            compare(r, {alt_out!r}, 1e-9 * arcsecond)
+        """)
 
     usno = novas.make_on_surface(38.9215, -77.0669, 92.0, 10.0, 1010.0)
 
@@ -408,12 +428,12 @@ def output_topocentric_tests(dates):
             compare(az.degrees, {az!r}, 0.00001 * arcsecond)
 
             alt, az, distance = apparent.altaz('standard')
-            compare(alt.degrees, {alt2!r}, 0.0005 * arcsecond)
-            compare(az.degrees, {az2!r}, 0.0005 * arcsecond)
+            compare(alt.degrees, {alt2!r}, 0.00001 * arcsecond)
+            compare(az.degrees, {az2!r}, 0.00001 * arcsecond)
 
             alt, az, distance = apparent.altaz(10.0, 1010.0)
-            compare(alt.degrees, {alt3!r}, 0.0005 * arcsecond)
-            compare(az.degrees, {az3!r}, 0.0005 * arcsecond)
+            compare(alt.degrees, {alt3!r}, 0.00001 * arcsecond)
+            compare(az.degrees, {az3!r}, 0.00001 * arcsecond)
 
         """)
 

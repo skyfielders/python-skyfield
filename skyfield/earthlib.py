@@ -1,7 +1,9 @@
 """Formulae for specific earth behaviors and effects."""
 
-from numpy import (abs, arcsin, arccos, arctan2, array, clip, cos, minimum,
-                   nan_to_num, pi, sin, sqrt, tan, where, zeros_like)
+from numpy import (
+    abs, arcsin, arccos, arctan2, array, bool, clip, cos, minimum,
+    nan_to_num, ones_like, pi, sin, sqrt, tan, where, zeros_like,
+)
 
 from .constants import (AU_M, ANGVEL, DAY_S, DEG2RAD, ERAD,
                         IERS_2010_INVERSE_EARTH_FLATTENING, RAD2DEG, T0, tau)
@@ -148,10 +150,10 @@ def refraction(alt_degrees, temperature_C, pressure_mbar):
 def refract(alt_degrees, temperature_C, pressure_mbar):
     """Given an unrefracted `alt` determine where it will appear in the sky."""
     alt = alt_degrees
-    while True:
-        alt1 = alt
-        alt = alt_degrees + refraction(alt, temperature_C, pressure_mbar)
-        converged = nan_to_num(abs(alt - alt1)).max() <= 3.0e-5
-        if converged:
-            break
+    mask = ones_like(alt, dtype=bool)
+    while mask.sum():
+        alt_previous = alt
+        alt_new = alt_degrees + refraction(alt, temperature_C, pressure_mbar)
+        alt = mask * alt_new + ~mask * alt_previous
+        mask = nan_to_num(abs(alt - alt_previous)) > 3.0e-5
     return alt
