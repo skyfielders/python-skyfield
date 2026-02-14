@@ -1,9 +1,9 @@
 import os
 from numpy import pi, seterr, linspace
 
-from skyfield.api import load
+from skyfield.api import load, wgs84, S, W
 from skyfield.constants import GM_SUN_Pitjeva_2005_km3_s2 as GM_SUN
-from skyfield.data import mpc
+from skyfield.data import mpc, sof
 from skyfield.keplerlib import _KeplerOrbit as KeplerOrbit, propagate, _CONVERT_GM
 from skyfield.tests.test_elementslib import compare, ele_to_vec
 from skyfield.units import Angle, Distance, Velocity
@@ -153,6 +153,29 @@ def test_comet_with_eccentricity_of_exactly_one():
     # tenth of an arcsecond among friends?)
     assert str(ra).startswith('18h 46m 46.4')
     assert str(dec).startswith("-72deg 05' 33.")
+
+def test_sof():
+    # it may be useful to test with the header line too
+    text = (b'       65803 20221021.7988553 20221030  1.01292656   3.413508'
+            b'  72.998191 319.555213 0.38357671 0.73  5582 19950307 20250227'
+            b' M-v 3Ek 18.11  0.15\n')
+
+    df = sof.load_sof_dataframe(BytesIO(text))
+    row = df.iloc[0]
+    assert row['name'] == '65803'
+    assert row['inclination_degrees'] == 3.413508
+
+    ts = load.timescale()
+    t = ts.utc(2022, 10, 30, 6, 23, 0)
+    didymos = sof.sof_orbit(row, ts, GM_SUN)
+    eph = load('de421.bsp')
+    elsauce = eph['earth'] + wgs84.latlon(30.470 * S, 70.768 * W)
+    ra, dec, distance = elsauce.at(t).observe(eph['sun'] + didymos).radec()
+
+    # measured in image: 115.169955, 4.375654 degrees
+    assert abs(ra.hours - 7.677997) < 0.0001
+    assert abs(dec.degrees - 4.37564) < 0.001
+    assert abs(distance.au - 0.1) < 0.01
 
 # Dimensions.
 
