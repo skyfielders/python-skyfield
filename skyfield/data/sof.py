@@ -49,7 +49,7 @@ def load_sof_dataframe(fobj):
     """
     fobj = io.StringIO(fobj.read().decode('ascii'))
     names, colspecs = zip(*_SOF_COLUMNS)
-    df = pd.read_fwf(fobj, colspecs=colspecs, names=names, dtype=_SOF_DTYPES)
+    df = pd.read_fwf(fobj, colspecs=colspecs, names=names, dtype=_SOF_DTYPES, header=0)
     return df
 
 def sof_orbit(row, ts, gm_km3_s2):

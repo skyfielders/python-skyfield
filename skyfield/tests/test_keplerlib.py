@@ -155,8 +155,10 @@ def test_comet_with_eccentricity_of_exactly_one():
     assert str(dec).startswith("-72deg 05' 33.")
 
 def test_sof():
-    # it may be useful to test with the header line too
-    text = (b'       65803 20221021.7988553 20221030  1.01292656   3.413508'
+    text = (b'Name        |Tp      .       |Te      |q          |i  .      |'
+            b'Om .      |om .      |e         |rms |n_o  |Tfirst  |Tlast   |'
+            b'Perts  |H .  |G . ^ \n'
+            b'       65803 20221021.7988553 20221030  1.01292656   3.413508'
             b'  72.998191 319.555213 0.38357671 0.73  5582 19950307 20250227'
             b' M-v 3Ek 18.11  0.15\n')
 
