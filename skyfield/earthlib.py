@@ -1,7 +1,7 @@
 """Formulae for specific earth behaviors and effects."""
 
 from numpy import (
-    abs, arcsin, arccos, arctan2, array, bool, clip, cos, minimum,
+    abs, arcsin, arccos, arctan2, array, bool_, clip, cos, minimum,
     nan_to_num, ones_like, pi, sin, sqrt, tan, where, zeros_like,
 )
 
@@ -150,7 +150,7 @@ def refraction(alt_degrees, temperature_C, pressure_mbar):
 def refract(alt_degrees, temperature_C, pressure_mbar):
     """Given an unrefracted `alt` determine where it will appear in the sky."""
     alt = alt_degrees
-    mask = ones_like(alt, dtype=bool)
+    mask = ones_like(alt, dtype=bool_)
     while mask.sum():
         alt_previous = alt
         alt_new = alt_degrees + refraction(alt, temperature_C, pressure_mbar)
