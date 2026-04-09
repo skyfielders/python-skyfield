@@ -1,0 +1,6 @@
+code_name_pairs: list[tuple[int, str]]
+code_names: dict[int, str]
+name_codes: dict[str, int]
+
+def numbered_name_of(code: int) -> str: ...
+def _target_name(target: str | int) -> str: ...
