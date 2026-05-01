@@ -479,6 +479,10 @@ for a coordinate system oriented to the Solar System.
  | ↕ Latitude ±90° above or below the ecliptic
  | ↔ Longitude 0°–360° measured east from March equinox
 
+Let’s take the ``position`` we already calculated above,
+which happens to measure the position of Mars as viewed from Earth’s center,
+and express that vector’s direction in ecliptic coordinates:
+
 .. testcode::
 
     from skyfield.framelib import ecliptic_frame
