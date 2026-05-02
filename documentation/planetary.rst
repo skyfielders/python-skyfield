@@ -4,23 +4,33 @@
 ============================
 
 Skyfield has limited support for planetary reference frames
-as defined in Jet Propulsion Lab data files.
-It supports:
+and planetary constants
+as defined in Jet Propulsion Lab (JPL) data files.
+Skyfield can:
 
-* Loading ``.tf`` and ``.tpc`` text files
-  defining a wide array of planetary constants.
+* Load a ``.tpc`` “Text Planetary Constants” file
+  that can specify a wide array of planetary constants,
+  including a body’s radius and the shape of its ellipsoid.
 
-* Loading ``.bcp`` binary arrays
-  that predict the orientation in space of Solar System bodies
-  over a range of dates.
+* Load a ``.tf`` “Text Frame” file
+  that defines one or more reference frames
+  describing the axis and rotation of a body and,
+  thus, the orientation of that body’s surface in space.
 
-* Given a latitude and longitude on a Solar System body like the Moon that is
-  (a) spherical and
-  (b) whose orientation is defined by a data series in a ``.bcp`` file,
-  computing that surface position’s location in space —
-  allowing observations either from the point of view of that surface position,
-  or observations of that surface position
-  for other observers in the Solar System.
+* Load a ``.bcp`` binary array
+  that provides the same information but in binary form.
+
+* Compute the position of a location on a body’s surface
+  relative to that body’s center,
+  given (1) a Solar System body
+  that’s spherical
+  and whose orientation is defined by a data series in a ``.bcp`` file
+  (the Moon is a good example),
+  and (2) the latitude and longitude of the position.
+  This allows the user
+  both to observe other targets from that surface position,
+  and to observe the surface position itself
+  from elsewhere in the Solar System.
 
 This leaves several features of such files still unsupported, though.
 Skyfield:
@@ -181,7 +191,7 @@ Computing a raw rotation matrix
 If you are directly manipulating vectors,
 you might simply want Skyfield to compute the NumPy rotation matrix
 for rotating vectors from the ICRF into the frame of reference
-of the Solar System body.
+of the Solar System body’s longitude and latitude.
 The ``frame`` object returned above
 can return these matrices directly.
 If given a single time ``t``,
