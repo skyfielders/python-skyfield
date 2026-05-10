@@ -1,10 +1,34 @@
 import os
 from skyfield.api import load, load_file
+from skyfield.errors import EphemerisRangeError
+from skyfield.jpllib import Stack
 
 from assay import assert_raises
 
 def _data_path(filename):
     return os.path.join(os.path.dirname(__file__), 'data', filename)
+
+class _FakeSpkSegment:
+    def __init__(self, start_jd, end_jd):
+        self.start_jd = start_jd
+        self.end_jd = end_jd
+
+class _FakeSegment:
+    center = 0
+    target = 1
+    ephemeris = None
+
+    def __init__(self, start_jd, end_jd):
+        self.spk_segment = _FakeSpkSegment(start_jd, end_jd)
+        self.called = False
+
+    def _at(self, t):
+        self.called = True
+        return None
+
+    def time_range(self, ts):
+        spk = self.spk_segment
+        return ts.tdb_jd(spk.start_jd), ts.tdb_jd(spk.end_jd)
 
 # Test file generated with:
 # python -m jplephem excerpt 1969/07/29 1969/07/30 de441.bsp de441-1969.bsp
@@ -29,6 +53,17 @@ def test_multiple_non_overlapping_segments_per_target():
     pluto.at(t).observe(pluto).apparent()
 
     # TODO: SSB.at(t).observe() fails the above test.
+
+def test_stack_scalar_no_matching_segment_raises_without_fallthrough():
+    ts = load.timescale()
+    t = ts.tdb_jd(3.0)
+    segments = [_FakeSegment(0.0, 1.0), _FakeSegment(5.0, 6.0)]
+    stack = Stack(segments)
+
+    with assert_raises(EphemerisRangeError, 'none of the 2 ephemeris segments'):
+        stack._at(t)
+
+    assert not any(segment.called for segment in segments)
 
 # Verify that ephemeris objects let their segments be edited.
 
