@@ -146,7 +146,7 @@ def moon_nodes(ephemeris):
     moon = ephemeris['moon']
 
     def moon_node_at(t):
-        """Return the phase of the moon 0 through 3 at time `t`."""
+        """Return True if the Moon is above the ecliptic, else False."""
         e = earth.at(t)
         lat, _, _ = e.observe(moon).apparent().frame_latlon(ecliptic_frame)
         return lat.radians > 0.0
