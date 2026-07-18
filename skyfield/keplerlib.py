@@ -451,7 +451,22 @@ def propagate(position, velocity, t0, t1, gm):
     gm : float
         Gravitational parameter in units that match the other arguments
     """
-    output_shape = (3,) + t1.shape
+    # When several orbits (N>1) share a single observation time (t1 is
+    # 0-d), this used to drop the per-orbit dimension entirely: the
+    # position/velocity arrays are computed with their real (3, N, 1)
+    # shape below, then force-reshaped into (3,) + t1.shape = (3,),
+    # raising "cannot reshape array of size 3*N into shape (3,)". This
+    # is reachable through Skyfield's own batch orbit builders (e.g.
+    # ``mpc._comet_orbits()``) whenever the resulting multi-orbit
+    # ``_KeplerOrbit`` is propagated to one shared ``Time``. Recover the
+    # orbit count from ``position`` (its shape[1] once 2-D) before the
+    # ndim==1 normalization below runs, and only widen the legacy
+    # single-orbit output shape when it would otherwise be wrong.
+    n_orbits = position.shape[1] if position.ndim > 1 else 1
+    if n_orbits > 1 and t1.shape == ():
+        output_shape = (3, n_orbits)
+    else:
+        output_shape = (3,) + t1.shape
 
     gm = atleast_1d(gm)
     if (gm <= 0).any():

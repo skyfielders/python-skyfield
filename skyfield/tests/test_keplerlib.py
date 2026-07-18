@@ -1,5 +1,5 @@
 import os
-from numpy import pi, seterr, linspace
+from numpy import array, pi, seterr, linspace
 
 from skyfield.api import load
 from skyfield.constants import GM_SUN_Pitjeva_2005_km3_s2 as GM_SUN
@@ -178,6 +178,46 @@ def test_kepler_shape_with_time_of_length_one():
     t = ts.utc(2025, 2, [22])
     p = k.at(t)
     assert p.xyz.au.shape == (3, 1)
+
+
+def test_kepler_shape_with_multiple_orbits_and_single_shared_time():
+    # Regression test: propagating several orbits (built together as one
+    # batch _KeplerOrbit, as skyfield.data.mpc._comet_orbits() does for a
+    # whole comets dataframe) to a single shared observation time used to
+    # raise "cannot reshape array of size 3*N into shape (3,)", because
+    # propagate()'s output_shape was computed from t1.shape alone and so
+    # dropped the per-orbit dimension whenever t1 was 0-d.
+    ts = load.timescale()
+    t_periapsis = ts.tt(2020, 1, [1, 15, 20])
+
+    k = KeplerOrbit._from_periapsis(
+        semilatus_rectum_au=array([2.5, 3.1, 1.8]),
+        eccentricity=array([0.1, 0.3, 0.05]),
+        inclination_degrees=array([10.0, 20.0, 5.0]),
+        longitude_of_ascending_node_degrees=array([50.0, 80.0, 12.0]),
+        argument_of_perihelion_degrees=array([30.0, 60.0, 90.0]),
+        t_periapsis=t_periapsis,
+        gm_km3_s2=GM_SUN,
+        center=10,
+    )
+
+    t = ts.utc(2025, 2, 22)  # one shared, scalar observation time
+    p = k.at(t)
+    assert p.xyz.au.shape == (3, 3)
+
+    # A single orbit must still squeeze to the legacy (3,) shape.
+    k1 = KeplerOrbit._from_periapsis(
+        semilatus_rectum_au=2.5,
+        eccentricity=0.1,
+        inclination_degrees=10.0,
+        longitude_of_ascending_node_degrees=50.0,
+        argument_of_perihelion_degrees=30.0,
+        t_periapsis=ts.tt(2020, 1, 1),
+        gm_km3_s2=GM_SUN,
+        center=10,
+    )
+    p1 = k1.at(t)
+    assert p1.xyz.au.shape == (3,)
 
 # Test various round-trips through the kepler orbit object.
 
