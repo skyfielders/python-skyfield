@@ -189,6 +189,9 @@ def test_strftime_with_microseconds():
     assert t.tai_strftime('%Y %S %f') == '1980 27 816000'
     assert t.tt_strftime('%Y %S %f') == '1980 00 000000'
     assert t.tdb_strftime('%Y %S %f') == '1980 59 998471'
+    assert t.utc_strftime('%f/%f %%f %%%f') == (
+        '816000/816000 %f %816000'
+    )
 
     t = ts.tt(1980, 9, [12, 12])
     assert t.utc_strftime('%Y %S %f') == ['1980 08 816000'] * 2
@@ -196,6 +199,9 @@ def test_strftime_with_microseconds():
     assert t.tai_strftime('%Y %S %f') == ['1980 27 816000'] * 2
     assert t.tt_strftime('%Y %S %f') == ['1980 00 000000'] * 2
     assert t.tdb_strftime('%Y %S %f') == ['1980 59 998471'] * 2
+    assert t.utc_strftime('%f/%f %%f %%%f') == [
+        '816000/816000 %f %816000',
+    ] * 2
 
 def test_tai_fraction_loses_no_precision(ts):
     t = ts.tai_jd(2459008.0, 0.0123456789)
