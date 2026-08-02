@@ -336,7 +336,11 @@ def _transit_ha(latitude, declination, altitude_radians):
 
 def _q(a, b, c, sign):
     discriminant = np.maximum(b*b - 4*a*c, 0.0)  # avoid tiny negative results
-    return - 2*c / (b + sign * sqrt(discriminant))
+    with np.errstate(invalid='ignore', divide='ignore'):
+        x = - 2*c / (b + sign * sqrt(discriminant))
+    # If c is zero, then x=0 is exactly a root, but the quotient above
+    # can be 0/0 = NaN when the denominator is also zero (see #1114).
+    return np.where(c == 0.0, 0.0, x)
 
 def _intersection(y0, y1, v0, v1):
     # Return x at which a curve reaches y=0, given its position and

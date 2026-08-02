@@ -136,6 +136,15 @@ def test_dark_twilight_day():
 
 # Logic.
 
+def test_intersection_when_curve_starts_exactly_at_zero():
+    # If the rise/set Newton iteration happens to land, to the last bit,
+    # exactly on the horizon, then the final parabola fit was dividing
+    # 0/0 = NaN (#1114).  These operands were captured live from a Mars
+    # setting at latitude 52.0N on 2029-11-04.
+    v = -1.5990198773309593e-16
+    x = almanac._intersection(0.0, 0.0, v, v)
+    assert x == 0.0
+
 def test_close_start_and_end():
     ts = api.load.timescale()
     t0 = ts.utc(2018, 9, 23, 1)
