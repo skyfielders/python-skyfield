@@ -103,7 +103,9 @@ class EarthSatellite(VectorFunction):
         else:
             year = two_digit_year + 1900
 
-        self.epoch = ts.utc(year, 1, satrec.epochdays)
+        whole_days = int(satrec.epochdays)
+        seconds = (satrec.epochdays - whole_days) * DAY_S
+        self.epoch = ts.utc(year, 1, whole_days, 0, 0, seconds)
 
         self._setup(satrec)
 
@@ -131,8 +133,8 @@ class EarthSatellite(VectorFunction):
         # be unified to always use epochyr and epochdays.
         whole, fraction = divmod(satrec.jdsatepoch, 1.0)
         year, month, day = compute_calendar_date(whole)
-        day += 0.5  # convert integer Julian day into Julian date float
-        self.epoch = ts.utc(year, month, day + fraction + satrec.jdsatepochF)
+        seconds = (0.5 + fraction + satrec.jdsatepochF) * DAY_S
+        self.epoch = ts.utc(year, month, day, 0, 0, seconds)
 
         self._setup(satrec)
         return self

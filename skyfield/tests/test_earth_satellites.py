@@ -207,3 +207,20 @@ def test_behind_earth_thoroughly():
         True, True, True, False,
         True, True, True, False,  # Last two fake sats can see each other.
     ]
+
+def test_tle_epoch_matches_sgp4_library():
+    from numpy import asarray
+    from sgp4.api import Satrec
+    from skyfield.constants import DAY_S
+    line1 = '1 55910U 23035C   23076.01808579 -.00000195  00000-0  00000+0 0  9994'
+    line2 = '2 55910  44.0037 312.8770 0004210 247.2472 260.1626 14.90311335    06'
+    ts = api.load.timescale(builtin=True)
+    satrec = Satrec.twoline2rv(line1, line2)
+    sat = EarthSatellite(line1, line2, ts=ts)
+    fraction = sat.epoch.tai_fraction - sat.epoch._leap_seconds() / DAY_S
+    offset_s = ((sat.epoch.whole - satrec.jdsatepoch)
+                + (fraction - satrec.jdsatepochF)) * DAY_S
+    assert abs(offset_s) < 1e-9
+    _, r_library, _ = satrec.sgp4(satrec.jdsatepoch, satrec.jdsatepochF)
+    r_epoch, _, _ = sat._position_and_velocity_TEME_km(sat.epoch)
+    assert abs(asarray(r_epoch) - r_library).max() < 1e-12
