@@ -7,7 +7,13 @@ cd ..
 
 ./bin/build
 
-for version in 3.7 3.13
+if [ ! -d ~/assay ]; then
+    echo "Downloading assay to ~/assay..."
+    curl -L https://github.com/brandon-rhodes/assay/archive/master.tar.gz | tar xz
+    mv assay-master ~/assay
+fi
+
+for version in 3.8 3.9 3.10 3.11 3.12 3.13 3.14
 do
     echo
     echo $version
@@ -20,7 +26,8 @@ do
     source $venv/bin/activate
     pushd ci
     uv pip install pytz pandas
-    uv pip install ../dist/skyfield-1.51-py3-none-any.whl
+    skyfield_wheel=$(ls -t ../dist/skyfield-*-py3-none-any.whl | head -1)
+    uv pip install "$skyfield_wheel"
     uv pip install ~/assay
     assay --batch skyfield.tests
     popd
