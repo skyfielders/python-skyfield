@@ -33,6 +33,7 @@ setup(
         'skyfield.tests',
     ],
     package_data = {
+        'skyfield': ['py.typed', '*.pyi'],
         'skyfield.data': ['*.gz', '*.npy', '*.npz'],
         'skyfield.tests': ['data/*'],
     },
