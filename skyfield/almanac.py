@@ -234,9 +234,9 @@ def sunrise_sunset(ephemeris, topos):
     topos_at = (ephemeris['earth'] + topos).at
 
     def is_sun_up_at(t):
-        """Return `True` if the sun has risen by time `t`.
+        """Return `True` if the Sun is up at time `t`.
 
-        The Sun has risen if its altitude above the horizon is greater
+        The Sun is up if its altitude above the horizon is greater
         than -0.8333 degrees.
 
         """
