@@ -261,8 +261,15 @@ class Stack(VectorFunction):
             for segment in reversed(self.segments):
                 spk = segment.spk_segment
                 if spk.start_jd <= t.tdb <= spk.end_jd:
-                    break
-            return segment._at(t)
+                    return segment._at(t)
+
+            start_time, _ = self.segments[0].time_range(t.ts)
+            _, end_time = self.segments[-1].time_range(t.ts)
+            text = (
+                'none of the {0} ephemeris segments for target {1} '
+                'cover date {2}'
+            ).format(len(self.segments), self.target, t.utc_iso())
+            raise EphemerisRangeError(text, start_time, end_time, True, None)
 
         shape = (3,) + t.shape
         position = np.empty(shape)
