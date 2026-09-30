@@ -463,7 +463,8 @@ The result ``t`` will be an array of times, and ``y`` will be ``0``
 through ``3`` for the Vernal Equinox through the Winter Solstice.
 
 If you or some of your users live in the Southern Hemisphere,
-you can use the ``SEASON_EVENTS_NEUTRAL`` array.
+you can use the ``SEASON_EVENTS_SOUTH`` array.
+Alternatively you can use the ``SEASON_EVENTS_NEUTRAL`` array.
 Instead of naming specific seasons,
 it names the equinoxes and solstices by the month in which they occur —
 so the ``March Equinox``, for example, is followed by the ``June Solstice``.
