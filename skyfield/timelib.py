@@ -9,7 +9,7 @@ from numpy import (
     nan, ndarray, nonzero, pi, rollaxis, searchsorted, sin, where, zeros_like,
 
 )
-from time import strftime, struct_time
+from time import strftime
 from ._compatibility import interp
 from .constants import ASEC2RAD, B1950, DAY_S, T0, tau
 from .curvelib import Splines, build_spline_given_ends
@@ -235,10 +235,7 @@ class Timescale(object):
         # Python forces an unhappy choice upon us: either use the faster
         # time.strftime() and lose support for '%f', or use the slower
         # datetime.strftime() and crash if years are negative.  We take the
-        # first option, but then patch '%f' support back in by secretly
-        # passing the microseconds string as the time zone name.  After all,
-        # the routines supported by this function never use time zones.
-        # What could go wrong?
+        # first option, then render microseconds separately.
 
         offset, ms = _strftime_offset_seconds(format)
         fraction = fraction + offset / DAY_S
@@ -257,19 +254,17 @@ class Timescale(object):
             yday = z
 
         if ms:
-            format = format[:ms.start()] + '%Z' + format[ms.end():]
             second = (second * 1e6).astype(int)
             second, usec = divmod(second, 1000000)
             if seconds_bump is not None:
                 second += seconds_bump
             if getattr(jd, 'ndim', 0):
-                u = ['%06d' % u for u in usec]
                 tup = (year, month, day, hour, minute, second,
-                       weekday, yday, z, u)
-                return [strftime(format, struct_time(t)) for t in zip(*tup)]
-            u = '%06d' % usec
-            tup = year, month, day, hour, minute, second, weekday, yday, z, u
-            return strftime(format, struct_time(tup))
+                       weekday, yday, z)
+                return [_strftime_with_microseconds(format, ms, t, u)
+                        for t, u in zip(zip(*tup), usec)]
+            tup = year, month, day, hour, minute, second, weekday, yday, z
+            return _strftime_with_microseconds(format, ms, tup, usec)
         else:
             second = second.astype(int)
             if seconds_bump is not None:
@@ -1212,10 +1207,41 @@ def build_delta_t_table(delta_t_recent):
         [[end_tt], [delta_t_parabola_morrison_stephenson_2004(end_J)]],
     )
 
-_format_uses_milliseconds = re.compile(r'%[-_0^#EO]*f').search
+_microsecond_directive = re.compile(r'%[-_0^#EO]*f').match
 _format_uses_seconds = re.compile(r'%[-_0^#EO]*[STXc]').search
 _format_uses_minutes = re.compile(r'%[-_0^#EO]*[MR]').search
 _format_uses_day_of_year = re.compile(r'%[-_0^#EO]*j').search
+
+def _find_microsecond_directives(format):
+    matches = []
+    i = 0
+    while True:
+        i = format.find('%', i)
+        if i < 0:
+            return matches
+        if format.startswith('%%', i):
+            i += 2
+            continue
+        match = _microsecond_directive(format, i)
+        if match is None:
+            i += 1
+        else:
+            matches.append(match)
+            i = match.end()
+
+def _strftime_with_microseconds(format, matches, tup, usec):
+    pieces = []
+    end = 0
+    for match in matches:
+        chunk = format[end:match.start()]
+        if chunk:
+            pieces.append(strftime(chunk, tup))
+        pieces.append('%06d' % usec)
+        end = match.end()
+    chunk = format[end:]
+    if chunk:
+        pieces.append(strftime(chunk, tup))
+    return ''.join(pieces)
 
 def _datetime_to_utc_tuple(dt):
     z = dt.tzinfo
@@ -1235,7 +1261,7 @@ def _normalize_jd_and_fraction(jd, fraction):
     return jd, fraction
 
 def _strftime_offset_seconds(format):
-    uses_ms = _format_uses_milliseconds(format)
+    uses_ms = _find_microsecond_directives(format)
     if uses_ms:
         if _OLD_PYTHON:
             raise ValueError('strftime() "%f" not supported under Python 2')
@@ -1256,17 +1282,15 @@ def _strftime(format, year, month, day, hour, minute, second,
     #_format_uses_day_of_year(format)
 
     if uses_ms:
-        format = format[:uses_ms.start()] + '%Z' + format[uses_ms.end():]
         second = (second * 1e6).astype(int)
         second, usec = divmod(second, 1000000)
         if getattr(year, 'ndim', 0):
-            u = ['%06d' % u for u in usec]
             tup = (year, month, day, hour, minute, second,
-                   weekday, yday, zero, u)
-            return [strftime(format, struct_time(t)) for t in zip(*tup)]
-        u = '%06d' % usec
-        tup = year, month, day, hour, minute, second, weekday, yday, zero, u
-        return strftime(format, struct_time(tup))
+                   weekday, yday, zero)
+            return [_strftime_with_microseconds(format, uses_ms, t, u)
+                    for t, u in zip(zip(*tup), usec)]
+        tup = year, month, day, hour, minute, second, weekday, yday, zero
+        return _strftime_with_microseconds(format, uses_ms, tup, usec)
     else:
         second = second.astype(int)
         tup = year, month, day, hour, minute, second, weekday, yday, zero
