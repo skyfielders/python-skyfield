@@ -420,12 +420,13 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
     old_t = t[i]
 
     # When might each rising have actually taken place?  Let's
-    # interpolate between the two times that bracket each rising.
+    # interpolate between the two times that bracket each rising.  The
+    # offset goes in the fraction, so a rising just microseconds after
+    # `t[i]` doesn't get rounded back to exactly `t[i]` (#1128).
     a = difference[i]
     b = tau - difference[i + 1]
     tt = t.tt
-    interpolated_tt = (b * tt[i] + a * tt[i+1]) / (a + b)
-    t = ts.tt_jd(interpolated_tt)
+    t = ts.tt_jd(tt[i], (tt[i+1] - tt[i]) * a / (a + b))
 
     def normalize_zero_to_tau(radians):
         return radians % tau
@@ -455,6 +456,11 @@ def _find(observer, target, start_time, end_time, horizon_degrees, f):
         if i < 2:
             ha_diff = normalize(ha.radians - old_ha_radians)
             t_diff = t - old_t
+            # If `t` didn't move, there's no rate to measure, so assume
+            # about one turn of the sky per day instead of 0/0 (#1128).
+            stuck = (t_diff == 0.0)
+            ha_diff[stuck] = tau
+            t_diff[stuck] = 1.0
             ha_per_day = ha_diff / t_diff
 
         # Remember this iteration's HA and `t` for the next iteration.

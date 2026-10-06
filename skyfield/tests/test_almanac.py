@@ -119,6 +119,23 @@ def test_new_moonrise_at_70_degrees_north():
     assert strings == ['2023-02-19 12:05']
     assert list(y) == [1]
 
+def test_setting_a_few_microseconds_after_start_time():
+    # This start time is a previous sunset, so the Sun sets only a few
+    # microseconds later.  The first interpolated guess used to round to
+    # exactly the start time, making the HA rate 0/0 = NaN, which
+    # reached the ephemeris as an EphemerisRangeError (#1128).
+    ts = api.load.timescale()
+    t0 = ts.tt_jd(2461260.7104250905)
+    t1 = ts.tt_jd(2461261.7520917575)
+    e = api.load('de421.bsp')
+    mauna_kea = e['earth'] + api.wgs84.latlon(19.8256, -155.4761, 4139)
+    t, y = almanac.find_settings(mauna_kea, e['sun'], t0, t1,
+                                 horizon_degrees=-2.3135787155399923)
+    strings = t.utc_strftime('%Y-%m-%d %H:%M:%S')
+    assert strings == ['2026-08-08 05:01:52', '2026-08-09 05:01:15']
+    assert list(y) == [1, 1]
+    assert 0.0 < (t[0] - t0) * 86400e6 < 100.0  # microseconds
+
 def test_dark_twilight_day():
     ts = api.load.timescale()
     t0 = ts.utc(2019, 11, 8, 4)
