@@ -207,7 +207,12 @@ def test_velocity_in_ITRF_to_GCRS2():
     relative_error = (length_of(actual_motion - predicted_motion)
                       / length_of(actual_motion))
 
-    acceptable_error = 1.8e-11
+    # The motion over 1 second is only ~7.3e-5 of the unit vector, so
+    # a single-ulp (~1.1e-16) difference in sin/cos/atan from the
+    # platform's math library moves this ratio by ~1.5e-12.  Measured:
+    # 1.735e-11 on x86_64 (glibc), 1.801e-11 on arm64 (macOS libm),
+    # same NumPy.  Leave room for that last-ulp noise.  See #582.
+    acceptable_error = 2.0e-11
     assert relative_error < acceptable_error
 
 def test_light_time_method():
