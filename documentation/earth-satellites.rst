@@ -971,6 +971,23 @@ and otherwise recording the propagator error:
 Build a satellite with a specific gravity model
 ===============================================
 
+The gravity constants used to propagate a satellite orbit are a separate choice
+from the Earth ellipsoid used to describe an observer's latitude and longitude
+or a satellite's subpoint.
+Skyfield's :class:`~skyfield.sgp4lib.EarthSatellite` constructor
+uses SGP4's default WGS72 gravity constants.
+As the `SGP4 gravity documentation <https://pypi.org/project/sgp4/#gravity>`_
+explains, these constants should match those used to generate the orbital elements;
+choosing the more recent WGS84 constants does not by itself improve a TLE's accuracy.
+
+The :data:`~skyfield.toposlib.wgs84` object used earlier on this page
+instead describes the Earth's shape for geographic coordinates.
+Using it to create an observer with ``wgs84.latlon()``
+or to compute a subpoint with ``wgs84.subpoint_of()``
+does not change the satellite's SGP4 gravity constants.
+You can therefore use these WGS84 geographic coordinates
+with a satellite propagated using the default WGS72 gravity model.
+
 If your satellite elements
 are designed for another gravity model besides the default WGS72 model,
 then use the underlying ``sgp4`` module to build the satellite.
