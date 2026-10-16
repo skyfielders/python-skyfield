@@ -117,13 +117,13 @@ class Star(object):
         if len(position.shape) > 1:
             if len(observer.xyz.au.shape) > 1:
                 vector = position - observer.xyz.au
-                vel = (observer.velocity.au_per_d.T - velocity).T
+                vel = (velocity - observer.velocity.au_per_d.T).T
             else:
                 vector = (position.T - observer.xyz.au).T
-                vel = (observer.velocity.au_per_d - velocity.T).T
+                vel = (velocity.T - observer.velocity.au_per_d).T
         else:
             vector = position - observer.xyz.au
-            vel = (observer.velocity.au_per_d.T - velocity).T
+            vel = (velocity - observer.velocity.au_per_d.T).T
         distance = length_of(vector)
         light_time = distance / C_AUDAY
         if len(position.shape) > 1 and not t.shape:
