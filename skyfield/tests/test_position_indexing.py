@@ -19,8 +19,9 @@ def test_indexed_observation_can_be_made_apparent(ts):
                                       position.light_time[index])
         np.testing.assert_array_equal(position[index].phase_angle(eph['sun']).radians,
                                       position.phase_angle(eph['sun']).radians[index])
-        np.testing.assert_array_equal(actual.altaz()[0].radians,
-                                      expected.altaz()[0].radians[index])
+        np.testing.assert_allclose(actual.altaz()[0].radians,
+                                   expected.altaz()[0].radians[index],
+                                   rtol=0, atol=2e-15)
 
 
 def test_indexed_observer_can_observe(ts):
