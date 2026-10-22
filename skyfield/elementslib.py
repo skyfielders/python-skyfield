@@ -285,7 +285,7 @@ def eccentric_anomaly(v, e, p):
         if e < 1:
             return 2*arctan(sqrt((1-e)/(1+e)) * tan(v/2))
         elif e > 1:
-            return normpi(2*arctanh(tan(v/2)/sqrt((e+1)/(e-1))))
+            return 2*arctanh(tan(v/2)/sqrt((e+1)/(e-1)))
         else:
             return 0
     else:
@@ -295,7 +295,7 @@ def eccentric_anomaly(v, e, p):
         E[inds] = 2*arctan(sqrt((1-e[inds])/(1+e[inds])) * tan(v[inds]/2))
 
         inds = (e>1) # hyperbolic
-        E[inds] = normpi(2*arctanh(tan(v[inds]/2)/sqrt((e[inds]+1)/(e[inds]-1))))
+        E[inds] = 2*arctanh(tan(v[inds]/2)/sqrt((e[inds]+1)/(e[inds]-1)))
 
         return E
 
