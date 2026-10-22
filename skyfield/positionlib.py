@@ -181,13 +181,24 @@ class ICRF(object):
         return build_position(p, v, self.t, body.target, self.target)
 
     def __getitem__(self, i):
-        return type(self)(
+        p = type(self)(
             self.xyz.au[:,i],
             self.velocity.au_per_d[:,i],
             self.t[i],
             self.center,
             self.target,
         )
+        p._ephemeris = self._ephemeris
+        cb = self.center_barycentric
+        if cb is not None and cb is not self:
+            p.center_barycentric = cb[i] if cb.t.shape else cb
+        gcrs = self._observer_gcrs_au
+        if gcrs is not None:
+            p._observer_gcrs_au = gcrs[:,i] if gcrs.ndim > 1 else gcrs
+        if 'light_time' in self.__dict__:
+            light_time = self.light_time
+            p.light_time = light_time[i] if getattr(light_time, 'shape', ()) else light_time
+        return p
 
     def __neg__(self):
         return type(self)(
