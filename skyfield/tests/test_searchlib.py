@@ -1,5 +1,8 @@
-from numpy import array
-from skyfield.searchlib import _choose_brackets, _identify_maxima
+from numpy import array, int8
+from skyfield.api import load
+from skyfield.searchlib import (
+    _choose_brackets, _fix_numpy_deprecation, _identify_maxima, find_discrete,
+)
 
 def test_brackets_of_simple_peak():
     y = array((10, 11, 12, 11, 10))
@@ -41,3 +44,18 @@ def test_both_kinds_of_maxima_at_once():
     x, y = _identify_maxima(x, y)
     assert list(x) == [2451547.5, 2451550.0]
     assert list(y) == [12, 13]
+
+def test_boolean_values_become_int8():
+    y = _fix_numpy_deprecation(array((True, False, True)))
+    assert y.dtype == int8
+    assert list(y) == [1, 0, 1]
+
+def test_find_discrete_with_boolean_function():
+    # NumPy 2.5 warns if code sets an array's `dtype` (issue #1153).
+    ts = load.timescale()
+    def f(t):
+        return t.tt % 1.0 > 0.5
+    f.step_days = 0.1
+    t, y = find_discrete(ts.tt_jd(2460000.0), ts.tt_jd(2460002.0), f)
+    assert y.dtype == int8
+    assert list(y) == [1, 0, 1, 0]

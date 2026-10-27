@@ -220,6 +220,7 @@ def _remove_adjacent_duplicates(a):
 def _fix_numpy_deprecation(y):
     # Alas, in the future NumPy will apparently disallow using Booleans
     # as indices, whereas we often encourage the use of `y` as an index.
+    # (NumPy 2.5 deprecates setting `y.dtype`, so we return a view.)
     if issubdtype(y.dtype, bool_):
-        y.dtype = int8
+        y = y.view(int8)
     return y
