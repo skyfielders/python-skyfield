@@ -32,7 +32,12 @@ Python package installation tool::
 
 Whichever way you install it, the Pandas library gives Skyfield the
 ability to load the Hipparcos catalog as a 118,218 row Pandas dataframe.
-You can filter individual stars out of the dataframe using the Pandas
+The catalog includes 263 stars without measured positions.  The example
+below removes those rows before building a :class:`Star`, so that they
+do not produce ``nan`` coordinates.  See `Stars with “nan” positions`_
+if you want to keep those rows.
+
+You can select individual stars from the dataframe using the Pandas
 ``loc[]`` operation with the star’s Hipparcos catalog number.  For
 example, Barnard’s Star — the star moving fastest across our sky — has
 the Hipparcos designation “HIP 87937” and would be accessed like this:
@@ -52,6 +57,9 @@ the Hipparcos designation “HIP 87937” and would be accessed like this:
 
     with load.open(hipparcos.URL) as f:
         df = hipparcos.load_dataframe(f)
+
+    # Keep stars with measured right ascension and declination.
+    df = df.dropna(subset=['ra_degrees', 'dec_degrees'])
 
     barnards_star = Star.from_dataframe(df.loc[87937])
 
@@ -100,18 +108,21 @@ The Hipparcos catalog, as pointed out in its official publication `The
 Hipparcos and Tycho Catalogues`_, includes 263 target stars for which no
 reliable position could be computed.  These stars have blanks for their
 right ascension and declination in the text of the catalog itself.  In
-Skyfield they will always return coordinates with the value ``nan`` (the
-floating point value “not a number”).
+Skyfield they return coordinates with the value ``nan`` (the floating
+point value “not a number”), including when you call ``.apparent()``.
 
-If you want to avoid ``nan`` coordinates, you can filter them out of
-your dataframe with:
+The first example on this page removes these stars with:
 
 .. testcode::
 
-    df = df[df['ra_degrees'].notnull()]
+    df = df.dropna(subset=['ra_degrees', 'dec_degrees'])
 
-The result will be the same if you filter by the ``dec_degrees`` column
-instead.
+Omit that line if you want to keep every row, including stars with
+unknown positions.  :meth:`Star.from_dataframe` preserves the rows and
+their order, so that each output position corresponds to the same row
+in your dataframe.  A star with unknown coordinates produces a ``nan``
+position without preventing other stars in the array from being
+computed.
 
 .. _The Hipparcos and Tycho Catalogues: https://www.cosmos.esa.int/documents/532822/552851/vol1_all.pdf/99adf6e3-6893-4824-8fc2-8d3c9cbba2b5
 
