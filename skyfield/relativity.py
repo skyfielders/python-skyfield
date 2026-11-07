@@ -1,4 +1,4 @@
-from numpy import abs, clip, einsum, sqrt, where
+from numpy import abs, clip, einsum, isnan, sqrt, where
 
 from .constants import C, AU_M, C_AUDAY, GS
 from .functions import _AVOID_DIVIDE_BY_ZERO, dots, length_of
@@ -92,7 +92,11 @@ def _compute_deflector_position(t, observer, position, deflector, tlt):
 
     # Should really add TDB offset, not TT, but doesn't matter.
 
-    tclose = t - clip(dlt, 0.0, tlt)
+    dlt = clip(dlt, 0.0, tlt)
+    # A NaN target has no closest-approach time.  Use the observation
+    # time for its ephemeris lookup; its coordinates will remain NaN
+    # when the deflection is applied.
+    tclose = t - where(isnan(dlt), 0.0, dlt)
 
     # Get position of gravitating body wrt ss barycenter at time when
     # incoming photons were closest to it.
