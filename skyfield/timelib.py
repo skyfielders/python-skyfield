@@ -6,7 +6,7 @@ from collections import namedtuple
 from datetime import date, datetime, timedelta
 from numpy import (
     array, concatenate, cos, float64, floor, int64, isnan, isinf, linspace,
-    nan, ndarray, nonzero, pi, rollaxis, searchsorted, sin, where, zeros_like,
+    nan, ndarray, nonzero, pi, rollaxis, searchsorted, sin, spacing, where, zeros_like,
 
 )
 from time import strftime, struct_time
@@ -705,6 +705,14 @@ class Time(object):
         """Return integer seconds since JD 0.0, plus a 0 ≤ fraction < 1."""
         seconds, fr = self._tai_seconds
         seconds2, fr = divmod(fr + offset, 1.0)
+        if offset:
+            # A fractional part just below 1.0 can round to 1.0 when
+            # _utc_tuple() later adds it to an integer second.  Normalize
+            # the carry *before* evaluating the leap-second offset, so that
+            # rounding across a leap boundary uses the new UTC offset.
+            near_carry = fr >= 1.0 - spacing(60.0) / 2.0
+            seconds2 = seconds2 + near_carry
+            fr = where(near_carry, 0.0, fr)
         seconds = seconds + seconds2  # not +=, which would modify cached array
         ts = self.ts
         tai_minus_utc = interp(seconds, ts._leap_tai, ts._leap_offsets)

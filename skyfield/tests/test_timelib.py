@@ -450,6 +450,20 @@ def test_iso_of_leap_second_with_fraction(ts):
     assert t.utc_iso(places=3) == '1973-12-31T23:59:60.123Z'
     assert t.utc_iso(places=4) == '1973-12-31T23:59:60.1235Z'
 
+def test_iso_rounding_across_end_of_normal_and_leap_minutes(ts):
+    # A half-millisecond rounding carry must not create a nonexistent
+    # second 60 in an ordinary minute or second 61 in a leap minute.
+    ordinary = ts.utc(2016, 12, 30, 23, 59, 59.9995)
+    leap = ts.utc(2016, 12, 31, 23, 59, 60.9995)
+    assert ordinary.utc_iso(places=3) == '2016-12-31T00:00:00.000Z'
+    assert leap.utc_iso(places=3) == '2017-01-01T00:00:00.000Z'
+
+def test_jpl_rounding_across_end_of_normal_and_leap_minutes(ts):
+    ordinary = ts.utc(2016, 12, 30, 23, 59, 59.99995)
+    leap = ts.utc(2016, 12, 31, 23, 59, 60.99995)
+    assert ordinary.utc_jpl() == 'A.D. 2016-Dec-31 00:00:00.0000 UTC'
+    assert leap.utc_jpl() == 'A.D. 2017-Jan-01 00:00:00.0000 UTC'
+
 def test_iso_of_array_showing_whole_seconds(ts):
     t = ts.utc(1973, 12, 31, 23, 59, np.arange(58.75, 63.1, 0.5))
     assert t.utc_iso(places=0) == [
